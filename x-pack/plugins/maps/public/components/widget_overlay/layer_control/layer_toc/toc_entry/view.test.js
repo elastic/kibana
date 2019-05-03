@@ -28,7 +28,7 @@ const defaultProps = {
   getSelectedLayerSelector: () => {},
   hasDirtyStateSelector: () => {},
   zoom: 0,
-  openTOCDetails: [],
+  isLayerDetailsOpen: false,
 };
 
 describe('TOCEntry', () => {
@@ -66,11 +66,11 @@ describe('TOCEntry', () => {
         .toMatchSnapshot();
     });
 
-    test('should display layer details when layer id is in openTOCDetails', async () => {
+    test('should display layer details when isLayerDetailsOpen is true', async () => {
       const component = shallowWithIntl(
         <TOCEntry
           {...defaultProps}
-          openTOCDetails={[LAYER_ID]}
+          isLayerDetailsOpen={true}
         />
       );
 

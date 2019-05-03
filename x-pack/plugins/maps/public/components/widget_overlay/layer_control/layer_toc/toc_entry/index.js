@@ -25,13 +25,13 @@ import {
 
 import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state = {}, ownProps) {
   return {
     isReadOnly: getIsReadOnly(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
     selectedLayer: getSelectedLayer(state),
     hasDirtyStateSelector: hasDirtyState(state),
-    openTOCDetails: getOpenTOCDetails(state),
+    isLayerDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
   };
 }
 

@@ -119,7 +119,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
 </div>
 `;
 
-exports[`TOCEntry props should display layer details when layer id is in openTOCDetails 1`] = `
+exports[`TOCEntry props should display layer details when isLayerDetailsOpen is true 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"

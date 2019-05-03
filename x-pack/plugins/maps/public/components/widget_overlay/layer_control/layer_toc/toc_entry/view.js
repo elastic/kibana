@@ -46,12 +46,8 @@ export class TOCEntry extends React.Component {
     this._updateDisplayName();
   }
 
-  _isLayerDetailsOpen = () => {
-    return this.props.openTOCDetails.includes(this.props.layer.getId());
-  }
-
   _toggleLayerDetailsVisibility = () => {
-    if (this._isLayerDetailsOpen()) {
+    if (this.props.isLayerDetailsOpen) {
       this.props.hideTOCDetails(this.props.layer.getId());
     } else {
       this.props.showTOCDetails(this.props.layer.getId());
@@ -166,7 +162,7 @@ export class TOCEntry extends React.Component {
   }
 
   _renderDetailsToggle() {
-    const isLayerDetailsOpen = this._isLayerDetailsOpen();
+    const { isLayerDetailsOpen } = this.props;
     return (
       <span className="mapTocEntry__detailsToggle">
         <button
@@ -236,7 +232,7 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLayerDetails = () => {
-    if (!this._isLayerDetailsOpen()) {
+    if (!this.props.isLayerDetailsOpen) {
       return null;
     }
 
