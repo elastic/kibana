@@ -40,7 +40,6 @@ export default function savedObjectsManagementTests({
             );
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
             break;
-
           case 'read':
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
