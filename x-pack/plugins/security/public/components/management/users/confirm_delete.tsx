@@ -19,41 +19,7 @@ interface Props {
 }
 
 class ConfirmDeleteUI extends Component<Props, {}> {
-  deleteUsers = () => {
-    const { usersToDelete, callback, apiClient } = this.props;
-    const errors: string[] = [];
-    usersToDelete.forEach(async username => {
-      try {
-        await apiClient.deleteUser(username);
-        toastNotifications.addSuccess(
-          this.props.intl.formatMessage(
-            {
-              id:
-                'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',
-              defaultMessage: 'Deleted user {username}',
-            },
-            { username }
-          )
-        );
-      } catch (e) {
-        errors.push(username);
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id:
-                'xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage',
-              defaultMessage: 'Error deleting user {username}',
-            },
-            { username }
-          )
-        );
-      }
-      if (callback) {
-        callback(usersToDelete, errors);
-      }
-    });
-  };
-  render() {
+  public render() {
     const { usersToDelete, onCancel, intl } = this.props;
     const moreThanOne = usersToDelete.length > 1;
     const title = moreThanOne
@@ -114,6 +80,41 @@ class ConfirmDeleteUI extends Component<Props, {}> {
       </EuiOverlayMask>
     );
   }
+
+  private deleteUsers = () => {
+    const { usersToDelete, callback, apiClient } = this.props;
+    const errors: string[] = [];
+    usersToDelete.forEach(async username => {
+      try {
+        await apiClient.deleteUser(username);
+        toastNotifications.addSuccess(
+          this.props.intl.formatMessage(
+            {
+              id:
+                'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',
+              defaultMessage: 'Deleted user {username}',
+            },
+            { username }
+          )
+        );
+      } catch (e) {
+        errors.push(username);
+        toastNotifications.addDanger(
+          this.props.intl.formatMessage(
+            {
+              id:
+                'xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage',
+              defaultMessage: 'Error deleting user {username}',
+            },
+            { username }
+          )
+        );
+      }
+      if (callback) {
+        callback(usersToDelete, errors);
+      }
+    });
+  };
 }
 
 export const ConfirmDelete = injectI18n(ConfirmDeleteUI);

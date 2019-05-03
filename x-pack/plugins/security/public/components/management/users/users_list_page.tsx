@@ -48,65 +48,12 @@ class UsersListPageUI extends Component<Props, State> {
       filter: '',
     };
   }
-  componentDidMount() {
+
+  public componentDidMount() {
     this.loadUsers();
   }
-  handleDelete = (usernames: string[], errors: string[]) => {
-    const { users } = this.state;
-    this.setState({
-      selection: [],
-      showDeleteConfirmation: false,
-      users: users.filter(({ username }) => {
-        return !usernames.includes(username) || errors.includes(username);
-      }),
-    });
-  };
-  async loadUsers() {
-    try {
-      const users = await this.props.apiClient.getUsers();
-      this.setState({ users });
-    } catch (e) {
-      if (e.body.statusCode === 403) {
-        this.setState({ permissionDenied: true });
-      } else {
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.security.management.users.fetchingUsersErrorMessage',
-              defaultMessage: 'Error fetching users: {message}',
-            },
-            { message: e.body.message }
-          )
-        );
-      }
-    }
-  }
-  renderToolsLeft() {
-    const { selection } = this.state;
-    if (selection.length === 0) {
-      return;
-    }
-    const numSelected = selection.length;
-    return (
-      <EuiButton
-        data-test-subj="deleteUserButton"
-        color="danger"
-        onClick={() => this.setState({ showDeleteConfirmation: true })}
-      >
-        <FormattedMessage
-          id="xpack.security.management.users.deleteUsersButtonLabel"
-          defaultMessage="Delete {numSelected} user{numSelected, plural, one { } other {s}}"
-          values={{
-            numSelected,
-          }}
-        />
-      </EuiButton>
-    );
-  }
-  onCancelDelete = () => {
-    this.setState({ showDeleteConfirmation: false });
-  };
-  render() {
+
+  public render() {
     const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
     const { intl } = this.props;
     if (permissionDenied) {
@@ -251,10 +198,10 @@ class UsersListPageUI extends Component<Props, State> {
     };
     const usersToShow = filter
       ? users.filter(({ username, roles, full_name: fullName = '', email = '' }) => {
-        const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
-        const normalizedQuery = filter.toLowerCase();
-        return normalized.indexOf(normalizedQuery) !== -1;
-      })
+          const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
+          const normalizedQuery = filter.toLowerCase();
+          return normalized.indexOf(normalizedQuery) !== -1;
+        })
       : users;
     return (
       <div className="secUsersListingPage">
@@ -310,6 +257,65 @@ class UsersListPageUI extends Component<Props, State> {
       </div>
     );
   }
+
+  private handleDelete = (usernames: string[], errors: string[]) => {
+    const { users } = this.state;
+    this.setState({
+      selection: [],
+      showDeleteConfirmation: false,
+      users: users.filter(({ username }) => {
+        return !usernames.includes(username) || errors.includes(username);
+      }),
+    });
+  };
+
+  private async loadUsers() {
+    try {
+      const users = await this.props.apiClient.getUsers();
+      this.setState({ users });
+    } catch (e) {
+      if (e.body.statusCode === 403) {
+        this.setState({ permissionDenied: true });
+      } else {
+        toastNotifications.addDanger(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.security.management.users.fetchingUsersErrorMessage',
+              defaultMessage: 'Error fetching users: {message}',
+            },
+            { message: e.body.message }
+          )
+        );
+      }
+    }
+  }
+
+  private renderToolsLeft() {
+    const { selection } = this.state;
+    if (selection.length === 0) {
+      return;
+    }
+    const numSelected = selection.length;
+    return (
+      <EuiButton
+        data-test-subj="deleteUserButton"
+        color="danger"
+        onClick={() => this.setState({ showDeleteConfirmation: true })}
+      >
+        <FormattedMessage
+          id="xpack.security.management.users.deleteUsersButtonLabel"
+          defaultMessage="Delete {numSelected} user{numSelected, plural, one { } other {s}}"
+          values={{
+            numSelected,
+          }}
+        />
+      </EuiButton>
+    );
+  }
+
+  private onCancelDelete = () => {
+    this.setState({ showDeleteConfirmation: false });
+  };
 }
 
 export const UsersListPage = injectI18n(UsersListPageUI);
