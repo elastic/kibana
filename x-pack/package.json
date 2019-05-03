@@ -169,7 +169,7 @@
     "@elastic/eui": "10.3.1",
     "@elastic/javascript-typescript-langserver": "^0.1.23",
     "@elastic/lsp-extension": "^0.1.1",
-    "@elastic/node-crypto": "0.1.2",
+    "@elastic/node-crypto": "^1.0.0",
     "@elastic/nodegit": "0.25.0-alpha.19",
     "@elastic/numeral": "2.3.3",
     "@kbn/babel-preset": "1.0.0",
