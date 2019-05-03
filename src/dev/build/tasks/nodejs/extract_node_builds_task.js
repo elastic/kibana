@@ -29,7 +29,7 @@ const statAsync = promisify(fs.stat);
 const mkdirpAsync = promisify(mkdirp);
 const copyFileAsync = promisify(fs.copyFile);
 
-export const ExtractNodeBuildsTask = {
+const ExtractNodeBuildsTask = {
   global: true,
   description: 'Extracting node.js builds for all platforms',
   async run(config) {
@@ -55,3 +55,7 @@ export const ExtractNodeBuildsTask = {
     return await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
   },
 };
+
+ExtractNodeBuildsTask.run = ExtractNodeBuildsTask.run.bind(ExtractNodeBuildsTask);
+
+export { ExtractNodeBuildsTask };

@@ -19,40 +19,21 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import { last } from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
-import { EuiToolTip, EuiButtonIcon, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
+import { SeriesDragHandler } from '../series_drag_handler';
 
 function AggRowUi(props) {
   let iconType = 'eyeClosed';
   let iconColor = 'subdued';
-  const last = _.last(props.siblings);
+  const lastSibling = last(props.siblings);
   const { intl } = props;
 
-  if (last.id === props.model.id) {
+  if (lastSibling.id === props.model.id) {
     iconType = 'eye';
     iconColor = 'text';
-  }
-
-  let dragHandle;
-  if (!props.disableDelete) {
-    dragHandle = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={(<FormattedMessage
-            id="tsvb.aggRow.dragToSortTooltip"
-            defaultMessage="Drag to sort"
-          />)}
-        >
-          <EuiButtonIcon
-            className="tvbAggRow__sortHandle"
-            aria-label={intl.formatMessage({ id: 'tsvb.aggRow.dragToSortAriaLabel', defaultMessage: 'Drag to sort' })}
-            iconType="grab"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
   }
 
   return (
@@ -64,7 +45,9 @@ function AggRowUi(props) {
         <EuiFlexItem className="tvbAggRow__children">
           {props.children}
         </EuiFlexItem>
-        {dragHandle}
+
+        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
+
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             testSubj="addMetric"
@@ -86,6 +69,7 @@ AggRowUi.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
   siblings: PropTypes.array,
+  dragHandleProps: PropTypes.object,
 };
 
 const AggRow = injectI18n(AggRowUi);
