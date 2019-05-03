@@ -73,7 +73,7 @@
 
     .lnsPageContentBody {
       flex-grow: 1;
-      padding: $euiSize;
+      padding: $euiSizeXL;
       display: flex;
       align-items: stretch;
       justify-content: stretch;
@@ -83,6 +83,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow-x: hidden;
       }
     }
   }

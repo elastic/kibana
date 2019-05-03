@@ -1,0 +1,11 @@
+.lnsMetricChartVis {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $euiSizeS;
+}
+
+.expressionRenderer-preview .lnsMetricChartVis_inner {
+  width: 100%;
+}

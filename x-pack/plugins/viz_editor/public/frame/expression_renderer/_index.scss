@@ -1,13 +1,23 @@
 .expressionRenderer-full {
-    flex: 1 1 100%;
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
 
-    &, & > .visualization, & > .elasticCharts {
-        min-height: 500px;
-    }
+  &, & > .visualization, & > .elasticCharts {
+    min-height: 500px;
+  }
 }
 
 .expressionRenderer-preview {
-    &, & > .visualization, & > .elasticCharts {
-        min-height: 120px;
-    }
+  @include euiOverflowShadow;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: $euiFontSizeXS;
+
+  &, & > .visualization, & > .elasticCharts {
+    height: 124px;
+  }
 }

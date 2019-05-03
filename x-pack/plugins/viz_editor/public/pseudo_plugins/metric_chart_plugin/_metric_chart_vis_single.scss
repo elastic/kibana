@@ -1,0 +1,7 @@
+.lnsMetricChartSingle {
+  overflow: hidden;
+
+  .euiStat__title {
+    @include euiTextTruncate;
+  }
+}

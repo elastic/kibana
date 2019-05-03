@@ -1,0 +1,39 @@
+.lnsMetricChartTable {
+  td:first-of-type {
+    position: relative;
+    padding-right: .75em;
+  }
+
+  td {
+    padding-top: .75em;
+    padding-bottom: .75em;
+    white-space: nowrap;
+  }
+
+  [class^="lnsMetricChartTable__tableBar"] {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: $euiSizeXS;
+    margin-top: .75em;
+    border-radius: $euiBorderRadius;
+    width: 0%;
+    transition: width $euiAnimSlightBounce $euiAnimSpeedNormal;
+
+    &[class*="--accent"] {
+      background-color: tint($euiColorAccent, 80%);
+    }
+    &[class*="--subdued"] {
+      background-color: $euiColorLightShade;
+    }
+  }
+}
+
+.expressionRenderer-full .lnsMetricChartTable {
+  min-width: 25vw;
+}
+
+.expressionRenderer-preview .lnsMetricChartTable {
+  width: 100%;
+}
