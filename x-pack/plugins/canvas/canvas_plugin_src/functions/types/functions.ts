@@ -105,17 +105,17 @@ interface FunctionHandlers {
 
 // A `FunctionFactory` defines the function that produces a named FunctionSpec.
 // prettier-ignore
-export type FunctionFactory<Name extends string, Arguments, Return> = 
+type FunctionFactory<Name extends string, Arguments, Return> = 
   () => Function<Name, Arguments, Return>;
 
 // A `ContextFunctionFactory` defines the function that produces a named FunctionSpec
 // which includes a Context.
 // prettier-ignore
-export type ContextFunctionFactory<Name extends string, Context, Arguments, Return> = 
+type ContextFunctionFactory<Name extends string, Context, Arguments, Return> = 
     () => ContextFunction<Name, Context, Arguments, Return>;
 
 // A `NullContextualFunctionFactory` defines the function that produces a named FunctionSpec
 // which includes an always-null Context.
 // prettier-ignore
-export type NullContextFunctionFactory<Name extends string, Arguments, Return> = 
+type NullContextFunctionFactory<Name extends string, Arguments, Return> = 
     () => ContextFunction<Name, null, Arguments, Return>;
