@@ -5,9 +5,9 @@
  */
 
 import { get, sortBy } from 'lodash';
-import { DatatableColumn, DatatableRow, DatatableColumnType, Ticks } from '../../types';
+import { PointSeriesColumns, Ticks } from '../../types';
 
-export const getTickHash = (columns: DatatableColumn[], rows: DatatableRow[]) => {
+export const getTickHash = (columns: PointSeriesColumns, rows: Array<Record<string, any>>) => {
   const ticks: Ticks = {
     x: {
       hash: {},
@@ -19,7 +19,7 @@ export const getTickHash = (columns: DatatableColumn[], rows: DatatableRow[]) =>
     },
   };
 
-  if (get<DatatableColumn[], DatatableColumnType>(columns, 'x.type') === 'string') {
+  if (get(columns, 'x.type') === 'string') {
     sortBy(rows, ['x']).forEach(row => {
       if (!ticks.x.hash[row.x]) {
         ticks.x.hash[row.x] = ticks.x.counter++;
