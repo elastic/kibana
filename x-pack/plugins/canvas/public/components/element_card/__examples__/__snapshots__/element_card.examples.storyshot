@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ElementTypes/ElementCard with click handler 1`] = `
+exports[`Storyshots components/ElementCard with click handler 1`] = `
 <div
   style={
     Object {
@@ -58,7 +58,7 @@ exports[`Storyshots components/ElementTypes/ElementCard with click handler 1`] =
 </div>
 `;
 
-exports[`Storyshots components/ElementTypes/ElementCard with image 1`] = `
+exports[`Storyshots components/ElementCard with image 1`] = `
 <div
   style={
     Object {
@@ -103,7 +103,7 @@ exports[`Storyshots components/ElementTypes/ElementCard with image 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ElementTypes/ElementCard with title and description 1`] = `
+exports[`Storyshots components/ElementCard with title and description 1`] = `
 <div
   style={
     Object {

@@ -70,6 +70,15 @@ const testCustomElements = [
 ];
 
 storiesOf('components/ElementTypes/ElementGrid', module)
+  .addDecorator(story => (
+    <div
+      style={{
+        width: '1000px',
+      }}
+    >
+      {story()}
+    </div>
+  ))
   .add('without controls', () => (
     <ElementGrid elements={testElements} handleClick={action('addElement')} />
   ))
