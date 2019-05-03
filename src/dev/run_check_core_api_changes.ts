@@ -57,6 +57,7 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
       extractorMessageReporting: {
         default: {
           logLevel: 'warning' as ExtractorLogLevel.Warning,
+          addToApiReportFile: true,
         },
         'ae-internal-missing-underscore': {
           logLevel: 'none' as ExtractorLogLevel.None,
