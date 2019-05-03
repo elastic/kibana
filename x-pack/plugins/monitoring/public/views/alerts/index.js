@@ -63,7 +63,8 @@ uiRoutes.when('/alerts', {
         title: i18n('xpack.monitoring.alerts.clusterAlertsTitle', { defaultMessage: 'Cluster Alerts' }),
         getPageData,
         $scope,
-        $injector
+        $injector,
+        reactNodeId: 'monitoringAlertsApp'
       });
 
       this.data = $route.current.locals.alerts;
