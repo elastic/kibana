@@ -35,7 +35,7 @@ interface CacheEntry {
 interface SpacesServiceDeps {
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
-  getSecurity: () => SecurityPlugin;
+  getSecurity: () => SecurityPlugin | undefined;
   config$: Observable<SpacesConfig>;
   spacesAuditLogger: any;
 }

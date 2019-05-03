@@ -8,7 +8,6 @@ jest.mock('../../../../server/lib/get_client_shield', () => ({
 }));
 import * as Rx from 'rxjs';
 import Boom from 'boom';
-// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
 import { SavedObjectsService } from '../../../../../src/legacy/server/kbn_server';
@@ -17,7 +16,7 @@ import { ElasticsearchServiceSetup } from '../../../../../src/core/server';
 let mockCallWithRequest;
 beforeEach(() => {
   mockCallWithRequest = jest.fn();
-  getClient.mockReturnValue({
+  (getClient as jest.Mock).mockReturnValue({
     callWithRequest: mockCallWithRequest,
   });
 });

@@ -14,6 +14,6 @@ declare module 'hapi' {
   interface PluginProperties {
     cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
-    security: SecurityPlugin;
+    security?: SecurityPlugin;
   }
 }

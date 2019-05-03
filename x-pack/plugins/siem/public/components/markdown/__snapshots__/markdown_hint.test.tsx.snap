@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MarkdownHint rendering it renders the expected hints 1`] = `
+<Component
+  show={true}
+/>
+`;

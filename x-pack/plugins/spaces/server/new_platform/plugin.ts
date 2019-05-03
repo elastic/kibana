@@ -51,7 +51,7 @@ export interface SpacesCoreSetup {
 export interface PluginsSetup {
   // TODO: Spaces has a circular dependency with Security right now.
   // Security is not yet available when init runs, so this is wrapped in a function for the time being.
-  getSecurity: () => SecurityPlugin;
+  getSecurity: () => SecurityPlugin | undefined;
   xpackMain: XPackMainPlugin;
   // TODO: this is temporary for `watchLicenseAndStatusToInitialize`
   spaces: any;
@@ -92,8 +92,7 @@ export class Plugin {
     xpackMainPlugin.info.feature(this.pluginId).registerLicenseCheckResultsGenerator(checkLicense);
 
     const spacesAuditLogger = new SpacesAuditLogger(
-      this.initializerContext.legacyConfig,
-      new AuditLogger(core.http.server, 'spaces')
+      new AuditLogger(server, 'spaces', this.initializerContext.legacyConfig, xpackMainPlugin.info)
     );
 
     const service = new SpacesService(
@@ -110,7 +109,7 @@ export class Plugin {
 
     const { addScopedSavedObjectsClientWrapperFactory, types } = core.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
-      Number.MAX_VALUE,
+      Number.MAX_SAFE_INTEGER - 1,
       spacesSavedObjectsClientWrapperFactory(spacesService, types)
     );
 

@@ -45,7 +45,7 @@ const createMockServer = () => {
         }),
       },
     } as unknown) as AuthorizationService,
-  };
+  } as any;
   return mockServer;
 };
 

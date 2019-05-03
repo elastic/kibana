@@ -397,6 +397,17 @@ module.exports = {
     },
 
     /**
+     * SIEM overrides
+     */
+    {
+      files: ['x-pack/plugins/siem/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        'import/order': 'error',
+      },
+    },
+
+    /**
      * disable jsx-a11y for kbn-ui-framework
      */
     {
