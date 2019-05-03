@@ -217,7 +217,7 @@ export function Main(props: MainProps) {
         <EuiTabbedContent
           className="lnsInspectFlyout__tabbedContent"
           tabs={inspectorTabs}
-          initialSelectedTab={inspectorTabs[1]}
+          initialSelectedTab={inspectorTabs[0]}
           onTabClick={(tab) => { console.log('clicked tab', tab); }}
         />
       </EuiFlyout>

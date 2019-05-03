@@ -8,7 +8,7 @@
     "@types/lodash-es": "^4.17.0"
   },
   "dependencies": {
-    "@elastic/charts": "^3.11.3",
+    "@elastic/charts": "^4.0.2",
     "lodash-es": "^4.17.0"
   }
 }

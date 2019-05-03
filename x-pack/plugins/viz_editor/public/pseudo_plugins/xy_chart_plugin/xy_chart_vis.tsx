@@ -19,6 +19,7 @@ import {
   Settings,
   timeFormatter,
   TooltipType,
+  CurveType,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
 // @ts-ignore
@@ -26,6 +27,7 @@ import { register } from '@kbn/interpreter/common';
 import moment from 'moment';
 import React from 'react';
 import * as ReactDOM from 'react-dom';
+import { SETTINGS, gridVerticalSettings, gridHorizontalSettings } from './chart_settings';
 
 type XScaleTypes = ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
 
@@ -143,6 +145,7 @@ function XyChart(props: { config: XyChartConfig }) {
   return (
     <Chart renderer="canvas" key={key}>
       <Settings
+        {...SETTINGS}
         showLegend={!config.hideTooltips && config.splitSeriesAccessors.length > 0}
         legendPosition={Position.Right}
         tooltipType={config.hideTooltips ? TooltipType.None : TooltipType.VerticalCursor}
@@ -156,12 +159,16 @@ function XyChart(props: { config: XyChartConfig }) {
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={getFormatterFunction(config.xAxisType)}
+            showGridLines
+            gridLineStyle={gridVerticalSettings}
           />
           <Axis
             id={getAxisId('left')}
             title={config.yAxisName}
             position={Position.Left}
             tickFormat={d => String(Math.floor(Number(d)))}
+            showGridLines
+            gridLineStyle={gridHorizontalSettings}
           />
         </>
       )}
@@ -176,6 +183,7 @@ function XyChart(props: { config: XyChartConfig }) {
           stackAccessors={config.stacked ? [config.xAccessor] : []}
           data={config.data}
           yScaleToDataExtent={false}
+          curve={CurveType.CURVE_CATMULL_ROM}
         />
       )}
       {config.seriesType === 'area' && (
@@ -189,6 +197,7 @@ function XyChart(props: { config: XyChartConfig }) {
           stackAccessors={config.stacked ? [config.xAccessor] : []}
           data={config.data}
           yScaleToDataExtent={false}
+          curve={CurveType.CURVE_CATMULL_ROM}
         />
       )}
       {config.seriesType === 'bar' && (
