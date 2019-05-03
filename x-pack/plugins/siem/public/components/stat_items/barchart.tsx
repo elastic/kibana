@@ -22,7 +22,9 @@ const ChartBaseComponent = pure<{
   width: number | undefined;
   height: number | undefined;
 }>(({ data, ...chartConfigs }) =>
-  chartConfigs.width && chartConfigs.height ? (
+  chartConfigs.width &&
+  chartConfigs.height &&
+  data.every(({ value }) => value != null && value.length > 0) ? (
     <SeriesChart yType={SCALE.ORDINAL} orientation={ORIENTATION.HORIZONTAL} {...chartConfigs}>
       {data.map(series =>
         series.value != null ? (

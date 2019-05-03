@@ -18,7 +18,6 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { LoadingPanel } from '../loading';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
 
@@ -36,13 +35,13 @@ export interface StatItem {
   description?: string;
   value: number | undefined | null;
   color?: string;
-  icon: string;
+  icon?: 'storage' | 'cross' | 'check' | 'visMapCoordinate';
 }
 
 export interface AreaChartData {
   key: string;
-  value: ChartData[] | null;
-  color: string;
+  value: ChartData[] | [] | null;
+  color?: string | undefined;
 }
 
 export interface ChartData {
@@ -53,78 +52,84 @@ export interface ChartData {
 
 export interface BarChartData {
   key: string;
-  value: ChartData[] | null;
-  color: string;
+  value: ChartData[] | [] | null;
+  color?: string | undefined;
 }
 
 export interface StatItems {
   fields: StatItem[];
   description?: string;
-  areaChart?: AreaChartData[];
-  barChart?: BarChartData[];
+  enableAreaChart?: boolean;
+  enableBarChart?: boolean;
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
 }
 
 export interface StatItemsProps extends StatItems {
   isLoading: boolean;
   key: string;
+  areaChart?: AreaChartData[];
+  barChart?: BarChartData[];
 }
 
 export const StatItemsComponent = pure<StatItemsProps>(
-  ({ fields, description, isLoading, key, grow, barChart, areaChart }) => (
-    <FlexItem key={`stat-items-${key}`} grow={grow}>
-      <EuiPanel>
-        <EuiTitle size="xxxs">
-          <h6>{description}</h6>
-        </EuiTitle>
+  ({ fields, description, isLoading, key, grow, barChart, areaChart }) => {
+    const isBarChartDataAbailable =
+      barChart &&
+      barChart.length &&
+      barChart.every(item => item.value != null && item.value.length > 0);
+    const isAreaChartDataAvailable =
+      areaChart &&
+      areaChart.length &&
+      areaChart.every(item => item.value != null && item.value.length > 0);
+    const chartExist = isBarChartDataAbailable || isAreaChartDataAvailable;
+    return (
+      <FlexItem key={`stat-items-${key}`} grow={grow}>
+        <EuiPanel>
+          <EuiTitle size="xxxs">
+            <h6>{description}</h6>
+          </EuiTitle>
 
-        <EuiFlexGroup>
-          {fields.map(field => (
-            <FlexItem key={`stat-items-field-${field.key}`}>
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <FlexItem grow={false}>
-                  <EuiIcon type={field.icon} color={field.color} size="l" />
-                </FlexItem>
+          <EuiFlexGroup>
+            {fields.map(field => (
+              <FlexItem key={`stat-items-field-${field.key}`}>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  {(isBarChartDataAbailable || isBarChartDataAbailable) && field.icon ? (
+                    <FlexItem grow={false}>
+                      <EuiIcon type={field.icon} color={field.color} size="l" />
+                    </FlexItem>
+                  ) : null}
 
-                <FlexItem>
-                  <StatValue>
-                    <p>
-                      {field.value && field.value.toLocaleString()} {field.description}
-                    </p>
-                  </StatValue>
-                </FlexItem>
-              </EuiFlexGroup>
-            </FlexItem>
-          ))}
-        </EuiFlexGroup>
+                  <FlexItem>
+                    <StatValue>
+                      <p>
+                        {field.value && field.value.toLocaleString()} {field.description}
+                      </p>
+                    </StatValue>
+                  </FlexItem>
+                </EuiFlexGroup>
+              </FlexItem>
+            ))}
+          </EuiFlexGroup>
 
-        {areaChart || barChart ? <EuiHorizontalRule margin="s" /> : null}
+          {chartExist ? <EuiHorizontalRule /> : null}
 
-        {isLoading && (areaChart || barChart) ? (
-          <LoadingPanel
-            height="auto"
-            width="100%"
-            text="Loading"
-            data-test-subj="InitialLoadingKpisHostsChart"
-          />
-        ) : (
           <EuiFlexGroup>
             {barChart ? (
               <FlexItem>
-                <BarChart barChart={barChart} />
+                {isBarChartDataAbailable ? <BarChart barChart={barChart} /> : null}
               </FlexItem>
             ) : null}
 
             {areaChart ? (
               <FlexItem>
-                <AreaChart areaChart={areaChart} />
+                {isAreaChartDataAvailable ? <AreaChart areaChart={areaChart!} /> : null}
               </FlexItem>
             ) : null}
           </EuiFlexGroup>
-        )}
-      </EuiPanel>
-    </FlexItem>
-  )
+        </EuiPanel>
+      </FlexItem>
+    );
+  }
 );
 
 const FlexItem = styled(EuiFlexItem)`

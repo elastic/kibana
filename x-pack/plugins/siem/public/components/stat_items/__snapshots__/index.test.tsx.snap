@@ -21,28 +21,64 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
   areaChart={
     Array [
       Object {
-        "color": "#000000",
-        "key": "uniqueSourcePrivateIps",
-        "value": null,
+        "color": "#DB1374",
+        "key": "uniqueSourceIpsHistogram",
+        "value": Array [
+          Object {
+            "x": 1556686800000,
+            "y": 580213,
+          },
+          Object {
+            "x": 1556730000000,
+            "y": 1096175,
+          },
+          Object {
+            "x": 1556773200000,
+            "y": 12382,
+          },
+        ],
       },
       Object {
-        "color": "#000000",
-        "key": "uniqueDestinationPrivateIps",
-        "value": null,
+        "color": "#490092",
+        "key": "uniqueDestinationIpsHistogram",
+        "value": Array [
+          Object {
+            "x": 1556686800000,
+            "y": 565975,
+          },
+          Object {
+            "x": 1556730000000,
+            "y": 1084366,
+          },
+          Object {
+            "x": 1556773200000,
+            "y": 12280,
+          },
+        ],
       },
     ]
   }
   barChart={
     Array [
       Object {
-        "color": "#000000",
-        "key": "uniqueSourcePrivateIps",
-        "value": null,
+        "color": "#DB1374",
+        "key": "uniqueSourceIps",
+        "value": Array [
+          Object {
+            "x": 1714,
+            "y": "uniqueSourceIps",
+          },
+        ],
       },
       Object {
-        "color": "#000000",
-        "key": "uniqueDestinationPrivateIps",
-        "value": null,
+        "color": "#490092",
+        "key": "uniqueDestinationIps",
+        "value": Array [
+          Object {
+            "x": 2354,
+            "y": "uniqueDestinationIps",
+          },
+        ],
       },
     ]
   }
@@ -50,16 +86,16 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
   fields={
     Array [
       Object {
-        "color": "#000000",
-        "description": "UNIQUE_SOURCE_PRIVATE_IPS",
-        "key": "uniqueSourcePrivateIps",
-        "value": null,
+        "color": "#DB1374",
+        "description": "Source",
+        "key": "uniqueSourceIps",
+        "value": 1714,
       },
       Object {
-        "color": "#000000",
-        "description": "UNIQUE_DESTINATION_PRIVATE_IPS",
-        "key": "uniqueDestinationPrivateIps",
-        "value": null,
+        "color": "#490092",
+        "description": "Dest.",
+        "key": "uniqueDestinationIps",
+        "value": 2359,
       },
     ]
   }
@@ -69,28 +105,64 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
     areaChart={
       Array [
         Object {
-          "color": "#000000",
-          "key": "uniqueSourcePrivateIps",
-          "value": null,
+          "color": "#DB1374",
+          "key": "uniqueSourceIpsHistogram",
+          "value": Array [
+            Object {
+              "x": 1556686800000,
+              "y": 580213,
+            },
+            Object {
+              "x": 1556730000000,
+              "y": 1096175,
+            },
+            Object {
+              "x": 1556773200000,
+              "y": 12382,
+            },
+          ],
         },
         Object {
-          "color": "#000000",
-          "key": "uniqueDestinationPrivateIps",
-          "value": null,
+          "color": "#490092",
+          "key": "uniqueDestinationIpsHistogram",
+          "value": Array [
+            Object {
+              "x": 1556686800000,
+              "y": 565975,
+            },
+            Object {
+              "x": 1556730000000,
+              "y": 1084366,
+            },
+            Object {
+              "x": 1556773200000,
+              "y": 12280,
+            },
+          ],
         },
       ]
     }
     barChart={
       Array [
         Object {
-          "color": "#000000",
-          "key": "uniqueSourcePrivateIps",
-          "value": null,
+          "color": "#DB1374",
+          "key": "uniqueSourceIps",
+          "value": Array [
+            Object {
+              "x": 1714,
+              "y": "uniqueSourceIps",
+            },
+          ],
         },
         Object {
-          "color": "#000000",
-          "key": "uniqueDestinationPrivateIps",
-          "value": null,
+          "color": "#490092",
+          "key": "uniqueDestinationIps",
+          "value": Array [
+            Object {
+              "x": 2354,
+              "y": "uniqueDestinationIps",
+            },
+          ],
         },
       ]
     }
@@ -98,24 +170,22 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
     fields={
       Array [
         Object {
-          "color": "#000000",
-          "description": "UNIQUE_SOURCE_PRIVATE_IPS",
-          "key": "uniqueSourcePrivateIps",
-          "value": null,
+          "color": "#DB1374",
+          "description": "Source",
+          "key": "uniqueSourceIps",
+          "value": 1714,
         },
         Object {
-          "color": "#000000",
-          "description": "UNIQUE_DESTINATION_PRIVATE_IPS",
-          "key": "uniqueDestinationPrivateIps",
-          "value": null,
+          "color": "#490092",
+          "description": "Dest.",
+          "key": "uniqueDestinationIps",
+          "value": 2359,
         },
       ]
     }
     isLoading={false}
   >
-    <EuiFlexItem
-      key="stat-items-undefined"
-    >
+    <EuiFlexItem>
       <div
         className="euiFlexItem"
       >
@@ -142,6 +212,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
               title={
                 <EuiFlexGroup
                   component="span"
+                  gutterSize="none"
                   justifyContent="spaceBetween"
                 >
                   <EuiFlexItem
@@ -167,7 +238,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                             component="span"
                           >
                             <EuiIcon
-                              color="#000000"
+                              color="#DB1374"
                               size="xl"
                               type="stopFilled"
                             />
@@ -177,7 +248,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                           >
                             <pure(Component)
                               isLoading={false}
-                              value={null}
+                              value={1714}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -186,7 +257,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                         component="span"
                         grow={4}
                       >
-                        UNIQUE_SOURCE_PRIVATE_IPS
+                        Source
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
@@ -213,7 +284,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                             component="span"
                           >
                             <EuiIcon
-                              color="#000000"
+                              color="#490092"
                               size="xl"
                               type="stopFilled"
                             />
@@ -223,7 +294,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                           >
                             <pure(Component)
                               isLoading={false}
-                              value={null}
+                              value={2359}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -232,7 +303,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                         component="span"
                         grow={4}
                       >
-                        UNIQUE_DESTINATION_PRIVATE_IPS
+                        Dest.
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
@@ -273,14 +344,15 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                   >
                     <EuiFlexGroup
                       component="span"
+                      gutterSize="none"
                       justifyContent="spaceBetween"
                     >
                       <span
-                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
                           component="span"
-                          key="stat-items-field-uniqueSourcePrivateIps"
+                          key="stat-items-field-uniqueSourceIps"
                         >
                           <span
                             className="euiFlexItem"
@@ -318,7 +390,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                             className="euiFlexItem"
                                           >
                                             <EuiIcon
-                                              color="#000000"
+                                              color="#DB1374"
                                               size="xl"
                                               type="stopFilled"
                                             >
@@ -328,7 +400,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                                 height="16"
                                                 style={
                                                   Object {
-                                                    "fill": "#000000",
+                                                    "fill": "#DB1374",
                                                   }
                                                 }
                                                 viewBox="0 0 16 16"
@@ -341,7 +413,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                                   height="16"
                                                   style={
                                                     Object {
-                                                      "fill": "#000000",
+                                                      "fill": "#DB1374",
                                                     }
                                                   }
                                                   viewBox="0 0 16 16"
@@ -369,14 +441,14 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                           >
                                             <pure(Component)
                                               isLoading={false}
-                                              value={null}
+                                              value={1714}
                                             >
                                               <Component
                                                 isLoading={false}
-                                                value={null}
+                                                value={1714}
                                               >
                                                 <span>
-                                                  --
+                                                  1,714
                                                 </span>
                                               </Component>
                                             </pure(Component)>
@@ -393,7 +465,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                   <span
                                     className="euiFlexItem euiFlexItem--flexGrow4"
                                   >
-                                    UNIQUE_SOURCE_PRIVATE_IPS
+                                    Source
                                   </span>
                                 </EuiFlexItem>
                               </span>
@@ -402,7 +474,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                         </EuiFlexItem>
                         <EuiFlexItem
                           component="span"
-                          key="stat-items-field-uniqueDestinationPrivateIps"
+                          key="stat-items-field-uniqueDestinationIps"
                         >
                           <span
                             className="euiFlexItem"
@@ -440,7 +512,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                             className="euiFlexItem"
                                           >
                                             <EuiIcon
-                                              color="#000000"
+                                              color="#490092"
                                               size="xl"
                                               type="stopFilled"
                                             >
@@ -450,7 +522,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                                 height="16"
                                                 style={
                                                   Object {
-                                                    "fill": "#000000",
+                                                    "fill": "#490092",
                                                   }
                                                 }
                                                 viewBox="0 0 16 16"
@@ -463,7 +535,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                                   height="16"
                                                   style={
                                                     Object {
-                                                      "fill": "#000000",
+                                                      "fill": "#490092",
                                                     }
                                                   }
                                                   viewBox="0 0 16 16"
@@ -491,14 +563,14 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                           >
                                             <pure(Component)
                                               isLoading={false}
-                                              value={null}
+                                              value={2359}
                                             >
                                               <Component
                                                 isLoading={false}
-                                                value={null}
+                                                value={2359}
                                               >
                                                 <span>
-                                                  --
+                                                  2,359
                                                 </span>
                                               </Component>
                                             </pure(Component)>
@@ -515,7 +587,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                   <span
                                     className="euiFlexItem euiFlexItem--flexGrow4"
                                   >
-                                    UNIQUE_DESTINATION_PRIVATE_IPS
+                                    Dest.
                                   </span>
                                 </EuiFlexItem>
                               </span>
@@ -549,14 +621,24 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                       barChart={
                         Array [
                           Object {
-                            "color": "#000000",
-                            "key": "uniqueSourcePrivateIps",
-                            "value": null,
+                            "color": "#DB1374",
+                            "key": "uniqueSourceIps",
+                            "value": Array [
+                              Object {
+                                "x": 1714,
+                                "y": "uniqueSourceIps",
+                              },
+                            ],
                           },
                           Object {
-                            "color": "#000000",
-                            "key": "uniqueDestinationPrivateIps",
-                            "value": null,
+                            "color": "#490092",
+                            "key": "uniqueDestinationIps",
+                            "value": Array [
+                              Object {
+                                "x": 2354,
+                                "y": "uniqueDestinationIps",
+                              },
+                            ],
                           },
                         ]
                       }
@@ -565,14 +647,24 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                         barChart={
                           Array [
                             Object {
-                              "color": "#000000",
-                              "key": "uniqueSourcePrivateIps",
-                              "value": null,
+                              "color": "#DB1374",
+                              "key": "uniqueSourceIps",
+                              "value": Array [
+                                Object {
+                                  "x": 1714,
+                                  "y": "uniqueSourceIps",
+                                },
+                              ],
                             },
                             Object {
-                              "color": "#000000",
-                              "key": "uniqueDestinationPrivateIps",
-                              "value": null,
+                              "color": "#490092",
+                              "key": "uniqueDestinationIps",
+                              "value": Array [
+                                Object {
+                                  "x": 2354,
+                                  "y": "uniqueDestinationIps",
+                                },
+                              ],
                             },
                           ]
                         }
@@ -593,14 +685,24 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                 data={
                                   Array [
                                     Object {
-                                      "color": "#000000",
-                                      "key": "uniqueSourcePrivateIps",
-                                      "value": null,
+                                      "color": "#DB1374",
+                                      "key": "uniqueSourceIps",
+                                      "value": Array [
+                                        Object {
+                                          "x": 1714,
+                                          "y": "uniqueSourceIps",
+                                        },
+                                      ],
                                     },
                                     Object {
-                                      "color": "#000000",
-                                      "key": "uniqueDestinationPrivateIps",
-                                      "value": null,
+                                      "color": "#490092",
+                                      "key": "uniqueDestinationIps",
+                                      "value": Array [
+                                        Object {
+                                          "x": 2354,
+                                          "y": "uniqueDestinationIps",
+                                        },
+                                      ],
                                     },
                                   ]
                                 }
@@ -609,14 +711,24 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                   data={
                                     Array [
                                       Object {
-                                        "color": "#000000",
-                                        "key": "uniqueSourcePrivateIps",
-                                        "value": null,
+                                        "color": "#DB1374",
+                                        "key": "uniqueSourceIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": 1714,
+                                            "y": "uniqueSourceIps",
+                                          },
+                                        ],
                                       },
                                       Object {
-                                        "color": "#000000",
-                                        "key": "uniqueDestinationPrivateIps",
-                                        "value": null,
+                                        "color": "#490092",
+                                        "key": "uniqueDestinationIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": 2354,
+                                            "y": "uniqueDestinationIps",
+                                          },
+                                        ],
                                       },
                                     ]
                                   }
@@ -644,14 +756,40 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                       areaChart={
                         Array [
                           Object {
-                            "color": "#000000",
-                            "key": "uniqueSourcePrivateIps",
-                            "value": null,
+                            "color": "#DB1374",
+                            "key": "uniqueSourceIpsHistogram",
+                            "value": Array [
+                              Object {
+                                "x": 1556686800000,
+                                "y": 580213,
+                              },
+                              Object {
+                                "x": 1556730000000,
+                                "y": 1096175,
+                              },
+                              Object {
+                                "x": 1556773200000,
+                                "y": 12382,
+                              },
+                            ],
                           },
                           Object {
-                            "color": "#000000",
-                            "key": "uniqueDestinationPrivateIps",
-                            "value": null,
+                            "color": "#490092",
+                            "key": "uniqueDestinationIpsHistogram",
+                            "value": Array [
+                              Object {
+                                "x": 1556686800000,
+                                "y": 565975,
+                              },
+                              Object {
+                                "x": 1556730000000,
+                                "y": 1084366,
+                              },
+                              Object {
+                                "x": 1556773200000,
+                                "y": 12280,
+                              },
+                            ],
                           },
                         ]
                       }
@@ -660,14 +798,40 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                         areaChart={
                           Array [
                             Object {
-                              "color": "#000000",
-                              "key": "uniqueSourcePrivateIps",
-                              "value": null,
+                              "color": "#DB1374",
+                              "key": "uniqueSourceIpsHistogram",
+                              "value": Array [
+                                Object {
+                                  "x": 1556686800000,
+                                  "y": 580213,
+                                },
+                                Object {
+                                  "x": 1556730000000,
+                                  "y": 1096175,
+                                },
+                                Object {
+                                  "x": 1556773200000,
+                                  "y": 12382,
+                                },
+                              ],
                             },
                             Object {
-                              "color": "#000000",
-                              "key": "uniqueDestinationPrivateIps",
-                              "value": null,
+                              "color": "#490092",
+                              "key": "uniqueDestinationIpsHistogram",
+                              "value": Array [
+                                Object {
+                                  "x": 1556686800000,
+                                  "y": 565975,
+                                },
+                                Object {
+                                  "x": 1556730000000,
+                                  "y": 1084366,
+                                },
+                                Object {
+                                  "x": 1556773200000,
+                                  "y": 12280,
+                                },
+                              ],
                             },
                           ]
                         }
@@ -688,14 +852,40 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                 data={
                                   Array [
                                     Object {
-                                      "color": "#000000",
-                                      "key": "uniqueSourcePrivateIps",
-                                      "value": null,
+                                      "color": "#DB1374",
+                                      "key": "uniqueSourceIpsHistogram",
+                                      "value": Array [
+                                        Object {
+                                          "x": 1556686800000,
+                                          "y": 580213,
+                                        },
+                                        Object {
+                                          "x": 1556730000000,
+                                          "y": 1096175,
+                                        },
+                                        Object {
+                                          "x": 1556773200000,
+                                          "y": 12382,
+                                        },
+                                      ],
                                     },
                                     Object {
-                                      "color": "#000000",
-                                      "key": "uniqueDestinationPrivateIps",
-                                      "value": null,
+                                      "color": "#490092",
+                                      "key": "uniqueDestinationIpsHistogram",
+                                      "value": Array [
+                                        Object {
+                                          "x": 1556686800000,
+                                          "y": 565975,
+                                        },
+                                        Object {
+                                          "x": 1556730000000,
+                                          "y": 1084366,
+                                        },
+                                        Object {
+                                          "x": 1556773200000,
+                                          "y": 12280,
+                                        },
+                                      ],
                                     },
                                   ]
                                 }
@@ -704,14 +894,40 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                   data={
                                     Array [
                                       Object {
-                                        "color": "#000000",
-                                        "key": "uniqueSourcePrivateIps",
-                                        "value": null,
+                                        "color": "#DB1374",
+                                        "key": "uniqueSourceIpsHistogram",
+                                        "value": Array [
+                                          Object {
+                                            "x": 1556686800000,
+                                            "y": 580213,
+                                          },
+                                          Object {
+                                            "x": 1556730000000,
+                                            "y": 1096175,
+                                          },
+                                          Object {
+                                            "x": 1556773200000,
+                                            "y": 12382,
+                                          },
+                                        ],
                                       },
                                       Object {
-                                        "color": "#000000",
-                                        "key": "uniqueDestinationPrivateIps",
-                                        "value": null,
+                                        "color": "#490092",
+                                        "key": "uniqueDestinationIpsHistogram",
+                                        "value": Array [
+                                          Object {
+                                            "x": 1556686800000,
+                                            "y": 565975,
+                                          },
+                                          Object {
+                                            "x": 1556730000000,
+                                            "y": 1084366,
+                                          },
+                                          Object {
+                                            "x": 1556773200000,
+                                            "y": 12280,
+                                          },
+                                        ],
                                       },
                                     ]
                                   }
@@ -741,11 +957,12 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
 
 exports[`Stat Items rendering kpis without charts it renders the default widget 1`] = `
 <pure(Component)
-  description="UNIQUE_PRIVATE_IPS"
+  description="HOSTS"
   fields={
     Array [
       Object {
-        "key": "uniqueSourcePrivateIps",
+        "color": "#3185FC",
+        "key": "hosts",
         "value": null,
       },
     ]
@@ -753,20 +970,19 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
   isLoading={false}
 >
   <Component
-    description="UNIQUE_PRIVATE_IPS"
+    description="HOSTS"
     fields={
       Array [
         Object {
-          "key": "uniqueSourcePrivateIps",
+          "color": "#3185FC",
+          "key": "hosts",
           "value": null,
         },
       ]
     }
     isLoading={false}
   >
-    <EuiFlexItem
-      key="stat-items-undefined"
-    >
+    <EuiFlexItem>
       <div
         className="euiFlexItem"
       >
@@ -784,7 +1000,7 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
                   size="xxs"
                 >
                   <span>
-                    UNIQUE_PRIVATE_IPS
+                    HOSTS
                   </span>
                 </EuiTitle>
               }
@@ -793,6 +1009,7 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
               title={
                 <EuiFlexGroup
                   component="span"
+                  gutterSize="none"
                   justifyContent="spaceBetween"
                 >
                   <EuiFlexItem
@@ -852,7 +1069,7 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
                         <span
                           className="euiTitle euiTitle--xxsmall"
                         >
-                          UNIQUE_PRIVATE_IPS
+                          HOSTS
                         </span>
                       </EuiTitle>
                     </p>
@@ -867,14 +1084,15 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
                   >
                     <EuiFlexGroup
                       component="span"
+                      gutterSize="none"
                       justifyContent="spaceBetween"
                     >
                       <span
-                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <EuiFlexItem
                           component="span"
-                          key="stat-items-field-uniqueSourcePrivateIps"
+                          key="stat-items-field-hosts"
                         >
                           <span
                             className="euiFlexItem"
@@ -954,6 +1172,251 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
               <div
                 className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
               />
+            </EuiFlexGroup>
+          </div>
+        </EuiPanel>
+      </div>
+    </EuiFlexItem>
+  </Component>
+</pure(Component)>
+`;
+
+exports[`Stat Items rendering kpis without charts it renders the default widget 2`] = `
+<pure(Component)
+  areaChart={Array []}
+  barChart={Array []}
+  description="HOSTS"
+  fields={
+    Array [
+      Object {
+        "color": "#3185FC",
+        "key": "hosts",
+        "value": null,
+      },
+    ]
+  }
+  isLoading={false}
+>
+  <Component
+    areaChart={Array []}
+    barChart={Array []}
+    description="HOSTS"
+    fields={
+      Array [
+        Object {
+          "color": "#3185FC",
+          "key": "hosts",
+          "value": null,
+        },
+      ]
+    }
+    isLoading={false}
+  >
+    <EuiFlexItem>
+      <div
+        className="euiFlexItem"
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium"
+          >
+            <EuiStat
+              description={
+                <EuiTitle
+                  size="xxs"
+                >
+                  <span>
+                    HOSTS
+                  </span>
+                </EuiTitle>
+              }
+              reverse={false}
+              textAlign="left"
+              title={
+                <EuiFlexGroup
+                  component="span"
+                  gutterSize="none"
+                  justifyContent="spaceBetween"
+                >
+                  <EuiFlexItem
+                    component="span"
+                  >
+                    <EuiFlexGroup
+                      alignItems="center"
+                      component="span"
+                      data-test-subj="stat-title"
+                      gutterSize="m"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem
+                        component="span"
+                        grow={2}
+                      >
+                        <EuiFlexGroup
+                          alignItems="center"
+                          component="span"
+                          gutterSize="m"
+                        >
+                          <EuiFlexItem
+                            component="span"
+                          >
+                            <pure(Component)
+                              isLoading={false}
+                              value={null}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        component="span"
+                        grow={4}
+                      />
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              titleColor="default"
+              titleSize="m"
+            >
+              <div
+                className="euiStat euiStat--leftAligned"
+              >
+                <EuiText
+                  className="euiStat__description"
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small euiStat__description"
+                  >
+                    <p>
+                      <EuiTitle
+                        size="xxs"
+                      >
+                        <span
+                          className="euiTitle euiTitle--xxsmall"
+                        >
+                          HOSTS
+                        </span>
+                      </EuiTitle>
+                    </p>
+                  </div>
+                </EuiText>
+                <EuiTitle
+                  className="euiStat__title"
+                  size="m"
+                >
+                  <p
+                    className="euiTitle euiTitle--medium euiStat__title"
+                  >
+                    <EuiFlexGroup
+                      component="span"
+                      gutterSize="none"
+                      justifyContent="spaceBetween"
+                    >
+                      <span
+                        className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          component="span"
+                          key="stat-items-field-hosts"
+                        >
+                          <span
+                            className="euiFlexItem"
+                          >
+                            <EuiFlexGroup
+                              alignItems="center"
+                              component="span"
+                              data-test-subj="stat-title"
+                              gutterSize="m"
+                              justifyContent="spaceBetween"
+                            >
+                              <span
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                data-test-subj="stat-title"
+                              >
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={2}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow2"
+                                  >
+                                    <EuiFlexGroup
+                                      alignItems="center"
+                                      component="span"
+                                      gutterSize="m"
+                                    >
+                                      <span
+                                        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                      >
+                                        <EuiFlexItem
+                                          component="span"
+                                        >
+                                          <span
+                                            className="euiFlexItem"
+                                          >
+                                            <pure(Component)
+                                              isLoading={false}
+                                              value={null}
+                                            >
+                                              <Component
+                                                isLoading={false}
+                                                value={null}
+                                              >
+                                                <span>
+                                                  --
+                                                </span>
+                                              </Component>
+                                            </pure(Component)>
+                                          </span>
+                                        </EuiFlexItem>
+                                      </span>
+                                    </EuiFlexGroup>
+                                  </span>
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={4}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow4"
+                                  />
+                                </EuiFlexItem>
+                              </span>
+                            </EuiFlexGroup>
+                          </span>
+                        </EuiFlexItem>
+                      </span>
+                    </EuiFlexGroup>
+                  </p>
+                </EuiTitle>
+              </div>
+            </EuiStat>
+            <EuiFlexGroup
+              gutterSize="none"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={10}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrow10"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={10}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrow10"
+                  />
+                </EuiFlexItem>
+              </div>
             </EuiFlexGroup>
           </div>
         </EuiPanel>

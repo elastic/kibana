@@ -8,6 +8,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { KpiHostsData } from '../../../../graphql/types';
 import {
   AreaChartData,
@@ -40,13 +42,7 @@ const fieldTitleMapping: StatItems[] = [
         icon: 'storage',
       },
     ],
-    areaChart: [
-      {
-        key: 'hostsHistogram',
-        value: null,
-        color: euiColorVis1,
-      },
-    ],
+    enableAreaChart: true,
     grow: 2,
     description: i18n.HOSTS,
   },
@@ -67,31 +63,9 @@ const fieldTitleMapping: StatItems[] = [
         icon: 'cross',
       },
     ],
-    areaChart: [
-      {
-        key: 'authSuccessHistogram',
-        value: null,
-        color: euiColorVis0,
-      },
-      {
-        key: 'authFailureHistogram',
-        value: null,
-        color: euiColorVis9,
-      },
-    ],
-    barChart: [
-      {
-        key: 'authSuccess',
-        value: null,
-        color: euiColorVis0,
-      },
-      {
-        key: 'authFailure',
-        value: null,
-        color: euiColorVis9,
-      },
-    ],
-    grow: 5,
+    enableAreaChart: true,
+    enableBarChart: true,
+    grow: 4,
     description: i18n.AUTHENTICATION,
   },
   {
@@ -111,61 +85,45 @@ const fieldTitleMapping: StatItems[] = [
         icon: 'visMapCoordinate',
       },
     ],
-    areaChart: [
-      {
-        key: 'uniqueSourceIpsHistogram',
-        value: null,
-        color: euiColorVis2,
-      },
-      {
-        key: 'uniqueDestinationIpsHistogram',
-        value: null,
-        color: euiColorVis3,
-      },
-    ],
-    barChart: [
-      {
-        key: 'uniqueSourceIps',
-        value: null,
-        color: euiColorVis2,
-      },
-      {
-        key: 'uniqueDestinationIps',
-        value: null,
-        color: euiColorVis3,
-      },
-    ],
-    grow: 5,
+    enableAreaChart: true,
+    enableBarChart: true,
+    grow: 4,
     description: i18n.UNIQUE_PRIVATE_IPS,
   },
 ];
 
 export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
-  return (
+  return loading ? (
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
     <EuiFlexGroup>
-      {fieldTitleMapping.map(card => {
+      {fieldTitleMapping.map(stat => {
         let statItemProps: StatItemsProps = {
-          ...card,
+          ...stat,
           isLoading: loading,
-          key: `kpi-hosts-summary-${card.description}`,
+          key: `kpi-hosts-summary-${stat.description}`,
         };
 
-        if (card.fields != null)
+        if (stat.fields != null)
           statItemProps = {
             ...statItemProps,
-            fields: addValueToFields(card.fields, data),
+            fields: addValueToFields(stat.fields, data),
           };
 
-        if (card.areaChart != null)
+        if (stat.enableAreaChart)
           statItemProps = {
             ...statItemProps,
-            areaChart: addValueToAreaChart(card.areaChart, data),
+            areaChart: addValueToAreaChart(stat.fields, data),
           };
 
-        if (card.barChart != null)
+        if (stat.enableBarChart != null)
           statItemProps = {
             ...statItemProps,
-            barChart: addValueToBarChart(card.barChart, data),
+            barChart: addValueToBarChart(stat.fields, data),
           };
 
         return <StatItemsComponent {...statItemProps} />;
@@ -177,12 +135,16 @@ export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
 const addValueToFields = (fields: StatItem[], data: KpiHostsData): StatItem[] =>
   fields.map(field => ({ ...field, value: get(field.key, data) }));
 
-const addValueToAreaChart = (fields: AreaChartData[], data: KpiHostsData): AreaChartData[] =>
+const addValueToAreaChart = (fields: StatItem[], data: KpiHostsData): AreaChartData[] =>
   fields
-    .filter(field => get(field.key, data) != null)
-    .map(field => ({ ...field, value: get(field.key, data) }));
+    .filter(field => get(`${field.key}Histogram`, data) != null)
+    .map(field => ({
+      ...field,
+      value: get(`${field.key}Histogram`, data),
+      key: `${field.key}Histogram`,
+    }));
 
-const addValueToBarChart = (fields: BarChartData[], data: KpiHostsData): BarChartData[] => {
+const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartData[] => {
   return fields
     .filter(field => get(field.key, data) != null)
     .map(field => {
