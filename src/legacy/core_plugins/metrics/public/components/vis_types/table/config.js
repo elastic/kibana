@@ -40,7 +40,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-
+import { data } from 'plugins/data';
+import { Storage } from 'ui/storage';
+const { QueryBar } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 class TableSeriesConfig extends Component {
 
   componentWillMount() {
@@ -51,6 +54,9 @@ class TableSeriesConfig extends Component {
       });
     }
   }
+  handleSubmit = query => {
+    this.props.onChange({ filter: query.query });
+  };
 
   render() {
     const defaults = { offset_time: '', value_template: '' };
@@ -124,12 +130,25 @@ class TableSeriesConfig extends Component {
               />)}
               fullWidth
             >
-              <EuiFieldText
+              <QueryBar
+                query={
+                  {
+                    language: (model.filter && model.filter.language) ? model.filter.language : 'lucene',
+                    query: (model.filter && model.filter.query) ? model.filter.query : ''
+                  }}
+                screenTitle={'TSVBTableDataOptionsTab'}
+                onSubmit={this.handleSubmit}
+                appName={'VisEditor'}
+                indexPatterns={[this.props.indexPatternForQuery]}
+                store={localStorage || {}}
+                showDatePicker={false}
+              />
+              {/* <EuiFieldText
                 style={{ border: '1px solid blue' }}
                 onChange={handleTextChange('filter')}
                 value={model.filter}
                 fullWidth
-              />
+              /> */}
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
