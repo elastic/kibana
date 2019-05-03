@@ -19,6 +19,10 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   const libs = compose(kbnServer);
   initInfraServer(libs);
 
+  libs.sources.defineInternalSourceConfiguration('something-internal', {
+    name: 'Something internal',
+  });
+
   // Register a function with server to manage the collection of usage stats
   kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
 
