@@ -17,6 +17,7 @@ import { DatasourceField, fieldToOperation } from '../../../common';
 import { Draggable } from '../../common/components/draggable';
 import { DroppablePane } from '../../frame/main/droppable_pane';
 import { AxisEditor } from './axis_editor';
+import { EuiTextColor } from '@elastic/eui';
 
 const PLUGIN_NAME = 'table_chart';
 
@@ -56,8 +57,10 @@ function lnsConfigPanel({
         <React.Fragment key={index}>
           <div className="lnsConfigPanel__axis">
             <span className="lnsConfigPanel__axisTitle">Add column</span>
-            <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField(index)}>
-              Drop another field here
+            <Draggable className="lnsEmptyChart__item" canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField(index)}>
+              <EuiTextColor color="subdued">
+                Drop another field here
+              </EuiTextColor>
             </Draggable>
           </div>
           <div className="lnsConfigPanel__axis">
@@ -73,10 +76,13 @@ function lnsConfigPanel({
       <div className="lnsConfigPanel__axis">
         <span className="lnsConfigPanel__axisTitle">Add column</span>
         <Draggable
+          className="lnsEmptyChart__item"
           canHandleDrop={(f: DatasourceField) => true}
           onDrop={onDropField(firstQuery.select.length)}
         >
-          Drop another field here
+          <EuiTextColor color="subdued">
+            Drop another field here
+          </EuiTextColor>
         </Draggable>
       </div>
     </>

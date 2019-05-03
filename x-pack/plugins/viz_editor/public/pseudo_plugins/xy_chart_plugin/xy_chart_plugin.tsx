@@ -9,6 +9,7 @@ import {
   EuiSuperSelect,
   EuiSwitch,
   IconType,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import React from 'react';
 import { DatasourceField, fieldToOperation, SelectOperation } from '../../../common';
@@ -27,6 +28,7 @@ import { prefillPrivateState, updateXyState } from './state_helpers';
 import { PLUGIN_NAME, XyChartVisModel, XyDisplayType } from './types';
 import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
+import { EuiSpacer } from '@elastic/eui';
 
 function lnsConfigPanel({
   visModel,
@@ -43,33 +45,42 @@ function lnsConfigPanel({
     },
   } = visModel;
 
+  const displayOptions = [
+    {
+      id: 'line',
+      label: 'Line',
+      iconType: 'visLine',
+    },
+    {
+      id: 'area',
+      label: 'Area',
+      iconType: 'visArea',
+    },
+    {
+      id: 'bar',
+      label: 'Bar',
+      iconType: 'visBarVertical',
+    },
+  ];
+
   return (
     <>
       <div className="lnsConfigPanel__axis">
         <span className="lnsConfigPanel__axisTitle">Display type</span>
-        <EuiSuperSelect
-          options={[
-            {
-              value: 'line',
-              inputDisplay: 'Line',
-            },
-            {
-              value: 'area',
-              inputDisplay: 'Area',
-            },
-            {
-              value: 'bar',
-              inputDisplay: 'Bar',
-            },
-          ]}
-          valueOfSelected={displayType || 'line'}
-          onChange={(value: XyDisplayType) => {
-            const updatedVisModel = updateXyState(visModel, { displayType: value });
+        <EuiSpacer size="s" />
+        <EuiButtonGroup
+          legend="Display type"
+          isIconOnly
+          options={displayOptions}
+          idSelected={displayType || 'line'}
+          isFullWidth
+          onChange={(id) => {
+            const updatedVisModel = updateXyState(visModel, { displayType: id as XyDisplayType });
             onChangeVisModel(updatedVisModel);
           }}
         />
-      </div>
-      <div className="lnsConfigPanel__axis">
+
+        <EuiSpacer size="m" />
         <EuiSwitch
           label="Stacked"
           checked={stacked}

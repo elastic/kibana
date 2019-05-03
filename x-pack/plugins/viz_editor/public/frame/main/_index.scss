@@ -26,8 +26,12 @@
   }
 }
 
+.lnsSidebar__header {
+  padding: $euiSize 0;
+}
+
 .lnsSidebar__sourceGroup {
-  padding: $euiSize;
+  padding: $euiSizeL $euiSize;
   flex-grow: 0;
 }
 
@@ -35,6 +39,7 @@
   @include euiScrollBar;
   overflow: hidden auto;
   padding: $euiSize;
+  min-width: ($euiSize * 18);
 }
 
 .lnsSidebar--expression {

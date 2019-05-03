@@ -2,9 +2,9 @@
   @include euiFontSizeS;
   background: $euiColorEmptyShade;
   border-radius: $euiBorderRadius;
-  padding: $euiSizeS;
   display: flex;
   align-items: center;
+  margin-top: $euiSizeXS;
 }
 
 .lnsConfigPanel__summaryPopover {
@@ -18,7 +18,7 @@
 
 .lnsConfigPanel__summaryLink {
   display: flex;
-  align-items: center;
+  padding: $euiSizeM $euiSizeXS;
 
   > span {
     flex-grow: 1;

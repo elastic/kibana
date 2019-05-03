@@ -180,7 +180,6 @@ export function Main(props: MainProps) {
 
   const [flyoutIsOpen, setFlyoutIsOpen] = useState(false);
 
-  // TODO: Hook this up
   let flyout;
   if (flyoutIsOpen) {
     flyout = (
@@ -219,7 +218,7 @@ export function Main(props: MainProps) {
     <EuiPage className="lnsPage">
       {!state.metadata.expressionMode && (
         <EuiPageSideBar className="lnsSidebar">
-          <EuiFlexGroup className="lnsSidebar__sourceGroup" gutterSize="s" alignItems="center">
+          <EuiFlexGroup className="lnsSidebar__sourceGroup lnsSidebar__header" gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiTitle size="xs"><h2>Source: </h2></EuiTitle>
             </EuiFlexItem>
@@ -254,7 +253,6 @@ export function Main(props: MainProps) {
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              {/* TODO: Hook up to flyout*/}
               <EuiButtonIcon
                 onClick={() => { setFlyoutIsOpen(true); }}
                 iconType="inspect"
@@ -318,10 +316,12 @@ export function Main(props: MainProps) {
           />
         ) : (
           <>
-            <EuiTitle size="xs">
-              <h3>{panelProps.visModel.editorPlugin} <EuiButtonEmpty size="xs" disabled>(change)</EuiButtonEmpty></h3>
-            </EuiTitle>
-            <EuiSpacer />
+            <div className="lnsSidebar__header">
+              {/* Hook up the button to allow user to force into a particular chart type and stay there (don't switch chart types when changing data) */}
+              <EuiTitle size="xs">
+                <h3>{'Auto' || panelProps.visModel.editorPlugin} <EuiButtonEmpty size="xs" disabled>(change)</EuiButtonEmpty></h3>
+              </EuiTitle>
+            </div>
 
             <ConfigPanel {...panelProps} />
 
@@ -341,7 +341,9 @@ export function Main(props: MainProps) {
                     }}
                     paddingSize="s"
                   >
-                    {suggestion.title}
+                    <EuiTitle size="xxxs">
+                      <h4>{suggestion.title}</h4>
+                    </EuiTitle>
                     <ExpressionRenderer
                       {...props}
                       expression={suggestion.previewExpression}

@@ -1,3 +1,4 @@
 .lnsEmptyChart__item {
   @include lnsDragAndDropItem;
+  margin-top: $euiSizeXS;
 }
