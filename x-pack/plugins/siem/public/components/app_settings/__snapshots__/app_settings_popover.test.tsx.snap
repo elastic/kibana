@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AppSettingsPopover rendering it renders against snapshot 1`] = `
+<Component
+  onClick={[Function]}
+  onClose={[Function]}
+  showPopover={false}
+/>
+`;
