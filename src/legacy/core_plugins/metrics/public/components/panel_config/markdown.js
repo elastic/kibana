@@ -96,6 +96,7 @@ class MarkdownPanelConfigUi extends Component {
   }
 
   render() {
+    // TODO: change default filter to {language: 'lucene', query: ''}
     const defaults = { filter: '' };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
