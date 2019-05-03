@@ -13,6 +13,7 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeSavedObjectsManagementBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
+    // TODO: Revisit if/when savedObjectsManagement UI Capabilities are refactored
     if (feature.id !== 'savedObjectsManagement') {
       return [];
     }
