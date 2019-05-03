@@ -26,9 +26,6 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
-import { Storage } from 'ui/storage';
-import { data } from 'plugins/data';
-const { QueryBar } = data.query.ui;
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -44,13 +41,15 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
 /*
 QueryBarInput will be the text input, the language switcher, and autocomplete.
 import { QueryBarInput } from 'ui/query_bar';
 */
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-
+const { QueryBar } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 class TimeseriesPanelConfigUi extends Component {
   constructor(props) {
