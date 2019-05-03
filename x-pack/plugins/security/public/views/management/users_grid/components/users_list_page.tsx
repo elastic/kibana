@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { User } from '../../../../common/model';
-import { ConfirmDelete } from './confirm_delete';
-import { UserAPIClient } from '../../../lib/api';
+import { ConfirmDeleteUsers } from '../../../../components/management/users';
+import { User } from '../../../../../common/model';
+import { UserAPIClient } from '../../../../lib/api';
 
 interface Props {
   intl: InjectedIntl;
@@ -228,7 +228,7 @@ class UsersListPageUI extends Component<Props, State> {
           </EuiPageContentHeader>
           <EuiPageContentBody>
             {showDeleteConfirmation ? (
-              <ConfirmDelete
+              <ConfirmDeleteUsers
                 onCancel={this.onCancelDelete}
                 usersToDelete={selection.map(user => user.username)}
                 callback={this.handleDelete}

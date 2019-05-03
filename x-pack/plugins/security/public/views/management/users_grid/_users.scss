@@ -1,0 +1,8 @@
+// HACK -- Fix for background color full-height of browser
+.secUsersListingPage {
+  min-height: calc(100vh - 70px);
+}
+
+.secUsersListingPage__content {
+  flex-grow: 0;
+}

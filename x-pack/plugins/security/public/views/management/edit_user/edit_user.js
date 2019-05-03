@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import routes from 'ui/routes';
-import template from 'plugins/security/views/management/edit_user.html';
+import template from 'plugins/security/views/management/edit_user/edit_user.html';
 import 'angular-resource';
 import 'ui/angular_ui_select';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
-import { EDIT_USERS_PATH } from './management_urls';
-import { EditUserPage } from '../../components/management/users';
-import { UserAPIClient } from '../../lib/api';
+import { EDIT_USERS_PATH } from '../management_urls';
+import { EditUserPage } from './components';
+import { UserAPIClient } from '../../../lib/api';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
-import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from './breadcrumbs';
+import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from '../breadcrumbs';
 
 const renderReact = (elem, httpClient, changeUrl, username) => {
   render(

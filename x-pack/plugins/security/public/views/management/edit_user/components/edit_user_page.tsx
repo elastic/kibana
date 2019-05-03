@@ -28,12 +28,12 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
-import { UserValidator, UserValidationResult } from '../../../lib/validate_user';
-import { User, EditUser, Role } from '../../../../common/model';
-import { USERS_PATH } from '../../../views/management/management_urls';
-import { ConfirmDelete } from './confirm_delete';
-import { UserAPIClient } from '../../../lib/api';
-import { ChangePasswordForm } from '../change_password_form';
+import { UserValidator, UserValidationResult } from '../../../../lib/validate_user';
+import { User, EditUser, Role } from '../../../../../common/model';
+import { USERS_PATH } from '../../../../views/management/management_urls';
+import { ConfirmDeleteUsers } from '../../../../components/management/users';
+import { UserAPIClient } from '../../../../lib/api';
+import { ChangePasswordForm } from '../../../../components/management/change_password_form';
 
 interface Props {
   username: string;
@@ -406,7 +406,7 @@ class EditUserPageUI extends Component<Props, State> {
             )}
 
             {showDeleteConfirmation ? (
-              <ConfirmDelete
+              <ConfirmDeleteUsers
                 onCancel={this.onCancelDelete}
                 usersToDelete={[user.username]}
                 callback={this.handleDelete}

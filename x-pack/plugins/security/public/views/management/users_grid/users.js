@@ -7,13 +7,13 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
-import template from 'plugins/security/views/management/users.html';
+import template from 'plugins/security/views/management/users_grid/users.html';
 import 'plugins/security/services/shield_user';
-import { SECURITY_PATH, USERS_PATH } from './management_urls';
-import { UsersListPage } from '../../components/management/users';
-import { UserAPIClient } from '../../lib/api';
+import { SECURITY_PATH, USERS_PATH } from '../management_urls';
+import { UsersListPage } from './components';
+import { UserAPIClient } from '../../../lib/api';
 import { I18nContext } from 'ui/i18n';
-import { getUsersBreadcrumbs } from './breadcrumbs';
+import { getUsersBreadcrumbs } from '../breadcrumbs';
 
 routes.when(SECURITY_PATH, {
   redirectTo: USERS_PATH,

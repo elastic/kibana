@@ -7,8 +7,8 @@
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EditUserPage } from './edit_user_page';
 import React from 'react';
-import { UserAPIClient } from '../../../lib/api';
-import { User, Role } from '../../../../common/model';
+import { UserAPIClient } from '../../../../lib/api';
+import { User, Role } from '../../../../../common/model';
 import { ReactWrapper } from 'enzyme';
 
 const buildClient = () => {

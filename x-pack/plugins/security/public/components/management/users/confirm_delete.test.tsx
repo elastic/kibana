@@ -5,14 +5,14 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ConfirmDelete } from './confirm_delete';
+import { ConfirmDeleteUsers } from './confirm_delete';
 import React from 'react';
 import { UserAPIClient } from '../../../lib/api';
 
-describe('ConfirmDelete', () => {
+describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a single user', () => {
     const wrapper = mountWithIntl(
-      <ConfirmDelete apiClient={null as any} usersToDelete={['foo']} onCancel={jest.fn()} />
+      <ConfirmDeleteUsers apiClient={null as any} usersToDelete={['foo']} onCancel={jest.fn()} />
     );
 
     expect(wrapper.find('EuiModalHeaderTitle').text()).toMatchInlineSnapshot(`"Delete user foo"`);
@@ -20,7 +20,7 @@ describe('ConfirmDelete', () => {
 
   it('renders a warning for a multiple users', () => {
     const wrapper = mountWithIntl(
-      <ConfirmDelete
+      <ConfirmDeleteUsers
         apiClient={null as any}
         usersToDelete={['foo', 'bar', 'baz']}
         onCancel={jest.fn()}
@@ -33,7 +33,7 @@ describe('ConfirmDelete', () => {
   it('fires onCancel when the operation is cancelled', () => {
     const onCancel = jest.fn();
     const wrapper = mountWithIntl(
-      <ConfirmDelete apiClient={null as any} usersToDelete={['foo']} onCancel={onCancel} />
+      <ConfirmDeleteUsers apiClient={null as any} usersToDelete={['foo']} onCancel={onCancel} />
     );
 
     expect(onCancel).toBeCalledTimes(0);
@@ -51,7 +51,11 @@ describe('ConfirmDelete', () => {
     apiClient.deleteUser = deleteUser;
 
     const wrapper = mountWithIntl(
-      <ConfirmDelete usersToDelete={['foo', 'bar']} apiClient={apiClient} onCancel={onCancel} />
+      <ConfirmDeleteUsers
+        usersToDelete={['foo', 'bar']}
+        apiClient={apiClient}
+        onCancel={onCancel}
+      />
     );
 
     wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
@@ -74,7 +78,11 @@ describe('ConfirmDelete', () => {
     apiClient.deleteUser = deleteUser;
 
     const wrapper = mountWithIntl(
-      <ConfirmDelete usersToDelete={['foo', 'bar']} apiClient={apiClient} onCancel={onCancel} />
+      <ConfirmDeleteUsers
+        usersToDelete={['foo', 'bar']}
+        apiClient={apiClient}
+        onCancel={onCancel}
+      />
     );
 
     wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UserAPIClient } from '../../../lib/api';
-import { User } from '../../../../common/model';
+import { UserAPIClient } from '../../../../lib/api';
+import { User } from '../../../../../common/model';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UsersListPage } from './users_list_page';
 import React from 'react';
