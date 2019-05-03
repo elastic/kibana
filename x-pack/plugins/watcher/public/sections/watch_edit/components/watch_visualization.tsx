@@ -7,14 +7,15 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import '@elastic/charts/dist/style.css';
 import {
+  AnnotationDomainTypes,
   Axis,
-  CustomSeriesColorsMap,
   DARK_THEME,
-  DataSeriesColorsValues,
+  getAnnotationId,
   getAxisId,
   getSpecId,
   Chart,
   LIGHT_THEME,
+  LineAnnotation,
   LineSeries,
   Position,
   ScaleType,
@@ -129,16 +130,6 @@ const WatchVisualizationUi = () => {
   };
   const aggLabel = aggTypes[watch.aggType].text;
 
-  const getCustomColors = (specId: string) => {
-    const customSeriesColors: CustomSeriesColorsMap = new Map();
-    const dataSeriesColorValues: DataSeriesColorsValues = {
-      colorValues: [],
-      specId: getSpecId(specId),
-    };
-    customSeriesColors.set(dataSeriesColorValues, '#BD271E');
-    return customSeriesColors;
-  };
-
   if (isLoading) {
     return (
       <Fragment>
@@ -192,17 +183,10 @@ const WatchVisualizationUi = () => {
           {getThreshold(watch).map((value: any, i: number) => {
             const specId = i === 0 ? 'threshold' : `threshold${i}`;
             return (
-              <LineSeries
-                key={specId}
-                id={getSpecId(specId)}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                data={[[domain.min, watch.threshold[i]], [domain.max, watch.threshold[i]]]}
-                xAccessor={0}
-                yAccessors={[1]}
-                timeZone={timezone}
-                yScaleToDataExtent={true}
-                customSeriesColors={getCustomColors(specId)}
+              <LineAnnotation
+                annotationId={getAnnotationId(specId)}
+                domainType={AnnotationDomainTypes.YDomain}
+                dataValues={[{ dataValue: watch.threshold[i], details: specId }]}
               />
             );
           })}
