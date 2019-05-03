@@ -6,8 +6,9 @@
 
 export interface EditorFrameSetup {
   render: (domElement: Element) => void;
-  registerDatasource: (name: string, datasource: Datasource<any>) => void;
-  registerVisualization: (name: string, visualization: Visualization<any>) => void;
+  // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
+  registerDatasource: <T>(name: string, datasource: Datasource<T>) => void;
+  registerVisualization: <T>(name: string, visualization: Visualization<T>) => void;
 }
 
 export interface EditorFrameState {
