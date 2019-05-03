@@ -1,0 +1,16 @@
+.lnsConfigPanel__summaryPopoverLeft,
+.lnsConfigPanel__summaryPopoverRight {
+  padding: $euiSizeS;
+}
+
+.lnsConfigPanel__summaryPopoverLeft {
+  padding-top: 0;
+}
+
+.lnsConfigPanel__summaryPopoverLeft--shaded {
+  background-color: $euiColorLightestShade;
+}
+
+.lnsConfigPanel__summaryPopoverRight {
+  width: $euiSize * 12;
+}

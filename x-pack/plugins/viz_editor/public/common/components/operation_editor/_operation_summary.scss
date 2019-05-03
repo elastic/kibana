@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   margin-top: $euiSizeXS;
+  padding: $euiSizeXS;
 }
 
 .lnsConfigPanel__summaryPopover {
@@ -18,7 +19,7 @@
 
 .lnsConfigPanel__summaryLink {
   display: flex;
-  padding: $euiSizeM $euiSizeXS;
+  padding: $euiSizeS $euiSizeXS;
 
   > span {
     flex-grow: 1;

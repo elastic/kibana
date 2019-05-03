@@ -98,7 +98,7 @@ export function OperationEditor<T extends SelectOperation>(props: OperationEdito
     | undefined;
 
   const subEditor = SubEditor ? (
-    <EuiFlexItem>
+    <EuiFlexItem className="lnsConfigPanel__summaryPopoverRight">
       <SubEditor {...props} />
     </EuiFlexItem>
   ) : null;
@@ -113,9 +113,10 @@ export function OperationEditor<T extends SelectOperation>(props: OperationEdito
         closePopover={close}
         anchorPosition="leftUp"
         withTitle
+        panelPaddingSize="s"
       >
-        <EuiFlexGroup>
-          <EuiFlexItem grow={!subEditor}>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={!subEditor} className={`lnsConfigPanel__summaryPopoverLeft ${subEditor && 'lnsConfigPanel__summaryPopoverLeft--shaded'}`}>
             <EuiSideNav items={sideNavItems} />
           </EuiFlexItem>
           {subEditor}

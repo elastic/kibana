@@ -81,21 +81,22 @@ function fieldOperationEditor(props: OperationEditorProps<FieldOperation>) {
     }));
 
   return (
-    <EuiSelect
-      options={options}
-      value={argument && argument.field}
-      onChange={e =>
-        onOperationChange({
-          ...operation,
-          id: operation.id || e.target.value,
-          argument: {
-            ...argument,
-            field: e.target.value,
-          },
-        } as SelectOperation)
-      }
-      aria-label="Field"
-    />
+    <EuiFormRow label="Field">
+      <EuiSelect
+        options={options}
+        value={argument && argument.field}
+        onChange={e =>
+          onOperationChange({
+            ...operation,
+            id: operation.id || e.target.value,
+            argument: {
+              ...argument,
+              field: e.target.value,
+            },
+          } as SelectOperation)
+        }
+      />
+    </EuiFormRow>
   );
 }
 
@@ -236,10 +237,10 @@ function dateHistogramOperationEditor(props: OperationEditorProps<DateHistogramO
           aria-label="Field"
         />
       </EuiFormRow>
-      <EuiFormRow label="Level of Detail">
+      <EuiFormRow label="Level of detail">
         <FixedEuiRange
           min={0}
-          max={intervals.length}
+          max={intervals.length - 1}
           step={1}
           value={argument && intervalToNumeric(argument.interval)}
           showTicks

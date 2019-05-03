@@ -99,9 +99,9 @@ function buildSuggestion(visModel: TableChartVisModel, score: number = 0.5) {
   return {
     title,
     visModel,
-    previewExpression: '',
+    previewExpression: 'icon',
     score,
-    iconType: 'visMetric',
+    iconType: 'visTable',
     pluginName: PLUGIN_NAME,
     category: 'Metric',
   } as Suggestion;

@@ -39,6 +39,7 @@ import {
   VisModel,
 } from '../..';
 import { ExpressionRenderer } from '../expression_renderer';
+import { EuiIcon } from '@elastic/eui';
 
 type Action =
   | { type: 'loaded' }
@@ -344,11 +345,18 @@ export function Main(props: MainProps) {
                     <EuiTitle size="xxxs">
                       <h4>{suggestion.title}</h4>
                     </EuiTitle>
-                    <ExpressionRenderer
-                      {...props}
-                      expression={suggestion.previewExpression}
-                      size="preview"
-                    />
+                    {/* Hack for now, but should actually check if the previewExpression is valid */}
+                    {suggestion.previewExpression.endsWith('| icon') ? (
+                      <div className="lnsSidebar__suggestionIcon">
+                        <EuiIcon size="xxl" color="subdued" type={suggestion.iconType} />
+                      </div>
+                    ) : (
+                      <ExpressionRenderer
+                        {...props}
+                        expression={suggestion.previewExpression}
+                        size="preview"
+                      />
+                    )}
                   </EuiPanel>
                 ))}
               </div>
