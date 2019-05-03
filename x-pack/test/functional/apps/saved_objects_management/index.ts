@@ -7,10 +7,10 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function advancedSettingsApp({
+export default function savedObjectsManagementApp({
   loadTestFile,
 }: KibanaFunctionalTestDefaultProviders) {
-  describe('Saved objects management', function savedObjectsManagementAppTestSuite() {
+  describe.only('Saved objects management', function savedObjectsManagementAppTestSuite() {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./feature_controls/saved_objects_management_security'));
   });
