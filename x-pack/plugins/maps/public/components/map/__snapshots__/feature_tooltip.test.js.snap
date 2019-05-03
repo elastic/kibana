@@ -161,6 +161,19 @@ exports[`FeatureTooltip should show close button, but not filter button 1`] = `
 </Fragment>
 `;
 
+exports[`FeatureTooltip should show error message if unable to load tooltip content 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="cross"
+  size="m"
+  title="Unable to load tooltip content"
+>
+  <p>
+    Simulated load properties error
+  </p>
+</EuiCallOut>
+`;
+
 exports[`FeatureTooltip should show only filter button for filterable properties 1`] = `
 <Fragment>
   <EuiFlexGroup
