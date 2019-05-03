@@ -241,6 +241,7 @@ export class MBMapContainer extends React.Component {
     if (!this._mbDrawControlAdded) {
       return;
     }
+
     this._mbMap.getCanvas().style.cursor = '';
     this._mbMap.off('draw.create', this._onDraw);
     this._mbMap.removeControl(this._mbDrawControl);
@@ -251,6 +252,7 @@ export class MBMapContainer extends React.Component {
   _updateDrawControl() {
     if (!this._mbDrawControlAdded) {
       this._mbMap.addControl(this._mbDrawControl);
+      this._mbDrawControlAdded = true;
       this._mbMap.getCanvas().style.cursor = 'crosshair';
       this._mbMap.on('draw.create', this._onDraw);
     }
