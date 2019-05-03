@@ -11,14 +11,6 @@ export interface EditorFrameSetup {
   registerVisualization: <T>(name: string, visualization: Visualization<T>) => void;
 }
 
-export interface EditorFrameState {
-  visualizations: { [id: string]: object };
-  datasources: { [id: string]: object };
-
-  activeDatasourceId: string;
-  activeVisualizationId: string;
-}
-
 // Hints the default nesting to the data source. 0 is the highest priority
 export type DimensionPriority = 0 | 1 | 2;
 
