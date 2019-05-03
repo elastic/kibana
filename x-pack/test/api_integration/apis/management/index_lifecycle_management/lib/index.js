@@ -12,3 +12,7 @@ export {
   wait,
   getPolicyNames,
 } from './utils';
+
+export {
+  initElasticsearchIndicesHelpers
+} from './elasticsearch';

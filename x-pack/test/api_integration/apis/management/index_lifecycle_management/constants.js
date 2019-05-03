@@ -6,3 +6,5 @@
 
 export const API_BASE_PATH = '/api/index_lifecycle_management';
 export const DEFAULT_POLICY_NAME = 'watch-history-ilm-policy';
+export const INDEX_TEMPLATE_NAME = 'api-integration-tests-template';
+export const INDEX_TEMPLATE_PATTERN_PREFIX = 'api_integration_tests_';

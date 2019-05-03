@@ -5,6 +5,7 @@
  */
 
 import { getRandomString } from './lib';
+import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
 
 export const gePolicyPayload = ({ name = getRandomString() } = {}) => ({
   lifecycle: {
@@ -44,4 +45,11 @@ export const gePolicyPayload = ({ name = getRandomString() } = {}) => ({
       }
     }
   }
+});
+
+export const getTemplatePayload = () => ({
+  index_patterns: [`${INDEX_TEMPLATE_PATTERN_PREFIX}*`],
+  settings: {
+    number_of_shards: 1
+  },
 });
