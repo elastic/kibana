@@ -16,18 +16,19 @@ import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
 import _ from 'lodash';
 
-export function JsonUploadAndParse(props) {
-  const {
-    appName,
-    boolIndexData = false,
-    boolCreateIndexPattern = true,
-    transformDetails,
-    onIndexReadyStatusChange,
-    onIndexAddSuccess,
-    onIndexAddError,
-    onIndexPatternCreateSuccess,
-    onIndexPatternCreateError,
-  } = props;
+export function JsonUploadAndParse({
+  appName,
+  boolIndexData,
+  boolCreateIndexPattern,
+  transformDetails,
+  onFileUpload,
+  onFileRemove,
+  onIndexReadyStatusChange,
+  onIndexAddSuccess,
+  onIndexAddError,
+  onIndexPatternCreateSuccess,
+  onIndexPatternCreateError,
+}) {
 
   // File state
   const [fileRef, setFileRef] = useState(null);
@@ -59,8 +60,8 @@ export function JsonUploadAndParse(props) {
 
   // Set index ready
   useEffect(() => {
-    const boolIndexReady = !!parsedFile && !!selectedIndexType && !!indexName &&
-      !hasIndexErrors && !indexRequestInFlight;
+    const boolIndexReady = !!parsedFile && !!selectedIndexType &&
+      !!indexName && !hasIndexErrors && !indexRequestInFlight;
     setIndexReady(boolIndexReady);
     onIndexReadyStatusChange(boolIndexReady);
   }, [
@@ -150,7 +151,8 @@ export function JsonUploadAndParse(props) {
     <EuiForm>
       <JsonIndexFilePicker
         {...{
-          ...props,
+          onFileUpload,
+          onFileRemove,
           fileRef,
           setFileRef,
           setParsedFile,
@@ -169,6 +171,11 @@ export function JsonUploadAndParse(props) {
     </EuiForm>
   );
 }
+
+JsonUploadAndParse.defaultProps = {
+  boolIndexData: false,
+  boolCreateIndexPattern: true,
+};
 
 JsonUploadAndParse.propTypes = {
   appName: PropTypes.string,

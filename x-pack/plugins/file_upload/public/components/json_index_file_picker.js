@@ -15,7 +15,6 @@ import { parseFile } from '../util/file_parser';
 import { MAX_BYTES } from '../../common/constants/file_import';
 
 export function JsonIndexFilePicker({
-  fileUploadMessage,
   onFileUpload,
   onFileRemove,
   fileRef,
@@ -33,7 +32,7 @@ export function JsonIndexFilePicker({
         <FormattedMessage
           id="xpack.file_upload.filePickerLabel"
           defaultMessage={
-            fileUploadMessage || 'Please select a Json file to upload'
+            'Please select a Json file to upload'
           }
         />
       )}
