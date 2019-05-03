@@ -62,7 +62,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and Fl
       );
       expect(data).toEqual({
         edges: [],
-        pageInfo: { endCursor: { tiebreaker: null, value: '10' }, hasNextPage: false },
+        pageInfo: { activePage: 0 },
         totalCount: 0,
       });
     });

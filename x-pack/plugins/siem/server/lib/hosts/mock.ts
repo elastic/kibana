@@ -262,10 +262,7 @@ export const mockGetHostsResult = {
   ],
   totalCount: 1627,
   pageInfo: {
-    hasNextPage: false,
-    endCursor: {
-      value: '10',
-    },
+    activePage: 0,
   },
 };
 

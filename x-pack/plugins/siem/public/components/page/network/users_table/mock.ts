@@ -59,10 +59,6 @@ export const mockUsersData: UsersData = {
   ],
   totalCount: 3,
   pageInfo: {
-    endCursor: {
-      value: '10',
-      tiebreaker: null,
-    },
-    hasNextPage: false,
+    activePage: 0,
   },
 };

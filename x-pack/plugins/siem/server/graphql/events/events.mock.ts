@@ -14,11 +14,7 @@ export const mockEventsData: { Events: EventsData } = {
   Events: {
     totalCount: 15546,
     pageInfo: {
-      hasNextPage: true,
-      endCursor: {
-        value: '1546878704036',
-        tiebreaker: '10624',
-      },
+      activePage: 0,
     },
     kpiEventType: [{ count: 28, value: 'Young' }, { count: 82, value: 'Old' }],
     edges: [

@@ -62,10 +62,7 @@ const testCaseSource = {
             }
           }
           pageInfo{
-            endCursor{
-              value
-            }
-            hasNextPage
+            activePage
           }
         }
       }  
@@ -80,6 +77,7 @@ const testCaseSource = {
     pagination: {
       limit: 2,
       cursor: null,
+      activePage: 0,
     },
   },
   context: {

@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -18,7 +17,7 @@ import { KibanaConfigContext } from '../../../formatted_date';
 import { HostsTable } from './index';
 import { mockData } from './mock';
 
-describe('Load More Table Component', () => {
+describe('HostsTable Load More Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
@@ -38,8 +37,6 @@ describe('Load More Table Component', () => {
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
               loadMore={loadMore}
               type={hostsModel.HostsType.page}
             />
@@ -59,8 +56,6 @@ describe('Load More Table Component', () => {
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
               loadMore={loadMore}
               type={hostsModel.HostsType.page}
             />
@@ -77,8 +72,6 @@ describe('Load More Table Component', () => {
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
-                hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-                nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
                 loadMore={loadMore}
                 type={hostsModel.HostsType.page}
               />

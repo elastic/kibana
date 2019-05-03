@@ -101,7 +101,7 @@ export interface Columns<T> {
   render?: (item: T) => void;
 }
 
-export const LoadMoreTable = memo<BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>>(
+export const LoadMoreTable = memo<BasicTableProps<any>>(
   ({
     columns,
     headerCount,
@@ -128,8 +128,10 @@ export const LoadMoreTable = memo<BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>>(
     const pageCount = Math.ceil(totalCount / limit);
     const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
     useEffect(() => {
-      setActivePage(0);
-      updateActivePage(0);
+      if (activePage !==  0) {
+        setActivePage(0);
+        updateActivePage(0);
+      }
     }, effectDeps);
 
     const onButtonClick = () => {
@@ -258,6 +260,7 @@ export const LoadMoreTable = memo<BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>>(
                 >
                   <EuiFlexItem grow={false}>
                     <EuiPagination
+                      data-test-subj="numberedPagination"
                       pageCount={pageCount}
                       activePage={activePage}
                       onPageClick={goToPage}

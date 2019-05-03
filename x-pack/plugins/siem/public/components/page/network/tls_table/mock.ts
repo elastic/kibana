@@ -50,9 +50,6 @@ export const mockTlsData: TlsData = {
     },
   ],
   pageInfo: {
-    endCursor: {
-      value: '10',
-    },
-    hasNextPage: false,
+    activePage: 0,
   },
 };

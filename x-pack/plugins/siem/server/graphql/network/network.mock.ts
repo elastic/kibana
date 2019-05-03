@@ -54,10 +54,7 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
       },
     ],
     pageInfo: {
-      endCursor: {
-        value: '10',
-      },
-      hasNextPage: true,
+      activePage: 0,
     },
   },
 };
@@ -90,8 +87,7 @@ export const mockNetworkDnsData: { NetworkDns: NetworkDnsData } = {
       },
     ],
     pageInfo: {
-      endCursor: { value: '10' },
-      hasNextPage: true,
+      activePage: 0,
     },
   },
 };

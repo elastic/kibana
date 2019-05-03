@@ -47,10 +47,7 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
       },
     ],
     pageInfo: {
-      endCursor: {
-        value: '10',
-      },
-      hasNextPage: true,
+      activePage: 0,
     },
   },
 };

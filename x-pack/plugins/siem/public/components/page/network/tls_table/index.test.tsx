@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -36,8 +35,6 @@ describe('Tls Table Component', () => {
             loading={false}
             loadMore={loadMore}
             data={mockTlsData.edges}
-            hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -53,12 +50,10 @@ describe('Tls Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <TlsTable
-              totalCount={1}
+              totalCount={mockTlsData.totalCount}
               loading={false}
               loadMore={loadMore}
               data={mockTlsData.edges}
-              hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>
@@ -68,6 +63,8 @@ describe('Tls Table Component', () => {
         direction: 'desc',
         field: '_id',
       });
+
+      console.log('DEBUG', wrapper.debug())
 
       wrapper
         .find('.euiTable thead tr th button')

@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -35,8 +34,6 @@ describe('NetworkTopNFlow Table Component', () => {
             loading={false}
             data={mockData.NetworkDns.edges}
             totalCount={mockData.NetworkDns.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
             loadMore={loadMore}
             type={networkModel.NetworkType.page}
           />
@@ -56,8 +53,6 @@ describe('NetworkTopNFlow Table Component', () => {
               loading={false}
               data={mockData.NetworkDns.edges}
               totalCount={mockData.NetworkDns.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
               loadMore={loadMore}
               type={networkModel.NetworkType.page}
             />

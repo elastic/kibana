@@ -41,8 +41,6 @@ describe('Domains Table Component', () => {
             loadMore={loadMore}
             data={mockDomainsData.edges}
             flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -65,8 +63,6 @@ describe('Domains Table Component', () => {
               loadMore={loadMore}
               data={mockDomainsData.edges}
               flowTarget={FlowTarget.source}
-              hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

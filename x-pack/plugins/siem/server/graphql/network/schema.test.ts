@@ -72,8 +72,8 @@ const testNetworkTopNFlowSource = {
             }
           }
           pageInfo {
-          activePage
-        }
+            activePage
+          }
         }
       }
     }
@@ -90,6 +90,7 @@ const testNetworkTopNFlowSource = {
     pagination: {
       limit: 2,
       cursor: null,
+      activePage: 0,
     },
   },
   context: {
@@ -141,8 +142,8 @@ const testNetworkDnsSource = {
             }
           }
           pageInfo {
-          activePage
-        }
+            activePage
+          }
         }
       }
     }
@@ -158,6 +159,7 @@ const testNetworkDnsSource = {
     pagination: {
       limit: 2,
       cursor: null,
+      activePage: 0,
     },
   },
   context: {

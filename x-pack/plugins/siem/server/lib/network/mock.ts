@@ -24,7 +24,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
-  pagination: { limit: 10, cursor: null, tiebreaker: null },
+  pagination: { activePage: 0, limit: 10, cursor: null, tiebreaker: null },
   filterQuery: {},
   fields: [
     'totalCount',
@@ -683,11 +683,7 @@ export const mockResult = {
     },
   ],
   pageInfo: {
-    endCursor: {
-      tiebreaker: null,
-      value: '10',
-    },
-    hasNextPage: true,
+    activePage: 0,
   },
   totalCount: 545,
 };

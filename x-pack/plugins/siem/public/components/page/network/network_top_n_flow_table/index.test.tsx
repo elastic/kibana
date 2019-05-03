@@ -37,8 +37,6 @@ describe('NetworkTopNFlow Table Component', () => {
             loading={false}
             data={mockData.NetworkTopNFlow.edges}
             totalCount={mockData.NetworkTopNFlow.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
             loadMore={loadMore}
             type={networkModel.NetworkType.page}
           />
@@ -63,8 +61,6 @@ describe('NetworkTopNFlow Table Component', () => {
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
               loadMore={loadMore}
               type={networkModel.NetworkType.page}
             />
@@ -97,8 +93,6 @@ describe('NetworkTopNFlow Table Component', () => {
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
               loadMore={loadMore}
               type={networkModel.NetworkType.page}
             />
@@ -138,8 +132,6 @@ describe('NetworkTopNFlow Table Component', () => {
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
               loadMore={loadMore}
               type={networkModel.NetworkType.page}
             />

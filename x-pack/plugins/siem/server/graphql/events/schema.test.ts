@@ -45,11 +45,7 @@ const cases = [
         ) {
           totalCount
           pageInfo {
-            endCursor {
-              value
-              tiebreaker
-            }
-            hasNextPage
+            activePage
           }
           edges {
             cursor{
@@ -111,6 +107,7 @@ const cases = [
       },
       pagination: {
         limit: 2,
+        activePage: 0,
         cursor: null,
       },
       sortField: {
