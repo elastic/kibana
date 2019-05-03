@@ -22,8 +22,7 @@ building your dashboard.
 +
 image:images/NewDashboard.png[New Dashboard]
 
-[[adding-visualizations-to-a-dashboard]]
-. To add a visualization to the dashboard, click *Add* and select the
+. [[adding-visualizations-to-a-dashboard]]To add a visualization to the dashboard, click *Add* and select the
 visualization. If you have a large number of visualizations, you can enter a
 *Filter* string to filter the list.
 +
@@ -36,8 +35,7 @@ click *Options* and select *Use dark theme*. To change the default theme, go
 to *Management/Kibana/Advanced Settings* and set `dashboard:defaultDarkTheme`
 to `true`.
 
-[[saving-dashboards]]
-. When you're done adding and arranging visualizations, click *Save* to save the 
+. [[saving-dashboards]]When you're done adding and arranging visualizations, click *Save* to save the 
 dashboard:
 .. Enter a name for the dashboard. 
 .. To store the time period specified in the time filter with the dashboard, select
