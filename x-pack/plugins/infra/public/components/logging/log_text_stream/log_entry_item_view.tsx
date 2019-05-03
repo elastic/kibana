@@ -114,6 +114,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
               <LogTextStreamItemFieldField
                 dataTestSubj={`logColumn fieldLogColumn fieldLogColumn:${column.field}`}
                 encodedValue={column.value}
+                isHighlighted={isHighlighted}
                 isHovered={isHovered}
                 key={`${columnIndex}`}
                 scale={scale}
