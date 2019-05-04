@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
-      await PageObjects.settings.setScriptedFieldScript(`doc['iHaveNoClosingTick].value`);
+      await PageObjects.settings.setScriptedFieldScript(`i n v a l i d  s c r i p t`);
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async () => {
         const invalidScriptErrorExists = await testSubjects.exists('invalidScriptError');
