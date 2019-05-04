@@ -9,6 +9,8 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { StatItem, StatItems, StatItemsComponent } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 
@@ -86,7 +88,13 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
 ];
 
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
-  return (
+  return loading ? (
+    <EuiFlexGroup style={{ minHeight: 86 }} justifyContent="center" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
     <EuiFlexGroup>
       {fieldTitleMapping.map(stat => (
         <StatItemsComponent

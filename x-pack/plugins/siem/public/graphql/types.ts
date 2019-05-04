@@ -1072,6 +1072,14 @@ export interface HistogramData {
   doc_count?: number | null;
 
   key_as_string?: string | null;
+
+  count?: Count | null;
+}
+
+export interface Count {
+  value?: number | null;
+
+  doc_count?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -2441,45 +2449,15 @@ export namespace GetKpiHostsQuery {
     uniqueDestinationIpsHistogram?: (UniqueDestinationIpsHistogram | null)[] | null;
   };
 
-  export type HostsHistogram = {
-    __typename?: 'HistogramData';
+  export type HostsHistogram = ChartFields.Fragment;
 
-    x?: number | null;
+  export type AuthSuccessHistogram = ChartFields.Fragment;
 
-    y?: number | null;
-  };
+  export type AuthFailureHistogram = ChartFields.Fragment;
 
-  export type AuthSuccessHistogram = {
-    __typename?: 'HistogramData';
+  export type UniqueSourceIpsHistogram = ChartFields.Fragment;
 
-    x?: number | null;
-
-    y?: number | null;
-  };
-
-  export type AuthFailureHistogram = {
-    __typename?: 'HistogramData';
-
-    x?: number | null;
-
-    y?: number | null;
-  };
-
-  export type UniqueSourceIpsHistogram = {
-    __typename?: 'HistogramData';
-
-    x?: number | null;
-
-    y?: number | null;
-  };
-
-  export type UniqueDestinationIpsHistogram = {
-    __typename?: 'HistogramData';
-
-    x?: number | null;
-
-    y?: number | null;
-  };
+  export type UniqueDestinationIpsHistogram = ChartFields.Fragment;
 }
 
 export namespace GetKpiNetworkQuery {
@@ -3862,5 +3840,21 @@ export namespace GetUsersQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace ChartFields {
+  export type Fragment = {
+    __typename?: 'HistogramData';
+
+    x?: string | null;
+
+    y?: Y | null;
+  };
+
+  export type Y = {
+    __typename?: 'Count';
+
+    value?: number | null;
   };
 }

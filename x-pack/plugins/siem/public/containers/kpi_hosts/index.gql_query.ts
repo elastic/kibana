@@ -7,34 +7,37 @@
 import gql from 'graphql-tag';
 
 export const kpiHostsQuery = gql`
+  fragment ChartFields on HistogramData {
+    x: key_as_string
+    y: count {
+      value
+      doc_count
+    }
+  }
+
   query GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {
     source(id: $sourceId) {
       id
       KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {
         hosts
         hostsHistogram {
-          x: key
-          y: doc_count
+          ...ChartFields
         }
         authSuccess
         authSuccessHistogram {
-          x: key
-          y: doc_count
+          ...ChartFields
         }
         authFailure
         authFailureHistogram {
-          x: key
-          y: doc_count
+          ...ChartFields
         }
         uniqueSourceIps
         uniqueSourceIpsHistogram {
-          x: key
-          y: doc_count
+          ...ChartFields
         }
         uniqueDestinationIps
         uniqueDestinationIpsHistogram {
-          x: key
-          y: doc_count
+          ...ChartFields
         }
       }
     }

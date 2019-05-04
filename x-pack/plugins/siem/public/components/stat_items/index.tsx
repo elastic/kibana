@@ -18,8 +18,10 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { EuiText } from '@elastic/eui';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
+import { getEmptyTagValue } from '../empty_value';
 
 export const WrappedByAutoSizer = styled.div`
   height: 100px;
@@ -40,7 +42,7 @@ export interface StatItem {
 
 export interface AreaChartData {
   key: string;
-  value: ChartData[] | [] | null;
+  value: ChartData[] | null;
   color?: string | undefined;
 }
 
@@ -72,7 +74,17 @@ export interface StatItemsProps extends StatItems {
 }
 
 export const StatItemsComponent = pure<StatItemsProps>(
-  ({ fields, description, isLoading, key, grow, barChart, areaChart }) => {
+  ({
+    fields,
+    description,
+    isLoading,
+    key,
+    grow,
+    barChart,
+    areaChart,
+    enableAreaChart,
+    enableBarChart,
+  }) => {
     const isBarChartDataAbailable =
       barChart &&
       barChart.length &&
@@ -81,7 +93,6 @@ export const StatItemsComponent = pure<StatItemsProps>(
       areaChart &&
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
-    const chartExist = isBarChartDataAbailable || isAreaChartDataAvailable;
     return (
       <FlexItem key={`stat-items-${key}`} grow={grow}>
         <EuiPanel>
@@ -93,7 +104,7 @@ export const StatItemsComponent = pure<StatItemsProps>(
             {fields.map(field => (
               <FlexItem key={`stat-items-field-${field.key}`}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  {(isBarChartDataAbailable || isBarChartDataAbailable) && field.icon ? (
+                  {(isAreaChartDataAvailable || isBarChartDataAbailable) && field.icon ? (
                     <FlexItem grow={false}>
                       <EuiIcon type={field.icon} color={field.color} size="l" />
                     </FlexItem>
@@ -101,8 +112,9 @@ export const StatItemsComponent = pure<StatItemsProps>(
 
                   <FlexItem>
                     <StatValue>
-                      <p>
-                        {field.value && field.value.toLocaleString()} {field.description}
+                      <p data-test-subj="stat-title">
+                        {field.value ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
+                        {field.description}
                       </p>
                     </StatValue>
                   </FlexItem>
@@ -111,18 +123,18 @@ export const StatItemsComponent = pure<StatItemsProps>(
             ))}
           </EuiFlexGroup>
 
-          {chartExist ? <EuiHorizontalRule /> : null}
+          {enableAreaChart || enableBarChart ? <EuiHorizontalRule /> : null}
 
           <EuiFlexGroup>
-            {barChart ? (
+            {enableBarChart ? (
               <FlexItem>
-                {isBarChartDataAbailable ? <BarChart barChart={barChart} /> : null}
+                <BarChart barChart={barChart!} />
               </FlexItem>
             ) : null}
 
-            {areaChart ? (
+            {enableAreaChart ? (
               <FlexItem>
-                {isAreaChartDataAvailable ? <AreaChart areaChart={areaChart!} /> : null}
+                <AreaChart areaChart={areaChart!} />
               </FlexItem>
             ) : null}
           </EuiFlexGroup>
@@ -130,6 +142,16 @@ export const StatItemsComponent = pure<StatItemsProps>(
       </FlexItem>
     );
   }
+);
+
+export const ChartHolder = () => (
+  <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" textAlign="center">
+        Chart Data Not Available
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
 
 const FlexItem = styled(EuiFlexItem)`

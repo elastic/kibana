@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -94,7 +94,7 @@ const fieldTitleMapping: StatItems[] = [
 
 export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
   return loading ? (
-    <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 247 }}>
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>
@@ -147,13 +147,13 @@ const addValueToAreaChart = (fields: StatItem[], data: KpiHostsData): AreaChartD
 const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartData[] => {
   return fields
     .filter(field => get(field.key, data) != null)
-    .map(field => {
+    .map((field, idx) => {
       return {
         ...field,
         value: [
           {
             x: get(field.key, data),
-            y: field.key,
+            y: getOr('', `${idx}.description`, fields),
           },
         ],
       };

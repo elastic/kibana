@@ -11,38 +11,55 @@ import {
 } from '@elastic/eui';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { EuiSeriesChart, EuiBarSeries } from '@elastic/eui/lib/experimental';
-import { BarChartData, WrappedByAutoSizer } from '.';
+// @ts-ignore
+import { EuiSeriesChart, EuiBarSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
+import { BarChartData, WrappedByAutoSizer, ChartHolder } from '.';
 import { AutoSizer } from '../auto_sizer';
 
 const { SCALE, ORIENTATION } = EuiSeriesChartUtils;
+const getYaxis = (value: string | number) => {
+  const label = value.toString();
+  return label.length > 4 ? `${label.slice(0, 4)}.` : label;
+};
 
 const ChartBaseComponent = pure<{
   data: BarChartData[];
   width: number | undefined;
   height: number | undefined;
-}>(({ data, ...chartConfigs }) =>
-  chartConfigs.width &&
-  chartConfigs.height &&
-  data.every(({ value }) => value != null && value.length > 0) ? (
-    <SeriesChart yType={SCALE.ORDINAL} orientation={ORIENTATION.HORIZONTAL} {...chartConfigs}>
-      {data.map(series =>
-        series.value != null ? (
-          /**
-           * Placing ts-ignore here for fillOpacity
-           * */
+}>(({ data, ...chartConfigs }) => {
+  return chartConfigs.width &&
+    chartConfigs.height &&
+    data &&
+    data.length &&
+    data.every(({ value }) => value != null && value.length > 0) ? (
+    <SeriesChart
+      yType={SCALE.ORDINAL}
+      orientation={ORIENTATION.HORIZONTAL}
+      showDefaultAxis={false}
+      {...chartConfigs}
+    >
+      {data.map(series => {
+        return (
           // @ts-ignore
           <EuiBarSeries
             key={`stat-items-areachart-${series.key}`}
-            name={`stat-items-areachart-${series.key}`}
-            data={series.value}
+            name={series.key}
+            data={series.value!}
             color={series.color}
           />
-        ) : null
-      )}
+        );
+      })}
+      {/*
+// @ts-ignore */}
+      <EuiXAxis />
+      {/*
+// @ts-ignore */}
+      <EuiYAxis tickFormat={getYaxis} />
     </SeriesChart>
-  ) : null
-);
+  ) : (
+    <ChartHolder />
+  );
+});
 
 export const BarChart = pure<{ barChart: BarChartData[] }>(({ barChart }) => (
   <AutoSizer detectAnyWindowResize={false} content>
@@ -54,6 +71,7 @@ export const BarChart = pure<{ barChart: BarChartData[] }>(({ barChart }) => (
   </AutoSizer>
 ));
 
+// @ts-ignore
 const SeriesChart = styled(EuiSeriesChart)`
   svg
     .rv-xy-plot__axis--horizontal

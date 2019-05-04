@@ -7,37 +7,46 @@
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { EuiSeriesChart, EuiAreaSeries } from '@elastic/eui/lib/experimental';
-import { AreaChartData, WrappedByAutoSizer } from '.';
+// @ts-ignore
+import { EuiSeriesChart, EuiAreaSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
+import { clone as _clone } from 'lodash';
+import { AreaChartData, WrappedByAutoSizer, ChartHolder } from '.';
 import { AutoSizer } from '../auto_sizer';
 
 const ChartBaseComponent = pure<{
   data: AreaChartData[];
   width: number | undefined;
   height: number | undefined;
-}>(({ data, ...chartConfigs }) =>
-  chartConfigs.width &&
-  chartConfigs.height &&
-  data.every(({ value }) => value != null && value.length > 0) ? (
-    <SeriesChart {...chartConfigs}>
-      {data.map(series =>
-        series.value != null ? (
-          /**
-           * Placing ts-ignore here for fillOpacity
-           * */
+}>(({ data, ...chartConfigs }) => {
+  return chartConfigs.width &&
+    chartConfigs.height &&
+    data &&
+    data.length &&
+    data.every(({ value }) => value != null && value.length > 0) ? (
+    <SeriesChart {...chartConfigs} showDefaultAxis={false} xType="ordinal">
+      {data.map(series => {
+        return (
           // @ts-ignore
           <EuiAreaSeries
             key={`stat-items-areachart-${series.key}`}
-            name={`stat-items-areachart-${series.key}`}
-            data={series.value}
+            name={series.key.replace('Histogram', '')}
+            data={series.value!}
             fillOpacity={0.04}
             color={series.color}
           />
-        ) : null
-      )}
+        );
+      })}
+      {/*
+// @ts-ignore */}
+      <EuiXAxis tickFormat={value => value.toString().split('T')[0]} />
+      {/*
+// @ts-ignore */}
+      <EuiYAxis />
     </SeriesChart>
-  ) : null
-);
+  ) : (
+    <ChartHolder />
+  );
+});
 
 export const AreaChart = pure<{ areaChart: AreaChartData[] }>(({ areaChart }) => (
   <AutoSizer detectAnyWindowResize={false} content>
@@ -49,6 +58,7 @@ export const AreaChart = pure<{ areaChart: AreaChartData[] }>(({ areaChart }) =>
   </AutoSizer>
 ));
 
+// @ts-ignore
 const SeriesChart = styled(EuiSeriesChart)`
   svg .rv-xy-plot__axis__ticks .rv-xy-plot__axis__tick:not(:first-child):not(:last-child) {
     display: none;

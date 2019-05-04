@@ -185,772 +185,472 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
     }
     isLoading={false}
   >
-    <EuiFlexItem>
-      <div
-        className="euiFlexItem"
+    <Styled(EuiFlexItem)
+      key="stat-items-undefined"
+    >
+      <EuiFlexItem
+        className="sc-bxivhb bQCHAr"
       >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
+        <div
+          className="euiFlexItem sc-bxivhb bQCHAr"
         >
-          <div
-            className="euiPanel euiPanel--paddingMedium"
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
           >
-            <EuiStat
-              description={
-                <EuiTitle
-                  size="xxs"
+            <div
+              className="euiPanel euiPanel--paddingMedium"
+            >
+              <EuiTitle
+                size="xxxs"
+              >
+                <h6
+                  className="euiTitle euiTitle--xxxsmall"
                 >
-                  <span>
-                    UNIQUE_PRIVATE_IPS
-                  </span>
-                </EuiTitle>
-              }
-              reverse={false}
-              textAlign="left"
-              title={
-                <EuiFlexGroup
-                  component="span"
-                  gutterSize="none"
-                  justifyContent="spaceBetween"
+                  UNIQUE_PRIVATE_IPS
+                </h6>
+              </EuiTitle>
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <EuiFlexItem
-                    component="span"
+                  <Styled(EuiFlexItem)
+                    key="stat-items-field-uniqueSourceIps"
                   >
-                    <EuiFlexGroup
-                      alignItems="center"
-                      component="span"
-                      data-test-subj="stat-title"
-                      gutterSize="m"
-                      justifyContent="spaceBetween"
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
                     >
-                      <EuiFlexItem
-                        component="span"
-                        grow={2}
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
                       >
                         <EuiFlexGroup
                           alignItems="center"
-                          component="span"
                           gutterSize="m"
+                          responsive={false}
                         >
-                          <EuiFlexItem
-                            component="span"
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
-                            <EuiIcon
-                              color="#DB1374"
-                              size="xl"
-                              type="stopFilled"
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem
-                            component="span"
-                          >
-                            <pure(Component)
-                              isLoading={false}
-                              value={1714}
-                            />
-                          </EuiFlexItem>
+                            <Styled(EuiFlexItem)>
+                              <EuiFlexItem
+                                className="sc-bxivhb bQCHAr"
+                              >
+                                <div
+                                  className="euiFlexItem sc-bxivhb bQCHAr"
+                                >
+                                  <Styled(EuiTitle)>
+                                    <EuiTitle
+                                      className="sc-ifAKCX bfXlPM"
+                                    >
+                                      <p
+                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
+                                      >
+                                        1,714
+                                         
+                                        Source
+                                      </p>
+                                    </EuiTitle>
+                                  </Styled(EuiTitle)>
+                                </div>
+                              </EuiFlexItem>
+                            </Styled(EuiFlexItem)>
+                          </div>
                         </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        component="span"
-                        grow={4}
-                      >
-                        Source
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    component="span"
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                  <Styled(EuiFlexItem)
+                    key="stat-items-field-uniqueDestinationIps"
                   >
-                    <EuiFlexGroup
-                      alignItems="center"
-                      component="span"
-                      data-test-subj="stat-title"
-                      gutterSize="m"
-                      justifyContent="spaceBetween"
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
                     >
-                      <EuiFlexItem
-                        component="span"
-                        grow={2}
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
                       >
                         <EuiFlexGroup
                           alignItems="center"
-                          component="span"
                           gutterSize="m"
+                          responsive={false}
                         >
-                          <EuiFlexItem
-                            component="span"
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
-                            <EuiIcon
-                              color="#490092"
-                              size="xl"
-                              type="stopFilled"
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem
-                            component="span"
-                          >
-                            <pure(Component)
-                              isLoading={false}
-                              value={2359}
-                            />
-                          </EuiFlexItem>
+                            <Styled(EuiFlexItem)>
+                              <EuiFlexItem
+                                className="sc-bxivhb bQCHAr"
+                              >
+                                <div
+                                  className="euiFlexItem sc-bxivhb bQCHAr"
+                                >
+                                  <Styled(EuiTitle)>
+                                    <EuiTitle
+                                      className="sc-ifAKCX bfXlPM"
+                                    >
+                                      <p
+                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
+                                      >
+                                        2,359
+                                         
+                                        Dest.
+                                      </p>
+                                    </EuiTitle>
+                                  </Styled(EuiTitle)>
+                                </div>
+                              </EuiFlexItem>
+                            </Styled(EuiFlexItem)>
+                          </div>
                         </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        component="span"
-                        grow={4}
-                      >
-                        Dest.
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              titleColor="default"
-              titleSize="m"
-            >
-              <div
-                className="euiStat euiStat--leftAligned"
-              >
-                <EuiText
-                  className="euiStat__description"
-                  size="s"
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                </div>
+              </EuiFlexGroup>
+              <EuiHorizontalRule>
+                <hr
+                  className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+                />
+              </EuiHorizontalRule>
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <div
-                    className="euiText euiText--small euiStat__description"
-                  >
-                    <p>
-                      <EuiTitle
-                        size="xxs"
-                      >
-                        <span
-                          className="euiTitle euiTitle--xxsmall"
-                        >
-                          UNIQUE_PRIVATE_IPS
-                        </span>
-                      </EuiTitle>
-                    </p>
-                  </div>
-                </EuiText>
-                <EuiTitle
-                  className="euiStat__title"
-                  size="m"
-                >
-                  <p
-                    className="euiTitle euiTitle--medium euiStat__title"
-                  >
-                    <EuiFlexGroup
-                      component="span"
-                      gutterSize="none"
-                      justifyContent="spaceBetween"
+                  <Styled(EuiFlexItem)>
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
                     >
-                      <span
-                        className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
                       >
-                        <EuiFlexItem
-                          component="span"
-                          key="stat-items-field-uniqueSourceIps"
-                        >
-                          <span
-                            className="euiFlexItem"
-                          >
-                            <EuiFlexGroup
-                              alignItems="center"
-                              component="span"
-                              data-test-subj="stat-title"
-                              gutterSize="m"
-                              justifyContent="spaceBetween"
-                            >
-                              <span
-                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                data-test-subj="stat-title"
-                              >
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={2}
-                                >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow2"
-                                  >
-                                    <EuiFlexGroup
-                                      alignItems="center"
-                                      component="span"
-                                      gutterSize="m"
-                                    >
-                                      <span
-                                        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                      >
-                                        <EuiFlexItem
-                                          component="span"
-                                        >
-                                          <span
-                                            className="euiFlexItem"
-                                          >
-                                            <EuiIcon
-                                              color="#DB1374"
-                                              size="xl"
-                                              type="stopFilled"
-                                            >
-                                              <stopFilled
-                                                className="euiIcon euiIcon--xLarge"
-                                                focusable="false"
-                                                height="16"
-                                                style={
-                                                  Object {
-                                                    "fill": "#DB1374",
-                                                  }
-                                                }
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              >
-                                                <svg
-                                                  className="euiIcon euiIcon--xLarge"
-                                                  focusable="false"
-                                                  height="16"
-                                                  style={
-                                                    Object {
-                                                      "fill": "#DB1374",
-                                                    }
-                                                  }
-                                                  viewBox="0 0 16 16"
-                                                  width="16"
-                                                  xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                  <rect
-                                                    fillRule="evenodd"
-                                                    height="12"
-                                                    rx="2"
-                                                    width="12"
-                                                    x="2"
-                                                    y="2"
-                                                  />
-                                                </svg>
-                                              </stopFilled>
-                                            </EuiIcon>
-                                          </span>
-                                        </EuiFlexItem>
-                                        <EuiFlexItem
-                                          component="span"
-                                        >
-                                          <span
-                                            className="euiFlexItem"
-                                          >
-                                            <pure(Component)
-                                              isLoading={false}
-                                              value={1714}
-                                            >
-                                              <Component
-                                                isLoading={false}
-                                                value={1714}
-                                              >
-                                                <span>
-                                                  1,714
-                                                </span>
-                                              </Component>
-                                            </pure(Component)>
-                                          </span>
-                                        </EuiFlexItem>
-                                      </span>
-                                    </EuiFlexGroup>
-                                  </span>
-                                </EuiFlexItem>
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={4}
-                                >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow4"
-                                  >
-                                    Source
-                                  </span>
-                                </EuiFlexItem>
-                              </span>
-                            </EuiFlexGroup>
-                          </span>
-                        </EuiFlexItem>
-                        <EuiFlexItem
-                          component="span"
-                          key="stat-items-field-uniqueDestinationIps"
-                        >
-                          <span
-                            className="euiFlexItem"
-                          >
-                            <EuiFlexGroup
-                              alignItems="center"
-                              component="span"
-                              data-test-subj="stat-title"
-                              gutterSize="m"
-                              justifyContent="spaceBetween"
-                            >
-                              <span
-                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                data-test-subj="stat-title"
-                              >
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={2}
-                                >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow2"
-                                  >
-                                    <EuiFlexGroup
-                                      alignItems="center"
-                                      component="span"
-                                      gutterSize="m"
-                                    >
-                                      <span
-                                        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                      >
-                                        <EuiFlexItem
-                                          component="span"
-                                        >
-                                          <span
-                                            className="euiFlexItem"
-                                          >
-                                            <EuiIcon
-                                              color="#490092"
-                                              size="xl"
-                                              type="stopFilled"
-                                            >
-                                              <stopFilled
-                                                className="euiIcon euiIcon--xLarge"
-                                                focusable="false"
-                                                height="16"
-                                                style={
-                                                  Object {
-                                                    "fill": "#490092",
-                                                  }
-                                                }
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              >
-                                                <svg
-                                                  className="euiIcon euiIcon--xLarge"
-                                                  focusable="false"
-                                                  height="16"
-                                                  style={
-                                                    Object {
-                                                      "fill": "#490092",
-                                                    }
-                                                  }
-                                                  viewBox="0 0 16 16"
-                                                  width="16"
-                                                  xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                  <rect
-                                                    fillRule="evenodd"
-                                                    height="12"
-                                                    rx="2"
-                                                    width="12"
-                                                    x="2"
-                                                    y="2"
-                                                  />
-                                                </svg>
-                                              </stopFilled>
-                                            </EuiIcon>
-                                          </span>
-                                        </EuiFlexItem>
-                                        <EuiFlexItem
-                                          component="span"
-                                        >
-                                          <span
-                                            className="euiFlexItem"
-                                          >
-                                            <pure(Component)
-                                              isLoading={false}
-                                              value={2359}
-                                            >
-                                              <Component
-                                                isLoading={false}
-                                                value={2359}
-                                              >
-                                                <span>
-                                                  2,359
-                                                </span>
-                                              </Component>
-                                            </pure(Component)>
-                                          </span>
-                                        </EuiFlexItem>
-                                      </span>
-                                    </EuiFlexGroup>
-                                  </span>
-                                </EuiFlexItem>
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={4}
-                                >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow4"
-                                  >
-                                    Dest.
-                                  </span>
-                                </EuiFlexItem>
-                              </span>
-                            </EuiFlexGroup>
-                          </span>
-                        </EuiFlexItem>
-                      </span>
-                    </EuiFlexGroup>
-                  </p>
-                </EuiTitle>
-              </div>
-            </EuiStat>
-            <EuiHorizontalRule>
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-              />
-            </EuiHorizontalRule>
-            <EuiFlexGroup
-              gutterSize="none"
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <EuiFlexItem
-                  grow={5}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrow5"
-                  >
-                    <pure(Component)
-                      barChart={
-                        Array [
-                          Object {
-                            "color": "#DB1374",
-                            "key": "uniqueSourceIps",
-                            "value": Array [
+                        <pure(Component)
+                          barChart={
+                            Array [
                               Object {
-                                "x": 1714,
-                                "y": "uniqueSourceIps",
+                                "color": "#DB1374",
+                                "key": "uniqueSourceIps",
+                                "value": Array [
+                                  Object {
+                                    "x": 1714,
+                                    "y": "uniqueSourceIps",
+                                  },
+                                ],
                               },
-                            ],
-                          },
-                          Object {
-                            "color": "#490092",
-                            "key": "uniqueDestinationIps",
-                            "value": Array [
                               Object {
-                                "x": 2354,
-                                "y": "uniqueDestinationIps",
+                                "color": "#490092",
+                                "key": "uniqueDestinationIps",
+                                "value": Array [
+                                  Object {
+                                    "x": 2354,
+                                    "y": "uniqueDestinationIps",
+                                  },
+                                ],
                               },
-                            ],
-                          },
-                        ]
-                      }
-                    >
-                      <Component
-                        barChart={
-                          Array [
-                            Object {
-                              "color": "#DB1374",
-                              "key": "uniqueSourceIps",
-                              "value": Array [
-                                Object {
-                                  "x": 1714,
-                                  "y": "uniqueSourceIps",
-                                },
-                              ],
-                            },
-                            Object {
-                              "color": "#490092",
-                              "key": "uniqueDestinationIps",
-                              "value": Array [
-                                Object {
-                                  "x": 2354,
-                                  "y": "uniqueDestinationIps",
-                                },
-                              ],
-                            },
-                          ]
-                        }
-                      >
-                        <AutoSizer
-                          content={true}
-                          detectAnyWindowResize={false}
+                            ]
+                          }
                         >
-                          <styled.div
-                            data-test-subj="wrapped-by-auto-sizer"
-                            innerRef={[Function]}
+                          <Component
+                            barChart={
+                              Array [
+                                Object {
+                                  "color": "#DB1374",
+                                  "key": "uniqueSourceIps",
+                                  "value": Array [
+                                    Object {
+                                      "x": 1714,
+                                      "y": "uniqueSourceIps",
+                                    },
+                                  ],
+                                },
+                                Object {
+                                  "color": "#490092",
+                                  "key": "uniqueDestinationIps",
+                                  "value": Array [
+                                    Object {
+                                      "x": 2354,
+                                      "y": "uniqueDestinationIps",
+                                    },
+                                  ],
+                                },
+                              ]
+                            }
                           >
-                            <div
-                              className="sc-bxivhb fLNTGm"
-                              data-test-subj="wrapped-by-auto-sizer"
+                            <AutoSizer
+                              content={true}
+                              detectAnyWindowResize={false}
                             >
-                              <pure(Component)
-                                data={
-                                  Array [
-                                    Object {
-                                      "color": "#DB1374",
-                                      "key": "uniqueSourceIps",
-                                      "value": Array [
-                                        Object {
-                                          "x": 1714,
-                                          "y": "uniqueSourceIps",
-                                        },
-                                      ],
-                                    },
-                                    Object {
-                                      "color": "#490092",
-                                      "key": "uniqueDestinationIps",
-                                      "value": Array [
-                                        Object {
-                                          "x": 2354,
-                                          "y": "uniqueDestinationIps",
-                                        },
-                                      ],
-                                    },
-                                  ]
-                                }
+                              <styled.div
+                                data-test-subj="wrapped-by-auto-sizer"
+                                innerRef={[Function]}
                               >
-                                <Component
-                                  data={
-                                    Array [
-                                      Object {
-                                        "color": "#DB1374",
-                                        "key": "uniqueSourceIps",
-                                        "value": Array [
-                                          Object {
-                                            "x": 1714,
-                                            "y": "uniqueSourceIps",
-                                          },
-                                        ],
-                                      },
-                                      Object {
-                                        "color": "#490092",
-                                        "key": "uniqueDestinationIps",
-                                        "value": Array [
-                                          Object {
-                                            "x": 2354,
-                                            "y": "uniqueDestinationIps",
-                                          },
-                                        ],
-                                      },
-                                    ]
-                                  }
-                                />
-                              </pure(Component)>
-                              <styled.div>
                                 <div
-                                  className="sc-ifAKCX kHhUkS"
-                                />
+                                  className="sc-htpNat loNVyu"
+                                  data-test-subj="wrapped-by-auto-sizer"
+                                >
+                                  <pure(Component)
+                                    data={
+                                      Array [
+                                        Object {
+                                          "color": "#DB1374",
+                                          "key": "uniqueSourceIps",
+                                          "value": Array [
+                                            Object {
+                                              "x": 1714,
+                                              "y": "uniqueSourceIps",
+                                            },
+                                          ],
+                                        },
+                                        Object {
+                                          "color": "#490092",
+                                          "key": "uniqueDestinationIps",
+                                          "value": Array [
+                                            Object {
+                                              "x": 2354,
+                                              "y": "uniqueDestinationIps",
+                                            },
+                                          ],
+                                        },
+                                      ]
+                                    }
+                                  >
+                                    <Component
+                                      data={
+                                        Array [
+                                          Object {
+                                            "color": "#DB1374",
+                                            "key": "uniqueSourceIps",
+                                            "value": Array [
+                                              Object {
+                                                "x": 1714,
+                                                "y": "uniqueSourceIps",
+                                              },
+                                            ],
+                                          },
+                                          Object {
+                                            "color": "#490092",
+                                            "key": "uniqueDestinationIps",
+                                            "value": Array [
+                                              Object {
+                                                "x": 2354,
+                                                "y": "uniqueDestinationIps",
+                                              },
+                                            ],
+                                          },
+                                        ]
+                                      }
+                                    />
+                                  </pure(Component)>
+                                </div>
                               </styled.div>
-                            </div>
-                          </styled.div>
-                        </AutoSizer>
-                      </Component>
-                    </pure(Component)>
-                  </div>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={5}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrow5"
-                  >
-                    <pure(Component)
-                      areaChart={
-                        Array [
-                          Object {
-                            "color": "#DB1374",
-                            "key": "uniqueSourceIpsHistogram",
-                            "value": Array [
-                              Object {
-                                "x": 1556686800000,
-                                "y": 580213,
-                              },
-                              Object {
-                                "x": 1556730000000,
-                                "y": 1096175,
-                              },
-                              Object {
-                                "x": 1556773200000,
-                                "y": 12382,
-                              },
-                            ],
-                          },
-                          Object {
-                            "color": "#490092",
-                            "key": "uniqueDestinationIpsHistogram",
-                            "value": Array [
-                              Object {
-                                "x": 1556686800000,
-                                "y": 565975,
-                              },
-                              Object {
-                                "x": 1556730000000,
-                                "y": 1084366,
-                              },
-                              Object {
-                                "x": 1556773200000,
-                                "y": 12280,
-                              },
-                            ],
-                          },
-                        ]
-                      }
+                            </AutoSizer>
+                          </Component>
+                        </pure(Component)>
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                  <Styled(EuiFlexItem)>
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
                     >
-                      <Component
-                        areaChart={
-                          Array [
-                            Object {
-                              "color": "#DB1374",
-                              "key": "uniqueSourceIpsHistogram",
-                              "value": Array [
-                                Object {
-                                  "x": 1556686800000,
-                                  "y": 580213,
-                                },
-                                Object {
-                                  "x": 1556730000000,
-                                  "y": 1096175,
-                                },
-                                Object {
-                                  "x": 1556773200000,
-                                  "y": 12382,
-                                },
-                              ],
-                            },
-                            Object {
-                              "color": "#490092",
-                              "key": "uniqueDestinationIpsHistogram",
-                              "value": Array [
-                                Object {
-                                  "x": 1556686800000,
-                                  "y": 565975,
-                                },
-                                Object {
-                                  "x": 1556730000000,
-                                  "y": 1084366,
-                                },
-                                Object {
-                                  "x": 1556773200000,
-                                  "y": 12280,
-                                },
-                              ],
-                            },
-                          ]
-                        }
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
                       >
-                        <AutoSizer
-                          content={true}
-                          detectAnyWindowResize={false}
+                        <pure(Component)
+                          areaChart={
+                            Array [
+                              Object {
+                                "color": "#DB1374",
+                                "key": "uniqueSourceIpsHistogram",
+                                "value": Array [
+                                  Object {
+                                    "x": 1556686800000,
+                                    "y": 580213,
+                                  },
+                                  Object {
+                                    "x": 1556730000000,
+                                    "y": 1096175,
+                                  },
+                                  Object {
+                                    "x": 1556773200000,
+                                    "y": 12382,
+                                  },
+                                ],
+                              },
+                              Object {
+                                "color": "#490092",
+                                "key": "uniqueDestinationIpsHistogram",
+                                "value": Array [
+                                  Object {
+                                    "x": 1556686800000,
+                                    "y": 565975,
+                                  },
+                                  Object {
+                                    "x": 1556730000000,
+                                    "y": 1084366,
+                                  },
+                                  Object {
+                                    "x": 1556773200000,
+                                    "y": 12280,
+                                  },
+                                ],
+                              },
+                            ]
+                          }
                         >
-                          <styled.div
-                            data-test-subj="wrapped-by-auto-sizer"
-                            innerRef={[Function]}
+                          <Component
+                            areaChart={
+                              Array [
+                                Object {
+                                  "color": "#DB1374",
+                                  "key": "uniqueSourceIpsHistogram",
+                                  "value": Array [
+                                    Object {
+                                      "x": 1556686800000,
+                                      "y": 580213,
+                                    },
+                                    Object {
+                                      "x": 1556730000000,
+                                      "y": 1096175,
+                                    },
+                                    Object {
+                                      "x": 1556773200000,
+                                      "y": 12382,
+                                    },
+                                  ],
+                                },
+                                Object {
+                                  "color": "#490092",
+                                  "key": "uniqueDestinationIpsHistogram",
+                                  "value": Array [
+                                    Object {
+                                      "x": 1556686800000,
+                                      "y": 565975,
+                                    },
+                                    Object {
+                                      "x": 1556730000000,
+                                      "y": 1084366,
+                                    },
+                                    Object {
+                                      "x": 1556773200000,
+                                      "y": 12280,
+                                    },
+                                  ],
+                                },
+                              ]
+                            }
                           >
-                            <div
-                              className="sc-bxivhb fLNTGm"
-                              data-test-subj="wrapped-by-auto-sizer"
+                            <AutoSizer
+                              content={true}
+                              detectAnyWindowResize={false}
                             >
-                              <pure(Component)
-                                data={
-                                  Array [
-                                    Object {
-                                      "color": "#DB1374",
-                                      "key": "uniqueSourceIpsHistogram",
-                                      "value": Array [
-                                        Object {
-                                          "x": 1556686800000,
-                                          "y": 580213,
-                                        },
-                                        Object {
-                                          "x": 1556730000000,
-                                          "y": 1096175,
-                                        },
-                                        Object {
-                                          "x": 1556773200000,
-                                          "y": 12382,
-                                        },
-                                      ],
-                                    },
-                                    Object {
-                                      "color": "#490092",
-                                      "key": "uniqueDestinationIpsHistogram",
-                                      "value": Array [
-                                        Object {
-                                          "x": 1556686800000,
-                                          "y": 565975,
-                                        },
-                                        Object {
-                                          "x": 1556730000000,
-                                          "y": 1084366,
-                                        },
-                                        Object {
-                                          "x": 1556773200000,
-                                          "y": 12280,
-                                        },
-                                      ],
-                                    },
-                                  ]
-                                }
+                              <styled.div
+                                data-test-subj="wrapped-by-auto-sizer"
+                                innerRef={[Function]}
                               >
-                                <Component
-                                  data={
-                                    Array [
-                                      Object {
-                                        "color": "#DB1374",
-                                        "key": "uniqueSourceIpsHistogram",
-                                        "value": Array [
-                                          Object {
-                                            "x": 1556686800000,
-                                            "y": 580213,
-                                          },
-                                          Object {
-                                            "x": 1556730000000,
-                                            "y": 1096175,
-                                          },
-                                          Object {
-                                            "x": 1556773200000,
-                                            "y": 12382,
-                                          },
-                                        ],
-                                      },
-                                      Object {
-                                        "color": "#490092",
-                                        "key": "uniqueDestinationIpsHistogram",
-                                        "value": Array [
-                                          Object {
-                                            "x": 1556686800000,
-                                            "y": 565975,
-                                          },
-                                          Object {
-                                            "x": 1556730000000,
-                                            "y": 1084366,
-                                          },
-                                          Object {
-                                            "x": 1556773200000,
-                                            "y": 12280,
-                                          },
-                                        ],
-                                      },
-                                    ]
-                                  }
-                                />
-                              </pure(Component)>
-                              <styled.div>
                                 <div
-                                  className="sc-ifAKCX kHhUkS"
-                                />
+                                  className="sc-htpNat loNVyu"
+                                  data-test-subj="wrapped-by-auto-sizer"
+                                >
+                                  <pure(Component)
+                                    data={
+                                      Array [
+                                        Object {
+                                          "color": "#DB1374",
+                                          "key": "uniqueSourceIpsHistogram",
+                                          "value": Array [
+                                            Object {
+                                              "x": 1556686800000,
+                                              "y": 580213,
+                                            },
+                                            Object {
+                                              "x": 1556730000000,
+                                              "y": 1096175,
+                                            },
+                                            Object {
+                                              "x": 1556773200000,
+                                              "y": 12382,
+                                            },
+                                          ],
+                                        },
+                                        Object {
+                                          "color": "#490092",
+                                          "key": "uniqueDestinationIpsHistogram",
+                                          "value": Array [
+                                            Object {
+                                              "x": 1556686800000,
+                                              "y": 565975,
+                                            },
+                                            Object {
+                                              "x": 1556730000000,
+                                              "y": 1084366,
+                                            },
+                                            Object {
+                                              "x": 1556773200000,
+                                              "y": 12280,
+                                            },
+                                          ],
+                                        },
+                                      ]
+                                    }
+                                  >
+                                    <Component
+                                      data={
+                                        Array [
+                                          Object {
+                                            "color": "#DB1374",
+                                            "key": "uniqueSourceIpsHistogram",
+                                            "value": Array [
+                                              Object {
+                                                "x": 1556686800000,
+                                                "y": 580213,
+                                              },
+                                              Object {
+                                                "x": 1556730000000,
+                                                "y": 1096175,
+                                              },
+                                              Object {
+                                                "x": 1556773200000,
+                                                "y": 12382,
+                                              },
+                                            ],
+                                          },
+                                          Object {
+                                            "color": "#490092",
+                                            "key": "uniqueDestinationIpsHistogram",
+                                            "value": Array [
+                                              Object {
+                                                "x": 1556686800000,
+                                                "y": 565975,
+                                              },
+                                              Object {
+                                                "x": 1556730000000,
+                                                "y": 1084366,
+                                              },
+                                              Object {
+                                                "x": 1556773200000,
+                                                "y": 12280,
+                                              },
+                                            ],
+                                          },
+                                        ]
+                                      }
+                                    />
+                                  </pure(Component)>
+                                </div>
                               </styled.div>
-                            </div>
-                          </styled.div>
-                        </AutoSizer>
-                      </Component>
-                    </pure(Component)>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-          </div>
-        </EuiPanel>
-      </div>
-    </EuiFlexItem>
+                            </AutoSizer>
+                          </Component>
+                        </pure(Component)>
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </EuiPanel>
+        </div>
+      </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </Component>
 </pure(Component)>
 `;
@@ -982,201 +682,91 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
     }
     isLoading={false}
   >
-    <EuiFlexItem>
-      <div
-        className="euiFlexItem"
+    <Styled(EuiFlexItem)
+      key="stat-items-undefined"
+    >
+      <EuiFlexItem
+        className="sc-bxivhb bQCHAr"
       >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
+        <div
+          className="euiFlexItem sc-bxivhb bQCHAr"
         >
-          <div
-            className="euiPanel euiPanel--paddingMedium"
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
           >
-            <EuiStat
-              description={
-                <EuiTitle
-                  size="xxs"
+            <div
+              className="euiPanel euiPanel--paddingMedium"
+            >
+              <EuiTitle
+                size="xxxs"
+              >
+                <h6
+                  className="euiTitle euiTitle--xxxsmall"
                 >
-                  <span>
-                    HOSTS
-                  </span>
-                </EuiTitle>
-              }
-              reverse={false}
-              textAlign="left"
-              title={
-                <EuiFlexGroup
-                  component="span"
-                  gutterSize="none"
-                  justifyContent="spaceBetween"
+                  HOSTS
+                </h6>
+              </EuiTitle>
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <EuiFlexItem
-                    component="span"
+                  <Styled(EuiFlexItem)
+                    key="stat-items-field-hosts"
                   >
-                    <EuiFlexGroup
-                      alignItems="center"
-                      component="span"
-                      data-test-subj="stat-title"
-                      gutterSize="m"
-                      justifyContent="spaceBetween"
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
                     >
-                      <EuiFlexItem
-                        component="span"
-                        grow={2}
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
                       >
                         <EuiFlexGroup
                           alignItems="center"
-                          component="span"
                           gutterSize="m"
+                          responsive={false}
                         >
-                          <EuiFlexItem
-                            component="span"
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
-                            <pure(Component)
-                              isLoading={false}
-                              value={null}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        component="span"
-                        grow={4}
-                      />
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              titleColor="default"
-              titleSize="m"
-            >
-              <div
-                className="euiStat euiStat--leftAligned"
-              >
-                <EuiText
-                  className="euiStat__description"
-                  size="s"
-                >
-                  <div
-                    className="euiText euiText--small euiStat__description"
-                  >
-                    <p>
-                      <EuiTitle
-                        size="xxs"
-                      >
-                        <span
-                          className="euiTitle euiTitle--xxsmall"
-                        >
-                          HOSTS
-                        </span>
-                      </EuiTitle>
-                    </p>
-                  </div>
-                </EuiText>
-                <EuiTitle
-                  className="euiStat__title"
-                  size="m"
-                >
-                  <p
-                    className="euiTitle euiTitle--medium euiStat__title"
-                  >
-                    <EuiFlexGroup
-                      component="span"
-                      gutterSize="none"
-                      justifyContent="spaceBetween"
-                    >
-                      <span
-                        className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                      >
-                        <EuiFlexItem
-                          component="span"
-                          key="stat-items-field-hosts"
-                        >
-                          <span
-                            className="euiFlexItem"
-                          >
-                            <EuiFlexGroup
-                              alignItems="center"
-                              component="span"
-                              data-test-subj="stat-title"
-                              gutterSize="m"
-                              justifyContent="spaceBetween"
-                            >
-                              <span
-                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                data-test-subj="stat-title"
+                            <Styled(EuiFlexItem)>
+                              <EuiFlexItem
+                                className="sc-bxivhb bQCHAr"
                               >
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={2}
+                                <div
+                                  className="euiFlexItem sc-bxivhb bQCHAr"
                                 >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow2"
-                                  >
-                                    <EuiFlexGroup
-                                      alignItems="center"
-                                      component="span"
-                                      gutterSize="m"
+                                  <Styled(EuiTitle)>
+                                    <EuiTitle
+                                      className="sc-ifAKCX bfXlPM"
                                     >
-                                      <span
-                                        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                      <p
+                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
                                       >
-                                        <EuiFlexItem
-                                          component="span"
-                                        >
-                                          <span
-                                            className="euiFlexItem"
-                                          >
-                                            <pure(Component)
-                                              isLoading={false}
-                                              value={null}
-                                            >
-                                              <Component
-                                                isLoading={false}
-                                                value={null}
-                                              >
-                                                <span>
-                                                  --
-                                                </span>
-                                              </Component>
-                                            </pure(Component)>
-                                          </span>
-                                        </EuiFlexItem>
-                                      </span>
-                                    </EuiFlexGroup>
-                                  </span>
-                                </EuiFlexItem>
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={4}
-                                >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow4"
-                                  />
-                                </EuiFlexItem>
-                              </span>
-                            </EuiFlexGroup>
-                          </span>
-                        </EuiFlexItem>
-                      </span>
-                    </EuiFlexGroup>
-                  </p>
-                </EuiTitle>
-              </div>
-            </EuiStat>
-            <EuiFlexGroup
-              gutterSize="none"
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
-              />
-            </EuiFlexGroup>
-          </div>
-        </EuiPanel>
-      </div>
-    </EuiFlexItem>
+                                         
+                                      </p>
+                                    </EuiTitle>
+                                  </Styled(EuiTitle)>
+                                </div>
+                              </EuiFlexItem>
+                            </Styled(EuiFlexItem)>
+                          </div>
+                        </EuiFlexGroup>
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                </div>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                />
+              </EuiFlexGroup>
+            </div>
+          </EuiPanel>
+        </div>
+      </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </Component>
 </pure(Component)>
 `;
@@ -1212,216 +802,110 @@ exports[`Stat Items rendering kpis without charts it renders the default widget 
     }
     isLoading={false}
   >
-    <EuiFlexItem>
-      <div
-        className="euiFlexItem"
+    <Styled(EuiFlexItem)
+      key="stat-items-undefined"
+    >
+      <EuiFlexItem
+        className="sc-bxivhb bQCHAr"
       >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
+        <div
+          className="euiFlexItem sc-bxivhb bQCHAr"
         >
-          <div
-            className="euiPanel euiPanel--paddingMedium"
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
           >
-            <EuiStat
-              description={
-                <EuiTitle
-                  size="xxs"
+            <div
+              className="euiPanel euiPanel--paddingMedium"
+            >
+              <EuiTitle
+                size="xxxs"
+              >
+                <h6
+                  className="euiTitle euiTitle--xxxsmall"
                 >
-                  <span>
-                    HOSTS
-                  </span>
-                </EuiTitle>
-              }
-              reverse={false}
-              textAlign="left"
-              title={
-                <EuiFlexGroup
-                  component="span"
-                  gutterSize="none"
-                  justifyContent="spaceBetween"
+                  HOSTS
+                </h6>
+              </EuiTitle>
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <EuiFlexItem
-                    component="span"
+                  <Styled(EuiFlexItem)
+                    key="stat-items-field-hosts"
                   >
-                    <EuiFlexGroup
-                      alignItems="center"
-                      component="span"
-                      data-test-subj="stat-title"
-                      gutterSize="m"
-                      justifyContent="spaceBetween"
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
                     >
-                      <EuiFlexItem
-                        component="span"
-                        grow={2}
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
                       >
                         <EuiFlexGroup
                           alignItems="center"
-                          component="span"
                           gutterSize="m"
+                          responsive={false}
                         >
-                          <EuiFlexItem
-                            component="span"
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                           >
-                            <pure(Component)
-                              isLoading={false}
-                              value={null}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        component="span"
-                        grow={4}
-                      />
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              titleColor="default"
-              titleSize="m"
-            >
-              <div
-                className="euiStat euiStat--leftAligned"
-              >
-                <EuiText
-                  className="euiStat__description"
-                  size="s"
-                >
-                  <div
-                    className="euiText euiText--small euiStat__description"
-                  >
-                    <p>
-                      <EuiTitle
-                        size="xxs"
-                      >
-                        <span
-                          className="euiTitle euiTitle--xxsmall"
-                        >
-                          HOSTS
-                        </span>
-                      </EuiTitle>
-                    </p>
-                  </div>
-                </EuiText>
-                <EuiTitle
-                  className="euiStat__title"
-                  size="m"
-                >
-                  <p
-                    className="euiTitle euiTitle--medium euiStat__title"
-                  >
-                    <EuiFlexGroup
-                      component="span"
-                      gutterSize="none"
-                      justifyContent="spaceBetween"
-                    >
-                      <span
-                        className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                      >
-                        <EuiFlexItem
-                          component="span"
-                          key="stat-items-field-hosts"
-                        >
-                          <span
-                            className="euiFlexItem"
-                          >
-                            <EuiFlexGroup
-                              alignItems="center"
-                              component="span"
-                              data-test-subj="stat-title"
-                              gutterSize="m"
-                              justifyContent="spaceBetween"
-                            >
-                              <span
-                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                data-test-subj="stat-title"
+                            <Styled(EuiFlexItem)>
+                              <EuiFlexItem
+                                className="sc-bxivhb bQCHAr"
                               >
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={2}
+                                <div
+                                  className="euiFlexItem sc-bxivhb bQCHAr"
                                 >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow2"
-                                  >
-                                    <EuiFlexGroup
-                                      alignItems="center"
-                                      component="span"
-                                      gutterSize="m"
+                                  <Styled(EuiTitle)>
+                                    <EuiTitle
+                                      className="sc-ifAKCX bfXlPM"
                                     >
-                                      <span
-                                        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                      <p
+                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
                                       >
-                                        <EuiFlexItem
-                                          component="span"
-                                        >
-                                          <span
-                                            className="euiFlexItem"
-                                          >
-                                            <pure(Component)
-                                              isLoading={false}
-                                              value={null}
-                                            >
-                                              <Component
-                                                isLoading={false}
-                                                value={null}
-                                              >
-                                                <span>
-                                                  --
-                                                </span>
-                                              </Component>
-                                            </pure(Component)>
-                                          </span>
-                                        </EuiFlexItem>
-                                      </span>
-                                    </EuiFlexGroup>
-                                  </span>
-                                </EuiFlexItem>
-                                <EuiFlexItem
-                                  component="span"
-                                  grow={4}
-                                >
-                                  <span
-                                    className="euiFlexItem euiFlexItem--flexGrow4"
-                                  />
-                                </EuiFlexItem>
-                              </span>
-                            </EuiFlexGroup>
-                          </span>
-                        </EuiFlexItem>
-                      </span>
-                    </EuiFlexGroup>
-                  </p>
-                </EuiTitle>
-              </div>
-            </EuiStat>
-            <EuiFlexGroup
-              gutterSize="none"
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <EuiFlexItem
-                  grow={10}
+                                         
+                                      </p>
+                                    </EuiTitle>
+                                  </Styled(EuiTitle)>
+                                </div>
+                              </EuiFlexItem>
+                            </Styled(EuiFlexItem)>
+                          </div>
+                        </EuiFlexGroup>
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                </div>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrow10"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={10}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrow10"
-                  />
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-          </div>
-        </EuiPanel>
-      </div>
-    </EuiFlexItem>
+                  <Styled(EuiFlexItem)>
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
+                    >
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
+                      />
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                  <Styled(EuiFlexItem)>
+                    <EuiFlexItem
+                      className="sc-bxivhb bQCHAr"
+                    >
+                      <div
+                        className="euiFlexItem sc-bxivhb bQCHAr"
+                      />
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </EuiPanel>
+        </div>
+      </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </Component>
 </pure(Component)>
 `;
