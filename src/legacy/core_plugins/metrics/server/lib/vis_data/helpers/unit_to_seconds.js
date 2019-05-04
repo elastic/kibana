@@ -61,13 +61,13 @@ export const convertIntervalToUnit = (intervalString, newUnit) => {
   return { value, unit };
 };
 
-export const getSuitableUnit = intervalInSeconds => (sortedUnits.find((key, index, array) => {
+export const getSuitableUnit = intervalInSeconds => sortedUnits.find((key, index, array) => {
   const nextUnit = array[index + 1];
   const isValidInput = isNumber(intervalInSeconds) && intervalInSeconds > 0;
   const isLastItem = index + 1 === array.length;
 
   return isValidInput && (intervalInSeconds >= units[key] && intervalInSeconds < units[nextUnit] || isLastItem);
-}));
+});
 
 export default (unit) => {
   return units[unit];
