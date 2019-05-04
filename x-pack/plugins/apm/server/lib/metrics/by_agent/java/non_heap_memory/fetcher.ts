@@ -7,16 +7,20 @@ import { ESFilter } from 'elasticsearch';
 import {
   SERVICE_AGENT_NAME,
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
+  METRIC_JAVA_NON_HEAP_MEMORY_MAX,
+  METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
+  METRIC_JAVA_NON_HEAP_MEMORY_USED
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../../../typings/common';
 import { Setup } from '../../../../helpers/setup_request';
-import { MetricsAggs, MetricsKeys, AggValue } from '../../../query_types';
+import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 
 export interface NonHeapMemoryMetrics extends MetricsKeys {
   nonHeapMemoryMax: AggValue;
   nonHeapMemoryCommitted: AggValue;
+  nonHeapMemoryUsed: AggValue;
 }
 
 export type HeapMemoryResponse = PromiseReturnType<typeof fetch>;
@@ -35,6 +39,16 @@ export async function fetch(setup: Setup, serviceName: string) {
     filters.push(esFilterQuery);
   }
 
+  const aggs = {
+    nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },
+    nonHeapMemoryCommitted: {
+      avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED }
+    },
+    nonHeapMemoryUsed: {
+      avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_USED }
+    }
+  };
+
   const params = {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
@@ -43,17 +57,9 @@ export async function fetch(setup: Setup, serviceName: string) {
       aggs: {
         timeseriesData: {
           date_histogram: getMetricsDateHistogramParams(start, end),
-          aggs: {
-            nonHeapMemoryMax: { avg: { field: 'jvm.memory.non_heap.max' } },
-            nonHeapMemoryCommitted: {
-              avg: { field: 'jvm.memory.non_heap.committed' }
-            }
-          }
+          aggs
         },
-        nonHeapMemoryMax: { avg: { field: 'jvm.memory.non_heap.max' } },
-        nonHeapMemoryCommitted: {
-          avg: { field: 'jvm.memory.non_heap.committed' }
-        }
+        ...aggs
       }
     }
   };

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getHeapMemoryChartData } from './heap_memory';
+import { getHeapMemoryChart } from './heap_memory';
 import { Setup } from '../../../helpers/setup_request';
-import { getNonHeapMemoryChartData } from './non_heap_memory';
+import { getNonHeapMemoryChart } from './non_heap_memory';
 import { PromiseReturnType } from '../../../../../typings/common';
 
 export type JavaMetricsChartsResponse = PromiseReturnType<
@@ -15,8 +15,8 @@ export type JavaMetricsChartsResponse = PromiseReturnType<
 
 export async function getJavaMetricsCharts(setup: Setup, serviceName: string) {
   const charts = await Promise.all([
-    getHeapMemoryChartData(setup, serviceName),
-    getNonHeapMemoryChartData(setup, serviceName)
+    getHeapMemoryChart(setup, serviceName),
+    getNonHeapMemoryChart(setup, serviceName)
   ]);
 
   return { charts };

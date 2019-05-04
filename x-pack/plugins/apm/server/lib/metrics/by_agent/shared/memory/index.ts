@@ -6,7 +6,7 @@
 
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, MemoryMetrics } from './fetcher';
-import { ChartBase } from '../../../query_types';
+import { ChartBase } from '../../../types';
 import { transformDataToChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<MemoryMetrics> = {
@@ -15,8 +15,8 @@ const chartBase: ChartBase<MemoryMetrics> = {
   type: 'linemark',
   yUnit: 'percent',
   series: {
-    memoryUsedMax: 'System max',
-    memoryUsedAvg: 'System average'
+    memoryUsedMax: { title: 'System max' },
+    memoryUsedAvg: { title: 'System average' }
   }
 };
 

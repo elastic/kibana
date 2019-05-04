@@ -4,26 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, NonHeapMemoryMetrics } from './fetcher';
-import { ChartBase } from '../../../query_types';
+import { ChartBase } from '../../../types';
 import { transformDataToChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<NonHeapMemoryMetrics> = {
   title: 'Non-Heap Memory',
   key: 'non_heap_memory_area_chart',
   type: 'area',
-  yUnit: 'bytes',
+  yUnit: 'bytes-GB',
   series: {
-    nonHeapMemoryMax: 'Max',
-    nonHeapMemoryCommitted: 'Committed'
+    nonHeapMemoryUsed: {
+      title: 'Used',
+      color: theme.euiColorVis0
+    },
+    nonHeapMemoryCommitted: {
+      title: 'Committed',
+      color: theme.euiColorVis1
+    },
+    nonHeapMemoryMax: {
+      title: 'Max',
+      color: theme.euiColorVis2
+    }
   }
 };
 
-export async function getNonHeapMemoryChartData(
-  setup: Setup,
-  serviceName: string
-) {
+export async function getNonHeapMemoryChart(setup: Setup, serviceName: string) {
   const result = await fetch(setup, serviceName);
   return transformDataToChart<NonHeapMemoryMetrics>(result, chartBase);
 }

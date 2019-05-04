@@ -7,16 +7,20 @@ import { ESFilter } from 'elasticsearch';
 import {
   SERVICE_AGENT_NAME,
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
+  METRIC_JAVA_HEAP_MEMORY_MAX,
+  METRIC_JAVA_HEAP_MEMORY_COMMITTED,
+  METRIC_JAVA_HEAP_MEMORY_USED
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../../../typings/common';
 import { Setup } from '../../../../helpers/setup_request';
-import { MetricsAggs, MetricsKeys, AggValue } from '../../../query_types';
+import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 
 export interface HeapMemoryMetrics extends MetricsKeys {
   heapMemoryMax: AggValue;
   heapMemoryCommitted: AggValue;
+  heapMemoryUsed: AggValue;
 }
 
 export type HeapMemoryResponse = PromiseReturnType<typeof fetch>;
@@ -35,6 +39,14 @@ export async function fetch(setup: Setup, serviceName: string) {
     filters.push(esFilterQuery);
   }
 
+  const aggs = {
+    heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
+    heapMemoryCommitted: {
+      avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED }
+    },
+    heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } }
+  };
+
   const params = {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
@@ -43,15 +55,9 @@ export async function fetch(setup: Setup, serviceName: string) {
       aggs: {
         timeseriesData: {
           date_histogram: getMetricsDateHistogramParams(start, end),
-          aggs: {
-            heapMemoryMax: { avg: { field: 'jvm.memory.heap.max' } },
-            heapMemoryCommitted: {
-              avg: { field: 'jvm.memory.heap.committed' }
-            }
-          }
+          aggs
         },
-        heapMemoryMax: { avg: { field: 'jvm.memory.heap.max' } },
-        heapMemoryCommitted: { avg: { field: 'jvm.memory.heap.committed' } }
+        ...aggs
       }
     }
   };

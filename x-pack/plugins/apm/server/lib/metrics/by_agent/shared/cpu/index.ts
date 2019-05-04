@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, CPUMetrics } from './fetcher';
-import { ChartBase } from '../../../query_types';
+import { ChartBase } from '../../../types';
 import { transformDataToChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<CPUMetrics> = {
@@ -15,10 +16,22 @@ const chartBase: ChartBase<CPUMetrics> = {
   type: 'linemark',
   yUnit: 'percent',
   series: {
-    systemCPUAverage: 'System average',
-    systemCPUMax: 'System max',
-    processCPUAverage: 'Process average',
-    processCPUMax: 'Process max'
+    systemCPUMax: {
+      title: 'System max',
+      color: theme.euiColorVis1
+    },
+    systemCPUAverage: {
+      title: 'System average',
+      color: theme.euiColorVis0
+    },
+    processCPUMax: {
+      title: 'Process max',
+      color: theme.euiColorVis7
+    },
+    processCPUAverage: {
+      title: 'Process average',
+      color: theme.euiColorVis5
+    }
   }
 };
 

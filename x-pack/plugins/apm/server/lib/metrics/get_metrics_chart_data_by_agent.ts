@@ -6,6 +6,11 @@
 import { Setup } from '../helpers/setup_request';
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
+import { GenericMetricsChart } from './types';
+
+export interface MetricsChartsByAgentAPIResponse {
+  charts: GenericMetricsChart[];
+}
 
 export async function getMetricsChartDataByAgent({
   setup,

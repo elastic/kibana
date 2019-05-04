@@ -5,7 +5,7 @@
  */
 
 import { Setup } from '../helpers/setup_request';
-import { ChartType, YUnit } from '../../../typings/common';
+import { ChartType, YUnit } from '../../../typings/timeseries';
 import { Coordinate } from '../../../typings/timeseries';
 
 export interface MetricsRequestArgs {
@@ -27,14 +27,22 @@ export interface MetricsKeys {
   [key: string]: AggValue;
 }
 
-type SeriesTitleMap<T extends MetricsKeys> = { [key in keyof T]: string };
+interface SeriesDetails {
+  title: string;
+  color?: string;
+}
+
+type SeriesDetailsMap<T extends MetricsKeys> = {
+  [key in keyof T]: SeriesDetails
+};
 
 export interface ChartBase<T extends MetricsKeys> {
   title: string;
   key: string;
   type: ChartType;
   yUnit: YUnit;
-  series: SeriesTitleMap<T>;
+  transformValue?: (value: number) => number;
+  series: SeriesDetailsMap<T>;
 }
 
 export interface Chart<T extends MetricsKeys> {
@@ -46,9 +54,12 @@ export interface Chart<T extends MetricsKeys> {
   series: Array<ChartSeries<T>>;
 }
 
+export type GenericMetricsChart = Chart<MetricsKeys>;
+
 export interface ChartSeries<T extends MetricsKeys> {
   title: string;
   key: keyof T;
+  type: ChartType;
   overallValue: number | null;
   data: Coordinate[];
 }

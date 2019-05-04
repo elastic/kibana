@@ -56,7 +56,7 @@ export function ServiceDetailTabs({
       defaultMessage: 'Metrics'
     }),
     path: `/${serviceName}/metrics`,
-    render: () => <ServiceMetrics urlParams={urlParams} location={location} />
+    render: () => <ServiceMetrics urlParams={urlParams} />
   };
   const tabs = isRumAgent
     ? [transactionsTab, errorsTab]

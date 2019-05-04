@@ -4,7 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AggregationSearchResponse } from 'elasticsearch';
-import { ChartBase, Chart, MetricsAggs, MetricsKeys } from './query_types';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { ChartBase, Chart, MetricsAggs, MetricsKeys } from './types';
+
+const colors = [
+  theme.euiColorVis0,
+  theme.euiColorVis1,
+  theme.euiColorVis2,
+  theme.euiColorVis3,
+  theme.euiColorVis4,
+  theme.euiColorVis5,
+  theme.euiColorVis6
+];
 
 export function transformDataToChart<T extends MetricsKeys>(
   result: AggregationSearchResponse<void, MetricsAggs<T>>,
@@ -12,19 +23,25 @@ export function transformDataToChart<T extends MetricsKeys>(
 ) {
   const { aggregations, hits } = result;
   const { timeseriesData } = aggregations;
-  const seriesTitleMap = chartBase.series;
 
   const chart: Chart<T> = {
     ...chartBase,
     totalHits: hits.total,
-    series: Object.keys(chartBase.series).map(series => ({
-      title: seriesTitleMap[series],
-      key: series,
-      overallValue: aggregations[series].value,
-      data: timeseriesData.buckets.map(bucket => ({
-        x: bucket.key,
-        y: bucket[series].value
-      }))
+    series: Object.keys(chartBase.series).map((seriesKey, i) => ({
+      title: chartBase.series[seriesKey].title,
+      key: seriesKey,
+      type: chartBase.type,
+      color: chartBase.series[seriesKey].color || colors[i],
+      overallValue: aggregations[seriesKey].value,
+      data: timeseriesData.buckets.map(bucket => {
+        const { value } = bucket[seriesKey];
+        // TODO: confirm what values "value" can actually be and what causes problems in the charts...
+        const y = value === null || isNaN(value) ? null : value;
+        return {
+          x: bucket.key,
+          y
+        };
+      })
     }))
   };
 

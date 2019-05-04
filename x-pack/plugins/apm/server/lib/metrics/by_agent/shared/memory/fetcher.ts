@@ -13,7 +13,7 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../../../typings/common';
 import { Setup } from '../../../../helpers/setup_request';
-import { MetricsAggs, MetricsKeys, AggValue } from '../../../query_types';
+import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 
 export interface MemoryMetrics extends MetricsKeys {
