@@ -5,10 +5,12 @@
  */
 
 import expect from '@kbn/expect';
+import sinon from 'sinon';
 import { date } from '../date';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 
 describe('date', () => {
+  const clock = sinon.useFakeTimers();
   const fn = functionWrapper(date);
 
   it('returns a date in ms from a date string with the provided format', () => {
@@ -42,4 +44,5 @@ describe('date', () => {
       });
     });
   });
+  clock.restore();
 });

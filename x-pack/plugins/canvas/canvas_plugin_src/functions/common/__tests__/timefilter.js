@@ -5,11 +5,13 @@
  */
 
 import expect from '@kbn/expect';
+import sinon from 'sinon';
 import { timefilter } from '../timefilter';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyFilter } from './fixtures/test_filters';
 
 describe('timefilter', () => {
+  const clock = sinon.useFakeTimers();
   const fn = functionWrapper(timefilter);
   const fromDate = '2018-02-06T15:00:00.950Z';
   const toDate = '2018-02-07T15:00:00.950Z';
@@ -82,4 +84,5 @@ describe('timefilter', () => {
       });
     });
   });
+  clock.restore();
 });
