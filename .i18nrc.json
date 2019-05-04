@@ -1,6 +1,7 @@
 {
   "paths": {
     "common.ui": "src/legacy/ui",
+    "data": "src/legacy/core_plugins/data",
     "server": "src/legacy/server",
     "console": "src/legacy/core_plugins/console",
     "core": "src/core",
@@ -41,6 +42,7 @@
     "xpack.reporting": "x-pack/plugins/reporting",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
+    "xpack.siem": "x-pack/plugins/siem",
     "xpack.security": "x-pack/plugins/security",
     "xpack.server": "x-pack/server",
     "xpack.spaces": "x-pack/plugins/spaces",

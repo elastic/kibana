@@ -258,6 +258,9 @@ const handleRepoDeleteStatusPolling = createRepoStatusPollingHandler(
         })
       );
       return isInProgress(status.deleteStatus.progress);
+    } else {
+      // Keep polling if the deleteStatus has not been persisted yet.
+      return true;
     }
   },
   pollRepoDeleteStatus

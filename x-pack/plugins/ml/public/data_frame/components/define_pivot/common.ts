@@ -9,6 +9,7 @@ import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
+  DataFramePreviewRequest,
   DropDownLabel,
   DropDownOption,
   PivotAggsConfigDict,
@@ -41,35 +42,32 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
   fields.forEach(field => {
     // group by
     if (field.type === FIELD_TYPE.STRING) {
-      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
-      const groupByOption: DropDownLabel = { label };
+      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
+      const groupByOption: DropDownLabel = { label: aggName };
       groupByOptions.push(groupByOption);
-      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}_${field.name}`;
-      groupByOptionsData[label] = {
+      groupByOptionsData[aggName] = {
         agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
         field: field.name,
-        formRowLabel,
+        aggName,
       };
     } else if (field.type === FIELD_TYPE.NUMBER) {
-      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label };
+      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}(${field.name})`;
+      const groupByOption: DropDownLabel = { label: aggName };
       groupByOptions.push(groupByOption);
-      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}_${field.name}`;
-      groupByOptionsData[label] = {
+      groupByOptionsData[aggName] = {
         agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
         field: field.name,
-        formRowLabel,
+        aggName,
         interval: '10',
       };
     } else if (field.type === FIELD_TYPE.DATE) {
-      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label };
+      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}(${field.name})`;
+      const groupByOption: DropDownLabel = { label: aggName };
       groupByOptions.push(groupByOption);
-      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}_${field.name}`;
-      groupByOptionsData[label] = {
+      groupByOptionsData[aggName] = {
         agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
         field: field.name,
-        formRowLabel,
+        aggName,
         interval: '1m',
       };
     }
@@ -82,10 +80,9 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
           (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
         (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
       ) {
-        const label = `${agg}(${field.name})`;
-        aggOption.options.push({ label });
-        const formRowLabel = `${agg}_${field.name}`;
-        aggOptionsData[label] = { agg, field: field.name, formRowLabel };
+        const aggName = `${agg}(${field.name})`;
+        aggOption.options.push({ label: aggName });
+        aggOptionsData[aggName] = { agg, field: field.name, aggName };
       }
     });
     aggOptions.push(aggOption);
@@ -98,3 +95,7 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
     aggOptionsData,
   };
 }
+
+export const getPivotPreviewDevConsoleStatement = (request: DataFramePreviewRequest) => {
+  return `POST _data_frame/transforms/_preview\n${JSON.stringify(request, null, 2)}\n`;
+};

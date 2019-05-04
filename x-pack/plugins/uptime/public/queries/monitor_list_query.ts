@@ -20,6 +20,14 @@ export const monitorListQueryString = `
         }
         ping {
           timestamp
+          container {
+            id
+          }
+          kubernetes {
+            pod {
+              uid
+            }
+          }
           monitor {
             duration {
               us
@@ -30,6 +38,7 @@ export const monitorListQueryString = `
             status
           }
           url {
+            domain
             full
           }
         }

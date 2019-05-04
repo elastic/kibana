@@ -36,13 +36,13 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     },
     {
       // Get one repository.
-      url: `/api/code/repo/github.com/Microsoft/TypeScript-Node-Starter`,
+      url: `/api/code/repo/github.com/elastic/code-examples_empty-file`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
       // Get the status of one repository.
-      url: `/api/code/repo/status/github.com/Microsoft/TypeScript-Node-Starter`,
+      url: `/api/code/repo/status/github.com/elastic/code-examples_empty-file`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
@@ -136,14 +136,14 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         .post(`/api/code/repo`)
         .auth(kibanaUsername, kibanaUserPassword)
         .set('kbn-xsrf', 'foo')
-        .send({ url: 'https://github.com/Microsoft/TypeScript-Node-Starter' })
+        .send({ url: 'https://github.com/elastic/code-examples_empty-file.git' })
         .expect(200);
     });
 
     after(async () => {
       // Delete the repository
       await supertest
-        .delete(`/api/code/repo/github.com/Microsoft/TypeScript-Node-Starter`)
+        .delete(`/api/code/repo/github.com/elastic/code-examples_empty-file`)
         .auth(kibanaUsername, kibanaUserPassword)
         .set('kbn-xsrf', 'foo')
         .expect(200);
@@ -175,7 +175,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         });
 
         await supertest
-          .delete(`/api/code/repo/github.com/Microsoft/TypeScript-Node-Starter`)
+          .delete(`/api/code/repo/github.com/elastic/code-examples_empty-file`)
           .auth(username, password)
           .set('kbn-xsrf', 'foo')
           .expect(404);
@@ -213,12 +213,12 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
           .post(`/api/code/repo`)
           .auth(username, password)
           .set('kbn-xsrf', 'foo')
-          .send({ url: 'https://github.com/elastic/TypeScript-Node-Starter' })
+          .send({ url: 'https://github.com/elastic/code-examples_single-image.git' })
           .expect(200);
 
         // Delete repository
         await supertest
-          .delete(`/api/code/repo/github.com/elastic/TypeScript-Node-Starter`)
+          .delete(`/api/code/repo/github.com/elastic/code-examples_single-image`)
           .auth(username, password)
           .set('kbn-xsrf', 'foo')
           .expect(200);
