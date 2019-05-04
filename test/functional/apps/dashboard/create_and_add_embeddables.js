@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const browser = getService('browser');
+  const visualTesting = getService('visualTesting');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('create and add embeddables', async () => {
@@ -49,6 +50,7 @@ export default function ({ getService, getPageObjects }) {
           expect(panelCount).to.eql(originalPanelCount + 1);
         });
 
+        await visualTesting.snapshot();
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
@@ -72,6 +74,7 @@ export default function ({ getService, getPageObjects }) {
         const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
         await dashboardAddPanel.closeAddPanel();
         expect(exists).to.be(true);
+        await visualTesting.snapshot();
       });
 
       describe('is false', () => {
@@ -88,6 +91,7 @@ export default function ({ getService, getPageObjects }) {
           const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
           await dashboardAddPanel.closeAddPanel();
           expect(exists).to.be(false);
+          await visualTesting.snapshot();
         });
 
         after(async () => {
