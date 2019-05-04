@@ -5,10 +5,17 @@
  */
 
 import { sortBy } from 'lodash';
+// @ts-ignore
 import { queryDatatable } from '../../../../common/lib/datatable/query';
+// @ts-ignore
 import { getDemoRows } from './get_demo_rows';
+import { ContextFunction, Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 
-export function demodata() {
+interface Arguments {
+  type: string | null;
+}
+
+export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datatable> {
   return {
     name: 'demodata',
     aliases: [],
@@ -29,7 +36,8 @@ export function demodata() {
     fn: (context, args) => {
       const demoRows = getDemoRows(args.type);
 
-      let set = {};
+      let set = {} as { columns: DatatableColumn[]; rows: DatatableRow[] };
+
       if (args.type === 'ci') {
         set = {
           columns: [
