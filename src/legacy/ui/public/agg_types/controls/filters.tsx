@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import { omit } from 'lodash';
+import React, { useState, useEffect } from 'react';
+import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,6 +37,28 @@ interface FilterValue {
 function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<FilterValue[]>) {
   const [filters, setFilters] = useState(() =>
     value.map(filter => ({ ...filter, id: generateId() }))
+  );
+
+  useEffect(() => {
+    // set parsed values into model after initialization
+    setValue(
+      filters.map(filter =>
+        omit({ ...filter, input: { query: fromUser(filter.input.query) } }, 'id')
+      )
+    );
+  }, []);
+
+  useEffect(
+    () => {
+      // responsible for discarding changes
+      if (
+        value.length !== filters.length ||
+        value.some((filter, index) => !isEqual(filter, omit(filters[index], 'id')))
+      ) {
+        setFilters(value.map(filter => ({ ...filter, id: generateId() })));
+      }
+    },
+    [value]
   );
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
@@ -87,7 +109,7 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
       >
         <FormattedMessage
           id="common.ui.aggTypes.filters.addFilterButtonLabel"
-          defaultMessage="Add Filter"
+          defaultMessage="Add filter"
         />
       </EuiButton>
       <EuiSpacer size="m" />

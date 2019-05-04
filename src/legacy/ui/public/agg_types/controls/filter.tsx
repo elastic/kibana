@@ -60,7 +60,7 @@ function FilterRow({
   });
 
   const FilterControl = (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" responsive={false}>
       <EuiFlexItem>
         <EuiButtonIcon
           iconType="tag"
@@ -68,7 +68,7 @@ function FilterRow({
             defaultMessage: 'Toggle filter label',
           })}
           aria-expanded={showCustomLabel}
-          aria-controls={`visEditorFilterLabel${id}`}
+          aria-controls={`visEditorFilterLabel${arrayIndex}`}
           onClick={() => setShowCustomLabel(!showCustomLabel)}
         />
       </EuiFlexItem>
@@ -107,7 +107,7 @@ function FilterRow({
       </EuiFormRow>
       {showCustomLabel ? (
         <EuiFormRow
-          id={`visEditorFilterLabel${id}`}
+          id={`visEditorFilterLabel${arrayIndex}`}
           label={i18n.translate('common.ui.aggTypes.filters.definiteFilterLabel', {
             defaultMessage: 'Filter {index} label',
             description:
