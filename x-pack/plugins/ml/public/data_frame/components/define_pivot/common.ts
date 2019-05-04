@@ -41,7 +41,7 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
 
   fields.forEach(field => {
     // group by
-    if (field.type === FIELD_TYPE.STRING) {
+    if (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP) {
       const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
       const groupByOption: DropDownLabel = { label: aggName };
       groupByOptions.push(groupByOption);
@@ -78,7 +78,8 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
       if (
         (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
           (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
-        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
+        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER) ||
+        (agg === PIVOT_SUPPORTED_AGGS.TRANSACTION_DURATION && field.type === FIELD_TYPE.DATE)
       ) {
         const aggName = `${agg}(${field.name})`;
         aggOption.options.push({ label: aggName });

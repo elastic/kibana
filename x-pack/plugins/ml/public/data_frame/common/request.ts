@@ -21,7 +21,7 @@ import {
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from './pivot_group_by';
 
-import { PivotAggDict, PivotAggsConfig } from './pivot_aggs';
+import { PivotAggDict, PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
 import { DateHistogramAgg, HistogramAgg, PivotGroupByDict, TermsAgg } from './pivot_group_by';
 
 export interface DataFramePreviewRequest {
@@ -121,11 +121,31 @@ export function getDataFramePreviewRequest(
   });
 
   aggs.forEach(agg => {
-    request.pivot.aggregations[agg.aggName] = {
-      [agg.agg]: {
-        field: agg.field,
-      },
-    };
+    if (agg.agg !== PIVOT_SUPPORTED_AGGS.TRANSACTION_DURATION) {
+      request.pivot.aggregations[agg.aggName] = {
+        [agg.agg]: {
+          field: agg.field,
+        },
+      };
+    } else {
+      request.pivot.aggregations[agg.aggName] = {
+        scripted_metric: {
+          map_script: `state.ts = doc['${agg.field}'].value.getMillis();`,
+          combine_script: 'return state',
+          reduce_script: `
+double min = 9000000000000L;
+double max = 0L;
+for (s in states) {
+  if (s.ts > 0) {
+    min = Math.min(min, s.ts);
+    max = Math.max(max, s.ts);
+  }
+}
+return Math.round((max - min));
+`,
+        },
+      };
+    }
   });
 
   return request;
