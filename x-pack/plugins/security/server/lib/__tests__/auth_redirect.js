@@ -34,8 +34,6 @@ describe('lib/auth_redirect', function () {
       .isAvailable.returns(true);
     server.plugins.xpack_main.info
       .feature.returns({ isEnabled: sinon.stub().returns(true) });
-    server.plugins.xpack_main.info
-      .license.isOneOf.returns(false);
 
     authenticate = authenticateFactory(server);
   });
@@ -128,12 +126,4 @@ describe('lib/auth_redirect', function () {
     sinon.assert.notCalled(h.redirect);
   });
 
-  it('replies with no credentials when license is basic', async () => {
-    server.plugins.xpack_main.info.license.isOneOf.returns(true);
-
-    await authenticate(request, h);
-
-    sinon.assert.calledWith(h.authenticated, { credentials: {} });
-    sinon.assert.notCalled(h.redirect);
-  });
 });

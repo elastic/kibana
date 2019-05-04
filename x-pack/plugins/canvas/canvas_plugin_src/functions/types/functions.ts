@@ -13,7 +13,7 @@ import { functions as serverFunctions } from '../../functions/server';
  * A Function type which represents a Function in Canvas.  This type assumes
  * any Context can be provided and used by the Function implementation.
  */
-export interface Function<Name, Arguments, Return> {
+export interface Function<Name extends string, Arguments, Return> {
   /** Arguments for the Function */
   args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
   aliases?: string[];
@@ -30,7 +30,7 @@ export interface Function<Name, Arguments, Return> {
 /**
  * A Function type which restricts the incoming Context to a specific type.
  */
-export interface ContextFunction<Name, Context, Arguments, Return>
+export interface ContextFunction<Name extends string, Context, Arguments, Return>
   extends Function<Name, Arguments, Return> {
   /** The incoming Context provided to the Function; the information piped in. */
   context?: {
@@ -43,7 +43,7 @@ export interface ContextFunction<Name, Context, Arguments, Return>
 /**
  * A Function type which restricts the incoming Context specifically to `null`.
  */
-export interface NullContextFunction<Name, Arguments, Return>
+export interface NullContextFunction<Name extends string, Arguments, Return>
   extends ContextFunction<Name, null, Arguments, Return> {
   /** The incoming Context provided to the Function; the information piped in. */
   context?: {
@@ -53,27 +53,36 @@ export interface NullContextFunction<Name, Arguments, Return>
   fn(context: null, args: Arguments, handlers: FunctionHandlers): Return;
 }
 
-/**
- * A type which infers all of the Function names.
- */
+// A reducing type for Function Factories to a base `Function`.
+// This is useful for collecting all of the Functions and the concepts they share as
+// one useable type.
 // prettier-ignore
-export type AvailableFunctions<FnFactory> = 
+type FunctionFactories<FnFactory> = 
   FnFactory extends ContextFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
-    { name: Name, context: Context, arguments: Arguments, return: Return } :
+    Function<Name, Arguments, Return> :
   FnFactory extends NullContextFunctionFactory<infer Name, infer Arguments, infer Return> ?
-    { name: Name, arguments: Arguments, return: Return } :
+    Function<Name, Arguments, Return> :
   FnFactory extends FunctionFactory<infer Name, infer Arguments, infer Return> ?
-    { name: Name, arguments: Arguments, return: Return } :
-    never;
+    Function<Name, Arguments, Return> :
+  never;
+
+/**
+ * A type containing all available Functions.
+ */
+export type AvailableFunctions = FunctionFactories<Functions>;
 
 /**
  * A type containing all of the Function names available to Canvas, formally exported.
  */
 // prettier-ignore
-export type AvailableFunctionNames = 
-  AvailableFunctions<typeof commonFunctions[number]>['name'] &
-  AvailableFunctions<typeof browserFunctions[number]>['name'] &
-  AvailableFunctions<typeof serverFunctions[number]>['name'];
+export type AvailableFunctionNames = AvailableFunctions['name'];
+
+// A type containing all of the raw Function definitions in Canvas.
+// prettier-ignore
+type Functions = 
+  typeof commonFunctions[number] &
+  typeof browserFunctions[number] &
+  typeof serverFunctions[number];
 
 // A union of strings representing Canvas Function "types". This is used in the `type` field
 // of the Function specification.  We may refactor this to be a known type, rather than a
