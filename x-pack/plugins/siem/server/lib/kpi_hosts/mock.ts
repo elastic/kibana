@@ -57,7 +57,7 @@ export const mockResponse = {
         hits: [],
       },
       aggregations: {
-        unique_destination_ips_hostogram: {
+        unique_destination_ips_histogram: {
           doc_count: 2175136,
           ips_over_time: {
             buckets: [
@@ -86,7 +86,7 @@ export const mockResponse = {
         hosts: {
           value: 1026,
         },
-        hosts_hostogram: {
+        hosts_histogram: {
           doc_count: 9681207,
           hosts_over_time: {
             buckets: [
@@ -112,7 +112,7 @@ export const mockResponse = {
         unique_destination_ips: {
           value: 2662,
         },
-        unique_source_ips_hostogram: {
+        unique_source_ips_histogram: {
           doc_count: 2503604,
           ips_over_time: {
             buckets: [
@@ -320,7 +320,7 @@ export const mockGeneralQuery = [
           field: 'host.name',
         },
       },
-      hosts_hostogram: {
+      hosts_histogram: {
         filter: {
           bool: {
             should: [
@@ -347,7 +347,7 @@ export const mockGeneralQuery = [
           field: 'source.ip',
         },
       },
-      unique_source_ips_hostogram: {
+      unique_source_ips_histogram: {
         filter: {
           bool: {
             should: [
@@ -374,7 +374,7 @@ export const mockGeneralQuery = [
           field: 'destination.ip',
         },
       },
-      unique_destination_ips_hostogram: {
+      unique_destination_ips_histogram: {
         filter: {
           bool: {
             should: [

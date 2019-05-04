@@ -30,14 +30,9 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
         body: [...generalQuery, ...authQuery],
       }
     );
-
     return {
       hosts: getOr(null, 'responses.0.aggregations.hosts.value', response),
-      hostsHistogram: getOr(
-        null,
-        'responses.0.aggregations.hosts_hostogram.hosts_over_time.buckets',
-        response
-      ),
+      hostsHistogram: getOr(null, 'responses.0.aggregations.hosts_histogram.buckets', response),
       authSuccess: getOr(
         null,
         'responses.1.aggregations.authentication_success.doc_count',
@@ -45,7 +40,7 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       ),
       authSuccessHistogram: getOr(
         null,
-        'responses.1.aggregations.authentication_success.attempts_over_time.buckets',
+        'responses.1.aggregations.authentication_success_histogram.buckets',
         response
       ),
       authFailure: getOr(
@@ -55,13 +50,13 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       ),
       authFailureHistogram: getOr(
         null,
-        'responses.1.aggregations.authentication_failure.attempts_over_time.buckets',
+        'responses.1.aggregations.authentication_failure_histogram.buckets',
         response
       ),
       uniqueSourceIps: getOr(null, 'responses.0.aggregations.unique_source_ips.value', response),
       uniqueSourceIpsHistogram: getOr(
         null,
-        'responses.0.aggregations.unique_source_ips_hostogram.ips_over_time.buckets',
+        'responses.0.aggregations.unique_source_ips_histogram.buckets',
         response
       ),
       uniqueDestinationIps: getOr(
@@ -71,7 +66,7 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
       ),
       uniqueDestinationIpsHistogram: getOr(
         null,
-        'responses.0.aggregations.unique_destination_ips_hostogram.ips_over_time.buckets',
+        'responses.0.aggregations.unique_destination_ips_histogram.buckets',
         response
       ),
     };

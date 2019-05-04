@@ -1101,6 +1101,14 @@ export interface HistogramData {
   doc_count?: number | null;
 
   key_as_string?: string | null;
+
+  count?: Count | null;
+}
+
+export interface Count {
+  value?: number | null;
+
+  doc_count?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -5292,6 +5300,8 @@ export namespace HistogramDataResolvers {
     doc_count?: DocCountResolver<number | null, TypeParent, Context>;
 
     key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
+
+    count?: CountResolver<Count | null, TypeParent, Context>;
   }
 
   export type KeyResolver<
@@ -5309,6 +5319,30 @@ export namespace HistogramDataResolvers {
     Parent = HistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+  export type CountResolver<
+    R = Count | null,
+    Parent = HistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CountResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = Count> {
+    value?: ValueResolver<number | null, TypeParent, Context>;
+
+    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
+  }
+
+  export type ValueResolver<R = number | null, Parent = Count, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type DocCountResolver<R = number | null, Parent = Count, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace NetworkTopNFlowDataResolvers {

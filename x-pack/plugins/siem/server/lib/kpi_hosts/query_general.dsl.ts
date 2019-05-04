@@ -44,24 +44,15 @@ export const buildGeneralQuery = ({
             field: 'host.name',
           },
         },
-        hosts_hostogram: {
-          filter: {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'host.name',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
+        hosts_histogram: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            buckets: '6',
           },
-          aggregations: {
-            hosts_over_time: {
-              auto_date_histogram: {
-                field: '@timestamp',
-                buckets: '6',
+          aggs: {
+            count: {
+              cardinality: {
+                field: 'host.name',
               },
             },
           },
@@ -71,24 +62,15 @@ export const buildGeneralQuery = ({
             field: 'source.ip',
           },
         },
-        unique_source_ips_hostogram: {
-          filter: {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'source.ip',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
+        unique_source_ips_histogram: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            buckets: '6',
           },
-          aggregations: {
-            ips_over_time: {
-              auto_date_histogram: {
-                field: '@timestamp',
-                buckets: 6,
+          aggs: {
+            count: {
+              cardinality: {
+                field: 'source.ip',
               },
             },
           },
@@ -98,24 +80,15 @@ export const buildGeneralQuery = ({
             field: 'destination.ip',
           },
         },
-        unique_destination_ips_hostogram: {
-          filter: {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'destination.ip',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
+        unique_destination_ips_histogram: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            buckets: '6',
           },
-          aggregations: {
-            ips_over_time: {
-              auto_date_histogram: {
-                field: '@timestamp',
-                buckets: 6,
+          aggs: {
+            count: {
+              cardinality: {
+                field: 'destination.ip',
               },
             },
           },
