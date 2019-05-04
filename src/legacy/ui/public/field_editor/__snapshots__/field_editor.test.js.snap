@@ -1344,13 +1344,16 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={true}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
