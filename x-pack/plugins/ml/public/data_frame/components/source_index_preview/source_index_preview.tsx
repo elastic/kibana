@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -41,6 +42,7 @@ import { IndexPatternContext, SimpleQuery } from '../../common';
 import {
   EsDoc,
   EsFieldName,
+  getSourceIndexDevConsoleStatement,
   getSelectableFields,
   MAX_COLUMNS,
   toggleSelectedField,
@@ -89,6 +91,8 @@ interface Props {
 }
 
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
+  const [clearTable, setClearTable] = useState(false);
+
   const indexPattern = useContext(IndexPatternContext);
 
   if (indexPattern === null) {
@@ -97,6 +101,18 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
+
+  // EuiInMemoryTable has an issue with dynamic sortable columns
+  // and will trigger a full page Kibana error in such a case.
+  // The following is a workaround until this is solved upstream:
+  // - If the sortable/columns config changes,
+  //   the table will be unmounted/not rendered.
+  //   This is what setClearTable(true) in toggleColumn() does.
+  // - After that on next render it gets re-enabled. To make sure React
+  //   doesn't consolidate the state updates, setTimeout is used.
+  if (clearTable) {
+    setTimeout(() => setClearTable(false), 0);
+  }
 
   function toggleColumnsPopover() {
     setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -108,6 +124,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   function toggleColumn(column: EsFieldName) {
     // spread to a new array otherwise the component wouldn't re-render
+    setClearTable(true);
     setSelectedFields([...toggleSelectedField(selectedFields, column)]);
   }
 
@@ -238,6 +255,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     });
   }
 
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
+  });
+
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -245,7 +266,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -300,6 +321,16 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                 </EuiPopover>
               </EuiText>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy
+                beforeMessage={euiCopyText}
+                textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
+              >
+                {(copy: () => void) => (
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -307,17 +338,19 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       {status !== SOURCE_INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      <ExpandableTable
-        items={tableItems}
-        columns={columns}
-        pagination={true}
-        hasActions={false}
-        isSelectable={false}
-        itemId="_id"
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isExpandable={true}
-        sorting={sorting}
-      />
+      {clearTable === false && (
+        <ExpandableTable
+          items={tableItems}
+          columns={columns}
+          pagination={true}
+          hasActions={false}
+          isSelectable={false}
+          itemId="_id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable={true}
+          sorting={sorting}
+        />
+      )}
     </EuiPanel>
   );
 });

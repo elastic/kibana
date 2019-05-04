@@ -5,6 +5,7 @@
  */
 
 import { presentation } from './presentation';
+import { report } from './report';
 
 // Registry expects a function that returns a spec object
-export const tagSpecs = [presentation];
+export const tagSpecs = [presentation, report];

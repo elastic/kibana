@@ -32,6 +32,7 @@ import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { taskManager } from './plugins/task_manager';
 import { rollup } from './plugins/rollup';
+import { siem } from './plugins/siem';
 import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { translations } from './plugins/translations';
@@ -69,6 +70,7 @@ module.exports = function (kibana) {
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
+    siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
     translations(kibana),

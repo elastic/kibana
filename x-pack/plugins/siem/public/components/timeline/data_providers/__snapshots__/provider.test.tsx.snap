@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Provider rendering renders correctly against snapshot 1`] = `
+<Component
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "id-Provider 1",
+      "kqlQuery": "",
+      "name": "Provider 1",
+      "queryMatch": Object {
+        "field": "name",
+        "value": "Provider 1",
+      },
+    }
+  }
+/>
+`;
