@@ -18,19 +18,28 @@
  */
 
 import _ from 'lodash';
+import * as Rx from 'rxjs';
 import { onlyDisabled } from './lib/only_disabled';
 import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';
 import { compareFilters } from './lib/compare_filters';
-import { EventsProvider } from '../events';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $rootScope, getAppState, globalState, config) {
-  const EventEmitter = Private(EventsProvider);
+export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState, config) {
+  const queryFilter = {};
 
-  const queryFilter = new EventEmitter();
+  const update$ = new Rx.Subject();
+  const fetch$ = new Rx.Subject();
+
+  queryFilter.getUpdates$ = function () {
+    return update$.asObservable();
+  };
+
+  queryFilter.getFetches$ = function () {
+    return fetch$.asObservable();
+  };
 
   queryFilter.getFilters = function () {
     const compareOptions = { disabled: true, negate: true };
@@ -370,11 +379,13 @@ export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $r
 
         // save states and emit the required events
         saveState();
-        queryFilter.emit('update')
-          .then(function () {
-            if (!doFetch) return;
-            queryFilter.emit('fetch');
-          });
+        update$.next();
+        // queryFilter.emit('update')
+        // .then(function () {
+        if (!doFetch) return;
+        fetch$.next();
+        // queryFilter.emit('fetch');
+        // });
 
         // iterate over each state type, checking for changes
         function getActions() {

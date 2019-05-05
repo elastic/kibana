@@ -140,12 +140,15 @@ describe('add filters', function () {
     });
 
     it('should fire the update and fetch events', async function () {
-      const emitSpy = sinon.spy(queryFilter, 'emit');
+      const updateStub = sinon.stub();
+      const fetchStub = sinon.stub();
 
-      const awaitFetch = new Promise(resolve => {
-        queryFilter.on('fetch', () => {
-          resolve();
-        });
+      queryFilter.getUpdates$().subscribe({
+        next: updateStub,
+      });
+
+      queryFilter.getFetches$().subscribe({
+        next: fetchStub,
       });
 
       // set up the watchers, add new filters, and crank the digest loop
@@ -158,10 +161,8 @@ describe('add filters', function () {
       expect(globalState.save.callCount).to.be(1);
 
       // this time, events should be emitted
-      await awaitFetch;
-      expect(emitSpy.callCount).to.be(2);
-      expect(emitSpy.firstCall.args[0]).to.be('update');
-      expect(emitSpy.secondCall.args[0]).to.be('fetch');
+      expect(fetchStub.called);
+      expect(updateStub.called);
     });
   });
 

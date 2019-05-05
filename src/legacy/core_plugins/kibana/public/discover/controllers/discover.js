@@ -561,11 +561,13 @@ function discoverController(
         });
 
         // update data source when filters update
-        $scope.$listen(queryFilter, 'update', function () {
-          $scope.filters = queryFilter.getFilters();
-          return $scope.updateDataSource().then(function () {
-            $state.save();
-          });
+        queryFilter.getUpdates$().subscribe({
+          next: () => {
+            $scope.filters = queryFilter.getFilters();
+            return $scope.updateDataSource().then(function () {
+              $state.save();
+            });
+          }
         });
 
         // update data source when hitting forward/back and the query changes
@@ -574,7 +576,9 @@ function discoverController(
         });
 
         // fetch data when filters fire fetch event
-        $scope.$listen(queryFilter, 'fetch', $scope.fetch);
+        queryFilter.getFetches$().subscribe({
+          next: () => $scope.fetch
+        });
 
         $scope.$watch('opts.timefield', function (timefield) {
           $scope.enableTimeRangeSelector = !!timefield;

@@ -26,21 +26,19 @@ import './_toggle_filters';
 import './_invert_filters';
 import './_pin_filters';
 import { FilterBarQueryFilterProvider } from '../query_filter';
-import { EventsProvider } from '../../events';
 let queryFilter;
-let EventEmitter;
 
 describe('Query Filter', function () {
   describe('Module', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
       queryFilter = Private(FilterBarQueryFilterProvider);
-      EventEmitter = Private(EventsProvider);
     }));
 
     describe('module instance', function () {
-      it('should be an event emitter', function () {
-        expect(queryFilter).to.be.an(EventEmitter);
+      it('should use observables', function () {
+        expect(queryFilter.getUpdates$).to.be.a('function');
+        expect(queryFilter.getFetches$).to.be.a('function');
       });
     });
 
