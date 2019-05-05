@@ -41,7 +41,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
     logger
   );
 
-  configService.preSetup(new Map([['server', configDefinition.schema]]))
+  configService.preSetup(new Map([['server', configDefinition.schema]]));
   return configService;
 };
 
