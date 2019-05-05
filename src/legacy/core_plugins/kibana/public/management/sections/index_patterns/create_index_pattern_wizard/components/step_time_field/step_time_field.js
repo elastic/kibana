@@ -67,7 +67,7 @@ export class StepTimeFieldComponent extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.fetchTimeFields();
   }
 
