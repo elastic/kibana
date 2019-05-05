@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import { parse as UrlParse } from 'url';
+import { parse } from 'url';
 
 import request from 'request';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
@@ -170,7 +170,7 @@ describe('http service', () => {
       it('supports Url change on the flight', async () => {
         const { http } = await root.setup();
         http.registerOnRequest((req, t) => {
-          t.setUrl(UrlParse('/new-url'));
+          t.setUrl(parse('/new-url'));
           return t.next();
         });
 
