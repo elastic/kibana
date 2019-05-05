@@ -6,7 +6,7 @@
 
 import { merge } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from 'plugins/watcher/../common/constants';
-import { ActionDefaultsRegistryProvider } from '../registry';
+import { xpackWatcherActionDefaultsService } from '../action_defaults_service';
 
 const DEFAULT_ADMIN_EMAIL_CONFIG_KEY = 'xPack:defaultAdminEmail';
 const actionType = ACTION_TYPES.EMAIL;
@@ -17,17 +17,15 @@ function getActionDefaults(config) {
   };
 }
 
-ActionDefaultsRegistryProvider.register(() => {
-  return {
-    actionType,
-    watchType: WATCH_TYPES.THRESHOLD,
-    getDefaults: (config) => {
-      const actionDefaults = getActionDefaults(config);
-      const actionWatchComboDefaults = {
-        subject: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
-      };
+xpackWatcherActionDefaultsService.register({
+  actionType,
+  watchType: WATCH_TYPES.THRESHOLD,
+  getDefaults: (config) => {
+    const actionDefaults = getActionDefaults(config);
+    const actionWatchComboDefaults = {
+      subject: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
+    };
 
-      return merge(actionDefaults, actionWatchComboDefaults);
-    }
-  };
+    return merge(actionDefaults, actionWatchComboDefaults);
+  }
 });
