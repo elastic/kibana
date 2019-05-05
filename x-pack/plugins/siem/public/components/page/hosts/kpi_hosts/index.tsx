@@ -88,7 +88,7 @@ const fieldTitleMapping: StatItems[] = [
     enableAreaChart: true,
     enableBarChart: true,
     grow: 4,
-    description: i18n.UNIQUE_PRIVATE_IPS,
+    description: i18n.UNIQUE_IPS,
   },
 ];
 

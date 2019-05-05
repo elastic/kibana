@@ -35,7 +35,7 @@ export const ACTIVE_USERS = i18n.translate('xpack.siem.kpiHosts.source.activeUse
   defaultMessage: 'Active Users',
 });
 
-export const UNIQUE_PRIVATE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniqueIpsTitle', {
+export const UNIQUE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniqueIpsTitle', {
   defaultMessage: 'Unique IPs',
 });
 
