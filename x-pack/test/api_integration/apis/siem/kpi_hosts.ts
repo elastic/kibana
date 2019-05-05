@@ -38,23 +38,39 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
             expect(kpiHosts!.hosts).to.equal(1);
             expect(kpiHosts!.hostsHistogram).to.eql([
               {
-                x: 1549728000000,
-                y: 1574,
+                x: '2019-02-09T16:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 1,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549738800000,
-                y: 0,
+                x: '2019-02-09T19:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 0,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549749600000,
-                y: 1302,
+                x: '2019-02-09T22:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 1,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549760400000,
-                y: 3281,
+                x: '2019-02-10T01:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 1,
+                },
                 __typename: 'HistogramData',
               },
             ]);
@@ -65,46 +81,78 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
             expect(kpiHosts!.uniqueSourceIps).to.equal(121);
             expect(kpiHosts!.uniqueSourceIpsHistogram).to.eql([
               {
-                x: 1549728000000,
-                y: 1574,
+                x: '2019-02-09T16:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 52,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549738800000,
-                y: 0,
+                x: '2019-02-09T19:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 0,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549749600000,
-                y: 1302,
+                x: '2019-02-09T22:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 31,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549760400000,
-                y: 3281,
+                x: '2019-02-10T01:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 88,
+                },
                 __typename: 'HistogramData',
               },
             ]);
             expect(kpiHosts!.uniqueDestinationIps).to.equal(154);
             expect(kpiHosts!.uniqueDestinationIpsHistogram).to.eql([
               {
-                x: 1549728000000,
-                y: 1574,
+                x: '2019-02-09T16:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 61,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549738800000,
-                y: 0,
+                x: '2019-02-09T19:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 0,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549749600000,
-                y: 1302,
+                x: '2019-02-09T22:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 45,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549760400000,
-                y: 3281,
+                x: '2019-02-10T01:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 114,
+                },
                 __typename: 'HistogramData',
               },
             ]);
@@ -137,23 +185,39 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
             expect(kpiHosts!.hosts).to.equal(1);
             expect(kpiHosts!.hostsHistogram).to.eql([
               {
-                x: 1549728000000,
-                y: 1574,
+                x: '2019-02-09T16:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 1,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549738800000,
-                y: 0,
+                x: '2019-02-09T19:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 0,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549749600000,
-                y: 1302,
+                x: '2019-02-09T22:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 1,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549760400000,
-                y: 3281,
+                x: '2019-02-10T01:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 1,
+                },
                 __typename: 'HistogramData',
               },
             ]);
@@ -164,46 +228,62 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
             expect(kpiHosts!.uniqueSourceIps).to.equal(121);
             expect(kpiHosts!.uniqueSourceIpsHistogram).to.eql([
               {
-                x: 1549728000000,
-                y: 1574,
+                x: '2019-02-09T16:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 52,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549738800000,
-                y: 0,
+                x: '2019-02-09T19:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 0,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549749600000,
-                y: 1302,
+                x: '2019-02-09T22:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 31,
+                },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549760400000,
-                y: 3281,
+                x: '2019-02-10T01:00:00.000Z',
+                y: {
+                  __typename: 'Count',
+                  doc_count: null,
+                  value: 88,
+                },
                 __typename: 'HistogramData',
               },
             ]);
             expect(kpiHosts!.uniqueDestinationIps).to.equal(154);
             expect(kpiHosts!.uniqueDestinationIpsHistogram).to.eql([
               {
-                x: 1549728000000,
-                y: 1574,
+                x: '2019-02-09T16:00:00.000Z',
+                y: { value: 61, doc_count: null, __typename: 'Count' },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549738800000,
-                y: 0,
+                x: '2019-02-09T19:00:00.000Z',
+                y: { value: 0, doc_count: null, __typename: 'Count' },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549749600000,
-                y: 1302,
+                x: '2019-02-09T22:00:00.000Z',
+                y: { value: 45, doc_count: null, __typename: 'Count' },
                 __typename: 'HistogramData',
               },
               {
-                x: 1549760400000,
-                y: 3281,
+                x: '2019-02-10T01:00:00.000Z',
+                y: { value: 114, doc_count: null, __typename: 'Count' },
                 __typename: 'HistogramData',
               },
             ]);

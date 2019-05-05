@@ -99,7 +99,6 @@ export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => 
       {fieldTitleMapping.map(stat => (
         <StatItemsComponent
           key={`kpi-network-summary-${stat.fields[0].key}`}
-          isLoading={loading}
           description={stat.description}
           fields={addValueToFields(stat.fields, data)}
         />

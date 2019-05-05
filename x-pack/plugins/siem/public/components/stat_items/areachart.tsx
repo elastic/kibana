@@ -28,7 +28,7 @@ export const ChartBaseComponent = pure<{
           // @ts-ignore
           <EuiAreaSeries
             key={`stat-items-areachart-${series.key}`}
-            name={`stat-items-areachart-${series.key}`}
+            name={series.key.replace('Histogram', '')}
             // @ts-ignore
             data={series.value}
             fillOpacity={0.04}

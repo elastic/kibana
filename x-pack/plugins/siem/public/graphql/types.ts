@@ -1069,8 +1069,6 @@ export interface KpiHostsData {
 export interface HistogramData {
   key?: number | null;
 
-  doc_count?: number | null;
-
   key_as_string?: string | null;
 
   count?: Count | null;
@@ -3856,5 +3854,7 @@ export namespace ChartFields {
     __typename?: 'Count';
 
     value?: number | null;
+
+    doc_count?: number | null;
   };
 }

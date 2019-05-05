@@ -159,6 +159,6 @@ const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartDat
           },
         ],
       });
-    return dataSet;
+    return acc.concat(dataSet);
   }, []);
 };

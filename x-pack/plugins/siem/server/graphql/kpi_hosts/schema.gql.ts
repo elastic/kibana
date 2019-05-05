@@ -14,7 +14,6 @@ export const kpiHostsSchema = gql`
 
   type HistogramData {
     key: Float
-    doc_count: Float
     key_as_string: String
     count: Count
   }

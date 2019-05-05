@@ -1098,8 +1098,6 @@ export interface KpiHostsData {
 export interface HistogramData {
   key?: number | null;
 
-  doc_count?: number | null;
-
   key_as_string?: string | null;
 
   count?: Count | null;
@@ -5297,19 +5295,12 @@ export namespace HistogramDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HistogramData> {
     key?: KeyResolver<number | null, TypeParent, Context>;
 
-    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
-
     key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
 
     count?: CountResolver<Count | null, TypeParent, Context>;
   }
 
   export type KeyResolver<
-    R = number | null,
-    Parent = HistogramData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DocCountResolver<
     R = number | null,
     Parent = HistogramData,
     Context = SiemContext

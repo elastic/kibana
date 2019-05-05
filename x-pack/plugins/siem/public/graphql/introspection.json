@@ -6414,14 +6414,6 @@
             "deprecationReason": null
           },
           {
-            "name": "doc_count",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "key_as_string",
             "description": "",
             "args": [],
