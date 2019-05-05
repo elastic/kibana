@@ -11,21 +11,113 @@ export interface KpiHostsAdapter {
   getKpiHosts(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiHostsData>;
 }
 
-export interface KpiHostsHit extends SearchHit {
+export interface KpiHostsGeneralHit extends SearchHit {
   aggregations: {
     hosts: {
       value: number;
     };
-    agents: {
-      value: number;
+    hosts_histogram: {
+      buckets: [
+        {
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+          count: {
+            value: number;
+          };
+        }
+      ];
     };
     unique_source_ips: {
       value: number;
     };
+    unique_source_ips_histogram: {
+      buckets: [
+        {
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+          count: {
+            value: number;
+          };
+        }
+      ];
+    };
     unique_destination_ips: {
       value: number;
     };
+    unique_destination_ips_histogram: {
+      buckets: [
+        {
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+          count: {
+            value: number;
+          };
+        }
+      ];
+    };
   };
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  hits: {
+    max_score: number | null;
+    hits: [];
+  };
+  took: number;
+  timeout: number;
+}
+
+export interface KpiHostsAuthHit extends SearchHit {
+  aggregations: {
+    authentication_success: {
+      doc_count: number;
+    };
+    authentication_success_histogram: {
+      buckets: [
+        {
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+          count: {
+            doc_count: number;
+          };
+        }
+      ];
+    };
+    authentication_failure: {
+      doc_count: number;
+    };
+    authentication_failure_histogram: {
+      buckets: [
+        {
+          key_as_string: string;
+          key: number;
+          doc_count: number;
+          count: {
+            doc_count: number;
+          };
+        }
+      ];
+    };
+  };
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  hits: {
+    max_score: number | null;
+    hits: [];
+  };
+  took: number;
+  timeout: number;
 }
 
 export interface KpiHostsBody {

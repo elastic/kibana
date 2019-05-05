@@ -12,7 +12,12 @@ import { TermAggregation } from '../types';
 
 import { buildAuthQuery } from './query_authentication.dsl';
 import { buildGeneralQuery } from './query_general.dsl';
-import { KpiHostsAdapter, KpiHostsESMSearchBody, KpiHostsHit } from './types';
+import {
+  KpiHostsAdapter,
+  KpiHostsESMSearchBody,
+  KpiHostsGeneralHit,
+  KpiHostsAuthHit,
+} from './types';
 
 export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -23,13 +28,12 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
   ): Promise<KpiHostsData> {
     const generalQuery: KpiHostsESMSearchBody[] = buildGeneralQuery(options);
     const authQuery: KpiHostsESMSearchBody[] = buildAuthQuery(options);
-    const response = await this.framework.callWithRequest<KpiHostsHit, TermAggregation>(
-      request,
-      'msearch',
-      {
-        body: [...generalQuery, ...authQuery],
-      }
-    );
+    const response = await this.framework.callWithRequest<
+      KpiHostsGeneralHit | KpiHostsAuthHit,
+      TermAggregation
+    >(request, 'msearch', {
+      body: [...generalQuery, ...authQuery],
+    });
     return {
       hosts: getOr(null, 'responses.0.aggregations.hosts.value', response),
       hostsHistogram: getOr(null, 'responses.0.aggregations.hosts_histogram.buckets', response),
