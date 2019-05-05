@@ -33,27 +33,42 @@ const testKpiHostsSource = {
           hosts
           hostsHistogram {
             key
-            doc_count
+            count {
+              doc_count
+              value
+            }
           }
           authSuccess
           authSuccessHistogram {
             key
-            doc_count
+            count {
+              doc_count
+              value
+            }
           }
           authFailure
           authFailureHistogram {
             key
-            doc_count
+            count {
+              doc_count
+              value
+            }
           }
           uniqueSourceIps
           uniqueSourceIpsHistogram {
             key
-            doc_count
+            count {
+              doc_count
+              value
+            }
           }
           uniqueDestinationIps
           uniqueDestinationIpsHistogram {
             key
-            doc_count
+            count {
+              doc_count
+              value
+            }
           }
         }
       }

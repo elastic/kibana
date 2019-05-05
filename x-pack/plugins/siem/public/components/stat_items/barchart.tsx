@@ -57,19 +57,23 @@ const ChartBaseComponent = pure<{
   ) : null;
 });
 
-export const BarChart = pure<{ barChart: BarChartData[] | [] | null | undefined }>(({ barChart }) =>
-  barChart &&
-  barChart.length &&
-  barChart.every(({ value }) => value != null && value.length > 0) ? (
+export const BarChart = pure<{ barChart: BarChartData[] | [] | null | undefined }>(
+  ({ barChart }) => (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer innerRef={measureRef}>
-          <ChartBaseComponent height={height} width={width} data={barChart} />
+          {barChart &&
+          barChart.length &&
+          barChart.every(
+            ({ value }) => value != null && value.length > 0 && value.some(({ x }) => x != null)
+          ) ? (
+            <ChartBaseComponent height={height} width={width} data={barChart} />
+          ) : (
+            <ChartHolder />
+          )}
         </WrappedByAutoSizer>
       )}
     </AutoSizer>
-  ) : (
-    <ChartHolder />
   )
 );
 

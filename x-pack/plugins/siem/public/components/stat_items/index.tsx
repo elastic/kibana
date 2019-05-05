@@ -47,8 +47,8 @@ export interface AreaChartData {
 }
 
 export interface ChartData {
-  x: number | string;
-  y: number;
+  x: number | string | null;
+  y: number | string | null;
   y0?: number;
 }
 
