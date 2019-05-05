@@ -1,0 +1,212 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UncommonProcess Table Component rendering it renders the default Uncommon process table 1`] = `
+<Component>
+  <Connect(pure(Component))
+    data={
+      Array [
+        Object {
+          "cursor": Object {
+            "value": "98966fa2013c396155c460d35c0902be",
+          },
+          "node": Object {
+            "_id": "cPsuhGcB0WOhS6qyTKC0",
+            "hosts": Array [],
+            "instances": 93,
+            "process": Object {
+              "name": Array [
+                "elrond.elstc.co",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
+            },
+            "user": Object {
+              "id": Array [
+                "0",
+              ],
+              "name": Array [
+                "root",
+              ],
+            },
+          },
+        },
+        Object {
+          "cursor": Object {
+            "value": "98966fa2013c396155c460d35c0902be",
+          },
+          "node": Object {
+            "_id": "cPsuhGcB0WOhS6qyTKC0",
+            "hosts": Array [
+              Object {
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
+              },
+            ],
+            "instances": 93,
+            "process": Object {
+              "name": Array [
+                "elrond.elstc.co",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
+            },
+            "user": Object {
+              "id": Array [
+                "0",
+              ],
+              "name": Array [
+                "root",
+              ],
+            },
+          },
+        },
+        Object {
+          "cursor": Object {
+            "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          },
+          "node": Object {
+            "_id": "KwQDiWcB0WOhS6qyXmrW",
+            "hosts": Array [
+              Object {
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
+              },
+              Object {
+                "id": Array [
+                  "host-id-2",
+                ],
+                "name": Array [
+                  "hello-world-2",
+                ],
+              },
+            ],
+            "instances": 97,
+            "process": Object {
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
+            },
+            "user": Object {
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
+            },
+          },
+        },
+        Object {
+          "cursor": Object {
+            "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          },
+          "node": Object {
+            "_id": "KwQDiWcB0WOhS6qyXmrW",
+            "hosts": Array [
+              Object {
+                "ip": Array [
+                  "127.0.0.1",
+                ],
+              },
+            ],
+            "instances": 97,
+            "process": Object {
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
+            },
+            "user": Object {
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
+            },
+          },
+        },
+        Object {
+          "cursor": Object {
+            "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          },
+          "node": Object {
+            "_id": "KwQDiWcB0WOhS6qyXmrW",
+            "hosts": Array [
+              Object {
+                "ip": Array [
+                  "127.0.0.1",
+                ],
+              },
+              Object {
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
+              },
+              Object {
+                "ip": Array [
+                  "127.0.0.1",
+                ],
+              },
+              Object {
+                "id": Array [
+                  "host-id-2",
+                ],
+                "name": Array [
+                  "hello-world-2",
+                ],
+              },
+              Object {
+                "ip": Array [
+                  "127.0.0.1",
+                ],
+              },
+            ],
+            "instances": 97,
+            "process": Object {
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
+            },
+            "user": Object {
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
+            },
+          },
+        },
+      ]
+    }
+    hasNextPage={true}
+    loadMore={[MockFunction]}
+    loading={false}
+    nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+    totalCount={5}
+    type="page"
+  />
+</Component>
+`;
