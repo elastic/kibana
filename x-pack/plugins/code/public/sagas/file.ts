@@ -39,6 +39,7 @@ import {
   gotoRepo,
   Match,
   setNotFound,
+  noNeedToFetchRepoTree,
 } from '../actions';
 import { RootState } from '../reducers';
 import { treeCommitsSelector, createTreeSelector } from '../selectors';
@@ -54,6 +55,8 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
         // do not request file tree if this tree exists and its children are not empty
         if (!children || children.length === 0) {
           yield call(fetchPath, { uri, revision, path, parents, isDir });
+        } else {
+          yield put(noNeedToFetchRepoTree());
         }
       } else {
         yield call(fetchPath, { uri, revision, path, parents, isDir });

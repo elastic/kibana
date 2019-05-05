@@ -29,6 +29,7 @@ import {
   resetRepoTree,
   routeChange,
   setNotFound,
+  noNeedToFetchRepoTree,
 } from '../actions';
 
 export interface FileState {
@@ -133,15 +134,22 @@ export const file = handleActions(
           }
         }
       }),
-    [String(resetRepoTree)]: (state: FileState) =>
-      produce<FileState>(state, (draft: FileState) => {
-        draft.tree = initialState.tree;
-        draft.openedPaths = initialState.openedPaths;
-      }),
     [String(fetchRepoTreeFailed)]: (state: FileState) =>
       produce(state, draft => {
         draft.fileTreeLoading = false;
         draft.rootFileTreeLoading = false;
+      }),
+    [String(noNeedToFetchRepoTree)]: (state: FileState) =>
+      produce(state, draft => {
+        draft.fileTreeLoading = false;
+        draft.rootFileTreeLoading = false;
+      }),
+    [String(resetRepoTree)]: (state: FileState) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.tree = initialState.tree;
+        draft.openedPaths = initialState.openedPaths;
+        draft.rootFileTreeLoading = true;
+        draft.fileTreeLoading = false;
       }),
     [String(openTreePath)]: (state: FileState, action: Action<any>) =>
       produce<FileState>(state, (draft: FileState) => {
