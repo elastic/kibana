@@ -33,10 +33,6 @@ describe('add filters', function () {
   let appState;
   let globalState;
 
-  function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   beforeEach(ngMock.module(
     'kibana',
     'kibana/courier',
@@ -146,21 +142,26 @@ describe('add filters', function () {
     it('should fire the update and fetch events', async function () {
       const emitSpy = sinon.spy(queryFilter, 'emit');
 
+      const awaitFetch = new Promise(resolve => {
+        queryFilter.on('fetch', () => {
+          resolve();
+        });
+      });
+
       // set up the watchers, add new filters, and crank the digest loop
       $rootScope.$digest();
       await queryFilter.addFilters(filters);
       $rootScope.$digest();
-      await timeout(0);
 
       // updates should trigger state saves
       expect(appState.save.callCount).to.be(1);
       expect(globalState.save.callCount).to.be(1);
 
       // this time, events should be emitted
+      await awaitFetch;
       expect(emitSpy.callCount).to.be(2);
       expect(emitSpy.firstCall.args[0]).to.be('update');
       expect(emitSpy.secondCall.args[0]).to.be('fetch');
-
     });
   });
 

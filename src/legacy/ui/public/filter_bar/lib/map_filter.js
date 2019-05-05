@@ -70,21 +70,18 @@ export async function mapFilter(indexPatterns, filter) {
     return generateMappingChain(map, memo);
   }, noop);
 
-  /**
-   * Map the filter into an object with the key and value exposed so it's
-   * easier to work with in the template
-   * @param {object} filter The filter the map
-   * @returns {Promise}
-   */
-  return mapFn(filter).then(function (result) {
-    filter.meta = filter.meta || {};
-    filter.meta.type = result.type;
-    filter.meta.key = result.key;
-    filter.meta.value = result.value;
-    filter.meta.params = result.params;
-    filter.meta.disabled = !!(filter.meta.disabled);
-    filter.meta.negate = !!(filter.meta.negate);
-    filter.meta.alias = filter.meta.alias || null;
-    return filter;
-  });
+  const mapped = await mapFn(filter);
+
+  // Map the filter into an object with the key and value exposed so it's
+  // easier to work with in the template
+  filter.meta = filter.meta || {};
+  filter.meta.type = mapped.type;
+  filter.meta.key = mapped.key;
+  filter.meta.value = mapped.value;
+  filter.meta.params = mapped.params;
+  filter.meta.disabled = !!(filter.meta.disabled);
+  filter.meta.negate = !!(filter.meta.negate);
+  filter.meta.alias = filter.meta.alias || null;
+
+  return filter;
 }
