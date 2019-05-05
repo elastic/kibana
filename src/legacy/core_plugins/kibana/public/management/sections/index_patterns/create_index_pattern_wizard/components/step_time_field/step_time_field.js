@@ -213,18 +213,18 @@ export class StepTimeFieldComponent extends Component {
       ? (
         <>
           <EuiCallOut
-              title={(
-                <FormattedMessage
-                  id="kbn.management.createIndexPattern.stepTime.error"
-                  defaultMessage="Error"
-                />
-              )}
-              color="danger"
-              iconType="cross"
-            >
-              <p>
-                {this.formatErrorMessage(this.state.error)}
-              </p>
+            title={(
+              <FormattedMessage
+                id="kbn.management.createIndexPattern.stepTime.error"
+                defaultMessage="Error"
+              />
+            )}
+            color="danger"
+            iconType="cross"
+          >
+            <p>
+              {this.formatErrorMessage(this.state.error)}
+            </p>
           </EuiCallOut>
           <EuiSpacer size="m"/>
         </>
