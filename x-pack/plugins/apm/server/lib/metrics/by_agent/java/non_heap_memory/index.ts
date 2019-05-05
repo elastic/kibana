@@ -5,27 +5,45 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, NonHeapMemoryMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
 import { transformDataToChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<NonHeapMemoryMetrics> = {
-  title: 'Non-Heap Memory',
+  title: i18n.translate('xpack.apm.agentMetrics.java.nonHeapMemoryChartTitle', {
+    defaultMessage: 'Non-Heap Memory'
+  }),
   key: 'non_heap_memory_area_chart',
   type: 'area',
   yUnit: 'bytes-GB',
   series: {
     nonHeapMemoryUsed: {
-      title: 'Used',
+      title: i18n.translate(
+        'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
+        {
+          defaultMessage: 'Used'
+        }
+      ),
       color: theme.euiColorVis0
     },
     nonHeapMemoryCommitted: {
-      title: 'Committed',
+      title: i18n.translate(
+        'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
+        {
+          defaultMessage: 'Committed'
+        }
+      ),
       color: theme.euiColorVis1
     },
     nonHeapMemoryMax: {
-      title: 'Max',
+      title: i18n.translate(
+        'xpack.apm.agentMetrics.java.nonHeapMemorySeriesMax',
+        {
+          defaultMessage: 'Max'
+        }
+      ),
       color: theme.euiColorVis2
     }
   }

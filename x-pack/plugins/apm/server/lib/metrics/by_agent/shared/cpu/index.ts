@@ -5,31 +5,42 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, CPUMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
 import { transformDataToChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<CPUMetrics> = {
-  title: 'CPU usage',
+  title: i18n.translate('xpack.apm.serviceDetails.metrics.cpuUsageChartTitle', {
+    defaultMessage: 'CPU usage'
+  }),
   key: 'cpu_usage_chart',
   type: 'linemark',
   yUnit: 'percent',
   series: {
     systemCPUMax: {
-      title: 'System max',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
+        defaultMessage: 'System max'
+      }),
       color: theme.euiColorVis1
     },
     systemCPUAverage: {
-      title: 'System average',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.systemAverageLabel', {
+        defaultMessage: 'System average'
+      }),
       color: theme.euiColorVis0
     },
     processCPUMax: {
-      title: 'Process max',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
+        defaultMessage: 'Process max'
+      }),
       color: theme.euiColorVis7
     },
     processCPUAverage: {
-      title: 'Process average',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
+        defaultMessage: 'Process average'
+      }),
       color: theme.euiColorVis5
     }
   }

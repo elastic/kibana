@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import Joi from 'joi';
 import { CoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -24,7 +25,9 @@ export function initMetricsApi(core: CoreSetup) {
     path: `/api/apm/services/{serviceName}/metrics/charts`,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultValidators({
+          agentName: Joi.string()
+        })
       },
       tags: ['access:apm']
     },
