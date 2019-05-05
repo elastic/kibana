@@ -8,8 +8,11 @@ import { find } from 'lodash';
 
 const actionDefaults = [];
 
-const xpackWatcherActionDefaultsService = (config) => ({
+const xpackWatcherActionDefaults = {
   register: actionDefaults.push,
+};
+
+const xpackWatcherActionDefaultsService = (config) => ({
   getDefaults: (watchType, actionType) => {
     const match = find(actionDefaults, { watchType, actionType });
 
@@ -17,4 +20,4 @@ const xpackWatcherActionDefaultsService = (config) => ({
   }
 });
 
-export { xpackWatcherActionDefaultsService };
+export { xpackWatcherActionDefaultsService, xpackWatcherActionDefaults };

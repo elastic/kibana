@@ -6,7 +6,7 @@
 
 import { merge } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from 'plugins/watcher/../common/constants';
-import { xpackWatcherActionDefaultsService } from '../action_defaults_service';
+import { xpackWatcherActionDefaults } from '../action_defaults_service';
 
 const DEFAULT_ADMIN_EMAIL_CONFIG_KEY = 'xPack:defaultAdminEmail';
 const actionType = ACTION_TYPES.EMAIL;
@@ -17,7 +17,7 @@ function getActionDefaults(config) {
   };
 }
 
-xpackWatcherActionDefaultsService.register({
+xpackWatcherActionDefaults.register({
   actionType,
   watchType: WATCH_TYPES.THRESHOLD,
   getDefaults: (config) => {

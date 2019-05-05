@@ -6,7 +6,7 @@
 
 import { merge } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from 'plugins/watcher/../common/constants';
-import { xpackWatcherActionDefaultsService } from '../action_defaults_service';
+import { xpackWatcherActionDefaults } from '../action_defaults_service';
 
 const actionType = ACTION_TYPES.LOGGING;
 
@@ -14,7 +14,7 @@ function getActionDefaults() {
   return {};
 }
 
-xpackWatcherActionDefaultsService.register({
+xpackWatcherActionDefaults.register({
   actionType,
   watchType: WATCH_TYPES.THRESHOLD,
   getDefaults: (config) => {
