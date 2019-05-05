@@ -31,11 +31,11 @@ export const mockRequest = {
     operationName: 'GetKpiHostsQuery',
     variables: {
       sourceId: 'default',
-      timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
+      timerange: { interval: '12h', from: 1556890277121, to: 1556976677122 },
       filterQuery: '',
     },
     query:
-      'query GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {\n      hosts\n      agents\n      authentication {\n        success\n        failure\n        __typename\n      }\n      uniqueSourceIps\n      uniqueDestinationIps\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'fragment ChartFields on HistogramData {\n  x: key\n  y: count {\n    value\n    doc_count\n    __typename\n  }\n  __typename\n}\n\nquery GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {\n      hosts\n      hostsHistogram {\n        ...ChartFields\n        __typename\n      }\n      authSuccess\n      authSuccessHistogram {\n        ...ChartFields\n        __typename\n      }\n      authFailure\n      authFailureHistogram {\n        ...ChartFields\n        __typename\n      }\n      uniqueSourceIps\n      uniqueSourceIpsHistogram {\n        ...ChartFields\n        __typename\n      }\n      uniqueDestinationIps\n      uniqueDestinationIpsHistogram {\n        ...ChartFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
@@ -44,12 +44,12 @@ export const mockResponse = {
   took: 4405,
   responses: [
     {
-      took: 4404,
+      took: 1234,
       timed_out: false,
       _shards: {
         total: 71,
         successful: 71,
-        skipped: 64,
+        skipped: 65,
         failed: 0,
       },
       hits: {
@@ -58,93 +58,111 @@ export const mockResponse = {
       },
       aggregations: {
         unique_destination_ips_histogram: {
-          doc_count: 2175136,
-          ips_over_time: {
-            buckets: [
-              {
-                key_as_string: '2019-04-24T07:00:00.000Z',
-                key: 1556089200000,
-                doc_count: 1189146,
+          buckets: [
+            {
+              key_as_string: '2019-05-03T13:00:00.000Z',
+              key: 1556888400000,
+              doc_count: 3158515,
+              count: {
+                value: 1809,
               },
-              {
-                key_as_string: '2019-04-24T19:00:00.000Z',
-                key: 1556132400000,
-                doc_count: 977334,
+            },
+            {
+              key_as_string: '2019-05-04T01:00:00.000Z',
+              key: 1556931600000,
+              doc_count: 703032,
+              count: {
+                value: 407,
               },
-              {
-                key_as_string: '2019-04-25T07:00:00.000Z',
-                key: 1556175600000,
-                doc_count: 8656,
+            },
+            {
+              key_as_string: '2019-05-04T13:00:00.000Z',
+              key: 1556974800000,
+              doc_count: 1780,
+              count: {
+                value: 64,
               },
-            ],
-            interval: '12h',
-          },
+            },
+          ],
+          interval: '12h',
         },
         unique_source_ips: {
-          value: 11929,
+          value: 1407,
         },
         hosts: {
-          value: 1026,
-        },
-        hosts_histogram: {
-          doc_count: 9681207,
-          hosts_over_time: {
-            buckets: [
-              {
-                key_as_string: '2019-04-24T07:00:00.000Z',
-                key: 1556089200000,
-                doc_count: 5017216,
-              },
-              {
-                key_as_string: '2019-04-24T19:00:00.000Z',
-                key: 1556132400000,
-                doc_count: 4590090,
-              },
-              {
-                key_as_string: '2019-04-25T07:00:00.000Z',
-                key: 1556175600000,
-                doc_count: 73901,
-              },
-            ],
-            interval: '12h',
-          },
-        },
-        unique_destination_ips: {
-          value: 2662,
+          value: 986,
         },
         unique_source_ips_histogram: {
-          doc_count: 2503604,
-          ips_over_time: {
-            buckets: [
-              {
-                key_as_string: '2019-04-24T07:00:00.000Z',
-                key: 1556089200000,
-                doc_count: 1419836,
+          buckets: [
+            {
+              key_as_string: '2019-05-03T13:00:00.000Z',
+              key: 1556888400000,
+              doc_count: 3158515,
+              count: {
+                value: 1182,
               },
-              {
-                key_as_string: '2019-04-24T19:00:00.000Z',
-                key: 1556132400000,
-                doc_count: 1074440,
+            },
+            {
+              key_as_string: '2019-05-04T01:00:00.000Z',
+              key: 1556931600000,
+              doc_count: 703032,
+              count: {
+                value: 364,
               },
-              {
-                key_as_string: '2019-04-25T07:00:00.000Z',
-                key: 1556175600000,
-                doc_count: 9328,
+            },
+            {
+              key_as_string: '2019-05-04T13:00:00.000Z',
+              key: 1556974800000,
+              doc_count: 1780,
+              count: {
+                value: 63,
               },
-            ],
-            interval: '12h',
-          },
+            },
+          ],
+          interval: '12h',
+        },
+        hosts_histogram: {
+          buckets: [
+            {
+              key_as_string: '2019-05-03T13:00:00.000Z',
+              key: 1556888400000,
+              doc_count: 3158515,
+              count: {
+                value: 919,
+              },
+            },
+            {
+              key_as_string: '2019-05-04T01:00:00.000Z',
+              key: 1556931600000,
+              doc_count: 703032,
+              count: {
+                value: 82,
+              },
+            },
+            {
+              key_as_string: '2019-05-04T13:00:00.000Z',
+              key: 1556974800000,
+              doc_count: 1780,
+              count: {
+                value: 4,
+              },
+            },
+          ],
+          interval: '12h',
+        },
+        unique_destination_ips: {
+          value: 1954,
         },
       },
       status: 200,
     },
     {
-      took: 1124,
+      took: 320,
       timed_out: false,
       _shards: {
         total: 71,
         successful: 71,
-        skipped: 64,
+        skipped: 65,
         failed: 0,
       },
       hits: {
@@ -153,55 +171,68 @@ export const mockResponse = {
       },
       aggregations: {
         authentication_success: {
-          doc_count: 2,
-          attempts_over_time: {
-            buckets: [
-              {
-                key_as_string: '2019-04-24T18:00:00.000Z',
-                key: 1556128800000,
-                doc_count: 1,
-              },
-              {
-                key_as_string: '2019-04-24T21:00:00.000Z',
-                key: 1556139600000,
-                doc_count: 0,
-              },
-              {
-                key_as_string: '2019-04-25T00:00:00.000Z',
-                key: 1556150400000,
-                doc_count: 0,
-              },
-              {
-                key_as_string: '2019-04-25T03:00:00.000Z',
-                key: 1556161200000,
-                doc_count: 1,
-              },
-            ],
-            interval: '3h',
-          },
+          doc_count: 61,
         },
         authentication_failure: {
-          doc_count: 306495,
-          attempts_over_time: {
-            buckets: [
-              {
-                key_as_string: '2019-04-24T07:00:00.000Z',
-                key: 1556089200000,
-                doc_count: 220265,
+          doc_count: 15722,
+        },
+        authentication_failure_histogram: {
+          buckets: [
+            {
+              key_as_string: '2019-05-03T13:00:00.000Z',
+              key: 1556888400000,
+              doc_count: 11739,
+              count: {
+                doc_count: 11731,
               },
-              {
-                key_as_string: '2019-04-24T19:00:00.000Z',
-                key: 1556132400000,
-                doc_count: 86135,
+            },
+            {
+              key_as_string: '2019-05-04T01:00:00.000Z',
+              key: 1556931600000,
+              doc_count: 4031,
+              count: {
+                doc_count: 3979,
               },
-              {
-                key_as_string: '2019-04-25T07:00:00.000Z',
-                key: 1556175600000,
-                doc_count: 95,
+            },
+            {
+              key_as_string: '2019-05-04T13:00:00.000Z',
+              key: 1556974800000,
+              doc_count: 13,
+              count: {
+                doc_count: 12,
               },
-            ],
-            interval: '12h',
-          },
+            },
+          ],
+          interval: '12h',
+        },
+        authentication_success_histogram: {
+          buckets: [
+            {
+              key_as_string: '2019-05-03T13:00:00.000Z',
+              key: 1556888400000,
+              doc_count: 11739,
+              count: {
+                doc_count: 8,
+              },
+            },
+            {
+              key_as_string: '2019-05-04T01:00:00.000Z',
+              key: 1556931600000,
+              doc_count: 4031,
+              count: {
+                doc_count: 52,
+              },
+            },
+            {
+              key_as_string: '2019-05-04T13:00:00.000Z',
+              key: 1556974800000,
+              doc_count: 13,
+              count: {
+                doc_count: 1,
+              },
+            },
+          ],
+          interval: '12h',
         },
       },
       status: 200,
@@ -210,99 +241,139 @@ export const mockResponse = {
 };
 
 export const mockResult = {
-  hosts: 1026,
+  hosts: 986,
   hostsHistogram: [
     {
-      doc_count: 5017216,
-      key: 1556089200000,
-      key_as_string: '2019-04-24T07:00:00.000Z',
+      key_as_string: '2019-05-03T13:00:00.000Z',
+      key: 1556888400000,
+      doc_count: 3158515,
+      count: {
+        value: 919,
+      },
     },
     {
-      doc_count: 4590090,
-      key: 1556132400000,
-      key_as_string: '2019-04-24T19:00:00.000Z',
+      key_as_string: '2019-05-04T01:00:00.000Z',
+      key: 1556931600000,
+      doc_count: 703032,
+      count: {
+        value: 82,
+      },
     },
     {
-      doc_count: 73901,
-      key: 1556175600000,
-      key_as_string: '2019-04-25T07:00:00.000Z',
+      key_as_string: '2019-05-04T13:00:00.000Z',
+      key: 1556974800000,
+      doc_count: 1780,
+      count: {
+        value: 4,
+      },
     },
   ],
-  authSuccess: 2,
+  authSuccess: 61,
   authSuccessHistogram: [
     {
-      doc_count: 1,
-      key: 1556128800000,
-      key_as_string: '2019-04-24T18:00:00.000Z',
+      key_as_string: '2019-05-03T13:00:00.000Z',
+      key: 1556888400000,
+      doc_count: 11739,
+      count: {
+        doc_count: 8,
+      },
     },
     {
-      doc_count: 0,
-      key: 1556139600000,
-      key_as_string: '2019-04-24T21:00:00.000Z',
+      key_as_string: '2019-05-04T01:00:00.000Z',
+      key: 1556931600000,
+      doc_count: 4031,
+      count: {
+        doc_count: 52,
+      },
     },
     {
-      doc_count: 0,
-      key: 1556150400000,
-      key_as_string: '2019-04-25T00:00:00.000Z',
-    },
-    {
-      doc_count: 1,
-      key: 1556161200000,
-      key_as_string: '2019-04-25T03:00:00.000Z',
+      key_as_string: '2019-05-04T13:00:00.000Z',
+      key: 1556974800000,
+      doc_count: 13,
+      count: {
+        doc_count: 1,
+      },
     },
   ],
-  authFailure: 306495,
+  authFailure: 15722,
   authFailureHistogram: [
     {
-      doc_count: 220265,
-      key: 1556089200000,
-      key_as_string: '2019-04-24T07:00:00.000Z',
+      key_as_string: '2019-05-03T13:00:00.000Z',
+      key: 1556888400000,
+      doc_count: 11739,
+      count: {
+        doc_count: 11731,
+      },
     },
     {
-      doc_count: 86135,
-      key: 1556132400000,
-      key_as_string: '2019-04-24T19:00:00.000Z',
+      key_as_string: '2019-05-04T01:00:00.000Z',
+      key: 1556931600000,
+      doc_count: 4031,
+      count: {
+        doc_count: 3979,
+      },
     },
     {
-      doc_count: 95,
-      key: 1556175600000,
-      key_as_string: '2019-04-25T07:00:00.000Z',
+      key_as_string: '2019-05-04T13:00:00.000Z',
+      key: 1556974800000,
+      doc_count: 13,
+      count: {
+        doc_count: 12,
+      },
     },
   ],
-  uniqueSourceIps: 11929,
+  uniqueSourceIps: 1407,
   uniqueSourceIpsHistogram: [
     {
-      doc_count: 1419836,
-      key: 1556089200000,
-      key_as_string: '2019-04-24T07:00:00.000Z',
+      key_as_string: '2019-05-03T13:00:00.000Z',
+      key: 1556888400000,
+      doc_count: 3158515,
+      count: {
+        value: 1182,
+      },
     },
     {
-      doc_count: 1074440,
-      key: 1556132400000,
-      key_as_string: '2019-04-24T19:00:00.000Z',
+      key_as_string: '2019-05-04T01:00:00.000Z',
+      key: 1556931600000,
+      doc_count: 703032,
+      count: {
+        value: 364,
+      },
     },
     {
-      doc_count: 9328,
-      key: 1556175600000,
-      key_as_string: '2019-04-25T07:00:00.000Z',
+      key_as_string: '2019-05-04T13:00:00.000Z',
+      key: 1556974800000,
+      doc_count: 1780,
+      count: {
+        value: 63,
+      },
     },
   ],
-  uniqueDestinationIps: 2662,
+  uniqueDestinationIps: 1954,
   uniqueDestinationIpsHistogram: [
     {
-      doc_count: 1189146,
-      key: 1556089200000,
-      key_as_string: '2019-04-24T07:00:00.000Z',
+      key_as_string: '2019-05-03T13:00:00.000Z',
+      key: 1556888400000,
+      doc_count: 3158515,
+      count: {
+        value: 1809,
+      },
     },
     {
-      doc_count: 977334,
-      key: 1556132400000,
-      key_as_string: '2019-04-24T19:00:00.000Z',
+      key_as_string: '2019-05-04T01:00:00.000Z',
+      key: 1556931600000,
+      doc_count: 703032,
+      count: {
+        value: 407,
+      },
     },
     {
-      doc_count: 8656,
-      key: 1556175600000,
-      key_as_string: '2019-04-25T07:00:00.000Z',
+      key_as_string: '2019-05-04T13:00:00.000Z',
+      key: 1556974800000,
+      doc_count: 1780,
+      count: {
+        value: 64,
+      },
     },
   ],
 };
@@ -315,101 +386,24 @@ export const mockGeneralQuery = [
   },
   {
     aggregations: {
-      hosts: {
-        cardinality: {
-          field: 'host.name',
-        },
-      },
+      hosts: { cardinality: { field: 'host.name' } },
       hosts_histogram: {
-        filter: {
-          bool: {
-            should: [
-              {
-                exists: {
-                  field: 'host.name',
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        aggregations: {
-          hosts_over_time: {
-            auto_date_histogram: {
-              field: '@timestamp',
-              buckets: '6',
-            },
-          },
-        },
+        auto_date_histogram: { field: '@timestamp', buckets: '6' },
+        aggs: { count: { cardinality: { field: 'host.name' } } },
       },
-      unique_source_ips: {
-        cardinality: {
-          field: 'source.ip',
-        },
-      },
+      unique_source_ips: { cardinality: { field: 'source.ip' } },
       unique_source_ips_histogram: {
-        filter: {
-          bool: {
-            should: [
-              {
-                exists: {
-                  field: 'source.ip',
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        aggregations: {
-          ips_over_time: {
-            auto_date_histogram: {
-              field: '@timestamp',
-              buckets: 6,
-            },
-          },
-        },
+        auto_date_histogram: { field: '@timestamp', buckets: '6' },
+        aggs: { count: { cardinality: { field: 'source.ip' } } },
       },
-      unique_destination_ips: {
-        cardinality: {
-          field: 'destination.ip',
-        },
-      },
+      unique_destination_ips: { cardinality: { field: 'destination.ip' } },
       unique_destination_ips_histogram: {
-        filter: {
-          bool: {
-            should: [
-              {
-                exists: {
-                  field: 'destination.ip',
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        aggregations: {
-          ips_over_time: {
-            auto_date_histogram: {
-              field: '@timestamp',
-              buckets: 6,
-            },
-          },
-        },
+        auto_date_histogram: { field: '@timestamp', buckets: '6' },
+        aggs: { count: { cardinality: { field: 'destination.ip' } } },
       },
     },
     query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: 1556091284295,
-                lte: 1556177684295,
-              },
-            },
-          },
-        ],
-      },
+      bool: { filter: [{ range: { '@timestamp': { gte: 1556889840660, lte: 1556976240660 } } }] },
     },
     size: 0,
     track_total_hits: false,
@@ -424,35 +418,15 @@ export const mockAuthQuery = [
   },
   {
     aggs: {
-      authentication_success: {
-        filter: {
-          term: {
-            'event.type': 'authentication_success',
-          },
-        },
-        aggs: {
-          attempts_over_time: {
-            auto_date_histogram: {
-              field: '@timestamp',
-              buckets: 6,
-            },
-          },
-        },
+      authentication_success: { filter: { term: { 'event.type': 'authentication_success' } } },
+      authentication_success_histogram: {
+        auto_date_histogram: { field: '@timestamp', buckets: '6' },
+        aggs: { count: { filter: { term: { 'event.type': 'authentication_success' } } } },
       },
-      authentication_failure: {
-        filter: {
-          term: {
-            'event.type': 'authentication_failure',
-          },
-        },
-        aggs: {
-          attempts_over_time: {
-            auto_date_histogram: {
-              field: '@timestamp',
-              buckets: 6,
-            },
-          },
-        },
+      authentication_failure: { filter: { term: { 'event.type': 'authentication_failure' } } },
+      authentication_failure_histogram: {
+        auto_date_histogram: { field: '@timestamp', buckets: '6' },
+        aggs: { count: { filter: { term: { 'event.type': 'authentication_failure' } } } },
       },
     },
     query: {
@@ -461,28 +435,13 @@ export const mockAuthQuery = [
           {
             bool: {
               should: [
-                {
-                  match: {
-                    'event.type': 'authentication_success',
-                  },
-                },
-                {
-                  match: {
-                    'event.type': 'authentication_failure',
-                  },
-                },
+                { match: { 'event.type': 'authentication_success' } },
+                { match: { 'event.type': 'authentication_failure' } },
               ],
               minimum_should_match: 1,
             },
           },
-          {
-            range: {
-              '@timestamp': {
-                gte: 1556091284295,
-                lte: 1556177684295,
-              },
-            },
-          },
+          { range: { '@timestamp': { gte: 1556889840660, lte: 1556976240660 } } },
         ],
       },
     },

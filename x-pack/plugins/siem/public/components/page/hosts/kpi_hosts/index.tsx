@@ -104,7 +104,6 @@ export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
       {fieldTitleMapping.map(stat => {
         let statItemProps: StatItemsProps = {
           ...stat,
-          isLoading: loading,
           key: `kpi-hosts-summary-${stat.description}`,
         };
 

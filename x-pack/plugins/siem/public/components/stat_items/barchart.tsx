@@ -27,11 +27,8 @@ const ChartBaseComponent = pure<{
   width: number | undefined;
   height: number | undefined;
 }>(({ data, ...chartConfigs }) => {
-  return chartConfigs.width &&
-    chartConfigs.height &&
-    data &&
-    data.length &&
-    data.every(({ value }) => value != null && value.length > 0) ? (
+  return chartConfigs.width && chartConfigs.height ? (
+    // @ts-ignore
     <SeriesChart
       yType={SCALE.ORDINAL}
       orientation={ORIENTATION.HORIZONTAL}
@@ -44,6 +41,7 @@ const ChartBaseComponent = pure<{
           <EuiBarSeries
             key={`stat-items-areachart-${series.key}`}
             name={series.key}
+            // @ts-ignore
             data={series.value!}
             color={series.color}
           />
@@ -56,20 +54,24 @@ const ChartBaseComponent = pure<{
 // @ts-ignore */}
       <EuiYAxis tickFormat={getYaxis} />
     </SeriesChart>
-  ) : (
-    <ChartHolder />
-  );
+  ) : null;
 });
 
-export const BarChart = pure<{ barChart: BarChartData[] }>(({ barChart }) => (
-  <AutoSizer detectAnyWindowResize={false} content>
-    {({ measureRef, content: { height, width } }) => (
-      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
-        <ChartBaseComponent height={height} width={width} data={barChart} />
-      </WrappedByAutoSizer>
-    )}
-  </AutoSizer>
-));
+export const BarChart = pure<{ barChart: BarChartData[] | [] | null | undefined }>(({ barChart }) =>
+  barChart &&
+  barChart.length &&
+  barChart.every(({ value }) => value != null && value.length > 0) ? (
+    <AutoSizer detectAnyWindowResize={false} content>
+      {({ measureRef, content: { height, width } }) => (
+        <WrappedByAutoSizer innerRef={measureRef}>
+          <ChartBaseComponent height={height} width={width} data={barChart} />
+        </WrappedByAutoSizer>
+      )}
+    </AutoSizer>
+  ) : (
+    <ChartHolder />
+  )
+);
 
 // @ts-ignore
 const SeriesChart = styled(EuiSeriesChart)`

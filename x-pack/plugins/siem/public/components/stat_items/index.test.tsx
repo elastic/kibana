@@ -4,43 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow, ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { StatItemsComponent, StatItemsProps } from '.';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
-import { EuiHorizontalRule, EuiIcon } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
+// @ts-ignore
+import { EuiAreaSeries, EuiBarSeries } from '@elastic/eui/lib/experimental';
 
 describe('Stat Items', () => {
-  describe('loading', () => {
-    test('it renders loading icons', () => {
-      const mockStatItemsData: StatItemsProps = {
-        fields: [
-          {
-            key: 'networkEvents',
-            description: 'NETWORK_EVENTS',
-            value: null,
-            color: '#000000',
-          },
-        ],
-        isLoading: true,
-        key: 'mock-key',
-      };
-      const wrapper = shallow(<StatItemsComponent {...mockStatItemsData} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
-  });
-
   describe.each([
     [
       mount(
         <StatItemsComponent
-          fields={[{ key: 'hosts', value: null, color: '#3185FC' }]}
+          fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
           description="HOSTS"
-          isLoading={false}
           key="mock-keys"
         />
       ),
@@ -48,26 +29,25 @@ describe('Stat Items', () => {
     [
       mount(
         <StatItemsComponent
-          fields={[{ key: 'hosts', value: null, color: '#3185FC' }]}
+          fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
           description="HOSTS"
-          isLoading={false}
           areaChart={[]}
           barChart={[]}
           key="mock-keys"
         />
       ),
     ],
-  ])('rendering kpis without charts', wrapper => {
+  ])('disable charts', wrapper => {
     test('it renders the default widget', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('should handle multiple titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]').filter(EuiFlexGroup)).toHaveLength(1);
+    test('should render titles', () => {
+      expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
     });
 
-    test('should not render color indicators', () => {
-      expect(wrapper.find(EuiIcon)).toHaveLength(0);
+    test('should not render icons', () => {
+      expect(wrapper.find('[data-test-subj="stat-icon"]').filter('EuiIcon')).toHaveLength(0);
     });
 
     test('should not render barChart', () => {
@@ -86,9 +66,23 @@ describe('Stat Items', () => {
   describe('rendering kpis with charts', () => {
     const mockStatItemsData: StatItemsProps = {
       fields: [
-        { key: 'uniqueSourceIps', description: 'Source', value: 1714, color: '#DB1374' },
-        { key: 'uniqueDestinationIps', description: 'Dest.', value: 2359, color: '#490092' },
+        {
+          key: 'uniqueSourceIps',
+          description: 'Source',
+          value: 1714,
+          color: '#DB1374',
+          icon: 'cross',
+        },
+        {
+          key: 'uniqueDestinationIps',
+          description: 'Dest.',
+          value: 2359,
+          color: '#490092',
+          icon: 'cross',
+        },
       ],
+      enableAreaChart: true,
+      enableBarChart: true,
       areaChart: [
         {
           key: 'uniqueSourceIpsHistogram',
@@ -118,7 +112,6 @@ describe('Stat Items', () => {
         },
       ],
       description: 'UNIQUE_PRIVATE_IPS',
-      isLoading: false,
       key: 'mock-keys',
     };
     let wrapper: ReactWrapper;
@@ -130,11 +123,11 @@ describe('Stat Items', () => {
     });
 
     test('should handle multiple titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]').filter(EuiFlexGroup)).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="stat-title"]')).toHaveLength(2);
     });
 
-    test('should render color indicators', () => {
-      expect(wrapper.find(EuiIcon)).toHaveLength(2);
+    test('should render kpi icons', () => {
+      expect(wrapper.find('[data-test-subj="stat-icon"]').filter('EuiIcon')).toHaveLength(2);
     });
 
     test('should render barChart', () => {
@@ -145,55 +138,7 @@ describe('Stat Items', () => {
       expect(wrapper.find(AreaChart)).toHaveLength(1);
     });
 
-    test('should render spliter', () => {
-      expect(wrapper.find(EuiHorizontalRule)).toHaveLength(1);
-    });
-  });
-
-  describe('areaChart data not available', () => {
-    const mockStatItemsData: StatItemsProps = {
-      fields: [
-        { key: 'uniqueSourceIps', description: 'Source', value: 1714, color: '#DB1374' },
-        { key: 'uniqueDestinationIps', description: 'Dest.', value: 2359, color: '#490092' },
-      ],
-      areaChart: [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [],
-          color: '#490092',
-        },
-      ],
-      barChart: [
-        { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
-        {
-          key: 'uniqueDestinationIps',
-          value: [{ x: 2354, y: 'uniqueDestinationIps' }],
-          color: '#490092',
-        },
-      ],
-      description: 'UNIQUE_PRIVATE_IPS',
-      isLoading: false,
-      key: 'mock-keys',
-    };
-    let wrapper: ReactWrapper;
-    beforeAll(() => {
-      wrapper = mount(<StatItemsComponent {...mockStatItemsData} />);
-    });
-
-    test('should render barChart', () => {
-      expect(wrapper.find(BarChart)).toHaveLength(1);
-    });
-
-    test('should not render areaChart', () => {
-      expect(wrapper.find(AreaChart)).toHaveLength(0);
-    });
-
-    test('should render spliter', () => {
+    test('should render separator', () => {
       expect(wrapper.find(EuiHorizontalRule)).toHaveLength(1);
     });
   });

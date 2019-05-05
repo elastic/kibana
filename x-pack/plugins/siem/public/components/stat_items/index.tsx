@@ -42,13 +42,13 @@ export interface StatItem {
 
 export interface AreaChartData {
   key: string;
-  value: ChartData[] | null;
+  value: ChartData[] | [] | null;
   color?: string | undefined;
 }
 
 export interface ChartData {
-  x: number;
-  y: number | string;
+  x: number | string;
+  y: number;
   y0?: number;
 }
 
@@ -67,24 +67,13 @@ export interface StatItems {
 }
 
 export interface StatItemsProps extends StatItems {
-  isLoading: boolean;
   key: string;
   areaChart?: AreaChartData[];
   barChart?: BarChartData[];
 }
 
 export const StatItemsComponent = pure<StatItemsProps>(
-  ({
-    fields,
-    description,
-    isLoading,
-    key,
-    grow,
-    barChart,
-    areaChart,
-    enableAreaChart,
-    enableBarChart,
-  }) => {
+  ({ fields, description, key, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
     const isBarChartDataAbailable =
       barChart &&
       barChart.length &&
@@ -106,7 +95,12 @@ export const StatItemsComponent = pure<StatItemsProps>(
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   {(isAreaChartDataAvailable || isBarChartDataAbailable) && field.icon ? (
                     <FlexItem grow={false}>
-                      <EuiIcon type={field.icon} color={field.color} size="l" />
+                      <EuiIcon
+                        type={field.icon}
+                        color={field.color}
+                        size="l"
+                        data-test-subj="stat-icon"
+                      />
                     </FlexItem>
                   ) : null}
 
