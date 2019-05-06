@@ -18,12 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
-import { getActionType } from '../../../../common/lib/get_action_type';
-import { BaseWatch, ExecutedWatchDetails } from '../../../../common/types/watch_types';
-import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
+import { getActionType } from '../../../../../common/lib/get_action_type';
+import { BaseWatch, ExecutedWatchDetails } from '../../../../../common/types/watch_types';
+import { ACTION_MODES, TIME_UNITS } from '../../../../../common/constants';
 import { JsonWatchEditForm } from './json_watch_edit_form';
 import { JsonWatchEditSimulate } from './json_watch_edit_simulate';
-import { WatchContext } from './watch_context';
+import { WatchContext } from '../../watch_context';
 
 interface WatchAction {
   actionId: string;
@@ -111,7 +111,10 @@ const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
             onClick={() => {
               setSelectedTab(tab.id);
               setExecuteDetails(
-                new ExecuteDetails({ ...executeDetails, actionModes: getActionModes(watchActions) })
+                new ExecuteDetails({
+                  ...executeDetails,
+                  actionModes: getActionModes(watchActions),
+                })
               );
             }}
             isSelected={tab.id === selectedTab}

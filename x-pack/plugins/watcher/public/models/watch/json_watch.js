@@ -23,7 +23,7 @@ export class JsonWatch extends BaseWatch {
   }
 
   validate() {
-    const validationResult = super.validate();
+    const validationResult = {};
     const idRegex = /^[A-Za-z0-9\-\_]+$/;
     const errors = {
       id: [],

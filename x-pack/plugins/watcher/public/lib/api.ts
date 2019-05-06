@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Settings } from 'plugins/watcher/models/settings';
 import { Watch } from 'plugins/watcher/models/watch';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { WatchStatus } from 'plugins/watcher/models/watch_status';
@@ -157,10 +158,25 @@ export const loadIndexPatterns = async () => {
   });
   return savedObjects;
 };
+
 export const getWatchVisualizationData = async (watchModel: BaseWatch, visualizeOptions: any) => {
   const response = await getHttpClient().post(`${basePath}/watch/visualize`, {
     watch: watchModel.upstreamJson,
     options: visualizeOptions.upstreamJson,
   });
   return response.data;
+};
+
+export const loadSettings = () => {
+  return useRequest({
+    path: `${basePath}/settings`,
+    method: 'get',
+    processData: (data: {
+      actionTypes: {
+        [key: string]: {
+          enabled: boolean;
+        };
+      };
+    }) => Settings.fromUpstreamJson(data),
+  });
 };

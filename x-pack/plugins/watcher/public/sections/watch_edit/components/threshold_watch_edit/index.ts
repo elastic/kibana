@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './settings_service.factory';
+export { ThresholdWatchEdit } from './threshold_watch_edit';

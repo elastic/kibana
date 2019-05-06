@@ -95,7 +95,7 @@ export class ThresholdWatch extends BaseWatch {
     return `${staticPart} ${dynamicPartText}`;
   }
   validate() {
-    const validationResult = super.validate();
+    const validationResult = {};
     const errors = {
       name: [],
       index: [],

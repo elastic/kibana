@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiRegistry } from 'ui/registry/_registry';
-
-export const ActionDefaultsRegistryProvider = uiRegistry({
-  name: 'actionDefaultsRegistry'
-});
+export { JsonWatchEdit } from './json_watch_edit';
