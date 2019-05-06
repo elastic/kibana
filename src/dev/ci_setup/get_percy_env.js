@@ -37,5 +37,6 @@ const shortCommit = commit.slice(0, 8);
 
 const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
 
-console.log(`export PERCY_PARALLEL_TOTAL="${ciGroupCount}"`);
-console.log(`export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : pkg.branch}/${process.env.BUILD_ID}"`);
+console.log(`export LOG_LEVEL=debug;`);
+console.log(`export PERCY_PARALLEL_TOTAL="${ciGroupCount}";`);
+console.log(`export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : pkg.branch}/${process.env.BUILD_ID}";`);
