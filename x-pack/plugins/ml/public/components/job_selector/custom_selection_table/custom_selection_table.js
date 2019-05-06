@@ -253,6 +253,7 @@ export function CustomSelectionTable({
               {!singleSelection &&
               <EuiCheckbox
                 id={`${item.id}-checkbox`}
+                data-testid={`${item.id}-checkbox`}
                 checked={isItemSelected(item.id)}
                 onChange={() => toggleItem(item.id)}
                 type="inList"
@@ -260,6 +261,7 @@ export function CustomSelectionTable({
               {singleSelection &&
               <EuiRadio
                 id={item.id}
+                data-testid={`${item.id}-radio-button`}
                 checked={isItemSelected(item.id)}
                 onChange={() => toggleItem(item.id)}
                 disabled={timeseriesOnly && item.isSingleMetricViewerJob === false}
