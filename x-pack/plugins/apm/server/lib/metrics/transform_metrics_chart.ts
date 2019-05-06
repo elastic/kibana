@@ -35,7 +35,6 @@ export function transformDataToChart<T extends MetricsKeys>(
       overallValue: aggregations[seriesKey].value,
       data: timeseriesData.buckets.map(bucket => {
         const { value } = bucket[seriesKey];
-        // TODO: confirm what values "value" can actually be and what causes problems in the charts...
         const y = value === null || isNaN(value) ? null : value;
         return {
           x: bucket.key,

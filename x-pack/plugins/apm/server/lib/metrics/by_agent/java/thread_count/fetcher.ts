@@ -10,7 +10,6 @@ import {
   SERVICE_NAME,
   METRIC_JAVA_THREAD_COUNT
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../../typings/common';
 import { Setup } from '../../../../helpers/setup_request';
 import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
@@ -19,7 +18,6 @@ export interface ThreadCountMetrics extends MetricsKeys {
   threadCount: AggValue;
 }
 
-export type HeapMemoryResponse = PromiseReturnType<typeof fetch>;
 export async function fetch(setup: Setup, serviceName: string) {
   const { start, end, esFilterQuery, client, config } = setup;
   const filters: ESFilter[] = [
