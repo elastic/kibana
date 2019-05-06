@@ -34,13 +34,12 @@ import { getIndexBreadcrumbs } from './breadcrumbs';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, $injector, i18n) {
+function updateObjectsTable($scope, $injector, i18n, uiCapabilities) {
   const Private = $injector.get('Private');
   const indexPatterns = $injector.get('indexPatterns');
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
-  const uiCapabilites = chrome.getInjected('uiCapabilities');
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
@@ -65,7 +64,7 @@ function updateObjectsTable($scope, $injector, i18n) {
           perPageConfig={config.get('savedObjects:perPage')}
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
-          uiCapabilities={uiCapabilites}
+          uiCapabilities={uiCapabilities}
           getEditUrl={(id, type) => {
             if (type === 'index-pattern' || type === 'indexPatterns') {
               return kbnUrl.eval(`#/management/kibana/index_patterns/${id}`);
@@ -82,7 +81,7 @@ function updateObjectsTable($scope, $injector, i18n) {
             return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
           }}
           canGoInApp={(type) => {
-            return canViewInApp(uiCapabilites, type);
+            return canViewInApp(uiCapabilities, type);
           }}
           goInApp={(id, type) => {
             kbnUrl.change(getInAppUrl(id, type));
@@ -114,8 +113,8 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       controllerAs: 'managementObjectsController',
-      controller: function ($scope, $injector, i18n) {
-        updateObjectsTable($scope, $injector, i18n);
+      controller: function ($scope, $injector, i18n, uiCapabilities) {
+        updateObjectsTable($scope, $injector, i18n, uiCapabilities);
         $scope.$on('$destroy', destroyObjectsTable);
       }
     };
