@@ -27,8 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
-import { ConfirmWatchesModal } from '../../../../components/confirm_watches_modal';
-import { ErrableFormRow } from '../../../../components/form_errors';
+import { ConfirmWatchesModal, ErrableFormRow } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { groupByTypes } from '../../../../models/watch/group_by_types';
