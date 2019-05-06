@@ -53,6 +53,7 @@ export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE'
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
+export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -79,6 +80,13 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
   await Promise.all(syncs);
+}
+
+export function setMapInitError(errorMessage) {
+  return {
+    type: SET_MAP_INIT_ERROR,
+    errorMessage
+  };
 }
 
 export function trackCurrentLayerState(layerId) {

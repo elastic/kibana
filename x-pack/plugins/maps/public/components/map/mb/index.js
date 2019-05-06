@@ -13,7 +13,8 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setTooltipState
+  setTooltipState,
+  setMapInitError,
 } from '../../../actions/store_actions';
 import { getTooltipState, getLayerList, getMapReady, getGoto, getScrollZoom } from '../../../selectors/map_selectors';
 import { getIsFilterable } from '../../../store/ui';
@@ -55,6 +56,9 @@ function mapDispatchToProps(dispatch) {
     },
     setTooltipState(tooltipState) {
       dispatch(setTooltipState(tooltipState));
+    },
+    setMapInitError(errorMessage) {
+      dispatch(setMapInitError(errorMessage));
     }
   };
 }

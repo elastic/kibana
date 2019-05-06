@@ -13,7 +13,6 @@ import { DECIMAL_DEGREES_PRECISION, FEATURE_ID_PROPERTY_NAME, ZOOM_PRECISION } f
 import mapboxgl from 'mapbox-gl';
 import { FeatureTooltip } from '../feature_tooltip';
 
-
 const TOOLTIP_TYPE = {
   HOVER: 'HOVER',
   LOCKED: 'LOCKED'
@@ -171,10 +170,12 @@ export class MBMapContainer extends React.Component {
   }
 
   componentDidUpdate() {
-    // do not debounce syncing of map-state and tooltip
-    this._syncMbMapWithMapState();
-    this._syncTooltipState();
-    this._debouncedSync();
+    if (this._mbMap) {
+      // do not debounce syncing of map-state and tooltip
+      this._syncMbMapWithMapState();
+      this._syncTooltipState();
+      this._debouncedSync();
+    }
   }
 
   componentDidMount() {
@@ -196,12 +197,16 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-
-    this._mbMap = await createMbMapInstance({
-      node: this.refs.mapContainer,
-      initialView: this.props.goto ? this.props.goto.center : null,
-      scrollZoom: this.props.scrollZoom
-    });
+    try {
+      this._mbMap = await createMbMapInstance({
+        node: this.refs.mapContainer,
+        initialView: this.props.goto ? this.props.goto.center : null,
+        scrollZoom: this.props.scrollZoom
+      });
+    } catch(error) {
+      this.props.setMapInitError(error.message);
+      return;
+    }
 
     if (!this._isMounted) {
       return;
