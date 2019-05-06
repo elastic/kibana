@@ -34,7 +34,9 @@ class VisController {
 
     this.updateSubsciption = this.vis.API.queryFilter.getUpdates$()
       .subscribe({
-        next: () => this.queryBarUpdateHandler,
+        next: () => {
+          this.queryBarUpdateHandler();
+        },
       });
   }
 
