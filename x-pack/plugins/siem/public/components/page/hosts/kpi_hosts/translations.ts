@@ -43,6 +43,13 @@ export const UNIQUE_SOURCE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniq
   defaultMessage: 'Source',
 });
 
+export const UNIQUE_SOURCE_IPS_ABBREVIATION = i18n.translate(
+  'xpack.siem.kpiHosts.source.uniqueSourceIpsAbbreviationTitle',
+  {
+    defaultMessage: 'Src.',
+  }
+);
+
 export const UNIQUE_DESTINATION_IPS = i18n.translate(
   'xpack.siem.kpiHosts.source.uniqueDestinationIpsTitle',
   {

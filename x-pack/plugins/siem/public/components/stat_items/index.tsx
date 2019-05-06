@@ -26,6 +26,10 @@ import { getEmptyTagValue } from '../empty_value';
 export const WrappedByAutoSizer = styled.div`
   height: 100px;
   position: relative;
+
+  &:hover {
+    z-index: 100;
+  }
 `;
 
 export interface StatItem {
@@ -34,6 +38,7 @@ export interface StatItem {
   value: number | undefined | null;
   color?: string;
   icon?: 'storage' | 'cross' | 'check' | 'visMapCoordinate';
+  name?: string;
 }
 
 export interface AreaChartData {
@@ -137,7 +142,7 @@ export const StatItemsComponent = pure<StatItemsProps>(
 export const ChartHolder = () => (
   <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
     <EuiFlexItem grow={false}>
-      <EuiText size="s" textAlign="center">
+      <EuiText size="s" textAlign="center" color="subdued">
         Chart Data Not Available
       </EuiText>
     </EuiFlexItem>

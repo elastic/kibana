@@ -72,6 +72,7 @@ const fieldTitleMapping: StatItems[] = [
     fields: [
       {
         key: 'uniqueSourceIps',
+        name: i18n.UNIQUE_SOURCE_IPS_ABBREVIATION,
         description: i18n.UNIQUE_SOURCE_IPS,
         value: null,
         color: euiColorVis2,
@@ -144,10 +145,11 @@ const addValueToAreaChart = (fields: StatItem[], data: KpiHostsData): AreaChartD
     }));
 
 const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartData[] => {
+  if (fields.length === 0) return [];
   return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
     const key = get('key', field);
     const x: number | null = getOr(null, key, data);
-    const y: string = getOr('', `${idx}.description`, fields);
+    const y: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
     const dataSet: BarChartData[] = [];
     if (y != null)
       dataSet.push({

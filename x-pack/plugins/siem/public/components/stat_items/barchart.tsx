@@ -19,7 +19,8 @@ import { AutoSizer } from '../auto_sizer';
 const { SCALE, ORIENTATION } = EuiSeriesChartUtils;
 const getYaxis = (value: string | number) => {
   const label = value.toString();
-  return label.length > 4 ? `${label.slice(0, 4)}.` : label;
+  const labelLength = 4;
+  return label.length > labelLength ? `${label.slice(0, labelLength)}.` : label;
 };
 
 export const BarChartBaseComponent = pure<{
@@ -63,7 +64,11 @@ export const BarChartWithCustomPrompt = pure<{
   height: number | null | undefined;
   width: number | null | undefined;
 }>(({ data, height, width }) => {
-  return data && data.length && data.every(({ value }) => value != null && value.length > 0) ? (
+  return data &&
+    data.length &&
+    data.every(
+      ({ value }) => value != null && value.length > 0 && value.every(chart => chart.x != null)
+    ) ? (
     <BarChartBaseComponent height={height} width={width} data={data} />
   ) : (
     <ChartHolder />

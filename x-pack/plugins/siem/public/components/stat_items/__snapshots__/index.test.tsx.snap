@@ -721,7 +721,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                 innerRef={[Function]}
                               >
                                 <div
-                                  className="sc-bxivhb fLNTGm"
+                                  className="sc-bxivhb iDiKZF"
                                 >
                                   <pure(Component)
                                     data={
@@ -937,7 +937,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                 innerRef={[Function]}
                               >
                                 <div
-                                  className="sc-bxivhb fLNTGm"
+                                  className="sc-bxivhb iDiKZF"
                                 >
                                   <pure(Component)
                                     data={
