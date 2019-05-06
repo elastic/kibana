@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, MouseEvent } from 'react';
+import React, { Component, Fragment, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -147,7 +147,7 @@ export class SidebarHeader extends Component<Props, State> {
   private _renderLayoutControls = () => {
     const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
     return (
-      <>
+      <Fragment>
         <EuiFlexItem grow={false}>
           <EuiToolTip position="bottom" content="Move element to top layer">
             <EuiButtonIcon
@@ -188,7 +188,7 @@ export class SidebarHeader extends Component<Props, State> {
             />
           </EuiToolTip>
         </EuiFlexItem>
-      </>
+      </Fragment>
     );
   };
 
@@ -342,7 +342,7 @@ export class SidebarHeader extends Component<Props, State> {
     const { isModalVisible } = this.state;
 
     return (
-      <>
+      <Fragment>
         <EuiFlexGroup
           className="canvasLayout__sidebarHeader"
           gutterSize="none"
@@ -380,7 +380,7 @@ export class SidebarHeader extends Component<Props, State> {
             />
           </EuiOverlayMask>
         ) : null}
-      </>
+      </Fragment>
     );
   }
 }
