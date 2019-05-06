@@ -62,9 +62,9 @@ function pointGeometryFactory(lat, lon) {
   };
 }
 
-export function geoPointToGeometry(value, accumulator = []) {
+export function geoPointToGeometry(value, accumulator) {
   if (!value) {
-    return accumulator;
+    return;
   }
 
   if (typeof value === 'string') {
@@ -80,12 +80,13 @@ export function geoPointToGeometry(value, accumulator = []) {
     const lat = parseFloat(commaSplit[0]);
     const lon = parseFloat(commaSplit[1]);
     accumulator.push(pointGeometryFactory(lat, lon));
-    return accumulator;}
+    return;
+  }
 
   if (typeof value === 'object' && _.has(value, 'lat') && _.has(value, 'lon')) {
     // Geo-point expressed as an object with the format: { lon, lat }
     accumulator.push(pointGeometryFactory(value.lat, value.lon));
-    return accumulator;
+    return;
   }
 
   if (!Array.isArray(value)) {
@@ -110,22 +111,21 @@ export function geoPointToGeometry(value, accumulator = []) {
 
   // Geo-point expressed as an array of values
   for (let i = 0; i < value.length; i++) {
-    accumulator.push(geoPointToGeometry(value[i]));
+    geoPointToGeometry(value[i], accumulator);
   }
-  return accumulator;
 }
 
-export function geoShapeToGeometry(value, accumulator = []) {
+export function geoShapeToGeometry(value, accumulator) {
   if (!value) {
-    return accumulator;
+    return;
   }
 
   if (Array.isArray(value)) {
     // value expressed as an array of values
     for (let i = 0; i < value.length; i++) {
-      accumulator.push(value[i]);
+      geoShapeToGeometry(value[i], accumulator);
     }
-    return accumulator;
+    return;
   }
 
   // TODO handle case where value is WKT and convert to geojson
@@ -176,7 +176,6 @@ export function geoShapeToGeometry(value, accumulator = []) {
   }
 
   accumulator.push(geoJson);
-  return accumulator;
 }
 
 const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
