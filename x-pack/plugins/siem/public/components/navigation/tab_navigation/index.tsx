@@ -83,7 +83,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
   public render() {
     return (
       <TabNavigationContainer>
-        <EuiTabs>{this.renderTabs()}</EuiTabs>
+        <EuiTabs display="condensed">{this.renderTabs()}</EuiTabs>
       </TabNavigationContainer>
     );
   }
@@ -109,10 +109,10 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       <EuiTab
         data-href={tab.href}
         data-test-subj={`navigation-${tab.id}`}
-        onClick={() => this.handleTabClick(tab.href, tab.id)}
-        isSelected={this.state.selectedTabId === tab.id}
         disabled={tab.disabled}
+        isSelected={this.state.selectedTabId === tab.id}
         key={`navigation-${tab.id}`}
+        onClick={() => this.handleTabClick(tab.href, tab.id)}
       >
         {tab.name}
       </EuiTab>
