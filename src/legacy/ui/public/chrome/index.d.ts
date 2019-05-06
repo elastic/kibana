@@ -24,7 +24,7 @@ import { BreadcrumbsApi } from './api/breadcrumbs';
 import { HelpExtensionApi } from './api/help_extension';
 import { ChromeNavLinks } from './api/nav';
 
-interface IInjector {
+export interface IInjector {
   get<T>(injectable: string): T;
 }
 

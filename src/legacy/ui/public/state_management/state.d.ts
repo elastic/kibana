@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export interface State {
+export class State {
   [key: string]: any;
   translateHashToRison: (stateHashOrRison: string | string[]) => string | string[];
   getQueryParamName: () => string;

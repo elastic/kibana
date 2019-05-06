@@ -17,24 +17,13 @@
  * under the License.
  */
 
-import { Query } from 'ui/visualize';
-import { QueryLanguageType } from 'ui/visualize/loader/types';
-
-function isLegacyQuery(query: string | Query): query is string {
-  return (query as Query).language === undefined;
+export interface SaveOptions {
+  confirmOverwrite: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
 }
 
-/**
- * Creates a standardized query object from old queries that were either strings or pure ES query DSL
- *
- * @param query - a legacy query, what used to be stored in SearchSource's query property
- * @return Object
- */
-export function migrateLegacyQuery(query: string | Query): Query {
-  // Lucene was the only option before, so language-less queries are all lucene
-  if (isLegacyQuery(query)) {
-    return { query, language: QueryLanguageType.LUCENE };
-  }
-
-  return query;
+export interface SavedObject {
+  save: (saveOptions: SaveOptions) => Promise<string>;
+  copyOnSave: boolean;
 }
