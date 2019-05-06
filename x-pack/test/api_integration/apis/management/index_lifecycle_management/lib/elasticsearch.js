@@ -11,9 +11,10 @@ import { getRandomString } from './random';
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const initElasticsearchIndicesHelpers = (es) => {
-  // Indices
   let indicesCreated = [];
+  let templatesCreated = [];
 
+  // Indices
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
     return es.indices.create({ index }).then(() => index);
@@ -33,20 +34,33 @@ export const initElasticsearchIndicesHelpers = (es) => {
     es.indices.getTemplate()
   );
 
-  const createIndexTemplate = (name, template) => (
-    es.indices.putTemplate({ name, body: template }, { create: true })
+  // Create index template if it does not already exist
+  const createIndexTemplate = (name, template) => {
+    templatesCreated.push(name);
+    return es.indices.putTemplate({ name, body: template }, { create: true });
+  };
+
+  const deleteIndexTemplate = (name) => {
+    templatesCreated = templatesCreated.filter(i => i !== name);
+    return es.indices.deleteTemplate({ name });
+  };
+
+  const deleteAllTemplates = () => (
+    Promise.all(templatesCreated.map(deleteIndexTemplate)).then(() => templatesCreated = [])
   );
 
-  const deleteIndexTemplate = (name) => (
-    es.indices.deleteTemplate({ name })
+  const cleanUp = () => (
+    Promise.all([deleteAllIndices(), deleteAllTemplates()])
   );
 
   return ({
     createIndex,
     deleteIndex,
     deleteAllIndices,
+    deleteAllTemplates,
     getIndexTemplates,
     createIndexTemplate,
     deleteIndexTemplate,
+    cleanUp,
   });
 };

@@ -8,6 +8,7 @@
 export default function ({ loadTestFile }) {
   describe('index lifecycle management', () => {
     loadTestFile(require.resolve('./policies'));
+    loadTestFile(require.resolve('./templates'));
     loadTestFile(require.resolve('./indices'));
   });
 }

@@ -41,7 +41,7 @@ export async function loadIndexTemplate(templateName, httpClient = getHttpClient
   if (!templateName) {
     return {};
   }
-  const response = await httpClient.get(`${apiPrefix}/template/${templateName}`);
+  const response = await httpClient.get(`${apiPrefix}/templates/${templateName}`);
   return response.data;
 }
 

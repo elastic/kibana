@@ -50,7 +50,7 @@ export default function ({ getService }) {
         });
       });
 
-      it('should add the indices linkes to the policies', () => {
+      it('should add the indices linked to the policies', () => {
         // TODO: when attaching indices to policy is done
       });
     });
