@@ -13,15 +13,19 @@ import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
 
 interface LinkToPageProps {
-  match: RouteMatch<{}>;
+  match: RouteMatch<{
+    sourceId?: string;
+  }>;
 }
 
 export class LinkToPage extends React.Component<LinkToPageProps> {
   public render() {
     const { match } = this.props;
 
+    const sourceId = match.params.sourceId || 'default';
+
     return (
-      <Source.Provider sourceId="default">
+      <Source.Provider sourceId={sourceId}>
         <Switch>
           <Route
             path={`${match.url}/:nodeType(host|container|pod)-logs/:nodeId`}
