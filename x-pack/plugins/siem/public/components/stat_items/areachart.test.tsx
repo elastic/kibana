@@ -12,35 +12,30 @@ import { AreaChartData } from '.';
 
 describe('AreaChartBaseComponent', () => {
   let wrapper: ReactWrapper;
+  const mockAreaChartData: AreaChartData[] = [
+    {
+      key: 'uniqueSourceIpsHistogram',
+      value: [
+        { x: 1556686800000, y: 580213 },
+        { x: 1556730000000, y: 1096175 },
+        { x: 1556773200000, y: 12382 },
+      ],
+      color: '#DB1374',
+    },
+    {
+      key: 'uniqueDestinationIpsHistogram',
+      value: [
+        { x: 1556686800000, y: 565975 },
+        { x: 1556730000000, y: 1084366 },
+        { x: 1556773200000, y: 12280 },
+      ],
+      color: '#490092',
+    },
+  ];
 
   describe('render', () => {
     beforeAll(() => {
-      wrapper = mount(
-        <AreaChartBaseComponent
-          height={100}
-          width={120}
-          data={[
-            {
-              key: 'uniqueSourceIpsHistogram',
-              value: [
-                { x: 1556686800000, y: 580213 },
-                { x: 1556730000000, y: 1096175 },
-                { x: 1556773200000, y: 12382 },
-              ],
-              color: '#DB1374',
-            },
-            {
-              key: 'uniqueDestinationIpsHistogram',
-              value: [
-                { x: 1556686800000, y: 565975 },
-                { x: 1556730000000, y: 1084366 },
-                { x: 1556773200000, y: 12280 },
-              ],
-              color: '#490092',
-            },
-          ]}
-        />
-      );
+      wrapper = mount(<AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />);
     });
 
     it('should render two area series', () => {
@@ -59,30 +54,7 @@ describe('AreaChartBaseComponent', () => {
   describe('no render', () => {
     beforeAll(() => {
       wrapper = mount(
-        <AreaChartBaseComponent
-          height={null}
-          width={null}
-          data={[
-            {
-              key: 'uniqueSourceIpsHistogram',
-              value: [
-                { x: 1556686800000, y: 580213 },
-                { x: 1556730000000, y: 1096175 },
-                { x: 1556773200000, y: 12382 },
-              ],
-              color: '#DB1374',
-            },
-            {
-              key: 'uniqueDestinationIpsHistogram',
-              value: [
-                { x: 1556686800000, y: 565975 },
-                { x: 1556730000000, y: 1084366 },
-                { x: 1556773200000, y: 12280 },
-              ],
-              color: '#490092',
-            },
-          ]}
-        />
+        <AreaChartBaseComponent height={null} width={null} data={mockAreaChartData} />
       );
     });
 
@@ -94,33 +66,30 @@ describe('AreaChartBaseComponent', () => {
 
 describe('AreaChartWithCustomPrompt', () => {
   let wrapper: ReactWrapper;
+  const mockAreaChartData: AreaChartData[] = [
+    {
+      key: 'uniqueSourceIpsHistogram',
+      value: [
+        { x: 1556686800000, y: 580213 },
+        { x: 1556730000000, y: 1096175 },
+        { x: 1556773200000, y: 12382 },
+      ],
+      color: '#DB1374',
+    },
+    {
+      key: 'uniqueDestinationIpsHistogram',
+      value: [
+        { x: 1556686800000, y: 565975 },
+        { x: 1556730000000, y: 1084366 },
+        { x: 1556773200000, y: 12280 },
+      ],
+      color: '#490092',
+    },
+  ];
   describe('renders areachart', () => {
     beforeAll(() => {
       wrapper = mount(
-        <AreaChartWithCustomPrompt
-          height={100}
-          width={120}
-          data={[
-            {
-              key: 'uniqueSourceIpsHistogram',
-              value: [
-                { x: 1556686800000, y: 580213 },
-                { x: 1556730000000, y: 1096175 },
-                { x: 1556773200000, y: 12382 },
-              ],
-              color: '#DB1374',
-            },
-            {
-              key: 'uniqueDestinationIpsHistogram',
-              value: [
-                { x: 1556686800000, y: 565975 },
-                { x: 1556730000000, y: 1084366 },
-                { x: 1556773200000, y: 12280 },
-              ],
-              color: '#490092',
-            },
-          ]}
-        />
+        <AreaChartWithCustomPrompt height={100} width={120} data={mockAreaChartData} />
       );
     });
 
@@ -130,7 +99,7 @@ describe('AreaChartWithCustomPrompt', () => {
     });
   });
 
-  describe.each([[], [null]])('renders prompt', (data: AreaChartData[] | [] | null | undefined) => {
+  describe.each([[], null])('renders prompt', (data: AreaChartData[] | [] | null | undefined) => {
     beforeAll(() => {
       wrapper = mount(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });

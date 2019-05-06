@@ -22,10 +22,10 @@ const getYaxis = (value: string | number) => {
   return label.length > 4 ? `${label.slice(0, 4)}.` : label;
 };
 
-const ChartBaseComponent = pure<{
+export const BarChartBaseComponent = pure<{
   data: BarChartData[];
-  width: number | undefined;
-  height: number | undefined;
+  width: number | null | undefined;
+  height: number | null | undefined;
 }>(({ data, ...chartConfigs }) => {
   return chartConfigs.width && chartConfigs.height ? (
     // @ts-ignore
@@ -33,6 +33,7 @@ const ChartBaseComponent = pure<{
       yType={SCALE.ORDINAL}
       orientation={ORIENTATION.HORIZONTAL}
       showDefaultAxis={false}
+      data-test-subj="stat-bar-chart"
       {...chartConfigs}
     >
       {data.map(series => {
@@ -57,20 +58,24 @@ const ChartBaseComponent = pure<{
   ) : null;
 });
 
+export const BarChartWithCustomPrompt = pure<{
+  data: BarChartData[] | null | undefined;
+  height: number | null | undefined;
+  width: number | null | undefined;
+}>(({ data, height, width }) => {
+  return data && data.length && data.every(({ value }) => value != null && value.length > 0) ? (
+    <BarChartBaseComponent height={height} width={width} data={data} />
+  ) : (
+    <ChartHolder />
+  );
+});
+
 export const BarChart = pure<{ barChart: BarChartData[] | [] | null | undefined }>(
   ({ barChart }) => (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer innerRef={measureRef}>
-          {barChart &&
-          barChart.length &&
-          barChart.every(
-            ({ value }) => value != null && value.length > 0 && value.some(({ x }) => x != null)
-          ) ? (
-            <ChartBaseComponent height={height} width={width} data={barChart} />
-          ) : (
-            <ChartHolder />
-          )}
+          <BarChartWithCustomPrompt height={height} width={width} data={barChart} />
         </WrappedByAutoSizer>
       )}
     </AutoSizer>
