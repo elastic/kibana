@@ -43,8 +43,8 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
         <RoutedTabs
           tabs={[
             {
-              title: 'Snapshot',
-              path: `${match.path}/snapshot`,
+              title: 'Inventory',
+              path: `${match.path}/inventory`,
             },
             // {
             //   title: 'Metrics explorer',
@@ -54,7 +54,7 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
         />
 
         <Switch>
-          <Route path={`${match.path}/snapshot`} component={SnapshotPage} />
+          <Route path={`${match.path}/inventory`} component={SnapshotPage} />
           <Route path={`${match.path}/metrics-explorer`} component={MetricsExplorerPage} />
         </Switch>
       </ColumnarPage>
