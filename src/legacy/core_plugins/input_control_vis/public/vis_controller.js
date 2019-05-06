@@ -36,8 +36,6 @@ class VisController {
       .subscribe({
         next: () => this.queryBarUpdateHandler,
       });
-
-    // this.vis.API.queryFilter.on('update', this.queryBarUpdateHandler);
   }
 
   async render(visData, visParams, status) {
@@ -53,7 +51,6 @@ class VisController {
 
   destroy() {
     this.updateSubsciption.unsubscribe();
-    // this.vis.API.queryFilter.off('update', this.queryBarUpdateHandler);
     unmountComponentAtNode(this.el);
   }
 
