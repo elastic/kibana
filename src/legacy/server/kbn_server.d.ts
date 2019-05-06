@@ -30,9 +30,14 @@ import {
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
-import { IndexPatternsServiceFactory } from './index_patterns';
-import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 import { CapabilitiesModifier } from './capabilities';
+import { IndexPatternsServiceFactory } from './index_patterns';
+import {
+  SavedObjectsClient,
+  SavedObjectsService,
+  SavedObjectsSchema,
+  SavedObjectsManagement,
+} from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -64,6 +69,7 @@ declare module 'hapi' {
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
+    savedObjectsManagement(): SavedObjectsManagement;
   }
 
   interface Request {

@@ -17,22 +17,21 @@
  * under the License.
  */
 
-export function getSavedObjectIcon(type) {
-  switch (type) {
-    case 'search':
-    case 'searches':
-      return 'search';
-    case 'visualization':
-    case 'visualizations':
-      return 'visualizeApp';
-    case 'dashboard':
-    case 'dashboards':
-      return 'dashboardApp';
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return 'indexPatternApp';
-    default:
-      return 'apps';
-  }
-}
+import { SavedObjectsManagement } from './management';
+
+type Management = PublicMethodsOf<SavedObjectsManagement>;
+const createManagementMock = () => {
+  const mocked: jest.Mocked<Management> = {
+    isImportAndExportable: jest.fn().mockReturnValue(true),
+    getDefaultSearchField: jest.fn(),
+    getIcon: jest.fn(),
+    getTitle: jest.fn(),
+    getEditUrl: jest.fn(),
+    getInAppUrl: jest.fn(),
+  };
+  return mocked;
+};
+
+export const managementMock = {
+  create: createManagementMock,
+};
