@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`empty_column_renderer renders correctly against snapshot 1`] = `
+<span>
+  --
+</span>
+`;

@@ -122,7 +122,7 @@ export class CodeFileTree extends React.Component<Props> {
               />
               <span className="codeFileTree__directory">
                 <EuiText size="xs" grow={false} className="eui-displayInlineBlock">
-                  {`${node.name}/`}
+                  {node.name}
                 </EuiText>
               </span>
             </div>

@@ -385,13 +385,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg text');
       const values = await Promise.all(elements.map(async element => {
         const text = await element.getVisibleText();
-        return text.split('\n');
+        return text;
       }));
-      // .flat() replacement
-      return values.reduce((acc, val) => [...acc, ...val], []);
+      return values.filter(item => item.length > 0);
     }
 
     async clickMetricEditor() {
@@ -678,10 +677,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
       await fromCell.clearValue();
-      await fromCell.type(`${from}`);
+      await fromCell.type(`${from}`, { charByChar: true });
       const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
       await toCell.clearValue();
-      await toCell.type(`${to}`);
+      await toCell.type(`${to}`, { charByChar: true });
     }
 
     async clickYAxisOptions(axisId) {
