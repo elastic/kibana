@@ -45,7 +45,7 @@ let pivotPreviewObj: UsePivotPreviewDataReturnType;
 describe('usePivotPreviewData', () => {
   test('indexPattern not defined', () => {
     testHook(() => {
-      pivotPreviewObj = usePivotPreviewData(null, query, [], []);
+      pivotPreviewObj = usePivotPreviewData({ title: 'lorem', fields: [] }, query, {}, {});
     });
 
     expect(pivotPreviewObj.errorMessage).toBe('');
@@ -56,7 +56,7 @@ describe('usePivotPreviewData', () => {
 
   test('indexPattern set triggers loading', () => {
     testHook(() => {
-      pivotPreviewObj = usePivotPreviewData({ title: 'lorem', fields: [] }, query, [], []);
+      pivotPreviewObj = usePivotPreviewData({ title: 'lorem', fields: [] }, query, {}, {});
     });
 
     expect(pivotPreviewObj.errorMessage).toBe('');

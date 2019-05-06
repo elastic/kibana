@@ -20,7 +20,9 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import moment from 'moment';
+
 import { InvalidLogScaleValues } from '../../../errors';
+import { timeTicks } from './time_ticks';
 
 export function VislibAxisScaleProvider() {
   class AxisScale {
@@ -217,16 +219,7 @@ export function VislibAxisScaleProvider() {
       this.validateScale(this.scale);
 
       if (this.axisConfig.isTimeDomain()) {
-        // on a time domain shift it to have the buckets start at nice points in time (e.g. at the start of the day) in UTC
-        // then shift the calculated tick positions back into the real domain to have a nice tick position in the actual
-        // time zone. This is necessary because the d3 time scale doesn't provide a function to get nice time positions in
-        // a configurable time zone directly.
-        const offset = moment(domain[0]).utcOffset();
-        const shiftedDomain = domain.map(val => moment(val).add(offset, 'minute'));
-        this.tickScale = scale.copy().domain(shiftedDomain);
-        this.scale.timezoneCorrectedTicks = (n) => this.tickScale.ticks(n).map((d) => {
-          return moment(d).subtract(offset, 'minute').valueOf();
-        });
+        this.scale.timezoneCorrectedTicks = timeTicks(scale);
       }
 
       return this.scale;

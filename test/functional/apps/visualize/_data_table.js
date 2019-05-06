@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should allow applying changed params', async () => {
       await PageObjects.visualize.setNumericInterval('1', { append: true });
-      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      const interval = await PageObjects.visualize.getNumericInterval();
       expect(interval).to.be('20001');
       const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
       expect(isApplyButtonEnabled).to.be(true);
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should allow reseting changed params', async () => {
       await PageObjects.visualize.clickReset();
-      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      const interval = await PageObjects.visualize.getNumericInterval();
       expect(interval).to.be('2000');
     });
 
@@ -349,13 +349,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickBucket('Split Rows');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.dest');
-        await PageObjects.visualize.setSize(3);
+        await PageObjects.visualize.setSize(3, 3);
         await PageObjects.visualize.toggleOpenEditor(3, 'false');
         await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Rows');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');
-        await PageObjects.visualize.setSize(3);
+        await PageObjects.visualize.setSize(3, 4);
         await PageObjects.visualize.toggleOpenEditor(4, 'false');
         await PageObjects.visualize.clickGo();
       });

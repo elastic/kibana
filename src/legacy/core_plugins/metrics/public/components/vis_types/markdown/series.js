@@ -21,12 +21,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import Sortable from 'react-anything-sortable';
 import Split from '../../split';
-import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Aggs } from '../../aggs/aggs';
+import { SeriesDragHandler } from '../../series_drag_handler';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -40,6 +40,7 @@ function MarkdownSeriesUi(props) {
     selectedTab,
     visible,
     intl,
+    name,
     uiRestrictions
   } = props;
 
@@ -47,7 +48,6 @@ function MarkdownSeriesUi(props) {
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
-  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -56,21 +56,17 @@ function MarkdownSeriesUi(props) {
   if (visible) {
     let seriesBody;
     if (selectedTab === 'metrics') {
-      const handleSort = (data) => {
-        const metrics = data.map(id => model.metrics.find(m => m.id === id));
-        props.onChange({ metrics });
-      };
       seriesBody = (
         <div>
-          <Sortable
-            style={{ cursor: 'default' }}
-            dynamic={true}
-            direction="vertical"
-            onSort={handleSort}
-            sortHandle="tvbAggRow__sortHandle"
-          >
-            { aggs }
-          </Sortable>
+          <Aggs
+            onChange={props.onChange}
+            fields={fields}
+            panel={panel}
+            model={model}
+            name={name}
+            uiRestrictions={uiRestrictions}
+            dragHandleProps={props.dragHandleProps}
+          />
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}
@@ -123,8 +119,6 @@ function MarkdownSeriesUi(props) {
     <div
       className={`${props.className}`}
       style={props.style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
     >
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -155,6 +149,8 @@ function MarkdownSeriesUi(props) {
           />
         </EuiFlexItem>
 
+        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={true} />
+
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             addTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.addSeriesTooltip', defaultMessage: 'Add series' })}
@@ -169,11 +165,9 @@ function MarkdownSeriesUi(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       { body }
     </div>
   );
-
 }
 
 MarkdownSeriesUi.propTypes = {
@@ -187,19 +181,15 @@ MarkdownSeriesUi.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   selectedTab: PropTypes.string,
-  sortData: PropTypes.string,
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
 
 const MarkdownSeries = injectI18n(MarkdownSeriesUi);
