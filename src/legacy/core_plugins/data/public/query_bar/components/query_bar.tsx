@@ -236,7 +236,6 @@ export class QueryBarUI extends Component<Props, State> {
     if (!this.inputRef) {
       return;
     }
-
     const {
       query: { query, language },
     } = this.state;
