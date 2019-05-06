@@ -19,7 +19,7 @@ const chartBase: ChartBase<HeapMemoryMetrics> = {
   }),
   key: 'heap_memory_area_chart',
   type: 'area',
-  yUnit: 'bytes-GB',
+  yUnit: 'bytes',
   series: {
     heapMemoryUsed: {
       title: i18n.translate(

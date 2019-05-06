@@ -11,10 +11,10 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../../typings/common';
 import { Setup } from '../../../../helpers/setup_request';
 import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+import { rangeFilter } from '../../../../helpers/range_filter';
 
 export interface MemoryMetrics extends MetricsKeys {
   memoryUsedAvg: AggValue;
@@ -26,14 +26,13 @@ const percentUsedScript = {
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
 };
 
-export type MemoryResponse = PromiseReturnType<typeof fetch>;
 export async function fetch(setup: Setup, serviceName: string) {
   const { start, end, esFilterQuery, client, config } = setup;
   const filters: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'metric' } },
     {
-      range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
+      range: rangeFilter(start, end)
     }
   ];
 

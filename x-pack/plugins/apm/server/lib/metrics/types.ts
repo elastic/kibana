@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../helpers/setup_request';
 import { ChartType, YUnit } from '../../../typings/timeseries';
 import { Coordinate } from '../../../typings/timeseries';
-
-export interface MetricsRequestArgs {
-  serviceName: string;
-  setup: Setup;
-}
 
 export interface AggValue {
   value: number | null;

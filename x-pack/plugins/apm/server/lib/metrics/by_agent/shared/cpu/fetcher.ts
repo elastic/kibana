@@ -11,10 +11,10 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../../typings/common';
 import { Setup } from '../../../../helpers/setup_request';
 import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+import { rangeFilter } from '../../../../helpers/range_filter';
 
 export interface CPUMetrics extends MetricsKeys {
   systemCPUAverage: AggValue;
@@ -23,14 +23,13 @@ export interface CPUMetrics extends MetricsKeys {
   processCPUMax: AggValue;
 }
 
-export type CPUResponse = PromiseReturnType<typeof fetch>;
 export async function fetch(setup: Setup, serviceName: string) {
   const { start, end, esFilterQuery, client, config } = setup;
   const filters: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'metric' } },
     {
-      range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
+      range: rangeFilter(start, end)
     }
   ];
 

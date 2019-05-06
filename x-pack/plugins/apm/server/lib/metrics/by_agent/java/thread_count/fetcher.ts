@@ -13,6 +13,7 @@ import {
 import { Setup } from '../../../../helpers/setup_request';
 import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+import { rangeFilter } from '../../../../helpers/range_filter';
 
 export interface ThreadCountMetrics extends MetricsKeys {
   threadCount: AggValue;
@@ -25,7 +26,7 @@ export async function fetch(setup: Setup, serviceName: string) {
     { term: { [PROCESSOR_EVENT]: 'metric' } },
     { term: { [SERVICE_AGENT_NAME]: 'java' } },
     {
-      range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
+      range: rangeFilter(start, end)
     }
   ];
 

@@ -17,7 +17,7 @@ const chartBase: ChartBase<NonHeapMemoryMetrics> = {
   }),
   key: 'non_heap_memory_area_chart',
   type: 'area',
-  yUnit: 'bytes-GB',
+  yUnit: 'bytes',
   series: {
     nonHeapMemoryUsed: {
       title: i18n.translate(

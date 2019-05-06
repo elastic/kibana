@@ -89,8 +89,8 @@ function addFilterForLegacyData(
   return nextParams;
 }
 
-export function setupRequest<T extends {} = {}>(req: Legacy.Request): Setup {
-  const query = (req.query as unknown) as APMRequestQuery & T;
+export function setupRequest(req: Legacy.Request): Setup {
+  const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
   const uiSettings = req.getUiSettingsService();
   const config = req.server.config();

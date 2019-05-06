@@ -8,6 +8,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../common/i18n';
+import { YUnit, Coordinate } from '../../typings/timeseries';
 
 const SECONDS_CUT_OFF = 10 * 1000000; // 10 seconds (in microseconds)
 const MILLISECONDS_CUT_OFF = 10 * 1000; // 10 milliseconds (in microseconds)
@@ -140,4 +141,61 @@ export function asPercent(
 
   const decimal = numerator / denominator;
   return numeral(decimal).format('0.0%');
+}
+
+export function roundToPlaces(value: number, places: number) {
+  const multiplier = 10 * places;
+  return Math.floor(value * multiplier) / multiplier;
+}
+
+export function asBytes(value: number | null, places = 2) {
+  if (value === null || isNaN(value)) {
+    return '';
+  }
+
+  if (value > 1e12) {
+    return `${roundToPlaces(value / 1e12, places)} TB`;
+  }
+
+  if (value > 1e9) {
+    return `${roundToPlaces(value / 1e9, places)} GB`;
+  }
+
+  if (value > 1e6) {
+    return `${roundToPlaces(value / 1e6, places)} MB`;
+  }
+
+  if (value > 1000) {
+    return `${roundToPlaces(value / 1000, places)} KB`;
+  }
+
+  return `${roundToPlaces(value, places)} B`;
+}
+
+export function getYTickFormatter(unit: YUnit) {
+  switch (unit) {
+    case 'bytes': {
+      return (value: number | null) => asBytes(value);
+    }
+    case 'percent': {
+      return (y: number | null) => asPercent(y || 0, 1);
+    }
+    default: {
+      return (y: number | null) => (y === null ? y : roundToPlaces(y, 2));
+    }
+  }
+}
+
+export function getTooltipFormatter(unit: YUnit) {
+  switch (unit) {
+    case 'bytes': {
+      return (c: Coordinate) => asBytes(c.y);
+    }
+    case 'percent': {
+      return (c: Coordinate) => asPercent(c.y || 0, 1);
+    }
+    default: {
+      return (c: Coordinate) => (c.y === null ? c.y : roundToPlaces(c.y, 2));
+    }
+  }
 }

@@ -9,57 +9,17 @@ import { GenericMetricsChart } from '../../../../server/lib/metrics/types';
 // @ts-ignore
 import CustomPlot from '../../shared/charts/CustomPlot';
 import { HoverXHandlers } from '../../shared/charts/SyncChartGroup';
-import { StringMap } from '../../../../typings/common';
-import { asPercent } from '../../../utils/formatters';
-import { Coordinate, YUnit } from '../../../../typings/timeseries';
+import {
+  getYTickFormatter,
+  getTooltipFormatter
+} from '../../../utils/formatters';
 
 interface Props {
   chart: GenericMetricsChart;
   hoverXHandlers: HoverXHandlers;
 }
 
-function asBytesGB(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
-  return `${Math.floor(value / 1e7) / 100} GB`;
-}
-
-function getYTickFormatter(unit: YUnit) {
-  switch (unit) {
-    case 'bytes-GB': {
-      return asBytesGB;
-    }
-    case 'percent': {
-      return (y: number | null) => asPercent(y || 0, 1);
-    }
-    default: {
-      return (y: number | null) => (y === null ? y : Math.floor(y * 100) / 100);
-    }
-  }
-}
-
-function getTooltipFormatter(unit: YUnit) {
-  switch (unit) {
-    case 'bytes-GB': {
-      return (c: Coordinate) => asBytesGB(c.y);
-    }
-    case 'percent': {
-      return (c: Coordinate) => asPercent(c.y || 0, 1);
-    }
-    default: {
-      return (c: Coordinate) =>
-        c.y === null ? c.y : Math.floor(c.y * 100) / 100;
-    }
-  }
-}
-
 export function MetricsChart({ chart, hoverXHandlers }: Props) {
-  const chartProps: StringMap<any> = {};
-  if (chart.yUnit === 'percent') {
-    chartProps.yMax = 1;
-  }
-
   const formatYValue = getYTickFormatter(chart.yUnit);
   const formatTooltip = getTooltipFormatter(chart.yUnit);
 
@@ -79,7 +39,7 @@ export function MetricsChart({ chart, hoverXHandlers }: Props) {
         series={transformedSeries}
         tickFormatY={formatYValue}
         formatTooltipValue={formatTooltip}
-        {...chartProps}
+        yMax={chart.yUnit === 'percent' ? 1 : 'max'}
       />
     </React.Fragment>
   );

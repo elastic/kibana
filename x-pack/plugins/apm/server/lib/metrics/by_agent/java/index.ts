@@ -8,11 +8,6 @@ import { getHeapMemoryChart } from './heap_memory';
 import { Setup } from '../../../helpers/setup_request';
 import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
-import { PromiseReturnType } from '../../../../../typings/common';
-
-export type JavaMetricsChartsResponse = PromiseReturnType<
-  typeof getJavaMetricsCharts
->;
 
 export async function getJavaMetricsCharts(setup: Setup, serviceName: string) {
   const charts = await Promise.all([

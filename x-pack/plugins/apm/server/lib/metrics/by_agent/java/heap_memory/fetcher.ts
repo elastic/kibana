@@ -12,10 +12,10 @@ import {
   METRIC_JAVA_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_HEAP_MEMORY_USED
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../../typings/common';
 import { Setup } from '../../../../helpers/setup_request';
 import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+import { rangeFilter } from '../../../../helpers/range_filter';
 
 export interface HeapMemoryMetrics extends MetricsKeys {
   heapMemoryMax: AggValue;
@@ -23,7 +23,6 @@ export interface HeapMemoryMetrics extends MetricsKeys {
   heapMemoryUsed: AggValue;
 }
 
-export type HeapMemoryResponse = PromiseReturnType<typeof fetch>;
 export async function fetch(setup: Setup, serviceName: string) {
   const { start, end, esFilterQuery, client, config } = setup;
   const filters: ESFilter[] = [
@@ -31,7 +30,7 @@ export async function fetch(setup: Setup, serviceName: string) {
     { term: { [PROCESSOR_EVENT]: 'metric' } },
     { term: { [SERVICE_AGENT_NAME]: 'java' } },
     {
-      range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
+      range: rangeFilter(start, end)
     }
   ];
 

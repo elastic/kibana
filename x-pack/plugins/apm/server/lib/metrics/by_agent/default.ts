@@ -7,11 +7,6 @@
 import { Setup } from '../../helpers/setup_request';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
-import { PromiseReturnType } from '../../../../typings/common';
-
-export type DefaultMetricsChartsResponse = PromiseReturnType<
-  typeof getDefaultMetricsCharts
->;
 
 export async function getDefaultMetricsCharts(
   setup: Setup,
