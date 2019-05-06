@@ -4,20 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore Untyped library
 import uniqBy from 'lodash.uniqby';
+// @ts-ignore Untyped Elastic library
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, values } from 'lodash';
 import moment from 'moment';
+// @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
+// @ts-ignore Untyped local
 import { unquoteString } from '../../../../common/lib/unquote_string';
+// @ts-ignore Untyped local
 import { isColumnReference } from './lib/is_column_reference';
+// @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
+import {
+  ContextFunction,
+  Datatable,
+  DatatableRow,
+  PointSeries,
+  PointSeriesColumnName,
+  PointSeriesColumns,
+} from '../../types';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 
-const columnExists = (cols, colName) => cols.includes(unquoteString(colName));
+const columnExists = (cols: string[], colName: string): boolean =>
+  cols.includes(unquoteString(colName));
 
-export function pointseries() {
+function keysOf<T, K extends keyof T>(obj: T): K[] {
+  return Object.keys(obj) as K[];
+}
+
+type Arguments = { [key in PointSeriesColumnName]: string | null };
+
+export function pointseries(): ContextFunction<'pointseries', Datatable, Arguments, PointSeries> {
   return {
     name: 'pointseries',
     type: 'pointseries',
@@ -56,21 +77,22 @@ export function pointseries() {
       // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
       const columnNames = context.columns.map(col => col.name);
       const mathScope = pivotObjectArray(context.rows, columnNames);
-      const autoQuoteColumn = col => {
-        if (!columnNames.includes(col)) {
+      const autoQuoteColumn = (col: string | null) => {
+        if (!col || !columnNames.includes(col)) {
           return col;
         }
+
         return col.match(/\s/) ? `'${col}'` : col;
       };
 
-      const measureNames = [];
-      const dimensions = [];
-      const columns = {};
+      const measureNames: PointSeriesColumnName[] = [];
+      const dimensions: Array<{ name: keyof Arguments; value: string }> = [];
+      const columns = {} as PointSeriesColumns;
 
       // Separates args into dimensions and measures arrays
       // by checking if arg is a column reference (dimension)
-      Object.keys(args).forEach(arg => {
-        const mathExp = autoQuoteColumn(args[arg]);
+      keysOf(args).forEach(argName => {
+        const mathExp = autoQuoteColumn(args[argName]);
 
         if (mathExp != null && mathExp.trim() !== '') {
           const col = {
@@ -86,25 +108,29 @@ export function pointseries() {
             }
 
             dimensions.push({
-              name: arg,
+              name: argName,
               value: mathExp,
             });
             col.type = getExpressionType(context.columns, mathExp);
             col.role = 'dimension';
           } else {
-            measureNames.push(arg);
+            measureNames.push(argName);
             col.type = 'number';
             col.role = 'measure';
           }
 
-          columns[arg] = col;
+          // @ts-ignore untyped local: get_expression_type
+          columns[argName] = col;
         }
       });
 
       const PRIMARY_KEY = '%%CANVAS_POINTSERIES_PRIMARY_KEY%%';
-      const rows = context.rows.map((row, i) => ({ ...row, [PRIMARY_KEY]: i }));
+      const rows: DatatableRow[] = context.rows.map((row, i) => ({
+        ...row,
+        [PRIMARY_KEY]: i,
+      }));
 
-      function normalizeValue(expression, value) {
+      function normalizeValue(expression: string, value: string) {
         switch (getExpressionType(context.columns, expression)) {
           case 'string':
             return String(value);
@@ -120,9 +146,9 @@ export function pointseries() {
       // Dimensions
       // Group rows by their dimension values, using the argument values and preserving the PRIMARY_KEY
       // There's probably a better way to do this
-      const results = rows.reduce((acc, row, i) => {
+      const results: DatatableRow = rows.reduce((rowAcc: DatatableRow, row, i) => {
         const newRow = dimensions.reduce(
-          (acc, { name, value }) => {
+          (acc: Record<string, string | number>, { name, value }) => {
             try {
               acc[name] = args[name]
                 ? normalizeValue(value, evaluate(value, mathScope)[i])
@@ -137,19 +163,24 @@ export function pointseries() {
           { [PRIMARY_KEY]: row[PRIMARY_KEY] }
         );
 
-        return Object.assign(acc, { [row[PRIMARY_KEY]]: newRow });
+        return Object.assign(rowAcc, { [row[PRIMARY_KEY]]: newRow });
       }, {});
 
       // Measures
       // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
       // for each measure
-      const measureKeys = groupBy(rows, row =>
-        dimensions.map(({ name }) => (args[name] ? row[args[name]] : '_all')).join('::%BURLAP%::')
+      const measureKeys = groupBy<DatatableRow>(rows, row =>
+        dimensions
+          .map(({ name }) => {
+            const value = args[name];
+            return value ? row[value] : '_all';
+          })
+          .join('::%BURLAP%::')
       );
 
       // Then compute that 1 value for each measure
-      values(measureKeys).forEach(rows => {
-        const subtable = { type: 'datatable', columns: context.columns, rows: rows };
+      values<DatatableRow[]>(measureKeys).forEach(valueRows => {
+        const subtable = { type: 'datatable', columns: context.columns, rows: valueRows };
         const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
         const measureValues = measureNames.map(measure => {
           try {
@@ -165,7 +196,7 @@ export function pointseries() {
           }
         });
 
-        rows.forEach(row => {
+        valueRows.forEach(row => {
           Object.assign(results[row[PRIMARY_KEY]], zipObject(measureNames, measureValues));
         });
       });
@@ -178,7 +209,7 @@ export function pointseries() {
 
       return {
         type: 'pointseries',
-        columns: columns,
+        columns,
         rows: resultingRows,
       };
     },
