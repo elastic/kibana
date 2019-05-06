@@ -276,7 +276,7 @@ describe('geoShapeToGeometry', () => {
     const shapes = [];
     geoShapeToGeometry(value, shapes);
     expect(shapes.length).toBe(2);
-    // expect(shapes[0].type).toBe('LineString');
+    expect(shapes[0].type).toBe('LineString');
     expect(shapes[0].coordinates).toEqual(linestringCoordinates);
     expect(shapes[1].type).toBe('Point');
     expect(shapes[1].coordinates).toEqual(pointCoordinates);
