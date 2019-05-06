@@ -484,7 +484,12 @@ const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
       continue;
     } // fixme avoid this by not letting annotations get in here
     // key points of the dragged shape bounding box
-    for (const referenceShape of shapes) {
+    const a = config.pageWidth / 2;
+    const b = config.pageHeight / 2;
+    const pageBordersAndCenterLines = [
+      { a, b, localTransformMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a, b, 0, 1] },
+    ];
+    for (const referenceShape of shapes.concat(pageBordersAndCenterLines)) {
       if (referenceShape.type === 'annotation') {
         continue;
       } // fixme avoid this by not letting annotations get in here
