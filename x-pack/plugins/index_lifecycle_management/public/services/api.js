@@ -62,14 +62,6 @@ export async function saveLifecycle(lifecycle, httpClient = getHttpClient()) {
   return response.data;
 }
 
-export async function getAffectedIndices(indexTemplateName, policyName, httpClient = getHttpClient()) {
-  const path = policyName
-    ? `${apiPrefix}/indices/affected/${indexTemplateName}/${encodeURIComponent(policyName)}`
-    : `${apiPrefix}/indices/affected/${indexTemplateName}`;
-  const response = await httpClient.get(path);
-  return response.data;
-}
-
 export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/retry`, { indexNames });
   // Only track successful actions.

@@ -4,35 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { API_BASE_PATH, INDEX_TEMPLATE_NAME } from './constants';
-import { initElasticsearchIndicesHelpers } from './lib';
+import { API_BASE_PATH } from './constants';
 
-export const registerHelpers = ({ supertest, es }) => {
-  const { deleteIndexTemplate, deleteAllIndices } = initElasticsearchIndicesHelpers(es);
-
-  const getIndicesAffectedByTemplate = (template) => (
-    supertest.get(`${API_BASE_PATH}/indices/affected/${template}`)
-  );
-
-  const addPolicyToIndex = (policyName, indexName, rolloverAlias) => {
-    return supertest
+export const registerHelpers = ({ supertest }) => {
+  const addPolicyToIndex = (policyName, indexName, rolloverAlias) => (
+    supertest
       .post(`${API_BASE_PATH}/index/add`)
       .set('kbn-xsrf', 'xxx')
       .send({
         indexName,
         policyName,
         alias: rolloverAlias,
+      })
+  );
+
+  const removePolicyFromIndex = (indexName) => {
+    const indexNames = Array.isArray(indexName) ? indexName : [indexName];
+    return supertest
+      .post(`${API_BASE_PATH}/index/remove`)
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        indexNames
       });
   };
 
-  const cleanUp = () => {
-    return deleteIndexTemplate(INDEX_TEMPLATE_NAME)
-      .then(deleteAllIndices);
-  };
-
   return {
-    cleanUp,
-    getIndicesAffectedByTemplate,
     addPolicyToIndex,
+    removePolicyFromIndex,
   };
 };

@@ -7,7 +7,7 @@
 import { getRandomString } from './lib';
 import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
 
-export const gePolicyPayload = ({ name = getRandomString() } = {}) => ({
+export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
   lifecycle: {
     name: name,
     phases: {

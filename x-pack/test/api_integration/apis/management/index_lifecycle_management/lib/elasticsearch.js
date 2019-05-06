@@ -15,6 +15,10 @@ export const initElasticsearchIndicesHelpers = (es) => {
   let templatesCreated = [];
 
   // Indices
+  const getIndex = (index) => (
+    es.indices.get({ index })
+  );
+
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
     return es.indices.create({ index }).then(() => index);
@@ -42,7 +46,13 @@ export const initElasticsearchIndicesHelpers = (es) => {
 
   const deleteIndexTemplate = (name) => {
     templatesCreated = templatesCreated.filter(i => i !== name);
-    return es.indices.deleteTemplate({ name });
+    return es.indices.deleteTemplate({ name })
+      .catch((err) => {
+        // Silently fail templates not found
+        if (err.statusCode !== 404) {
+          throw err;
+        }
+      });
   };
 
   const deleteAllTemplates = () => (
@@ -54,6 +64,7 @@ export const initElasticsearchIndicesHelpers = (es) => {
   );
 
   return ({
+    getIndex,
     createIndex,
     deleteIndex,
     deleteAllIndices,
