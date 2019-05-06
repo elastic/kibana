@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import init from './init';
 import { mappings } from './server/mappings';
-import { CANVAS_APP } from './common/lib';
+import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';
 
 export function canvas(kibana) {
@@ -33,6 +33,30 @@ export function canvas(kibana) {
       home: ['plugins/canvas/register_feature'],
       mappings,
       migrations,
+      savedObjectsManagement: {
+        [CANVAS_TYPE]: {
+          icon: 'canvasApp',
+          defaultSearchField: 'name',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.name;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/canvas#/workpad/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'canvas.show',
+            };
+          },
+        },
+        [CUSTOM_ELEMENT_TYPE]: {
+          icon: 'canvasApp',
+          defaultSearchField: 'name',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.displayName;
+          },
+        },
+      },
     },
 
     config: Joi => {
