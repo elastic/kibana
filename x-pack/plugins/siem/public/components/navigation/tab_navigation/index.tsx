@@ -5,7 +5,6 @@
  */
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 
@@ -53,13 +52,6 @@ interface TabNavigationState {
   selectedTabId: string;
 }
 
-const TabNavigationContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-top: -8px;
-`;
-
 export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
   constructor(props: TabNavigationProps) {
     super(props);
@@ -81,11 +73,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     }
   }
   public render() {
-    return (
-      <TabNavigationContainer>
-        <EuiTabs display="condensed">{this.renderTabs()}</EuiTabs>
-      </TabNavigationContainer>
-    );
+    return <EuiTabs display="condensed">{this.renderTabs()}</EuiTabs>;
   }
 
   public mapLocationToTab = (pathname: string) =>

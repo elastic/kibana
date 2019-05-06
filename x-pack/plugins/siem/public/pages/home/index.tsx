@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
@@ -20,7 +13,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
-import { AppSettings } from '../../components/app_settings';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
@@ -60,6 +52,8 @@ export const HomePage = pure(() => (
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
         <Page data-test-subj="pageContainer">
+          <HelpMenu />
+
           <DragDropContextWrapper>
             <Flyout
               flyoutHeight={calculateFlyoutHeight({
@@ -81,36 +75,34 @@ export const HomePage = pure(() => (
             </Flyout>
 
             <EuiPageBody>
-              <PageHeader data-test-subj="pageHeader">
-                <PageHeaderSection>
-                  <FixEuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-                    <EuiFlexItem grow={false}>
-                      <SiemNavigation />
-                      <HelpMenu />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
-                        <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                          <SuperDatePicker id="global" />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
-                          <EuiButton
-                            data-test-subj="add-data"
-                            href="kibana#home/tutorial_directory/security"
-                          >
-                            <FormattedMessage
-                              id="xpack.siem.global.addData"
-                              defaultMessage="Add data"
-                            />
-                          </EuiButton>
+              <GlobalHeader data-test-subj="globalHeader">
+                <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
+                  <EuiFlexItem>
+                    <SiemNavigation />
+                  </EuiFlexItem>
 
-                          {/* <AppSettings /> */}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </FixEuiFlexGroup>
-                </PageHeaderSection>
-              </PageHeader>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
+                      <EuiFlexItem data-test-subj="datePickerContainer">
+                        <SuperDatePicker id="global" />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="add-data"
+                          href="kibana#home/tutorial_directory/security"
+                          iconType="plusInCircle"
+                        >
+                          <FormattedMessage
+                            id="xpack.siem.global.addData"
+                            defaultMessage="Add data"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </GlobalHeader>
 
               <PageHeadline />
 
@@ -131,26 +123,15 @@ export const HomePage = pure(() => (
   </AutoSizer>
 ));
 
+const paddingTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
+
 const Page = styled(EuiPage)`
-  padding: 0px 70px 24px 24px; // 70px temporary until timeline is moved - MichaelMarcialis
+  padding: 0 ${paddingTimeline} ${theme.euiSizeL} ${theme.euiSizeL};
 `;
 
-const PageHeader = styled(EuiPageHeader)`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  position: fixed;
-  width: calc(100% - 75px);
-  z-index: 10;
-  padding: 6px 0px 6px 0px;
-  margin-bottom: 0px;
-  margin-left: -1px;
-  margin-top: -1px;
-`;
-
-const PageHeaderSection = styled(EuiPageHeaderSection)`
-  width: 100%;
-  user-select: none;
-`;
-
-const FixEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: -6px;
+const GlobalHeader = styled.header`
+  background: ${theme.euiColorGhost};
+  border-bottom: ${theme.euiBorderThin};
+  margin: 0 -${paddingTimeline} ${theme.euiSizeL} -${theme.euiSizeL};
+  padding: ${theme.euiSizeL} ${paddingTimeline} ${theme.euiSizeL} ${theme.euiSizeL};
 `;

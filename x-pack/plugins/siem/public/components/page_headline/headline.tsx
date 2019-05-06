@@ -7,11 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
-
-export const FlexGroup = styled(EuiFlexGroup)`
-  margin-top: 120px;
-`;
 
 export interface PageHeadlineProps {
   children?: React.ReactNode;
@@ -21,7 +16,7 @@ export interface PageHeadlineProps {
 }
 
 export const PageHeadlineComponent = pure<PageHeadlineProps>(({ children, subtitle, title }) => (
-  <FlexGroup alignItems="center">
+  <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="l">
         <h1 data-test-subj="page_headline_title">{title}</h1>
@@ -33,5 +28,5 @@ export const PageHeadlineComponent = pure<PageHeadlineProps>(({ children, subtit
     </EuiFlexItem>
 
     {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
-  </FlexGroup>
+  </EuiFlexGroup>
 ));
