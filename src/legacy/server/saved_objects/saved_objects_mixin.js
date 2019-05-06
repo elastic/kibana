@@ -46,8 +46,8 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   const { savedObjectsManagement = {} } = kbnServer.uiExports;
   return visibleTypes.filter(
     type =>
-      !savedObjectsManagement[type] ||
-      savedObjectsManagement[type].isImportableAndExportable !== false
+      savedObjectsManagement[type] &&
+      savedObjectsManagement[type].isImportableAndExportable === true
   );
 }
 
