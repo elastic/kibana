@@ -8,7 +8,7 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { MapEmbeddable } from './map_embeddable';
-import { getIndexPatternsFromIds } from '../index_pattern_util';
+import { indexPatternService } from '../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { createMapStore } from '../store/store';
@@ -44,14 +44,18 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
       }));
     }
     const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
-    try {
-      const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
-      return _.compact(indexPatterns);
-    } catch (error) {
-      //  Unable to load index pattern, better to not throw error so map embeddable can render
-      //  Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
-      return null;
-    }
+
+    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
+      try {
+        return await indexPatternService.get(indexPatternId);
+      } catch (error) {
+        // Unable to load index pattern, better to not throw error so map embeddable can render
+        // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
+        return null;
+      }
+    });
+    const indexPatterns = await Promise.all(promises);
+    return _.compact(indexPatterns);
   }
 
   async create(panelMetadata, onEmbeddableStateChanged) {
