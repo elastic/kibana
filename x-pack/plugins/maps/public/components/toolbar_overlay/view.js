@@ -118,13 +118,13 @@ export class ToolbarOverlay extends React.Component {
 
   _getDrawActionsPanel() {
 
-    const drawPolygonAction =       {
+    const drawPolygonAction = {
       name: i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
         defaultMessage: 'Draw shape to filter data',
       }),
     };
 
-    const drawBoundsAction =      {
+    const drawBoundsAction = {
       name: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabel', {
         defaultMessage: 'Draw bounds to filter data',
       }),
