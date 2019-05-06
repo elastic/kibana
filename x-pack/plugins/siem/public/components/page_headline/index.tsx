@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -78,13 +77,10 @@ type PageHeadlineComponentProps = RouteComponentProps;
 
 export const PageHeadlineComponents = pure<PageHeadlineComponentProps>(({ location }) => {
   return (
-    <>
-      <PageHeadlineComponent
-        data-test-subj="page_headline"
-        {...getHeaderForRoute(location.pathname)}
-      />
-      <EuiHorizontalRule />
-    </>
+    <PageHeadlineComponent
+      data-test-subj="page_headline"
+      {...getHeaderForRoute(location.pathname)}
+    />
   );
 });
 
