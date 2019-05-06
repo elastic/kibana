@@ -133,7 +133,7 @@ class TableSeriesConfig extends Component {
               <QueryBar
                 query={
                   {
-                    language: (model.filter && model.filter.language) ? model.filter.language : 'lucene',
+                    language: (model.filter && model.filter.language) ? model.filter.language : 'kuery',
                     query: (model.filter && model.filter.query) ? model.filter.query : ''
                   }}
                 screenTitle={'TSVBTableDataOptionsTab'}

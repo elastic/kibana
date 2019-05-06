@@ -86,7 +86,6 @@ class MetricPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    // TODO: change default filter to {language: 'lucene', query: ''}
     const defaults = { filter: '' };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
@@ -137,7 +136,7 @@ class MetricPanelConfig extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : 'lucene',
+                      language: model.filter.language ? model.filter.language : 'kuery',
                       query: model.filter.query,
                     }}
                     screenTitle={'MetricPanelConfigQuery'}

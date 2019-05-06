@@ -30,7 +30,6 @@ const localStorage = new Storage(window.localStorage);
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
-  // TODO: change default filter to {language: 'lucene', query: ''}
   const defaults = { filter: '' };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
@@ -64,7 +63,7 @@ export const SplitByFilter = props => {
           />)}
         >
           <QueryBar
-            query={{ language: (model.filter.language ? model.filter.language : 'lucene'), query: model.filter.query }}
+            query={{ language: (model.filter.language ? model.filter.language : 'kuery'), query: model.filter.query }}
             screenTitle={'DataMetricsGroupByFilter'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}
