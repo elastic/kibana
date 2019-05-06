@@ -20,17 +20,13 @@ function newJob() {
 }
 
 export const CreateJobButton: SFC = () => {
-  const canCreateDataFrameJob: boolean = checkPermission('canCreateDataFrameJob');
-  const canPreviewDataFrameJob: boolean = checkPermission('canPreviewDataFrameJob');
+  const disabled =
+    !checkPermission('canCreateDataFrameJob') ||
+    !checkPermission('canPreviewDataFrameJob') ||
+    !checkPermission('canStartStopDataFrameJob');
 
   const button = (
-    <EuiButton
-      disabled={!canCreateDataFrameJob || !canPreviewDataFrameJob}
-      fill
-      onClick={newJob}
-      iconType="plusInCircle"
-      size="s"
-    >
+    <EuiButton disabled={disabled} fill onClick={newJob} iconType="plusInCircle" size="s">
       <FormattedMessage
         id="xpack.ml.dataframe.jobsList.createDataFrameButton"
         defaultMessage="Create data frame"
@@ -38,7 +34,7 @@ export const CreateJobButton: SFC = () => {
     </EuiButton>
   );
 
-  if (!canCreateDataFrameJob) {
+  if (disabled) {
     return (
       <EuiToolTip position="top" content={createPermissionFailureMessage('canCreateDataFrameJob')}>
         {button}
