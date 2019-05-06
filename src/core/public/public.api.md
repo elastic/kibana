@@ -319,8 +319,6 @@ export interface PluginInitializerContext {
 // @public
 export interface PluginSetupContext {
     // (undocumented)
-    application: Pick<ApplicationSetup, 'registerApp'>;
-    // (undocumented)
     basePath: BasePathSetup;
     // (undocumented)
     chrome: ChromeSetup;

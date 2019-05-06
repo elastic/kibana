@@ -28,7 +28,7 @@ import { UiSettingsSetup } from '../ui_settings';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { OverlayStart } from '../overlays';
-import { ApplicationStart, ApplicationSetup } from '../application';
+import { ApplicationStart } from '../application';
 import { HttpSetup } from '../http';
 
 /**
@@ -45,8 +45,6 @@ export interface PluginInitializerContext {}
  * @public
  */
 export interface PluginSetupContext {
-  // Plugins may not register legacy applications.
-  application: Pick<ApplicationSetup, 'registerApp'>;
   basePath: BasePathSetup;
   chrome: ChromeSetup;
   fatalErrors: FatalErrorsSetup;
@@ -62,7 +60,7 @@ export interface PluginSetupContext {
  * @public
  */
 export interface PluginStartContext {
-  application: ApplicationStart;
+  application: Pick<ApplicationStart, 'capabilities'>;
   basePath: BasePathStart;
   i18n: I18nStart;
   notifications: NotificationsStart;
@@ -100,9 +98,6 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): PluginSetupContext {
   return {
-    application: {
-      registerApp: deps.application.registerApp,
-    },
     http: deps.http,
     basePath: deps.basePath,
     chrome: deps.chrome,
@@ -129,7 +124,9 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): PluginStartContext {
   return {
-    application: deps.application,
+    application: {
+      capabilities: deps.application.capabilities,
+    },
     basePath: deps.basePath,
     i18n: deps.i18n,
     notifications: deps.notifications,
