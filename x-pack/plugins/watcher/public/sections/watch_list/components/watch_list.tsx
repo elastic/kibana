@@ -68,7 +68,10 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       }),
       sortable: true,
       truncateText: true,
-      render: (id: string) => {
+      render: (id: string, watch: any) => {
+        if (watch.isSystemWatch) {
+          return id;
+        }
         return (
           <EuiLink
             className="indTable__link euiTableCellContent"
@@ -137,7 +140,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
             return (
               <EuiButtonEmpty
                 iconType="pencil"
-                disabled={disabled}
+                isDisabled={disabled}
                 aria-label={intl.formatMessage({
                   id: 'xpack.watcher.sections.watchList.watchTable.menuEditButtonDescription',
                   defaultMessage: 'Edit watch',
@@ -158,6 +161,13 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
 
   const selectionConfig = {
     onSelectionChange: setSelection,
+    selectable: (watch: any) => !watch.isSystemWatch,
+    selectableMessage: (selectable: boolean) =>
+      !selectable
+        ? i18n.translate('xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText', {
+            defaultMessage: 'This watch is read-only',
+          })
+        : undefined,
   };
 
   const searchConfig = {
