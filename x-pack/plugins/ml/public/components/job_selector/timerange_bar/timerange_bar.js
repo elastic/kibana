@@ -12,7 +12,8 @@ import { EuiToolTip } from '@elastic/eui';
 
 export function TimeRangeBar({
   isRunning,
-  timerange
+  timerange,
+  ganttBarWidth
 }) {
   const style = {
     width: timerange.widthPx,
@@ -29,7 +30,7 @@ export function TimeRangeBar({
     >
       <Fragment>
         <div className="mlJobSelector__ganttBarBackEdge">
-          <div className="mlJobSelector__ganttBarDashed" />
+          <div className="mlJobSelector__ganttBarDashed" style={{ width: `${ganttBarWidth}px` }}/>
         </div>
         <div style={style} className={className}/>
       </Fragment>
@@ -38,6 +39,7 @@ export function TimeRangeBar({
 }
 
 TimeRangeBar.propTypes = {
+  ganttBarWidth: PropTypes.number,
   isRunning: PropTypes.bool,
   timerange: PropTypes.shape({
     widthPx: PropTypes.number,

@@ -31,6 +31,7 @@ const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
 
 export function JobSelectorTable({
+  ganttBarWidth,
   groupsList,
   jobs,
   onSelection,
@@ -138,7 +139,7 @@ export function JobSelectorTable({
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {}, isRunning }) => (
-          <TimeRangeBar timerange={timeRange} isRunning={isRunning} />
+          <TimeRangeBar timerange={timeRange} isRunning={isRunning} ganttBarWidth={ganttBarWidth} />
         )
       }
     ];
@@ -200,7 +201,7 @@ export function JobSelectorTable({
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {} }) => (
-          <TimeRangeBar timerange={timeRange} />
+          <TimeRangeBar timerange={timeRange} ganttBarWidth={ganttBarWidth}/>
         )
       }
     ];
@@ -238,6 +239,7 @@ export function JobSelectorTable({
 }
 
 JobSelectorTable.propTypes = {
+  ganttBarWidth: PropTypes.number.isRequired,
   groupsList: PropTypes.array,
   jobs: PropTypes.array,
   onSelection: PropTypes.func.isRequired,

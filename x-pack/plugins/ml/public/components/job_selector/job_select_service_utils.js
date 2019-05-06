@@ -94,7 +94,7 @@ export function getSelectedJobIds(globalState) {
 }
 
 export function getGroupsFromJobs(jobs) {
-  const groups = [];
+  const groups = {};
   const groupsMap = {};
 
   jobs.forEach((job) => {
@@ -160,11 +160,10 @@ export function getGroupsFromJobs(jobs) {
   return { groups: Object.keys(groups).map(g => groups[g]), groupsMap };
 }
 
-export function normalizeTimes(jobs, dateFormatTz) {
+export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
   const min = Math.min(...jobs.map(job => +job.timeRange.from));
   const max = Math.max(...jobs.map(job => +job.timeRange.to));
-
-  const ganttScale = d3.scale.linear().domain([min, max]).range([1, 299]);
+  const ganttScale = d3.scale.linear().domain([min, max]).range([1, ganttBarWidth]);
 
   jobs.forEach(job => {
     if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {

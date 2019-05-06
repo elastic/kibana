@@ -6,7 +6,7 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
 
@@ -99,6 +99,7 @@ function getInitialGroupsMap(selectedGroups) {
 }
 
 const BADGE_LIMIT = 10;
+const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
 export function JobSelector({
   config,
@@ -118,6 +119,8 @@ export function JobSelector({
   const [showAllBarBadges, setShowAllBarBadges] = useState(false);
   const [applyTimeRange, setApplyTimeRange] = useState(true);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
+  const flyoutEl = useRef(null);
 
   useEffect(() => {
     // listen for update from Single Metric Viewer
@@ -137,6 +140,27 @@ export function JobSelector({
     setNewSelection(selectedIds);
   }, [isFlyoutVisible]); // eslint-disable-line
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (jobs.length > 0 && flyoutEl && flyoutEl.current && flyoutEl.current.flyout) {
+        const tzConfig = config.get('dateFormat:tz');
+        const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+        const derivedWidth = Math.round(flyoutEl.current.flyout.offsetWidth / 4);
+        const normalizedJobs = normalizeTimes(jobs, dateFormatTz, derivedWidth);
+        setJobs(normalizedJobs);
+        const { groups: updatedGroups } = getGroupsFromJobs(normalizedJobs);
+        setGroups(updatedGroups);
+        setGanttBarWidth(derivedWidth);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [config, jobs]);
+
   function closeFlyout() {
     setIsFlyoutVisible(false);
   }
@@ -152,7 +176,7 @@ export function JobSelector({
 
     ml.jobs.jobsWithTimerange(dateFormatTz)
       .then((resp) => {
-        const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz);
+        const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz, DEFAULT_GANTT_BAR_WIDTH);
         const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
         setJobs(normalizedJobs);
         setGroups(groupsWithTimerange);
@@ -383,6 +407,7 @@ export function JobSelector({
     if (isFlyoutVisible) {
       return (
         <EuiFlyout
+          ref={flyoutEl}
           onClose={closeFlyout}
           aria-labelledby="Job Selection"
           size="l"
@@ -406,7 +431,7 @@ export function JobSelector({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    {!singleSelection &&
+                    {!singleSelection && newSelection.length > 0 &&
                     <EuiButtonEmpty
                       onClick={clearSelection}
                       size="xs"
@@ -430,6 +455,7 @@ export function JobSelector({
             </EuiFlexGroup>
             <JobSelectorTable
               jobs={jobs}
+              ganttBarWidth={ganttBarWidth}
               groupsList={groups}
               onSelection={handleNewSelection}
               selectedIds={newSelection}
