@@ -50,16 +50,25 @@ describe('Data Frame: Common', () => {
           'the-agg-label': { avg: { field: 'the-agg-field' } },
           'the-transaction-label': {
             scripted_metric: {
-              combine_script: 'return state',
-              map_script: "state.ts = doc['the-transaction-field'].value.getMillis();",
+              init_script: 'state.timestamps = []',
+              map_script: `state.timestamps.add(doc['the-transaction-field'].value.getMillis())`,
+              combine_script: `
+state.min = Double.POSITIVE_INFINITY;
+state.max = Double.NEGATIVE_INFINITY;
+for (timestamp in state.timestamps) {
+  state.min = Math.min(state.min, timestamp);
+  state.max = Math.max(state.max, timestamp);
+}
+return state;
+`,
               reduce_script: `
 double min = Double.POSITIVE_INFINITY;
 double max = Double.NEGATIVE_INFINITY;
 for (s in states) {
-  min = Math.min(min, s.ts);
-  max = Math.max(max, s.ts);
+  min = Math.min(min, s.min);
+  max = Math.max(max, s.max);
 }
-return Math.round((max - min));
+return max - min;
 `,
             },
           },
