@@ -18,7 +18,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsActions, inputsModel, State } from '../../store';
-import { MetricsTimeState } from '../../utils/with_time';
+import { GlobalTimeState } from '../../utils/with_global_time';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -79,7 +79,7 @@ interface TimeArgs {
 
 export type SuperDatePickerProps = OwnProps &
   SuperDatePickerDispatchProps &
-  MetricsTimeState &
+  GlobalTimeState &
   SuperDatePickerStateRedux;
 
 export interface SuperDatePickerState {

@@ -11,7 +11,7 @@ import { TimerangeInput } from '../graphql/types';
 import { useInterval } from './hooks/use_interval';
 import { replaceStateKeyInQueryString, UrlStateContainer } from './url_state';
 
-export interface MetricsTimeState {
+export interface GlobalTimeState {
   isAutoReloading: boolean;
   refreshInterval: number;
   setAutoReload: (isAutoReloading: boolean) => void;
@@ -20,7 +20,7 @@ export interface MetricsTimeState {
   timeRange: TimerangeInput;
 }
 
-export const useMetricsTime = () => {
+export const useGlobalTime = () => {
   const [isAutoReloading, setAutoReload] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(5000);
   const [timeRange, setTimeRange] = useState({
@@ -65,15 +65,15 @@ export const useMetricsTime = () => {
   };
 };
 
-export const MetricsTimeContainer = createContainer(useMetricsTime);
+export const GlobalTimeContainer = createContainer(useGlobalTime);
 
 interface WithMetricsTimeProps {
-  children: (args: MetricsTimeState) => React.ReactElement;
+  children: (args: GlobalTimeState) => React.ReactElement;
 }
-export const WithMetricsTime: React.FunctionComponent<WithMetricsTimeProps> = ({
+export const WithGlobalTime: React.FunctionComponent<WithMetricsTimeProps> = ({
   children,
 }: WithMetricsTimeProps) => {
-  const metricsTimeState = useContext(MetricsTimeContainer.Context);
+  const metricsTimeState = useContext(GlobalTimeContainer.Context);
   return children({ ...metricsTimeState });
 };
 
@@ -81,14 +81,14 @@ export const WithMetricsTime: React.FunctionComponent<WithMetricsTimeProps> = ({
  * Url State
  */
 
-interface MetricsTimeUrlState {
-  time?: MetricsTimeState['timeRange'];
+interface GlobalTimeUrlState {
+  time?: GlobalTimeState['timeRange'];
   autoReload?: boolean;
   refreshInterval?: number;
 }
 
-export const WithMetricsTimeUrlState = () => (
-  <WithMetricsTime>
+export const WithGlobalTimeUrlState = () => (
+  <WithGlobalTime>
     {({
       timeRange,
       setTimeRange,
@@ -135,10 +135,10 @@ export const WithMetricsTimeUrlState = () => (
         }}
       />
     )}
-  </WithMetricsTime>
+  </WithGlobalTime>
 );
 
-const mapToUrlState = (value: any): MetricsTimeUrlState | undefined =>
+const mapToUrlState = (value: any): GlobalTimeUrlState | undefined =>
   value
     ? {
         time: mapToTimeUrlState(value.time),
@@ -154,10 +154,10 @@ const mapToAutoReloadUrlState = (value: any) => (typeof value === 'boolean' ? va
 
 const mapToRefreshInterval = (value: any) => (typeof value === 'number' ? value : undefined);
 
-export const replaceMetricTimeInQueryString = (from: number, to: number) =>
+export const replaceGlobalTimeInQueryString = (from: number, to: number) =>
   Number.isNaN(from) || Number.isNaN(to)
     ? (value: string) => value
-    : replaceStateKeyInQueryString<MetricsTimeUrlState>('metricTime', {
+    : replaceStateKeyInQueryString<GlobalTimeUrlState>('metricTime', {
         autoReload: false,
         time: {
           interval: '>=1m',

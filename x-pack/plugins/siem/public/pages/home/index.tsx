@@ -33,7 +33,7 @@ import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 import { Timelines } from '../timelines';
-import { WithMetricsTime, WithMetricsTimeUrlState } from '../../utils/with_time';
+import { WithGlobalTime, WithGlobalTimeUrlState } from '../../utils/with_global_time';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -89,9 +89,9 @@ export const HomePage = pure(() => (
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
                         <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                          <WithMetricsTimeUrlState />
+                          <WithGlobalTimeUrlState />
 
-                          <WithMetricsTime>
+                          <WithGlobalTime>
                             {({
                               timeRange,
                               setTimeRange,
@@ -112,7 +112,7 @@ export const HomePage = pure(() => (
                                 }}
                               />
                             )}
-                          </WithMetricsTime>
+                          </WithGlobalTime>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
                           <AppSettings />
