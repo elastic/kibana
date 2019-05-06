@@ -36,12 +36,36 @@ describe('Data Frame: Common', () => {
     ];
     const aggs: PivotAggsConfig[] = [
       { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', aggName: 'the-agg-label' },
+      {
+        agg: PIVOT_SUPPORTED_AGGS.TRANSACTION_DURATION,
+        field: 'the-transaction-field',
+        aggName: 'the-transaction-label',
+      },
     ];
     const request = getDataFramePreviewRequest('the-index-pattern-title', query, groupBy, aggs);
 
     expect(request).toEqual({
       pivot: {
-        aggregations: { 'the-agg-label': { avg: { field: 'the-agg-field' } } },
+        aggregations: {
+          'the-agg-label': { avg: { field: 'the-agg-field' } },
+          'the-transaction-label': {
+            scripted_metric: {
+              combine_script: 'return state',
+              map_script: "state.ts = doc['the-transaction-field'].value.getMillis();",
+              reduce_script: `
+double min = 9000000000000L;
+double max = 0L;
+for (s in states) {
+  if (s.ts > 0) {
+    min = Math.min(min, s.ts);
+    max = Math.max(max, s.ts);
+  }
+}
+return Math.round((max - min));
+`,
+            },
+          },
+        },
         group_by: { 'the-group-by-label': { terms: { field: 'the-group-by-field' } } },
       },
       source: {

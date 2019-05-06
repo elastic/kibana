@@ -14,6 +14,9 @@ export enum PIVOT_SUPPORTED_AGGS {
   MAX = 'max',
   MIN = 'min',
   SUM = 'sum',
+  // This is an example of a custom aggregation that doesn't directly map
+  // to an ES aggregation. It's config will be transformed from its
+  // UI config to an ES config in getDataFramePreviewRequest().
   TRANSACTION_DURATION = 'transaction_duration',
   VALUE_COUNT = 'value_count',
 }

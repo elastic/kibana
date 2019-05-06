@@ -35,6 +35,7 @@ describe('Data Frame: Define Pivot Common', () => {
             { label: 'max(the-field)' },
             { label: 'min(the-field)' },
             { label: 'sum(the-field)' },
+            { label: 'transaction_duration(the-field)' },
             { label: 'value_count(the-field)' },
           ],
         },
@@ -44,6 +45,11 @@ describe('Data Frame: Define Pivot Common', () => {
         'max(the-field)': { agg: 'max', field: 'the-field', aggName: 'max(the-field)' },
         'min(the-field)': { agg: 'min', field: 'the-field', aggName: 'min(the-field)' },
         'sum(the-field)': { agg: 'sum', field: 'the-field', aggName: 'sum(the-field)' },
+        'transaction_duration(the-field)': {
+          agg: 'transaction_duration',
+          field: 'the-field',
+          aggName: 'transaction_duration(the-field)',
+        },
         'value_count(the-field)': {
           agg: 'value_count',
           field: 'the-field',
