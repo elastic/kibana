@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 import { registerHelpers } from './policies.helpers';
-import { gePolicyPayload } from './fixtures';
+import { getPolicyPayload } from './fixtures';
 import { getPolicyNames } from './lib';
 import { DEFAULT_POLICY_NAME } from './constants';
 
@@ -57,7 +57,7 @@ export default function ({ getService }) {
 
     describe('create', () => {
       it('should create a lifecycle policy', async () => {
-        const policy = gePolicyPayload();
+        const policy = getPolicyPayload();
         const { lifecycle: { name } } = policy;
 
         // Load current policies
@@ -75,7 +75,7 @@ export default function ({ getService }) {
 
     describe('delete', () => {
       it('should delete the policy created', async () => {
-        const policy = gePolicyPayload();
+        const policy = getPolicyPayload();
         const { lifecycle: { name } } = policy;
 
         // Create new policy

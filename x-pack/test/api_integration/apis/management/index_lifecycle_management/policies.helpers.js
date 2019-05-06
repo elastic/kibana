@@ -5,13 +5,13 @@
  */
 
 import { API_BASE_PATH, DEFAULT_POLICY_NAME } from './constants';
-import { gePolicyPayload } from './fixtures';
+import { getPolicyPayload } from './fixtures';
 import { getPolicyNames } from './lib';
 
 export const registerHelpers = ({ supertest }) => {
   const loadPolicies = () => supertest.get(`${API_BASE_PATH}/policies`);
 
-  const createPolicy = (policy = gePolicyPayload()) => {
+  const createPolicy = (policy = getPolicyPayload()) => {
     return supertest
       .post(`${API_BASE_PATH}/lifecycle`)
       .set('kbn-xsrf', 'xxx')

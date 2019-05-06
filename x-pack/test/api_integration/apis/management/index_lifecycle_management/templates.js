@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
-import { getTemplatePayload, gePolicyPayload } from './fixtures';
+import { getTemplatePayload, getPolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 
@@ -41,8 +41,15 @@ export default function ({ getService }) {
         expect(body.map(t => t.name)).to.contain(templateName);
       });
 
-      it('should filter out the reserved system templates', () => {
-        // TODO (check with Bill)
+      it('should filter out the system template whose index patterns does not contain wildcard', async () => {
+        // system template start witht a "."
+        const templateName = `.${getRandomString()}`;
+        const template = getTemplatePayload();
+        await createIndexTemplate(templateName, { ...template, index_patterns: ['no-wildcard'] });
+
+        // Load the templates and verify that our new template is **not** in the list
+        const { body } = await loadTemplates().expect(200);
+        expect(body.map(t => t.name)).not.to.contain(templateName);
       });
     });
 
@@ -61,7 +68,7 @@ export default function ({ getService }) {
     describe('update', () => {
       it('should add a policy to a template', async () => {
         // Create policy
-        const policy = gePolicyPayload();
+        const policy = getPolicyPayload();
         const { lifecycle: { name: policyName } } = policy;
         await createPolicy(policy);
 
