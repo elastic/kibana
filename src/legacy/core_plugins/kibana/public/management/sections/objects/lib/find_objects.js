@@ -17,22 +17,14 @@
  * under the License.
  */
 
-export function canViewInApp(uiCapabilities, type) {
-  switch (type) {
-    case 'search':
-    case 'searches':
-      return uiCapabilities.discover.show;
-    case 'visualization':
-    case 'visualizations':
-      return uiCapabilities.visualize.show;
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return uiCapabilities.management.kibana.index_patterns;
-    case 'dashboard':
-    case 'dashboards':
-      return uiCapabilities.dashboard.show;
-    default:
-      return uiCapabilities[type].show;
-  }
+import { kfetch } from 'ui/kfetch';
+import { keysToCamelCaseShallow } from 'ui/utils/case_conversion';
+
+export async function findObjects(findOptions) {
+  const response = await kfetch({
+    method: 'GET',
+    pathname: '/api/kibana/management/saved_objects/_find',
+    query: findOptions,
+  });
+  return keysToCamelCaseShallow(response);
 }
