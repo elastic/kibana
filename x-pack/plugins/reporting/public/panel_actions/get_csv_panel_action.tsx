@@ -103,7 +103,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
         defaultMessage: `CSV Download Started`,
       }),
-      text: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadMessage', {
+      text: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedMessage', {
         defaultMessage: `Your CSV will download momentarily.`,
       }),
       'data-test-subj': 'csvDownloadStarted',
