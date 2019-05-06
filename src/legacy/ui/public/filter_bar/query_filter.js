@@ -22,15 +22,15 @@ import { onlyDisabled } from './lib/only_disabled';
 import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';
 import { compareFilters } from './lib/compare_filters';
-import { EventsProvider } from '../events';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $rootScope, getAppState, globalState, config) {
-  const EventEmitter = Private(EventsProvider);
+import chrome from 'ui/chrome';
+const config = chrome.getUiSettingsClient();
 
-  const queryFilter = new EventEmitter();
+export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState) {
+  const queryFilter = {};
 
   queryFilter.getFilters = function () {
     const compareOptions = { disabled: true, negate: true };
@@ -66,7 +66,6 @@ export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $r
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, global) {
-
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
 
