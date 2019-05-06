@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, last, max, sum, get } from 'lodash';
+import { first, isNumber, last, max, sum, get } from 'lodash';
 import moment from 'moment';
 
 import {
@@ -39,6 +39,19 @@ export interface InfraSnapshotBucketWithValues {
 
 export type InfraSnapshotMetricsBucket = InfraSnapshotBucketWithKey & InfraSnapshotBucketWithValues;
 
+interface InfraSnapshotIpHit {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number | null;
+  _source: {
+    host: {
+      id: string[] | string;
+    };
+  };
+  sort: number[];
+}
+
 export interface InfraSnapshotNodeGroupByBucket {
   key: {
     id: string;
@@ -48,7 +61,7 @@ export interface InfraSnapshotNodeGroupByBucket {
   ip: {
     hits: {
       total: { value: number };
-      hits: Array<{ _source: any }>;
+      hits: InfraSnapshotIpHit[];
     };
   };
 }
@@ -57,7 +70,9 @@ const getIPFromBucket = (
   options: InfraSnapshotRequestOptions,
   bucket: InfraSnapshotNodeGroupByBucket
 ): string | null => {
-  return get(bucket, `ip.hits.hits[0]._source.${IP_FIELDS[options.nodeType]}`);
+  const ip = get(bucket, `ip.hits.hits[0]._source.${IP_FIELDS[options.nodeType]}`);
+  // Use the first ip since it's the IPv4 IP address
+  return Array.isArray(ip) ? first(ip) : ip;
 };
 
 export const getNodePath = (
