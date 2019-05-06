@@ -18,9 +18,17 @@
  */
 
 import _ from 'lodash';
-import { ContainerState, Embeddable } from 'ui/embeddable';
-import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
-import { Filters, Query, TimeRange } from 'ui/embeddable/types';
+import {
+  APPLY_FILTER_TRIGGER,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  Filters,
+  Query,
+  TimeRange,
+  Trigger,
+  Container,
+} from 'plugins/embeddable_api/index';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { VisualizeLoader } from 'ui/visualize/loader';
@@ -30,43 +38,67 @@ import {
   VisualizeLoaderParams,
   VisualizeUpdateParams,
 } from 'ui/visualize/loader/types';
+import { Subscription } from 'rxjs';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './visualize_embeddable_factory';
 
 export interface VisualizeEmbeddableConfiguration {
-  onEmbeddableStateChanged: OnEmbeddableStateChanged;
   savedVisualization: VisSavedObject;
   indexPatterns?: StaticIndexPattern[];
-  editUrl?: string;
-  editable: boolean;
+  editUrl: string;
   loader: VisualizeLoader;
+  editable: boolean;
 }
 
-export class VisualizeEmbeddable extends Embeddable {
-  private onEmbeddableStateChanged: OnEmbeddableStateChanged;
+export interface VisualizeInput extends EmbeddableInput {
+  timeRange?: TimeRange;
+  query?: Query;
+  filters?: Filters;
+  hidePanelTitles?: boolean;
+  vis?: {
+    colors?: { [key: string]: string };
+  };
+}
+
+export interface VisualizeOutput extends EmbeddableOutput {
+  title: string;
+  editUrl: string;
+  indexPatterns?: StaticIndexPattern[];
+  savedObjectId: string;
+}
+
+export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private savedVisualization: VisSavedObject;
   private loader: VisualizeLoader;
   private uiState: PersistedState;
   private handler?: EmbeddedVisualizeHandler;
-  private customization?: object;
-  private panelTitle?: string;
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filters;
+  private subscription: Subscription;
 
-  constructor({
-    onEmbeddableStateChanged,
-    savedVisualization,
-    indexPatterns,
-    editUrl,
-    editable,
-    loader,
-  }: VisualizeEmbeddableConfiguration) {
-    super({
-      title: savedVisualization.title,
+  constructor(
+    {
+      savedVisualization,
+      loader,
       editUrl,
-      editable,
       indexPatterns,
-    });
-    this.onEmbeddableStateChanged = onEmbeddableStateChanged;
+      editable,
+    }: VisualizeEmbeddableConfiguration,
+    initialInput: VisualizeInput,
+    parent?: Container
+  ) {
+    super(
+      VISUALIZE_EMBEDDABLE_TYPE,
+      initialInput,
+      {
+        title: savedVisualization.title,
+        editUrl,
+        indexPatterns,
+        editable,
+        savedObjectId: savedVisualization.id,
+      },
+      parent
+    );
     this.savedVisualization = savedVisualization;
     this.loader = loader;
 
@@ -76,6 +108,11 @@ export class VisualizeEmbeddable extends Embeddable {
     this.uiState = new PersistedState(parsedUiState);
 
     this.uiState.on('change', this.uiStateChangeHandler);
+
+    this.subscription = this.getInput$().subscribe(() => {
+      this.reload();
+      this.handleInputChanges();
+    });
   }
 
   public getInspectorAdapters() {
@@ -85,62 +122,62 @@ export class VisualizeEmbeddable extends Embeddable {
     return this.handler.inspectorAdapters;
   }
 
-  public getEmbeddableState() {
-    return {
-      customization: this.customization,
-    };
+  public supportsTrigger(trigger: Trigger) {
+    return trigger.id !== APPLY_FILTER_TRIGGER;
   }
 
   /**
-   * Transfers all changes in the containerState.embeddableCustomization into
+   * Transfers all changes in the containerState.customization into
    * the uiState of this visualization.
    */
-  public transferCustomizationsToUiState(containerState: ContainerState) {
+  public transferCustomizationsToUiState() {
     // Check for changes that need to be forwarded to the uiState
     // Since the vis has an own listener on the uiState we don't need to
     // pass anything from here to the handler.update method
-    const customization = containerState.embeddableCustomization;
-    if (customization && !_.isEqual(this.customization, customization)) {
+    const visCustomizations = this.input.vis;
+    if (visCustomizations) {
       // Turn this off or the uiStateChangeHandler will fire for every modification.
       this.uiState.off('change', this.uiStateChangeHandler);
       this.uiState.clearAllKeys();
-      Object.getOwnPropertyNames(customization).forEach(key => {
-        this.uiState.set(key, customization[key]);
-      });
-      this.customization = customization;
+      this.uiState.set('vis', visCustomizations);
+      // Object.getOwnPropertyNames(customization).forEach(key => {
+      //   this.uiState.set(key, customization[key]);
+      // });
       this.uiState.on('change', this.uiStateChangeHandler);
     }
   }
 
-  public onContainerStateChanged(containerState: ContainerState) {
-    this.transferCustomizationsToUiState(containerState);
+  public handleInputChanges() {
+    this.transferCustomizationsToUiState();
 
     const updatedParams: VisualizeUpdateParams = {};
 
     // Check if timerange has changed
-    if (containerState.timeRange !== this.timeRange) {
-      updatedParams.timeRange = containerState.timeRange;
-      this.timeRange = containerState.timeRange;
+    if (this.input.timeRange !== this.timeRange) {
+      updatedParams.timeRange = this.input.timeRange;
+      this.timeRange = this.input.timeRange;
     }
 
     // Check if filters has changed
-    if (containerState.filters !== this.filters) {
-      updatedParams.filters = containerState.filters;
-      this.filters = containerState.filters;
+    if (this.input.filters !== this.filters) {
+      updatedParams.filters = this.input.filters;
+      this.filters = this.input.filters;
     }
 
     // Check if query has changed
-    if (containerState.query !== this.query) {
-      updatedParams.query = containerState.query;
-      this.query = containerState.query;
+    if (this.input.query !== this.query) {
+      updatedParams.query = this.input.query;
+      this.query = this.input.query;
     }
 
-    const derivedPanelTitle = this.getPanelTitle(containerState);
-    if (this.panelTitle !== derivedPanelTitle) {
+    if (this.input.title || this.input.hidePanelTitles) {
+      let derivedPanelTitle = '';
+      if (!this.input.hidePanelTitles) {
+        derivedPanelTitle = this.getTitle() || '';
+      }
       updatedParams.dataAttrs = {
         title: derivedPanelTitle,
       };
-      this.panelTitle = derivedPanelTitle;
     }
 
     if (this.handler && !_.isEmpty(updatedParams)) {
@@ -153,17 +190,16 @@ export class VisualizeEmbeddable extends Embeddable {
    * @param {Element} domNode
    * @param {ContainerState} containerState
    */
-  public render(domNode: HTMLElement, containerState: ContainerState) {
-    this.panelTitle = this.getPanelTitle(containerState);
-    this.timeRange = containerState.timeRange;
-    this.query = containerState.query;
-    this.filters = containerState.filters;
+  public render(domNode: HTMLElement) {
+    this.timeRange = this.input.timeRange;
+    this.query = this.input.query;
+    this.filters = this.input.filters;
 
-    this.transferCustomizationsToUiState(containerState);
+    this.transferCustomizationsToUiState();
 
     const dataAttrs: { [key: string]: string } = {
       'shared-item': '',
-      title: this.panelTitle,
+      title: this.output.title,
     };
     if (this.savedVisualization.description) {
       dataAttrs.description = this.savedVisualization.description;
@@ -173,9 +209,9 @@ export class VisualizeEmbeddable extends Embeddable {
       uiState: this.uiState,
       // Append visualization to container instead of replacing its content
       append: true,
-      timeRange: containerState.timeRange,
-      query: containerState.query,
-      filters: containerState.filters,
+      timeRange: this.input.timeRange,
+      query: this.input.query,
+      filters: this.input.filters,
       cssClass: `panel-content panel-content--fullWidth`,
       dataAttrs,
     };
@@ -188,6 +224,10 @@ export class VisualizeEmbeddable extends Embeddable {
   }
 
   public destroy() {
+    super.destroy();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
     this.uiState.off('change', this.uiStateChangeHandler);
     this.savedVisualization.destroy();
     if (this.handler) {
@@ -202,23 +242,9 @@ export class VisualizeEmbeddable extends Embeddable {
     }
   }
 
-  /**
-   * Retrieve the panel title for this panel from the container state.
-   * This will either return the overwritten panel title or the visualization title.
-   */
-  private getPanelTitle(containerState: ContainerState) {
-    let derivedPanelTitle = '';
-    if (!containerState.hidePanelTitles) {
-      derivedPanelTitle =
-        containerState.customTitle !== undefined
-          ? containerState.customTitle
-          : this.savedVisualization.title;
-    }
-    return derivedPanelTitle;
-  }
-
   private uiStateChangeHandler = () => {
-    this.customization = this.uiState.toJSON();
-    this.onEmbeddableStateChanged(this.getEmbeddableState());
+    this.updateInput({
+      ...this.uiState.toJSON(),
+    });
   };
 }

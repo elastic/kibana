@@ -19,23 +19,25 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable } from 'ui/embeddable';
+import { Embeddable, EmbeddableOutput } from 'plugins/embeddable_api/index';
 import { I18nContext } from 'ui/i18n';
 import { DisabledLabVisualization } from './disabled_lab_visualization';
+import { VisualizeInput } from './visualize_embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './visualize_embeddable_factory';
 
-export class DisabledLabEmbeddable extends Embeddable {
+export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
   private domNode?: HTMLElement;
 
-  constructor(title: string) {
-    super({ title });
+  constructor(private readonly title: string, initialInput: VisualizeInput) {
+    super(VISUALIZE_EMBEDDABLE_TYPE, initialInput, { title });
   }
 
   public render(domNode: HTMLElement) {
-    if (this.metadata.title) {
+    if (this.title) {
       this.domNode = domNode;
       ReactDOM.render(
         <I18nContext>
-          <DisabledLabVisualization title={this.metadata.title} />
+          <DisabledLabVisualization title={this.title} />
         </I18nContext>,
         domNode
       );
