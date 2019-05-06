@@ -37,6 +37,8 @@ import { getLogger } from 'selenium-webdriver/lib/logging';
 
 import { preventParallelCalls } from './prevent_parallel_calls';
 
+import { Browsers } from './browsers';
+
 const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -56,7 +58,7 @@ Executor.prototype.execute = preventParallelCalls(
 );
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | 'firefox') {
+async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
@@ -114,7 +116,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
   return { driver: session, By, Key, until, LegacyActionSequence };
 }
 
-export async function initWebDriver(log: ToolingLog, browserType: 'chrome' | 'firefox') {
+export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
   logger.addHandler((entry: { message: string }) => {

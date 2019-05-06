@@ -17,13 +17,14 @@
  * under the License.
  */
 
-export function ComboBoxProvider({ getService }) {
+export function ComboBoxProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
+  const PageObjects = getPageObjects(['common']);
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
@@ -57,6 +58,21 @@ export function ComboBoxProvider({ getService }) {
         await find.clickByCssSelector('.euiFilterSelectItem');
       }
 
+      await this.closeOptionsList(comboBoxElement);
+    }
+
+    /**
+     * This method set custom value to comboBox.
+     * It applies changes by pressing Enter key. Sometimes it may lead to auto-submitting a form.
+     *
+     * @param {string} comboBoxSelector
+     * @param {string} value
+     */
+    async setCustom(comboBoxSelector, value) {
+      log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
+      const comboBoxElement = await testSubjects.find(comboBoxSelector);
+      await this._filterOptionsList(comboBoxElement, value);
+      await PageObjects.common.pressEnterKey();
       await this.closeOptionsList(comboBoxElement);
     }
 

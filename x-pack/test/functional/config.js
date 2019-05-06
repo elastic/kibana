@@ -59,6 +59,7 @@ import {
   UserMenuProvider,
   UptimeProvider,
   InfraSourceConfigurationFlyoutProvider,
+  InfraLogStreamProvider,
 } from './services';
 
 import {
@@ -148,6 +149,7 @@ export default async function ({ readConfigFile }) {
       uptime: UptimeProvider,
       rollup: RollupPageProvider,
       infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
+      infraLogStream: InfraLogStreamProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -179,7 +181,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['xpack.license.self_generated.type=trial', 'xpack.security.enabled=true'],
+      serverArgs: [],
     },
 
     kbnTestServer: {

@@ -217,7 +217,7 @@ uiModules
         }
 
         function normalizeModelName(modelName = '') {
-          return modelName.replace('-', '_');
+          return modelName.replace(/-/g, '_');
         }
       }
     };

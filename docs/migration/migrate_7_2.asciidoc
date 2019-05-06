@@ -11,6 +11,7 @@ See also <<release-highlights>> and <<release-notes>>.
 
 coming[7.2.0]
 
+
 * <<breaking_72_index_pattern_changes>>
 
 
@@ -30,6 +31,7 @@ time-based index patterns to a wildcard pattern to prepare for this change.
 *Impact:* If you query a time-based index pattern, that query will now be performed 
 on the root wildcard term. For example, a query on an index pattern such as 
 `[logstash-]YYYY.MM.DD` will now query all indices that match `logstash-*`.
+
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
