@@ -35,9 +35,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action',
             connectorId: 'log',
-            connectorOptions: {
-              username: 'username',
-            },
+            connectorOptions: {},
           },
         })
         .expect(200)
@@ -48,7 +46,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             attributes: {
               description: 'My action',
               connectorId: 'log',
-              connectorOptions: { username: 'username' },
+              connectorOptions: {},
             },
             references: [],
             updated_at: resp.body.updated_at,
@@ -65,9 +63,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action',
             connectorId: 'log',
-            connectorOptions: {
-              username: 'username',
-            },
+            connectorOptions: {},
           },
         })
         .expect(200)
@@ -78,7 +74,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             attributes: {
               description: 'My action',
               connectorId: 'log',
-              connectorOptions: { username: 'username' },
+              connectorOptions: {},
             },
             references: [],
             updated_at: resp.body.updated_at,
@@ -96,9 +92,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action to duplicate',
             connectorId: 'log',
-            connectorOptions: {
-              username: 'username',
-            },
+            connectorOptions: {},
           },
         })
         .expect(200);
@@ -109,9 +103,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action to duplicate',
             connectorId: 'log',
-            connectorOptions: {
-              username: 'username',
-            },
+            connectorOptions: {},
           },
         })
         .expect(409);
@@ -125,9 +117,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action to duplicate',
             connectorId: 'log',
-            connectorOptions: {
-              username: 'username',
-            },
+            connectorOptions: {},
           },
         })
         .expect(200);
@@ -138,9 +128,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action to overwrite',
             connectorId: 'log',
-            connectorOptions: {
-              username: 'username',
-            },
+            connectorOptions: {},
           },
         })
         .expect(200);
@@ -154,9 +142,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action',
             connectorId: 'unregistered-connector',
-            connectorOptions: {
-              username: 'username',
-            },
+            connectorOptions: {},
           },
         })
         .expect(400)

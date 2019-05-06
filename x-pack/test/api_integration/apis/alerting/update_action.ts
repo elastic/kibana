@@ -24,10 +24,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             connectorId: 'log',
             description: 'My description updated',
-            connectorOptions: {
-              bar: true,
-              foo: false,
-            },
+            connectorOptions: {},
           },
         })
         .expect(200)
@@ -41,10 +38,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             attributes: {
               connectorId: 'log',
               description: 'My description updated',
-              connectorOptions: {
-                bar: true,
-                foo: false,
-              },
+              connectorOptions: {},
             },
           });
         });
@@ -58,10 +52,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             connectorId: 'log',
             description: 'My description updated',
-            connectorOptions: {
-              bar: true,
-              foo: false,
-            },
+            connectorOptions: {},
           },
         })
         .expect(404)
