@@ -49,47 +49,6 @@ export default function ({ getService }) {
             });
         });
 
-        it('should validate types', async () => {
-          await supertest
-            .post('/api/saved_objects/_export')
-            .send({
-              type: ['foo'],
-            })
-            .expect(400)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                // eslint-disable-next-line max-len
-                message: 'child "type" fails because ["type" at position 0 fails because ["0" must be one of [index-pattern, search, visualization, dashboard]]]',
-                validation: { source: 'payload', keys: [ 'type.0' ] },
-              });
-            });
-        });
-
-        it('should validate types in objects', async () => {
-          await supertest
-            .post('/api/saved_objects/_export')
-            .send({
-              objects: [
-                {
-                  type: 'foo',
-                  id: '1',
-                },
-              ],
-            })
-            .expect(400)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                // eslint-disable-next-line max-len
-                message: 'child "objects" fails because ["objects" at position 0 fails because [child "type" fails because ["type" must be one of [index-pattern, search, visualization, dashboard]]]]',
-                validation: { source: 'payload', keys: [ 'objects.0.type' ] },
-              });
-            });
-        });
-
         it('should support including dependencies when exporting selected objects', async () => {
           await supertest
             .post('/api/saved_objects/_export')
@@ -164,6 +123,27 @@ export default function ({ getService }) {
                     },
                   ],
                 },
+              });
+            });
+        });
+
+        it(`should return 400 when exporting unsupported type`, async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              type: ['wigwags'],
+            })
+            .expect(400)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'child "type" fails because ["type" at position 0 fails because ' +
+                  '["0" must be one of [config, index-pattern, visualization, search, dashboard, url]]]',
+                validation: {
+                  source: 'payload',
+                  keys: ['type.0'],
+                }
               });
             });
         });

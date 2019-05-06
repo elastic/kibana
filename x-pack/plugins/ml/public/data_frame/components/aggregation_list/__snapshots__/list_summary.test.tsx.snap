@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <AggListSummary /> Minimal initialization 1`] = `
+<EuiForm>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="s"
+  >
+    the-agg
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</EuiForm>
+`;

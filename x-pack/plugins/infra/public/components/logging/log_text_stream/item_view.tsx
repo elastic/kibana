@@ -15,20 +15,21 @@ interface StreamItemProps {
   scale: TextScale;
   wrap: boolean;
   openFlyoutWithItem: (id: string) => void;
+  isHighlighted: boolean;
 }
 
 export const LogTextStreamItemView = React.forwardRef<Element, StreamItemProps>(
-  ({ item, scale, wrap, openFlyoutWithItem }, ref) => {
+  ({ item, scale, wrap, openFlyoutWithItem, isHighlighted }, ref) => {
     switch (item.kind) {
       case 'logEntry':
         return (
           <LogTextStreamLogEntryItemView
             boundingBoxRef={ref}
             logEntry={item.logEntry}
-            searchResult={item.searchResult}
             scale={scale}
             wrap={wrap}
             openFlyoutWithItem={openFlyoutWithItem}
+            isHighlighted={isHighlighted}
           />
         );
     }

@@ -40,8 +40,10 @@ import {
 } from 'ui/notify';
 
 import {
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCode,
   EuiConfirmModal,
   EuiFieldNumber,
@@ -317,7 +319,9 @@ export class FieldEditorComponent extends PureComponent {
     const { intl } = this.props;
 
     return (
-      <EuiFormRow label={intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' })}>
+      <EuiFormRow
+        label={intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' })}
+      >
         <EuiSelect
           value={field.type}
           disabled={!field.scripted}
@@ -328,6 +332,57 @@ export class FieldEditorComponent extends PureComponent {
           }}
         />
       </EuiFormRow>
+    );
+  }
+
+  /**
+   * renders a warning and a table of conflicting indices
+   * in case there are indices with different types
+   */
+  renderTypeConflict() {
+    const { intl } = this.props;
+    const { field = {} } = this.state;
+    if (!field.conflictDescriptions || typeof field.conflictDescriptions !== 'object') {
+      return null;
+    }
+
+    const columns = [{
+      field: 'type',
+      name: intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' }),
+      width: '100px',
+    }, {
+      field: 'indices',
+      name: intl.formatMessage({ id: 'common.ui.fieldEditor.indexNameLabel', defaultMessage: 'Index names' })
+    }];
+
+    const items = Object
+      .entries(field.conflictDescriptions)
+      .map(([type, indices]) => ({
+        type,
+        indices: Array.isArray(indices) ? indices.join(', ') : 'Index names unavailable'
+      }));
+
+    return (
+      <div>
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={<FormattedMessage id="common.ui.fieldEditor.fieldTypeConflict" defaultMessage="Field type conflict"/>}
+          size="s"
+        >
+          <FormattedMessage
+            id="common.ui.fieldEditor.multiTypeLabelDesc"
+            defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
+          The indices per type are as follows:"
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+        />
+        <EuiSpacer size="m" />
+      </div>
     );
   }
 
@@ -719,6 +774,7 @@ export class FieldEditorComponent extends PureComponent {
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
+          {this.renderTypeConflict()}
           {this.renderFormat()}
           {this.renderPopularity()}
           {this.renderScript()}

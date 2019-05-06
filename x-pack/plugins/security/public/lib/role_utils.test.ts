@@ -75,6 +75,15 @@ describe('role', () => {
       expect(isReadOnlyRole(testRole)).toBe(true);
     });
 
+    test('returns false for disabled roles', () => {
+      const testRole = {
+        transient_metadata: {
+          enabled: false,
+        },
+      };
+      expect(isReadOnlyRole(testRole)).toBe(false);
+    });
+
     test('returns false for all other roles', () => {
       const testRole = {};
       expect(isReadOnlyRole(testRole)).toBe(false);

@@ -22,14 +22,21 @@ import { ResponseObject, Server } from 'hapi';
 import {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
+  HttpServiceStart,
   ConfigService,
   PluginsServiceSetup,
+  PluginsServiceStart,
 } from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
+import {
+  SavedObjectsClient,
+  SavedObjectsService,
+  SavedObjectsSchema,
+  SavedObjectsManagement,
+} from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -56,6 +63,7 @@ declare module 'hapi' {
     savedObjects: SavedObjectsService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
+    savedObjectsManagement(): SavedObjectsManagement;
   }
 
   interface Request {
@@ -77,9 +85,15 @@ export default class KbnServer {
     setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;
-        http?: HttpServiceSetup;
+        http: HttpServiceSetup;
       };
       plugins: PluginsServiceSetup;
+    };
+    start: {
+      core: {
+        http: HttpServiceStart;
+      };
+      plugins: PluginsServiceStart;
     };
     stop: null;
     params: {

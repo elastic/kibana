@@ -118,7 +118,7 @@ class EditRolePageUI extends Component<Props, State> {
     );
   }
 
-  public getFormTitle = () => {
+  private getFormTitle = () => {
     let titleText;
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
@@ -156,7 +156,7 @@ class EditRolePageUI extends Component<Props, State> {
     );
   };
 
-  public getActionButton = () => {
+  private getActionButton = () => {
     if (this.editingExistingRole() && !isReadOnlyRole(this.props.role)) {
       return (
         <EuiFlexItem grow={false}>
@@ -168,7 +168,7 @@ class EditRolePageUI extends Component<Props, State> {
     return null;
   };
 
-  public getRoleName = () => {
+  private getRoleName = () => {
     return (
       <EuiPanel>
         <EuiFormRow
@@ -202,7 +202,7 @@ class EditRolePageUI extends Component<Props, State> {
     );
   };
 
-  public onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+  private onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     const name = rawValue.replace(/\s/g, '_');
 
@@ -214,7 +214,7 @@ class EditRolePageUI extends Component<Props, State> {
     });
   };
 
-  public getElasticsearchPrivileges() {
+  private getElasticsearchPrivileges() {
     return (
       <div>
         <EuiSpacer />
@@ -233,13 +233,13 @@ class EditRolePageUI extends Component<Props, State> {
     );
   }
 
-  public onRoleChange = (role: Role) => {
+  private onRoleChange = (role: Role) => {
     this.setState({
       role,
     });
   };
 
-  public getKibanaPrivileges = () => {
+  private getKibanaPrivileges = () => {
     return (
       <div>
         <EuiSpacer />
@@ -259,18 +259,33 @@ class EditRolePageUI extends Component<Props, State> {
     );
   };
 
-  public getFormButtons = () => {
+  private getFormButtons = () => {
     if (isReadOnlyRole(this.props.role)) {
-      return (
-        <EuiButton onClick={this.backToRoleList} data-test-subj="roleFormReturnButton">
-          <FormattedMessage
-            id="xpack.security.management.editRole.returnToRoleListButtonLabel"
-            defaultMessage="Return to role list"
-          />
-        </EuiButton>
-      );
+      return this.getReturnToRoleListButton();
     }
 
+    return (
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.getCancelButton()}</EuiFlexItem>
+        <EuiFlexItem grow={true} />
+        {this.getActionButton()}
+      </EuiFlexGroup>
+    );
+  };
+
+  private getReturnToRoleListButton = () => {
+    return (
+      <EuiButton onClick={this.backToRoleList} data-test-subj="roleFormReturnButton">
+        <FormattedMessage
+          id="xpack.security.management.editRole.returnToRoleListButtonLabel"
+          defaultMessage="Return to role list"
+        />
+      </EuiButton>
+    );
+  };
+
+  private getSaveButton = () => {
     const saveText = this.editingExistingRole() ? (
       <FormattedMessage
         id="xpack.security.management.editRole.updateRoleText"
@@ -284,36 +299,33 @@ class EditRolePageUI extends Component<Props, State> {
     );
 
     return (
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj={`roleFormSaveButton`}
-            fill
-            onClick={this.saveRole}
-            disabled={isReservedRole(this.props.role)}
-          >
-            {saveText}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
-            <FormattedMessage
-              id="xpack.security.management.editRole.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true} />
-        {this.getActionButton()}
-      </EuiFlexGroup>
+      <EuiButton
+        data-test-subj={`roleFormSaveButton`}
+        fill
+        onClick={this.saveRole}
+        disabled={isReservedRole(this.props.role)}
+      >
+        {saveText}
+      </EuiButton>
     );
   };
 
-  public editingExistingRole = () => {
+  private getCancelButton = () => {
+    return (
+      <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
+        <FormattedMessage
+          id="xpack.security.management.editRole.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      </EuiButtonEmpty>
+    );
+  };
+
+  private editingExistingRole = () => {
     return !!this.props.role.name;
   };
 
-  public saveRole = () => {
+  private saveRole = () => {
     this.validator.enableValidation();
 
     const result = this.validator.validateForSave(this.state.role);
@@ -344,7 +356,7 @@ class EditRolePageUI extends Component<Props, State> {
     }
   };
 
-  public handleDeleteRole = () => {
+  private handleDeleteRole = () => {
     const { httpClient, role, intl } = this.props;
 
     deleteRole(httpClient, role.name)
@@ -362,7 +374,7 @@ class EditRolePageUI extends Component<Props, State> {
       });
   };
 
-  public backToRoleList = () => {
+  private backToRoleList = () => {
     window.location.hash = ROLES_PATH;
   };
 }
