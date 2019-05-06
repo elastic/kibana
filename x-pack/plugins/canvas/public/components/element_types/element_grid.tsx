@@ -5,9 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { map, includes } from 'lodash';
-// @ts-ignore no @types definition
-import lowerCase from 'lodash.lowercase';
+import { map } from 'lodash';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
 import { CustomElement } from '../../lib/custom_element';
@@ -22,15 +20,15 @@ export interface Props {
   /**
    * text filter to filter out cards
    */
-  filter?: string;
+  filter: string;
+  /**
+   * indicate whether or not edit/delete controls should be displayed
+   */
+  showControls: boolean;
   /**
    * handler invoked when clicking a card
    */
   handleClick: (element: ElementSpec | CustomElement) => void;
-  /**
-   * indicate whether or not edit/delete controls should be displayed
-   */
-  showControls?: boolean;
   /**
    * click handler for the edit button
    */
@@ -49,15 +47,29 @@ export const ElementGrid = ({
   onDelete,
   showControls,
 }: Props) => {
-  filter = lowerCase(filter);
+  filter = filter.toLowerCase();
 
   return (
     <EuiFlexGrid gutterSize="l" columns={4}>
       {map(elements, (element: ElementSpec | CustomElement, index) => {
-        const { help = '', name, displayName, image } = element;
+        const { help = '', name, displayName = '', image } = element;
         const whenClicked = () => handleClick(element);
+        let textMatch = false;
 
-        const card = (
+        if (
+          !filter.length ||
+          name.toLowerCase().includes(filter) ||
+          displayName.toLowerCase().includes(filter) ||
+          help.toLowerCase().includes(filter)
+        ) {
+          textMatch = true;
+        }
+
+        if (!textMatch) {
+          return null;
+        }
+
+        return (
           <EuiFlexItem key={index} className="canvasElementCard__wrapper">
             <ElementCard
               title={displayName || name}
@@ -70,20 +82,6 @@ export const ElementGrid = ({
             )}
           </EuiFlexItem>
         );
-
-        if (!filter) {
-          return card;
-        }
-        if (includes(lowerCase(name), filter)) {
-          return card;
-        }
-        if (includes(lowerCase(displayName), filter)) {
-          return card;
-        }
-        if (includes(lowerCase(help), filter)) {
-          return card;
-        }
-        return null;
       })}
     </EuiFlexGrid>
   );
@@ -97,4 +95,5 @@ ElementGrid.propTypes = {
 
 ElementGrid.defaultProps = {
   showControls: false,
+  filter: '',
 };

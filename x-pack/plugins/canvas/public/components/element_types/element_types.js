@@ -113,7 +113,7 @@ export class ElementTypes extends Component {
     sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
 
   render() {
-    const { search, setSearch, addElement, addCustomElement, isLoading } = this.props;
+    const { search, setSearch, addElement, addCustomElement } = this.props;
     let { elements, customElements } = this.props;
     elements = this._sortElements(elements);
 
@@ -125,10 +125,6 @@ export class ElementTypes extends Component {
         titleSize="s"
       />
     );
-
-    if (isLoading) {
-      customElementContent = <div style={{ width: '100%' }}>Fetching Workpads...</div>;
-    }
 
     if (customElements.length) {
       customElements = this._sortElements(customElements);
