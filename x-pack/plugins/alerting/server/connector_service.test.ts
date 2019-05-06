@@ -62,6 +62,31 @@ Object {
   });
 });
 
+describe('getEncryptedAttributes()', () => {
+  test('returns empty array when unencryptedAttributes is undefined', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      name: 'My connector',
+      async executor() {},
+    });
+    const result = connectorService.getEncryptedAttributes('my-connector');
+    expect(result).toEqual([]);
+  });
+
+  test('returns values inside unencryptedAttributes array when it exists', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      name: 'My connector',
+      unencryptedAttributes: ['a', 'b', 'c'],
+      async executor() {},
+    });
+    const result = connectorService.getEncryptedAttributes('my-connector');
+    expect(result).toEqual(['a', 'b', 'c']);
+  });
+});
+
 describe('list()', () => {
   test('returns list of connectors', () => {
     const connectorService = new ConnectorService();

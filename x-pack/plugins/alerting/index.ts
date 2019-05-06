@@ -49,7 +49,11 @@ export function alerting(kibana: any) {
       });
 
       const connectorService = new ConnectorService();
-      const actionService = new ActionService(connectorService);
+      const actionService = new ActionService(
+        connectorService,
+        // @ts-ignore
+        server.plugins.encrypted_saved_objects
+      );
       const alertService = new AlertService();
 
       // Register default connectors

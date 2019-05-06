@@ -39,6 +39,11 @@ export class ConnectorService {
     return connector;
   }
 
+  public getEncryptedAttributes(id: string) {
+    const connector = this.get(id);
+    return connector.unencryptedAttributes || [];
+  }
+
   public list() {
     const connectorIds = Object.keys(this.connectors);
     return connectorIds.map(id => ({
