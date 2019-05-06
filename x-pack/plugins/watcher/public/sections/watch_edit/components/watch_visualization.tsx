@@ -123,6 +123,15 @@ const WatchVisualizationUi = () => {
   );
 
   const timezone = getTimezone();
+  const actualThreshold = getThreshold(watch);
+  let maxY = actualThreshold[actualThreshold.length - 1];
+  (Object.values(watchVisualizationData) as number[][][]).forEach(data => {
+    data.forEach(([, y]) => {
+      if (y > maxY) {
+        maxY = y;
+      }
+    });
+  });
   const dateFormatter = (d: number) => {
     return moment(d)
       .tz(timezone)
@@ -165,7 +174,12 @@ const WatchVisualizationUi = () => {
             showOverlappingTicks={true}
             tickFormat={dateFormatter}
           />
-          <Axis id={getAxisId('left')} title={aggLabel} position={Position.Left} />
+          <Axis
+            domain={{ max: maxY }}
+            id={getAxisId('left')}
+            title={aggLabel}
+            position={Position.Left}
+          />
           {watchVisualizationDataKeys.map((key: string) => {
             return (
               <LineSeries
@@ -180,7 +194,7 @@ const WatchVisualizationUi = () => {
               />
             );
           })}
-          {getThreshold(watch).map((value: any, i: number) => {
+          {actualThreshold.map((value: any, i: number) => {
             const specId = i === 0 ? 'threshold' : `threshold${i}`;
             return (
               <LineAnnotation
