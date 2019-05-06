@@ -65,6 +65,7 @@ export interface OnRequestToolkit {
   redirected: (url: string) => OnRequestResult;
   /** Fail the request with specified error. */
   rejected: (error: Error, options?: { statusCode?: number }) => OnRequestResult;
+  /** Change url for an incoming request. */
   setUrl: (newUrl: string | Url) => void;
 }
 
