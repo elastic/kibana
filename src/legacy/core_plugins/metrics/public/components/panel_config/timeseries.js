@@ -78,7 +78,6 @@ class TimeseriesPanelConfigUi extends Component {
   }
 
   render() {
-    // TODO: change default filter to {language: 'lucene', query: ''}
     const defaults = {
       filter: '',
       axis_max: '',

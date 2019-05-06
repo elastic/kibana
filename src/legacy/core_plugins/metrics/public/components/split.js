@@ -53,7 +53,7 @@ class Split extends Component {
     const mainFilterLanguage =
       this.props.panel.filter && this.props.panel.filter.language
         ? this.props.panel.filter.language
-        : 'lucene';
+        : 'kuery';
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
         split_filters: [
