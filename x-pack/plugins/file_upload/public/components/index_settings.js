@@ -10,7 +10,8 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
-  EuiSelect
+  EuiSelect,
+  EuiCallOut
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getExistingIndices, getExistingIndexPatterns }
@@ -70,6 +71,38 @@ export const IndexSettings = injectI18n(function IndexSettings({
           onChange={({ target }) => setSelectedIndexType(target.value)}
         />
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      {indexDisabled
+        ? null
+        : (
+          <EuiCallOut
+            title="Index name guidelines"
+            iconType="pin"
+          >
+            <div>
+              <ul>
+                <li>Lowercase only</li>
+                <li>{`Cannot include \\, /, *, ?, ", <, >, |, \` \` \
+                  (space character), , (comma), #`
+                }
+                </li>
+                <li>{
+                  `Indices prior to 7.0 could contain a colon (:), \
+                  but that’s been deprecated and won’t be supported in 7.0+`
+                }
+                </li>
+                <li>{`Cannot start with -, _, +`}</li>
+                <li>{`Cannot be . or ..`}</li>
+                <li>{
+                  `Cannot be longer than 255 bytes (note it is bytes, \
+                  so multi-byte characters will count towards the 255 \
+                  limit faster)`
+                }
+                </li>
+              </ul>
+            </div>
+          </EuiCallOut>
+        )}
       <EuiSpacer size="s" />
       <EuiFormRow
         label={
