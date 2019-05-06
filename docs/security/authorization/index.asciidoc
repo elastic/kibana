@@ -40,9 +40,9 @@ image::security/images/create-space-privilege.png[Create space privilege]
 
 ==== Assigning different privileges to different spaces
 
-Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added space privileges, click **Add space privilege**. If you’ve already added privileges for either **Global (all spaces)** or an individual space, you will not be able to select these in the **Spaces** control.
+Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added space privileges, click **Add space privilege**. If you’ve already added privileges for either *** Global (all spaces)** or an individual space, you will not be able to select these in the **Spaces** control.
 
-Additionally, if you’ve already assigned privileges at **Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, space privileges are also a union. If you’ve already granted the user the **All** privilege at **Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space. 
+Additionally, if you’ve already assigned privileges at *** Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, space privileges are also a union. If you’ve already granted the user the **All** privilege at *** Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space. 
 
 
 ==== Privilege summary
@@ -77,10 +77,10 @@ image::security/images/privilege-example-1.png[Privilege example 1]
 [role="screenshot"]
 image::security/images/privilege-example-2.png[Privilege example 2]
 
-=== Example 3: Grant read access to all spaces and write access to an individual space
+==== Example 3: Grant read access to all spaces and write access to an individual space
 
 . Click **Add space privilege**.
-. For **Spaces**, select **Global (all spaces)**.
+. For **Spaces**, select *** Global (all spaces)**.
 . For **Privilege**, select **Read**.
 . Click **Create space privilege**.
 . Click **Add space privilege**.

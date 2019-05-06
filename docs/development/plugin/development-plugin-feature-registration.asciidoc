@@ -9,7 +9,7 @@ Registering features also gives your plugin access to “UI Capabilities”. The
 
 ==== Registering a feature
 
-Feature registration is controlled via the built-in `xpack_main` plugin. To register a feature, call `xpack_main`’s `registerFeature` function from your plugin’s `init` function, and provide the appropriate details:
+Feature registration is controlled via the built-in `xpack_main` plugin. To register a feature, call `xpack_main`'s `registerFeature` function from your plugin’s `init` function, and provide the appropriate details:
 
 ["source","javascript"]
 -----------
