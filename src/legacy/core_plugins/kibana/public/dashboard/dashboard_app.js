@@ -528,7 +528,7 @@ app.directive('dashboardApp', function ($injector) {
       // update data when filters fire fetch event
 
       this.fetchSubscription = queryFilter.getFetches$().subscribe({
-        next: () => $scope.refresh
+        next: $scope.refresh
       });
 
       $scope.$on('$destroy', () => {

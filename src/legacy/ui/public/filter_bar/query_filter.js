@@ -380,12 +380,8 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
         // save states and emit the required events
         saveState();
         update$.next();
-        // queryFilter.emit('update')
-        // .then(function () {
         if (!doFetch) return;
         fetch$.next();
-        // queryFilter.emit('fetch');
-        // });
 
         // iterate over each state type, checking for changes
         function getActions() {
