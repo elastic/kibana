@@ -25,7 +25,7 @@ import { first, tap } from 'rxjs/operators';
 import { I18nSetup } from '../i18n';
 import { InjectedMetadataService } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
-import { ErrorInfo, getErrorInfo } from './get_error_info';
+import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 export interface FatalErrorsParams {
   rootDomElement: HTMLElement;
@@ -56,12 +56,12 @@ export interface FatalErrorsSetup {
   /**
    * An Observable that will emit whenever a fatal error is added with `add()`
    */
-  get$: () => Rx.Observable<ErrorInfo>;
+  get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
 /** @interal */
 export class FatalErrorsService {
-  private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
+  private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
   private i18n?: I18nSetup;
 
   constructor(private params: FatalErrorsParams) {

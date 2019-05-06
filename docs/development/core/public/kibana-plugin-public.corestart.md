@@ -4,6 +4,8 @@
 
 ## CoreStart interface
 
+Core services exposed to the start lifecycle
+
 <b>Signature:</b>
 
 ```typescript
