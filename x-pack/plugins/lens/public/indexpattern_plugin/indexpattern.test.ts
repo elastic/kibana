@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternDatasource } from './indexpattern';
+import { indexPatternDatasource, IndexPatternPersistedState } from './indexpattern';
 import { DatasourcePublicAPI, Operation } from '../types';
 
 describe('IndexPattern Data Source', () => {
-  let persistedState: object;
+  let persistedState: IndexPatternPersistedState;
 
   beforeEach(() => {
     persistedState = {
@@ -23,7 +23,6 @@ describe('IndexPattern Data Source', () => {
 
           // Private
           operationType: 'value',
-          arguments: {},
         },
       },
     };
@@ -54,7 +53,7 @@ describe('IndexPattern Data Source', () => {
     it('should persist from saved state', async () => {
       const state = await indexPatternDatasource.initialize(persistedState);
 
-      expect(indexPatternDatasource.getPersistedState(state)).toEqual(persistedState);
+      expect(indexPatternDatasource.getPersistableState(state)).toEqual(persistedState);
     });
   });
 

@@ -37,12 +37,14 @@ export interface DatasourceSuggestion<T = unknown> {
 /**
  * Interface for the datasource registry
  */
-export interface Datasource<T = unknown> {
+export interface Datasource<T = unknown, P = unknown> {
   // For initializing, either from an empty state or from persisted state
-  initialize: (state?: T | any) => Promise<T>;
+  // Because this will be called at runtime, state might have a type of `any` and
+  // datasources should validate their arguments
+  initialize: (state?: P) => Promise<T>;
 
   // Given the current state, which parts should be saved?
-  getPersistedState: (state: T) => object;
+  getPersistableState: (state: T) => P;
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
