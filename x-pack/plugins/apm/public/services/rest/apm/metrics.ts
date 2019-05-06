@@ -16,7 +16,7 @@ export async function loadMetricsChartData({
   kuery
 }: {
   serviceName: string;
-  agentName: string;
+  agentName?: string;
   start: string;
   end: string;
   kuery?: string;

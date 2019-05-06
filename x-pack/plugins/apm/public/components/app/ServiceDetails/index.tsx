@@ -56,6 +56,7 @@ export function ServiceDetails() {
         urlParams={urlParams}
         transactionTypes={serviceDetailsData.types}
         isRumAgent={isRumAgent}
+        agentName={serviceDetailsData.agentName}
       />
     </React.Fragment>
   );

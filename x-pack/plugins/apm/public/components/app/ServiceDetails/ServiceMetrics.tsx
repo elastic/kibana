@@ -13,10 +13,11 @@ import { MetricsChart } from './MetricsChart';
 
 interface ServiceMetricsProps {
   urlParams: IUrlParams;
+  agentName?: string;
 }
 
-export function ServiceMetrics({ urlParams }: ServiceMetricsProps) {
-  const { data } = useServiceMetricCharts(urlParams);
+export function ServiceMetrics({ urlParams, agentName }: ServiceMetricsProps) {
+  const { data } = useServiceMetricCharts(urlParams, agentName);
   return (
     <React.Fragment>
       <SyncChartGroup

@@ -13,7 +13,10 @@ const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: []
 };
 
-export function useServiceMetricCharts(urlParams: IUrlParams) {
+export function useServiceMetricCharts(
+  urlParams: IUrlParams,
+  agentName?: string
+) {
   const { serviceName, start, end, kuery } = urlParams;
 
   const { data = INITIAL_DATA, error, status } = useFetcher<
@@ -23,9 +26,7 @@ export function useServiceMetricCharts(urlParams: IUrlParams) {
       if (serviceName && start && end) {
         return loadMetricsChartData({
           serviceName,
-          // TODO: Remove hard-coded agent -- should we add agent name to url params or query for
-          // agent based on service name in the back end to make this simpler in the client?
-          agentName: serviceName === 'opbeans-java' ? 'java' : 'default',
+          agentName,
           start,
           end,
           kuery
