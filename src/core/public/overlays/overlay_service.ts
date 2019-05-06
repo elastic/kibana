@@ -18,6 +18,7 @@
  */
 
 import { FlyoutService } from './flyout';
+import { ModalService, ModalRef } from './modal';
 
 import { FlyoutRef } from '..';
 import { I18nStart } from '../i18n';
@@ -29,14 +30,18 @@ interface StartDeps {
 /** @internal */
 export class OverlayService {
   private flyoutService: FlyoutService;
+  private modalService: ModalService;
 
-  constructor(targetDomElement: HTMLElement) {
-    this.flyoutService = new FlyoutService(targetDomElement);
+  constructor(targetDomElement1: HTMLElement, targetDomElement2: HTMLElement) {
+    this.flyoutService = new FlyoutService(targetDomElement1);
+    this.modalService = new ModalService(targetDomElement2);
   }
 
   public start({ i18n }: StartDeps): OverlayStart {
     return {
       openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
+
+      openModal: this.modalService.openModal.bind(this.modalService, i18n),
     };
   }
 }
@@ -50,4 +55,11 @@ export interface OverlayStart {
       'data-test-subj'?: string;
     }
   ) => FlyoutRef;
+  openModal: (
+    modalChildren: React.ReactNode,
+    modalProps?: {
+      closeButtonAriaLabel?: string;
+      'data-test-subj'?: string;
+    }
+  ) => ModalRef;
 }

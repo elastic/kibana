@@ -19,3 +19,4 @@
 
 export { OverlayService, OverlayStart } from './overlay_service';
 export { FlyoutRef } from './flyout';
+export { ModalRef } from './modal';

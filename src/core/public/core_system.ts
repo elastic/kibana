@@ -68,7 +68,8 @@ export class CoreSystem {
   private readonly plugins: PluginsService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly overlayTargetDomElement: HTMLDivElement;
+  private readonly overlayTargetDomElement1: HTMLDivElement;
+  private readonly overlayTargetDomElement2: HTMLDivElement;
 
   constructor(params: Params) {
     const {
@@ -101,8 +102,9 @@ export class CoreSystem {
     this.http = new HttpService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
-    this.overlayTargetDomElement = document.createElement('div');
-    this.overlay = new OverlayService(this.overlayTargetDomElement);
+    this.overlayTargetDomElement1 = document.createElement('div');
+    this.overlayTargetDomElement2 = document.createElement('div');
+    this.overlay = new OverlayService(this.overlayTargetDomElement1, this.overlayTargetDomElement2);
     this.chrome = new ChromeService({ browserSupportsCsp });
 
     const core: CoreContext = {};
@@ -163,7 +165,8 @@ export class CoreSystem {
       const legacyPlatformTargetDomElement = document.createElement('div');
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
-      this.rootDomElement.appendChild(this.overlayTargetDomElement);
+      this.rootDomElement.appendChild(this.overlayTargetDomElement1);
+      this.rootDomElement.appendChild(this.overlayTargetDomElement2);
 
       const injectedMetadata = this.injectedMetadata.start();
       const i18n = this.i18n.start();

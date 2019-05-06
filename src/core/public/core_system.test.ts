@@ -216,7 +216,7 @@ describe('#start()', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>foo bar</p>';
     await startCore(root);
-    expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
+    expect(root.innerHTML).toBe('<div></div><div></div><div></div><div></div>');
   });
 
   it('calls capabilities#start()', async () => {
