@@ -143,7 +143,7 @@ export class ConfigService {
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
-      throw new Error(`No config validator defined for ${namespace}`);
+      throw new Error(`No config schema defined for ${namespace}`);
     }
     const validatedConfig = schema.validate(
       config,

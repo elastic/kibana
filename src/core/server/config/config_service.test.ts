@@ -144,7 +144,7 @@ test("throws error if 'schema' is not defined for a key", async () => {
   const configs = configService.atPath('key', ExampleClass as any);
 
   expect(configs.pipe(first()).toPromise()).rejects.toMatchInlineSnapshot(
-    `[Error: No config validator defined for key]`
+    `[Error: No config schema defined for key]`
   );
 });
 
