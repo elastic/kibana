@@ -46,6 +46,9 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
           <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+
+          <EuiSpacer />
+
           <GlobalTime>
             {({ to, from, setQuery }) => (
               <>

@@ -55,118 +55,117 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
       {({ filebeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
-          <>
-            <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
+          <GlobalTime>
+            {({ to, from, setQuery }) => (
+              <>
+                <IpOverviewQuery
+                  sourceId="default"
+                  filterQuery={filterQuery}
+                  type={networkModel.NetworkType.details}
+                  ip={decodeIpv6(ip)}
+                >
+                  {({ ipOverviewData, loading }) => (
+                    <IpOverview
+                      ip={decodeIpv6(ip)}
+                      data={ipOverviewData}
+                      loading={loading}
+                      type={networkModel.NetworkType.details}
+                      flowTarget={flowTarget}
+                    />
+                  )}
+                </IpOverviewQuery>
 
-            <GlobalTime>
-              {({ to, from, setQuery }) => (
-                <>
-                  <IpOverviewQuery
-                    sourceId="default"
-                    filterQuery={filterQuery}
-                    type={networkModel.NetworkType.details}
-                    ip={decodeIpv6(ip)}
-                  >
-                    {({ ipOverviewData, loading }) => (
-                      <IpOverview
-                        ip={decodeIpv6(ip)}
-                        data={ipOverviewData}
-                        loading={loading}
-                        type={networkModel.NetworkType.details}
-                        flowTarget={flowTarget}
-                      />
-                    )}
-                  </IpOverviewQuery>
-                  <EuiSpacer size="s" />
-                  <EuiHorizontalRule margin="xs" />
-                  <EuiSpacer />
+                <EuiHorizontalRule />
 
-                  <DomainsQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    flowTarget={flowTarget}
-                    ip={decodeIpv6(ip)}
-                    sourceId="default"
-                    startDate={from}
-                    type={networkModel.NetworkType.details}
-                  >
-                    {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                      <DomainsTableManage
-                        data={domains}
-                        indexPattern={indexPattern}
-                        id={id}
-                        flowTarget={flowTarget}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        ip={ip}
-                        loading={loading}
-                        loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        totalCount={totalCount}
-                        type={networkModel.NetworkType.details}
-                      />
-                    )}
-                  </DomainsQuery>
+                <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
 
-                  <EuiSpacer />
+                <EuiSpacer />
 
-                  <UsersQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    flowTarget={flowTarget}
-                    ip={decodeIpv6(ip)}
-                    sourceId="default"
-                    startDate={from}
-                    type={networkModel.NetworkType.details}
-                  >
-                    {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                      <UsersTableManage
-                        data={users}
-                        id={id}
-                        flowTarget={flowTarget}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        loading={loading}
-                        loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        totalCount={totalCount}
-                        type={networkModel.NetworkType.details}
-                      />
-                    )}
-                  </UsersQuery>
+                <DomainsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  flowTarget={flowTarget}
+                  ip={decodeIpv6(ip)}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.details}
+                >
+                  {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                    <DomainsTableManage
+                      data={domains}
+                      indexPattern={indexPattern}
+                      id={id}
+                      flowTarget={flowTarget}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      ip={ip}
+                      loading={loading}
+                      loadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.details}
+                    />
+                  )}
+                </DomainsQuery>
 
-                  <EuiSpacer />
+                <EuiSpacer />
 
-                  <TlsQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    flowTarget={flowTarget}
-                    ip={decodeIpv6(ip)}
-                    sourceId="default"
-                    startDate={from}
-                    type={networkModel.NetworkType.details}
-                  >
-                    {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                      <TlsTableManage
-                        data={tls}
-                        id={id}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
-                        loading={loading}
-                        loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        totalCount={totalCount}
-                        type={networkModel.NetworkType.details}
-                      />
-                    )}
-                  </TlsQuery>
-                </>
-              )}
-            </GlobalTime>
-          </>
+                <UsersQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  flowTarget={flowTarget}
+                  ip={decodeIpv6(ip)}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.details}
+                >
+                  {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                    <UsersTableManage
+                      data={users}
+                      id={id}
+                      flowTarget={flowTarget}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loading={loading}
+                      loadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.details}
+                    />
+                  )}
+                </UsersQuery>
+
+                <EuiSpacer />
+
+                <TlsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  flowTarget={flowTarget}
+                  ip={decodeIpv6(ip)}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.details}
+                >
+                  {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                    <TlsTableManage
+                      data={tls}
+                      id={id}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
+                      loading={loading}
+                      loadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.details}
+                    />
+                  )}
+                </TlsQuery>
+              </>
+            )}
+          </GlobalTime>
         ) : (
           <EmptyPage
             title={i18n.NO_FILEBEAT_INDICES}
