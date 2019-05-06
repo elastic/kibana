@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { failure } from 'io-ts/lib/PathReporter';
+
 import {
+  InfraLogEntryColumn,
+  InfraLogEntryFieldColumn,
+  InfraLogEntryMessageColumn,
+  InfraLogEntryTimestampColumn,
   InfraLogMessageConstantSegment,
   InfraLogMessageFieldSegment,
   InfraLogMessageSegment,
   InfraSourceResolvers,
 } from '../../graphql/types';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
+import { SourceConfigurationRuntimeType } from '../../lib/sources';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
@@ -44,6 +51,15 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
     logItem: InfraSourceLogItem;
+  };
+  InfraLogEntryColumn: {
+    __resolveType(
+      logEntryColumn: InfraLogEntryColumn
+    ):
+      | 'InfraLogEntryTimestampColumn'
+      | 'InfraLogEntryMessageColumn'
+      | 'InfraLogEntryFieldColumn'
+      | null;
   };
   InfraLogMessageSegment: {
     __resolveType(
@@ -122,11 +138,34 @@ export const createLogEntriesResolvers = (libs: {
       };
     },
     async logItem(source, args, { req }) {
-      return await libs.logEntries.getLogItem(req, args.id, source.configuration);
+      const sourceConfiguration = SourceConfigurationRuntimeType.decode(
+        source.configuration
+      ).getOrElseL(errors => {
+        throw new Error(failure(errors).join('\n'));
+      });
+
+      return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
+    },
+  },
+  InfraLogEntryColumn: {
+    __resolveType(logEntryColumn) {
+      if (isTimestampColumn(logEntryColumn)) {
+        return 'InfraLogEntryTimestampColumn';
+      }
+
+      if (isMessageColumn(logEntryColumn)) {
+        return 'InfraLogEntryMessageColumn';
+      }
+
+      if (isFieldColumn(logEntryColumn)) {
+        return 'InfraLogEntryFieldColumn';
+      }
+
+      return null;
     },
   },
   InfraLogMessageSegment: {
-    __resolveType: (messageSegment: InfraLogMessageSegment) => {
+    __resolveType(messageSegment) {
       if (isConstantSegment(messageSegment)) {
         return 'InfraLogMessageConstantSegment';
       }
@@ -139,6 +178,15 @@ export const createLogEntriesResolvers = (libs: {
     },
   },
 });
+
+const isTimestampColumn = (column: InfraLogEntryColumn): column is InfraLogEntryTimestampColumn =>
+  'timestamp' in column;
+
+const isMessageColumn = (column: InfraLogEntryColumn): column is InfraLogEntryMessageColumn =>
+  'message' in column;
+
+const isFieldColumn = (column: InfraLogEntryColumn): column is InfraLogEntryFieldColumn =>
+  'field' in column && 'value' in column;
 
 const isConstantSegment = (
   segment: InfraLogMessageSegment

@@ -38,6 +38,7 @@ export class SavedObjectsManagementBuilder {
       'map',
       'maps-telemetry',
       'canvas-workpad',
+      'canvas-element',
       'infrastructure-ui-source',
       'upgrade-assistant-reindex-operation',
       'upgrade-assistant-telemetry',
