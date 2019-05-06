@@ -21,6 +21,7 @@ import path from 'path';
 import request from 'request';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { Router } from '../router';
+
 import { url as authUrl } from './__fixtures__/plugins/dummy_security/server/plugin';
 import { url as onReqUrl } from './__fixtures__/plugins/dummy_on_request/server/plugin';
 
@@ -158,6 +159,29 @@ describe('http service', () => {
       });
       it(`Shouldn't share request object between interceptors`, async () => {
         await kbnTestServer.request.get(root, onReqUrl.independentReq).expect(200);
+      });
+    });
+
+    describe('#registerRouter()', () => {
+      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      beforeEach(async () => {
+        const plugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_legacy');
+
+        root = kbnTestServer.createRoot(
+          {
+            plugins: { paths: [plugin] },
+          },
+          {
+            dev: true,
+          }
+        );
+        await root.setup();
+        await root.start();
+      }, 30000);
+      afterEach(async () => await root.shutdown());
+
+      it('Should support registering a route from legacy platform', async () => {
+        await kbnTestServer.request.get(root, '/hi').expect(200, { content: 'from-new-platform' });
       });
     });
   });

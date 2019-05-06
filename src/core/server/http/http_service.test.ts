@@ -151,7 +151,13 @@ test('returns http server contract on setup', async () => {
 
   const service = new HttpService({ configService, env, logger });
 
-  expect(await service.setup()).toBe(httpServer);
+  const setupContract = await service.setup();
+  expect(setupContract).toMatchObject(httpServer);
+  expect(setupContract).toMatchObject(
+    expect.objectContaining({
+      shouldListen: expect.any(Function),
+    })
+  );
 });
 
 test('does not start http server if process is dev cluster master', async () => {

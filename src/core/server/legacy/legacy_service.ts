@@ -139,7 +139,7 @@ export class LegacyService implements CoreService {
       // bridge with the "legacy" Kibana. If server isn't run (e.g. if process is
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
-      serverOptions: startDeps.http.isListening()
+      serverOptions: setupDeps.http.shouldListen()
         ? {
             ...setupDeps.http.options,
             listener: this.setupProxyListener(setupDeps.http.server),

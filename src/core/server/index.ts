@@ -58,7 +58,6 @@ export interface CoreSetup {
 }
 
 export interface CoreStart {
-  http: HttpServiceStart;
   plugins: PluginsServiceStart;
 }
 

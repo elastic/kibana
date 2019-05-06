@@ -32,7 +32,6 @@ import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { HttpServiceStart } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
@@ -51,13 +50,12 @@ let setupDeps: {
 };
 
 let startDeps: {
-  http: HttpServiceStart;
   plugins: PluginsServiceStart;
 };
 
 const logger = loggingServiceMock.create();
 let configService: ReturnType<typeof configServiceMock.create>;
-
+const shouldListenMock = jest.fn(() => true);
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
   configService = configServiceMock.create();
@@ -69,6 +67,7 @@ beforeEach(() => {
     http: {
       options: { someOption: 'foo', someAnotherOption: 'bar' },
       server: { listener: { addListener: jest.fn() }, route: jest.fn() },
+      shouldListen: shouldListenMock,
     },
     plugins: {
       contracts: new Map([['plugin-id', 'plugin-value']]),
@@ -80,9 +79,6 @@ beforeEach(() => {
   };
 
   startDeps = {
-    http: {
-      isListening: () => true,
-    },
     plugins: {
       contracts: new Map(),
     },
@@ -318,16 +314,18 @@ describe('once LegacyService is set up with connection info', () => {
 
 describe('once LegacyService is set up without connection info', () => {
   const disabledHttpStartDeps = {
-    http: {
-      isListening: () => false,
-    },
     plugins: {
       contracts: new Map(),
     },
   };
+
   beforeEach(async () => {
+    shouldListenMock.mockReturnValue(false);
     await legacyService.setup(setupDeps);
     await legacyService.start(disabledHttpStartDeps);
+  });
+  afterEach(() => {
+    shouldListenMock.mockReset();
   });
 
   test('creates legacy kbnServer with `autoListen: false`.', () => {
@@ -358,11 +356,15 @@ describe('once LegacyService is set up without connection info', () => {
 
 describe('once LegacyService is set up in `devClusterMaster` mode', () => {
   beforeEach(() => {
+    shouldListenMock.mockReturnValue(false);
     configService.atPath.mockImplementation(path => {
       return new BehaviorSubject(
         path === 'dev' ? { basePathProxyTargetPort: 100500 } : { basePath: '/abc' }
       );
     });
+  });
+  afterEach(() => {
+    shouldListenMock.mockReset();
   });
 
   test('creates ClusterManager without base path proxy.', async () => {
@@ -383,9 +385,6 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       http: setupDeps.http,
     });
     await devClusterLegacyService.start({
-      http: {
-        isListening: () => false,
-      },
       plugins: {
         contracts: new Map(),
       },
@@ -414,9 +413,6 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       http: setupDeps.http,
     });
     await devClusterLegacyService.start({
-      http: {
-        isListening: () => false,
-      },
       plugins: {
         contracts: new Map(),
       },

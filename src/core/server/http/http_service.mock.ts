@@ -22,6 +22,7 @@ import { HttpService } from './http_service';
 
 const createSetupContractMock = () => {
   const setupContract = {
+    shouldListen: jest.fn(),
     options: {} as ServerOptions,
     registerAuth: jest.fn(),
     registerOnRequest: jest.fn(),
@@ -29,15 +30,8 @@ const createSetupContractMock = () => {
     // we can mock some hapi server method when we need it
     server: {} as Server,
   };
+  setupContract.shouldListen.mockReturnValue(true);
   return setupContract;
-};
-
-const createStartContractMock = () => {
-  const startContract = {
-    isListening: jest.fn(),
-  };
-  startContract.isListening.mockReturnValue(true);
-  return startContract;
 };
 
 type HttpServiceContract = PublicMethodsOf<HttpService>;
@@ -48,7 +42,6 @@ const createHttpServiceMock = () => {
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createSetupContractMock());
-  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 
