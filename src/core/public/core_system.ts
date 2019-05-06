@@ -91,6 +91,7 @@ export class CoreSystem {
     });
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
+      // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
 

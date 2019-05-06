@@ -58,13 +58,23 @@ export interface FatalErrorsSetup {
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
 
-  constructor(private rootDomElement: HTMLElement, private stopCoreSystem: () => void) {}
+  /**
+   *
+   * @param rootDomElement
+   * @param onFirstErrorCb - Callback function that gets executed after the first error,
+   *   but before the FatalErrorsService renders the error to the DOM. Used by Core to
+   *   to stop all services before showing the error page.
+   */
+  constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
 
-  public setup({ i18n, injectedMetadata: injectedMetadata }: Deps) {
+  public setup({ i18n, injectedMetadata }: Deps) {
     this.errorInfo$
       .pipe(
         first(),
-        tap(() => this.onFirstError(injectedMetadata, i18n))
+        tap(() => {
+          this.onFirstErrorCb();
+          this.renderError(injectedMetadata, i18n);
+        })
       )
       .subscribe({
         error: error => {
@@ -74,7 +84,7 @@ export class FatalErrorsService {
       });
 
     const fatalErrorsSetup: FatalErrorsSetup = {
-      add: (error, source) => {
+      add: (error, source?) => {
         const errorInfo = getErrorInfo(error, source);
 
         this.errorInfo$.next(errorInfo);
@@ -95,11 +105,7 @@ export class FatalErrorsService {
     return fatalErrorsSetup;
   }
 
-  private onFirstError(injectedMetadata: InjectedMetadataSetup, i18n: I18nSetup) {
-    // stop the core systems so that things like the legacy platform are stopped
-    // and angular/react components are unmounted;
-    this.stopCoreSystem();
-
+  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nSetup) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
