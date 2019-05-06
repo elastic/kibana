@@ -11,6 +11,8 @@ import {
   UsageAPIProvider,
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
+  SiemGraphQLProvider,
+  InfraOpsSourceConfigurationProvider,
 } from './services';
 
 import {
@@ -34,6 +36,8 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
       infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
       infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
+      siemGraphQLClient: SiemGraphQLProvider,
+      infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,

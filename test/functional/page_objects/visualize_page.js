@@ -385,13 +385,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg text');
       const values = await Promise.all(elements.map(async element => {
         const text = await element.getVisibleText();
-        return text.split('\n');
+        return text;
       }));
-      // .flat() replacement
-      return values.reduce((acc, val) => [...acc, ...val], []);
+      return values.filter(item => item.length > 0);
     }
 
     async clickMetricEditor() {
@@ -567,42 +566,35 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getInterval() {
-      const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option[selected]`);
-      return await intervalElement.getProperty('label');
+      return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
-      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      await input.type(newValue);
-      // The interval element will only interpret space as "select this" if there
-      // was a long enough gap from the typing above to the space click.  Hence the
-      // need for the sleep.
-      await PageObjects.common.sleep(500);
-      await input.pressKeys(browser.keys.SPACE);
+      return await comboBox.set('visEditorInterval', newValue);
     }
 
     async setCustomInterval(newValue) {
-      await this.setInterval('Custom');
-      const input = await find.byCssSelector('input[name="customInterval"]');
-      await input.clearValue();
-      await input.type(newValue);
+      log.debug(`Visualize.setCustomInterval(${newValue})`);
+      return await comboBox.setCustom('visEditorInterval', newValue);
     }
 
-    async setNumericInterval(newValue, { append } = {}) {
-      const input = await find.byCssSelector('input[name="interval"]');
-      if (!append) {
-        await input.clearValue();
+    async getNumericInterval(agg = 2) {
+      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
+      return await intervalElement.getProperty('value');
+    }
+
+    async setNumericInterval(newValue, { append } = {}, agg = 2) {
+      if (append) {
+        await testSubjects.append(`visEditorInterval${agg}`, String(newValue));
+      } else {
+        await testSubjects.setValue(`visEditorInterval${agg}`, String(newValue));
       }
-      await input.type(newValue + '');
-      await PageObjects.common.sleep(1000);
     }
 
-    async setSize(newValue) {
-      const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
-      await input.clearValue();
-      await input.type(String(newValue));
+    async setSize(newValue, aggId) {
+      const dataTestSubj = aggId ? `aggregationEditor${aggId} sizeParamEditor` : 'sizeParamEditor';
+      await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
@@ -615,12 +607,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async toggleOtherBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showOther"]');
+    async toggleOtherBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} otherBucketSwitch`);
     }
 
-    async toggleMissingBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showMissing"]');
+    async toggleMissingBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
@@ -685,10 +677,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
       await fromCell.clearValue();
-      await fromCell.type(`${from}`);
+      await fromCell.type(`${from}`, { charByChar: true });
       const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
       await toCell.clearValue();
-      await toCell.type(`${to}`);
+      await toCell.type(`${to}`, { charByChar: true });
     }
 
     async clickYAxisOptions(axisId) {
@@ -877,6 +869,22 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return chartData;
     }
 
+    /*
+    ** This method returns the paths that compose an area chart.
+    */
+    async getAreaChartPaths(dataLabel) {
+      const path = await retry.try(
+        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2)
+      );
+      const data = await path.getAttribute('d');
+      log.debug(data);
+      // This area chart data starts with a 'M'ove to a x,y location, followed
+      // by a bunch of 'L'ines from that point to the next.  Those points are
+      // the values we're going to use to calculate the data values we're testing.
+      // So git rid of the one 'M' and split the rest on the 'L's.
+      return data.split('L');
+    }
+
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
     async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
       // 1). get the range/pixel ratio
@@ -888,18 +896,15 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const chartTypes = await retry.try(
         async () => await find
           .allByCssSelector(`.visWrapper__chart circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
-
-      // 5). for each chart element, find the green circle, then the cy position
-      async function getChartType(chart) {
+      // 4). for each chart element, find the green circle, then the cy position
+      const chartData = await Promise.all(chartTypes.map(async chart => {
         const cy = await chart.getAttribute('cy');
         // the point_series_options test has data in the billions range and
         // getting 11 digits of precision with these calculations is very hard
         return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(6));
-      }
+      }));
 
-      // 4). pass the chartTypes to the getChartType function
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      return chartData;
     }
 
     // this is ALMOST identical to DiscoverPage.getBarChartData

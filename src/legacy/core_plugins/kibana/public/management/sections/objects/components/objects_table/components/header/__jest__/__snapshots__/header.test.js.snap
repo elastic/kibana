@@ -9,10 +9,7 @@ exports[`Header should render normally 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h1>
           <FormattedMessage
             defaultMessage="Saved Objects"
@@ -97,13 +94,11 @@ exports[`Header should render normally 1`] = `
     size="m"
   />
   <EuiText
-    grow={true}
     size="s"
   >
     <p>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen."

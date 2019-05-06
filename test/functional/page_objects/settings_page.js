@@ -281,7 +281,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickIndexPatternLogstash() {
-      await find.clickByPartialLinkText('logstash-*');
+      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
+      await indexLink.click();
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
@@ -487,7 +488,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const datePatternField = await find.byCssSelector(
         'input[data-test-subj="dateEditorPattern"]'
       );
-      // Both clearValue & clearValueWithKeyboard does not work here
+      // clearValue does not work here
       // Send Backspace event for each char in value string to clear field
       await datePatternField.clearValueWithKeyboard({ charByChar: true });
       await datePatternField.type(datePattern);
@@ -564,7 +565,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      await find.setValue('.euiFilePicker__input', path);
+      if (browser.isW3CEnabled) {
+        const input = await find.byCssSelector('.euiFilePicker__input');
+        await input.type(path);
+      } else {
+        await find.setValue('.euiFilePicker__input', path);
+      }
+
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
         await testSubjects.click('importSavedObjectsOverwriteToggle');

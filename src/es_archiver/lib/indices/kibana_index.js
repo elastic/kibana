@@ -187,7 +187,7 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
         bool: {
           must_not: {
             ids: {
-              type: 'doc',
+              type: '_doc',
               values: ['space:default']
             }
           }

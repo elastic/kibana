@@ -19,7 +19,7 @@
 
 let newPlatformUiSettingsClient;
 
-export function __newPlatformInit__(instance) {
+export function __newPlatformSetup__(instance) {
   if (newPlatformUiSettingsClient) {
     throw new Error('ui/chrome/api/ui_settings already initialized');
   }

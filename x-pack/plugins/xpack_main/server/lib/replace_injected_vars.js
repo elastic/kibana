@@ -33,11 +33,6 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
     return originalInjectedVarsWithUICapabilities;
   }
 
-  // authentication is not a thing you can do
-  if (xpackInfo.license.isOneOf('basic')) {
-    return await withXpackInfo();
-  }
-
   // request is not authenticated
   if (!await server.plugins.security.isAuthenticated(request)) {
     return originalInjectedVarsWithUICapabilities;

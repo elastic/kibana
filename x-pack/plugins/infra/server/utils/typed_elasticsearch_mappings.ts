@@ -8,6 +8,8 @@ export type ElasticsearchMappingOf<Type> = Type extends string
   ? ElasticsearchStringFieldMapping
   : Type extends number
   ? ElasticsearchNumberFieldMapping
+  : Type extends object[]
+  ? ElasticsearchNestedFieldMapping<Type>
   : Type extends {}
   ? ElasticsearchObjectFieldMapping<Type>
   : never;
@@ -27,6 +29,11 @@ export interface ElasticsearchNumberFieldMapping {
     | 'half_float'
     | 'scaled_float'
     | 'date';
+}
+
+export interface ElasticsearchNestedFieldMapping<Obj extends object[]> {
+  type?: 'nested';
+  properties: { [K in keyof Obj[0]]-?: ElasticsearchMappingOf<Obj[0][K]> };
 }
 
 export interface ElasticsearchObjectFieldMapping<Obj extends {}> {
