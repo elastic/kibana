@@ -6,7 +6,7 @@
 
 ==== Base privileges
 Assigning a base privilege grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
-
+[[kibana-privileges-all]]
 `all`:: Grants full read-write access.
 `read`:: Grants read-only access.
 

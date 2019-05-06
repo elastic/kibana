@@ -91,12 +91,3 @@ image::security/images/privilege-example-2.png[Privilege example 2]
 [role="screenshot"]
 image::security/images/privilege-example-3.png[Privilege example 3]
 
-==== Multi-tenant {kib}
-
-When running multiple tenants of {kib}, and changing the `kibana.index` in your `kibana.yml`, you 
-must create custom roles that authorize the user for that specific tenant. You can use
-either the *Management / Security / Roles* page in {kib} or the <<role-management-api>>
-to assign a specific <<kibana-privileges, Kibana privilege>> at that tenant. After creating the
-custom role, you should assign this role to the user(s) that you wish to have access.
-
-While multi-tenant installations are supported, the recommended approach to securing access to segments of {kib} is to grant users access to specific spaces.
