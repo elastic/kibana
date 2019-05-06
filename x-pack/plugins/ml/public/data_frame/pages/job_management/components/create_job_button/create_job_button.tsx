@@ -21,10 +21,11 @@ function newJob() {
 
 export const CreateJobButton: SFC = () => {
   const canCreateDataFrameJob: boolean = checkPermission('canCreateDataFrameJob');
+  const canPreviewDataFrameJob: boolean = checkPermission('canPreviewDataFrameJob');
 
   const button = (
     <EuiButton
-      disabled={!canCreateDataFrameJob}
+      disabled={!canCreateDataFrameJob || !canPreviewDataFrameJob}
       fill
       onClick={newJob}
       iconType="plusInCircle"

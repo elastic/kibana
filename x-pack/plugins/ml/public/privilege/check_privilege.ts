@@ -92,7 +92,11 @@ export function checkCreateDataFrameJobsPrivilege(Promise: PPC, kbnUrl: any): PP
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
-      if (privileges.canCreateDataFrameJob) {
+      if (
+        privileges.canCreateDataFrameJob &&
+        privileges.canPreviewDataFrameJob &&
+        privileges.canStartStopDataFrameJob
+      ) {
         return resolve(privileges);
       } else {
         // if the user has no permission to create a data frame job,
