@@ -106,7 +106,7 @@ export function geoPointToGeometry(value, accumulator) {
     const lat = value[1];
     const lon = value[0];
     accumulator.push(pointGeometryFactory(lat, lon));
-    return accumulator;
+    return;
   }
 
   // Geo-point expressed as an array of values
