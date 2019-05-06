@@ -86,10 +86,7 @@ beforeEach(() => {
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract() as jest.Mocked<UiSettingsClient>,
   };
-  mockSetupContext = {
-    ...omit(mockSetupDeps, 'injectedMetadata'),
-    application: omit(mockSetupDeps.application, 'registerLegacyApp'),
-  };
+  mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
     basePath: basePathServiceMock.createStartContract(),
@@ -98,7 +95,12 @@ beforeEach(() => {
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
   };
-  mockStartContext = omit(mockStartDeps, 'injectedMetadata');
+  mockStartContext = {
+    ...omit(mockStartDeps, 'injectedMetadata'),
+    application: {
+      capabilities: mockStartDeps.application.capabilities,
+    },
+  };
 
   // Reset these for each test.
   mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>(([

@@ -16,7 +16,6 @@ export interface PluginSetupContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [application](./kibana-plugin-public.pluginsetupcontext.application.md) | <code>Pick&lt;ApplicationSetup, 'registerApp'&gt;</code> |  |
 |  [basePath](./kibana-plugin-public.pluginsetupcontext.basepath.md) | <code>BasePathSetup</code> |  |
 |  [chrome](./kibana-plugin-public.pluginsetupcontext.chrome.md) | <code>ChromeSetup</code> |  |
 |  [fatalErrors](./kibana-plugin-public.pluginsetupcontext.fatalerrors.md) | <code>FatalErrorsSetup</code> |  |
