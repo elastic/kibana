@@ -236,7 +236,7 @@ export class ToolbarOverlay extends React.Component {
   render() {
 
     if (
-      !this.props.isReadOnly ||
+      !this.props.isFilterable ||
       !this.state.uniqueIndexPatternsAndGeoFields.length
     ) {
       return null;

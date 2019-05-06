@@ -7,13 +7,13 @@
 import { connect } from 'react-redux';
 import { ToolbarOverlay } from './view';
 import { getDrawState, getUniqueIndexPatternIds } from '../../selectors/map_selectors';
-import { getIsReadOnly } from '../../store/ui';
+import { getIsFilterable } from '../../store/ui';
 import { updateDrawState } from '../../actions/store_actions';
 
 
 function mapStateToProps(state = {}) {
   return {
-    isReadOnly: getIsReadOnly(state),
+    isFilterable: getIsFilterable(state),
     drawState: getDrawState(state),
     uniqueIndexPatternIds: getUniqueIndexPatternIds(state)
   };
