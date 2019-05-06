@@ -507,7 +507,7 @@ const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
               b: d.baseAB ? d.baseAB[1] : d.b,
             }
           : referenceShape;
-      // key points of the stationery shape
+      // key points of the stationary shape
       for (let k = -1; k < 2; k++) {
         for (let l = -1; l < 2; l++) {
           if ((k && !l) || (!k && l)) {
