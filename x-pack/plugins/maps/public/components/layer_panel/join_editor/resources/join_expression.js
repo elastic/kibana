@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../../../shared/components/single_field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getTermsFields } from '../../../../shared/utils/get_terms_fields';
 
 import {
   indexPatternService,
@@ -154,7 +155,7 @@ export class JoinExpression extends Component {
           value={this.props.rightValue}
           onChange={this.props.onRightFieldChange}
           filterField={filterStringOrNumberFields}
-          fields={this.props.rightFields}
+          fields={getTermsFields(this.props.rightFields)}
           isClearable={false}
         />
       </EuiFormRow>

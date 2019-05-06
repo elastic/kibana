@@ -21,6 +21,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('feature controls security', () => {
     before(async () => {
@@ -82,6 +83,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizeLandingPage', 10000);
         await testSubjects.existOrFail('newItemButton');
+      });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
       });
 
       it(`can view existing Visualization`, async () => {
@@ -159,6 +164,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizeLandingPage', 10000);
         await testSubjects.existOrFail('newItemButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`can view existing Visualization`, async () => {

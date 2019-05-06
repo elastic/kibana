@@ -38,15 +38,15 @@ class SamplePanelAction extends ContextMenuAction {
     if (!embeddable) {
       return;
     }
-    getNewPlatform().setup.core.overlays.openFlyout(
+    getNewPlatform().start.core.overlays.openFlyout(
       <React.Fragment>
         <EuiFlyoutHeader>
-          <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
-            <h1>{embeddable.metadata.title}</h1>
+          <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
+            <h2>{embeddable.metadata.title}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
+          <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
         </EuiFlyoutBody>
       </React.Fragment>,
       {

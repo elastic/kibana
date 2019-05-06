@@ -11,8 +11,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
-  const find = getService('find');
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('security feature controls', () => {
     before(async () => {
@@ -77,6 +77,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
         await PageObjects.canvas.expectCreateWorkpadButtonEnabled();
+      });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
       });
 
       it(`allows a workpad to be created`, async () => {
@@ -153,6 +157,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.canvas.expectCreateWorkpadButtonDisabled();
       });
 
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
+      });
+
       it(`does not allow a workpad to be created`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: false,
@@ -213,15 +221,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      const getMessageText = async () =>
-        await (await find.byCssSelector('body>pre')).getVisibleText();
-
       it(`returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -236,7 +241,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

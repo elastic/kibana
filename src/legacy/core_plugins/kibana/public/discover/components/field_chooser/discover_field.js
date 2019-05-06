@@ -24,7 +24,7 @@ import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import './string_progress_bar';
 import detailsHtml from './lib/detail_views/string.html';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
@@ -77,7 +77,7 @@ app.directive('discoverField', function ($compile, i18n) {
 
       };
 
-      $scope.canVisualize = uiCapabilities.visualize.show;
+      $scope.canVisualize = capabilities.get().visualize.show;
 
       $scope.toggleDisplay = function (field) {
         if (field.display) {

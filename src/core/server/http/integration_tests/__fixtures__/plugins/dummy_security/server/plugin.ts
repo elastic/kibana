@@ -36,7 +36,7 @@ export const url = {
   redirectTo: '/login',
 };
 
-export const sessionDurationMs = 30;
+export const sessionDurationMs = 1000;
 export class DummySecurityPlugin {
   public setup(core: CoreSetup) {
     const authenticate: AuthenticationHandler<Storage> = async (request, sessionStorage, t) => {
@@ -71,4 +71,5 @@ export class DummySecurityPlugin {
       },
     };
   }
+  public start() {}
 }

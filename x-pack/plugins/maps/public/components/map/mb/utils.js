@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
 
-export async function createMbMapInstance(node, initialView) {
+export async function createMbMapInstance({ node, initialView, scrollZoom }) {
   return new Promise((resolve) => {
     const options = {
       attributionControl: false,
@@ -17,6 +17,7 @@ export async function createMbMapInstance(node, initialView) {
         sources: {},
         layers: [],
       },
+      scrollZoom
     };
     if (initialView) {
       options.zoom = initialView.zoom;
