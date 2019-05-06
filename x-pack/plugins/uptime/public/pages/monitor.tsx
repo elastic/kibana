@@ -75,7 +75,12 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
         variables={{ dateRangeStart, dateRangeEnd, monitorId }}
       />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
+      <MonitorCharts
+        dateRangeStart={dateRangeStart}
+        dateRangeEnd={dateRangeEnd}
+        {...colors}
+        variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+      />
       <EuiSpacer size="s" />
       <PingList
         onSelectedStatusUpdate={(selectedStatus: string | null) =>

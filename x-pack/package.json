@@ -165,7 +165,7 @@
     "@babel/polyfill": "^7.2.5",
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.3.4",
-    "@elastic/charts": "^3.4.5",
+    "@elastic/charts": "4.2.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "10.3.1",
     "@elastic/javascript-typescript-langserver": "^0.1.23",

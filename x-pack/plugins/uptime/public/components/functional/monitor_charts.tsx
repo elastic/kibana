@@ -18,6 +18,7 @@ import {
   timeFormatter,
   CustomSeriesColorsMap,
 } from '@elastic/charts';
+import DateMath from '@elastic/datemath';
 import {
   // @ts-ignore missing typings
   EuiAreaSeries,
@@ -48,6 +49,8 @@ interface MonitorChartsQueryResult {
 
 interface MonitorChartsProps {
   danger: string;
+  dateRangeStart: string;
+  dateRangeEnd: string;
   mean: string;
   range: string;
   success: string;
@@ -55,8 +58,13 @@ interface MonitorChartsProps {
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export const MonitorChartsComponent = ({ danger, data, mean, range, success }: Props) => {
+export const MonitorChartsComponent = (props: Props) => {
+  const { danger, data, dateRangeStart, dateRangeEnd, mean, range, success } = props;
   if (data && data.monitorChartsData) {
+    const absoluteStart = DateMath.parse(dateRangeStart);
+    const absoluteEnd = DateMath.parse(dateRangeEnd);
+    console.log(absoluteStart.valueOf());
+    console.log(absoluteEnd.valueOf());
     const {
       monitorChartsData: {
         durationArea,
@@ -99,6 +107,7 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
       },
       danger
     );
+    console.log();
 
     return (
       <Fragment>
@@ -108,8 +117,59 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
               <h4>Monitor Duration ms</h4>
             </EuiTitle>
             <EuiPanel>
-              <Chart renderer="canvas" className="uptime-monitor-chart">
-                <Settings legendPosition={Position.Top} showLegend={true} />
+              <Chart className={'story-chart'}>
+                <Axis
+                  id={getAxisId('bottom')}
+                  title={'timestamp per 1 minute'}
+                  position={Position.Bottom}
+                  showOverlappingTicks={true}
+                  tickFormat={timeFormatter('MM-dd HH:mm')}
+                />
+                <Axis
+                  domain={{ min: 0 }}
+                  id={getAxisId('left')}
+                  title="Duration ms"
+                  position={Position.Left}
+                  tickFormat={d => Number(d).toFixed(2)}
+                />
+
+                <AreaSeries
+                  id={getSpecId('area')}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor={'x'}
+                  yAccessors={['Max']}
+                  y0Accessors={['Min']}
+                  data={durationArea.map(({ x, yMin, yMax }) => {
+                    const v = {
+                      x,
+                      Min: microsToMillis(yMin),
+                      Max: microsToMillis(yMax),
+                    };
+                    console.log(v);
+                    return v;
+                  })}
+                  yScaleToDataExtent={false}
+                  curve={CurveType.CURVE_MONOTONE_X}
+                />
+
+                <LineSeries
+                  id={getSpecId('average')}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor={0}
+                  yAccessors={[1]}
+                  data={durationLine.map(({ x, y }) => [x || 0, microsToMillis(y)])}
+                  yScaleToDataExtent={true}
+                  curve={CurveType.CURVE_MONOTONE_X}
+                />
+              </Chart>
+              {/* <Chart renderer="canvas" className="uptime-monitor-chart">
+                <Settings
+                  domain={{ min: absoluteStart.valueOf(), max: absoluteEnd.valueOf() }}
+                  legendPosition={Position.Top}
+                  showLegend={true}
+                />
                 <Axis
                   id={getAxisId('durationBottom')}
                   position={Position.Bottom}
@@ -118,6 +178,7 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
                   showOverlappingTicks={true}
                 />
                 <Axis
+                  domain={{ min: 0 }}
                   id={getAxisId('durationLeft')}
                   position={Position.Left}
                   tickFormat={d => Number(d).toFixed(0)}
@@ -150,7 +211,7 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
                   yAccessors={[1]}
                   yScaleToDataExtent={true}
                 />
-              </Chart>
+              </Chart> */}
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -159,7 +220,11 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
             </EuiTitle>
             <EuiPanel>
               <Chart renderer="canvas">
-                <Settings legendPosition={Position.Top} showLegend={true} />
+                <Settings
+                  domain={{ min: absoluteStart.valueOf(), max: absoluteEnd.valueOf() }}
+                  legendPosition={Position.Top}
+                  showLegend={true}
+                />
                 <Axis
                   id={getAxisId('checksBottom')}
                   position={Position.Bottom}

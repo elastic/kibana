@@ -1325,11 +1325,13 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^3.4.5":
-  version "3.4.5"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.4.5.tgz#9cd28a99a969858f92411e62c177aeb9e8236bd8"
-  integrity sha512-S6Z2CbKlPNXMh9+II0irq2hJ+2OxXGIykWQGjRBdC1+JnioxaCrb2ZpHqREw8B9A0QCGpSoAjUf93yBZqacZ4g==
+"@elastic/charts@4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.0.tgz#923ae2e3e1276bb7dbd62ec5b3a7f0190026370e"
+  integrity sha512-eFdR1SrqB73KEe5zuVHfMeJ0Ef9gpR08pHJbN42XFqhNrLkrxO2CJFNhIyP6BW0Qf2k2ncXhayC2oZ58f7pPaA==
   dependencies:
+    "@types/d3-shape" "^1.3.1"
+    "@types/luxon" "^1.11.1"
     classnames "^2.2.6"
     d3-array "^2.0.3"
     d3-collection "^1.0.7"
@@ -1345,7 +1347,7 @@
     prop-types "^15.7.2"
     react "^16.8.3"
     react-dom "^16.8.3"
-    react-konva "^16.8.3"
+    react-konva "16.8.3"
     react-spring "^8.0.8"
     resize-observer-polyfill "^1.5.1"
 
@@ -3302,6 +3304,11 @@
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.0.tgz#57f228f2b80c046b4a1bd5cac031f81f207f4f03"
   integrity sha512-RaE0B+14ToE4l6UqdarKPnXwVDuigfFv+5j9Dze/Nqr23yyuqdNvzcZi3xB+3Agvi5R4EOgAksfv3lXX4vBt9w==
+
+"@types/luxon@^1.11.1":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.12.0.tgz#acf14294d18e6eba427a5e5d7dfce0f5cd2a9400"
+  integrity sha512-+UzPmwHSEEyv7aGlNkVpuFxp/BirXgl8NnPGCtmyx2KXIzAapoW3IqSVk87/Z3PUk8vEL8Pe1HXEMJbNBOQgtg==
 
 "@types/memoize-one@^4.1.0":
   version "4.1.0"
@@ -21479,13 +21486,13 @@ react-is@~16.3.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.3.2.tgz#f4d3d0e2f5fbb6ac46450641eb2e25bf05d36b22"
   integrity sha512-ybEM7YOr4yBgFd6w8dJqwxegqZGJNBZl6U27HnGKuTZmDvVrD5quWOK/wAnMywiZzW+Qsk+l4X2c70+thp/A8Q==
 
-react-konva@^16.8.3:
-  version "16.8.5"
-  resolved "https://registry.yarnpkg.com/react-konva/-/react-konva-16.8.5.tgz#ada27c9728490dc939b871e076a44d1d4180b1d2"
-  integrity sha512-zTG1lXEZHkoUd+DtCd2dZPJlICN35KR51bGtSomWWBS/0HaWGe68ZuVZe9AIZfjmcLNfg5oNqrifAJ6UWYwA4g==
+react-konva@16.8.3:
+  version "16.8.3"
+  resolved "https://registry.yarnpkg.com/react-konva/-/react-konva-16.8.3.tgz#e55390040ea54675a0ef0d40b4fa93731e6d7b03"
+  integrity sha512-gU36TBxcPZANQOV5prAFnpRSNp2ikAT7zCICHTBJvOzAfa8Yhcyaey6EIrD+NTT/4y0PyGFBIkmWq6zdrlNrQg==
   dependencies:
-    react-reconciler "^0.20.3"
-    scheduler "^0.13.5"
+    react-reconciler "^0.20.1"
+    scheduler "^0.13.3"
 
 react-lib-adler32@^1.0.3:
   version "1.0.3"
@@ -21591,7 +21598,7 @@ react-portal@^3.2.0:
   dependencies:
     prop-types "^15.5.8"
 
-react-reconciler@^0.20.3:
+react-reconciler@^0.20.1:
   version "0.20.4"
   resolved "https://registry.yarnpkg.com/react-reconciler/-/react-reconciler-0.20.4.tgz#3da6a95841592f849cb4edd3d38676c86fd920b2"
   integrity sha512-kxERc4H32zV2lXMg/iMiwQHOtyqf15qojvkcZ5Ja2CPkjVohHw9k70pdDBwrnQhLVetUJBSYyqU3yqrlVTOajA==
@@ -23263,18 +23270,18 @@ scheduler@^0.13.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
 
-scheduler@^0.13.5:
-  version "0.13.5"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.5.tgz#b7226625167041298af3b98088a9dbbf6d7733a8"
-  integrity sha512-K98vjkQX9OIt/riLhp6F+XtDPtMQhqNcf045vsh+pcuvHq+PHy1xCrH3pq1P40m6yR46lpVvVhKdEOtnimuUJw==
+scheduler@^0.13.3, scheduler@^0.13.6:
+  version "0.13.6"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.6.tgz#466a4ec332467b31a91b9bf74e5347072e4cd889"
+  integrity sha512-IWnObHt413ucAYKsD9J1QShUKkbKLQQHdxRyw73sw4FN26iWr3DY/H34xGPe4nmL1DwXyWmSWmMrA9TfQbE/XQ==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
 
-scheduler@^0.13.6:
-  version "0.13.6"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.6.tgz#466a4ec332467b31a91b9bf74e5347072e4cd889"
-  integrity sha512-IWnObHt413ucAYKsD9J1QShUKkbKLQQHdxRyw73sw4FN26iWr3DY/H34xGPe4nmL1DwXyWmSWmMrA9TfQbE/XQ==
+scheduler@^0.13.5:
+  version "0.13.5"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.5.tgz#b7226625167041298af3b98088a9dbbf6d7733a8"
+  integrity sha512-K98vjkQX9OIt/riLhp6F+XtDPtMQhqNcf045vsh+pcuvHq+PHy1xCrH3pq1P40m6yR46lpVvVhKdEOtnimuUJw==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
