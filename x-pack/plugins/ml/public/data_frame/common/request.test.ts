@@ -53,13 +53,11 @@ describe('Data Frame: Common', () => {
               combine_script: 'return state',
               map_script: "state.ts = doc['the-transaction-field'].value.getMillis();",
               reduce_script: `
-double min = 9000000000000L;
-double max = 0L;
+double min = Double.POSITIVE_INFINITY;
+double max = Double.NEGATIVE_INFINITY;
 for (s in states) {
-  if (s.ts > 0) {
-    min = Math.min(min, s.ts);
-    max = Math.max(max, s.ts);
-  }
+  min = Math.min(min, s.ts);
+  max = Math.max(max, s.ts);
 }
 return Math.round((max - min));
 `,
