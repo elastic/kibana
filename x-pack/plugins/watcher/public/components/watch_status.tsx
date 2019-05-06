@@ -20,7 +20,7 @@ function StatusIcon({ status }: { status: string }) {
     case ACTION_STATES.THROTTLED:
       return <EuiIcon type="clock" color="warning" />;
     case WATCH_STATES.DISABLED:
-      return <EuiIcon type="minusInCircleFilled" color="#69707D" />; // EUI color: euiColorDarkShade
+      return <EuiIcon type="minusInCircleFilled" color="subdued" />;
     case WATCH_STATES.CONFIG_ERROR:
     case WATCH_STATES.ERROR:
     case ACTION_STATES.CONFIG_ERROR:
