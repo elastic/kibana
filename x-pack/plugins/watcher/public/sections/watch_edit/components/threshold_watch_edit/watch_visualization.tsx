@@ -7,14 +7,15 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import '@elastic/charts/dist/style.css';
 import {
+  AnnotationDomainTypes,
   Axis,
-  CustomSeriesColorsMap,
   DARK_THEME,
-  DataSeriesColorsValues,
+  getAnnotationId,
   getAxisId,
   getSpecId,
   Chart,
   LIGHT_THEME,
+  LineAnnotation,
   LineSeries,
   Position,
   ScaleType,
@@ -123,22 +124,21 @@ const WatchVisualizationUi = () => {
   );
 
   const timezone = getTimezone();
+  const actualThreshold = getThreshold(watch);
+  let maxY = actualThreshold[actualThreshold.length - 1];
+  (Object.values(watchVisualizationData) as number[][][]).forEach(data => {
+    data.forEach(([, y]) => {
+      if (y > maxY) {
+        maxY = y;
+      }
+    });
+  });
   const dateFormatter = (d: number) => {
     return moment(d)
       .tz(timezone)
       .format(getTimeBuckets(watch).getScaledDateFormat());
   };
   const aggLabel = aggTypes[watch.aggType].text;
-
-  const getCustomColors = (specId: string) => {
-    const customSeriesColors: CustomSeriesColorsMap = new Map();
-    const dataSeriesColorValues: DataSeriesColorsValues = {
-      colorValues: [],
-      specId: getSpecId(specId),
-    };
-    customSeriesColors.set(dataSeriesColorValues, '#BD271E');
-    return customSeriesColors;
-  };
 
   if (isLoading) {
     return (
@@ -175,7 +175,12 @@ const WatchVisualizationUi = () => {
             showOverlappingTicks={true}
             tickFormat={dateFormatter}
           />
-          <Axis id={getAxisId('left')} title={aggLabel} position={Position.Left} />
+          <Axis
+            domain={{ max: maxY }}
+            id={getAxisId('left')}
+            title={aggLabel}
+            position={Position.Left}
+          />
           {watchVisualizationDataKeys.map((key: string) => {
             return (
               <LineSeries
@@ -190,20 +195,13 @@ const WatchVisualizationUi = () => {
               />
             );
           })}
-          {getThreshold(watch).map((value: any, i: number) => {
+          {actualThreshold.map((value: any, i: number) => {
             const specId = i === 0 ? 'threshold' : `threshold${i}`;
             return (
-              <LineSeries
-                key={specId}
-                id={getSpecId(specId)}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                data={[[domain.min, watch.threshold[i]], [domain.max, watch.threshold[i]]]}
-                xAccessor={0}
-                yAccessors={[1]}
-                timeZone={timezone}
-                yScaleToDataExtent={true}
-                customSeriesColors={getCustomColors(specId)}
+              <LineAnnotation
+                annotationId={getAnnotationId(specId)}
+                domainType={AnnotationDomainTypes.YDomain}
+                dataValues={[{ dataValue: watch.threshold[i], details: specId }]}
               />
             );
           })}
