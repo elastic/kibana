@@ -23,7 +23,7 @@ export default function splitByFilter(req, panel, series, esQueryConfig, indexPa
   return next => doc => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach(filter => {
-        const builtEsQuery = buildEsQuery(indexPattern, [series.filter], [], esQueryConfig);
+        const builtEsQuery = buildEsQuery(indexPattern, [filter.filter], [], esQueryConfig);
         _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtEsQuery);
       });
     }
