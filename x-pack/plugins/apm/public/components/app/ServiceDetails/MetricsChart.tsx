@@ -34,7 +34,7 @@ function getYTickFormatter(unit: YUnit) {
       return (y: number | null) => asPercent(y || 0, 1);
     }
     default: {
-      return (y: number | null) => y;
+      return (y: number | null) => (y === null ? y : Math.floor(y * 100) / 100);
     }
   }
 }
@@ -48,7 +48,8 @@ function getTooltipFormatter(unit: YUnit) {
       return (c: Coordinate) => asPercent(c.y || 0, 1);
     }
     default: {
-      return (c: Coordinate) => c.y;
+      return (c: Coordinate) =>
+        c.y === null ? c.y : Math.floor(c.y * 100) / 100;
     }
   }
 }
