@@ -49,16 +49,16 @@ interface ElementsLoadedTelemetryProps {
 }
 
 function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedArgs) {
-  const resolvedArgsElements = new Set(Object.keys(resolvedArgs));
+  const resolvedArgsElements = Object.keys(resolvedArgs);
 
   const workpadElements = workpad.pages.reduce<string[]>((reduction, page) => {
     return [...reduction, ...page.elements.map(element => element.id)];
   }, []);
 
-  return workpadElements.every(element => resolvedArgsElements.has(element));
+  return workpadElements.every(element => resolvedArgsElements.includes(element));
 }
 
-const withElementsLoadedTelemetry = <P extends object>(
+export const withUnconnectedElementsLoadedTelemetry = <P extends object>(
   Component: React.ComponentType<P>,
   trackMetric: (metric: string | string[]) => void = trackCanvasUiMetric
 ) => {
@@ -109,12 +109,9 @@ const withElementsLoadedTelemetry = <P extends object>(
   };
 };
 
-const connectedTelemetryHOC = <P extends object>(Component: React.ComponentType<P>) => {
-  const telemetry = withElementsLoadedTelemetry(Component);
+export const withElementsLoadedTelemetry = <P extends object>(
+  Component: React.ComponentType<P>
+) => {
+  const telemetry = withUnconnectedElementsLoadedTelemetry(Component);
   return connect(mapStateToProps)(telemetry);
-};
-
-export {
-  connectedTelemetryHOC as withElementsLoadedTelemetry,
-  withElementsLoadedTelemetry as _unconnectedWithElementsLoadedTelemetry,
 };

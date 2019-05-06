@@ -7,13 +7,13 @@
 import React from 'react';
 import { render, cleanup } from 'react-testing-library';
 import {
-  _unconnectedWithElementsLoadedTelemetry,
+  withUnconnectedElementsLoadedTelemetry,
   WorkpadLoadedMetric,
   WorkpadLoadedWithErrorsMetric,
 } from '../workpad_telemetry';
 
 const trackMetric = jest.fn();
-const Component = _unconnectedWithElementsLoadedTelemetry(() => <div />, trackMetric);
+const Component = withUnconnectedElementsLoadedTelemetry(() => <div />, trackMetric);
 
 const mockWorkpad = {
   id: 'workpadid',
