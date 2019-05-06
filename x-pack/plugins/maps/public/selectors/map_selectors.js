@@ -200,6 +200,6 @@ export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some(layerDescriptor => {
     const currentState = copyPersistentState(layerDescriptor);
     const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-    return (trackedState) ? !_.isEqual(currentState, copyPersistentState(trackedState)) : false;
+    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
   });
 });

@@ -22,7 +22,7 @@ export default function codeIntelligenceFunctionalTests({
   const FIND_TIME = config.get('timeouts.find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Code', () => {
+  describe('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
       const testGoToDefinition = async () => {
@@ -116,7 +116,7 @@ export default function codeIntelligenceFunctionalTests({
 
         // Clean up the imported repository
         await PageObjects.code.clickDeleteRepositoryButton();
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
         });
