@@ -7,6 +7,7 @@
 import 'hapi';
 
 import { CloudPlugin } from '../plugins/cloud';
+import { EncryptedSavedObjectsPlugin } from '../plugins/encrypted_saved_objects';
 import { SecurityPlugin } from '../plugins/security';
 import { XPackMainPlugin } from '../plugins/xpack_main/xpack_main';
 
@@ -15,5 +16,6 @@ declare module 'hapi' {
     cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
     security?: SecurityPlugin;
+    encrypted_saved_objects?: EncryptedSavedObjectsPlugin;
   }
 }
