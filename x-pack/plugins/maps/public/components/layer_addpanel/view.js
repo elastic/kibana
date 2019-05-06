@@ -31,7 +31,8 @@ export class AddLayerPanel extends Component {
     hasLayerSelected: false,
     layer: null,
     indexingTriggered: false,
-    importIndexingReady: false
+    importIndexingReady: false,
+    importView: false,
   }
 
   _viewLayer = (source, fitToExtent = false) => {
@@ -73,19 +74,22 @@ export class AddLayerPanel extends Component {
     this.props.removeTransientLayer();
   }
 
-  _onSourceTypeChange = (sourceType) => {
-    this.setState({ sourceType });
+  _onSourceTypeChange = (sourceType, isImportView) => {
+    this.setState({ sourceType, importView: isImportView });
   }
 
   _renderNextBtn() {
-    if (!this.props.importView && !this.state.sourceType) {
+    if (!this.state.importView && !this.state.sourceType) {
       return null;
     }
 
-    const { hasLayerSelected, isLoading, selectLayerAndAdd, importView } = this.props;
+    const { hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
     return (
       <EuiButton
-        disabled={!hasLayerSelected || importView && !this.state.importIndexingReady}
+        disabled={
+          !hasLayerSelected || this.state.importView &&
+          !this.state.importIndexingReady
+        }
         isLoading={hasLayerSelected && isLoading}
         iconSide="right"
         iconType={'sortRight'}
@@ -123,7 +127,10 @@ export class AddLayerPanel extends Component {
             className="mapLayerAddpanel__card"
             title={Source.title}
             icon={icon}
-            onClick={() => this._onSourceTypeChange(Source.type)}
+            onClick={() => {
+              const isImportView = Source.indexReadyFile;
+              this._onSourceTypeChange(Source.type, isImportView);
+            }}
             description={Source.description}
             layout="horizontal"
             data-test-subj={_.camelCase(Source.title)}
@@ -238,7 +245,7 @@ export class AddLayerPanel extends Component {
         <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
           <div className="mapLayerPanel__bodyOverflow">
             {
-              this.props.importView
+              this.state.importView
                 ? this._renderFileImportEditor()
                 : this._renderAddLayerForm()
             }
