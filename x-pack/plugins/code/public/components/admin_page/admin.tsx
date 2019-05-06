@@ -13,11 +13,10 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import { Repository, SearchScope } from '../../../model';
 import { changeSearchScope, SearchOptions } from '../../actions';
 import { RootState } from '../../reducers';
-import { ShortcutsProvider } from '../shortcuts';
+import { SearchBar } from '../search_bar';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
-import { SearchBar } from './search_bar';
 
 enum AdminTabs {
   projects = 'Projects',
@@ -126,7 +125,6 @@ class AdminPage extends React.PureComponent<Props, State> {
       <div className="codeContainer__root">
         <div className="codeContainer__rootInner">
           <div className="codeContainer__adminWrapper">
-            <ShortcutsProvider />
             <SearchBar
               repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
               query={this.props.query}
