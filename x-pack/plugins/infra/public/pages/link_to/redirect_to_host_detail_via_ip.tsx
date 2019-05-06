@@ -7,6 +7,7 @@
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { replaceMetricTimeInQueryString } from '../../containers/metrics/with_metrics_time';
 import { useHostIpToName } from './use_host_ip_to_name';
 import { getFromFromLocation, getToFromLocation } from './query_params';
@@ -14,39 +15,66 @@ import { WithSource } from '../../containers/with_source';
 import { LoadingPage } from '../../components/loading_page';
 import { Error } from '../error';
 
-type RedirectToHostDetailProps = RouteComponentProps<{
+type RedirectToHostDetailType = RouteComponentProps<{
   hostIp: string;
 }>;
 
-export const RedirectToHostDetailViaIP = ({
-  match: {
-    params: { hostIp },
-  },
-  location,
-}: RedirectToHostDetailProps) => {
-  return (
-    <WithSource>
-      {({ configuration }) => {
-        const { loading, error, name } = useHostIpToName(
-          hostIp,
-          (configuration && configuration.metricAlias) || null
-        );
+interface RedirectToHostDetailProps extends RedirectToHostDetailType {
+  intl: InjectedIntl;
+}
 
-        if (error) {
-          return <Error message={`Host not found with IP address "${hostIp}".`} />;
-        }
+export const RedirectToHostDetailViaIP = injectI18n(
+  ({
+    match: {
+      params: { hostIp },
+    },
+    location,
+    intl,
+  }: RedirectToHostDetailProps) => {
+    return (
+      <WithSource>
+        {({ configuration }) => {
+          const { error, name } = useHostIpToName(
+            hostIp,
+            (configuration && configuration.metricAlias) || null
+          );
 
-        const searchString = replaceMetricTimeInQueryString(
-          getFromFromLocation(location),
-          getToFromLocation(location)
-        )('');
+          if (error) {
+            return (
+              <Error
+                message={intl.formatMessage(
+                  {
+                    id: 'xpack.infra.linkTo.hostWithIp.error',
+                    defaultMessage: 'Host not found with IP address "{hostIp}".',
+                  },
+                  { hostIp }
+                )}
+              />
+            );
+          }
 
-        if (name) {
-          return <Redirect to={`/metrics/host/${name}?${searchString}`} />;
-        }
+          const searchString = replaceMetricTimeInQueryString(
+            getFromFromLocation(location),
+            getToFromLocation(location)
+          )('');
 
-        return <LoadingPage message={`Loading host with IP address "${hostIp}".`} />;
-      }}
-    </WithSource>
-  );
-};
+          if (name) {
+            return <Redirect to={`/metrics/host/${name}?${searchString}`} />;
+          }
+
+          return (
+            <LoadingPage
+              message={intl.formatMessage(
+                {
+                  id: 'xpack.infra.linkTo.hostWithIp.loading',
+                  defaultMessage: 'Loading host with IP address "{hostIp}".',
+                },
+                { hostIp }
+              )}
+            />
+          );
+        }}
+      </WithSource>
+    );
+  }
+);
