@@ -62,7 +62,7 @@ class FilterItemsUi extends Component {
     const newFilter = () => ({
       color: this.props.model.color,
       id: uuid.v1(),
-      filter: { language: model.filter.language ? model.filter.language : 'lucene', query: '' },
+      filter: { language: model.filter.language ? model.filter.language : 'kuery', query: '' },
     });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
@@ -82,7 +82,7 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryBar
-            query={{ language: model.filter.language ? model.filter.language : 'lucene', query: model.filter.query }}
+            query={{ language: model.filter.language ? model.filter.language : 'kuery', query: model.filter.query }}
             screenTitle={'DataMetricsGroupByFiltersFilter'}
             onSubmit={(query) => this.handleSubmit(model, query)}
             appName={'VisEditor'}
