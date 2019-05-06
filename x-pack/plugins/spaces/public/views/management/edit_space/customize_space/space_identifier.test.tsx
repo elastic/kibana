@@ -17,7 +17,7 @@ test('renders without crashing', () => {
     },
     editable: true,
     onChange: jest.fn(),
-    validator: new SpaceValidator({ features: [] }),
+    validator: new SpaceValidator(),
   };
   const wrapper = shallowWithIntl(
     <SpaceIdentifier.WrappedComponent {...props} intl={null as any} />

@@ -53,6 +53,8 @@ export interface InfraSourceConfiguration {
   logAlias: string;
   /** The field mapping to use for this source */
   fields: InfraSourceFields;
+  /** The columns to use for log display */
+  logColumns: InfraSourceLogColumn[];
 }
 /** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
@@ -68,6 +70,35 @@ export interface InfraSourceFields {
   tiebreaker: string;
   /** The field to use as a timestamp for metrics and logs */
   timestamp: string;
+}
+/** The built-in timestamp log column */
+export interface InfraSourceTimestampLogColumn {
+  timestampColumn: InfraSourceTimestampLogColumnAttributes;
+}
+
+export interface InfraSourceTimestampLogColumnAttributes {
+  /** A unique id for the column */
+  id: string;
+}
+/** The built-in message log column */
+export interface InfraSourceMessageLogColumn {
+  messageColumn: InfraSourceMessageLogColumnAttributes;
+}
+
+export interface InfraSourceMessageLogColumnAttributes {
+  /** A unique id for the column */
+  id: string;
+}
+/** A log column containing a field value */
+export interface InfraSourceFieldLogColumn {
+  fieldColumn: InfraSourceFieldLogColumnAttributes;
+}
+
+export interface InfraSourceFieldLogColumnAttributes {
+  /** A unique id for the column */
+  id: string;
+  /** The field name this column refers to */
+  field: string;
 }
 /** The status of an infrastructure data source */
 export interface InfraSourceStatus {
@@ -143,6 +174,16 @@ export interface InfraLogEntry {
   gid: string;
   /** The source id */
   source: string;
+  /** The columns used for rendering the log entry */
+  columns: InfraLogEntryColumn[];
+}
+/** A special built-in column that contains the log entry's timestamp */
+export interface InfraLogEntryTimestampColumn {
+  /** The timestamp */
+  timestamp: number;
+}
+/** A special built-in column that contains the log entry's constructed message */
+export interface InfraLogEntryMessageColumn {
   /** A list of the formatted log entry segments */
   message: InfraLogMessageSegment[];
 }
@@ -155,10 +196,17 @@ export interface InfraLogMessageFieldSegment {
   /** A list of highlighted substrings of the value */
   highlights: string[];
 }
-/** A segment of the log entry message that was derived from a field */
+/** A segment of the log entry message that was derived from a string literal */
 export interface InfraLogMessageConstantSegment {
   /** The segment's message */
   constant: string;
+}
+/** A column that contains the value of a field of the log entry */
+export interface InfraLogEntryFieldColumn {
+  /** The field name of the column */
+  field: string;
+  /** The value of the field in the log entry */
+  value: string;
 }
 /** A consecutive sequence of log summary buckets */
 export interface InfraLogSummaryInterval {
@@ -246,20 +294,15 @@ export interface InfraDataPoint {
 
 export interface Mutation {
   /** Create a new source of infrastructure data */
-  createSource: CreateSourceResult;
-  /** Modify an existing source using the given sequence of update operations */
+  createSource: UpdateSourceResult;
+  /** Modify an existing source */
   updateSource: UpdateSourceResult;
   /** Delete a source of infrastructure data */
   deleteSource: DeleteSourceResult;
 }
-/** The result of a successful source creation */
-export interface CreateSourceResult {
-  /** The source that was created */
-  source: InfraSource;
-}
-/** The result of a sequence of source update operations */
+/** The result of a successful source update */
 export interface UpdateSourceResult {
-  /** The source after the operations were performed */
+  /** The source that was updated */
   source: InfraSource;
 }
 /** The result of a source deletion operations */
@@ -298,10 +341,10 @@ export interface InfraSnapshotMetricInput {
   /** The type of metric */
   type: InfraSnapshotMetricType;
 }
-/** The source to be created */
-export interface CreateSourceInput {
+/** The properties to update the source with */
+export interface UpdateSourceInput {
   /** The name of the data source */
-  name: string;
+  name?: string | null;
   /** A description of the data source */
   description?: string | null;
   /** The alias to read metric data from */
@@ -309,10 +352,12 @@ export interface CreateSourceInput {
   /** The alias to read log data from */
   logAlias?: string | null;
   /** The field mapping to use for this source */
-  fields?: CreateSourceFieldsInput | null;
+  fields?: UpdateSourceFieldsInput | null;
+  /** The log columns to display for this source */
+  logColumns?: UpdateSourceLogColumnInput[] | null;
 }
 /** The mapping of semantic fields of the source to be created */
-export interface CreateSourceFieldsInput {
+export interface UpdateSourceFieldsInput {
   /** The field to identify a container by */
   container?: string | null;
   /** The fields to identify a host by */
@@ -324,46 +369,28 @@ export interface CreateSourceFieldsInput {
   /** The field to use as a timestamp for metrics and logs */
   timestamp?: string | null;
 }
-/** The update operations to be performed */
-export interface UpdateSourceInput {
-  /** The name update operation to be performed */
-  setName?: UpdateSourceNameInput | null;
-  /** The description update operation to be performed */
-  setDescription?: UpdateSourceDescriptionInput | null;
-  /** The alias update operation to be performed */
-  setAliases?: UpdateSourceAliasInput | null;
-  /** The field update operation to be performed */
-  setFields?: UpdateSourceFieldsInput | null;
+/** One of the log column types to display for this source */
+export interface UpdateSourceLogColumnInput {
+  /** A custom field log column */
+  fieldColumn?: UpdateSourceFieldLogColumnInput | null;
+  /** A built-in message log column */
+  messageColumn?: UpdateSourceMessageLogColumnInput | null;
+  /** A built-in timestamp log column */
+  timestampColumn?: UpdateSourceTimestampLogColumnInput | null;
 }
-/** A name update operation */
-export interface UpdateSourceNameInput {
-  /** The new name to be set */
-  name: string;
+
+export interface UpdateSourceFieldLogColumnInput {
+  id: string;
+
+  field: string;
 }
-/** A description update operation */
-export interface UpdateSourceDescriptionInput {
-  /** The new description to be set */
-  description: string;
+
+export interface UpdateSourceMessageLogColumnInput {
+  id: string;
 }
-/** An alias update operation */
-export interface UpdateSourceAliasInput {
-  /** The new log index pattern or alias to bet set */
-  logAlias?: string | null;
-  /** The new metric index pattern or alias to bet set */
-  metricAlias?: string | null;
-}
-/** A field update operations */
-export interface UpdateSourceFieldsInput {
-  /** The new container field to be set */
-  container?: string | null;
-  /** The new host field to be set */
-  host?: string | null;
-  /** The new pod field to be set */
-  pod?: string | null;
-  /** The new tiebreaker field to be set */
-  tiebreaker?: string | null;
-  /** The new timestamp field to be set */
-  timestamp?: string | null;
+
+export interface UpdateSourceTimestampLogColumnInput {
+  id: string;
 }
 
 // ====================================================
@@ -442,13 +469,13 @@ export interface CreateSourceMutationArgs {
   /** The id of the source */
   id: string;
 
-  source: CreateSourceInput;
+  sourceProperties: UpdateSourceInput;
 }
 export interface UpdateSourceMutationArgs {
   /** The id of the source */
   id: string;
-  /** A sequence of update operations */
-  changes: UpdateSourceInput[];
+  /** The properties to update the source with */
+  sourceProperties: UpdateSourceInput;
 }
 export interface DeleteSourceMutationArgs {
   /** The id of the source */
@@ -514,6 +541,18 @@ export enum InfraMetric {
 // ====================================================
 // Unions
 // ====================================================
+
+/** All known log column types */
+export type InfraSourceLogColumn =
+  | InfraSourceTimestampLogColumn
+  | InfraSourceMessageLogColumn
+  | InfraSourceFieldLogColumn;
+
+/** A column of a log entry */
+export type InfraLogEntryColumn =
+  | InfraLogEntryTimestampColumn
+  | InfraLogEntryMessageColumn
+  | InfraLogEntryFieldColumn;
 
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
@@ -708,7 +747,7 @@ export namespace MetricsQuery {
 export namespace CreateSourceConfigurationMutation {
   export type Variables = {
     sourceId: string;
-    sourceConfiguration: CreateSourceInput;
+    sourceProperties: UpdateSourceInput;
   };
 
   export type Mutation = {
@@ -718,7 +757,7 @@ export namespace CreateSourceConfigurationMutation {
   };
 
   export type CreateSource = {
-    __typename?: 'CreateSourceResult';
+    __typename?: 'UpdateSourceResult';
 
     source: Source;
   };
@@ -763,7 +802,7 @@ export namespace SourceQuery {
 export namespace UpdateSourceMutation {
   export type Variables = {
     sourceId?: string | null;
-    changes: UpdateSourceInput[];
+    sourceProperties: UpdateSourceInput;
   };
 
   export type Mutation = {
@@ -891,41 +930,7 @@ export namespace LogEntries {
 
   export type End = InfraTimeKeyFields.Fragment;
 
-  export type Entries = {
-    __typename?: 'InfraLogEntry';
-
-    gid: string;
-
-    key: Key;
-
-    message: Message[];
-  };
-
-  export type Key = {
-    __typename?: 'InfraTimeKey';
-
-    time: number;
-
-    tiebreaker: number;
-  };
-
-  export type Message =
-    | InfraLogMessageFieldSegmentInlineFragment
-    | InfraLogMessageConstantSegmentInlineFragment;
-
-  export type InfraLogMessageFieldSegmentInlineFragment = {
-    __typename?: 'InfraLogMessageFieldSegment';
-
-    field: string;
-
-    value: string;
-  };
-
-  export type InfraLogMessageConstantSegmentInlineFragment = {
-    __typename?: 'InfraLogMessageConstantSegment';
-
-    constant: string;
-  };
+  export type Entries = InfraLogEntryFields.Fragment;
 }
 
 export namespace SourceConfigurationFields {
@@ -941,6 +946,8 @@ export namespace SourceConfigurationFields {
     metricAlias: string;
 
     fields: Fields;
+
+    logColumns: LogColumns[];
   };
 
   export type Fields = {
@@ -957,6 +964,49 @@ export namespace SourceConfigurationFields {
     tiebreaker: string;
 
     timestamp: string;
+  };
+
+  export type LogColumns =
+    | InfraSourceTimestampLogColumnInlineFragment
+    | InfraSourceMessageLogColumnInlineFragment
+    | InfraSourceFieldLogColumnInlineFragment;
+
+  export type InfraSourceTimestampLogColumnInlineFragment = {
+    __typename?: 'InfraSourceTimestampLogColumn';
+
+    timestampColumn: TimestampColumn;
+  };
+
+  export type TimestampColumn = {
+    __typename?: 'InfraSourceTimestampLogColumnAttributes';
+
+    id: string;
+  };
+
+  export type InfraSourceMessageLogColumnInlineFragment = {
+    __typename?: 'InfraSourceMessageLogColumn';
+
+    messageColumn: MessageColumn;
+  };
+
+  export type MessageColumn = {
+    __typename?: 'InfraSourceMessageLogColumnAttributes';
+
+    id: string;
+  };
+
+  export type InfraSourceFieldLogColumnInlineFragment = {
+    __typename?: 'InfraSourceFieldLogColumn';
+
+    fieldColumn: FieldColumn;
+  };
+
+  export type FieldColumn = {
+    __typename?: 'InfraSourceFieldLogColumnAttributes';
+
+    id: string;
+
+    field: string;
   };
 }
 
@@ -1003,5 +1053,68 @@ export namespace InfraSourceFields {
     version?: string | null;
 
     updatedAt?: number | null;
+  };
+}
+
+export namespace InfraLogEntryFields {
+  export type Fragment = {
+    __typename?: 'InfraLogEntry';
+
+    gid: string;
+
+    key: Key;
+
+    columns: Columns[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+
+    time: number;
+
+    tiebreaker: number;
+  };
+
+  export type Columns =
+    | InfraLogEntryTimestampColumnInlineFragment
+    | InfraLogEntryMessageColumnInlineFragment
+    | InfraLogEntryFieldColumnInlineFragment;
+
+  export type InfraLogEntryTimestampColumnInlineFragment = {
+    __typename?: 'InfraLogEntryTimestampColumn';
+
+    timestamp: number;
+  };
+
+  export type InfraLogEntryMessageColumnInlineFragment = {
+    __typename?: 'InfraLogEntryMessageColumn';
+
+    message: Message[];
+  };
+
+  export type Message =
+    | InfraLogMessageFieldSegmentInlineFragment
+    | InfraLogMessageConstantSegmentInlineFragment;
+
+  export type InfraLogMessageFieldSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageFieldSegment';
+
+    field: string;
+
+    value: string;
+  };
+
+  export type InfraLogMessageConstantSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageConstantSegment';
+
+    constant: string;
+  };
+
+  export type InfraLogEntryFieldColumnInlineFragment = {
+    __typename?: 'InfraLogEntryFieldColumn';
+
+    field: string;
+
+    value: string;
   };
 }
