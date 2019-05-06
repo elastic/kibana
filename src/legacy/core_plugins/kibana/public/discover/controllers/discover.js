@@ -564,7 +564,7 @@ function discoverController(
         queryFilter.getUpdates$().subscribe({
           next: () => {
             $scope.filters = queryFilter.getFilters();
-            return $scope.updateDataSource().then(function () {
+            $scope.updateDataSource().then(function () {
               $state.save();
             });
           }
@@ -577,7 +577,9 @@ function discoverController(
 
         // fetch data when filters fire fetch event
         queryFilter.getFetches$().subscribe({
-          next: () => $scope.fetch
+          next: () => {
+            $scope.fetch();
+          }
         });
 
         $scope.$watch('opts.timefield', function (timefield) {
