@@ -31,10 +31,6 @@ export class AbstractSource {
     return true;
   }
 
-  async getIndexPatternAndGeofield() {
-    return null;
-  }
-
   /**
    * return list of immutable source properties.
    * Immutable source properties are properties that can not be edited by the user.

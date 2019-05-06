@@ -37,18 +37,6 @@ export class AbstractESSource extends AbstractVectorSource {
     return true;
   }
 
-  async getIndexPatternAndGeofield() {
-    const indexPattern = await this._getIndexPattern();
-    if (!indexPattern) {
-      return null;
-    }
-    return {
-      indexPatternId: this._descriptor.indexPatternId,
-      indexPatternTitle: indexPattern.title,
-      geoField: this._descriptor.geoField
-    };
-  }
-
   getIndexPatternIds() {
     return  [this._descriptor.indexPatternId];
   }

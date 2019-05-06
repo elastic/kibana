@@ -275,10 +275,5 @@ export class AbstractLayer {
     return [];
   }
 
-  async getIndexPatternsAndGeofields() {
-    const config = await this._source.getIndexPatternAndGeofield();
-    return config ? [config] : [];
-  }
-
 }
 

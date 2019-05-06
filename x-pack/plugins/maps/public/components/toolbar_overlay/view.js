@@ -181,7 +181,9 @@ export class ToolbarOverlay extends React.Component {
       <EuiSelectable
         searchable
         searchProps={{
-          placeholder: 'Filter list',
+          placeholder: i18n.translate('xpack.maps.toolbarOverlay.indexPattern.filterListTitle', {
+            defaultMessage: 'Filter list',
+          }),
           compressed: true,
         }}
         options={options}

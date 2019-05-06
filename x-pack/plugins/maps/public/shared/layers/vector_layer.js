@@ -536,15 +536,4 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  async getIndexPatternsAndGeofields() {
-    let configs = await super.getIndexPatternsAndGeofields();
-    const validJoins = this.getValidJoins();
-    for (let i = 0; i < validJoins.length; i++) {
-      const source = validJoins[i].getJoinSource();
-      const configsFromJoins = await source.getIndexPatternAndGeofield();
-      configs = configs.concat(configsFromJoins);
-    }
-    return configs;
-  }
-
 }
