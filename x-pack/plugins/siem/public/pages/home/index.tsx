@@ -5,7 +5,8 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
@@ -126,12 +127,15 @@ export const HomePage = pure(() => (
 const paddingTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const Page = styled(EuiPage)`
-  padding: 0 ${paddingTimeline} ${theme.euiSizeL} ${theme.euiSizeL};
+  padding: 0 ${paddingTimeline} ${euiLightVars.euiSizeL} ${euiLightVars.euiSizeL};
 `;
 
 const GlobalHeader = styled.header`
-  background: ${theme.euiColorGhost};
-  border-bottom: ${theme.euiBorderThin};
-  margin: 0 -${paddingTimeline} ${theme.euiSizeL} -${theme.euiSizeL};
-  padding: ${theme.euiSizeL} ${paddingTimeline} ${theme.euiSizeL} ${theme.euiSizeL};
+  background: ${({ theme }) =>
+    theme.darkMode ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiColorEmptyShade};
+  border-bottom: ${({ theme }) =>
+    theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
+  margin: 0 -${paddingTimeline} ${euiLightVars.euiSizeL} -${euiLightVars.euiSizeL};
+  padding: ${euiLightVars.euiSizeL} ${paddingTimeline} ${euiLightVars.euiSizeL}
+    ${euiLightVars.euiSizeL};
 `;
