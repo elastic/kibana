@@ -19,31 +19,8 @@ import { LayerTOC } from './layer_toc';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, showFileImportWizard, closeLayerTOC, openLayerTOC }) {
-  if (!isLayerTOCOpen) {
-    return (
-      <EuiToolTip
-        delay="long"
-        content={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
-          defaultMessage: 'Expand layers panel'
-        })}
-        position="left"
-      >
-        <EuiButtonIcon
-          className="mapLayerControl__openLayerTOCButton"
-          color="text"
-          onClick={openLayerTOC}
-          iconType="menuLeft"
-          aria-label={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
-            defaultMessage: 'Expand layers panel'
-          })}
-        />
-      </EuiToolTip>
-    );
-  }
-
+export function LayerControl({ isReadOnly, showAddLayerWizard, closeLayerTOC }) {
   let addLayer;
-  let importFile;
   if (!isReadOnly) {
     addLayer = (
       <Fragment>
@@ -58,23 +35,6 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, s
           <FormattedMessage
             id="xpack.maps.layerControl.addLayerButtonLabel"
             defaultMessage="Add layer"
-          />
-        </EuiButton>
-      </Fragment>
-    );
-    importFile = (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiButton
-          className="mapLayerControl__addLayerButton"
-          fill
-          fullWidth
-          onClick={showFileImportWizard}
-          data-test-subj="importFileButton"
-        >
-          <FormattedMessage
-            id="xpack.maps.layerControl.importFileButtonLabel"
-            defaultMessage="Import file"
           />
         </EuiButton>
       </Fragment>
@@ -127,7 +87,6 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, s
         </EuiFlexItem>
       </EuiPanel>
 
-      {importFile}
       {addLayer}
 
     </Fragment>

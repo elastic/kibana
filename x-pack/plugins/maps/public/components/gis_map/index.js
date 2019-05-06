@@ -15,7 +15,6 @@ function mapStateToProps(state = {}) {
   return {
     layerDetailsVisible: flyoutDisplay === FLYOUT_STATE.LAYER_PANEL,
     addLayerVisible: flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD,
-    importFileVisible: flyoutDisplay === FLYOUT_STATE.IMPORT_FILE_WIZARD,
     noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE,
     isFullScreen: getIsFullScreen(state),
     refreshConfig: getRefreshConfig(state),

@@ -26,9 +26,6 @@ function mapDispatchToProps(dispatch) {
     showAddLayerWizard: () => {
       dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
     },
-    showFileImportWizard: () => {
-      dispatch(updateFlyout(FLYOUT_STATE.IMPORT_FILE_WIZARD));
-    },
     closeLayerTOC: () => {
       dispatch(setIsLayerTOCOpen(false));
     },

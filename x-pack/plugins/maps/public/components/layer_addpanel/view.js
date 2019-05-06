@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { ALL_SOURCES, DATA_SOURCES } from '../../shared/layers/sources/all_sources';
+import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -112,7 +112,7 @@ export class AddLayerPanel extends Component {
   }
 
   _renderSourceCards() {
-    return DATA_SOURCES.map(Source => {
+    return ALL_SOURCES.map(Source => {
       const icon = Source.icon
         ? <EuiIcon type={Source.icon} size="l" />
         : null;
@@ -218,7 +218,7 @@ export class AddLayerPanel extends Component {
     return this._renderSourceEditor();
   }
 
-  _renderFlyout(importView) {
+  _renderFlyout() {
     return (
       <EuiFlexGroup
         direction="column"
@@ -238,7 +238,7 @@ export class AddLayerPanel extends Component {
         <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
           <div className="mapLayerPanel__bodyOverflow">
             {
-              importView
+              this.props.importView
                 ? this._renderFileImportEditor()
                 : this._renderAddLayerForm()
             }
@@ -269,7 +269,6 @@ export class AddLayerPanel extends Component {
   }
 
   render() {
-    const { importView, flyoutVisible } = this.props;
-    return (flyoutVisible) ? this._renderFlyout(importView) : null;
+    return (this.props.flyoutVisible) ? this._renderFlyout() : null;
   }
 }

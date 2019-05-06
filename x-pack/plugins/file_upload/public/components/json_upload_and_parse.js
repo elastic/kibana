@@ -64,7 +64,7 @@ export function JsonUploadAndParse({
     const boolIndexReady = !!parsedFile && !!selectedIndexType &&
       !!indexName && !hasIndexErrors && !indexRequestInFlight;
     setIndexReady(boolIndexReady);
-    onIndexReadyStatusChange(boolIndexReady);
+    onIndexReadyStatusChange && onIndexReadyStatusChange(boolIndexReady);
   }, [
     parsedFile, selectedIndexType, indexName, hasIndexErrors,
     indexRequestInFlight, onIndexReadyStatusChange
