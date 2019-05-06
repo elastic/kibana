@@ -68,7 +68,7 @@ export class GisMap extends Component {
 
     if (mapInitError) {
       return (
-        <div data-render-complete={true}>
+        <div data-render-complete data-shared-item>
           <EuiCallOut
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
               defaultMessage: 'Unable to initialize map'
