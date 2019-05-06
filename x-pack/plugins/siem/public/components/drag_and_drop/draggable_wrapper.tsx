@@ -5,7 +5,7 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import { defaultTo } from 'lodash/fp';
+import { defaultTo, isEqual } from 'lodash/fp';
 import * as React from 'react';
 import {
   Draggable,
@@ -64,7 +64,14 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-class DraggableWrapperComponent extends React.PureComponent<Props> {
+/**
+ * Wraps a draggable component to handle registration / unregistration of the
+ * data provider associated with the item being dropped
+ */
+class DraggableWrapperComponent extends React.Component<Props> {
+  public shouldComponentUpdate = ({ dataProvider, width }: Props) =>
+    !isEqual(dataProvider, this.props.dataProvider) || width !== this.props.width;
+
   public componentDidMount() {
     const { dataProvider, registerProvider } = this.props;
 

@@ -96,7 +96,7 @@ describe('Timeline', () => {
     test('should add a new timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
-        columns: [],
+        columns: timelineDefaults.columns,
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual({
