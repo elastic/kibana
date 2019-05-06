@@ -12,10 +12,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  let version: string = '';
 
   describe('feature controls saved objects management', () => {
     before(async () => {
       await esArchiver.load('saved_objects_management/feature_controls/security');
+      const versionService = getService('kibanaServer').version;
+      version = await versionService.get();
     });
 
     after(async () => {
@@ -65,12 +68,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['A Dashboard', 'logstash-*', 'A Pie']);
+          expect(objects).to.eql([
+            'Advanced Settings [6.0.0]',
+            `Advanced Settings [${version}]`,
+            'A Dashboard',
+            'logstash-*',
+            'A Pie',
+          ]);
         });
 
         it('can view all saved objects in applications', async () => {
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
+            {
+              title: 'Advanced Settings [6.0.0]',
+              canViewInApp: false,
+            },
+            {
+              title: `Advanced Settings [${version}]`,
+              canViewInApp: false,
+            },
             {
               title: 'A Dashboard',
               canViewInApp: true,
@@ -171,14 +188,27 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await PageObjects.settings.clickKibanaSavedObjects();
         });
 
-        it('shows a visualization and an index pattern', async () => {
+        it('shows two configs, a visualization and an index pattern', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['logstash-*', 'A Pie']);
+          expect(objects).to.eql([
+            'Advanced Settings [6.0.0]',
+            `Advanced Settings [${version}]`,
+            'logstash-*',
+            'A Pie',
+          ]);
         });
 
-        it('can view only the visualization in application', async () => {
+        it('can view only two configs and the visualization in application', async () => {
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
+            {
+              title: 'Advanced Settings [6.0.0]',
+              canViewInApp: false,
+            },
+            {
+              title: `Advanced Settings [${version}]`,
+              canViewInApp: false,
+            },
             {
               title: 'logstash-*',
               canViewInApp: false,

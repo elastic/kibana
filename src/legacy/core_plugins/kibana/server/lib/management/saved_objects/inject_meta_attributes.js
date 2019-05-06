@@ -17,22 +17,17 @@
  * under the License.
  */
 
-export function canViewInApp(uiCapabilities, type) {
-  switch (type) {
-    case 'search':
-    case 'searches':
-      return uiCapabilities.discover.show;
-    case 'visualization':
-    case 'visualizations':
-      return uiCapabilities.visualize.show;
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return uiCapabilities.management.kibana.index_patterns;
-    case 'dashboard':
-    case 'dashboards':
-      return uiCapabilities.dashboard.show;
-    default:
-      return uiCapabilities[type].show;
-  }
+export function injectMetaAttributes(savedObject, savedObjectsManagement) {
+  const result = {
+    ...savedObject,
+    meta: savedObject.meta || {},
+  };
+
+  // Add extra meta information
+  result.meta.icon = savedObjectsManagement.getIcon(savedObject.type);
+  result.meta.title = savedObjectsManagement.getTitle(savedObject);
+  result.meta.editUrl = savedObjectsManagement.getEditUrl(savedObject);
+  result.meta.inAppUrl = savedObjectsManagement.getInAppUrl(savedObject);
+
+  return result;
 }
