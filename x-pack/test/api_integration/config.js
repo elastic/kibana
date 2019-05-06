@@ -12,6 +12,7 @@ import {
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
   SiemGraphQLProvider,
+  InfraOpsSourceConfigurationProvider,
 } from './services';
 
 import {
@@ -41,6 +42,7 @@ export default async function ({ readConfigFile }) {
       infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
       infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
       siemGraphQLClient: SiemGraphQLProvider,
+      infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,

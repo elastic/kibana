@@ -26,7 +26,6 @@ export const LogTextStreamItemView = React.forwardRef<Element, StreamItemProps>(
           <LogTextStreamLogEntryItemView
             boundingBoxRef={ref}
             logEntry={item.logEntry}
-            searchResult={item.searchResult}
             scale={scale}
             wrap={wrap}
             openFlyoutWithItem={openFlyoutWithItem}
