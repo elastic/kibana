@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
-import { UserAPIClient } from '../../../../lib/api';
+import { UserAPIClient } from '../../../lib/api';
 
 interface Props {
   intl: InjectedIntl;
