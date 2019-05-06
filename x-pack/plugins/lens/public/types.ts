@@ -7,8 +7,8 @@
 export interface EditorFrameSetup {
   render: (domElement: Element) => void;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T>(name: string, datasource: Datasource<T>) => void;
-  registerVisualization: <T>(name: string, visualization: Visualization<T>) => void;
+  registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
+  registerVisualization: <T, P>(name: string, visualization: Visualization<T, P>) => void;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -138,7 +138,15 @@ export interface VisualizationSuggestion<T = unknown> {
   datasourceSuggestionId: string;
 }
 
-export interface Visualization<T = unknown> {
+export interface Visualization<T = unknown, P = unknown> {
+  // For initializing, either from an empty state or from persisted state
+  // Because this will be called at runtime, state might have a type of `any` and
+  // visualizations should validate their arguments
+  initialize: (state?: P) => T;
+
+  // Given the current state, which parts should be saved?
+  getPersistableState: (state: T) => P;
+
   renderConfigPanel: (props: VisualizationProps<T>) => void;
 
   toExpression: (state: T, datasource: DatasourcePublicAPI) => string;
