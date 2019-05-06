@@ -49,6 +49,7 @@ export function JsonUploadAndParse({
     setSelectedIndexType('');
     setIndexName('');
     setParsedFile(null);
+    setFileRef(null);
   };
 
   // Set default index type

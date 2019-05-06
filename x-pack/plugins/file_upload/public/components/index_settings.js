@@ -81,14 +81,10 @@ export const IndexSettings = injectI18n(function IndexSettings({
           >
             <div>
               <ul>
+                <li>Must be a new index</li>
                 <li>Lowercase only</li>
                 <li>{`Cannot include \\, /, *, ?, ", <, >, |, \` \` \
                   (space character), , (comma), #`
-                }
-                </li>
-                <li>{
-                  `Indices prior to 7.0 could contain a colon (:), \
-                  but that’s been deprecated and won’t be supported in 7.0+`
                 }
                 </li>
                 <li>{`Cannot start with -, _, +`}</li>
