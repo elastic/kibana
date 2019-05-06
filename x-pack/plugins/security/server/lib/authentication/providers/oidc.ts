@@ -476,48 +476,6 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
   }
 
   /**
-   * Invalidates access and refresh tokens without calling `oidc/logout`.
-   * @param accessToken Access token to invalidate.
-   * @param refreshToken Refresh token to invalidate.
-   */
-  private async invalidateTokens(accessToken: string, refreshToken: string) {
-
-    // First invalidate old access token.
-    const {
-      invalidated_tokens: invalidatedAccessTokensCount,
-    } = await this._options.client.callWithInternalUser('shield.deleteAccessToken', {
-      body: { token: accessToken },
-    });
-
-    if (invalidatedAccessTokensCount === 0) {
-      this.debug('User access token was already invalidated.');
-    } else if (invalidatedAccessTokensCount === 1) {
-      this.debug('User access token has been successfully invalidated.');
-    } else {
-      this.debug(
-        `${invalidatedAccessTokensCount} user access tokens were invalidated, this is unexpected.`,
-      );
-    }
-
-    // Then invalidate old refresh token.
-    const {
-      invalidated_tokens: invalidatedRefreshTokensCount,
-    } = await this._options.client.callWithInternalUser('shield.deleteAccessToken', {
-      body: { refresh_token: refreshToken },
-    });
-
-    if (invalidatedRefreshTokensCount === 0) {
-      this.debug('User refresh token was already invalidated.');
-    } else if (invalidatedRefreshTokensCount === 1) {
-      this.debug('User refresh token has been successfully invalidated.');
-    } else {
-      this.debug(
-        `${invalidatedRefreshTokensCount} user refresh tokens were invalidated, this is unexpected.`,
-      );
-    }
-  }
-
-  /**
    * Gets Elasticsearch OpenID Connect Realm name
    * @returns {string}
    */
