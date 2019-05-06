@@ -296,10 +296,6 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
 }
 
 export const BasicTableContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  height: auto;
   position: relative;
 `;
 
