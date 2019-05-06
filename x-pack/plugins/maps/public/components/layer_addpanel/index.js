@@ -14,7 +14,8 @@ import {
   setTransientLayer,
   addLayer,
   setSelectedLayer,
-  removeTransientLayer
+  removeTransientLayer,
+  fitToLayerExtent,
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
@@ -39,7 +40,7 @@ function mapDispatchToProps(dispatch) {
       //this triggers a new request for preview. Any existing transient layers need to be cleared before the new one can be added.
       await dispatch(setSelectedLayer(null));
       await dispatch(removeTransientLayer());
-      dispatch(addLayer(layer.toLayerDescriptor()));
+      await dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
       dispatch(setTransientLayer(layer.getId()));
     },
@@ -57,6 +58,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(setTransientLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
+    fitToLayerExtent: layerId => dispatch(fitToLayerExtent(layerId))
   };
 }
 

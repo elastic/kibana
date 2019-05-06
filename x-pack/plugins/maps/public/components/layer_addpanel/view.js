@@ -34,7 +34,7 @@ export class AddLayerPanel extends Component {
     importIndexingReady: false
   }
 
-  _viewLayer = source => {
+  _viewLayer = (source, fitToExtent = false) => {
     if (!source) {
       this.setState({ layer: null });
       this.props.removeTransientLayer();
@@ -44,10 +44,11 @@ export class AddLayerPanel extends Component {
     const layerOptions = this.state.layer
       ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
       : {};
-    this.setState({
-      layer: source.createDefaultLayer(layerOptions, this.props.mapColors)
-    }, () => this.props.viewLayer(this.state.layer)
-    );
+    const layer = source.createDefaultLayer(layerOptions, this.props.mapColors);
+    this.setState({ layer }, async () => {
+      await this.props.viewLayer(this.state.layer);
+      fitToExtent && this.props.fitToLayerExtent(layer.getId());
+    });
   };
 
   _addImportedLayer = async source => {
@@ -61,8 +62,7 @@ export class AddLayerPanel extends Component {
     }
     this.setState({
       layer: source.createDefaultLayer({}, this.props.mapColors)
-    }, () => this.props.addImportedLayer(this.state.layer)
-    );
+    }, () => this.props.addImportedLayer(this.state.layer));
   };
 
   _clearSource = () => {
@@ -157,6 +157,7 @@ export class AddLayerPanel extends Component {
     if (importView) {
       editorProperties = {
         ...editorProperties,
+        onPreviewSource: source => this._viewLayer(source, true),
         boolIndexData: this.state.indexingTriggered,
         addAndViewSource: source => this._addImportedLayer(source),
         onRemove: this.props.removeTransientLayer,
