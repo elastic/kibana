@@ -92,7 +92,6 @@ class GaugePanelConfigUi extends Component {
   render() {
     const { selectedTab } = this.state;
     const { intl } = this.props;
-    // TODO: change default filter to {language: 'lucene', query: ''}
     const defaults = {
       gauge_max: '',
       filter: '',
@@ -167,7 +166,7 @@ class GaugePanelConfigUi extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : 'lucene',
+                      language: model.filter.language ? model.filter.language : 'kuery',
                       query: model.filter.query,
                     }}
                     screenTitle={'GaugePanelConfigQuery'}

@@ -186,7 +186,7 @@ class AnnotationsEditor extends Component {
                     query={{
                       language: model.query_string.language
                         ? model.query_string.language
-                        : 'lucene',
+                        : 'kuery',
                       query: model.query_string.query,
                     }}
                     screenTitle={'AnnotationsEditor'}
