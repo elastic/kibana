@@ -7,6 +7,7 @@
 import { BaseAction } from './base_action';
 import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 export class JiraAction extends BaseAction {
   constructor(props, errors) {
@@ -72,9 +73,9 @@ export class JiraAction extends BaseAction {
     const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
-      projectKey: json.actionJson.jira.fields.project.key,
-      issueType: json.actionJson.jira.fields.issuetype.name,
-      summary: json.actionJson.jira.fields.summary,
+      projectKey: get(json, 'actionJson.jira.fields.project.key'),
+      issueType: get(json, 'actionJson.jira.fields.issuetype.name'),
+      summary: get(json, 'actionJson.jira.fields.summary'),
     });
 
     const action = new JiraAction(props, errors);
@@ -98,7 +99,32 @@ export class JiraAction extends BaseAction {
       json.jira = {};
     }
 
-    if (!json.jira.fields.project.key) {
+    if (!json.jira.fields) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraFieldsPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonJiraFieldsKey} property',
+          values: {
+            actionJsonJiraProjectKey: 'actionJson.jira.fields'
+          }
+        }),
+      });
+      return { errors };
+    }
+
+    if (!json.jira.fields.project) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraProjectPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonJiraProject} property',
+          values: {
+            actionJsonJiraProject: 'actionJson.jira.fields.project'
+          }
+        }),
+      });
+    }
+
+    if (json.jira.fields.project && !json.jira.fields.project.key) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraProjectKeyPropertyMissingBadRequestMessage', {
@@ -110,7 +136,19 @@ export class JiraAction extends BaseAction {
       });
     }
 
-    if (!json.jira.fields.issuetype.name) {
+    if (!json.jira.fields.issuetype) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraIssueTypePropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonJiraIssueTypeKey} property',
+          values: {
+            actionJsonJiraIssueTypeKey: 'actionJson.jira.fields.issuetype'
+          }
+        }),
+      });
+    }
+
+    if (json.jira.fields.issuetype && !json.jira.fields.issuetype.name) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraIssueTypePropertyMissingBadRequestMessage', {

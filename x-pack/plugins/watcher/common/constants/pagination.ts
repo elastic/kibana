@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PAGINATION: { [key: string]: number } = {
-  PAGE_SIZE: 20,
+export const PAGINATION: { initialPageSize: number; pageSizeOptions: number[] } = {
+  initialPageSize: 10,
+  pageSizeOptions: [10, 50, 100],
 };

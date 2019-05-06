@@ -16,20 +16,19 @@ import {
   EuiTitle,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { loadWatchDetail, ackWatchAction } from '../../../lib/api';
 import { getPageErrorCode, WatchStatus } from '../../../components';
+import { PAGINATION } from '../../../../common/constants';
 
 const WatchDetailUi = ({ watchId }: { watchId: string }) => {
-  const pagination = {
-    initialPageSize: 10,
-    pageSizeOptions: [10, 50, 100],
-  };
-
   const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
 
   const [actionStatuses, setActionStatuses] = useState<any[]>([]);
   const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
+
+  const actionErrors = watchDetail && watchDetail.watchErrors.actionErrors;
 
   useEffect(
     () => {
@@ -134,6 +133,34 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
 
       <EuiSpacer size="s" />
 
+      {actionErrors && (
+        <EuiCallOut
+          title={i18n.translate('xpack.watcher.sections.watchDetail.actionErrorsCalloutTitle', {
+            defaultMessage: 'This watch contains action errors.',
+          })}
+          color="danger"
+          iconType="cross"
+        >
+          {Object.keys(actionErrors).map((action: string) => (
+            <Fragment key={action}>
+              <EuiText size="xs">
+                <h4>{action}</h4>
+                <ul>
+                  {actionErrors[action].map(
+                    (actionError: { message: string }, errorIndex: number) => (
+                      <li key={`action-error-${errorIndex}`}>{actionError.message}</li>
+                    )
+                  )}
+                </ul>
+              </EuiText>
+              <EuiSpacer size="s" />
+            </Fragment>
+          ))}
+        </EuiCallOut>
+      )}
+
+      <EuiSpacer size="s" />
+
       <EuiTitle size="s">
         <h2>
           <FormattedMessage
@@ -149,7 +176,7 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
         items={actionStatuses}
         itemId="id"
         columns={columns}
-        pagination={pagination}
+        pagination={PAGINATION}
         sorting={true}
         loading={isLoading}
         message={
