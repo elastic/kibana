@@ -14,13 +14,20 @@ import { Toast } from '@elastic/eui';
 
 // @public (undocumented)
 export interface ApplicationSetup {
+    // Warning: (ae-forgotten-export) The symbol "App" needs to be exported by the entry point index.d.ts
     registerApp(app: App): void;
+    // Warning: (ae-forgotten-export) The symbol "LegacyApp" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     registerLegacyApp(app: LegacyApp): void;
 }
 
+// Warning: (ae-missing-release-tag) "ApplicationStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
 // @public (undocumented)
 export interface ApplicationStart {
+    // Warning: (ae-forgotten-export) The symbol "CapabilitiesStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     availableApps: CapabilitiesStart['availableApps'];
     // (undocumented)
@@ -80,6 +87,8 @@ export interface ChromeBreadcrumb {
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
+// Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
 
@@ -109,6 +118,8 @@ export interface CoreSetup {
     uiSettings: UiSettingsSetup;
 }
 
+// Warning: (ae-missing-release-tag) "CoreStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
 // @public (undocumented)
 export interface CoreStart {
     // (undocumented)
@@ -127,6 +138,7 @@ export interface CoreStart {
 
 // @internal
 export class CoreSystem {
+    // Warning: (ae-forgotten-export) The symbol "Params" needs to be exported by the entry point index.d.ts
     constructor(params: Params);
     // (undocumented)
     setup(): Promise<{
@@ -141,6 +153,7 @@ export class CoreSystem {
 // @public
 export interface FatalErrorsSetup {
     add: (error: string | Error, source?: string) => never;
+    // Warning: (ae-forgotten-export) The symbol "ErrorInfo" needs to be exported by the entry point index.d.ts
     get$: () => Rx.Observable<ErrorInfo>;
 }
 
@@ -151,6 +164,8 @@ export class FlyoutRef {
     readonly onClose: Promise<void>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
 export type HttpSetup = ReturnType<HttpService['setup']>;
 
@@ -161,6 +176,8 @@ export interface I18nSetup {
     }) => JSX.Element;
 }
 
+// Warning: (ae-missing-release-tag) "I18nStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
 // @public (undocumented)
 export type I18nStart = I18nSetup;
 
@@ -271,6 +288,8 @@ export type NotificationsStart = NotificationsSetup;
 
 // @public (undocumented)
 export interface OverlayStart {
+    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
@@ -282,6 +301,8 @@ export interface OverlayStart {
 export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
     // (undocumented)
     setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    // Warning: (ae-forgotten-export) The symbol "PluginStartContext" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
@@ -358,6 +379,8 @@ export class UiSettingsClient {
     isDefault(key: string): boolean;
     isOverridden(key: string): boolean;
     overrideLocalDefault(key: string, newDefault: any): void;
+    // Warning: (ae-forgotten-export) The symbol "UiSettingsClientParams" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     readonly params: UiSettingsClientParams;
     remove(key: string): Promise<boolean>;
@@ -370,10 +393,18 @@ export type UiSettingsSetup = UiSettingsClient;
 
 // @public (undocumented)
 export interface UiSettingsState {
+    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsDefault" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsUser" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
 }
 
+
+// Warnings were encountered during analysis:
+// 
+// src/core/public/injected_metadata/injected_metadata_service.ts:48:7 - (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
+// src/core/public/injected_metadata/injected_metadata_service.ts:49:7 - (ae-forgotten-export) The symbol "DiscoveredPlugin" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

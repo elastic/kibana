@@ -13,10 +13,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const globalNav = getService('globalNav');
-
-  const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
 
   describe('security feature controls', () => {
     before(async () => {
@@ -207,7 +204,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
