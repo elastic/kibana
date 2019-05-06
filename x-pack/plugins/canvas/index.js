@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import init from './init';
 import { mappings } from './server/mappings';
-import { CANVAS_APP, CANVAS_TYPE } from './common/lib';
+import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';
 
 export function canvas(kibana) {
@@ -46,6 +46,14 @@ export function canvas(kibana) {
               path: `/app/canvas#/workpad/${encodeURIComponent(obj.id)}`,
               uiCapabilitiesPath: 'canvas.show',
             };
+          },
+        },
+        [CUSTOM_ELEMENT_TYPE]: {
+          icon: 'canvasApp',
+          defaultSearchField: 'name',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.displayName;
           },
         },
       },
