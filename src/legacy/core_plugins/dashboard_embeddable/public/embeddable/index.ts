@@ -17,5 +17,13 @@
  * under the License.
  */
 
-export { DashboardPanel } from './dashboard_panel';
-export { createPanelState } from './create_panel_state';
+export { DASHBOARD_CONTAINER_TYPE, DashboardContainerFactory } from './dashboard_container_factory';
+export { DashboardContainer, DashboardContainerInput } from './dashboard_container';
+export { createPanelState } from './panel';
+
+export * from './types';
+export {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+} from './dashboard_constants';

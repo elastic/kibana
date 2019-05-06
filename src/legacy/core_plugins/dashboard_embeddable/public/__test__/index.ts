@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { DashboardPanel } from './dashboard_panel';
-export { createPanelState } from './create_panel_state';
+export { getSampleDashboardInput, getSampleDashboardPanel } from './get_sample_dashboard_input';

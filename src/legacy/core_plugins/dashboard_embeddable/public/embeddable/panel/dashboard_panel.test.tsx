@@ -17,77 +17,77 @@
  * under the License.
  */
 
-// TODO: remove this when EUI supports types for this.
-// @ts-ignore: implicit any for JS file
-import { takeMountedSnapshot } from '@elastic/eui/lib/test';
-import _ from 'lodash';
+jest.mock('ui/metadata', () => ({
+  metadata: {
+    branch: 'my-metadata-branch',
+    version: 'my-metadata-version',
+  },
+}));
+
+import {
+  GreetingEmbeddable,
+  GreetingEmbeddableInput,
+  GreetingEmbeddableOutput,
+} from 'plugins/embeddable_api/__test__';
+import { embeddableFactories } from 'plugins/embeddable_api/index';
+import { QueryLanguageType, ViewMode } from 'plugins/embeddable_api/types';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { store } from '../../store';
-// @ts-ignore: implicit any for JS file
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
-import { embeddableIsInitialized, setPanels, updateTimeRange, updateViewMode } from '../actions';
-import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanel, DashboardPanelUiProps } from './dashboard_panel';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { DashboardContainer, DashboardContainerInput } from '../dashboard_container';
+import { DashboardPanel } from './dashboard_panel';
+import { GREETING_EMBEDDABLE } from 'plugins/embeddable_api/__test__';
 
-import { PanelError } from './panel_error';
-
-function getProps(props = {}): DashboardPanelUiProps {
-  const defaultTestProps = {
-    panel: { panelIndex: 'foo1' },
-    viewOnlyMode: false,
-    initialized: true,
-    lastReloadRequestTime: 0,
-    embeddableFactory: getEmbeddableFactoryMock(),
+function getDashboardContainerInput(): DashboardContainerInput {
+  return {
+    id: '123',
+    viewMode: ViewMode.EDIT,
+    filters: [],
+    query: {
+      language: QueryLanguageType.KUERY,
+      query: '',
+    },
+    timeRange: {
+      to: 'now',
+      from: 'now-15m',
+    },
+    useMargins: false,
+    title: 'My Test Dashboard',
+    isFullScreenMode: false,
+    panels: {},
   };
-  return _.defaultsDeep(props, defaultTestProps);
 }
 
-beforeAll(() => {
-  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
-  store.dispatch(updateViewMode(DashboardViewMode.EDIT));
-  store.dispatch(
-    setPanels({
-      foo1: {
-        panelIndex: 'foo1',
-        id: 'hi',
-        version: '123',
-        type: 'viz',
-        embeddableConfig: {},
-        gridData: {
-          x: 1,
-          y: 1,
-          w: 1,
-          h: 1,
-          i: 'hi',
-        },
-      },
-    })
-  );
-  const metadata = { title: 'my embeddable title', editUrl: 'editme' };
-  store.dispatch(embeddableIsInitialized({ metadata, panelId: 'foo1' }));
-});
-
-test('DashboardPanel matches snapshot', () => {
-  const component = mountWithIntl(
-    <Provider store={store}>
-      <DashboardPanel.WrappedComponent {...getProps()} />
-    </Provider>
-  );
-  expect(takeMountedSnapshot(component)).toMatchSnapshot();
-});
-
-test('renders an error when error prop is passed', () => {
-  const props = getProps({
-    error: 'Simulated error',
+test('DashboardPanel renders an embeddable when it is done loading', async () => {
+  const container = new DashboardContainer(getDashboardContainerInput(), embeddableFactories);
+  const newEmbeddable = await container.addNewEmbeddable<
+    GreetingEmbeddableInput,
+    GreetingEmbeddableOutput,
+    GreetingEmbeddable
+  >(GREETING_EMBEDDABLE, {
+    firstName: 'Theon',
+    lastName: 'Greyjoy',
+    id: '123',
   });
 
+  expect(newEmbeddable.id).toBeDefined();
+
   const component = mountWithIntl(
-    <Provider store={store}>
-      <DashboardPanel.WrappedComponent {...props} />
-    </Provider>
+    <DashboardPanel.WrappedComponent
+      intl={null as any}
+      container={container}
+      embeddableId={newEmbeddable.id}
+    />
   );
-  const panelError = component.find(PanelError);
-  expect(panelError.length).toBe(1);
+
+  await nextTick();
+  component.update();
+
+  // Due to the way embeddables mount themselves on the dom node, they are not forced to be
+  // react components, and hence, we can't use the usual
+  // findTestSubject(component, 'dashboardPanelHeading-HelloTheonGreyjoy');
+  expect(
+    component
+      .getDOMNode()
+      .querySelectorAll('[data-test-subj="dashboardPanelHeading-HelloTheonGreyjoy"]').length
+  ).toBe(1);
 });

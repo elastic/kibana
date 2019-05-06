@@ -16,6 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import 'uiExports/embeddableActions';
+import 'uiExports/embeddableFactories';
 
-export { DashboardPanel } from './dashboard_panel';
-export { createPanelState } from './create_panel_state';
+export {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+  DashboardContainer,
+  DashboardContainerInput,
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainerFactory,
+  DashboardPanelState,
+} from './embeddable';

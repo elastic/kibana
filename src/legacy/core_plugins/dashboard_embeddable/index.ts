@@ -17,4 +17,15 @@
  * under the License.
  */
 
-export { PanelHeaderContainer as PanelHeader } from './panel_header_container';
+import { resolve } from 'path';
+
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
+  return new kibana.Plugin({
+    uiExports: {
+      embeddableActions: ['plugins/dashboard_embeddable/actions/expand_panel_action'],
+      embeddableFactories: ['plugins/dashboard_embeddable/embeddable/dashboard_container_factory'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
+  });
+}

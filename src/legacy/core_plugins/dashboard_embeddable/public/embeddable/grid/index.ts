@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DashboardGridContainer as DashboardGrid } from './dashboard_grid_container';
+export { DashboardGrid } from './dashboard_grid';

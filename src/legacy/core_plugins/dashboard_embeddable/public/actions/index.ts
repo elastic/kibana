@@ -16,6 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { DashboardPanel } from './dashboard_panel';
-export { createPanelState } from './create_panel_state';

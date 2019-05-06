@@ -17,32 +17,21 @@
  * under the License.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { ContextMenuAction } from 'ui/embeddable';
-import { DashboardViewMode } from '../../../dashboard_view_mode';
+export interface PanelErrorProps {
+  error: string | React.ReactNode;
+}
 
-/**
- *
- * @param {function} onDeletePanel
- * @return {ContextMenuAction}
- */
-export function getRemovePanelAction(onDeletePanel: () => void) {
-  return new ContextMenuAction(
-    {
-      displayName: i18n.translate('kbn.dashboard.panel.removePanel.displayName', {
-        defaultMessage: 'Delete from dashboard',
-      }),
-      id: 'deletePanel',
-      parentPanelId: 'mainMenu',
-    },
-    {
-      icon: <EuiIcon type="trash" />,
-      isVisible: ({ containerState }) =>
-        containerState.viewMode === DashboardViewMode.EDIT && !containerState.isPanelExpanded,
-      onClick: onDeletePanel,
-    }
+export function PanelError({ error }: PanelErrorProps) {
+  return (
+    <div className="dshPanel__error panel-content">
+      <EuiText color="subdued" size="xs">
+        <EuiIcon type="alert" color="danger" />
+        <EuiSpacer size="s" />
+        {error}
+      </EuiText>
+    </div>
   );
 }

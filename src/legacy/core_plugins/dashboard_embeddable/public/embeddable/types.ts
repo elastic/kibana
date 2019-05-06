@@ -16,9 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PanelState, EmbeddableInput } from '../../../embeddable_api/public/index';
+export type PanelId = string;
+export type SavedObjectId = string;
 
-export { getEditPanelAction } from './get_edit_panel_action';
-export { getRemovePanelAction } from './get_remove_panel_action';
-export { getCustomizePanelAction } from './get_customize_panel_action';
-export { getToggleExpandPanelAction } from './get_toggle_expand_panel_action';
-export { getInspectorPanelAction } from './get_inspector_panel_action';
+export interface GridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
+
+export interface DashboardPanelState<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>
+  extends PanelState<TEmbeddableInput> {
+  readonly gridData: GridData;
+}

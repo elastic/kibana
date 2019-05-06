@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export { DashboardPanel } from './dashboard_panel';
-export { createPanelState } from './create_panel_state';
+export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DASHBOARD_GRID_HEIGHT = 20;
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+export const DEFAULT_PANEL_HEIGHT = 15;
