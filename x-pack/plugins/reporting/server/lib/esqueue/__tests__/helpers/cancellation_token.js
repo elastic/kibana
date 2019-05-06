@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { CancellationToken } from '../../helpers/cancellation_token';
+import { CancellationToken } from '../../../../../common/cancellation_token';
 
 describe('CancellationToken', function () {
   let cancellationToken;

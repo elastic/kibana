@@ -5,4 +5,4 @@
  */
 
 export * from './index.d';
-export { createGenerateCsv } from './generate_csv'
+export { createGenerateCsv } from './generate_csv';

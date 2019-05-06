@@ -27,7 +27,6 @@ function getDocumentPayloadFn(server: any) {
   }
 
   function getCompleted(output: any, jobType: string, title: any) {
-    console.trace();
     const exportType = exportTypesRegistry.get((item: any) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
 
