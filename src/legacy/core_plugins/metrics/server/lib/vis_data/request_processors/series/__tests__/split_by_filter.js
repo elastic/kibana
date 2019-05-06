@@ -28,7 +28,7 @@ describe('splitByFilter(req, panel, series)', () => {
   let req;
   beforeEach(() => {
     panel = {};
-    series = { id: 'test', split_mode: 'filter', filter: { query: 'host:example-01', language: 'lucene'} };
+    series = { id: 'test', split_mode: 'filter', filter: { query: 'host:example-01', language: 'lucene' } };
     req = {
       payload: {
         timerange: {
