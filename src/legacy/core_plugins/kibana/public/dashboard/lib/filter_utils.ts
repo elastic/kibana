@@ -18,7 +18,9 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
+import { Filter } from 'plugins/embeddable_api/index';
+import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 /**
  * @typedef {Object} QueryFilter
@@ -33,7 +35,7 @@ export class FilterUtils {
    * @returns {Boolean} True if the filter is of the special query type
    * (e.g. goes in the query input bar), false otherwise (e.g. is in the filter bar).
    */
-  static isQueryFilter(filter) {
+  public static isQueryFilter(filter: Filter) {
     return filter.query && !filter.meta;
   }
 
@@ -43,7 +45,7 @@ export class FilterUtils {
    * @returns {Array.<Object>} An array of filters stored with the dashboard. Includes
    * both query filters and filter bar filters.
    */
-  static getDashboardFilters(dashboard) {
+  public static getDashboardFilters(dashboard: SavedObjectDashboard) {
     return dashboard.searchSource.getOwnField('filter');
   }
 
@@ -52,7 +54,7 @@ export class FilterUtils {
    * @param {SavedDashboard} dashboard
    * @returns {QueryFilter}
    */
-  static getQueryFilterForDashboard(dashboard) {
+  public static getQueryFilterForDashboard(dashboard: SavedObjectDashboard) {
     if (dashboard.searchSource.getOwnField('query')) {
       return dashboard.searchSource.getOwnField('query');
     }
@@ -68,7 +70,7 @@ export class FilterUtils {
    * @return {Array.<Object>} Array of filters that should appear in the filter bar for the
    * given dashboard
    */
-  static getFilterBarsForDashboard(dashboard) {
+  public static getFilterBarsForDashboard(dashboard: SavedObjectDashboard) {
     return _.reject(this.getDashboardFilters(dashboard), this.isQueryFilter);
   }
 
@@ -79,11 +81,13 @@ export class FilterUtils {
    * @returns {string} the time represented in utc format, or if the time range was not able to be parsed into a moment
    * object, it returns the same object it was given.
    */
-  static convertTimeToUTCString(time) {
+  public static convertTimeToUTCString(time: string | Moment): string {
     if (moment(time).isValid()) {
-      return moment(time).utc();
-    }  else {
-      return time;
+      return moment(time)
+        .utc()
+        .toString();
+    } else {
+      return time.toString();
     }
   }
 
@@ -95,7 +99,7 @@ export class FilterUtils {
    * @param timeB {string|Moment}
    * @returns {boolean}
    */
-  static areTimesEqual(timeA, timeB) {
+  public static areTimesEqual(timeA: string | Moment, timeB: string | Moment) {
     return this.convertTimeToUTCString(timeA) === this.convertTimeToUTCString(timeB);
   }
 
@@ -105,7 +109,7 @@ export class FilterUtils {
    * @param filters {Array.<Object>}
    * @returns {Array.<Object>}
    */
-  static cleanFiltersForComparison(filters) {
-    return _.map(filters, (filter) => _.omit(filter, ['$$hashKey', '$state']));
+  public static cleanFiltersForComparison(filters: Filter[]) {
+    return _.map(filters, filter => _.omit(filter, ['$$hashKey', '$state']));
   }
 }

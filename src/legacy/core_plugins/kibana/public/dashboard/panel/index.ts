@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './types';
-
-export * from './dashboard';
+export { convertPanelDataPre61, convertPanelDataPre63, parseVersion } from './panel_utils';

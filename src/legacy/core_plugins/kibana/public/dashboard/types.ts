@@ -17,10 +17,75 @@
  * under the License.
  */
 
+import { AppState } from 'ui/state_management/app_state';
+import { Query, Filter, ViewMode } from 'plugins/embeddable_api/index';
+
 export interface GridData {
   w: number;
   h: number;
   x: number;
   y: number;
   i: string;
+}
+
+export interface SavedDashboardPanel {
+  readonly id?: string;
+  readonly version: string;
+  readonly type: string;
+  readonly panelIndex: string;
+  readonly embeddableConfig: any;
+  readonly gridData: GridData;
+  readonly title?: string;
+}
+
+export interface Pre61SavedDashboardPanel {
+  readonly size_x: number;
+  readonly size_y: number;
+  readonly row: number;
+  readonly col: number;
+  readonly panelIndex: any; // earlier versions allowed this to be number or string
+  readonly id: string;
+  readonly type: string;
+}
+
+export interface Pre64SavedDashboardPanel {
+  columns?: string;
+  sort?: string;
+  readonly id?: string;
+  readonly version: string;
+  readonly type: string;
+  readonly panelIndex: string;
+  readonly gridData: GridData;
+  readonly title?: string;
+  readonly embeddableConfig: any;
+}
+
+export interface DashboardAppStateDefaults {
+  panels: SavedDashboardPanel[];
+  fullScreenMode: boolean;
+  title: string;
+  description?: string;
+  timeRestore: boolean;
+  options: {
+    useMargins: boolean;
+    hidePanelTitles: boolean;
+  };
+  query: Query;
+  filters: Filter[];
+  viewMode: ViewMode;
+}
+
+export interface DashboardAppState extends AppState {
+  panels: SavedDashboardPanel[];
+  fullScreenMode: boolean;
+  title: string;
+  description: string;
+  timeRestore: boolean;
+  options: {
+    hidePanelTitles: boolean;
+    useMargins: boolean;
+  };
+  query: Query;
+  filters: Filter[];
+  viewMode: ViewMode;
 }

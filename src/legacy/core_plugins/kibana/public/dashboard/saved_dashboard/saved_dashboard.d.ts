@@ -17,6 +17,28 @@
  * under the License.
  */
 
-export { getAppStateMock } from './get_app_state_mock';
-export { getSavedDashboardMock } from './get_saved_dashboard_mock';
-export { getEmbeddableFactoryMock } from './get_embeddable_factories_mock';
+import { SearchSource } from 'ui/courier';
+import { SavedObject } from 'ui/saved_objects/saved_object';
+
+export interface SavedObjectDashboard extends SavedObject {
+  id?: string;
+  copyOnSave: boolean;
+  timeRestore: boolean;
+  timeTo: string;
+  timeFrom: string;
+  title: string;
+  description?: string;
+  panelsJSON: string;
+  optionsJSON: string | undefined;
+  // TODO: write a migration to rid of this, it's only around for bwc.
+  uiStateJSON?: string;
+  lastSavedTitle: string;
+  searchSource: SearchSource;
+  destroy: () => void;
+  refreshInterval?: {
+    display: string;
+    pause: boolean;
+    section: string;
+    value: string;
+  };
+}

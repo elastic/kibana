@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { SaveOptions } from 'ui/saved_objects/saved_object';
+import { DashboardStateManager } from '../dashboard_state_manager';
 import { updateSavedDashboard } from './update_saved_dashboard';
 
 /**
@@ -35,7 +37,12 @@ import { updateSavedDashboard } from './update_saved_dashboard';
  * @returns {Promise<string>} A promise that if resolved, will contain the id of the newly saved
  * dashboard.
  */
-export function saveDashboard(toJson, timeFilter, dashboardStateManager, saveOptions) {
+export async function saveDashboard(
+  toJson: (obj: any) => string,
+  timeFilter: any,
+  dashboardStateManager: DashboardStateManager,
+  saveOptions: SaveOptions
+) {
   dashboardStateManager.saveState();
 
   const savedDashboard = dashboardStateManager.savedDashboard;
@@ -43,10 +50,9 @@ export function saveDashboard(toJson, timeFilter, dashboardStateManager, saveOpt
 
   updateSavedDashboard(savedDashboard, appState, timeFilter, toJson);
 
-  return savedDashboard.save(saveOptions)
-    .then((id) => {
-      dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
-      dashboardStateManager.resetState();
-      return id;
-    });
+  const id = await savedDashboard.save(saveOptions);
+
+  dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
+  dashboardStateManager.resetState();
+  return id;
 }

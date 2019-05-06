@@ -17,45 +17,32 @@
  * under the License.
  */
 
-import React from 'react';
-import sinon from 'sinon';
-import { shallow } from 'enzyme';
+import { IAppState } from 'ui/state_management/app_state';
 
-import {
-  DashboardAddPanel,
-} from './add_panel';
-
-jest.mock('ui/capabilities',
-  () => ({
-    capabilities: {
-      get: () => ({
-        visualize: {
-          show: true,
-          save: true
-        }
-      })
+/**
+ * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
+ * This could be improved if we extract the appState and state classes externally of their angular providers.
+ * @return {AppStateMock}
+ */
+export function getAppStateMock(): IAppState {
+  class AppStateMock {
+    constructor(defaults: any) {
+      Object.assign(this, defaults);
     }
-  }), { virtual: true });
 
-jest.mock('ui/notify',
-  () => ({
-    toastNotifications: {
-      addDanger: () => {},
+    on() {}
+    off() {}
+    toJSON() {
+      return '';
     }
-  }), { virtual: true });
+    save() {}
+    translateHashToRison(stateHashOrRison: string | string[]) {
+      return stateHashOrRison;
+    }
+    getQueryParamName() {
+      return '';
+    }
+  }
 
-let onClose;
-beforeEach(() => {
-  onClose = sinon.spy();
-});
-
-test('render', () => {
-  const component = shallow(<DashboardAddPanel
-    onClose={onClose}
-    visTypes={{}}
-    addNewPanel={() => {}}
-    addNewVis={() => {}}
-    embeddableFactories={[]}
-  />);
-  expect(component).toMatchSnapshot();
-});
+  return AppStateMock;
+}

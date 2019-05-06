@@ -17,22 +17,29 @@
  * under the License.
  */
 
-/**
- * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
- * This could be improved if we extract the appState and state classes externally of their angular providers.
- * @return {AppStateMock}
- */
-export function getAppStateMock() {
-  class AppStateMock {
-    constructor(defaults) {
-      Object.assign(this, defaults);
-    }
+import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
-    on() {}
-    off() {}
-    toJSON() { return ''; }
-    save() {}
-  }
-
-  return AppStateMock;
+export function getSavedDashboardMock(
+  config?: Partial<SavedObjectDashboard>
+): SavedObjectDashboard {
+  return {
+    id: '123',
+    title: 'my dashboard',
+    panelsJSON: '[]',
+    searchSource: {
+      getOwnField: (param: any) => param,
+      setField: () => {},
+    },
+    copyOnSave: false,
+    timeRestore: false,
+    timeTo: 'now',
+    timeFrom: 'now-15m',
+    optionsJSON: '',
+    lastSavedTitle: '',
+    destroy: () => {},
+    save: () => {
+      return Promise.resolve('123');
+    },
+    ...config,
+  };
 }
