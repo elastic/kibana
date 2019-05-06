@@ -15,6 +15,7 @@ import { InfrastructurePage } from './pages/infrastructure';
 import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
 import { MetricDetail } from './pages/metrics';
+import { HistoryContext } from './utils/history_context';
 
 interface RouterProps {
   history: History;
@@ -24,26 +25,28 @@ interface RouterProps {
 const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }) => {
   return (
     <Router history={history}>
-      <Switch>
-        {uiCapabilities.infrastructure.show && (
-          <Redirect from="/" exact={true} to="/infrastructure/snapshot" />
-        )}
-        {uiCapabilities.infrastructure.show && (
-          <Redirect from="/infrastructure" exact={true} to="/infrastructure/snapshot" />
-        )}
-        {uiCapabilities.infrastructure.show && (
-          <Redirect from="/home" exact={true} to="/infrastructure/snapshot" />
-        )}
-        {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
-        {uiCapabilities.infrastructure.show && (
-          <Route path="/infrastructure" component={InfrastructurePage} />
-        )}
-        <Route path="/link-to" component={LinkToPage} />
-        {uiCapabilities.infrastructure.show && (
-          <Route path="/metrics/:type/:node" component={MetricDetail} />
-        )}
-        <Route component={NotFoundPage} />
-      </Switch>
+      <HistoryContext.Provider value={history}>
+        <Switch>
+          {uiCapabilities.infrastructure.show && (
+            <Redirect from="/" exact={true} to="/infrastructure/snapshot" />
+          )}
+          {uiCapabilities.infrastructure.show && (
+            <Redirect from="/infrastructure" exact={true} to="/infrastructure/snapshot" />
+          )}
+          {uiCapabilities.infrastructure.show && (
+            <Redirect from="/home" exact={true} to="/infrastructure/snapshot" />
+          )}
+          {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
+          {uiCapabilities.infrastructure.show && (
+            <Route path="/infrastructure" component={InfrastructurePage} />
+          )}
+          <Route path="/:sourceId?/link-to" component={LinkToPage} />
+          {uiCapabilities.infrastructure.show && (
+            <Route path="/metrics/:type/:node" component={MetricDetail} />
+          )}
+          <Route component={NotFoundPage} />
+        </Switch>
+      </HistoryContext.Provider>
     </Router>
   );
 };
