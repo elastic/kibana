@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -12,6 +13,7 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
@@ -77,6 +79,7 @@ export const HomePage = pure(() => (
                 id="timeline-1"
               />
             </Flyout>
+
             <EuiPageBody>
               <PageHeader data-test-subj="pageHeader">
                 <PageHeaderSection>
@@ -91,14 +94,26 @@ export const HomePage = pure(() => (
                           <SuperDatePicker id="global" />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
-                          <AppSettings />
+                          <EuiButton
+                            data-test-subj="add-data"
+                            href="kibana#home/tutorial_directory/security"
+                          >
+                            <FormattedMessage
+                              id="xpack.siem.global.addData"
+                              defaultMessage="Add data"
+                            />
+                          </EuiButton>
+
+                          {/* <AppSettings /> */}
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </FixEuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
+
               <PageHeadline />
+
               <Switch>
                 <Redirect from="/" exact={true} to="/overview" />
                 <Route path="/overview" component={Overview} />
