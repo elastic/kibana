@@ -10,10 +10,10 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-// @ts-ignore
-import { createPermissionFailureMessage } from '../../../../../privilege/check_privilege';
-// @ts-ignore
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import {
+  checkPermission,
+  createPermissionFailureMessage,
+} from '../../../../../privilege/check_privilege';
 
 function newJob() {
   window.location.href = `#/data_frame/new_job`;

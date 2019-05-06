@@ -13,7 +13,6 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-// @ts-ignore
 import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';

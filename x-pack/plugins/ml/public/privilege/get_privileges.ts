@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ml } from '../services/ml_api_service';
+// @ts-ignore
 import { setUpgradeInProgress } from '../services/upgrade_service';
 
-export function getPrivileges() {
-  const privileges = {
+import { Cluster, Privileges } from './common';
+
+export function getPrivileges(): Promise<Privileges> {
+  const privileges: Privileges = {
     // Anomaly Detection
     canGetJobs: false,
     canCreateJob: false,
@@ -78,22 +80,20 @@ export function getPrivileges() {
         'cluster:admin/xpack/ml/filters/update',
         'cluster:admin/xpack/ml/filters/delete',
         'cluster:monitor/xpack/ml/findfilestructure',
-      ]
+      ],
     };
 
     ml.checkPrivilege(priv)
-      .then((resp) => {
-
-        if(resp.upgradeInProgress === true) {
+      .then(resp => {
+        if (resp.upgradeInProgress === true) {
           setUpgradeInProgress(true);
           // only check for getting endpoints
           // force all to be true if security is disabled
-          setGettingPrivileges(resp.cluster, privileges, (resp.securityDisabled === true));
-        }
-        else if (resp.securityDisabled) {
+          setGettingPrivileges(resp.cluster, privileges, resp.securityDisabled === true);
+        } else if (resp.securityDisabled) {
           // if security has been disabled, securityDisabled is returned from the endpoint
           // therefore set all privileges to true
-          Object.keys(privileges).forEach(k => privileges[k] = true);
+          Object.keys(privileges).forEach(k => (privileges[k] = true));
         } else {
           setGettingPrivileges(resp.cluster, privileges);
           setActionPrivileges(resp.cluster, privileges);
@@ -107,12 +107,16 @@ export function getPrivileges() {
   });
 }
 
-function setGettingPrivileges(cluster = {}, privileges = {}, forceTrue = false) {
+function setGettingPrivileges(
+  cluster: Cluster = {},
+  privileges: Privileges = {},
+  forceTrue = false
+) {
   // Anomaly Detection
   if (
     forceTrue ||
     (cluster['cluster:monitor/xpack/ml/job/get'] &&
-    cluster['cluster:monitor/xpack/ml/job/stats/get'])
+      cluster['cluster:monitor/xpack/ml/job/stats/get'])
   ) {
     privileges.canGetJobs = true;
   }
@@ -120,7 +124,7 @@ function setGettingPrivileges(cluster = {}, privileges = {}, forceTrue = false) 
   if (
     forceTrue ||
     (cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
-    cluster['cluster:monitor/xpack/ml/datafeeds/stats/get'])
+      cluster['cluster:monitor/xpack/ml/datafeeds/stats/get'])
   ) {
     privileges.canGetDatafeeds = true;
   }
@@ -143,17 +147,19 @@ function setGettingPrivileges(cluster = {}, privileges = {}, forceTrue = false) 
   // Data Frames
   if (
     forceTrue ||
-    (cluster['cluster:monitor/data_frame/get'] &&
-    cluster['cluster:monitor/data_frame/stats/get'])) {
+    (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
+  ) {
     privileges.canGetDataFrameJobs = true;
   }
 }
 
-function setActionPrivileges(cluster = {}, privileges = {}) {
+function setActionPrivileges(cluster: Cluster = {}, privileges: Privileges = {}) {
   // Anomaly Detection
-  if (cluster['cluster:admin/xpack/ml/job/put'] &&
+  if (
+    cluster['cluster:admin/xpack/ml/job/put'] &&
     cluster['cluster:admin/xpack/ml/job/open'] &&
-    cluster['cluster:admin/xpack/ml/datafeeds/put']) {
+    cluster['cluster:admin/xpack/ml/datafeeds/put']
+  ) {
     privileges.canCreateJob = true;
   }
 
@@ -173,14 +179,18 @@ function setActionPrivileges(cluster = {}, privileges = {}) {
     privileges.canForecastJob = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/job/delete'] &&
-    cluster['cluster:admin/xpack/ml/datafeeds/delete']) {
+  if (
+    cluster['cluster:admin/xpack/ml/job/delete'] &&
+    cluster['cluster:admin/xpack/ml/datafeeds/delete']
+  ) {
     privileges.canDeleteJob = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/job/open'] &&
+  if (
+    cluster['cluster:admin/xpack/ml/job/open'] &&
     cluster['cluster:admin/xpack/ml/datafeeds/start'] &&
-    cluster['cluster:admin/xpack/ml/datafeeds/stop']) {
+    cluster['cluster:admin/xpack/ml/datafeeds/stop']
+  ) {
     privileges.canStartStopDatafeed = true;
   }
 
@@ -193,20 +203,26 @@ function setActionPrivileges(cluster = {}, privileges = {}) {
   }
 
   // Calendars
-  if (cluster['cluster:admin/xpack/ml/calendars/put'] &&
+  if (
+    cluster['cluster:admin/xpack/ml/calendars/put'] &&
     cluster['cluster:admin/xpack/ml/calendars/jobs/update'] &&
-    cluster['cluster:admin/xpack/ml/calendars/events/post']) {
+    cluster['cluster:admin/xpack/ml/calendars/events/post']
+  ) {
     privileges.canCreateCalendar = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/calendars/delete'] &&
-    cluster['cluster:admin/xpack/ml/calendars/events/delete']) {
+  if (
+    cluster['cluster:admin/xpack/ml/calendars/delete'] &&
+    cluster['cluster:admin/xpack/ml/calendars/events/delete']
+  ) {
     privileges.canDeleteCalendar = true;
   }
 
   // Filters
-  if (cluster['cluster:admin/xpack/ml/filters/put'] &&
-    cluster['cluster:admin/xpack/ml/filters/update']) {
+  if (
+    cluster['cluster:admin/xpack/ml/filters/put'] &&
+    cluster['cluster:admin/xpack/ml/filters/update']
+  ) {
     privileges.canCreateFilter = true;
   }
 
@@ -227,9 +243,11 @@ function setActionPrivileges(cluster = {}, privileges = {}) {
     privileges.canPreviewDataFrameJob = true;
   }
 
-  if (cluster['cluster:admin/data_frame/start'] &&
+  if (
+    cluster['cluster:admin/data_frame/start'] &&
     cluster['cluster:admin/data_frame/start_task'] &&
-    cluster['cluster:admin/data_frame/stop']) {
+    cluster['cluster:admin/data_frame/stop']
+  ) {
     privileges.canStartStopDataFrameJob = true;
   }
 }
