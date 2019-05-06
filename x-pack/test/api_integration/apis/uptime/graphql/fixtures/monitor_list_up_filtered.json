@@ -14,7 +14,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "https://www.google.com/" }
+          "url": { "domain": "www.google.com", "full": "https://www.google.com/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 74 },
@@ -58,7 +58,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "http://www.google.com/" }
+          "url": { "domain": "www.google.com", "full": "http://www.google.com/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 58 },
@@ -102,7 +102,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "https://www.github.com/" }
+          "url": { "domain": "www.github.com", "full": "https://www.github.com/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 69 },
@@ -146,7 +146,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "https://www.wikipedia.org/" }
+          "url": { "domain": "www.wikipedia.org", "full": "https://www.wikipedia.org/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 5 },
@@ -190,7 +190,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "http://www.reddit.com/" }
+          "url": { "domain": "www.reddit.com", "full": "http://www.reddit.com/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 79 },
@@ -234,7 +234,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "https://www.elastic.co" }
+          "url": { "domain": "www.elastic.co", "full": "https://www.elastic.co" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 79 },
@@ -278,7 +278,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "https://news.google.com/" }
+          "url": { "domain": "news.google.com", "full": "https://news.google.com/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 5 },
@@ -322,7 +322,7 @@
             "name": "",
             "status": "up"
           },
-          "url": { "full": "tcp://localhost:9200" }
+          "url": { "domain": "localhost", "full": "tcp://localhost:9200" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": 1 },
