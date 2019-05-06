@@ -13,6 +13,9 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+// @ts-ignore
+import { checkPermission } from '../../../../../privilege/check_privilege';
+
 import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
 import { deleteJobFactory, startJobFactory, stopJobFactory } from './job_service';
 
@@ -84,6 +87,9 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item
 };
 
 export const getActions = (getJobs: () => void) => {
+  const canDeleteDataFrameJob: boolean = checkPermission('canDeleteDataFrameJob');
+  const canStartStopDataFrameJob: boolean = checkPermission('canStartStopDataFrameJob');
+
   const deleteJob = deleteJobFactory(getJobs);
   const startJob = startJobFactory(getJobs);
   const stopJob = stopJobFactory(getJobs);
@@ -100,6 +106,7 @@ export const getActions = (getJobs: () => void) => {
             <EuiButtonEmpty
               size="xs"
               color="text"
+              disabled={!canStartStopDataFrameJob}
               iconType="play"
               onClick={() => startJob(item)}
               aria-label={buttonStartText}
@@ -116,6 +123,7 @@ export const getActions = (getJobs: () => void) => {
           <EuiButtonEmpty
             size="xs"
             color="text"
+            disabled={!canStartStopDataFrameJob}
             iconType="stop"
             onClick={() => stopJob(item)}
             aria-label={buttonStopText}
@@ -130,7 +138,9 @@ export const getActions = (getJobs: () => void) => {
         return (
           <DeleteAction
             deleteJob={deleteJob}
-            disabled={item.state.task_state === DATA_FRAME_RUNNING_STATE.STARTED}
+            disabled={
+              item.state.task_state === DATA_FRAME_RUNNING_STATE.STARTED || !canDeleteDataFrameJob
+            }
             item={item}
           />
         );

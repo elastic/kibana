@@ -67,7 +67,7 @@ export function checkGetDataFrameJobsPrivilege(Private, Promise, kbnUrl) {
     getPrivileges()
       .then((priv) => {
         privileges = priv;
-        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
+        // the minimum privilege for using ML with a basic license is being able to use the data frames.
         // all other functionality is controlled by the return privileges object
         if (privileges.canGetDataFrameJobs) {
           return resolve(privileges);
@@ -84,7 +84,7 @@ export function checkCreateDataFrameJobsPrivilege(Private, Promise, kbnUrl) {
     getPrivileges()
       .then((priv) => {
         privileges = priv;
-        if (privileges.canCreateJob) {
+        if (privileges.canCreateDataFrameJob) {
           return resolve(privileges);
         } else {
           // if the user has no permission to create a data frame job,
@@ -139,6 +139,18 @@ export function createPermissionFailureMessage(privilegeType) {
   } else if (privilegeType === 'canForecastJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
       defaultMessage: 'You do not have permission to run forecasts.'
+    });
+  } else if (privilegeType === 'canCreateDataFrameJob') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.createDataFrameJobsTooltip', {
+      defaultMessage: 'You do not have permission to create Data Frame jobs.'
+    });
+  } else if (privilegeType === 'canStartStopDataFrameJob') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDataFrameJobTooltip', {
+      defaultMessage: 'You do not have permission to start or stop Data Frame jobs.'
+    });
+  } else if (privilegeType === 'canDeleteDataFrameJob') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteFrameJobTooltip', {
+      defaultMessage: 'You do not have permission to delete Data Frame jobs.'
     });
   }
   return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {
