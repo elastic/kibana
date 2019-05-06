@@ -244,7 +244,7 @@ export default () => Joi.object({
         }))
       })).default([])
     }).default(),
-    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.0/manifest'),
+    manifestServiceUrl: Joi.string().default('https://catalogue-staging.maps.elastic.co/v7.2/manifest'),
     emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.0'),
   }).default(),
 
