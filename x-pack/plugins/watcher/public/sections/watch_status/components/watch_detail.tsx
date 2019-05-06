@@ -26,6 +26,20 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
     pageSizeOptions: [10, 50, 100],
   };
 
+  const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
+
+  const [actionStatuses, setActionStatuses] = useState<any[]>([]);
+  const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
+
+  useEffect(
+    () => {
+      if (watchDetail) {
+        setActionStatuses(watchDetail.watchStatus.actionStatuses);
+      }
+    },
+    [watchDetail]
+  );
+
   const columns = [
     {
       field: 'id',
@@ -100,20 +114,6 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
       ],
     },
   ];
-
-  const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
-
-  const [actionStatuses, setActionStatuses] = useState<any[]>([]);
-  const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
-
-  useEffect(
-    () => {
-      if (watchDetail) {
-        setActionStatuses(watchDetail.watchStatus.actionStatuses);
-      }
-    },
-    [watchDetail]
-  );
 
   // Another part of the UI will surface the error.
   if (getPageErrorCode(error)) {
