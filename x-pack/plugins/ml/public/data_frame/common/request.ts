@@ -130,17 +130,16 @@ export function getDataFramePreviewRequest(
     } else {
       request.pivot.aggregations[agg.aggName] = {
         scripted_metric: {
-          init_script: 'state.timestamps = []',
-          map_script: `state.timestamps.add(doc['${agg.field}'].value.getMillis())`,
-          combine_script: `
+          init_script: `
 state.min = Double.POSITIVE_INFINITY;
 state.max = Double.NEGATIVE_INFINITY;
-for (timestamp in state.timestamps) {
-  state.min = Math.min(state.min, timestamp);
-  state.max = Math.max(state.max, timestamp);
-}
-return state;
 `,
+          map_script: `
+double timestamp = doc['${agg.field}'].value.getMillis();
+state.min = Math.min(state.min, timestamp);
+state.max = Math.max(state.max, timestamp);
+`,
+          combine_script: `return state;`,
           reduce_script: `
 double min = Double.POSITIVE_INFINITY;
 double max = Double.NEGATIVE_INFINITY;
