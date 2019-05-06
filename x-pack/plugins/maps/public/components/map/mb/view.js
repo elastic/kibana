@@ -33,9 +33,13 @@ export class MBMapContainer extends React.Component {
     isDrawingFilter: false
   };
 
-  static getDerivedStateFromProps(nextProps) {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const nextIsDrawingFilter = nextProps.drawState !== null;
+    if (nextIsDrawingFilter === prevState.isDrawingFilter) {
+      return null;
+    }
     return {
-      isDrawingFilter: nextProps.drawState !== null
+      isDrawingFilter: nextIsDrawingFilter
     };
   }
 
