@@ -16,31 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Action,
-  actionRegistry,
-  triggerRegistry,
-  CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api/index';
 
-class SamplePanelLink extends Action {
-  constructor() {
-    super('samplePanelLink');
-  }
-
-  public getTitle() {
-    return 'Sample panel Link';
-  }
-
-  public execute() {
-    return undefined;
-  }
-
-  public getHref = () => {
-    return 'https://example.com/kibana/test';
-  };
-}
-
-actionRegistry.addAction(new SamplePanelLink());
-
-triggerRegistry.attachAction({ triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelLink' });
+import { Plugin as EmbeddableExplorer } from './plugin';
+import { createShim } from './shim';
+const embeddableExplorer = new EmbeddableExplorer();
+embeddableExplorer.start(createShim());

@@ -16,31 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Action,
-  actionRegistry,
-  triggerRegistry,
-  CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api/index';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { App } from './app/';
+import { CoreShim, PluginShim } from './shim';
 
-class SamplePanelLink extends Action {
-  constructor() {
-    super('samplePanelLink');
+const REACT_ROOT_ID = 'embeddableExplorerRoot';
+
+export class Plugin {
+  public start({ core, plugins }: { core: CoreShim; plugins: PluginShim }): void {
+    core.onRenderComplete(() => {
+      const root = document.getElementById(REACT_ROOT_ID);
+      ReactDOM.render(
+        <App embeddableFactories={plugins.embeddableAPI.embeddableFactories} />,
+        root
+      );
+    });
   }
-
-  public getTitle() {
-    return 'Sample panel Link';
-  }
-
-  public execute() {
-    return undefined;
-  }
-
-  public getHref = () => {
-    return 'https://example.com/kibana/test';
-  };
 }
-
-actionRegistry.addAction(new SamplePanelLink());
-
-triggerRegistry.attachAction({ triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelLink' });

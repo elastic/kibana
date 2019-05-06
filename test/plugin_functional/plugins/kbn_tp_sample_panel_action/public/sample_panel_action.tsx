@@ -21,20 +21,23 @@ import React from 'react';
 import { getNewPlatform } from 'ui/new_platform';
 
 import {
-  ContextMenuAction,
-  ContextMenuActionsRegistryProvider,
-  PanelActionAPI,
-} from 'ui/embeddable';
+  ExecuteActionContext,
+  actionRegistry,
+  Action,
+  triggerRegistry,
+  CONTEXT_MENU_TRIGGER,
+} from 'plugins/embeddable_api/index';
 
-class SamplePanelAction extends ContextMenuAction {
+class SamplePanelAction extends Action {
   constructor() {
-    super({
-      displayName: 'Sample Panel Action',
-      id: 'samplePanelAction',
-      parentPanelId: 'mainMenu',
-    });
+    super('samplePanelAction');
   }
-  public onClick = ({ embeddable }: PanelActionAPI) => {
+
+  public getTitle() {
+    return 'Sample Panel Action';
+  }
+
+  public execute = ({ embeddable }: ExecuteActionContext) => {
     if (!embeddable) {
       return;
     }
@@ -42,7 +45,7 @@ class SamplePanelAction extends ContextMenuAction {
       <React.Fragment>
         <EuiFlyoutHeader>
           <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-            <h2>{embeddable.metadata.title}</h2>
+            <h1>{embeddable.getTitle()}</h1>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -56,4 +59,5 @@ class SamplePanelAction extends ContextMenuAction {
   };
 }
 
-ContextMenuActionsRegistryProvider.register(() => new SamplePanelAction());
+actionRegistry.addAction(new SamplePanelAction());
+triggerRegistry.attachAction({ triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelAction' });

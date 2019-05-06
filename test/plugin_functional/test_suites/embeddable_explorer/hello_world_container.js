@@ -16,31 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Action,
-  actionRegistry,
-  triggerRegistry,
-  CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api/index';
 
-class SamplePanelLink extends Action {
-  constructor() {
-    super('samplePanelLink');
-  }
+import expect from '@kbn/expect';
 
-  public getTitle() {
-    return 'Sample panel Link';
-  }
+export default function ({ getService }) {
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
-  public execute() {
-    return undefined;
-  }
+  describe('hello world container', () => {
 
-  public getHref = () => {
-    return 'https://example.com/kibana/test';
-  };
+    before(async () => {
+      await testSubjects.click('embedExplorerTab-helloWorldContainer');
+    });
+
+    it('hello world embeddable renders', async () => {
+      await retry.try(async () => {
+        const text = await testSubjects.getVisibleText('helloWorldEmbeddable');
+        expect(text).to.be('Hello World!\nSincerly,\nJoe foo');
+      });
+    });
+  });
 }
-
-actionRegistry.addAction(new SamplePanelLink());
-
-triggerRegistry.attachAction({ triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelLink' });

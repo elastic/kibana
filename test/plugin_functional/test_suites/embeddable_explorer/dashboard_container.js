@@ -16,31 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Action,
-  actionRegistry,
-  triggerRegistry,
-  CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api/index';
 
-class SamplePanelLink extends Action {
-  constructor() {
-    super('samplePanelLink');
-  }
 
-  public getTitle() {
-    return 'Sample panel Link';
-  }
+export default function ({ getService }) {
+  const pieChart = getService('pieChart');
+  const testSubjects = getService('testSubjects');
+  const dashboardExpect = getService('dashboardExpect');
 
-  public execute() {
-    return undefined;
-  }
+  describe('dashboard container', () => {
 
-  public getHref = () => {
-    return 'https://example.com/kibana/test';
-  };
+    before(async () => {
+      await testSubjects.click('embedExplorerTab-dashboardEmbeddable');
+    });
+
+    it('pie charts', async () => {
+      await pieChart.expectPieSliceCount(5);
+    });
+
+    it('markdown', async () => {
+      await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    });
+
+    it('saved search', async () => {
+      await dashboardExpect.savedSearchRowCount(50);
+    });
+  });
 }
-
-actionRegistry.addAction(new SamplePanelLink());
-
-triggerRegistry.attachAction({ triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelLink' });
