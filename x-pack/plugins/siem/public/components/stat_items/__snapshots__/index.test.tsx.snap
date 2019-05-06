@@ -721,7 +721,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                 innerRef={[Function]}
                               >
                                 <div
-                                  className="sc-bxivhb iDiKZF"
+                                  className="sc-bxivhb fLNTGm"
                                 >
                                   <pure(Component)
                                     data={
@@ -883,7 +883,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                 innerRef={[Function]}
                               >
                                 <div
-                                  className="sc-bxivhb iDiKZF"
+                                  className="sc-bxivhb fLNTGm"
                                 >
                                   <pure(Component)
                                     data={
@@ -968,7 +968,93 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                           },
                                         ]
                                       }
-                                    />
+                                    >
+                                      <pure(Component)
+                                        data={
+                                          Array [
+                                            Object {
+                                              "color": "#DB1374",
+                                              "key": "uniqueSourceIpsHistogram",
+                                              "value": Array [
+                                                Object {
+                                                  "x": 1556686800000,
+                                                  "y": 580213,
+                                                },
+                                                Object {
+                                                  "x": 1556730000000,
+                                                  "y": 1096175,
+                                                },
+                                                Object {
+                                                  "x": 1556773200000,
+                                                  "y": 12382,
+                                                },
+                                              ],
+                                            },
+                                            Object {
+                                              "color": "#490092",
+                                              "key": "uniqueDestinationIpsHistogram",
+                                              "value": Array [
+                                                Object {
+                                                  "x": 1556686800000,
+                                                  "y": 565975,
+                                                },
+                                                Object {
+                                                  "x": 1556730000000,
+                                                  "y": 1084366,
+                                                },
+                                                Object {
+                                                  "x": 1556773200000,
+                                                  "y": 12280,
+                                                },
+                                              ],
+                                            },
+                                          ]
+                                        }
+                                      >
+                                        <Component
+                                          data={
+                                            Array [
+                                              Object {
+                                                "color": "#DB1374",
+                                                "key": "uniqueSourceIpsHistogram",
+                                                "value": Array [
+                                                  Object {
+                                                    "x": 1556686800000,
+                                                    "y": 580213,
+                                                  },
+                                                  Object {
+                                                    "x": 1556730000000,
+                                                    "y": 1096175,
+                                                  },
+                                                  Object {
+                                                    "x": 1556773200000,
+                                                    "y": 12382,
+                                                  },
+                                                ],
+                                              },
+                                              Object {
+                                                "color": "#490092",
+                                                "key": "uniqueDestinationIpsHistogram",
+                                                "value": Array [
+                                                  Object {
+                                                    "x": 1556686800000,
+                                                    "y": 565975,
+                                                  },
+                                                  Object {
+                                                    "x": 1556730000000,
+                                                    "y": 1084366,
+                                                  },
+                                                  Object {
+                                                    "x": 1556773200000,
+                                                    "y": 12280,
+                                                  },
+                                                ],
+                                              },
+                                            ]
+                                          }
+                                        />
+                                      </pure(Component)>
+                                    </Component>
                                   </pure(Component)>
                                 </div>
                               </styled.div>

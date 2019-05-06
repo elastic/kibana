@@ -26,10 +26,6 @@ import { getEmptyTagValue } from '../empty_value';
 export const WrappedByAutoSizer = styled.div`
   height: 100px;
   position: relative;
-
-  &:hover {
-    z-index: 100;
-  }
 `;
 
 export interface StatItem {

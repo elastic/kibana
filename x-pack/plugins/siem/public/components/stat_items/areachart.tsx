@@ -12,14 +12,19 @@ import { EuiSeriesChart, EuiAreaSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/
 import { AreaChartData, WrappedByAutoSizer, ChartHolder } from '.';
 import { AutoSizer } from '../auto_sizer';
 
-export const ChartBaseComponent = pure<{
+export const AreaChartBaseComponent = pure<{
   data: AreaChartData[];
-  width: number | undefined;
-  height: number | undefined;
+  width: number | null | undefined;
+  height: number | null | undefined;
 }>(({ data, ...chartConfigs }) =>
   chartConfigs.width && chartConfigs.height ? (
     // @ts-ignore
-    <SeriesChart {...chartConfigs} showDefaultAxis={false} xType="ordinal">
+    <SeriesChart
+      {...chartConfigs}
+      showDefaultAxis={false}
+      xType="ordinal"
+      data-test-subj="stat-area-chart"
+    >
       {data.map(series =>
         series.value != null ? (
           /**
@@ -46,18 +51,24 @@ export const ChartBaseComponent = pure<{
   ) : null
 );
 
+export const AreaChartWithCustomPrompt = pure<{
+  data: AreaChartData[] | null | undefined;
+  height: number | null | undefined;
+  width: number | null | undefined;
+}>(({ data, height, width }) => {
+  return data && data.length && data.every(({ value }) => value != null && value.length > 0) ? (
+    <AreaChartBaseComponent height={height} width={width} data={data} />
+  ) : (
+    <ChartHolder />
+  );
+});
+
 export const AreaChart = pure<{ areaChart: AreaChartData[] | [] | null | undefined }>(
   ({ areaChart }) => (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer innerRef={measureRef}>
-          {areaChart &&
-          areaChart.length &&
-          areaChart.every(({ value }) => value != null && value.length > 0) ? (
-            <ChartBaseComponent height={height} width={width} data={areaChart} />
-          ) : (
-            <ChartHolder />
-          )}
+          <AreaChartWithCustomPrompt data={areaChart} height={height} width={width} />
         </WrappedByAutoSizer>
       )}
     </AutoSizer>
