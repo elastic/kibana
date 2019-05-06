@@ -43,7 +43,11 @@ export class ConfigService {
   ) {
     this.log = logger.get('config');
   }
-
+  /**
+   * Defines a validation schema for an appropriate path in config object.
+   * Performs validation for initial values.
+   * @internal
+   */
   public async preSetup(schemas: Map<ConfigPath, Type<any>>) {
     this.schemas = new Map();
     for (const [path, schema] of schemas) {
