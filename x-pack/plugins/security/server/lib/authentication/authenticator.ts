@@ -14,12 +14,12 @@ import {
   BasicAuthenticationProvider,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
+  OpenIdConnectAuthenticationProvider,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
 import { LoginAttempt } from './login_attempt';
-import { OpenIdConnectAuthenticationProvider } from './providers/oidc';
 
 interface ProviderSession {
   provider: string;
@@ -64,13 +64,13 @@ function getProviderOptions(server: Legacy.Server) {
   };
 }
 
+
 /**
  * Prepares options object that is specific only to an authentication provider. This will be merged
  * with the general options
- * @param {Hapi.Server} server HapiJS Server instance.
- * @returns {Object}
+ * @param server  Server instance.
  */
-function getProviderSpecificOptions(server, providerName) {
+function getProviderSpecificOptions(server: Legacy.Server, providerName: string) {
   const config = server.config();
   if (config.has(`xpack.security.auth.${providerName}`)) {
     return config.get(`xpack.security.auth.${providerName}`);
@@ -137,10 +137,8 @@ class Authenticator {
       authProviders.map(
         (providerType) => {
           const providerOptions = Object.freeze({ ...generalOptions, ...getProviderSpecificOptions(server, providerType) });
-          return [providerType, instantiateProvider(providerType, providerOptions)] as [
-            string,
-            BaseAuthenticationProvider
-            ];
+          return [providerType, instantiateProvider(providerType, providerOptions)] as
+            [string, BaseAuthenticationProvider];
         }
       )
     );
