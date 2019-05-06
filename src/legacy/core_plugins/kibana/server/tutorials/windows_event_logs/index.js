@@ -43,7 +43,7 @@ export function windowsEventLogsSpecProvider(server, context) {
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.windowsEventLogs.artifacts.application.label', {
-          defaultMessage: 'Go to SIEM',
+          defaultMessage: 'SIEM App',
         }),
         path: '/app/siem'
       },

@@ -157,7 +157,7 @@ export function winlogbeatStatusCheck() {
 }
 
 export function onPremInstructions(platforms, context) {
-  const METRICBEAT_INSTRUCTIONS = createWinlogbeatInstructions(context);
+  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions(context);
 
   return {
     instructionSets: [
@@ -169,9 +169,9 @@ export function onPremInstructions(platforms, context) {
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
             instructions: [
-              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.START.WINDOWS,
             ],
           },
         ],
@@ -184,7 +184,7 @@ export function onPremInstructions(platforms, context) {
 export function onPremCloudInstructions() {
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const METRICBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
+  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
 
   return {
     instructionSets: [
@@ -198,9 +198,9 @@ export function onPremCloudInstructions() {
             instructions: [
               TRYCLOUD_OPTION1,
               TRYCLOUD_OPTION2,
-              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.START.WINDOWS,
             ],
           },
         ],
@@ -211,8 +211,8 @@ export function onPremCloudInstructions() {
 }
 
 export function cloudInstructions() {
-  const METRICBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
-  const METRICBEAT_CLOUD_INSTRUCTIONS = createWinlogbeatCloudInstructions();
+  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
+  const WINLOGBEAT_CLOUD_INSTRUCTIONS = createWinlogbeatCloudInstructions();
 
   return {
     instructionSets: [
@@ -224,9 +224,9 @@ export function cloudInstructions() {
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
             instructions: [
-              METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-              METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
+              WINLOGBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
+              WINLOGBEAT_INSTRUCTIONS.START.WINDOWS,
             ],
           },
         ],
