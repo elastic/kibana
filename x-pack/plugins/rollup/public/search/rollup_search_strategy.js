@@ -104,10 +104,9 @@ export const rollupSearchStrategy = {
     });
 
     return {
-      searching: new Promise((resolve, reject) => {
-        promise.then(result => {
-          resolve(shimHitsInFetchResponse(result));
-        }).catch(error => {
+      searching: promise
+        .then(shimHitsInFetchResponse)
+        .catch(error => {
           const {
             body: { statusText, error: title, message },
             res: { url },
@@ -122,9 +121,8 @@ export const rollupSearchStrategy = {
             type: getSearchErrorType({ message }),
           });
 
-          reject(searchError);
-        });
-      }),
+          return Promise.reject(searchError);
+        }),
       abort: () => controller.abort(),
       failedSearchRequests,
     };

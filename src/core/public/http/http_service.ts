@@ -41,7 +41,7 @@ export class HttpService {
 
     return {
       fetch,
-      delete: shorthand('HEAD'),
+      delete: shorthand('DELETE'),
       get: shorthand('GET'),
       head: shorthand('HEAD'),
       options: shorthand('OPTIONS'),

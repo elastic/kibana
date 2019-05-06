@@ -77,7 +77,6 @@ describe('Kuery value suggestions', function () {
       method: 'POST',
       body: '{"query":"","field":"machine.os.raw","boolFilter":[]}',
       credentials: 'same-origin',
-      signal: {},
       headers: {
         'Content-Type': 'application/json',
         'kbn-version': '1.2.3',
