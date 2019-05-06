@@ -21,27 +21,9 @@ export const registerHelpers = ({ supertest }) => {
       })
   );
 
-  // const deletePolicy = (name) => {
-  //   return supertest
-  //     .delete(`${API_BASE_PATH}/policies/${name}`)
-  //     .set('kbn-xsrf', 'xxx');
-  // };
-
-  // const deleteAllPolicies = (policies) => (
-  //   Promise.all(policies.map(deletePolicy))
-  // );
-
-  const cleanUp = () => {
-    // return loadTemplates()
-    //   .then(({ body }) => getPolicyNames(body).filter(name => name !== DEFAULT_POLICY_NAME))
-    //   .then(deleteAllPolicies);
-  };
-
   return {
-    cleanUp,
     loadTemplates,
     getTemplate,
     addPolicyToTemplate,
-    // deletePolicy,
   };
 };

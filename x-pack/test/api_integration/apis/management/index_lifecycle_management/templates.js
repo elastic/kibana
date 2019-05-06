@@ -9,7 +9,6 @@ import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
 import { getTemplatePayload, gePolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
-// import { DEFAULT_POLICY_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -21,7 +20,6 @@ export default function ({ getService }) {
     loadTemplates,
     getTemplate,
     addPolicyToTemplate,
-    cleanUp: cleanUpTemplates,
   } = registerTemplatesHelpers({ supertest });
 
   const {
@@ -30,7 +28,7 @@ export default function ({ getService }) {
   } = registerPoliciesHelpers({ supertest });
 
   describe('templates', () => {
-    after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates(), cleanUpPolicies()]));
+    after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
       it('should load all the templates', async () => {
