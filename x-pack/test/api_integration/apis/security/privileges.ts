@@ -12,7 +12,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   let version: string;
 
-  describe('Privileges', () => {
+  describe.skip('Privileges', () => {
     before(async () => {
       const versionService = getService('kibanaServer').version;
       version = await versionService.get();
