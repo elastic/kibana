@@ -12,6 +12,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
+import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { WithSource } from '../../containers/with_source';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
@@ -23,7 +24,7 @@ interface RedirectToLogsProps extends RedirectToLogsType {
 
 export const RedirectToLogs = injectI18n(({ location, intl }: RedirectToLogsProps) => (
   <WithSource>
-    {({ configuration, isLoading }) => {
+    {({ configuration, isLoading, sourceId }) => {
       if (isLoading) {
         return (
           <LoadingPage
@@ -42,7 +43,8 @@ export const RedirectToLogs = injectI18n(({ location, intl }: RedirectToLogsProp
       const filter = getFilterFromLocation(location);
       const searchString = compose(
         replaceLogFilterInQueryString(filter),
-        replaceLogPositionInQueryString(getTimeFromLocation(location))
+        replaceLogPositionInQueryString(getTimeFromLocation(location)),
+        replaceSourceIdInQueryString(sourceId)
       )('');
       return <Redirect to={`/logs?${searchString}`} />;
     }}
