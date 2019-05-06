@@ -19,6 +19,27 @@ import {
 } from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
 
+const { useEffect, useRef, useCallback } = React;
+
+const useExecOnCtrlEnter = action => {
+  useEffect(
+    () => {
+      const handler = ({ ctrlKey, metaKey, keyCode }) => {
+        const isModifierPressed = ctrlKey || metaKey; // ⌃ or ⌘
+        const isEnter = keyCode === 13;
+        if (isModifierPressed && isEnter) {
+          action();
+        }
+      };
+      document.addEventListener('keydown', handler);
+      return () => {
+        document.removeEventListener('keydown', handler);
+      };
+    },
+    [action]
+  );
+};
+
 const minFontSize = 12;
 const maxFontSize = 32;
 
@@ -36,6 +57,11 @@ export const Expression = ({
   isCompact,
   toggleCompactView,
 }) => {
+  const refForm = useRef(null);
+  refForm.current = formState;
+  const run = useCallback(() => setExpression(refForm.current.expression), [setExpression]);
+  useExecOnCtrlEnter(run);
+
   return (
     <EuiPanel
       className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
@@ -106,12 +132,7 @@ export const Expression = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                disabled={!!error}
-                onClick={() => setExpression(formState.expression)}
-                size="s"
-              >
+              <EuiButton fill disabled={!!error} onClick={run} size="s">
                 Run
               </EuiButton>
             </EuiFlexItem>
