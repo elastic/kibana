@@ -226,7 +226,10 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
           compressed
           items={dataFramePreviewData}
           columns={columns}
-          pagination={true}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
           sorting={sorting}
         />
       )}

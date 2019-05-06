@@ -344,7 +344,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           compressed
           items={tableItems}
           columns={columns}
-          pagination={true}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
           hasActions={false}
           isSelectable={false}
           itemId="_id"
