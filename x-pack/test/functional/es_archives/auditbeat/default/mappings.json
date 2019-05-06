@@ -1,0 +1,1905 @@
+{
+  "type": "index",
+  "value": {
+    "index": "auditbeat-7.0.0-alpha1-2018.11.27",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "mapping": {
+          "total_fields": {
+            "limit": "10000"
+          }
+        },
+        "refresh_interval": "5s",
+        "number_of_shards": "1",
+        "query": {
+          "default_field": [
+            "beat.name",
+            "beat.hostname",
+            "beat.timezone",
+            "beat.version",
+            "tags",
+            "error.message",
+            "error.type",
+            "meta.cloud.provider",
+            "meta.cloud.instance_id",
+            "meta.cloud.instance_name",
+            "meta.cloud.machine_type",
+            "meta.cloud.availability_zone",
+            "meta.cloud.project_id",
+            "meta.cloud.region",
+            "docker.container.id",
+            "docker.container.image",
+            "docker.container.name",
+            "host.name",
+            "host.id",
+            "host.architecture",
+            "host.os.platform",
+            "host.os.version",
+            "host.os.family",
+            "host.mac",
+            "kubernetes.pod.name",
+            "kubernetes.pod.uid",
+            "kubernetes.namespace",
+            "kubernetes.node.name",
+            "kubernetes.container.name",
+            "kubernetes.container.image",
+            "event.module",
+            "event.action",
+            "file.path",
+            "raw",
+            "file.target_path",
+            "file.type",
+            "file.device",
+            "file.inode",
+            "file.uid",
+            "file.owner",
+            "file.gid",
+            "file.group",
+            "file.mode",
+            "file.origin",
+            "raw",
+            "file.selinux.user",
+            "file.selinux.role",
+            "file.selinux.domain",
+            "file.selinux.level",
+            "event.category",
+            "event.type",
+            "user.auid",
+            "user.uid",
+            "user.euid",
+            "user.fsuid",
+            "user.suid",
+            "user.gid",
+            "user.egid",
+            "user.sgid",
+            "user.fsgid",
+            "user.name_map.auid",
+            "user.name_map.uid",
+            "user.name_map.euid",
+            "user.name_map.fsuid",
+            "user.name_map.suid",
+            "user.name_map.gid",
+            "user.name_map.egid",
+            "user.name_map.sgid",
+            "user.name_map.fsgid",
+            "user.selinux.user",
+            "user.selinux.role",
+            "user.selinux.domain",
+            "user.selinux.level",
+            "user.selinux.category",
+            "process.pid",
+            "process.ppid",
+            "process.name",
+            "process.title",
+            "process.exe",
+            "process.cwd",
+            "process.args",
+            "source.port",
+            "source.hostname",
+            "source.path",
+            "destination.port",
+            "destination.hostname",
+            "destination.path",
+            "network.direction",
+            "auditd.session",
+            "auditd.result",
+            "auditd.summary.actor.primary",
+            "auditd.summary.actor.secondary",
+            "auditd.summary.object.type",
+            "auditd.summary.object.primary",
+            "auditd.summary.object.secondary",
+            "auditd.summary.how",
+            "auditd.paths.inode",
+            "auditd.paths.dev",
+            "auditd.paths.obj_user",
+            "auditd.paths.obj_role",
+            "auditd.paths.obj_domain",
+            "auditd.paths.obj_level",
+            "auditd.paths.objtype",
+            "auditd.paths.ouid",
+            "auditd.paths.rdev",
+            "auditd.paths.nametype",
+            "auditd.paths.ogid",
+            "auditd.paths.item",
+            "auditd.paths.mode",
+            "auditd.paths.name",
+            "auditd.data.action",
+            "auditd.data.minor",
+            "auditd.data.acct",
+            "auditd.data.addr",
+            "auditd.data.cipher",
+            "auditd.data.id",
+            "auditd.data.entries",
+            "auditd.data.kind",
+            "auditd.data.ksize",
+            "auditd.data.spid",
+            "auditd.data.arch",
+            "auditd.data.argc",
+            "auditd.data.major",
+            "auditd.data.unit",
+            "auditd.data.table",
+            "auditd.data.terminal",
+            "auditd.data.grantors",
+            "auditd.data.direction",
+            "auditd.data.op",
+            "auditd.data.tty",
+            "auditd.data.syscall",
+            "auditd.data.data",
+            "auditd.data.family",
+            "auditd.data.mac",
+            "auditd.data.pfs",
+            "auditd.data.items",
+            "auditd.data.a0",
+            "auditd.data.a1",
+            "auditd.data.a2",
+            "auditd.data.a3",
+            "auditd.data.hostname",
+            "auditd.data.lport",
+            "auditd.data.rport",
+            "auditd.data.exit",
+            "auditd.data.fp",
+            "auditd.data.laddr",
+            "auditd.data.sport",
+            "auditd.data.capability",
+            "auditd.data.nargs",
+            "auditd.data.new-enabled",
+            "auditd.data.audit_backlog_limit",
+            "auditd.data.dir",
+            "auditd.data.cap_pe",
+            "auditd.data.model",
+            "auditd.data.new_pp",
+            "auditd.data.old-enabled",
+            "auditd.data.oauid",
+            "auditd.data.old",
+            "auditd.data.banners",
+            "auditd.data.feature",
+            "auditd.data.vm-ctx",
+            "auditd.data.opid",
+            "auditd.data.seperms",
+            "auditd.data.seresult",
+            "auditd.data.new-rng",
+            "auditd.data.old-net",
+            "auditd.data.sigev_signo",
+            "auditd.data.ino",
+            "auditd.data.old_enforcing",
+            "auditd.data.old-vcpu",
+            "auditd.data.range",
+            "auditd.data.res",
+            "auditd.data.added",
+            "auditd.data.fam",
+            "auditd.data.nlnk-pid",
+            "auditd.data.subj",
+            "auditd.data.a[0-3]",
+            "auditd.data.cgroup",
+            "auditd.data.kernel",
+            "auditd.data.ocomm",
+            "auditd.data.new-net",
+            "auditd.data.permissive",
+            "auditd.data.class",
+            "auditd.data.compat",
+            "auditd.data.fi",
+            "auditd.data.changed",
+            "auditd.data.msg",
+            "auditd.data.dport",
+            "auditd.data.new-seuser",
+            "auditd.data.invalid_context",
+            "auditd.data.dmac",
+            "auditd.data.ipx-net",
+            "auditd.data.iuid",
+            "auditd.data.macproto",
+            "auditd.data.obj",
+            "auditd.data.ipid",
+            "auditd.data.new-fs",
+            "auditd.data.vm-pid",
+            "auditd.data.cap_pi",
+            "auditd.data.old-auid",
+            "auditd.data.oses",
+            "auditd.data.fd",
+            "auditd.data.igid",
+            "auditd.data.new-disk",
+            "auditd.data.parent",
+            "auditd.data.len",
+            "auditd.data.oflag",
+            "auditd.data.uuid",
+            "auditd.data.code",
+            "auditd.data.nlnk-grp",
+            "auditd.data.cap_fp",
+            "auditd.data.new-mem",
+            "auditd.data.seperm",
+            "auditd.data.enforcing",
+            "auditd.data.new-chardev",
+            "auditd.data.old-rng",
+            "auditd.data.outif",
+            "auditd.data.cmd",
+            "auditd.data.hook",
+            "auditd.data.new-level",
+            "auditd.data.sauid",
+            "auditd.data.sig",
+            "auditd.data.audit_backlog_wait_time",
+            "auditd.data.printer",
+            "auditd.data.old-mem",
+            "auditd.data.perm",
+            "auditd.data.old_pi",
+            "auditd.data.state",
+            "auditd.data.format",
+            "auditd.data.new_gid",
+            "auditd.data.tcontext",
+            "auditd.data.maj",
+            "auditd.data.watch",
+            "auditd.data.device",
+            "auditd.data.grp",
+            "auditd.data.bool",
+            "auditd.data.icmp_type",
+            "auditd.data.new_lock",
+            "auditd.data.old_prom",
+            "auditd.data.acl",
+            "auditd.data.ip",
+            "auditd.data.new_pi",
+            "auditd.data.default-context",
+            "auditd.data.inode_gid",
+            "auditd.data.new-log_passwd",
+            "auditd.data.new_pe",
+            "auditd.data.selected-context",
+            "auditd.data.cap_fver",
+            "auditd.data.file",
+            "auditd.data.net",
+            "auditd.data.virt",
+            "auditd.data.cap_pp",
+            "auditd.data.old-range",
+            "auditd.data.resrc",
+            "auditd.data.new-range",
+            "auditd.data.obj_gid",
+            "auditd.data.proto",
+            "auditd.data.old-disk",
+            "auditd.data.audit_failure",
+            "auditd.data.inif",
+            "auditd.data.vm",
+            "auditd.data.flags",
+            "auditd.data.nlnk-fam",
+            "auditd.data.old-fs",
+            "auditd.data.old-ses",
+            "auditd.data.seqno",
+            "auditd.data.fver",
+            "auditd.data.qbytes",
+            "auditd.data.seuser",
+            "auditd.data.cap_fe",
+            "auditd.data.new-vcpu",
+            "auditd.data.old-level",
+            "auditd.data.old_pp",
+            "auditd.data.daddr",
+            "auditd.data.old-role",
+            "auditd.data.ioctlcmd",
+            "auditd.data.smac",
+            "auditd.data.apparmor",
+            "auditd.data.fe",
+            "auditd.data.perm_mask",
+            "auditd.data.ses",
+            "auditd.data.cap_fi",
+            "auditd.data.obj_uid",
+            "auditd.data.reason",
+            "auditd.data.list",
+            "auditd.data.old_lock",
+            "auditd.data.bus",
+            "auditd.data.old_pe",
+            "auditd.data.new-role",
+            "auditd.data.prom",
+            "auditd.data.uri",
+            "auditd.data.audit_enabled",
+            "auditd.data.old-log_passwd",
+            "auditd.data.old-seuser",
+            "auditd.data.per",
+            "auditd.data.scontext",
+            "auditd.data.tclass",
+            "auditd.data.ver",
+            "auditd.data.new",
+            "auditd.data.val",
+            "auditd.data.img-ctx",
+            "auditd.data.old-chardev",
+            "auditd.data.old_val",
+            "auditd.data.success",
+            "auditd.data.inode_uid",
+            "auditd.data.removed",
+            "auditd.data.socket.port",
+            "auditd.data.socket.saddr",
+            "auditd.data.socket.addr",
+            "auditd.data.socket.family",
+            "auditd.data.socket.path",
+            "auditd.messages",
+            "auditd.warnings",
+            "geoip.continent_name",
+            "geoip.city_name",
+            "geoip.region_name",
+            "geoip.country_iso_code",
+            "hash.blake2b_256",
+            "hash.blake2b_384",
+            "hash.blake2b_512",
+            "hash.md5",
+            "hash.sha1",
+            "hash.sha224",
+            "hash.sha256",
+            "hash.sha384",
+            "hash.sha3_224",
+            "hash.sha3_256",
+            "hash.sha3_384",
+            "hash.sha3_512",
+            "hash.sha512",
+            "hash.sha512_224",
+            "hash.sha512_256",
+            "hash.xxh64",
+            "fields.*"
+          ]
+        },
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "_meta": {
+          "version": "7.0.0-alpha1"
+        },
+        "dynamic_templates": [
+          {
+            "fields": {
+              "path_match": "fields.*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "keyword"
+              }
+            }
+          },
+          {
+            "docker.container.labels": {
+              "path_match": "docker.container.labels.*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "keyword"
+              }
+            }
+          },
+          {
+            "strings_as_keyword": {
+              "match_mapping_type": "string",
+              "mapping": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              }
+            }
+          }
+        ],
+        "date_detection": false,
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "auditd": {
+            "properties": {
+              "data": {
+                "properties": {
+                  "a0": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "a1": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "a2": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "a3": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "a[0-3]": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "acct": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "acl": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "action": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "added": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "addr": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "apparmor": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "arch": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "argc": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "audit_backlog_limit": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "audit_backlog_wait_time": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "audit_enabled": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "audit_failure": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "banners": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "bool": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "bus": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cap_fe": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cap_fi": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cap_fp": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cap_fver": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cap_pe": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cap_pi": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cap_pp": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "capability": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cgroup": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "changed": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cipher": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "class": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cmd": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "code": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "compat": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "daddr": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "data": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "default-context": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "device": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "dir": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "direction": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "dmac": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "dport": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "enforcing": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "entries": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "exit": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fam": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "family": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fd": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fe": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "feature": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fi": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "file": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "flags": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "format": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fp": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fver": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "grantors": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "grp": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "hook": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "hostname": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "icmp_type": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "igid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "img-ctx": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "inif": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ino": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "inode_gid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "inode_uid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "invalid_context": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ioctlcmd": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ip": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ipid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ipx-net": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "items": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "iuid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "kernel": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "kind": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ksize": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "laddr": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "len": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "list": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "lport": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "mac": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "macproto": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "maj": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "major": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "minor": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "model": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "msg": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "nargs": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "net": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-chardev": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-disk": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-enabled": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-fs": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-level": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-log_passwd": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-mem": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-net": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-range": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-rng": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-role": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-seuser": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new-vcpu": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new_gid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new_lock": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new_pe": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new_pi": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "new_pp": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "nlnk-fam": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "nlnk-grp": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "nlnk-pid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "oauid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "obj": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "obj_gid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "obj_uid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ocomm": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "oflag": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-auid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-chardev": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-disk": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-enabled": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-fs": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-level": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-log_passwd": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-mem": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-net": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-range": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-rng": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-role": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-ses": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-seuser": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old-vcpu": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old_enforcing": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old_lock": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old_pe": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old_pi": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old_pp": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old_prom": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "old_val": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "op": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "opid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "oses": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "outif": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "parent": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "per": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "perm": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "perm_mask": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "permissive": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "pfs": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "printer": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "prom": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "proto": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "qbytes": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "range": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "reason": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "removed": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "res": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "resrc": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "rport": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "sauid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "scontext": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "selected-context": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "seperm": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "seperms": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "seqno": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "seresult": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ses": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "seuser": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "sig": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "sigev_signo": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "smac": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "socket": {
+                    "properties": {
+                      "addr": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "family": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "path": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "port": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "saddr": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      }
+                    }
+                  },
+                  "spid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "sport": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "state": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "subj": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "success": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "syscall": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "table": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "tclass": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "tcontext": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "terminal": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "tty": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "unit": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "uri": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "uuid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "val": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ver": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "virt": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "vm": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "vm-ctx": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "vm-pid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "watch": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "messages": {
+                "type": "text",
+                "norms": false
+              },
+              "paths": {
+                "properties": {
+                  "dev": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "inode": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "item": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "mode": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "nametype": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "obj_domain": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "obj_level": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "obj_role": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "obj_user": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "objtype": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ogid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "ouid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "rdev": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "result": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sequence": {
+                "type": "long"
+              },
+              "session": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "summary": {
+                "properties": {
+                  "actor": {
+                    "properties": {
+                      "primary": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "secondary": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      }
+                    }
+                  },
+                  "how": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "object": {
+                    "properties": {
+                      "primary": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "secondary": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "type": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      }
+                    }
+                  }
+                }
+              },
+              "warnings": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "beat": {
+            "properties": {
+              "hostname": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "timezone": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "version": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "destination": {
+            "properties": {
+              "hostname": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "ip": {
+                "type": "ip"
+              },
+              "path": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "port": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "docker": {
+            "properties": {
+              "container": {
+                "properties": {
+                  "id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "image": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "labels": {
+                    "type": "object"
+                  },
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "error": {
+            "properties": {
+              "code": {
+                "type": "long"
+              },
+              "message": {
+                "type": "text",
+                "norms": false
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "event": {
+            "properties": {
+              "action": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "category": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "module": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "fields": {
+            "type": "object"
+          },
+          "file": {
+            "properties": {
+              "ctime": {
+                "type": "date"
+              },
+              "device": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "gid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "group": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "inode": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "mode": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "mtime": {
+                "type": "date"
+              },
+              "origin": {
+                "type": "text",
+                "norms": false,
+                "fields": {
+                  "raw": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "owner": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "path": {
+                "type": "text",
+                "norms": false,
+                "fields": {
+                  "raw": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "selinux": {
+                "properties": {
+                  "domain": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "level": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "role": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "user": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "setgid": {
+                "type": "boolean"
+              },
+              "setuid": {
+                "type": "boolean"
+              },
+              "size": {
+                "type": "long"
+              },
+              "target_path": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "uid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "geoip": {
+            "properties": {
+              "city_name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "continent_name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "country_iso_code": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "location": {
+                "type": "geo_point"
+              },
+              "region_name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "hash": {
+            "properties": {
+              "blake2b_256": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "blake2b_384": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "blake2b_512": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "md5": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha1": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha224": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha256": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha384": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha3_224": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha3_256": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha3_384": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha3_512": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha512": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha512_224": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sha512_256": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "xxh64": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "host": {
+            "properties": {
+              "architecture": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "id": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "ip": {
+                "type": "ip"
+              },
+              "mac": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "os": {
+                "properties": {
+                  "family": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "platform": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "version": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "kubernetes": {
+            "properties": {
+              "annotations": {
+                "type": "object"
+              },
+              "container": {
+                "properties": {
+                  "image": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "labels": {
+                "type": "object"
+              },
+              "namespace": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "node": {
+                "properties": {
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "pod": {
+                "properties": {
+                  "name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "uid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "meta": {
+            "properties": {
+              "cloud": {
+                "properties": {
+                  "availability_zone": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "instance_id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "instance_name": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "machine_type": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "project_id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "provider": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "region": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              }
+            }
+          },
+          "network": {
+            "properties": {
+              "direction": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "process": {
+            "properties": {
+              "args": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "cwd": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "exe": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "pid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "ppid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "title": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "source": {
+            "properties": {
+              "hostname": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "ip": {
+                "type": "ip"
+              },
+              "path": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "port": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "tags": {
+            "type": "keyword",
+            "ignore_above": 1024
+          },
+          "user": {
+            "properties": {
+              "auid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "egid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "euid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "fsgid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "fsuid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "gid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "name_map": {
+                "properties": {
+                  "auid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "egid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "euid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fsgid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "fsuid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "gid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "sgid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "suid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "uid": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "selinux": {
+                "properties": {
+                  "category": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "domain": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "level": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "role": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "user": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "sgid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "suid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "uid": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          }
+        }
+      }
+    },
+    "aliases": {}
+  }
+}
