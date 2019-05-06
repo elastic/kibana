@@ -63,9 +63,7 @@ export class MBMapContainer extends React.Component {
     if (!e.features.length) {
       return;
     }
-    const geoField = this.props.drawState.geoField;
-    const geoFieldType = this.props.drawState.geoFieldType;
-    const indexPatternId = this.props.drawState.indexPatternId;
+    const { geoField, geoFieldType, indexPatternId } = this.props.drawState;
     this.props.disableDrawState();
 
     const geoPolygonFilter = createShapeFilter(e.features[0].geometry, indexPatternId, geoField, geoFieldType);

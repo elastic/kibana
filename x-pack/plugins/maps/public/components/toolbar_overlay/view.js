@@ -35,7 +35,7 @@ export class ToolbarOverlay extends React.Component {
     drawType: null
   };
 
-  _openToolbar = () => {
+  _toggleToolbar = () => {
     if (!this._isMounted) {
       return;
     }
@@ -76,15 +76,6 @@ export class ToolbarOverlay extends React.Component {
     });
   };
 
-  _showIndexPatternSelection =  (drawType) => {
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({
-      drawType: drawType
-    });
-  };
-
   componentDidMount() {
     this._isMounted = true;
   }
@@ -115,8 +106,9 @@ export class ToolbarOverlay extends React.Component {
         });
       }
     } catch(e) {
-      console.error(e);
-      throw e;
+      // swallow errors.
+      // the Layer-TOC will indicate which layers are disfunctional on a per-layer basis
+      return [];
     }
   }
 
@@ -143,9 +135,13 @@ export class ToolbarOverlay extends React.Component {
       drawBoundsAction.onClick = () => this._activateDrawForFirstIndexPattern(DRAW_TYPE.BOUNDS);
     } else {
       drawPolygonAction.panel = this._getIndexPatternSelectionPanel(1);
-      drawPolygonAction.onClick = () => this._showIndexPatternSelection(DRAW_TYPE.POLYGON);
+      drawPolygonAction.onClick = () => {
+        this.setState({ drawType: DRAW_TYPE.POLYGON });
+      };
       drawBoundsAction.panel = this._getIndexPatternSelectionPanel(2);
-      drawBoundsAction.onClick = () => this._showIndexPatternSelection(DRAW_TYPE.BOUNDS);
+      drawBoundsAction.onClick = () => {
+        this.setState({ drawType: DRAW_TYPE.BOUNDS });
+      };
     }
 
     return flattenPanelTree({
@@ -224,7 +220,7 @@ export class ToolbarOverlay extends React.Component {
         className="mapToolbarOverlay__button"
         color="text"
         iconType="wrench"
-        onClick={this._openToolbar}
+        onClick={this._toggleToolbar}
         aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolbarIconTitle', {
           defaultMessage: 'Tools',
         })}
