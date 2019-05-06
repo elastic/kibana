@@ -106,7 +106,13 @@ describe('git_operations', () => {
       return new Promise(resolve => {
         if (!fs.existsSync(p)) {
           rimraf(p, error => {
-            Git.Clone.clone(url, p).then(repo => {
+            Git.Clone.clone(url, p, {
+              fetchOpts: {
+                callbacks: {
+                  certificateCheck: () => 0,
+                },
+              },
+            }).then(repo => {
               resolve(repo);
             });
           });

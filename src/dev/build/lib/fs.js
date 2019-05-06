@@ -31,7 +31,7 @@ import del from 'del';
 import deleteEmpty from 'delete-empty';
 import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
-import { Extract } from 'tar';
+import tar from 'tar';
 
 const mkdirpAsync = promisify(mkdirpCb);
 const writeFileAsync = promisify(fs.writeFile);
@@ -174,12 +174,14 @@ export async function untar(source, destination, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
+  await mkdirpAsync(destination);
+
   await createPromiseFromStreams([
     fs.createReadStream(source),
     createGunzip(),
-    new Extract({
+    tar.extract({
       ...extractOptions,
-      path: destination
+      cwd: destination
     }),
   ]);
 }

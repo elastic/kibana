@@ -20,4 +20,33 @@ export const sharedFragments = {
       updatedAt
     }
   `,
+  InfraLogEntryFields: gql`
+    fragment InfraLogEntryFields on InfraLogEntry {
+      gid
+      key {
+        time
+        tiebreaker
+      }
+      columns {
+        ... on InfraLogEntryTimestampColumn {
+          timestamp
+        }
+        ... on InfraLogEntryMessageColumn {
+          message {
+            ... on InfraLogMessageFieldSegment {
+              field
+              value
+            }
+            ... on InfraLogMessageConstantSegment {
+              constant
+            }
+          }
+        }
+        ... on InfraLogEntryFieldColumn {
+          field
+          value
+        }
+      }
+    }
+  `,
 };
