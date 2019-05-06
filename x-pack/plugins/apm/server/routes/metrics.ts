@@ -26,7 +26,7 @@ export function initMetricsApi(core: CoreSetup) {
     options: {
       validate: {
         query: withDefaultValidators({
-          agentName: Joi.string()
+          agentName: Joi.string().required()
         })
       },
       tags: ['access:apm']
@@ -34,6 +34,8 @@ export function initMetricsApi(core: CoreSetup) {
     handler: async req => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
+      // ternary type guard required here because req.query can be type: string | RequestQuery
+      // and req.query.* can each have a value of type: string | string[]
       const agentName =
         typeof req.query !== 'string' && typeof req.query.agentName === 'string'
           ? req.query.agentName

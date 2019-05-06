@@ -30,7 +30,7 @@ export function ServiceDetails() {
     return null;
   }
 
-  const isRumAgent = isRumAgentName(serviceDetailsData.agentName || '');
+  const isRumAgent = isRumAgentName(serviceDetailsData.agentName);
 
   return (
     <React.Fragment>
