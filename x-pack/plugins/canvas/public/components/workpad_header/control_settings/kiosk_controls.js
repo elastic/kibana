@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiFlexGrid,
   EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { timeDurationString } from '../../../lib/time_duration';
 import { CustomInterval } from './custom_interval';
@@ -37,49 +38,52 @@ export const KioskControls = ({
   );
 
   return (
-    <div>
-      <EuiDescriptionList textStyle="reverse">
-        <EuiDescriptionListTitle>Page cycle settings</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <span>Show pages for {timeDurationString(autoplayInterval)}</span>
-        </EuiDescriptionListDescription>
-      </EuiDescriptionList>
-      <EuiHorizontalRule margin="m" />
+    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiDescriptionList textStyle="reverse">
+          <EuiDescriptionListTitle>Cycle fullscreen pages</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <span>Every {timeDurationString(autoplayInterval)}</span>
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+        <EuiHorizontalRule margin="m" />
 
-      <div>
-        <EuiSwitch
-          checked={autoplayEnabled}
-          label="Cycle slides automatically"
-          onChange={ev => onSetEnabled(ev.target.checked)}
-        />
-        <EuiSpacer size="m" />
-      </div>
+        <div>
+          <EuiSwitch
+            checked={autoplayEnabled}
+            label="Cycle slides automatically"
+            onChange={ev => onSetEnabled(ev.target.checked)}
+          />
+          <EuiSpacer size="m" />
+        </div>
 
-      <EuiFormLabel>Change cycling interval</EuiFormLabel>
-      <EuiSpacer size="s" />
+        <EuiFormLabel>Change cycling interval</EuiFormLabel>
+        <EuiSpacer size="s" />
 
-      <EuiText size="s">
-        <EuiFlexGrid gutterSize="s" columns={2}>
-          <EuiFlexItem>
-            <ListGroup>
-              <RefreshItem duration="5000" label="5 seconds" />
-              <RefreshItem duration="10000" label="10 seconds" />
-              <RefreshItem duration="30000" label="30 seconds" />
-            </ListGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ListGroup>
-              <RefreshItem duration="60000" label="1 minute" />
-              <RefreshItem duration="300000" label="5 minutes" />
-              <RefreshItem duration="900000" label="15 minute" />
-            </ListGroup>
-          </EuiFlexItem>
-        </EuiFlexGrid>
-      </EuiText>
-      <EuiSpacer size="m" />
+        <EuiText size="s">
+          <EuiFlexGrid gutterSize="s" columns={2}>
+            <EuiFlexItem>
+              <ListGroup>
+                <RefreshItem duration="5000" label="5 seconds" />
+                <RefreshItem duration="10000" label="10 seconds" />
+                <RefreshItem duration="30000" label="30 seconds" />
+              </ListGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ListGroup>
+                <RefreshItem duration="60000" label="1 minute" />
+                <RefreshItem duration="300000" label="5 minutes" />
+                <RefreshItem duration="900000" label="15 minute" />
+              </ListGroup>
+            </EuiFlexItem>
+          </EuiFlexGrid>
+        </EuiText>
+      </EuiFlexItem>
 
-      <CustomInterval onSubmit={value => onSetInterval(value)} />
-    </div>
+      <EuiFlexItem grow={false}>
+        <CustomInterval onSubmit={value => onSetInterval(value)} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
