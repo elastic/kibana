@@ -187,7 +187,7 @@ class RelationshipsUI extends Component {
         dataType: 'string',
         sortable: false,
         render: (title, object) => {
-          const { path } = object.meta.inAppUrl;
+          const { path } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
             return (
