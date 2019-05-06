@@ -62,6 +62,40 @@ export function checkFindFileStructurePrivilege(Private, Promise, kbnUrl) {
   });
 }
 
+export function checkGetDataFrameJobsPrivilege(Private, Promise, kbnUrl) {
+  return new Promise((resolve, reject) => {
+    getPrivileges()
+      .then((priv) => {
+        privileges = priv;
+        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
+        // all other functionality is controlled by the return privileges object
+        if (privileges.canGetDataFrameJobs) {
+          return resolve(privileges);
+        } else {
+          kbnUrl.redirect('/access-denied');
+          return reject();
+        }
+      });
+  });
+}
+
+export function checkCreateDataFrameJobsPrivilege(Private, Promise, kbnUrl) {
+  return new Promise((resolve, reject) => {
+    getPrivileges()
+      .then((priv) => {
+        privileges = priv;
+        if (privileges.canCreateJob) {
+          return resolve(privileges);
+        } else {
+          // if the user has no permission to create a data frame job,
+          // redirect them back to the Data Frame Jobs Management page
+          kbnUrl.redirect('/data_frame');
+          return reject();
+        }
+      });
+  });
+}
+
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
 export function checkPermission(privilegeType) {

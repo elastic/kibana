@@ -10,6 +10,7 @@ import { setUpgradeInProgress } from '../services/upgrade_service';
 
 export function getPrivileges() {
   const privileges = {
+    // Anomaly Detection
     canGetJobs: false,
     canCreateJob: false,
     canDeleteJob: false,
@@ -21,13 +22,22 @@ export function getPrivileges() {
     canUpdateJob: false,
     canUpdateDatafeed: false,
     canPreviewDatafeed: false,
+    // Calendars
     canGetCalendars: false,
     canCreateCalendar: false,
     canDeleteCalendar: false,
+    // Filters
     canGetFilters: false,
     canCreateFilter: false,
     canDeleteFilter: false,
+    // File Data Visualizer
     canFindFileStructure: false,
+    // Data Frames
+    canGetDataFrameJobs: false,
+    canDeleteDataFrameJob: false,
+    canPreviewDataFrameJob: false,
+    canCreateDataFrameJob: false,
+    canStartStopDataFrameJob: false,
   };
 
   return new Promise((resolve, reject) => {
@@ -98,6 +108,7 @@ export function getPrivileges() {
 }
 
 function setGettingPrivileges(cluster = {}, privileges = {}, forceTrue = false) {
+  // Anomaly Detection
   if (
     forceTrue ||
     (cluster['cluster:monitor/xpack/ml/job/get'] &&
@@ -114,20 +125,32 @@ function setGettingPrivileges(cluster = {}, privileges = {}, forceTrue = false) 
     privileges.canGetDatafeeds = true;
   }
 
+  // Calendars
   if (forceTrue || cluster['cluster:monitor/xpack/ml/calendars/get']) {
     privileges.canGetCalendars = true;
   }
 
+  // Filters
   if (forceTrue || cluster['cluster:admin/xpack/ml/filters/get']) {
     privileges.canGetFilters = true;
   }
 
+  // File Data Visualizer
   if (forceTrue || cluster['cluster:monitor/xpack/ml/findfilestructure']) {
     privileges.canFindFileStructure = true;
+  }
+
+  // Data Frames
+  if (
+    forceTrue ||
+    (cluster['cluster:monitor/data_frame/get'] &&
+    cluster['cluster:monitor/data_frame/stats/get'])) {
+    privileges.canGetDataFrameJobs = true;
   }
 }
 
 function setActionPrivileges(cluster = {}, privileges = {}) {
+  // Anomaly Detection
   if (cluster['cluster:admin/xpack/ml/job/put'] &&
     cluster['cluster:admin/xpack/ml/job/open'] &&
     cluster['cluster:admin/xpack/ml/datafeeds/put']) {
@@ -169,6 +192,7 @@ function setActionPrivileges(cluster = {}, privileges = {}) {
     privileges.canPreviewDatafeed = true;
   }
 
+  // Calendars
   if (cluster['cluster:admin/xpack/ml/calendars/put'] &&
     cluster['cluster:admin/xpack/ml/calendars/jobs/update'] &&
     cluster['cluster:admin/xpack/ml/calendars/events/post']) {
@@ -180,6 +204,7 @@ function setActionPrivileges(cluster = {}, privileges = {}) {
     privileges.canDeleteCalendar = true;
   }
 
+  // Filters
   if (cluster['cluster:admin/xpack/ml/filters/put'] &&
     cluster['cluster:admin/xpack/ml/filters/update']) {
     privileges.canCreateFilter = true;
@@ -187,5 +212,24 @@ function setActionPrivileges(cluster = {}, privileges = {}) {
 
   if (cluster['cluster:admin/xpack/ml/filters/delete']) {
     privileges.canDeleteFilter = true;
+  }
+
+  // Data Frames
+  if (cluster['cluster:admin/data_frame/put']) {
+    privileges.canCreateDataFrameJob = true;
+  }
+
+  if (cluster['cluster:admin/data_frame/delete']) {
+    privileges.canDeleteDataFrameJob = true;
+  }
+
+  if (cluster['cluster:admin/data_frame/preview']) {
+    privileges.canPreviewDataFrameJob = true;
+  }
+
+  if (cluster['cluster:admin/data_frame/start'] &&
+    cluster['cluster:admin/data_frame/start_task'] &&
+    cluster['cluster:admin/data_frame/stop']) {
+    privileges.canStartStopDataFrameJob = true;
   }
 }

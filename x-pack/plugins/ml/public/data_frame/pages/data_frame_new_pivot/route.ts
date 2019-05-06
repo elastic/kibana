@@ -9,7 +9,7 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { checkBasicLicense } from '../../../license/check_license';
 // @ts-ignore
-import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkCreateDataFrameJobsPrivilege } from '../../../privilege/check_privilege';
 // @ts-ignore
 import { loadCurrentIndexPattern } from '../../../util/index_utils';
 // @ts-ignore
@@ -22,7 +22,7 @@ uiRoutes.when('/data_frame/new_job/step/pivot?', {
   k7Breadcrumbs: getDataFrameCreateBreadcrumbs,
   resolve: {
     CheckLicense: checkBasicLicense,
-    privileges: checkGetJobsPrivilege,
+    privileges: checkCreateDataFrameJobsPrivilege,
     indexPattern: loadCurrentIndexPattern,
   },
 });

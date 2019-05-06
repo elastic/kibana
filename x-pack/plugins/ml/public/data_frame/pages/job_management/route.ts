@@ -9,7 +9,7 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { checkBasicLicense } from '../../../license/check_license';
 // @ts-ignore
-import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkGetDataFrameJobsPrivilege } from '../../../privilege/check_privilege';
 // @ts-ignore
 import { loadIndexPatterns } from '../../../util/index_utils';
 // @ts-ignore
@@ -22,7 +22,7 @@ uiRoutes.when('/data_frame/?', {
   k7Breadcrumbs: getDataFrameBreadcrumbs,
   resolve: {
     CheckLicense: checkBasicLicense,
-    privileges: checkGetJobsPrivilege,
+    privileges: checkGetDataFrameJobsPrivilege,
     indexPatterns: loadIndexPatterns,
   },
 });
