@@ -17,20 +17,14 @@
  * under the License.
  */
 
-import { ContainerState, Embeddable } from 'ui/embeddable';
+import { resolve } from 'path';
 
-/**
- * Exposes information about the current state of the panel and the embeddable rendered internally.
- */
-export interface PanelActionAPI {
-  /**
-   * The embeddable that resides inside this action. It's possible it's undefined if the embeddable has not been returned from
-   * the EmbeddableFactory yet.
-   */
-  embeddable?: Embeddable;
-
-  /**
-   * Information about the current state of the panel and dashboard.
-   */
-  containerState: ContainerState;
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
+  return new kibana.Plugin({
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      embeddableActions: ['plugins/embeddable_api/actions/apply_filter_action'],
+    },
+  });
 }

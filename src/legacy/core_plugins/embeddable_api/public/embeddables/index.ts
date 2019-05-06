@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
+export { Embeddable } from './embeddable';
+export {
+  EmbeddableInstanceConfiguration,
+  EmbeddableFactory,
+  OutputSpec,
+} from './embeddable_factory';
+export { EmbeddableFactoryRegistry, embeddableFactories } from './embeddable_factories_registry';
+export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
 
-// @ts-ignore: implicit any for JS file
-import { uiRegistry } from 'ui/registry/_registry';
-
-export const ContextMenuActionsRegistryProvider = uiRegistry({
-  index: ['name'],
-  name: 'ContextMenuActions',
-});
+export { EmbeddableFactoryNotFoundError } from './embeddable_factory_not_found_error';

@@ -17,7 +17,5 @@
  * under the License.
  */
 
-export { ContextMenuPanel } from './context_menu_panel';
-export { ContextMenuAction } from './context_menu_action';
-export { buildEuiContextMenuPanels } from './build_eui_context_menu_panels';
-export { openContextMenu } from './open_context_menu';
+export { EmbeddablePanel } from './embeddable_panel';
+export { ADD_PANEL_ACTION_ID, AddPanelAction } from './panel_header';

@@ -17,13 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore: implicit any for JS file
-import { uiRegistry } from '../registry/_registry';
-
-/**
- * Registry of functions (EmbeddableFactoryProviders) which return an EmbeddableFactory.
- */
-export const EmbeddableFactoriesRegistryProvider = uiRegistry({
-  index: ['name'],
-  name: 'embeddableFactories',
-});
+export { InspectPanelAction } from './inspect_panel_action';
+export { ADD_PANEL_ACTION_ID, AddPanelAction } from './add_panel';
+export { RemovePanelAction } from './remove_panel_action';

@@ -17,7 +17,14 @@
  * under the License.
  */
 
-export { ContextMenuPanel } from './context_menu_panel';
-export { ContextMenuAction } from './context_menu_action';
-export { buildEuiContextMenuPanels } from './build_eui_context_menu_panels';
-export { openContextMenu } from './open_context_menu';
+import { i18n } from '@kbn/i18n';
+
+export class IncompatibleActionError extends Error {
+  constructor() {
+    super(
+      i18n.translate('embeddableApi.errors.incompatibleAction', {
+        defaultMessage: 'Action is incompatible',
+      })
+    );
+  }
+}

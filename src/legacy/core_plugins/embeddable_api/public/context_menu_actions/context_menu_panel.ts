@@ -18,10 +18,14 @@
  */
 
 import { ReactElement } from 'react';
-import { PanelActionAPI } from './types';
+import { IEmbeddable } from '../embeddables';
+import { ActionContext } from '../actions';
 
-interface ContextMenuPanelOptions {
-  getContent?: (panelActionAPI: PanelActionAPI) => ReactElement<any> | HTMLElement | undefined;
+/**
+ * Exposes information about the current state of the panel and the embeddable rendered internally.
+ */
+interface ContextMenuPanelOptions<E extends IEmbeddable> {
+  getContent?: (context: ActionContext<E>) => ReactElement<any> | HTMLElement | undefined;
 }
 
 interface ContextMenuPanelConfig {
@@ -29,11 +33,11 @@ interface ContextMenuPanelConfig {
   title: string;
 }
 
-export class ContextMenuPanel {
+export class ContextMenuPanel<E extends IEmbeddable> {
   public readonly id: string;
   public readonly title: string;
 
-  constructor(config: ContextMenuPanelConfig, options: ContextMenuPanelOptions = {}) {
+  constructor(config: ContextMenuPanelConfig, options: ContextMenuPanelOptions<E> = {}) {
     this.id = config.id;
     this.title = config.title;
 
@@ -45,7 +49,7 @@ export class ContextMenuPanel {
   /**
    * Optional, could be composed of actions instead of content.
    */
-  public getContent(panelActionAPI: PanelActionAPI): ReactElement<any> | HTMLElement | undefined {
+  public getContent(context: ActionContext<E>): ReactElement<any> | HTMLElement | undefined {
     return;
   }
 }

@@ -16,9 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export { actionRegistry, ExecuteActionContext, Action, ActionContext } from './actions';
 
-export { EmbeddableFactory, OnEmbeddableStateChanged } from './embeddable_factory';
-export * from './embeddable';
-export * from './context_menu_actions';
-export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange, RefreshConfig } from './types';
+export {
+  APPLY_FILTER_TRIGGER,
+  triggerRegistry,
+  Trigger,
+  executeTriggerActions,
+  CONTEXT_MENU_TRIGGER,
+} from './triggers';
+
+export { Container, ContainerInput, ContainerOutput, PanelState, IContainer } from './containers';
+
+export {
+  IEmbeddable,
+  EmbeddableFactory,
+  EmbeddableInstanceConfiguration,
+  Embeddable,
+  embeddableFactories,
+  OutputSpec,
+  ErrorEmbeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  EmbeddableFactoryRegistry,
+  isErrorEmbeddable,
+} from './embeddables';
+
+export {
+  Query,
+  Filters,
+  Filter,
+  TimeRange,
+  RefreshConfig,
+  ViewMode,
+  QueryLanguageType,
+} from './types';
+
+export { AddPanelAction } from './panel';

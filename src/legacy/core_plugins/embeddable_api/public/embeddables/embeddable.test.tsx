@@ -17,7 +17,27 @@
  * under the License.
  */
 
-export { ContextMenuPanel } from './context_menu_panel';
-export { ContextMenuAction } from './context_menu_action';
-export { buildEuiContextMenuPanels } from './build_eui_context_menu_panels';
-export { openContextMenu } from './open_context_menu';
+jest.mock('ui/metadata', () => ({
+  metadata: {
+    branch: 'my-metadata-branch',
+    version: 'my-metadata-version',
+  },
+}));
+
+import { skip } from 'rxjs/operators';
+import { GreetingEmbeddable } from '../__test__/index';
+
+test('Embeddable calls input subscribers when changed', async done => {
+  const hello = new GreetingEmbeddable({ id: '123', firstName: 'Sue' });
+
+  const subscription = hello
+    .getInput$()
+    .pipe(skip(1))
+    .subscribe(input => {
+      expect(input.nameTitle).toEqual('Dr.');
+      done();
+      subscription.unsubscribe();
+    });
+
+  hello.graduateWithPhd();
+});

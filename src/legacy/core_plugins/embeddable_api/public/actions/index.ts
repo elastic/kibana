@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { ContextMenuPanel } from './context_menu_panel';
-export { ContextMenuAction } from './context_menu_action';
-export { buildEuiContextMenuPanels } from './build_eui_context_menu_panels';
-export { openContextMenu } from './open_context_menu';
+export { Action, ActionContext, ExecuteActionContext } from './action';
+export { actionRegistry } from './action_registry';
+export { IncompatibleActionError } from './incompatible_action_error';
