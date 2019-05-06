@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 
+import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
 import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
@@ -117,34 +118,22 @@ const logEntriesAroundQuery = gql`
         filterQuery: $filterQuery
       ) {
         start {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         end {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         hasMoreBefore
         hasMoreAfter
         entries {
-          gid
-          key {
-            time
-            tiebreaker
-          }
-          message {
-            ... on InfraLogMessageFieldSegment {
-              field
-              value
-            }
-            ... on InfraLogMessageConstantSegment {
-              constant
-            }
-          }
+          ...InfraLogEntryFields
         }
       }
     }
   }
+
+  ${sharedFragments.InfraTimeKey}
+  ${sharedFragments.InfraLogEntryFields}
 `;
 
 const logEntriesBetweenQuery = gql`
@@ -157,34 +146,22 @@ const logEntriesBetweenQuery = gql`
       id
       logEntriesBetween(startKey: $startKey, endKey: $endKey, filterQuery: $filterQuery) {
         start {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         end {
-          time
-          tiebreaker
+          ...InfraTimeKeyFields
         }
         hasMoreBefore
         hasMoreAfter
         entries {
-          gid
-          key {
-            time
-            tiebreaker
-          }
-          message {
-            ... on InfraLogMessageFieldSegment {
-              field
-              value
-            }
-            ... on InfraLogMessageConstantSegment {
-              constant
-            }
-          }
+          ...InfraLogEntryFields
         }
       }
     }
   }
+
+  ${sharedFragments.InfraTimeKey}
+  ${sharedFragments.InfraLogEntryFields}
 `;
 
 const logSummaryBetweenQuery = gql`

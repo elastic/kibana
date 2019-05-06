@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List Expanded Row <JobDetailsPane /> Minimal initialization 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem>
+    <EuiSpacer
+      size="s"
+    />
+    <Section
+      key="the-section-title"
+      section={
+        Object {
+          "items": Array [
+            Object {
+              "description": "the-item-description",
+              "title": "the-item-title",
+            },
+          ],
+          "position": "left",
+          "title": "the-section-title",
+        }
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiSpacer
+      size="s"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: Job List Expanded Row <Section /> Minimal initialization 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <EuiTitle
+    size="xs"
+  >
+    <span>
+      the-section-title
+    </span>
+  </EuiTitle>
+  <EuiDescriptionList
+    compressed={true}
+    listItems={
+      Array [
+        Object {
+          "description": "the-item-description",
+          "title": "the-item-title",
+        },
+      ]
+    }
+    type="column"
+  />
+</EuiPanel>
+`;
