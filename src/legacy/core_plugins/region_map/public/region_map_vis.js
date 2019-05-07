@@ -20,6 +20,7 @@
 import './region_map_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
+import { supports } from 'ui/utils/supports';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
@@ -44,7 +45,9 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
 provided base maps, or add your own. Darker colors represent higher values.' }),
     icon: 'visMapRegion',
     visConfig: {
+      canDesaturate: !!supports.cssFilters,
       defaults: {
+        isDesaturated: true, //maintain desaturation in existing region maps
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',

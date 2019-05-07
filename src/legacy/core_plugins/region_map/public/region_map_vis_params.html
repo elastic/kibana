@@ -103,6 +103,31 @@
         ></icon-tip>
       </div>
     </div>
+    <div class="visEditorSidebar__formRow">
+      <label
+        class="visEditorSidebar__formLabel"
+        for="desaturateMapTiles"
+        i18n-id="tileMap.visParams.desaturateTilesLabel"
+        i18n-default-message="Desaturate tiles"
+      ></label>
+
+      <div class="visEditorSidebar__formControl">
+        <input
+          type="checkbox"
+          id="desaturateMapTiles"
+          name="isDesaturated"
+          ng-disabled="!vis.type.visConfig.canDesaturate"
+          ng-model="editorState.params.isDesaturated"
+        >
+        &nbsp;
+        <icon-tip
+          content="::'tileMap.visParams.reduceVibrancyOfTileColorsTip' | i18n: {
+            defaultMessage: 'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer. Deprecated. Please consider choosing a different base layer.'
+          }"
+          position="'right'"
+        ></icon-tip>
+      </div>
+    </div>
   </div>
 </div>
 
