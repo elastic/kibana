@@ -111,21 +111,18 @@ export default function exploreRepositoryFunctionalTests({
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-Directory-src/models')).to.be(true);
         });
-        log.info('src folder opened2');
 
         await testSubjects.click('codeFileTreeNode-Directory-src/models');
         // Then the 'models' folder on the file tree.
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-File-src/models/User.ts')).to.be(true);
         });
-        log.info('src folder opened3');
 
         await testSubjects.click('codeFileTreeNode-File-src/models/User.ts');
         // Then the 'User.ts' file on the file tree.
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
         });
-        log.info('src folder opened4');
 
         // Click breadcrumb does not affect file tree
         await retry.try(async () => {
@@ -134,11 +131,10 @@ export default function exploreRepositoryFunctionalTests({
         await testSubjects.click('codeFileBreadcrumb-src');
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-closed')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
-        log.info('src folder opened5');
 
         // open another folder
         await testSubjects.click('codeFileTreeNode-Directory-src-doc');
