@@ -110,6 +110,45 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
   };
 }
 
+
+/**
+ urlState={{
+          time: timeRange,
+          autoReload: isAutoReloading,
+          refreshInterval,
+        }}
+ urlStateKey="metricTime"
+ mapToUrlState={mapToUrlState}
+ onChange={newUrlState => {
+  if (newUrlState && newUrlState.time) {
+    setTimeRange(newUrlState.time);
+  }
+  if (newUrlState && newUrlState.autoReload) {
+    setAutoReload(true);
+  } else if (
+    newUrlState &&
+    typeof newUrlState.autoReload !== 'undefined' &&
+    !newUrlState.autoReload
+  ) {
+    setAutoReload(false);
+  }
+  if (newUrlState && newUrlState.refreshInterval) {
+    setRefreshInterval(newUrlState.refreshInterval);
+  }
+}}
+ onInitialize={initialUrlState => {
+  if (initialUrlState && initialUrlState.time) {
+    setTimeRange(initialUrlState.time);
+  }
+  if (initialUrlState && initialUrlState.autoReload) {
+    setAutoReload(true);
+  }
+  if (initialUrlState && initialUrlState.refreshInterval) {
+    setRefreshInterval(initialUrlState.refreshInterval);
+  }
+}}
+ */
+
 export const UrlStateContainer = <UrlState extends any>(
   props: UrlStateContainerProps<UrlState>
 ) => (

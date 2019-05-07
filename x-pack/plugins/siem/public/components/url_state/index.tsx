@@ -5,14 +5,24 @@
  */
 
 import { History, Location } from 'history';
-import throttle from 'lodash/fp/throttle';
+import { get, throttle } from 'lodash/fp';
 import React from 'react';
+import { pure } from 'recompose';
+import { connect } from 'react-redux';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
 
 import { QueryString } from 'ui/utils/query_string';
+import { ActionCreator } from 'typescript-fsa';
+import { inputsActions, inputsSelectors, State } from '../../store';
+import { InputsModel, InputsModelId, TimeRangeKinds, RelativeTimeRange } from '../../store/inputs/model';
 
-interface UrlStateContainerProps<UrlState> {
+interface UrlState {
+  global: any;
+  timeline: any;
+}
+
+interface UrlStateContainerProps {
   urlState: UrlState | undefined;
   urlStateKey: string;
   mapToUrlState?: (value: any) => UrlState | undefined;
@@ -20,14 +30,33 @@ interface UrlStateContainerProps<UrlState> {
   onInitialize?: (urlState: UrlState | undefined) => void;
 }
 
-interface UrlStateContainerLifecycleProps<UrlState> extends UrlStateContainerProps<UrlState> {
+interface UrlStateReduxProps {
+  limit: number;
+}
+
+interface UrlStateDispatchProps {
+  setAbsoluteTimerange: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
+  setRelativeTimerange: ActionCreator<{
+    id: InputsModelId;
+    fromStr: string;
+    toStr: string;
+    from: number;
+    to: number;
+  }>;
+}
+
+interface UrlStateContainerLifecycleProps extends UrlStateContainerProps {
   location: Location;
   history: History;
 }
 
-class UrlStateContainerLifecycle<UrlState> extends React.Component<
-  UrlStateContainerLifecycleProps<UrlState>
-> {
+type UrlStateProps = UrlStateContainerLifecycleProps & UrlStateReduxProps & UrlStateDispatchProps;
+
+class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
   public render() {
     return null;
   }
@@ -35,7 +64,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
   public componentDidUpdate({
     location: prevLocation,
     urlState: prevUrlState,
-  }: UrlStateContainerLifecycleProps<UrlState>) {
+  }: UrlStateContainerLifecycleProps) {
     const { history, location, urlState } = this.props;
 
     if (urlState !== prevUrlState) {
@@ -49,7 +78,6 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
 
   public componentDidMount() {
     const { location } = this.props;
-
     this.handleInitialize(location);
   }
 
@@ -67,20 +95,32 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
     }
   });
 
+  private urlStateMappedToActions = {
+    timerange: {
+      absolute: this.props.setAbsoluteTimerange,
+      relative: this.props.setRelativeTimerange,
+    },
+    another: {
+      nope: true,
+    },
+  };
+
   private handleInitialize = (location: Location) => {
-    const { onInitialize, mapToUrlState, urlStateKey } = this.props;
-
-    if (!onInitialize || !mapToUrlState) {
-      return;
-    }
-
-    const newUrlStateString = getParamFromQueryString(
-      getQueryStringFromLocation(location),
-      urlStateKey
-    );
-    const newUrlState = mapToUrlState(decodeRisonUrlState(newUrlStateString));
-
-    onInitialize(newUrlState);
+    Object.keys(this.urlStateMappedToActions).map(key => {
+      const newUrlStateString = getParamFromQueryString(getQueryStringFromLocation(location), key);
+      if (newUrlStateString) {
+        switch (key) {
+          case 'timerange':
+            const urlStateData: InputsModel = decodeRisonUrlState(newUrlStateString)
+            const globalType: TimeRangeKinds = get('global.kind', urlStateData);
+            const globalRange: RelativeTimeRange = urlStateData.global;
+            if (globalType !== null) {
+              return this.urlStateMappedToActions.timerange[globalType](globalRange);
+            }
+        }
+        return;
+      }
+    });
   };
 
   private handleLocationChange = (prevLocation: Location, newLocation: Location) => {
@@ -110,17 +150,32 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
   };
 }
 
-export const UrlStateContainer = <UrlState extends any>(
-  props: UrlStateContainerProps<UrlState>
-) => (
+export const UrlStateComponents = pure<UrlStateContainerProps>(props => (
   <Route<RouteProps>>
     {({ history, location }) => (
-      <UrlStateContainerLifecycle<UrlState> history={history} location={location} {...props} />
+      <UrlStateContainerLifecycle history={history} location={location} {...props} />
     )}
   </Route>
-);
+));
 
-export const decodeRisonUrlState = (value: string | undefined): RisonValue | undefined => {
+const makeMapStateToProps = () => {
+  const getInputsSelector = inputsSelectors.inputsSelector();
+  const mapStateToProps = (state: State) => ({
+    ...getInputsSelector(state),
+    urlStateKey: 'qwrty',
+  });
+
+  return mapStateToProps;
+};
+export const UrlStateContainer = connect(
+  makeMapStateToProps,
+  {
+    setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
+    setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
+  }
+)(UrlStateComponents);
+
+export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
   try {
     return value ? decode(value) : undefined;
   } catch (error) {
@@ -144,9 +199,11 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
+  debugger;
   const previousQueryValues = QueryString.decode(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
+  debugger;
   return QueryString.encode({
     ...previousQueryValues,
     [stateKey]: encodedUrlState,

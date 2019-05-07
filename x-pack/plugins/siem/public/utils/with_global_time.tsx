@@ -9,7 +9,7 @@ import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { TimerangeInput } from '../graphql/types';
 import { useInterval } from './hooks/use_interval';
-import { replaceStateKeyInQueryString, UrlStateContainer } from './url_state';
+import { replaceStateKeyInQueryString, UrlStateContainer } from '../components/url_state';
 
 export interface GlobalTimeState {
   isAutoReloading: boolean;

@@ -28,6 +28,7 @@ import { SiemNavigation } from '../../components/navigation';
 import { PageHeadline } from '../../components/page_headline';
 import { SuperDatePicker } from '../../components/super_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
+import { UrlStateContainer } from '../../components/url_state';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
@@ -108,6 +109,7 @@ export const HomePage = pure(() => (
                 <Route path="/link-to" component={LinkToPage} />
                 <Route component={NotFoundPage} />
               </Switch>
+              <UrlStateContainer />
             </EuiPageBody>
           </DragDropContextWrapper>
         </Page>

@@ -22,6 +22,8 @@ interface RelativeTimeRange {
 
 export type InputsModelId = 'global' | 'timeline';
 
+export type TimeRangeKinds = 'absolute' | 'relative';
+
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
 
 export interface Policy {
