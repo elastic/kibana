@@ -211,6 +211,6 @@ export class ESSearchSource extends AbstractESSource {
       return [VECTOR_FEATURE_TYPES.POINT];
     }
 
-    return [Object.values(VECTOR_FEATURE_TYPES)];
+    return Object.values(VECTOR_FEATURE_TYPES);
   }
 }

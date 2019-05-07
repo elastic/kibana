@@ -14,6 +14,7 @@ import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
+import { VECTOR_FEATURE_TYPES } from '../sources/vector_source';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -127,7 +128,7 @@ export class VectorStyle extends AbstractStyle {
     };
   }
 
-  pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
+  async pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
     const features = _.get(sourceDataRequest.getData(), 'features', []);
     if (features.length === 0) {
       return {};
@@ -142,16 +143,29 @@ export class VectorStyle extends AbstractStyle {
         };
       });
 
-    let isPointsOnly = true;
-    let isLinesOnly = true;
+    const supportedFeatures = await this._source.getSupportedFeatures();
+    const isSingleFeatureType = supportedFeatures.length === 1;
+
+    if (scaledFields.length === 0 && isSingleFeatureType) {
+      // no meta data to pull from source data request.
+      return {};
+    }
+
+    let hasPoints = false;
+    let hasLines = false;
+    let hasPolygons = false;
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
-      if (isPointsOnly && !['Point', 'MultiPoint'].includes(feature.geometry.type)) {
-        isPointsOnly = false;
+      if (!hasPoints && ['Point', 'MultiPoint'].includes(feature.geometry.type)) {
+        hasPoints = true;
       }
-      if (isLinesOnly && !['LineString', 'MultiLineString'].includes(feature.geometry.type)) {
-        isLinesOnly = false;
+      if (!hasLines && ['LineString', 'MultiLineString'].includes(feature.geometry.type)) {
+        hasLines = true;
       }
+      if (!hasPolygons && ['Polygon', 'MultiPolygon'].includes(feature.geometry.type)) {
+        hasPolygons = true;
+      }
+
       for (let j = 0; j < scaledFields.length; j++) {
         const scaledField = scaledFields[j];
         const newValue = parseFloat(feature.properties[scaledField.name]);
@@ -163,8 +177,9 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const featuresMeta = {
-      isPointsOnly,
-      isLinesOnly
+      hasPoints,
+      hasLines,
+      hasPolygons
     };
 
     scaledFields.forEach(({ min, max, name }) => {
@@ -222,8 +237,49 @@ export class VectorStyle extends AbstractStyle {
     return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
   }
 
-  _getIsPointsOnly = () => {
-    return _.get(this._descriptor, '__styleMeta.isPointsOnly', false);
+  getIsPointsOnly = async () => {
+    const supportedFeatures = await this._source.getSupportedFeatures();
+
+    if (supportedFeatures.length === 1) {
+      return supportedFeatures[0] === VECTOR_FEATURE_TYPES.POINT;
+    }
+
+    if (!this._descriptor.__styleMeta) {
+      return false;
+    }
+
+    const { hasPoints, hasLines, hasPolygons } = this._descriptor.__styleMeta;
+    return hasPoints && !hasLines && !hasPolygons;
+  }
+
+  getIsLinesOnly = async () => {
+    const supportedFeatures = await this._source.getSupportedFeatures();
+
+    if (supportedFeatures.length === 1) {
+      return supportedFeatures[0] === VECTOR_FEATURE_TYPES.LINE;
+    }
+
+    if (!this._descriptor.__styleMeta) {
+      return false;
+    }
+
+    const { hasPoints, hasLines, hasPolygons } = this._descriptor.__styleMeta;
+    return hasLines && !hasPoints && !hasPolygons;
+  }
+
+  getIsPolygonsOnly = async () => {
+    const supportedFeatures = await this._source.getSupportedFeatures();
+
+    if (supportedFeatures.length === 1) {
+      return supportedFeatures[0] === VECTOR_FEATURE_TYPES.POLYGON;
+    }
+
+    if (!this._descriptor.__styleMeta) {
+      return false;
+    }
+
+    const { hasPoints, hasLines, hasPolygons } = this._descriptor.__styleMeta;
+    return hasPolygons && !hasPoints && !hasLines;
   }
 
   _getFieldRange = (fieldName) => {
@@ -234,7 +290,8 @@ export class VectorStyle extends AbstractStyle {
     const styles = this.getProperties();
     return (
       <VectorIcon
-        isPointsOnly={this._getIsPointsOnly()}
+        loadIsPointsOnly={this.getIsPointsOnly}
+        loadIsLinesOnly={this.getIsLinesOnly}
         fillColor={styles.fillColor}
         lineColor={styles.lineColor}
       />

@@ -12,7 +12,7 @@ export class AbstractStyle {
     };
   }
 
-  pluckStyleMetaFromSourceDataRequest(/* sourceDataRequest */) {
+  async pluckStyleMetaFromSourceDataRequest(/* sourceDataRequest */) {
     return {};
   }
 
