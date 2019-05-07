@@ -12,11 +12,17 @@ export interface XyVisualizationState {
   roles: DimensionRole[];
 }
 
-export const xyVisualization: Visualization<XyVisualizationState> = {
+export type XyVisualizationPersistedState = XyVisualizationState;
+
+export const xyVisualization: Visualization<XyVisualizationState, XyVisualizationPersistedState> = {
   initialize() {
     return {
       roles: [],
     };
+  },
+
+  getPersistableState(state) {
+    return state;
   },
 
   renderConfigPanel: (domElement, props) => {
