@@ -79,13 +79,6 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      console.log(
-        wrapper
-          .find(`[data-test-subj="${FlowDirection.biDirectional}"]`)
-          .first()
-          .html()
-      );
-
       expect(
         wrapper
           .find(`[data-test-subj="${FlowDirection.biDirectional}"]`)
