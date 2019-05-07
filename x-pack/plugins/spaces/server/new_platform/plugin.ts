@@ -7,13 +7,13 @@
 import { ServerRoute } from 'hapi';
 import { Observable } from 'rxjs';
 import { Legacy } from 'kibana';
-import { KibanaConfig, SavedObjectsService } from '../../../../../src/legacy/server/kbn_server';
+import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
 import {
   Logger,
   HttpServiceSetup,
   PluginInitializerContext,
   ElasticsearchServiceSetup,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
 // @ts-ignore

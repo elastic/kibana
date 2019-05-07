@@ -7,7 +7,7 @@
 import {
   SavedObjectsService,
   KibanaConfig,
-} from '../../../../../../../src/legacy/server/kbn_server';
+} from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initPrivateSpacesApi } from './spaces';

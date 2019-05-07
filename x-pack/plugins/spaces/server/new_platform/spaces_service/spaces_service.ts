@@ -6,8 +6,8 @@
 
 import { first } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
-import { SavedObjectsService } from '../../../../../../src/legacy/server/kbn_server';
-import { Logger, ElasticsearchServiceSetup, Headers } from '../../../../../../src/core/server';
+import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { Logger, ElasticsearchServiceSetup, Headers } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';

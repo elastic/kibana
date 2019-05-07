@@ -5,7 +5,7 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
-import { Headers } from '../../../../../src/core/server';
+import { Headers } from 'src/core/server';
 import { AuthorizationService } from '../../../security/server/lib/authorization/service';
 import { isReservedSpace } from '../../common/is_reserved_space';
 import { Space } from '../../common/model/space';

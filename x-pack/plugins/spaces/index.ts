@@ -6,8 +6,8 @@
 
 import * as Rx from 'rxjs';
 import { resolve } from 'path';
-import KbnServer, { Server } from '../../../src/legacy/server/kbn_server';
-import { HttpServiceSetup } from '../../../src/core/server';
+import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { HttpServiceSetup } from 'src/core/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
