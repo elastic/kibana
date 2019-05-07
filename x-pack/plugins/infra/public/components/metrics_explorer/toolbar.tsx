@@ -17,7 +17,7 @@ import {
   MetricsExplorerTimeOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { Toolbar } from '../eui/toolbar';
-import { MetricsExploererKueryBar } from './kuery_bar';
+import { MetricsExplorerKueryBar } from './kuery_bar';
 import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
@@ -93,7 +93,7 @@ export const MetricsExplorerToolbar = injectI18n(
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <MetricsExploererKueryBar
+            <MetricsExplorerKueryBar
               derivedIndexPattern={derivedIndexPattern}
               onSubmit={onFilterQuerySubmit}
               value={options.filterQuery}

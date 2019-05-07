@@ -27,7 +27,7 @@ function validateQuery(query: string) {
   return true;
 }
 
-export const MetricsExploererKueryBar = injectI18n(
+export const MetricsExplorerKueryBar = injectI18n(
   ({ intl, derivedIndexPattern, onSubmit, value }: Props) => {
     const [draftQuery, setDraftQuery] = useState<string>(value || '');
     const [isValid, setValidation] = useState<boolean>(true);
