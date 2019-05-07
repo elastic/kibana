@@ -86,8 +86,12 @@ export class VectorLayer extends AbstractLayer {
     return 'vector';
   }
 
-  getTOCDetails() {
-    return this._style.getTOCDetails();
+  hasLegendDetails() {
+    return this._style.getDynamicPropertiesArray().length > 0;
+  }
+
+  getLegendDetails() {
+    return this._style.getLegendDetails();
   }
 
   _getBoundsBasedOnData() {
