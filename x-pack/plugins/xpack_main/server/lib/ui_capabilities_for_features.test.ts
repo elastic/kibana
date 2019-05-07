@@ -4,33 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UICapabilities } from 'ui/capabilities';
 import { Feature } from './feature_registry';
-import { populateUICapabilities } from './populate_ui_capabilities';
+import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 
 function getMockXpackMainPlugin(features: Feature[]) {
   return {
     getFeatures: () => features,
-  };
-}
-
-function getMockOriginalInjectedVars() {
-  return {
-    uiCapabilities: {
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      management: {},
-      catalogue: {
-        fooEntry: true,
-        barEntry: true,
-      },
-      feature: {
-        someCapability: true,
-      },
-      otherFeature: {},
-    },
   };
 }
 
@@ -51,28 +30,7 @@ describe('populateUICapabilities', () => {
   it('handles no original uiCapabilites and no registered features gracefully', () => {
     const xpackMainPlugin = getMockXpackMainPlugin([]);
 
-    expect(populateUICapabilities(xpackMainPlugin, {} as UICapabilities)).toEqual({});
-  });
-
-  it('returns the original uiCapabilities untouched when no features are registered', () => {
-    const xpackMainPlugin = getMockXpackMainPlugin([]);
-    const originalInjectedVars = getMockOriginalInjectedVars();
-
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
-      feature: {
-        someCapability: true,
-      },
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      management: {},
-      catalogue: {
-        fooEntry: true,
-        barEntry: true,
-      },
-      otherFeature: {},
-    });
+    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({});
   });
 
   it('handles features with no registered capabilities', () => {
@@ -86,23 +44,10 @@ describe('populateUICapabilities', () => {
         },
       },
     ]);
-    const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
-      feature: {
-        someCapability: true,
-      },
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      management: {},
-      catalogue: {
-        fooEntry: true,
-        barEntry: true,
-      },
+    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      catalogue: {},
       newFeature: {},
-      otherFeature: {},
     });
   });
 
@@ -118,26 +63,13 @@ describe('populateUICapabilities', () => {
         },
       },
     ]);
-    const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
-      feature: {
-        someCapability: true,
-      },
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      management: {},
-      catalogue: {
-        fooEntry: true,
-        barEntry: true,
-      },
+    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      catalogue: {},
       newFeature: {
         capability1: true,
         capability2: true,
       },
-      otherFeature: {},
     });
   });
 
@@ -156,21 +88,10 @@ describe('populateUICapabilities', () => {
         },
       },
     ]);
-    const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
-      feature: {
-        someCapability: true,
-      },
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      management: {},
+    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
       catalogue: {
-        fooEntry: true,
         anotherFooEntry: true,
-        barEntry: true,
         anotherBarEntry: true,
       },
       newFeature: {
@@ -179,7 +100,6 @@ describe('populateUICapabilities', () => {
         capability3: true,
         capability4: true,
       },
-      otherFeature: {},
     });
   });
 
@@ -197,21 +117,9 @@ describe('populateUICapabilities', () => {
         },
       },
     ]);
-    const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
-      feature: {
-        someCapability: true,
-      },
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      management: {},
-      catalogue: {
-        fooEntry: true,
-        barEntry: true,
-      },
+    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
+      catalogue: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -219,7 +127,6 @@ describe('populateUICapabilities', () => {
         capability4: true,
         capability5: true,
       },
-      otherFeature: {},
     });
   });
 
@@ -261,27 +168,15 @@ describe('populateUICapabilities', () => {
         },
       },
     ]);
-    const originalInjectedVars = getMockOriginalInjectedVars();
 
-    expect(populateUICapabilities(xpackMainPlugin, originalInjectedVars.uiCapabilities)).toEqual({
+    expect(uiCapabilitiesForFeatures(xpackMainPlugin)).toEqual({
       anotherNewFeature: {
         capability1: true,
         capability2: true,
         capability3: true,
         capability4: true,
       },
-      feature: {
-        someCapability: true,
-      },
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      management: {},
-      catalogue: {
-        fooEntry: true,
-        barEntry: true,
-      },
+      catalogue: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -289,7 +184,6 @@ describe('populateUICapabilities', () => {
         capability4: true,
         capability5: true,
       },
-      otherFeature: {},
       yetAnotherNewFeature: {
         capability1: true,
         capability2: true,
