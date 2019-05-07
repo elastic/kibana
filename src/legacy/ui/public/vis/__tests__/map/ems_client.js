@@ -21,7 +21,9 @@ import expect from '@kbn/expect';
 import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
 import EMS_FILES from './ems_mocks/sample_files.json';
 import EMS_TILES from './ems_mocks/sample_tiles.json';
-import EMS_TILEJSON from './ems_mocks/sample_tilejson.json';
+import EMS_STYLE_ROAD_MAP_BRIGHT from './ems_mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_DESATURATED from './ems_mocks/sample_style_desaturated';
+import EMS_STYLE_DARK_MAP from './ems_mocks/sample_style_dark';
 
 
 import { EMSClient } from '../../../../../core_plugins/tile_map/common/ems_client';
@@ -200,7 +202,13 @@ function getEMSClient(options = {}) {
     } else if (url.startsWith('https://files.foobar')) {
       return EMS_FILES;
     } else if (url.startsWith('https://raster-style.foobar')) {
-      return EMS_TILEJSON;
+      if (url.includes('osm-bright-desaturated')) {
+        return EMS_STYLE_ROAD_MAP_DESATURATED;
+      } else if (url.includes('osm-bright')) {
+        return EMS_STYLE_ROAD_MAP_BRIGHT;
+      } else if (url.includes('dark-matter')) {
+        return EMS_STYLE_DARK_MAP;
+      }
     }
   };
   return emsClient;
