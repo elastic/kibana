@@ -1,12 +1,8 @@
 <ml-nav-menu name="timeseriesexplorer"></ml-nav-menu>
 <ml-chart-tooltip></ml-chart-tooltip>
 <div class="ml-time-series-explorer" ng-controller="MlTimeSeriesExplorerController">
-  <navbar ng-show="jobs.length > 0 && chrome.getVisible()">
-    <job-select-button
-      timeseriesonly="true"
-      single-selection="true">
-    </job-select-button>
-  </navbar>
+
+  <ml-job-selector-react-wrapper timeseriesonly="true" singleselection="true" />
 
   <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
     <div class="no-results">

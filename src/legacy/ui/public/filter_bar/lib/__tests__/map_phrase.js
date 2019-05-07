@@ -19,43 +19,39 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapPhraseProvider } from '../map_phrase';
+import { mapPhrase } from '../map_phrase';
+import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
   describe('mapPhrase()', function () {
-    let mapPhrase;
-    let $rootScope;
+    let mapPhraseFn;
+    let mockIndexPatterns;
 
     beforeEach(ngMock.module(
       'kibana',
-      'kibana/courier',
-      function ($provide) {
-        $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
-      }
+      'kibana/courier'
     ));
 
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
-      mapPhrase = Private(FilterBarLibMapPhraseProvider);
+    beforeEach(ngMock.inject(function (Private) {
+      mockIndexPatterns = Private(IndexPatternMock);
+      mapPhraseFn = mapPhrase(mockIndexPatterns);
     }));
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } };
-      mapPhrase(filter).then(function (result) {
+      mapPhraseFn(filter).then(function (result) {
         expect(result).to.have.property('key', '_type');
         expect(result).to.have.property('value', 'apache');
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should return undefined for none matching', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
-      mapPhrase(filter).catch(function (result) {
+      mapPhraseFn(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });
-      $rootScope.$apply();
     });
 
   });

@@ -320,7 +320,7 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  private onNavClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  private onNavClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     const anchor = findClosestAnchor((event as any).nativeEvent.target);
     if (!anchor) {
       return;

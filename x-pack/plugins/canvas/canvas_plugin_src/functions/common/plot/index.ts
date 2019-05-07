@@ -24,7 +24,6 @@ import {
   Style,
   Palette,
   Legend,
-  DatatableColumn,
 } from '../../types';
 
 interface Arguments {
@@ -110,16 +109,8 @@ export function plot(): ContextFunction<'plot', PointSeries, Arguments, Render<a
               text?: string;
             } = {};
 
-            const x =
-              get<DatatableColumn[], DatatableColumn['type']>(context.columns, 'x.type') ===
-              'string'
-                ? ticks.x.hash[point.x]
-                : point.x;
-            const y =
-              get<DatatableColumn[], DatatableColumn['type']>(context.columns, 'y.type') ===
-              'string'
-                ? ticks.y.hash[point.y]
-                : point.y;
+            const x = get(context.columns, 'x.type') === 'string' ? ticks.x.hash[point.x] : point.x;
+            const y = get(context.columns, 'y.type') === 'string' ? ticks.y.hash[point.y] : point.y;
 
             if (point.size != null) {
               attrs.size = point.size;
