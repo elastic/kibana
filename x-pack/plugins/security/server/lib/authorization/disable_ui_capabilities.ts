@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, isObject, mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
@@ -22,53 +21,20 @@ export function disableUICapabilitesFactory(
   } = server.plugins;
 
   const features: Feature[] = xpackMainPlugin.getFeatures();
-  const uiCapabilitiesGroups = uiCapabilitiesGroupsFactory(features);
-  const featureNavLinkIds = features
-    .map(feature => feature.navLinkId)
-    .filter(navLinkId => navLinkId != null);
-
   const actions: Actions = authorization.actions;
-  const shouldDisableFeatureUICapability = (
-    featureId: keyof UICapabilities,
-    uiCapability: string
-  ) => {
-    // if the navLink isn't for a feature that we have registered, we don't wish to
-    // disable it based on privileges
-    return featureId !== 'navLinks' || featureNavLinkIds.includes(uiCapability);
-  };
+  const uiCapabilitiesGroups = uiCapabilitiesGroupsFactory(actions, features);
 
   const disableAll = (uiCapabilities: UICapabilities) => {
-    for (const uiCapabilityGroup of uiCapabilitiesGroups) {
-      uiCapabilityGroup.disable(uiCapabilities);
+    for (const group of uiCapabilitiesGroups) {
+      group.disable(uiCapabilities);
     }
     return uiCapabilities;
   };
 
   const usingPrivileges = async (uiCapabilities: UICapabilities) => {
-    function getActionsForFeatureCapability(
-      featureId: string,
-      uiCapability: string,
-      value: boolean | Record<string, boolean>
-    ): string[] {
-      if (typeof value === 'boolean') {
-        return [actions.ui.get(featureId, uiCapability)];
-      }
-      if (isObject(value)) {
-        return Object.keys(value).map(item => actions.ui.get(featureId, uiCapability, item));
-      }
-      throw new Error(`Expected value type of boolean or object, but found ${value}`);
-    }
-
-    const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
-      (acc, [featureId, featureUICapabilities]) => [
-        ...acc,
-        ...flatten(
-          Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
-            return getActionsForFeatureCapability(featureId, uiCapability, value);
-          })
-        ),
-      ],
-      []
+    const uiActions: string[] = uiCapabilitiesGroups.reduce(
+      (acc, group) => [...acc, ...group.getActions(uiCapabilities)],
+      [] as string[]
     );
 
     let checkPrivilegesResponse: CheckPrivilegesAtResourceResponse;
@@ -91,49 +57,11 @@ export function disableUICapabilitesFactory(
       throw err;
     }
 
-    const checkPrivilegesForCapability = (
-      enabled: boolean,
-      featureId: string,
-      ...uiCapabilityParts: string[]
-    ) => {
-      // if the uiCapability has already been disabled, we don't want to re-enable it
-      if (enabled === false) {
-        return false;
-      }
+    for (const group of uiCapabilitiesGroups) {
+      group.disableUsingPrivileges(uiCapabilities, checkPrivilegesResponse);
+    }
 
-      const action = actions.ui.get(featureId, ...uiCapabilityParts);
-      return checkPrivilegesResponse.privileges[action] === true;
-    };
-
-    return mapValues(uiCapabilities, (featureUICapabilities, featureId) => {
-      return mapValues(
-        featureUICapabilities,
-        (value: boolean | Record<string, boolean>, uiCapability) => {
-          if (typeof value === 'boolean') {
-            if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
-              return value;
-            }
-            return checkPrivilegesForCapability(value, featureId!, uiCapability!);
-          }
-
-          if (isObject(value)) {
-            const res = mapValues(value, (enabled, subUiCapability) => {
-              return checkPrivilegesForCapability(
-                enabled,
-                featureId!,
-                uiCapability!,
-                subUiCapability!
-              );
-            });
-            return res;
-          }
-
-          throw new Error(
-            `Unexpected UI Capability value. Expected boolean or object, but found ${value}`
-          );
-        }
-      );
-    }) as UICapabilities;
+    return uiCapabilities;
   };
 
   return {

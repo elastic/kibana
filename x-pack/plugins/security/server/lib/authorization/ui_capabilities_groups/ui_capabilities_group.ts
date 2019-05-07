@@ -5,7 +5,13 @@
  */
 
 import { UICapabilities } from 'ui/capabilities';
+import { CheckPrivilegesAtResourceResponse } from '../check_privileges';
 
 export interface UICapabilitiesGroup {
   disable(uiCapabilities: UICapabilities): void;
+  disableUsingPrivileges(
+    uiCapabilities: UICapabilities,
+    checkPrivilegesResponse: CheckPrivilegesAtResourceResponse
+  ): void;
+  getActions(uiCapabilities: UICapabilities): string[];
 }

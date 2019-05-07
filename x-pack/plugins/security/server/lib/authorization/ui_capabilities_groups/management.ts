@@ -6,9 +6,11 @@
 
 import { UICapabilities } from 'ui/capabilities';
 import { UICapabilitiesGroup } from './ui_capabilities_group';
+import { Actions } from '../actions';
+import { CheckPrivilegesAtResourceResponse } from '../check_privileges';
 
 export class ManagementCapabilitiesGroup implements UICapabilitiesGroup {
-  constructor() {}
+  constructor(private actions: Actions) {}
 
   disable(uiCapabilities: UICapabilities) {
     for (const section of Object.keys(uiCapabilities.management)) {
@@ -16,5 +18,32 @@ export class ManagementCapabilitiesGroup implements UICapabilitiesGroup {
         uiCapabilities.management[section][capability] = false;
       }
     }
+  }
+
+  disableUsingPrivileges(
+    uiCapabilities: UICapabilities,
+    checkPrivilegesResponse: CheckPrivilegesAtResourceResponse
+  ) {
+    for (const section of Object.keys(uiCapabilities.management)) {
+      for (const capability of Object.keys(uiCapabilities.management[section])) {
+        if (
+          checkPrivilegesResponse.privileges[
+            this.actions.ui.get('management', section, capability)
+          ] === false
+        ) {
+          uiCapabilities.management[section][capability] = false;
+        }
+      }
+    }
+  }
+
+  getActions(uiCapabilities: UICapabilities) {
+    const actions: string[] = [];
+    for (const section of Object.keys(uiCapabilities.management)) {
+      for (const capability of Object.keys(uiCapabilities.management[section])) {
+        actions.push(this.actions.ui.get('management', section, capability));
+      }
+    }
+    return actions;
   }
 }

@@ -10,13 +10,17 @@ import { Feature } from '../../../../../xpack_main/types';
 import { FeatureUICapabilitiesGroup } from './feature';
 import { ManagementCapabilitiesGroup } from './management';
 import { CatalogueUICapabilitiesGroup } from './catalogue';
+import { Actions } from '../actions';
 export { UICapabilitiesGroup };
 
-export function uiCapabilitiesGroupsFactory(features: Feature[]): UICapabilitiesGroup[] {
+export function uiCapabilitiesGroupsFactory(
+  actions: Actions,
+  features: Feature[]
+): UICapabilitiesGroup[] {
   return [
-    new CatalogueUICapabilitiesGroup(),
-    new NavLinkUICapabilitiesGroup(features),
-    new ManagementCapabilitiesGroup(),
-    ...features.map(feature => new FeatureUICapabilitiesGroup(feature)),
+    new CatalogueUICapabilitiesGroup(actions),
+    new NavLinkUICapabilitiesGroup(actions, features),
+    new ManagementCapabilitiesGroup(actions),
+    ...features.map(feature => new FeatureUICapabilitiesGroup(actions, feature)),
   ];
 }

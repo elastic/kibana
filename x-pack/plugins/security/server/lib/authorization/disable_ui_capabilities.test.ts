@@ -153,7 +153,7 @@ describe('usingPrivileges', () => {
         quzFeature: {
           foo: true,
           bar: true,
-        }
+        },
       });
 
       expect(mockServer.log).toMatchInlineSnapshot(`
@@ -271,7 +271,7 @@ describe('usingPrivileges', () => {
         quzFeature: {
           foo: true,
           bar: true,
-        }
+        },
       });
       expect(mockServer.log).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -325,15 +325,18 @@ describe('usingPrivileges', () => {
       checkPrivileges: {
         resolve: {
           privileges: {
+            [actions.ui.get('catalogue', 'foo')]: true,
+            [actions.ui.get('catalogue', 'bar')]: false,
             [actions.ui.get('navLinks', 'foo')]: true,
             [actions.ui.get('navLinks', 'bar')]: false,
-            [actions.ui.get('navLinks', 'quz')]: false,
             [actions.ui.get('management', 'kibana', 'indices')]: true,
             [actions.ui.get('management', 'kibana', 'settings')]: false,
             [actions.ui.get('fooFeature', 'foo')]: true,
             [actions.ui.get('fooFeature', 'bar')]: false,
-            [actions.ui.get('barFeature', 'foo')]: true,
-            [actions.ui.get('barFeature', 'bar')]: false,
+            [actions.ui.get('barFeature', 'foo', 'quz')]: true,
+            [actions.ui.get('barFeature', 'foo', 'baz')]: false,
+            [actions.ui.get('barFeature', 'bar', 'quz')]: true,
+            [actions.ui.get('barFeature', 'bar', 'baz')]: false,
           },
         },
       },
@@ -365,15 +368,28 @@ describe('usingPrivileges', () => {
         management: {
           kibana: {
             indices: true,
-            settings: false,
+            settings: true,
           },
         },
-        catalogue: {},
+        catalogue: {
+          foo: true,
+          bar: true,
+        },
         fooFeature: {
           foo: true,
           bar: true,
         },
         barFeature: {
+          foo: {
+            quz: true,
+            baz: true,
+          },
+          bar: {
+            quz: true,
+            baz: true,
+          },
+        },
+        quzFeature: {
           foo: true,
           bar: true,
         },
@@ -392,14 +408,27 @@ describe('usingPrivileges', () => {
           settings: false,
         },
       },
-      catalogue: {},
+      catalogue: {
+        foo: true,
+        bar: false,
+      },
       fooFeature: {
         foo: true,
         bar: false,
       },
       barFeature: {
+        foo: {
+          quz: true,
+          baz: false,
+        },
+        bar: {
+          quz: true,
+          baz: false,
+        },
+      },
+      quzFeature: {
         foo: true,
-        bar: false,
+        bar: true,
       },
     });
   });
@@ -409,13 +438,18 @@ describe('usingPrivileges', () => {
       checkPrivileges: {
         resolve: {
           privileges: {
+            [actions.ui.get('catalogue', 'foo')]: true,
+            [actions.ui.get('catalogue', 'bar')]: true,
             [actions.ui.get('navLinks', 'foo')]: true,
             [actions.ui.get('navLinks', 'bar')]: true,
             [actions.ui.get('management', 'kibana', 'indices')]: true,
+            [actions.ui.get('management', 'kibana', 'settings')]: true,
             [actions.ui.get('fooFeature', 'foo')]: true,
             [actions.ui.get('fooFeature', 'bar')]: true,
-            [actions.ui.get('barFeature', 'foo')]: true,
-            [actions.ui.get('barFeature', 'bar')]: true,
+            [actions.ui.get('barFeature', 'foo', 'quz')]: true,
+            [actions.ui.get('barFeature', 'foo', 'baz')]: true,
+            [actions.ui.get('barFeature', 'bar', 'quz')]: true,
+            [actions.ui.get('barFeature', 'bar', 'baz')]: true,
           },
         },
       },
@@ -442,18 +476,33 @@ describe('usingPrivileges', () => {
         navLinks: {
           foo: false,
           bar: false,
+          quz: false,
         },
         management: {
           kibana: {
             indices: false,
+            settings: false,
           },
         },
-        catalogue: {},
+        catalogue: {
+          foo: false,
+          bar: false,
+        },
         fooFeature: {
           foo: false,
           bar: false,
         },
         barFeature: {
+          foo: {
+            quz: false,
+            baz: false,
+          },
+          bar: {
+            quz: false,
+            baz: false,
+          },
+        },
+        quzFeature: {
           foo: false,
           bar: false,
         },
@@ -464,18 +513,33 @@ describe('usingPrivileges', () => {
       navLinks: {
         foo: false,
         bar: false,
+        quz: false,
       },
       management: {
         kibana: {
           indices: false,
+          settings: false,
         },
       },
-      catalogue: {},
+      catalogue: {
+        foo: false,
+        bar: false,
+      },
       fooFeature: {
         foo: false,
         bar: false,
       },
       barFeature: {
+        foo: {
+          quz: false,
+          baz: false,
+        },
+        bar: {
+          quz: false,
+          baz: false,
+        },
+      },
+      quzFeature: {
         foo: false,
         bar: false,
       },
@@ -574,7 +638,7 @@ describe('all', () => {
       quzFeature: {
         foo: true,
         bar: true,
-      }
+      },
     });
   });
 });

@@ -6,13 +6,34 @@
 
 import { UICapabilities } from 'ui/capabilities';
 import { UICapabilitiesGroup } from './ui_capabilities_group';
+import { Actions } from '../actions';
+import { CheckPrivilegesAtResourceResponse } from '../check_privileges';
 
 export class CatalogueUICapabilitiesGroup implements UICapabilitiesGroup {
-  constructor() {}
+  constructor(private actions: Actions) {}
 
   disable(uiCapabilities: UICapabilities) {
-    for (const capability of Object.keys(uiCapabilities.catalogue)) {
-      uiCapabilities.catalogue[capability] = false;
+    for (const catalogueId of Object.keys(uiCapabilities.catalogue)) {
+      uiCapabilities.catalogue[catalogueId] = false;
     }
+  }
+
+  disableUsingPrivileges(
+    uiCapabilities: UICapabilities,
+    checkPrivilegesResponse: CheckPrivilegesAtResourceResponse
+  ) {
+    for (const catalogueId of Object.keys(uiCapabilities.catalogue)) {
+      if (
+        checkPrivilegesResponse.privileges[this.actions.ui.get('catalogue', catalogueId)] === false
+      ) {
+        uiCapabilities.catalogue[catalogueId] = false;
+      }
+    }
+  }
+
+  getActions(uiCapabilities: UICapabilities) {
+    return Object.keys(uiCapabilities.catalogue).map(catalogueId =>
+      this.actions.ui.get('catalogue', catalogueId)
+    );
   }
 }
