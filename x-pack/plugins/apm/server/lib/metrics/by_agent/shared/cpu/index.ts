@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, CPUMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
-import { transformDataToChart } from '../../../transform_metrics_chart';
+import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<CPUMetrics> = {
   title: i18n.translate('xpack.apm.serviceDetails.metrics.cpuUsageChartTitle', {
@@ -48,5 +48,5 @@ const chartBase: ChartBase<CPUMetrics> = {
 
 export async function getCPUChartData(setup: Setup, serviceName: string) {
   const result = await fetch(setup, serviceName);
-  return transformDataToChart<CPUMetrics>(result, chartBase);
+  return transformDataToMetricsChart<CPUMetrics>(result, chartBase);
 }

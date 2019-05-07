@@ -9,10 +9,8 @@ import { GenericMetricsChart } from '../../../../server/lib/metrics/transform_me
 // @ts-ignore
 import CustomPlot from '../../shared/charts/CustomPlot';
 import { HoverXHandlers } from '../../shared/charts/SyncChartGroup';
-import {
-  getYTickFormatter,
-  getTooltipFormatter
-} from '../../../utils/formatters';
+import { asBytes, asPercent, roundToPlaces } from '../../../utils/formatters';
+import { YUnit, Coordinate } from '../../../../typings/timeseries';
 
 interface Props {
   chart: GenericMetricsChart;
@@ -43,4 +41,32 @@ export function MetricsChart({ chart, hoverXHandlers }: Props) {
       />
     </React.Fragment>
   );
+}
+
+function getYTickFormatter(unit: YUnit) {
+  switch (unit) {
+    case 'bytes': {
+      return (value: number | null) => asBytes(value);
+    }
+    case 'percent': {
+      return (y: number | null) => asPercent(y || 0, 1);
+    }
+    default: {
+      return (y: number | null) => (y === null ? y : roundToPlaces(y, 2));
+    }
+  }
+}
+
+function getTooltipFormatter(unit: YUnit) {
+  switch (unit) {
+    case 'bytes': {
+      return (c: Coordinate) => asBytes(c.y);
+    }
+    case 'percent': {
+      return (c: Coordinate) => asPercent(c.y || 0, 1);
+    }
+    default: {
+      return (c: Coordinate) => (c.y === null ? c.y : roundToPlaces(c.y, 2));
+    }
+  }
 }

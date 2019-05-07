@@ -5,10 +5,10 @@
  */
 import { AggregationSearchResponse } from 'elasticsearch';
 import { MetricsAggs, MetricSeriesKeys, AggValue } from './types';
-import { transformDataToChart } from './transform_metrics_chart';
+import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { ChartType, YUnit } from '../../../typings/timeseries';
 
-test('transformDataToChart should transform an ES result into a chart object', () => {
+test('transformDataToMetricsChart should transform an ES result into a chart object', () => {
   interface TestKeys extends MetricSeriesKeys {
     a: AggValue;
     b: AggValue;
@@ -60,7 +60,7 @@ test('transformDataToChart should transform an ES result into a chart object', (
     }
   };
 
-  const chart = transformDataToChart(response, chartBase);
+  const chart = transformDataToMetricsChart(response, chartBase);
 
   expect(chart).toMatchInlineSnapshot(`
 Object {

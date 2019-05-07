@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, MemoryMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
-import { transformDataToChart } from '../../../transform_metrics_chart';
+import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<MemoryMetrics> = {
   title: i18n.translate(
@@ -36,5 +36,5 @@ const chartBase: ChartBase<MemoryMetrics> = {
 
 export async function getMemoryChartData(setup: Setup, serviceName: string) {
   const result = await fetch(setup, serviceName);
-  return transformDataToChart<MemoryMetrics>(result, chartBase);
+  return transformDataToMetricsChart<MemoryMetrics>(result, chartBase);
 }

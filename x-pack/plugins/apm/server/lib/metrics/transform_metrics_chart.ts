@@ -17,8 +17,10 @@ const colors = [
   theme.euiColorVis6
 ];
 
-export type GenericMetricsChart = ReturnType<typeof transformDataToChart>;
-export function transformDataToChart<T extends MetricSeriesKeys>(
+export type GenericMetricsChart = ReturnType<
+  typeof transformDataToMetricsChart
+>;
+export function transformDataToMetricsChart<T extends MetricSeriesKeys>(
   result: AggregationSearchResponse<void, MetricsAggs<T>>,
   chartBase: ChartBase<T>
 ) {

@@ -171,31 +171,3 @@ export function asBytes(value: number | null, places = 2) {
 
   return `${roundToPlaces(value, places)} B`;
 }
-
-export function getYTickFormatter(unit: YUnit) {
-  switch (unit) {
-    case 'bytes': {
-      return (value: number | null) => asBytes(value);
-    }
-    case 'percent': {
-      return (y: number | null) => asPercent(y || 0, 1);
-    }
-    default: {
-      return (y: number | null) => (y === null ? y : roundToPlaces(y, 2));
-    }
-  }
-}
-
-export function getTooltipFormatter(unit: YUnit) {
-  switch (unit) {
-    case 'bytes': {
-      return (c: Coordinate) => asBytes(c.y);
-    }
-    case 'percent': {
-      return (c: Coordinate) => asPercent(c.y || 0, 1);
-    }
-    default: {
-      return (c: Coordinate) => (c.y === null ? c.y : roundToPlaces(c.y, 2));
-    }
-  }
-}

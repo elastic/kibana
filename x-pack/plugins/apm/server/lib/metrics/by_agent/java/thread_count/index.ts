@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, ThreadCountMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
-import { transformDataToChart } from '../../../transform_metrics_chart';
+import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<ThreadCountMetrics> = {
   title: i18n.translate('xpack.apm.agentMetrics.java.threadCountChartTitle', {
@@ -30,5 +30,5 @@ const chartBase: ChartBase<ThreadCountMetrics> = {
 
 export async function getThreadCountChart(setup: Setup, serviceName: string) {
   const result = await fetch(setup, serviceName);
-  return transformDataToChart<ThreadCountMetrics>(result, chartBase);
+  return transformDataToMetricsChart<ThreadCountMetrics>(result, chartBase);
 }

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, NonHeapMemoryMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
-import { transformDataToChart } from '../../../transform_metrics_chart';
+import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
 
 const chartBase: ChartBase<NonHeapMemoryMetrics> = {
   title: i18n.translate('xpack.apm.agentMetrics.java.nonHeapMemoryChartTitle', {
@@ -51,5 +51,5 @@ const chartBase: ChartBase<NonHeapMemoryMetrics> = {
 
 export async function getNonHeapMemoryChart(setup: Setup, serviceName: string) {
   const result = await fetch(setup, serviceName);
-  return transformDataToChart<NonHeapMemoryMetrics>(result, chartBase);
+  return transformDataToMetricsChart<NonHeapMemoryMetrics>(result, chartBase);
 }

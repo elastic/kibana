@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
 import { fetch, HeapMemoryMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
-import { transformDataToChart } from '../../../transform_metrics_chart';
+import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
 
 // TODO: i18n for titles
 
@@ -53,5 +53,5 @@ const chartBase: ChartBase<HeapMemoryMetrics> = {
 
 export async function getHeapMemoryChart(setup: Setup, serviceName: string) {
   const result = await fetch(setup, serviceName);
-  return transformDataToChart<HeapMemoryMetrics>(result, chartBase);
+  return transformDataToMetricsChart<HeapMemoryMetrics>(result, chartBase);
 }
