@@ -14,17 +14,7 @@ import { getPrivileges } from './get_privileges';
 
 let privileges: Privileges = {};
 
-// Helper type to allow `new Promise(...)`;
-type PromiseConstructor<T> = new (
-  arg: ((resolve: (arg?: T) => void, reject: (arg?: T) => void) => void)
-) => Promise<T>;
-
-// Privileges Promise Constructor
-type PPC = PromiseConstructor<Privileges>;
-// Privileges Promise
-type PP = Promise<Privileges>;
-
-export function checkGetJobsPrivilege(Promise: PPC, kbnUrl: any): PP {
+export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then((priv: Privileges) => {
       privileges = priv;
@@ -40,7 +30,7 @@ export function checkGetJobsPrivilege(Promise: PPC, kbnUrl: any): PP {
   });
 }
 
-export function checkCreateJobsPrivilege(Promise: PPC, kbnUrl: any): PP {
+export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
@@ -56,7 +46,7 @@ export function checkCreateJobsPrivilege(Promise: PPC, kbnUrl: any): PP {
   });
 }
 
-export function checkFindFileStructurePrivilege(Promise: PPC, kbnUrl: any): PP {
+export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
@@ -72,7 +62,7 @@ export function checkFindFileStructurePrivilege(Promise: PPC, kbnUrl: any): PP {
   });
 }
 
-export function checkGetDataFrameJobsPrivilege(Promise: PPC, kbnUrl: any): PP {
+export function checkGetDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
@@ -88,7 +78,7 @@ export function checkGetDataFrameJobsPrivilege(Promise: PPC, kbnUrl: any): PP {
   });
 }
 
-export function checkCreateDataFrameJobsPrivilege(Promise: PPC, kbnUrl: any): PP {
+export function checkCreateDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
