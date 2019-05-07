@@ -42,6 +42,11 @@ export function registerStatsApi(kbnServer, server, config) {
   };
 
   const getUsage = async callCluster => {
+    const collectorsReady = await collectorSet.areAllCollectorsReady();
+    if (!collectorsReady) {
+      return {};
+    }
+
     const usage = await collectorSet.bulkFetchUsage(callCluster);
     return collectorSet.toObject(usage);
   };
