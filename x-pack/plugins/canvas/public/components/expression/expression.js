@@ -25,11 +25,12 @@ const { useRef } = React;
 const minFontSize = 12;
 const maxFontSize = 32;
 
-const shortcut = (cmd, callback) => (
+const shortcut = (ref, cmd, callback) => (
   <Shortcuts
     name="EXPRESSION"
-    handler={command => {
-      if (command === cmd) {
+    handler={(command, event) => {
+      const isInputActive = ref.current && ref.current.ref === event.target;
+      if (isInputActive && command === cmd) {
         callback();
       }
     }}
@@ -58,12 +59,12 @@ export const Expression = ({
     <EuiPanel
       className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
     >
-      {shortcut('RUN', () => {
+      {shortcut(refExpressionInput, 'RUN', () => {
         if (!error) {
           setExpression(formState.expression);
         }
       })}
-      {shortcut('RUN_SELECTION', () => {
+      {shortcut(refExpressionInput, 'RUN_SELECTION', () => {
         if (!error && refExpressionInput.current) {
           const selection = refExpressionInput.current.getSelection();
           if (selection) {
