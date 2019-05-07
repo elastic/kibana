@@ -18,7 +18,6 @@
  */
 
 import expect from '@kbn/expect';
-// import ngMock from 'ng_mock';
 import { mapQueryString } from '../map_query_string';
 
 describe('Filter Bar Directive', function () {
