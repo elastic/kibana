@@ -12,11 +12,11 @@ import {
   DataFrameJobListRow,
   DataFrameJobState,
   DataFrameJobStats,
-  jobId,
+  JobId,
 } from '../common';
 
 interface DataFrameJobStateStats {
-  id: jobId;
+  id: JobId;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
 }

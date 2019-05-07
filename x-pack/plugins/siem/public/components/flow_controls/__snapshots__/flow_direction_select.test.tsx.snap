@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Select Flow Direction rendering it renders the basic group button for uni-direction and bi-direction 1`] = `
+<Component
+  id="TestFlowDirectionId"
+  onChangeDirection={[MockFunction]}
+  selectedDirection="uniDirectional"
+/>
+`;

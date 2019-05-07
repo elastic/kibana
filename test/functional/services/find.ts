@@ -30,13 +30,21 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const driver = webdriver.driver;
   const By = webdriver.By;
   const until = webdriver.until;
+  const browserType = webdriver.browserType;
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
   const wrap = (webElement: WebElement | WebElementWrapper) =>
-    new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight, log);
+    new WebElementWrapper(
+      webElement,
+      webdriver,
+      defaultFindTimeout,
+      fixedHeaderHeight,
+      log,
+      browserType
+    );
 
   const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) => webElements.map(wrap);
 
@@ -57,6 +65,14 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     ): Promise<WebElementWrapper> {
       log.debug(`Find.findByCssSelector('${selector}') with timeout=${timeout}`);
       return wrap(await driver.wait(until.elementLocated(By.css(selector)), timeout));
+    }
+
+    public async byXPath(
+      selector: string,
+      timeout: number = defaultFindTimeout
+    ): Promise<WebElementWrapper> {
+      log.debug(`Find.byXPath('${selector}') with timeout=${timeout}`);
+      return wrap(await driver.wait(until.elementLocated(By.xpath(selector)), timeout));
     }
 
     public async byClassName(
