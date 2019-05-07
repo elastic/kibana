@@ -8,11 +8,9 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
+import { assertDeeplyFalse } from '../../common/lib/assert_deeply_false';
 
 const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder(false);
 
@@ -26,9 +24,13 @@ export default function savedObjectsManagementTests({
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
-          username: scenario.username,
-          password: scenario.password,
+          credentials: {
+            username: scenario.username,
+            password: scenario.password,
+          },
         });
+        expect(uiCapabilities.success).to.be(true);
+        expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
         switch (scenario.username) {
           case 'superuser':
           case 'all':
@@ -51,8 +53,6 @@ export default function savedObjectsManagementTests({
             break;
           case 'foo_all':
           case 'foo_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.build({
                 all: [],
@@ -61,9 +61,10 @@ export default function savedObjectsManagementTests({
             );
             break;
           case 'no_kibana_privileges':
+          // these users have no access to any ui capabilities
           case 'legacy_all':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+          case 'no_kibana_privileges':
+            assertDeeplyFalse(uiCapabilities.value!.savedObjectsManagement);
             break;
           default:
             throw new UnreachableError(scenario);
