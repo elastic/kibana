@@ -32,11 +32,18 @@ storiesOf('components/ElementTypes/ElementGrid', module)
       onEdit={action('onEdit')}
     />
   ))
-  .add('with filter', () => (
+  .add('with text filter', () => (
     <ElementGrid
       elements={testElements}
       handleClick={action('addCustomElement')}
       filterText="table"
+    />
+  ))
+  .add('with tags filter', () => (
+    <ElementGrid
+      elements={testElements}
+      handleClick={action('addCustomElement')}
+      filterTags={['graphic']}
     />
   ))
   .add('with controls and filter', () => (

@@ -9,6 +9,7 @@ import { filter } from './filter';
 import { graphic } from './graphic';
 import { presentation } from './presentation';
 import { proportion } from './proportion';
+import { report } from './report';
 import { text } from './text';
 
 // Registry expects a function that returns a spec object

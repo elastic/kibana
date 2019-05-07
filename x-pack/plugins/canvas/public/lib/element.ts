@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { ElementSpec } from '../../canvas_plugin_src/elements/types';
 import defaultHeader from './default_header.png';
 import { tagsRegistry } from './tags_registry';
