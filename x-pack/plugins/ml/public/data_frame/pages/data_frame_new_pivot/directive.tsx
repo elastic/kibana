@@ -14,6 +14,7 @@ const module = uiModules.get('apps/ml', ['react']);
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
+import { InjectorService } from '../../../../common/types/angular';
 
 // @ts-ignore
 import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
@@ -22,10 +23,6 @@ type CreateSearchItems = () => { indexPattern: StaticIndexPattern };
 
 import { KibanaContext } from '../../common';
 import { Page } from './page';
-
-interface InjectorService {
-  get<T>(name: string, caller?: string): T;
-}
 
 module.directive('mlNewDataFrame', ($injector: InjectorService) => {
   return {
