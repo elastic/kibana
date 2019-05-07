@@ -74,8 +74,20 @@
         <div class="kuiInfoPanelBody">
           <div class="kuiInfoPanelBody__message">
             <span i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternLabel"
-                  i18n-default-message="Support for time-interval based index patterns has been removed! In the next major version of Kibana this index patterns will stop working. Migrate saved objects that use this index pattern to a wildcard pattern and delete this one."></span>
+                  i18n-default-message="Support for time-interval based index patterns has been removed! In the next major version of Kibana these index patterns will stop working. Migrate this index pattern to a wildcard pattern by specifying the new pattern below."></span>
           </div>
+          <form>
+            <input
+              class="form-control"
+              type="text"
+              ng-model="migration.newTitle"
+            />
+          </form>
+          <button ng-disabled="migration.isMigrating || !migration.newTitle.trim()" class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="migrate()">
+            <span ng-if="migration.isMigrating" class="euiLoadingSpinner euiLoadingSpinner--medium" />
+            <span i18n-id="kbn.management.editIndexPattern.migrate"
+                  i18n-default-message="Migrate"></span>
+          </button>
         </div>
       </div>
 

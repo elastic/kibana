@@ -23,9 +23,8 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/query_bar';
+
 import { capabilities } from 'ui/capabilities';
-import 'ui/search_bar';
 import 'ui/apply_filters';
 import 'ui/listen';
 import chrome from 'ui/chrome';
@@ -54,6 +53,9 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -341,6 +343,7 @@ function VisEditor(
 
     $scope.searchSource = searchSource;
     $scope.state = $state;
+    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');

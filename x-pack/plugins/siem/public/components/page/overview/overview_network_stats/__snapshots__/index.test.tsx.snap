@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview Network Stat Data rendering it renders the default OverviewNetworkStats 1`] = `
+<Component
+  data={
+    Object {
+      "auditbeatSocket": 12,
+      "filebeatSuricata": 60015,
+      "filebeatZeek": 2003,
+      "packetbeatDNS": 10277307,
+      "packetbeatFlow": 16,
+    }
+  }
+  loading={false}
+/>
+`;

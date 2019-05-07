@@ -34,23 +34,56 @@ const SavedSourceConfigurationFieldsRuntimeType = runtimeTypes.partial({
   timestamp: runtimeTypes.string,
 });
 
+export const SavedSourceConfigurationTimestampColumnRuntimeType = runtimeTypes.type({
+  timestampColumn: runtimeTypes.type({
+    id: runtimeTypes.string,
+  }),
+});
+
+export const SavedSourceConfigurationMessageColumnRuntimeType = runtimeTypes.type({
+  messageColumn: runtimeTypes.type({
+    id: runtimeTypes.string,
+  }),
+});
+
+export const SavedSourceConfigurationFieldColumnRuntimeType = runtimeTypes.type({
+  fieldColumn: runtimeTypes.type({
+    id: runtimeTypes.string,
+    field: runtimeTypes.string,
+  }),
+});
+
+export const SavedSourceConfigurationColumnRuntimeType = runtimeTypes.union([
+  SavedSourceConfigurationTimestampColumnRuntimeType,
+  SavedSourceConfigurationMessageColumnRuntimeType,
+  SavedSourceConfigurationFieldColumnRuntimeType,
+]);
+
 export const SavedSourceConfigurationRuntimeType = runtimeTypes.partial({
   name: runtimeTypes.string,
   description: runtimeTypes.string,
   metricAlias: runtimeTypes.string,
   logAlias: runtimeTypes.string,
   fields: SavedSourceConfigurationFieldsRuntimeType,
+  logColumns: runtimeTypes.array(SavedSourceConfigurationColumnRuntimeType),
 });
 
 export interface InfraSavedSourceConfiguration
   extends runtimeTypes.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
 
-export const pickSavedSourceConfiguration = (value: InfraSourceConfiguration) => {
-  const { container, host, pod, tiebreaker, timestamp } = value.fields;
+export const pickSavedSourceConfiguration = (
+  value: InfraSourceConfiguration
+): InfraSavedSourceConfiguration => {
+  const { name, description, metricAlias, logAlias, fields, logColumns } = value;
+  const { container, host, pod, tiebreaker, timestamp } = fields;
 
   return {
-    ...value,
+    name,
+    description,
+    metricAlias,
+    logAlias,
     fields: { container, host, pod, tiebreaker, timestamp },
+    logColumns,
   };
 };
 
@@ -69,6 +102,7 @@ export const StaticSourceConfigurationRuntimeType = runtimeTypes.partial({
   metricAlias: runtimeTypes.string,
   logAlias: runtimeTypes.string,
   fields: StaticSourceConfigurationFieldsRuntimeType,
+  logColumns: runtimeTypes.array(SavedSourceConfigurationColumnRuntimeType),
 });
 
 export interface InfraStaticSourceConfiguration
@@ -85,6 +119,7 @@ const SourceConfigurationFieldsRuntimeType = runtimeTypes.type({
 export const SourceConfigurationRuntimeType = runtimeTypes.type({
   ...SavedSourceConfigurationRuntimeType.props,
   fields: SourceConfigurationFieldsRuntimeType,
+  logColumns: runtimeTypes.array(SavedSourceConfigurationColumnRuntimeType),
 });
 
 export interface InfraSourceConfiguration

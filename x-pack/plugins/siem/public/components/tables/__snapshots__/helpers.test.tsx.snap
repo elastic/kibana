@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
+<Component>
+  <Connect(DraggableWrapperComponent)
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item1",
+        "kqlQuery": "",
+        "name": "item1",
+        "queryMatch": Object {
+          "field": "attrName",
+          "value": "item1",
+        },
+      }
+    }
+    key="idPrefix-attrName-item1"
+    render={[Function]}
+  />
+</Component>
+`;
+
+exports[`Table Helpers #getRowItemDraggables it returns correctly against snapshot 1`] = `
+<Component>
+  <Connect(DraggableWrapperComponent)
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item1",
+        "kqlQuery": "",
+        "name": "item1",
+        "queryMatch": Object {
+          "field": "attrName",
+          "value": "item1",
+        },
+      }
+    }
+    key="idPrefix-attrName-item1"
+    render={[Function]}
+  />
+  , 
+  <Connect(DraggableWrapperComponent)
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item2",
+        "kqlQuery": "",
+        "name": "item2",
+        "queryMatch": Object {
+          "field": "attrName",
+          "value": "item2",
+        },
+      }
+    }
+    key="idPrefix-attrName-item2"
+    render={[Function]}
+  />
+  , 
+  <Connect(DraggableWrapperComponent)
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item3",
+        "kqlQuery": "",
+        "name": "item3",
+        "queryMatch": Object {
+          "field": "attrName",
+          "value": "item3",
+        },
+      }
+    }
+    key="idPrefix-attrName-item3"
+    render={[Function]}
+  />
+   
+</Component>
+`;
+
+exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot 1`] = `
+<div>
+  <EuiToolTip
+    content={
+      <React.Fragment>
+        <span>
+          <React.Fragment>
+            item2
+          </React.Fragment>
+          <br />
+        </span>
+        <b>
+          <br />
+          <FormattedMessage
+            defaultMessage="More..."
+            id="xpack.siem.tables.rowItemHelper.moreDescription"
+            values={Object {}}
+          />
+        </b>
+      </React.Fragment>
+    }
+    delay="regular"
+    position="top"
+  >
+    <Styled(EuiIcon)
+      type="boxesHorizontal"
+    />
+  </EuiToolTip>
+</div>
+`;

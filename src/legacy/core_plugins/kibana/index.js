@@ -128,11 +128,101 @@ export default function (kibana) {
         },
       ],
 
+      savedObjectsManagement: {
+        'index-pattern': {
+          icon: 'indexPatternApp',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'management.kibana.index_patterns',
+            };
+          },
+        },
+        visualization: {
+          icon: 'visualizeApp',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'visualize.show',
+            };
+          },
+        },
+        search: {
+          icon: 'search',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'discover.show',
+            };
+          },
+        },
+        dashboard: {
+          icon: 'dashboardApp',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'dashboard.show',
+            };
+          },
+        },
+        url: {
+          defaultSearchField: 'url',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.url;
+          },
+        },
+        config: {
+          isImportableAndExportable: true,
+          getInAppUrl() {
+            return {
+              path: `/app/kibana#/management/kibana/settings`,
+              uiCapabilitiesPath: 'advancedSettings.show',
+            };
+          },
+          getTitle(obj) {
+            return `Advanced Settings [${obj.id}]`;
+          },
+        },
+      },
+
       savedObjectSchemas: {
-        'kql-telemetry': {
+        'sample-data-telemetry': {
           isNamespaceAgnostic: true,
         },
-        'sample-data-telemetry': {
+        'kql-telemetry': {
           isNamespaceAgnostic: true,
         },
       },
@@ -169,10 +259,11 @@ export default function (kibana) {
               index_patterns: true,
             },
             advancedSettings: {
+              show: true,
               save: true
             },
             indexPatterns: {
-              createNew: true,
+              save: true,
             },
             savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
               ...acc,
