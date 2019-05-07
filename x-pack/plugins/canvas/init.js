@@ -48,14 +48,14 @@ export default async function(server /*options*/) {
           all: ['canvas-workpad', 'canvas-element'],
           read: ['index-pattern'],
         },
-        ui: ['save'],
+        ui: ['save', 'show'],
       },
       read: {
         savedObject: {
           all: [],
           read: ['index-pattern', 'canvas-workpad', 'canvas-element'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   });

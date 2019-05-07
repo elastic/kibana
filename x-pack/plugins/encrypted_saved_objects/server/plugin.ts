@@ -7,7 +7,11 @@
 import crypto from 'crypto';
 import { Legacy, Server } from 'kibana';
 import { SavedObjectsRepository } from 'src/legacy/server/saved_objects/service/lib';
-import { BaseOptions } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import {
+  BaseOptions,
+  SavedObject,
+  SavedObjectAttributes,
+} from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
@@ -71,7 +75,11 @@ export class Plugin {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      getDecryptedAsInternalUser: async (type: string, id: string, options?: BaseOptions) => {
+      getDecryptedAsInternalUser: async <T extends SavedObjectAttributes = any>(
+        type: string,
+        id: string,
+        options?: BaseOptions
+      ): Promise<SavedObject<T>> => {
         const savedObject = await internalRepository.get(type, id, options);
         return {
           ...savedObject,
