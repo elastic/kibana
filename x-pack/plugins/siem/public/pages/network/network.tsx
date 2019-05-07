@@ -40,83 +40,85 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
   <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
     {({ filebeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
-        <GlobalTime>
-          {({ to, from, setQuery }) => (
-            <>
-              <KpiNetworkQuery
-                endDate={to}
-                filterQuery={filterQuery}
-                sourceId="default"
-                startDate={from}
-              >
-                {({ kpiNetwork, loading, id, refetch }) => (
-                  <KpiNetworkComponentManage
-                    id={id}
-                    setQuery={setQuery}
-                    refetch={refetch}
-                    data={kpiNetwork}
-                    loading={loading}
-                  />
-                )}
-              </KpiNetworkQuery>
+        <>
+          <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
 
-              <EuiHorizontalRule />
+          <EuiSpacer />
 
-              <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+          <GlobalTime>
+            {({ to, from, setQuery }) => (
+              <>
+                <KpiNetworkQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                >
+                  {({ kpiNetwork, loading, id, refetch }) => (
+                    <KpiNetworkComponentManage
+                      id={id}
+                      setQuery={setQuery}
+                      refetch={refetch}
+                      data={kpiNetwork}
+                      loading={loading}
+                    />
+                  )}
+                </KpiNetworkQuery>
 
-              <EuiSpacer />
+                <EuiSpacer />
 
-              <NetworkTopNFlowQuery
-                endDate={to}
-                filterQuery={filterQuery}
-                sourceId="default"
-                startDate={from}
-                type={networkModel.NetworkType.page}
-              >
-                {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => (
-                  <NetworkTopNFlowTableManage
-                    data={networkTopNFlow}
-                    indexPattern={indexPattern}
-                    id={id}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    loading={loading}
-                    loadMore={loadMore}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    totalCount={totalCount}
-                    type={networkModel.NetworkType.page}
-                  />
-                )}
-              </NetworkTopNFlowQuery>
+                <NetworkTopNFlowQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.page}
+                >
+                  {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => (
+                    <NetworkTopNFlowTableManage
+                      data={networkTopNFlow}
+                      indexPattern={indexPattern}
+                      id={id}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loading={loading}
+                      loadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.page}
+                    />
+                  )}
+                </NetworkTopNFlowQuery>
 
-              <EuiSpacer />
+                <EuiSpacer />
 
-              <NetworkDnsQuery
-                endDate={to}
-                filterQuery={filterQuery}
-                sourceId="default"
-                startDate={from}
-                type={networkModel.NetworkType.page}
-              >
-                {({ totalCount, loading, networkDns, pageInfo, loadMore, id, refetch }) => (
-                  <NetworkDnsTableManage
-                    data={networkDns}
-                    id={id}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    loading={loading}
-                    loadMore={loadMore}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    totalCount={totalCount}
-                    type={networkModel.NetworkType.page}
-                  />
-                )}
-              </NetworkDnsQuery>
-            </>
-          )}
-        </GlobalTime>
+                <NetworkDnsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.page}
+                >
+                  {({ totalCount, loading, networkDns, pageInfo, loadMore, id, refetch }) => (
+                    <NetworkDnsTableManage
+                      data={networkDns}
+                      id={id}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loading={loading}
+                      loadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.page}
+                    />
+                  )}
+                </NetworkDnsQuery>
+              </>
+            )}
+          </GlobalTime>
+        </>
       ) : (
         <EmptyPage
           title={i18n.NO_FILEBEAT_INDICES}
