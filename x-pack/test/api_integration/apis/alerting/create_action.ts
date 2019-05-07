@@ -19,7 +19,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .send({
           attributes: {
             description: 'My action',
-            connectorId: 'log',
+            connectorId: 'test',
             connectorOptions: {},
           },
         })
@@ -30,7 +30,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             id: resp.body.id,
             attributes: {
               description: 'My action',
-              connectorId: 'log',
+              connectorId: 'test',
               connectorOptions: {},
             },
             references: [],

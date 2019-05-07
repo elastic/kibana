@@ -27,7 +27,7 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
             references: [],
             version: resp.body.version,
             attributes: {
-              connectorId: 'log',
+              connectorId: 'test',
               description: 'My description',
               connectorOptions: {
                 bar: false,

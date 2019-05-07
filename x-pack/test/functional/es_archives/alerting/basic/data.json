@@ -5,7 +5,7 @@
     "source": {
       "action": {
         "description": "My description",
-        "connectorId": "log",
+        "connectorId": "test",
         "connectorOptions": {
           "foo": true,
           "bar": false

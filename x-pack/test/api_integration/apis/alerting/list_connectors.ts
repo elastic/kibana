@@ -24,11 +24,7 @@ export default function listConnectorTests({ getService }: KibanaFunctionalTestD
           }
           // Check for values explicitly in order to avoid this test failing each time plugins register
           // a new connector
-          expect(resp.body.some(createConnectorMatcher('log', 'Log'))).to.be(true);
-          expect(resp.body.some(createConnectorMatcher('message-slack', 'Message slack'))).to.be(
-            true
-          );
-          expect(resp.body.some(createConnectorMatcher('email', 'E-mail')));
+          expect(resp.body.some(createConnectorMatcher('test', 'Test'))).to.be(true);
         });
     });
   });

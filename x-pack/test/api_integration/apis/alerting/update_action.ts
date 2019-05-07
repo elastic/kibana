@@ -22,7 +22,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            connectorId: 'log',
+            connectorId: 'test',
             description: 'My description updated',
             connectorOptions: {},
           },
@@ -36,7 +36,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             version: resp.body.version,
             updated_at: resp.body.updated_at,
             attributes: {
-              connectorId: 'log',
+              connectorId: 'test',
               description: 'My description updated',
               connectorOptions: {},
             },
@@ -50,7 +50,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            connectorId: 'log',
+            connectorId: 'test',
             description: 'My description updated',
             connectorOptions: {},
           },
