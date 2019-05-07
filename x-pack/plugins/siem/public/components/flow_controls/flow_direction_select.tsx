@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupProps, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 
@@ -40,13 +40,71 @@ interface Props {
   onChangeDirection: (id: string, value: FlowDirection) => void;
 }
 
-export const FlowDirectionSelect = pure<Props>(({ id, onChangeDirection, selectedDirection }) => (
-  <MyEuiButtonGroup
-    name={`${id}-${selectedDirection}`}
-    options={getToggleButtonDirection(id)}
-    idSelected={`${id}-select-flow-direction-${selectedDirection}`}
-    onChange={onChangeDirection}
-    color="primary"
-    type="single"
-  />
-));
+interface State {
+  unidirectional: boolean;
+  bidirectional: boolean;
+}
+
+export class FlowDirectionSelect extends React.PureComponent<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      bidirectional: false,
+      unidirectional: true,
+    };
+  }
+
+  public toggleDirection = () => {
+    this.setState(prevState => ({
+      bidirectional: !prevState.bidirectional,
+      unidirectional: !prevState.unidirectional,
+    }));
+  };
+
+  public toggleBidirectional = () => {
+    if (this.state.unidirectional) {
+      this.toggleDirection();
+    }
+  };
+
+  public toggleUnidirectional = () => {
+    if (this.state.bidirectional) {
+      this.toggleDirection();
+    }
+  };
+
+  public render() {
+    const { id, onChangeDirection, selectedDirection } = this.props;
+
+    return (
+      <EuiFilterGroup>
+        <EuiFilterButton
+          withNext
+          hasActiveFilters={this.state.unidirectional}
+          onClick={this.toggleUnidirectional}
+        >
+          {i18n.UNIDIRECTIONAL}
+        </EuiFilterButton>
+
+        <EuiFilterButton
+          hasActiveFilters={this.state.bidirectional}
+          onClick={this.toggleBidirectional}
+        >
+          {i18n.BIDIRECTIONAL}
+        </EuiFilterButton>
+      </EuiFilterGroup>
+    );
+  }
+}
+
+// export const FlowDirectionSelect = pure<Props>(({ id, onChangeDirection, selectedDirection }) => (
+//   <MyEuiButtonGroup
+//     name={`${id}-${selectedDirection}`}
+//     options={getToggleButtonDirection(id)}
+//     idSelected={`${id}-select-flow-direction-${selectedDirection}`}
+//     onChange={onChangeDirection}
+//     color="primary"
+//     type="single"
+//   />
+// ));
