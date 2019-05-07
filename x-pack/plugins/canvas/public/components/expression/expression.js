@@ -20,8 +20,23 @@ import {
 import { Shortcuts } from 'react-shortcuts';
 import { ExpressionInput } from '../expression_input';
 
+const { useRef } = React;
+
 const minFontSize = 12;
 const maxFontSize = 32;
+
+const shortcut = (cmd, callback) => (
+  <Shortcuts
+    name="EXPRESSION"
+    handler={command => {
+      if (command === cmd) {
+        callback();
+      }
+    }}
+    targetNodeSelector="body"
+    global
+  />
+);
 
 export const Expression = ({
   functionDefinitions,
@@ -37,22 +52,22 @@ export const Expression = ({
   isCompact,
   toggleCompactView,
 }) => {
+  const refExpressionInput = useRef(null);
   return (
     <EuiPanel
       className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
     >
-      <Shortcuts
-        name="EXPRESSION"
-        handler={command => {
-          if (command === 'RUN') {
-            setExpression(formState.expression);
-            return;
+      {shortcut('RUN', () => setExpression(formState.expression))}
+      {shortcut('RUN_SELECTION', () => {
+        if (refExpressionInput.current) {
+          const selection = refExpressionInput.current.getSelection();
+          if (selection) {
+            setExpression(selection);
           }
-        }}
-        targetNodeSelector="body"
-        global
-      />
+        }
+      })}
       <ExpressionInput
+        ref={refExpressionInput}
         fontSize={fontSize}
         isCompact={isCompact}
         functionDefinitions={functionDefinitions}
