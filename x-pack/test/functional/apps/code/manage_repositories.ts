@@ -18,7 +18,7 @@ export default function manageRepositoriesFunctionalTests({
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Manage Repositories', () => {
+  describe('Code', () => {
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('Manage Repositories', () => {
@@ -37,7 +37,7 @@ export default function manageRepositoriesFunctionalTests({
         log.debug('Code test import repository');
         // Fill in the import repository input box with a valid git repository url.
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/elastic/code-examples_empty-file'
+          'https://github.com/Microsoft/TypeScript-Node-Starter'
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
@@ -46,7 +46,7 @@ export default function manageRepositoriesFunctionalTests({
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'elastic/code-examples_empty-file'
+            'Microsoft/TypeScript-Node-Starter'
           );
         });
 
@@ -65,7 +65,7 @@ export default function manageRepositoriesFunctionalTests({
         // Click the delete repository button.
         await PageObjects.code.clickDeleteRepositoryButton();
 
-        await retry.tryForTime(300000, async () => {
+        await retry.try(async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
         });
@@ -75,9 +75,8 @@ export default function manageRepositoriesFunctionalTests({
         log.debug('Code test import repository');
         // Fill in the import repository input box with a valid git repository url.
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'git://github.com/elastic/code-examples_empty-file'
+          'git://github.com/Microsoft/TypeScript-Node-Starter'
         );
-
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
 
@@ -85,7 +84,7 @@ export default function manageRepositoriesFunctionalTests({
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'elastic/code-examples_empty-file'
+            'Microsoft/TypeScript-Node-Starter'
           );
         });
 
@@ -101,7 +100,7 @@ export default function manageRepositoriesFunctionalTests({
         // Delete the repository
         await PageObjects.code.clickDeleteRepositoryButton();
 
-        await retry.tryForTime(300000, async () => {
+        await retry.try(async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
         });
