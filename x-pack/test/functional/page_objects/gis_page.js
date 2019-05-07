@@ -91,11 +91,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayerDeleted(layerName) {
       log.debug('Wait for layer deleted');
-      await retry.try(async () => {
+      await retry.waitFor('Layer to be deleted', async () => {
         const doesLayerExist = await this.doesLayerExist(layerName);
-        if (doesLayerExist) {
-          throw new Error('Layer still exists');
-        }
+        return !doesLayerExist;
       });
     }
 
