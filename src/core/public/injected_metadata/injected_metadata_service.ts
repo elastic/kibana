@@ -22,6 +22,16 @@ import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from '../utils/deep_freeze';
 
+/** @public */
+export interface LegacyNavLink {
+  id: string;
+  title: string;
+  order: number;
+  url: string;
+  icon?: string;
+  euiIconType?: string;
+}
+
 /** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
@@ -42,7 +52,7 @@ export interface InjectedMetadataParams {
       app: unknown;
       translations: unknown;
       bundleId: string;
-      nav: unknown;
+      nav: LegacyNavLink[];
       version: string;
       branch: string;
       buildNum: number;
@@ -140,7 +150,7 @@ export interface InjectedMetadataSetup {
     app: unknown;
     translations: unknown;
     bundleId: string;
-    nav: unknown;
+    nav: LegacyNavLink[];
     version: string;
     branch: string;
     buildNum: number;

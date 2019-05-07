@@ -16,28 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Capabilities, CapabilitiesService, CapabilitiesStart } from './capabilities_service';
+import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
+import { deepFreeze } from '../../utils/deep_freeze';
+import { MixedApp } from '../application_service';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<CapabilitiesStart> = {
-    getCapabilities: jest.fn(),
-  };
-  startContract.getCapabilities.mockReturnValue({
+const createStartContractMock = (
+  apps: ReadonlyArray<MixedApp> = []
+): jest.Mocked<CapabilitiesStart> => ({
+  availableApps: apps,
+  capabilities: deepFreeze({
     catalogue: {},
     management: {},
     navLinks: {},
-  } as Capabilities);
-  return startContract;
-};
+  }),
+});
 
 type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
-const createMock = () => {
-  const mocked: jest.Mocked<CapabilitiesServiceContract> = {
-    start: jest.fn(),
-  };
-  mocked.start.mockReturnValue(createStartContractMock());
-  return mocked;
-};
+const createMock = (): jest.Mocked<CapabilitiesServiceContract> => ({
+  start: jest.fn().mockImplementation(({ apps }) => createStartContractMock(apps)),
+});
 
 export const capabilitiesServiceMock = {
   create: createMock,
