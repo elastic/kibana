@@ -31,6 +31,7 @@ const createSetupContractMock = () => {
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
   setupContract.getLegacyMetadata.mockReturnValue({
+    nav: [],
     uiSettings: {
       defaults: { legacyInjectedUiSettingDefaults: true },
       user: { legacyInjectedUiSettingUserValues: true },

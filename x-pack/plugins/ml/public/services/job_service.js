@@ -154,6 +154,18 @@ class JobService {
     });
   }
 
+  loadJobsWrapper = () => {
+    return this.loadJobs()
+      .then(function (resp) {
+        return resp;
+      })
+      .catch(function (error) {
+        console.log('Error loading jobs in route resolve.', error);
+        // Always resolve to ensure tab still works.
+        Promise.resolve([]);
+      });
+  }
+
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
       ml.getJobs({ jobId })

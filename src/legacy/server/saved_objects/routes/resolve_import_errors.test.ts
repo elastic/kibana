@@ -47,7 +47,13 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       },
     };
 
-    server.route(createResolveImportErrorsRoute(prereqs, server));
+    server.route(
+      createResolveImportErrorsRoute(prereqs, server, [
+        'index-pattern',
+        'visualization',
+        'dashboard',
+      ])
+    );
   });
 
   test('formats successful response', async () => {
