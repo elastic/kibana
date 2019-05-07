@@ -119,10 +119,12 @@ describe('ServerStatus class', function () {
     it('serializes to overall status and individuals', function () {
       const pluginOne = { id: 'one', version: '1.0.0' };
       const pluginTwo = { id: 'two', version: '2.0.0' };
+      const pluginThree = { id: 'three', version: 'kibana' };
 
       const service = serverStatus.create('some service');
       const p1 = serverStatus.createForPlugin(pluginOne);
       const p2 = serverStatus.createForPlugin(pluginTwo);
+      const p3 = serverStatus.createForPlugin(pluginThree);
 
       service.green();
       p1.yellow();
@@ -137,6 +139,7 @@ describe('ServerStatus class', function () {
       expect(out(service)).toHaveProperty('state', 'green');
       expect(out(p1)).toHaveProperty('state', 'yellow');
       expect(out(p2)).toHaveProperty('state', 'red');
+      expect(out(p3)).toHaveProperty('id', 'plugin:three@8.0.0');
     });
   });
 
