@@ -81,7 +81,7 @@ import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 // This loads Ace editor's "groovy" mode, used below to highlight the script.
-require('brace/mode/groovy');
+import 'brace/mode/groovy';
 
 export class FieldEditorComponent extends PureComponent {
   static propTypes = {
