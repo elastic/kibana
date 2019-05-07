@@ -12,7 +12,7 @@ import {
 } from '../../../../server/routes/metrics_explorer/types';
 import { useMetricsExplorerData } from '../../../containers/metrics_explorer/use_metrics_explorer_data';
 import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
-import { SourceQuery } from '../../../../common/graphql/types';
+import { SourceQuery } from '../../../graphql/types';
 
 export const useMetricsExplorerState = (
   source: SourceQuery.Query['source']['configuration'],
