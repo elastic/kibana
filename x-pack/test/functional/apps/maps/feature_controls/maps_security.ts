@@ -10,20 +10,15 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
-  const kibanaServer = getService('kibanaServer');
-  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
-      await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'c698b940-e149-11e8-a35a-370a8516603a',
-      });
     });
 
     after(async () => {
@@ -40,7 +35,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             {
               feature: {
                 maps: ['all'],
-                dashboard: ['all'],
               },
               spaces: ['*'],
             },
@@ -72,7 +66,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Dashboard', 'Maps', 'Management']);
+        expect(navLinks).to.eql(['Maps', 'Management']);
       });
 
       it(`allows a map to be created`, async () => {
@@ -88,14 +82,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`doesn't show read-only badge`, async () => {
         await globalNav.badgeMissingOrFail();
       });
-
-      it(`shows edit link for map embeddable in dashboard`, async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.openContextMenu();
-        await dashboardPanelActions.expectExistsEditPanelAction();
-      });
     });
 
     describe('global maps read-only privileges', () => {
@@ -108,7 +94,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             {
               feature: {
                 maps: ['read'],
-                dashboard: ['all'],
               },
               spaces: ['*'],
             },
@@ -139,7 +124,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Dashboard', 'Maps', 'Management']);
+        expect(navLinks).to.eql(['Maps', 'Management']);
       });
 
       it(`does not show create new button`, async () => {
@@ -168,14 +153,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         it(`can't add layer`, async () => {
           await PageObjects.maps.expectMissingAddLayerButton();
         });
-      });
-
-      it(`does not show edit link for map embeddable in dashboard`, async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.openContextMenu();
-        await dashboardPanelActions.expectMissingEditPanelAction();
       });
     });
 
