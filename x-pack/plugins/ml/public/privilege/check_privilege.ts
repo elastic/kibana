@@ -144,15 +144,15 @@ export function createPermissionFailureMessage(privilegeType: string) {
     });
   } else if (privilegeType === 'canCreateDataFrameJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.createDataFrameJobsTooltip', {
-      defaultMessage: 'You do not have permission to create Data Frame jobs.',
+      defaultMessage: 'You do not have permission to create data frame jobs.',
     });
   } else if (privilegeType === 'canStartStopDataFrameJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDataFrameJobTooltip', {
-      defaultMessage: 'You do not have permission to start or stop Data Frame jobs.',
+      defaultMessage: 'You do not have permission to start or stop data frame jobs.',
     });
   } else if (privilegeType === 'canDeleteDataFrameJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.deleteFrameJobTooltip', {
-      defaultMessage: 'You do not have permission to delete Data Frame jobs.',
+      defaultMessage: 'You do not have permission to delete data frame jobs.',
     });
   }
   return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {
