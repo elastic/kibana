@@ -50,16 +50,35 @@ describe('BarChartBaseComponent', () => {
   });
 });
 
-describe('BarChartWithCustomPrompt', () => {
+describe.each([
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+    [
+      { key: 'uniqueSourceIps', value: [{ x: null, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+    [
+      { key: 'uniqueSourceIps', value: [{ x: 0, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ x: 0, y: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+  ],
+])('BarChartWithCustomPrompt', mockBarChartData => {
   let wrapper: ReactWrapper;
-  const mockBarChartData: BarChartData[] = [
-    { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
-    {
-      key: 'uniqueDestinationIps',
-      value: [{ x: 2354, y: 'uniqueDestinationIps' }],
-      color: '#490092',
-    },
-  ];
   describe('renders barchart', () => {
     beforeAll(() => {
       wrapper = mount(
@@ -73,7 +92,20 @@ describe('BarChartWithCustomPrompt', () => {
     });
   });
 
-  describe.each([[], null])('renders prompt', (data: BarChartData[] | [] | null | undefined) => {
+  describe.each([
+    [],
+    null,
+    [
+      [
+        { key: 'uniqueSourceIps', value: [{ x: null, y: 'uniqueSourceIps' }], color: '#DB1374' },
+        {
+          key: 'uniqueDestinationIps',
+          value: [{ x: null, y: 'uniqueDestinationIps' }],
+          color: '#490092',
+        },
+      ],
+    ],
+  ])('renders prompt', (data: BarChartData[] | [] | null | undefined) => {
     beforeAll(() => {
       wrapper = mount(<BarChartWithCustomPrompt height={100} width={120} data={data} />);
     });
