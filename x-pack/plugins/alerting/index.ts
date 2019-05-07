@@ -42,8 +42,7 @@ export function alerting(kibana: any) {
       }
 
       // Encrypted attributes
-      // @ts-ignore
-      server.plugins.encrypted_saved_objects.registerType({
+      server.plugins.encrypted_saved_objects!.registerType({
         type: 'action',
         attributesToEncrypt: new Set(['connectorOptionsSecrets']),
       });
@@ -51,7 +50,6 @@ export function alerting(kibana: any) {
       const connectorService = new ConnectorService();
       const actionService = new ActionService(
         connectorService,
-        // @ts-ignore
         server.plugins.encrypted_saved_objects
       );
       const alertService = new AlertService();
