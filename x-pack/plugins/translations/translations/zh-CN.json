@@ -3298,7 +3298,6 @@
     "xpack.apm.serviceDetails.integrationsMenu.enableMLAnomalyDetectionButtonTooltip": "为此服务设置 Machine Learning 作业",
     "xpack.apm.serviceDetails.integrationsMenu.enableWatcherErrorReportsButtonLabel": "启用 Watcher 错误报告",
     "xpack.apm.serviceDetails.integrationsMenu.integrationsButtonLabel": "集成",
-    "xpack.apm.serviceDetails.integrationsMenu.viewMLJobsButtonLabel": "查看现有 ML 作业",
     "xpack.apm.serviceDetails.integrationsMenu.viewWatchesButtonLabel": "查看现有监视",
     "xpack.apm.serviceDetails.metrics.cpuUsageChartTitle": "CPU 使用",
     "xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle": "错误发生次数",
