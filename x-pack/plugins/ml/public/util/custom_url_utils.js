@@ -63,7 +63,7 @@ export function getUrlForRecord(urlConfig, record) {
 
 // Returns whether the url_value of the supplied config is for
 // a Kibana page running on the same server as this ML plugin.
-function isKibanaUrl(urlConfig) {
+export function isKibanaUrl(urlConfig) {
   const urlValue = urlConfig.url_value;
   return urlValue.startsWith('kibana#/discover') || urlValue.startsWith('kibana#/dashboard');
 }
