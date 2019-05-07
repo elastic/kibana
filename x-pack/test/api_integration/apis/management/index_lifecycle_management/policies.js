@@ -6,23 +6,33 @@
 
 import expect from '@kbn/expect';
 
-import { registerHelpers } from './policies.helpers';
+import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
+import { registerHelpers as registerIndexHelpers } from './indices.helpers';
 import { getPolicyPayload } from './fixtures';
-import { getPolicyNames } from './lib';
+import { initElasticsearchIndicesHelpers, getPolicyNames } from './lib';
 import { DEFAULT_POLICY_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
+  const es = getService('es');
+
+  const {
+    createIndex,
+    cleanUp: cleanUpEsResources
+  } = initElasticsearchIndicesHelpers(es);
+
   const {
     loadPolicies,
     createPolicy,
     deletePolicy,
-    cleanUp,
-  } = registerHelpers({ supertest });
+    cleanUp: cleanUpPolicies,
+  } = registerPoliciesHelpers({ supertest });
+
+  const { addPolicyToIndex } = registerIndexHelpers({ supertest });
 
   describe('policies', () => {
-    after(() => cleanUp());
+    after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
@@ -50,9 +60,20 @@ export default function ({ getService }) {
         });
       });
 
-      it('should add the indices linked to the policies', () => {
-        // TODO: when attaching indices to policy is done
-        // Check todo HERE
+      it('should add the indices linked to the policies', async () => {
+        // Create a policy
+        const policy = getPolicyPayload();
+        const { name: policyName } = policy;
+        await createPolicy(policy);
+
+        // Create a new index
+        const indexName = await createIndex();
+
+        await addPolicyToIndex(policyName, indexName);
+
+        const { body } = await loadPolicies(true);
+        const fetchedPolicy = body.find(p => p.name === policyName);
+        expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
       });
     });
 

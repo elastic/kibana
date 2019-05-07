@@ -9,7 +9,9 @@ import { getPolicyPayload } from './fixtures';
 import { getPolicyNames } from './lib';
 
 export const registerHelpers = ({ supertest }) => {
-  const loadPolicies = () => supertest.get(`${API_BASE_PATH}/policies`);
+  const loadPolicies = (withIndices = false) => withIndices
+    ? supertest.get(`${API_BASE_PATH}/policies?withIndices=true`)
+    : supertest.get(`${API_BASE_PATH}/policies`);
 
   const createPolicy = (policy = getPolicyPayload()) => {
     return supertest
