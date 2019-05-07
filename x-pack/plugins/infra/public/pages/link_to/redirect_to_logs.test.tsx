@@ -21,7 +21,7 @@ describe('RedirectToLogs component', () => {
     expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
 />
 `);
   });
@@ -37,13 +37,14 @@ describe('RedirectToLogs component', () => {
     expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
 />
 `);
   });
 });
 
 const testSourceChildArgs = {
+  sourceId: 'default',
   configuration: {
     fields: {
       container: 'CONTAINER_FIELD',

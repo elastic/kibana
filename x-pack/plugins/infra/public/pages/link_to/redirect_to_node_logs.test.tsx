@@ -21,7 +21,7 @@ describe('RedirectToNodeLogs component', () => {
     expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
+  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=default"
 />
 `);
   });
@@ -35,7 +35,7 @@ describe('RedirectToNodeLogs component', () => {
     expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)"
+  to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)&sourceId=default"
 />
 `);
   });
@@ -49,7 +49,7 @@ describe('RedirectToNodeLogs component', () => {
     expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)"
+  to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)&sourceId=default"
 />
 `);
   });
@@ -65,7 +65,7 @@ describe('RedirectToNodeLogs component', () => {
     expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
 />
 `);
   });
@@ -83,13 +83,14 @@ describe('RedirectToNodeLogs component', () => {
     expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
 />
 `);
   });
 });
 
 const testSourceChildArgs = {
+  sourceId: 'default',
   configuration: {
     fields: {
       container: 'CONTAINER_FIELD',
