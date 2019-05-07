@@ -128,7 +128,7 @@ export class StartTrial extends React.PureComponent {
                     <FormattedMessage
                       id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityFeaturesConfigurationDescription"
                       defaultMessage="Advanced security features, such as authentication ({authenticationTypeList}),
-                      field- and document- level security, and auditing, require configuration.
+                      field- and document-level security, and auditing, require configuration.
                       See the {securityDocumentationLinkText} for instructions."
                       values={{
                         authenticationTypeList: 'AD/LDAP, SAML, PKI, SAML/SSO',
