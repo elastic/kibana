@@ -57,8 +57,7 @@ class GaugePanelConfigUi extends Component {
     super(props);
     this.state = {
       selectedTab: 'data',
-      indexPatternForQuery: {},
-      uiQueryLanguage: uiSettingsQueryLanguage,
+      indexPatternForQuery: {}
     };
   }
 

@@ -39,6 +39,9 @@ class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
+    this.state = {
+      uiQuerylanguage: uiSettingsQueryLanguage,
+    };
   }
 
   handleChange(item, name) {
