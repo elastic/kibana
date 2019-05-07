@@ -39,7 +39,7 @@ import {
   NotificationServiceConstructor,
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
-  MockCapabilitiesService,
+  MockApplicationService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -155,6 +155,11 @@ describe('#setup()', () => {
     return core.setup();
   }
 
+  it('calls application#setup()', async () => {
+    await setupCore();
+    expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls injectedMetadata#setup()', async () => {
     await setupCore();
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
@@ -219,9 +224,9 @@ describe('#start()', () => {
     expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
   });
 
-  it('calls capabilities#start()', async () => {
+  it('calls application#start()', async () => {
     await startCore();
-    expect(MockCapabilitiesService.start).toHaveBeenCalledTimes(1);
+    expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {
