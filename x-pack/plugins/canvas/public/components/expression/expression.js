@@ -35,6 +35,7 @@ const shortcut = (cmd, callback) => (
     }}
     targetNodeSelector="body"
     global
+    stopPropagation
   />
 );
 
