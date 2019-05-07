@@ -14,15 +14,12 @@ interface FeatureCapabilities {
   [featureId: string]: Record<string, boolean>;
 }
 
-export function populateUICapabilities(
-  xpackMainPlugin: Record<string, any>,
-  uiCapabilities: UICapabilities
-): UICapabilities {
+export function uiCapabilitiesForFeatures(xpackMainPlugin: Record<string, any>): UICapabilities {
   const features: Feature[] = xpackMainPlugin.getFeatures();
 
   const featureCapabilities: FeatureCapabilities[] = features.map(getCapabilitiesFromFeature);
 
-  return mergeCapabilities(uiCapabilities || {}, ...featureCapabilities);
+  return buildCapabilities(...featureCapabilities);
 }
 
 function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
@@ -60,25 +57,28 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
   return UIFeatureCapabilities;
 }
 
-function mergeCapabilities(
-  originalCapabilities: UICapabilities,
-  ...allFeatureCapabilities: FeatureCapabilities[]
-): UICapabilities {
-  return allFeatureCapabilities.reduce<UICapabilities>((acc, capabilities) => {
-    const mergableCapabilities: UICapabilities = _.omit(capabilities, ...ELIGIBLE_FLAT_MERGE_KEYS);
+function buildCapabilities(...allFeatureCapabilities: FeatureCapabilities[]): UICapabilities {
+  return allFeatureCapabilities.reduce<UICapabilities>(
+    (acc, capabilities) => {
+      const mergableCapabilities: UICapabilities = _.omit(
+        capabilities,
+        ...ELIGIBLE_FLAT_MERGE_KEYS
+      );
 
-    const mergedFeatureCapabilities = {
-      ...mergableCapabilities,
-      ...acc,
-    };
-
-    ELIGIBLE_FLAT_MERGE_KEYS.forEach(key => {
-      mergedFeatureCapabilities[key] = {
-        ...mergedFeatureCapabilities[key],
-        ...capabilities[key],
+      const mergedFeatureCapabilities = {
+        ...mergableCapabilities,
+        ...acc,
       };
-    });
 
-    return mergedFeatureCapabilities;
-  }, originalCapabilities);
+      ELIGIBLE_FLAT_MERGE_KEYS.forEach(key => {
+        mergedFeatureCapabilities[key] = {
+          ...mergedFeatureCapabilities[key],
+          ...capabilities[key],
+        };
+      });
+
+      return mergedFeatureCapabilities;
+    },
+    {} as UICapabilities
+  );
 }
