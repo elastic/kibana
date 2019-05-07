@@ -99,32 +99,7 @@ export class JiraAction extends BaseAction {
       json.jira = {};
     }
 
-    if (!json.jira.fields) {
-      errors.push({
-        code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraFieldsPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonJiraFieldsKey} property',
-          values: {
-            actionJsonJiraProjectKey: 'actionJson.jira.fields'
-          }
-        }),
-      });
-      return { errors };
-    }
-
-    if (!json.jira.fields.project) {
-      errors.push({
-        code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraProjectPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonJiraProject} property',
-          values: {
-            actionJsonJiraProject: 'actionJson.jira.fields.project'
-          }
-        }),
-      });
-    }
-
-    if (json.jira.fields.project && !json.jira.fields.project.key) {
+    if (!get(json, 'jira.fields.project.key')) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraProjectKeyPropertyMissingBadRequestMessage', {
@@ -136,19 +111,7 @@ export class JiraAction extends BaseAction {
       });
     }
 
-    if (!json.jira.fields.issuetype) {
-      errors.push({
-        code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraIssueTypePropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonJiraIssueTypeKey} property',
-          values: {
-            actionJsonJiraIssueTypeKey: 'actionJson.jira.fields.issuetype'
-          }
-        }),
-      });
-    }
-
-    if (json.jira.fields.issuetype && !json.jira.fields.issuetype.name) {
+    if (!get(json, 'jira.fields.issuetype.name')) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraIssueTypePropertyMissingBadRequestMessage', {
