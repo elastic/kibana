@@ -13,7 +13,7 @@ export const registerHelpers = ({ supertest }) => {
 
   const createPolicy = (policy = getPolicyPayload()) => {
     return supertest
-      .post(`${API_BASE_PATH}/lifecycle`)
+      .post(`${API_BASE_PATH}/policies`)
       .set('kbn-xsrf', 'xxx')
       .send(policy);
   };

@@ -69,7 +69,7 @@ export default function ({ getService }) {
       it('should add a policy to a template', async () => {
         // Create policy
         const policy = getPolicyPayload();
-        const { lifecycle: { name: policyName } } = policy;
+        const { name: policyName } = policy;
         await createPolicy(policy);
 
         // Create template

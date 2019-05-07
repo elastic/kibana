@@ -52,13 +52,14 @@ export default function ({ getService }) {
 
       it('should add the indices linked to the policies', () => {
         // TODO: when attaching indices to policy is done
+        // Check todo HERE
       });
     });
 
     describe('create', () => {
       it('should create a lifecycle policy', async () => {
         const policy = getPolicyPayload();
-        const { lifecycle: { name } } = policy;
+        const { name } = policy;
 
         // Load current policies
         const { body: bodyFirstLoad } = await loadPolicies();
@@ -67,7 +68,7 @@ export default function ({ getService }) {
         // Create new policy
         await createPolicy(policy).expect(200);
 
-        // Load current policies
+        // Make sure the new policy is returned
         const { body: bodySecondLoad } = await loadPolicies();
         expect(getPolicyNames(bodySecondLoad)).to.contain(name);
       });
@@ -76,7 +77,7 @@ export default function ({ getService }) {
     describe('delete', () => {
       it('should delete the policy created', async () => {
         const policy = getPolicyPayload();
-        const { lifecycle: { name } } = policy;
+        const { name } = policy;
 
         // Create new policy
         await createPolicy(policy);

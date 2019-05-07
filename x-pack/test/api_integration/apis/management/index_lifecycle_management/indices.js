@@ -38,7 +38,7 @@ export default function ({ getService }) {
       it('should add a lifecycle policy to the index', async () => {
         // Create a policy
         const policy = getPolicyPayload();
-        const { lifecycle: { name: policyName } } = policy;
+        const { name: policyName } = policy;
         await createPolicy(policy);
 
         // Create a new index
@@ -57,7 +57,7 @@ export default function ({ getService }) {
       it('should remove a lifecycle policy from an index', async () => {
         // Create a policy
         const policy = getPolicyPayload();
-        const { lifecycle: { name: policyName } } = policy;
+        const { name: policyName } = policy;
         await createPolicy(policy);
 
         // Create a new index

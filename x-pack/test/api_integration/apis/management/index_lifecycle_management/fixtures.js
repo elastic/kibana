@@ -8,40 +8,38 @@ import { getRandomString } from './lib';
 import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
 
 export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
-  lifecycle: {
-    name: name,
-    phases: {
-      hot: {
-        actions: {
-          rollover: {
-            max_age: '30d',
-            max_size: '50gb'
-          },
-          set_priority: {
-            priority: 100
-          }
+  name,
+  phases: {
+    hot: {
+      actions: {
+        rollover: {
+          max_age: '30d',
+          max_size: '50gb'
+        },
+        set_priority: {
+          priority: 100
         }
-      },
-      warm: {
-        actions: {
-          set_priority: {
-            priority: 50
-          }
+      }
+    },
+    warm: {
+      actions: {
+        set_priority: {
+          priority: 50
         }
-      },
-      cold: {
-        min_age: '10d',
-        actions: {
-          set_priority: {
-            priority: 0
-          }
+      }
+    },
+    cold: {
+      min_age: '10d',
+      actions: {
+        set_priority: {
+          priority: 0
         }
-      },
-      delete: {
-        min_age: '10d',
-        actions: {
-          delete: {}
-        }
+      }
+    },
+    delete: {
+      min_age: '10d',
+      actions: {
+        delete: {}
       }
     }
   }
