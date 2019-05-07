@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
   ElasticsearchServiceSetup,
 } from 'src/core/server';
+import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
 // @ts-ignore
@@ -31,6 +32,8 @@ import { SpacesService } from './spaces_service';
 import { SecurityPlugin } from '../../../security';
 import { SpacesServiceSetup } from './spaces_service/spaces_service';
 import { SpacesConfig } from './config';
+import { getActiveSpace } from '../lib/get_active_space';
+import { toggleUICapabilities } from '../lib/toggle_ui_capabilities';
 
 export interface SpacesHttpServiceSetup extends HttpServiceSetup {
   route(route: ServerRoute | ServerRoute[]): void;
@@ -46,6 +49,9 @@ export interface SpacesCoreSetup {
   };
   tutorial: {
     addScopedTutorialContextFactory: (factory: any) => void;
+  };
+  capabilities: {
+    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
   };
   // TODO: Required for shared AuditLogger base class
   legacyServer: Legacy.Server;
@@ -125,6 +131,22 @@ export class Plugin {
       createSpacesTutorialContextFactory(spacesService)
     );
 
+    core.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
+      const spacesClient = spacesService.scopedClient(request);
+      try {
+        const activeSpace = await getActiveSpace(
+          spacesClient,
+          request.getBasePath(),
+          this.initializerContext.legacyConfig.get('server.basePath')
+        );
+
+        const features = plugins.xpackMain.getFeatures();
+        return toggleUICapabilities(features, uiCapabilities, activeSpace);
+      } catch (e) {
+        return uiCapabilities;
+      }
+    });
+
     initPrivateApis({
       http: core.http,
       config: this.initializerContext.legacyConfig,
@@ -145,7 +167,6 @@ export class Plugin {
     core.usage.collectorSet.register(
       getSpacesUsageCollector({
         config: this.initializerContext.legacyConfig,
-        savedObjects: core.savedObjects,
         usage: core.usage,
         xpackMain: xpackMainPlugin,
       })

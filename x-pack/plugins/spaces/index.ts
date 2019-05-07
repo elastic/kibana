@@ -17,7 +17,6 @@ import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
-import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { plugin } from './server/new_platform';
 import {
   SpacesInitializerContext,
@@ -26,7 +25,6 @@ import {
 } from './server/new_platform/plugin';
 import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
 import { SpacesConfig } from './server/new_platform/config';
-
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
@@ -144,6 +142,9 @@ export const spaces = (kibana: Record<string, any>) =>
         tutorial: {
           addScopedTutorialContextFactory: (server as any).addScopedTutorialContextFactory,
         },
+        capabilities: {
+          registerCapabilitiesModifier: server.registerCapabilitiesModifier,
+        },
         legacyServer: server,
       };
 
@@ -167,21 +168,5 @@ export const spaces = (kibana: Record<string, any>) =>
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
       server.expose('spacesClient', spacesService);
-
-      server.registerCapabilitiesModifier(async (request, uiCapabilities) => {
-        const spacesClient = spacesService.scopedClient(request);
-        try {
-          const activeSpace = await getActiveSpace(
-            spacesClient,
-            request.getBasePath(),
-            initializerContext.legacyConfig.get('server.basePath')
-          );
-
-          const features = plugins.xpackMain.getFeatures();
-          return toggleUICapabilities(features, uiCapabilities, activeSpace);
-        } catch (e) {
-          return uiCapabilities;
-        }
-      });
     },
   });
