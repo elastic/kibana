@@ -5,7 +5,7 @@
  */
 import { AggregationSearchResponse } from 'elasticsearch';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ChartBase, MetricsAggs, MetricsKeys } from './types';
+import { ChartBase, MetricsAggs, MetricSeriesKeys } from './types';
 
 const colors = [
   theme.euiColorVis0,
@@ -18,7 +18,7 @@ const colors = [
 ];
 
 export type GenericMetricsChart = ReturnType<typeof transformDataToChart>;
-export function transformDataToChart<T extends MetricsKeys>(
+export function transformDataToChart<T extends MetricSeriesKeys>(
   result: AggregationSearchResponse<void, MetricsAggs<T>>,
   chartBase: ChartBase<T>
 ) {

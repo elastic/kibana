@@ -10,11 +10,11 @@ export interface AggValue {
   value: number | null;
 }
 
-export interface MetricsKeys {
+export interface MetricSeriesKeys {
   [key: string]: AggValue;
 }
 
-export interface ChartBase<T extends MetricsKeys> {
+export interface ChartBase<T extends MetricSeriesKeys> {
   title: string;
   key: string;
   type: ChartType;
@@ -27,7 +27,7 @@ export interface ChartBase<T extends MetricsKeys> {
   };
 }
 
-export type MetricsAggs<T extends MetricsKeys> = {
+export type MetricsAggs<T extends MetricSeriesKeys> = {
   timeseriesData: {
     buckets: Array<
       {

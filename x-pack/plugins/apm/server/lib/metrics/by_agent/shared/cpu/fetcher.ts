@@ -12,11 +12,11 @@ import {
   SERVICE_NAME
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../helpers/setup_request';
-import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
+import { MetricsAggs, MetricSeriesKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { rangeFilter } from '../../../../helpers/range_filter';
 
-export interface CPUMetrics extends MetricsKeys {
+export interface CPUMetrics extends MetricSeriesKeys {
   systemCPUAverage: AggValue;
   systemCPUMax: AggValue;
   processCPUAverage: AggValue;

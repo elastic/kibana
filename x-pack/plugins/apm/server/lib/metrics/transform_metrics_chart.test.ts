@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AggregationSearchResponse } from 'elasticsearch';
-import { MetricsAggs, MetricsKeys, AggValue } from './types';
+import { MetricsAggs, MetricSeriesKeys, AggValue } from './types';
 import { transformDataToChart } from './transform_metrics_chart';
 import { ChartType, YUnit } from '../../../typings/timeseries';
 
 test('transformDataToChart should transform an ES result into a chart object', () => {
-  interface TestKeys extends MetricsKeys {
+  interface TestKeys extends MetricSeriesKeys {
     a: AggValue;
     b: AggValue;
     c: AggValue;

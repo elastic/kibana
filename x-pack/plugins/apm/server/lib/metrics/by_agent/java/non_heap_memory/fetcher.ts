@@ -13,11 +13,11 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_USED
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../helpers/setup_request';
-import { MetricsAggs, MetricsKeys, AggValue } from '../../../types';
+import { MetricsAggs, MetricSeriesKeys, AggValue } from '../../../types';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { rangeFilter } from '../../../../helpers/range_filter';
 
-export interface NonHeapMemoryMetrics extends MetricsKeys {
+export interface NonHeapMemoryMetrics extends MetricSeriesKeys {
   nonHeapMemoryMax: AggValue;
   nonHeapMemoryCommitted: AggValue;
   nonHeapMemoryUsed: AggValue;
