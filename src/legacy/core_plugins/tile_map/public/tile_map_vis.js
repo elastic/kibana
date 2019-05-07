@@ -48,7 +48,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
       defaults: {
         colorSchema: 'Yellow to Red',
         mapType: 'Scaled Circle Markers',
-        isDesaturated: true,
+        isDesaturated: false, // Client side desaturation is deprecated in 7.2
         addTooltip: true,
         heatClusterSize: 1.5,
         legendPosition: 'bottomright',
