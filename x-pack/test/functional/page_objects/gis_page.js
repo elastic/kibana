@@ -95,8 +95,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayerDeleted(layerName) {
       log.debug('Wait for layer deleted');
-      await retry.try(async () => {
-        await !this.doesLayerExist(layerName);
+      await retry.waitFor('Layer to be deleted', async () => {
+        const doesLayerExist = await this.doesLayerExist(layerName);
+        return !doesLayerExist;
       });
     }
 
@@ -337,6 +338,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
       await testSubjects.click(`mapRemoveLayerButton`);
+      await this.waitForLayerDeleted(layerName);
     }
 
     async getLayerErrorText(layerName) {
