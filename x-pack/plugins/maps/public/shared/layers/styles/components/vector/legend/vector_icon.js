@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { dynamicColorShape, staticColorShape } from '../style_option_shapes';
-import { FillableCircle, FillableVector } from '../../../../../icons/additional_layer_icons';
+import { FillableCircle, FillableRectangle } from '../../../../../icons/additional_layer_icons';
 import { VectorStyle } from '../../../vector_style';
 import { getColorRampCenterColor } from '../../../../../utils/color_utils';
 
@@ -21,7 +21,7 @@ export function VectorIcon({ fillColor, lineColor, isPointsOnly }) {
 
   return isPointsOnly
     ? <FillableCircle style={style}/>
-    : <FillableVector style={style}/>;
+    : <FillableRectangle style={style}/>;
 }
 
 function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
