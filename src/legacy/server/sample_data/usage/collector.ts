@@ -36,6 +36,7 @@ export function makeSampleDataUsageCollector(server: KbnServer) {
     server.usage.collectorSet.makeUsageCollector({
       type: 'sample-data',
       fetch: fetchProvider(index),
+      isReady: () => true,
     })
   );
 }

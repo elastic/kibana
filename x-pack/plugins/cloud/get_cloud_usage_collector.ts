@@ -37,6 +37,7 @@ export function getCloudUsageCollector(server: KibanaHapiServer) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_CLOUD_STATS_TYPE,
+    isReady: () => true,
     fetch: createCollectorFetch(server),
   });
 }

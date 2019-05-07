@@ -73,6 +73,20 @@ export class CollectorSet {
     return x instanceof UsageCollector;
   }
 
+  async areAllCollectorsReady(collectorSet = this) {
+    if (!(collectorSet instanceof CollectorSet)) {
+      throw new Error(`areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet);
+    }
+
+    let allReady = true;
+    await collectorSet.asyncEach(async collector => {
+      if (!await collector.isReady()) {
+        allReady = false;
+      }
+    });
+    return allReady;
+  }
+
   /*
    * Call a bunch of fetch methods and then do them in bulk
    * @param {CollectorSet} collectorSet - a set of collectors to fetch. Default to all registered collectors
@@ -154,5 +168,15 @@ export class CollectorSet {
 
   map(mapFn) {
     return this._collectors.map(mapFn);
+  }
+
+  some(someFn) {
+    return this._collectors.some(someFn);
+  }
+
+  async asyncEach(eachFn) {
+    for (const collector of this._collectors) {
+      await eachFn(collector);
+    }
   }
 }

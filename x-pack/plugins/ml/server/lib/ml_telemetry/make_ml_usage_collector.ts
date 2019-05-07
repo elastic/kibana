@@ -27,6 +27,7 @@ interface KibanaHapiServer extends Server {
 export function makeMlUsageCollector(server: KibanaHapiServer): void {
   const mlUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'ml',
+    isReady: () => true,
     fetch: async (): Promise<MlTelemetry> => {
       try {
         const savedObjectsClient = getSavedObjectsClient(server);

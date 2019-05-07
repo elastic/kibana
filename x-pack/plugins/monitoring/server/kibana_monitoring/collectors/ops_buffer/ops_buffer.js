@@ -29,6 +29,12 @@ export function opsBuffer(server) {
       server.log(['debug', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG], 'Received Kibana Ops event data');
     },
 
+    hasEvents() {
+      const hasEvents = eventRoller.hasEvents();
+      console.log({ hasEvents });
+      return hasEvents;
+    },
+
     async flush() {
       let cloud; // a property that will be left out of the result if the details are undefined
       const cloudDetails = cloudDetector.getCloudDetails();

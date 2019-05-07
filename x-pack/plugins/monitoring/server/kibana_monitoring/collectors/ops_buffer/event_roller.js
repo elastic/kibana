@@ -22,6 +22,10 @@ export class EventRoller {
     return get(this.rollup, path);
   }
 
+  hasEvents() {
+    return this.rollup !== null;
+  }
+
   rollupEvent(event) {
     const heapStats = v8.getHeapStatistics();
     const requests = mapRequests(event.requests);

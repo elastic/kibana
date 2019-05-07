@@ -48,6 +48,7 @@ export function getLocalizationUsageCollector(server: any) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_LOCALIZATION_STATS_TYPE,
+    isReady: () => true,
     fetch: createCollectorFetch(server),
   });
 }
