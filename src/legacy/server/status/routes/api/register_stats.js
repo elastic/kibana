@@ -22,6 +22,8 @@ import boom, { boomify } from 'boom';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
 
+const STATS_NOT_READY_MESSAGE = 'Stats are not ready yet. Please try again later.';
+
 /*
  * API for Kibana meta info and accumulated operations stats
  * Including ?extended in the query string fetches Elasticsearch cluster_uuid and server.usage.collectorSet data
@@ -72,7 +74,7 @@ export function registerStatsApi(kbnServer, server, config) {
           const collectorsReady = await collectorSet.areAllCollectorsReady();
 
           if (shouldGetUsage && !collectorsReady) {
-            return boom.serverUnavailable('Not all collectors are ready.');
+            return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
           }
 
           const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve();
@@ -137,7 +139,7 @@ export function registerStatsApi(kbnServer, server, config) {
          * from ES */
         const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
         if (!await kibanaStatsCollector.isReady()) {
-          return boom.serverUnavailable('Not all collectors are ready.');
+          return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
         }
         let kibanaStats = await kibanaStatsCollector.fetch();
         kibanaStats = collectorSet.toApiFieldNames(kibanaStats);

@@ -49,7 +49,7 @@ export class Collector {
 
     const defaultFormatterForBulkUpload = result => ({ type, payload: result });
     this._formatForBulkUpload = formatForBulkUpload || defaultFormatterForBulkUpload;
-    if (isReady) {
+    if (typeof isReady === 'function') {
       this.isReady = isReady;
     }
   }
