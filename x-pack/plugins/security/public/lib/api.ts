@@ -29,16 +29,10 @@ export class UserAPIClient {
     await kfetch({ pathname: url, method: 'DELETE' }, {});
   }
 
-  public async saveUser(user: EditUser, isNewUser: boolean) {
+  public async saveUser(user: EditUser) {
     const url = `${usersUrl}/${encodeURIComponent(user.username)}`;
-    const saveUserData: Record<string, any> = {
-      ...user,
-    };
-    if (!isNewUser) {
-      delete saveUserData.password;
-    }
-    delete saveUserData.confirmPassword;
-    await kfetch({ pathname: url, body: JSON.stringify(saveUserData), method: 'POST' });
+
+    await kfetch({ pathname: url, body: JSON.stringify(user), method: 'POST' });
   }
 
   public async getRoles(): Promise<Role[]> {

@@ -149,11 +149,15 @@ class EditUserPageUI extends Component<Props, State> {
       const { changeUrl, apiClient } = this.props;
       const { user, isNewUser, selectedRoles } = this.state;
       const userToSave: EditUser = { ...user };
+      if (!isNewUser) {
+        delete userToSave.password;
+      }
+      delete userToSave.confirmPassword;
       userToSave.roles = selectedRoles.map(selectedRole => {
         return selectedRole.label;
       });
       try {
-        await apiClient.saveUser(userToSave, isNewUser);
+        await apiClient.saveUser(userToSave);
         toastNotifications.addSuccess(
           this.props.intl.formatMessage(
             {
