@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Resizeable it renders 1`] = `
+<Component>
+  <Resizeable
+    handle={
+      <Styled(styled.div)
+        data-test-subj="test-resize-handle"
+      />
+    }
+    height="100%"
+    id="test"
+    onResize={[MockFunction]}
+    render={[Function]}
+  />
+</Component>
+`;

@@ -21,128 +21,131 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
   const log = getService('log');
   const security = getService('security');
 
-  describe('with security enabled:', () => {
-    before(async () => {
-      await esArchiver.load('empty_kibana');
-      await security.role.create('global_code_all_role', {
-        elasticsearch: {
-          indices: [],
-        },
-        kibana: [
-          {
-            feature: {
-              code: ['all'],
-            },
-            spaces: ['*'],
+  describe('Security', () => {
+    describe('with security enabled:', () => {
+      before(async () => {
+        await esArchiver.load('empty_kibana');
+        await security.role.create('global_code_all_role', {
+          elasticsearch: {
+            indices: [],
           },
-        ],
-      });
-
-      await security.user.create(codeAdmin, {
-        password: dummyPassword,
-        roles: ['global_code_all_role'],
-        full_name: 'code admin',
-      });
-
-      await security.role.create('global_code_read_role', {
-        elasticsearch: {
-          indices: [],
-        },
-        kibana: [
-          {
-            feature: {
-              code: ['read'],
+          kibana: [
+            {
+              feature: {
+                code: ['all'],
+              },
+              spaces: ['*'],
             },
-            spaces: ['*'],
+          ],
+        });
+
+        await security.user.create(codeAdmin, {
+          password: dummyPassword,
+          roles: ['global_code_all_role'],
+          full_name: 'code admin',
+        });
+
+        await security.role.create('global_code_read_role', {
+          elasticsearch: {
+            indices: [],
           },
-        ],
+          kibana: [
+            {
+              feature: {
+                code: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create(codeUser, {
+          password: dummyPassword,
+          roles: ['global_code_read_role'],
+          full_name: 'code user',
+        });
       });
 
-      await security.user.create(codeUser, {
-        password: dummyPassword,
-        roles: ['global_code_read_role'],
-        full_name: 'code user',
-      });
-    });
+      async function login(user: string) {
+        await PageObjects.security.logout();
+        await PageObjects.security.login(user, dummyPassword);
+        await PageObjects.common.navigateToApp('code');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      }
 
-    async function login(user: string) {
-      await PageObjects.security.logout();
-      await PageObjects.security.login(user, dummyPassword);
-      await PageObjects.common.navigateToApp('code');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    it('codeAdmin should have an import button', async () => {
-      await login(codeAdmin);
-      await retry.tryForTime(5000, async () => {
-        const buttons = await testSubjects.findAll('importRepositoryButton');
-        expect(buttons).to.have.length(1);
-      });
-    });
-    it('codeUser should not have that import button', async () => {
-      await login(codeUser);
-      await retry.tryForTime(5000, async () => {
-        const buttons = await testSubjects.findAll('importRepositoryButton');
-        expect(buttons).to.have.length(0);
-      });
-    });
-
-    it('only codeAdmin can manage repositories', async () => {
-      await login(codeAdmin);
-      await retry.tryForTime(5000, async () => {
-        const buttons = await testSubjects.findAll('importRepositoryButton');
-        expect(buttons).to.have.length(1);
-      });
-      await PageObjects.code.fillImportRepositoryUrlInputBox(
-        'https://github.com/Microsoft/TypeScript-Node-Starter'
-      );
-      // Click the import repository button.
-      await PageObjects.code.clickImportRepositoryButton();
-
-      await retry.tryForTime(300000, async () => {
-        const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-        expect(repositoryItems).to.have.length(1);
-        for (const buttonSelector of manageButtonSelectors) {
-          const buttons = await testSubjects.findAll(buttonSelector);
+      it('codeAdmin should have an import button', async () => {
+        await login(codeAdmin);
+        await retry.tryForTime(5000, async () => {
+          const buttons = await testSubjects.findAll('importRepositoryButton');
           expect(buttons).to.have.length(1);
-          log.debug(`button ${buttonSelector} found.`);
-        }
-        const importButton = await testSubjects.findAll('newProjectButton');
-        expect(importButton).to.have.length(1);
-        log.debug(`button newProjectButton found.`);
+        });
       });
-
-      await login(codeUser);
-      await retry.tryForTime(5000, async () => {
-        const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-        expect(repositoryItems).to.have.length(1);
-        for (const buttonSelector of manageButtonSelectors) {
-          const buttons = await testSubjects.findAll(buttonSelector);
+      it('codeUser should not have that import button', async () => {
+        await login(codeUser);
+        await retry.tryForTime(5000, async () => {
+          const buttons = await testSubjects.findAll('importRepositoryButton');
           expect(buttons).to.have.length(0);
-        }
-        const importButton = await testSubjects.findAll('newProjectButton');
-        expect(importButton).to.have.length(0);
+        });
       });
-    });
-    async function cleanProjects() {
-      // remove imported project
-      await login(codeAdmin);
-      await retry.tryForTime(30000, async () => {
-        const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-        if (repositoryItems.length > 0) {
-          const deleteButton = await testSubjects.findAll('deleteRepositoryButton');
-          if (deleteButton.length > 0) {
-            await PageObjects.code.clickDeleteRepositoryButton();
-          }
-        }
-        expect(repositoryItems).to.have.length(0);
-      });
-    }
 
-    after(async () => {
-      await cleanProjects();
-      await PageObjects.security.logout();
-      await esArchiver.unload('code');
+      it('only codeAdmin can manage repositories', async () => {
+        await login(codeAdmin);
+        await retry.tryForTime(5000, async () => {
+          const buttons = await testSubjects.findAll('importRepositoryButton');
+          expect(buttons).to.have.length(1);
+        });
+        await PageObjects.code.fillImportRepositoryUrlInputBox(
+          'https://github.com/Microsoft/TypeScript-Node-Starter'
+        );
+        // Click the import repository button.
+        await PageObjects.code.clickImportRepositoryButton();
+
+        await retry.tryForTime(300000, async () => {
+          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
+          expect(repositoryItems).to.have.length(1);
+          for (const buttonSelector of manageButtonSelectors) {
+            const buttons = await testSubjects.findAll(buttonSelector);
+            expect(buttons).to.have.length(1);
+            log.debug(`button ${buttonSelector} found.`);
+          }
+          const importButton = await testSubjects.findAll('newProjectButton');
+          expect(importButton).to.have.length(1);
+          log.debug(`button newProjectButton found.`);
+        });
+
+        await login(codeUser);
+        await retry.tryForTime(5000, async () => {
+          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
+          expect(repositoryItems).to.have.length(1);
+          for (const buttonSelector of manageButtonSelectors) {
+            const buttons = await testSubjects.findAll(buttonSelector);
+            expect(buttons).to.have.length(0);
+          }
+          const importButton = await testSubjects.findAll('newProjectButton');
+          expect(importButton).to.have.length(0);
+        });
+      });
+
+      async function cleanProjects() {
+        // remove imported project
+        await login(codeAdmin);
+        await retry.tryForTime(300000, async () => {
+          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
+          if (repositoryItems.length > 0) {
+            const deleteButton = await testSubjects.findAll('deleteRepositoryButton');
+            if (deleteButton.length > 0) {
+              await PageObjects.code.clickDeleteRepositoryButton();
+            }
+          }
+          expect(repositoryItems).to.have.length(0);
+        });
+      }
+
+      after(async () => {
+        await cleanProjects();
+        await PageObjects.security.logout();
+        await esArchiver.unload('code');
+      });
     });
   });
 }
