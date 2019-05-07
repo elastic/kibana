@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import * as Rx from 'rxjs';
 import { onlyDisabled } from './lib/only_disabled';
 import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';
@@ -26,11 +27,29 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-import chrome from 'ui/chrome';
-const config = chrome.getUiSettingsClient();
+import { getNewPlatform } from 'ui/new_platform';
 
 export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState) {
   const queryFilter = {};
+
+  // ui settings handling
+  const uiSettingsClient = getNewPlatform().setup.core.uiSettings;
+  const pinnedByDefault$ = uiSettingsClient.get$('filters:pinnedByDefault');
+  let pinnedByDefault;
+  pinnedByDefault$.subscribe((newValue) => {
+    pinnedByDefault = newValue;
+  });
+
+  const update$ = new Rx.Subject();
+  const fetch$ = new Rx.Subject();
+
+  queryFilter.getUpdates$ = function () {
+    return update$.asObservable();
+  };
+
+  queryFilter.getFetches$ = function () {
+    return fetch$.asObservable();
+  };
 
   queryFilter.getFilters = function () {
     const compareOptions = { disabled: true, negate: true };
@@ -65,18 +84,14 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
    * @param {bool} global Whether the filter should be added to global state
    * @returns {Promise} filter map promise
    */
-  queryFilter.addFilters = function (filters, global) {
-    if (global === undefined) {
-      const configDefault = config.get('filters:pinnedByDefault');
-
-      if (configDefault === false || configDefault === true) {
-        global = configDefault;
-      }
+  queryFilter.addFilters = function (filters, addToGlobalState) {
+    if (addToGlobalState === undefined) {
+      addToGlobalState = pinnedByDefault;
     }
 
     // Determine the state for the new filter (whether to pass the filter through other apps or not)
     const appState = getAppState();
-    const filterState = (global) ? globalState : appState;
+    const filterState = (addToGlobalState) ? globalState : appState;
 
     if (!Array.isArray(filters)) {
       filters = [filters];
