@@ -13,7 +13,7 @@ import {
   asDynamicBytes,
   asPercent,
   getFixedByteFormatter,
-  roundToPlaces
+  asDecimal
 } from '../../../utils/formatters';
 import { Coordinate } from '../../../../typings/timeseries';
 
@@ -62,7 +62,7 @@ function getYTickFormatter(chart: GenericMetricsChart) {
       return (y: number | null) => asPercent(y || 0, 1);
     }
     default: {
-      return (y: number | null) => (y === null ? y : roundToPlaces(y, 2));
+      return (y: number | null) => (y === null ? y : asDecimal(y));
     }
   }
 }
@@ -76,7 +76,7 @@ function getTooltipFormatter({ yUnit }: GenericMetricsChart) {
       return (c: Coordinate) => asPercent(c.y || 0, 1);
     }
     default: {
-      return (c: Coordinate) => (c.y === null ? c.y : roundToPlaces(c.y, 2));
+      return (c: Coordinate) => (c.y === null ? c.y : asDecimal(c.y));
     }
   }
 }
