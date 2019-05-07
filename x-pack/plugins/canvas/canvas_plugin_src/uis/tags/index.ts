@@ -12,4 +12,4 @@ import { proportion } from './proportion';
 import { text } from './text';
 
 // Registry expects a function that returns a spec object
-export const tagSpecs = [chart, filter, graphic, presentation, proportion, text];
+export const tagSpecs = [chart, filter, graphic, presentation, proportion, report, text];

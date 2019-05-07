@@ -10,9 +10,11 @@ import { Tag } from '../components/tag';
 import { getId } from './get_id';
 import { tagsRegistry } from './tags_registry';
 
-// generates the object for EuiSearchBar for tag filtering
-export const getTagsFilter = type => {
+// EUI helper functions
+// generates the FieldValueSelectionFilter object for EuiSearchBar for tag filtering
+export const getTagsFilter = (type: 'health' | 'badge') => {
   const uniqueTags = sortBy(Object.values(tagsRegistry.toJS()), 'name');
+
   return {
     type: 'field_value_selection',
     field: 'tag',
@@ -20,7 +22,7 @@ export const getTagsFilter = type => {
     multiSelect: true,
     options: uniqueTags.map(({ name, color }) => ({
       value: name,
-      name: name,
+      name,
       view: (
         <div>
           <Tag key={getId('tag')} color={color} name={name} type={type} />
