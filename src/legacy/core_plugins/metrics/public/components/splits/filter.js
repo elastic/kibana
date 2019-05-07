@@ -26,7 +26,10 @@ const { QueryBar } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 const localStorage = new Storage(window.localStorage);
+const uiSettings = chrome.getUiSettingsClient();
+const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
@@ -63,7 +66,7 @@ export const SplitByFilter = props => {
           />)}
         >
           <QueryBar
-            query={{ language: (model.filter.language ? model.filter.language : 'kuery'), query: model.filter.query }}
+            query={{ language: (model.filter.language ? model.filter.language : uiSettingsQueryLanguage), query: model.filter.query }}
             screenTitle={'DataMetricsGroupByFilter'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}

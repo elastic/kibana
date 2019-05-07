@@ -47,8 +47,10 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
+import chrome from 'ui/chrome';
 const { QueryBar } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
+const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 class MarkdownPanelConfigUi extends Component {
   constructor(props) {
@@ -56,6 +58,7 @@ class MarkdownPanelConfigUi extends Component {
     this.state = {
       selectedTab: 'markdown',
       indexPatternForQuery: {},
+      uiQueryLanguage: uiSettingsQueryLanguage,
     };
     this.handleCSSChange = this.handleCSSChange.bind(this);
   }
@@ -175,7 +178,7 @@ class MarkdownPanelConfigUi extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : 'kuery',
+                      language: model.filter.language ? model.filter.language : this.state.uiQueryLanguage,
                       query: model.filter.query,
                     }}
                     screenTitle={'TimeseriesPanelConfigQuery'}
