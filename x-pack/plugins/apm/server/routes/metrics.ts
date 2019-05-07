@@ -34,12 +34,8 @@ export function initMetricsApi(core: CoreSetup) {
     handler: async req => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
-      // ternary type guard required here because req.query can be type: string | RequestQuery
-      // and req.query.* can each have a value of type: string | string[]
-      const agentName =
-        typeof req.query !== 'string' && typeof req.query.agentName === 'string'
-          ? req.query.agentName
-          : '';
+      // casting approach recommended here: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/25605
+      const { agentName } = req.query as { agentName: string };
       return await getMetricsChartDataByAgent({
         setup,
         serviceName,
