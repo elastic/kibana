@@ -42,7 +42,7 @@ const MonitoringWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.watcher.sections.watchDetail.header"
+              id="xpack.watcher.sections.watchEdit.monitoring.header"
               defaultMessage="Watch '{watchName}' is a system watch and cannot be edited. {watchStatusLink}"
               values={{
                 watchName: watch.name,
@@ -51,7 +51,7 @@ const MonitoringWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
                     href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/status`}
                   >
                     <FormattedMessage
-                      id="xpack.watcher.sections.watchDetail.header.watchLinkTitle"
+                      id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
                       defaultMessage="View watch status."
                     />
                   </EuiLink>
