@@ -24,6 +24,7 @@ export default function ({ getService }) {
   const {
     addPolicyToIndex,
     removePolicyFromIndex,
+    retryPolicyOnIndex,
   } = registerIndexHelpers({ supertest });
 
   const {
@@ -75,6 +76,26 @@ export default function ({ getService }) {
 
         indexFetched = await getIndex(indexName);
         expect(indexFetched[indexName].settings.index.lifecycle).be(undefined);
+      });
+    });
+
+    describe('index management extension', () => {
+      it('should have an endpoint to retry a policy for an index that is in the ERROR step', async () => {
+        // Create a policy
+        const policy = getPolicyPayload();
+        const { name: policyName } = policy;
+        await createPolicy(policy);
+
+        // Create a new index
+        const indexName = await createIndex();
+
+        await addPolicyToIndex(policyName, indexName);
+
+        // As there is no easy way to set the index in the ERROR state to be able to retry
+        // we validate that the error returned *is* coming from the ES "_ilm/retry" endpoint
+        const { body } = await retryPolicyOnIndex(indexName);
+        const expected = `[illegal_argument_exception] cannot retry an action for an index [${indexName}] that has not encountered an error when running a Lifecycle Policy`; // eslint-disable-line max-len
+        expect(body.message).to.be(expected);
       });
     });
   });
