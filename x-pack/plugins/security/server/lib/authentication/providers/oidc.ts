@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import { Legacy } from '../../../../../../../kibana';
-import { AuthenticatedUser } from '../../../../common/model';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
@@ -257,8 +256,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
 
       this.debug('Redirecting to OpenID Connect Provider with authentication request.');
       // If this is a third party initiated login, redirect to /
-      const redirectAfterLogin = params.iss ? `${request.getBasePath()}` : `${request.getBasePath()}${request.url.path}`;
-
+      const redirectAfterLogin = params.iss ? '/' : `${request.getBasePath()}${request.url.path}`;
       return AuthenticationResult.redirectTo(
         redirect,
         // Store the state and nonce parameters in the session state of the user

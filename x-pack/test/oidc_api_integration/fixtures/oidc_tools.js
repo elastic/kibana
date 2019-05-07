@@ -5,7 +5,7 @@
  */
 
 
-import url from "url";
+import url from 'url';
 
 export function getStateAndNonce(urlWithStateAndNonce) {
   const stateValue = url.parse(urlWithStateAndNonce, true).query.state;

@@ -63,7 +63,7 @@ export const security = (kibana) => new kibana.Plugin({
       }).default(),
       auth: Joi.object({
         oidc: Joi.object({
-          realm: Joi.string().required()
+          realm: Joi.string().default()
         }).default(),
       }).default(),
     }).default();
