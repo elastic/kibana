@@ -57,7 +57,7 @@ Where:
 - `BACKPORT_CONFIG_DIR`: This can be ANY empty folder on your local machine. Upon running the docker container for the first time, a [`config.json`](https://github.com/sqren/backport/blob/master/docs/configuration.md#global-config-backportconfigjson) will be created automatically. This must be filled out with `username` and `accessToken` or these must be passed as CLI arguments: `backport --username <username> --accessToken <accessToken>`
 - `GIT_CONFIG_FILE`: Must point to a local [`.gitconfig`](https://gist.github.com/sqren/618ab2f77ffb8b5388d675fe705ed6da) file that contains the user's name and email.
 
-You can now use `backport` as if it was installed locally.
+You can now use `backport` as if it was installed on the host machine.
 
 ## Usage
 
