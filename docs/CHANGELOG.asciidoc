@@ -29,7 +29,7 @@ See <<breaking-changes, breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 [float]
-[[enhancements-6.8.0]]
+[[enhancements-7.1.0]]
 === Enhancements
 Security:: 
 * Enables security features (authentication, user/role management, and RBAC) at 
