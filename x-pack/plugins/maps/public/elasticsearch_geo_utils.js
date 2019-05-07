@@ -185,7 +185,6 @@ const BOTTOM_RIGHT_INDEX = 2;
 
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   const safePolygon = convertMapExtentToPolygon(mapExtent);
-
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
     const verticies = safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
     return {
@@ -214,40 +213,70 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   }
 }
 
-export function createShapeFilter(geojsonPolygon, indexPatternId, geoFieldName, geoFieldType) {
 
-  //take outer
-  const points  = geojsonPolygon.coordinates[0].map(coordinatePair => {
-    return {
-      lon: _.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION),
-      lat: _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)
-    };
-  });
+export function createExtentFilterWithMeta(mapExtent, indexPatternId, geoFieldName, geoFieldType) {
+
+  const roundedExtent = {
+    minLon: _.round(mapExtent.minLon, DECIMAL_DEGREES_PRECISION),
+    minLat: _.round(mapExtent.minLat, DECIMAL_DEGREES_PRECISION),
+    maxLon: _.round(mapExtent.maxLon, DECIMAL_DEGREES_PRECISION),
+    maxLat: _.round(mapExtent.maxLat, DECIMAL_DEGREES_PRECISION)
+  };
+
+  const filter = createExtentFilter(roundedExtent, geoFieldName, geoFieldType);
+  filter.meta = {
+    negate: false,
+    index: indexPatternId,
+    alias: i18n.translate('xpack.maps.elasticsearch_geo_utils.extentFilter.aliasTitle', {
+      defaultMessage: `extent at {coordinate}`,
+      values: {
+        coordinate: `[${roundedExtent.minLon}, ${roundedExtent.minLat}, ${roundedExtent.maxLon}, ${roundedExtent.maxLat}]`
+      }
+    })
+  };
+  return filter;
+}
+
+export function createShapeFilterWithMeta(geojsonPolygon, indexPatternId, geoFieldName, geoFieldType) {
 
   const filter = {
     meta: {
       negate: false,
       index: indexPatternId,
-      alias: i18n.translate('xpack.maps.elasticsearch_geo_utils.filter.aliasTitle', {
-        defaultMessage: `geo polygon at {coordinate}`,
-        // eslint-disable-next-line max-len
-        values: { coordinate: `${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}` }
+      alias: i18n.translate('xpack.maps.elasticsearch_geo_utils.shapeFilter.aliasTitle', {
+        defaultMessage: `shape at {coordinate}`,
+        values: {
+          // eslint-disable-next-line max-len
+          coordinate: `${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}`
+        }
       })
     }
   };
 
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+    const pointsArray  = geojsonPolygon.coordinates[0].map(coordinatePair => {
+      return {
+        lon: _.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION),
+        lat: _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)
+      };
+    });
     filter.geo_polygon = {
       ignore_unmapped: true,
       [geoFieldName]: {
-        points: points
+        points: pointsArray
       }
     };
   } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+    const geojsonCoordinateArray  = geojsonPolygon.coordinates[0].map(coordinatePair => {
+      return [_.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION), _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)];
+    });
     filter.geo_shape = {
       ignore_unmapped: true,
       [geoFieldName]: {
-        shape: geojsonPolygon,
+        shape: {
+          type: 'Polygon',
+          coordinates: [geojsonCoordinateArray]
+        },
         relation: 'INTERSECTS'
       }
     };

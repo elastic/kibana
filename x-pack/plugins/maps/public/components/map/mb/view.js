@@ -9,14 +9,18 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
-import { DECIMAL_DEGREES_PRECISION, FEATURE_ID_PROPERTY_NAME, ZOOM_PRECISION } from '../../../../common/constants';
+import {
+  DECIMAL_DEGREES_PRECISION,
+  FEATURE_ID_PROPERTY_NAME,
+  ZOOM_PRECISION
+} from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/store_actions';
 import { filterBarQueryFilter } from '../../../kibana_services';
-import { createShapeFilter } from '../../../elasticsearch_geo_utils';
+import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
@@ -67,15 +71,35 @@ export class MBMapContainer extends React.Component {
     if (!e.features.length) {
       return;
     }
-    const { geoField, geoFieldType, indexPatternId } = this.props.drawState;
+    const { geoField, geoFieldType, indexPatternId, drawType } = this.props.drawState;
     this.props.disableDrawState();
 
-    const geoPolygonFilter = createShapeFilter(e.features[0].geometry, indexPatternId, geoField, geoFieldType);
-    if (!geoPolygonFilter) {
+
+    let filter;
+    if (drawType === DRAW_TYPE.POLYGON) {
+      filter = createShapeFilterWithMeta(e.features[0].geometry, indexPatternId, geoField, geoFieldType);
+    } else if (drawType === DRAW_TYPE.BOUNDS) {
+      const coordinates = e.features[0].geometry.coordinates[0];
+      const extent = {
+        minLon: coordinates[0][0],
+        minLat: coordinates[0][1],
+        maxLon: coordinates[0][0],
+        maxLat: coordinates[0][1]
+      };
+      for (let i  = 1; i < coordinates.length; i++) {
+        extent.minLon = Math.min(coordinates[i][0], extent.minLon);
+        extent.minLat = Math.min(coordinates[i][1], extent.minLat);
+        extent.maxLon = Math.max(coordinates[i][0], extent.maxLon);
+        extent.maxLat = Math.max(coordinates[i][1], extent.maxLat);
+      }
+      filter = createExtentFilterWithMeta(extent, indexPatternId, geoField, geoFieldType);
+    }
+
+    if (!filter) {
       return;
     }
-    filterBarQueryFilter.addFilters([geoPolygonFilter]);
 
+    filterBarQueryFilter.addFilters([filter]);
   };
 
   _debouncedSync = _.debounce(() => {
