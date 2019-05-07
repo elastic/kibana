@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from 'recompose';
-import { DatetimeRangeAbsolute as Component } from './datetime_range_absolute';
-
-export const DatetimeRangeAbsolute = compose()(Component);
+export { DatetimeQuickList } from './datetime_quick_list';

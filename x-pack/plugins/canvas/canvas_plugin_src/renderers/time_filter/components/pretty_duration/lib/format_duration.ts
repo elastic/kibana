@@ -6,15 +6,15 @@
 
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
-import { quickRanges } from './quick_ranges';
+import { QuickRange, quickRanges } from './quick_ranges';
 import { timeUnits } from './time_units';
 
-const lookupByRange = {};
-quickRanges.forEach(function(frame) {
+const lookupByRange: { [key: string]: QuickRange } = {};
+quickRanges.forEach(frame => {
   lookupByRange[frame.from + ' to ' + frame.to] = frame;
 });
 
-function formatTime(time, roundUp = false) {
+const formatTime = (time: string, roundUp = false): string => {
   if (moment.isMoment(time)) {
     return time.format('lll');
   } else {
@@ -25,13 +25,13 @@ function formatTime(time, roundUp = false) {
       return moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : time;
     }
   }
-}
+};
 
-function cantLookup(from, to) {
+const cantLookup = (from: string, to: string): string => {
   return `${formatTime(from)} to ${formatTime(to)}`;
-}
+};
 
-export function formatDuration(from, to) {
+export const formatDuration = (from: string, to: string): string => {
   let text;
   // If both parts are date math, try to look up a reasonable string
   if (from && to && !moment.isMoment(from) && !moment.isMoment(to)) {
@@ -56,4 +56,4 @@ export function formatDuration(from, to) {
   } else {
     return cantLookup(from, to);
   }
-}
+};
