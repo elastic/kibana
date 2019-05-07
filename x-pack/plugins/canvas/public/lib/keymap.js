@@ -108,6 +108,7 @@ export const keymap = {
     EDITING: { ...getShortcuts('e', ['alt']), help: 'Toggle edit mode' },
     GRID: { ...getShortcuts('g', ['alt']), help: 'Show grid' },
     REFRESH: refreshShortcut,
+    RUN: { ...getShortcuts('enter', ['ctrl']), help: 'Run expression' },
   },
   PRESENTATION: {
     displayName: 'Presentation controls',
