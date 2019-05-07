@@ -1,0 +1,123 @@
+---
+- job:
+    name: elastic+kibana+pull-request
+    display-name: 'elastic / kibana # pull-request'
+    description: Exhaustive testing of Kibana pull requests.
+    parameters: []
+    properties:
+    - github:
+        url: https://github.com/elastic/kibana/
+    - inject:
+        properties-content: |-
+          CI=true
+          HOME=$JENKINS_HOME
+          PR_SOURCE_BRANCH=${ghprbSourceBranch}
+          PR_TARGET_BRANCH=${ghprbTargetBranch}
+          PR_AUTHOR=${ghprbPullAuthorLogin}
+    - branch-api:
+        time-period: Hour
+        number-of-builds: 60
+    concurrent: true
+    scm:
+    - git:
+        branches:
+        - ${ghprbActualCommit}
+        refspec: +refs/pull/${ghprbPullId}/*:refs/remotes/origin/pr/${ghprbPullId}/*
+    triggers:
+    - github-pull-request:
+        org-list:
+        - elastic
+        allow-whitelist-orgs-as-admins: true
+        trigger-phrase: (.*(?:jenkins\W+)?test\W+(?:this|it)(?:\W+please)?.*)|^retest$
+        github-hooks: true
+        status-context: kibana-ci
+        cancel-builds-on-update: true
+        success-comment: |-
+          ## :green_heart: Build Succeeded
+          * [continuous-integration/kibana-ci/pull-request](${BUILD_URL})
+        failure-comment: |-
+          ## :broken_heart: Build Failed
+          * [continuous-integration/kibana-ci/pull-request](${BUILD_URL})
+        error-comment: |-
+          ## :x: Build Error
+          * [continuous-integration/kibana-ci/pull-request](${BUILD_URL})
+    axes:
+    - axis:
+        type: slave
+        name: node
+        values:
+        - immutable
+    - axis:
+        type: yaml
+        filename: kibana/.ci/jobs.yml
+        name: JOB
+    yaml-strategy:
+      exclude-key: exclude
+      filename: kibana/.ci/jobs.yml
+    builders:
+    - shell: |-
+        #!/usr/local/bin/runbld
+
+        set -euo pipefail
+
+        # Set GITHUB_TOKEN for reporting test failures
+        set +x
+        export VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+        unset VAULT_ROLE_ID VAULT_SECRET_ID
+        export GITHUB_TOKEN=$(vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
+        export KIBANA_CI_REPORTER_KEY=$(vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
+        export PERCY_TOKEN=$(vault read -field=value secret/kibana-issues/dev/percy)
+        unset VAULT_TOKEN
+        set -x
+
+        ./.ci/run.sh
+    publishers:
+    - google-cloud-storage:
+        credentials-id: kibana-ci-gcs-plugin
+        uploads:
+        - classic:
+            file-pattern: kibana/target/kibana-*
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true
+        - classic:
+            file-pattern: kibana/target/junit/**/*
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true
+        - classic:
+            file-pattern: kibana/test/**/screenshots/**/*.png
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true
+        - classic:
+            file-pattern: kibana/test/functional/failure_debug/html/*.html
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true
+        - classic:
+            file-pattern: kibana/x-pack/test/**/screenshots/**/*.png
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true
+        - classic:
+            file-pattern: kibana/x-pack/test/functional/failure_debug/html/*.html
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true
+        - classic:
+            file-pattern: kibana/x-pack/test/functional/apps/reporting/reports/session/*.pdf
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true
+    - junit:
+        results: kibana/target/junit/**/*.xml
+        keep-long-stdio: true
+        allow-empty-results: true
