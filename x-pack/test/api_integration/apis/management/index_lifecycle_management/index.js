@@ -10,5 +10,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./policies'));
     loadTestFile(require.resolve('./templates'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./nodes'));
   });
 }
