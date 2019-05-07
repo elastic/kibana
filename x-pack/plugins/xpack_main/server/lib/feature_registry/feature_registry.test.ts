@@ -39,7 +39,6 @@ describe('FeatureRegistry', () => {
       },
       privileges: {
         all: {
-          grantWithBaseRead: true,
           catalogue: ['foo'],
           management: {
             foo: ['bar'],

@@ -23,16 +23,14 @@ Kibana home page.
 . In the side navigation, click *Dashboard*.
 . Click *Create new dashboard.*  
 . Click *Add*.
-
-[[adding-visualizations-to-a-dashboard]]
-. Use *Add Panels* to add visualizations and saved searches to the dashboard. 
-If you have a large number of visualizations, you can filter the lists. 
+. [[adding-visualizations-to-a-dashboard]]Use *Add Panels* to add visualizations
+and saved searches to the dashboard. If you have a large number of
+visualizations, you can filter the lists. 
 +
 [role="screenshot"]
 image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
 
-[[saving-dashboards]]
-. When you're finished adding and arranging the panels,
+. [[saving-dashboards]]When you're finished adding and arranging the panels,
 go to the menu bar and click *Save*.
 
 . In *Save Dashboard*, enter a dashboard title and optionally a description. 

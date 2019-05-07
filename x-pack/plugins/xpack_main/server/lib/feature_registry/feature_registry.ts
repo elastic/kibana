@@ -12,13 +12,6 @@ import { UICapabilities } from 'ui/capabilities';
  */
 export interface FeatureKibanaPrivileges {
   /**
-   * Flag indicating if this privilege should be included as part of the "Base Read" privilege.
-   * You probably don't need to set this.
-   * Default: false
-   */
-  grantWithBaseRead?: boolean;
-
-  /**
    * If this feature includes management sections, you can specify them here to control visibility of those
    * pages based on user privileges.
    *
@@ -233,7 +226,6 @@ const managementSchema = Joi.object().pattern(
 const catalogueSchema = Joi.array().items(Joi.string());
 
 const privilegeSchema = Joi.object({
-  grantWithBaseRead: Joi.bool(),
   management: managementSchema,
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),
