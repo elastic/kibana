@@ -58,11 +58,6 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleColorEditor
         styleProperty="fillColor"
-        stylePropertyName={
-          i18n.translate('xpack.maps.styles.vector.fillColorLabel', {
-            defaultMessage: 'Fill color'
-          })
-        }
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.fillColor}
         ordinalFields={this.state.ordinalFields}
@@ -76,11 +71,6 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleColorEditor
         styleProperty="lineColor"
-        stylePropertyName={
-          i18n.translate('xpack.maps.styles.vector.borderColorLabel', {
-            defaultMessage: 'Border color'
-          })
-        }
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineColor}
         ordinalFields={this.state.ordinalFields}
@@ -94,11 +84,6 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleSizeEditor
         styleProperty="lineWidth"
-        stylePropertyName={
-          i18n.translate('xpack.maps.styles.vector.borderWidthLabel', {
-            defaultMessage: 'Border width'
-          })
-        }
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.lineWidth}
         ordinalFields={this.state.ordinalFields}
@@ -112,11 +97,6 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleSizeEditor
         styleProperty="iconSize"
-        stylePropertyName={
-          i18n.translate('xpack.maps.styles.vector.symbolSizeLabel', {
-            defaultMessage: 'Symbol size'
-          })
-        }
         handlePropertyChange={this.props.handlePropertyChange}
         styleDescriptor={this.props.styleProperties.iconSize}
         ordinalFields={this.state.ordinalFields}
