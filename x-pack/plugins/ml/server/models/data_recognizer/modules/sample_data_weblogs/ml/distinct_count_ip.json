@@ -1,6 +1,6 @@
 
 {
-  "groups": ["kibana-sample-logs"],
+  "groups": ["kibana-sample-logs", "kibana-sample-data"],
   "description": "Kibana sample web logs data : find anomalies in the distinct count of client IPs",
   "analysis_config" : {
     "bucket_span": "1h",
