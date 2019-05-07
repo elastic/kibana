@@ -183,12 +183,12 @@ export function asDynamicBytes(value: number | null) {
   if (value === null || isNaN(value)) {
     return '';
   }
-  return getFixedByteFormatter(value)(value);
+  return unmemoizedFixedByteFormatter(value)(value);
 }
 
 type GetByteFormatter = (max: number) => ByteFormatter;
 
-export const getFixedByteFormatter: GetByteFormatter = memoize(max => {
+const unmemoizedFixedByteFormatter: GetByteFormatter = max => {
   if (max > 1e12) {
     return asTerabytes;
   }
@@ -206,4 +206,6 @@ export const getFixedByteFormatter: GetByteFormatter = memoize(max => {
   }
 
   return asBytes;
-});
+};
+
+export const getFixedByteFormatter = memoize(unmemoizedFixedByteFormatter);
