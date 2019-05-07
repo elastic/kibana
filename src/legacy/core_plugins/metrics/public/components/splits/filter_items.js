@@ -29,13 +29,19 @@ const { QueryBar } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
 const localStorage = new Storage(window.localStorage);
+const uiSettings = chrome.getUiSettingsClient();
+const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 class FilterItemsUi extends Component {
 
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
+    this.state = {
+      uiQuerylanguage: uiSettingsQueryLanguage,
+    };
   }
 
   handleChange(item, name) {
@@ -82,7 +88,7 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryBar
-            query={{ language: model.filter.language ? model.filter.language : 'kuery', query: model.filter.query }}
+            query={{ language: model.filter.language ? model.filter.language : this.state.uiQuerylanguage, query: model.filter.query }}
             screenTitle={'DataMetricsGroupByFiltersFilter'}
             onSubmit={(query) => this.handleSubmit(model, query)}
             appName={'VisEditor'}

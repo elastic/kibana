@@ -31,7 +31,9 @@ import YesNo from './yes_no';
 import { Storage } from 'ui/storage';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { data } from 'plugins/data';
+import chrome from 'ui/chrome';
 const { QueryBar } = data.query.ui;
+const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 import {
   htmlIdGenerator,
@@ -68,6 +70,7 @@ class AnnotationsEditor extends Component {
     super(props);
     this.state = {
       indexPatternForQuery: {},
+      uiQueryLanguage: uiSettingsQueryLanguage,
     };
     this.renderRow = this.renderRow.bind(this);
 
@@ -82,7 +85,6 @@ class AnnotationsEditor extends Component {
       this.props.model.default_index_pattern;
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
-
   }
 
   handleChange(item, name) {
@@ -186,7 +188,7 @@ class AnnotationsEditor extends Component {
                     query={{
                       language: model.query_string.language
                         ? model.query_string.language
-                        : 'kuery',
+                        : this.state.uiQueryLanguage,
                       query: model.query_string.query,
                     }}
                     screenTitle={'AnnotationsEditor'}

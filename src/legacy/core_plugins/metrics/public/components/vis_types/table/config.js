@@ -42,8 +42,11 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { data } from 'plugins/data';
 import { Storage } from 'ui/storage';
+import chrome from 'ui/chrome';
+
 const { QueryBar } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
+const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 class TableSeriesConfig extends Component {
 
   componentWillMount() {
@@ -133,7 +136,7 @@ class TableSeriesConfig extends Component {
               <QueryBar
                 query={
                   {
-                    language: (model.filter && model.filter.language) ? model.filter.language : 'kuery',
+                    language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
                     query: (model.filter && model.filter.query) ? model.filter.query : ''
                   }}
                 screenTitle={'TSVBTableDataOptionsTab'}

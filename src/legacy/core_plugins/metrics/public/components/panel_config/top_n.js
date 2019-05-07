@@ -45,9 +45,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
-
+import chrome from 'ui/chrome';
 const { QueryBar } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
+const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 class TopNPanelConfig extends Component {
 
@@ -56,6 +57,7 @@ class TopNPanelConfig extends Component {
     this.state = {
       selectedTab: 'data',
       indexPatternForQuery: {},
+      uiQuerylanguage: uiSettingsQueryLanguage,
     };
   }
 
@@ -158,7 +160,7 @@ class TopNPanelConfig extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : 'kuery',
+                      language: model.filter.language ? model.filter.language : this.state.uiQuerylanguage,
                       query: model.filter.query,
                     }}
                     screenTitle={'TopNPanelConfigQuery'}
