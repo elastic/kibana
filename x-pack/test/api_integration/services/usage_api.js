@@ -9,6 +9,25 @@ export function UsageAPIProvider({ getService }) {
   const supertest = getService('supertest');
   const supertestNoAuth = getService('supertestWithoutAuth');
 
+  async function getStats(test) {
+    try {
+      return await test
+        .get('/api/stats?extended=true')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+    }
+    catch (err) {
+      if (err.message.includes('503')) {
+        await new Promise(resolve => {
+          setTimeout(async () => {
+            resolve(await getStats(test));
+          }, 500);
+        });
+      }
+      throw err;
+    }
+  }
+
   return {
     async getUsageStatsNoAuth() {
       const { body } = await supertestNoAuth
@@ -19,10 +38,7 @@ export function UsageAPIProvider({ getService }) {
     },
 
     async getUsageStats() {
-      const { body } = await supertest
-        .get('/api/stats?extended=true')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      const { body } = await getStats(supertest);
       return body.usage;
     },
   };
