@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
+import { initElasticsearchHelpers, getRandomString } from './lib';
 import { getTemplatePayload, getPolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
@@ -14,7 +14,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  const { createIndexTemplate, cleanUp: cleanUpEsResources } = initElasticsearchIndicesHelpers(es);
+  const { createIndexTemplate, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
   const {
     loadTemplates,

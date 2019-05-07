@@ -10,7 +10,7 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchIndicesHelpers = (es) => {
+export const initElasticsearchHelpers = (es) => {
   let indicesCreated = [];
   let templatesCreated = [];
 
@@ -63,6 +63,8 @@ export const initElasticsearchIndicesHelpers = (es) => {
     Promise.all([deleteAllIndices(), deleteAllTemplates()])
   );
 
+  const getNodesStats = () => es.nodes.stats();
+
   return ({
     getIndex,
     createIndex,
@@ -72,6 +74,7 @@ export const initElasticsearchIndicesHelpers = (es) => {
     getIndexTemplates,
     createIndexTemplate,
     deleteIndexTemplate,
+    getNodesStats,
     cleanUp,
   });
 };

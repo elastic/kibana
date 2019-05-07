@@ -14,5 +14,5 @@ export {
 } from './utils';
 
 export {
-  initElasticsearchIndicesHelpers
+  initElasticsearchHelpers
 } from './elasticsearch';

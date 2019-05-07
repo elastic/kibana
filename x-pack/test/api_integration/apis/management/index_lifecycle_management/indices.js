@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { registerHelpers as registerIndexHelpers } from './indices.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
-import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
+import { initElasticsearchHelpers, getRandomString } from './lib';
 import { getPolicyPayload } from './fixtures';
 
 export default function ({ getService }) {
@@ -19,7 +19,7 @@ export default function ({ getService }) {
     getIndex,
     createIndex,
     cleanUp: cleanUpEsResources
-  } = initElasticsearchIndicesHelpers(es);
+  } = initElasticsearchHelpers(es);
 
   const {
     addPolicyToIndex,
