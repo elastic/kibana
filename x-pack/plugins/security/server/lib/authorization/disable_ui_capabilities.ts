@@ -10,6 +10,7 @@ import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
 import { CheckPrivilegesAtResourceResponse } from './check_privileges';
 import { CheckPrivilegesDynamically } from './check_privileges_dynamically';
+import { uiCapabilitiesGroupsFactory } from './ui_capabilities_groups';
 
 export function disableUICapabilitesFactory(
   server: Record<string, any>,
@@ -21,6 +22,7 @@ export function disableUICapabilitesFactory(
   } = server.plugins;
 
   const features: Feature[] = xpackMainPlugin.getFeatures();
+  const uiCapabilitiesGroups = uiCapabilitiesGroupsFactory(features);
   const featureNavLinkIds = features
     .map(feature => feature.navLinkId)
     .filter(navLinkId => navLinkId != null);
@@ -36,22 +38,10 @@ export function disableUICapabilitesFactory(
   };
 
   const disableAll = (uiCapabilities: UICapabilities) => {
-    return mapValues(uiCapabilities, (featureUICapabilities, featureId) =>
-      mapValues(featureUICapabilities, (value, uiCapability) => {
-        if (typeof value === 'boolean') {
-          if (shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
-            return false;
-          }
-          return value;
-        }
-
-        if (isObject(value)) {
-          return mapValues(value, () => false);
-        }
-
-        throw new Error(`Expected value type of boolean or object, but found ${value}`);
-      })
-    ) as UICapabilities;
+    for (const uiCapabilityGroup of uiCapabilitiesGroups) {
+      uiCapabilityGroup.disable(uiCapabilities);
+    }
+    return uiCapabilities;
   };
 
   const usingPrivileges = async (uiCapabilities: UICapabilities) => {

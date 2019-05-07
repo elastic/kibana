@@ -75,6 +75,12 @@ describe('usingPrivileges', () => {
             navLinkId: 'foo',
             privileges: {},
           },
+          {
+            id: 'barFeature',
+            name: 'Bar Feature',
+            app: [],
+            privileges: {},
+          },
         ],
       });
       const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
@@ -83,18 +89,32 @@ describe('usingPrivileges', () => {
           navLinks: {
             foo: true,
             bar: true,
+            quz: true,
           },
           management: {
             kibana: {
               indices: true,
             },
           },
-          catalogue: {},
+          catalogue: {
+            foo: true,
+            bar: true,
+          },
           fooFeature: {
             foo: true,
             bar: true,
           },
           barFeature: {
+            foo: {
+              quz: true,
+              baz: true,
+            },
+            bar: {
+              quz: true,
+              baz: true,
+            },
+          },
+          quzFeature: {
             foo: true,
             bar: true,
           },
@@ -105,21 +125,35 @@ describe('usingPrivileges', () => {
         navLinks: {
           foo: false,
           bar: true,
+          quz: true,
         },
         management: {
           kibana: {
             indices: false,
           },
         },
-        catalogue: {},
+        catalogue: {
+          foo: false,
+          bar: false,
+        },
         fooFeature: {
           foo: false,
           bar: false,
         },
         barFeature: {
-          foo: false,
-          bar: false,
+          foo: {
+            quz: false,
+            baz: false,
+          },
+          bar: {
+            quz: false,
+            baz: false,
+          },
         },
+        quzFeature: {
+          foo: true,
+          bar: true,
+        }
       });
 
       expect(mockServer.log).toMatchInlineSnapshot(`
@@ -159,6 +193,12 @@ describe('usingPrivileges', () => {
             app: [],
             privileges: {},
           },
+          {
+            id: 'barFeature',
+            name: 'Bar Feature',
+            app: [],
+            privileges: {},
+          },
         ],
       });
       const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
@@ -167,18 +207,32 @@ describe('usingPrivileges', () => {
           navLinks: {
             foo: true,
             bar: true,
+            quz: true,
           },
           management: {
             kibana: {
               indices: true,
             },
           },
-          catalogue: {},
+          catalogue: {
+            foo: true,
+            bar: true,
+          },
           fooFeature: {
             foo: true,
             bar: true,
           },
           barFeature: {
+            foo: {
+              quz: true,
+              baz: true,
+            },
+            bar: {
+              quz: true,
+              baz: true,
+            },
+          },
+          quzFeature: {
             foo: true,
             bar: true,
           },
@@ -189,21 +243,35 @@ describe('usingPrivileges', () => {
         navLinks: {
           foo: false,
           bar: true,
+          quz: true,
         },
         management: {
           kibana: {
             indices: false,
           },
         },
-        catalogue: {},
+        catalogue: {
+          foo: false,
+          bar: false,
+        },
         fooFeature: {
           foo: false,
           bar: false,
         },
         barFeature: {
-          foo: false,
-          bar: false,
+          foo: {
+            quz: false,
+            baz: false,
+          },
+          bar: {
+            quz: false,
+            baz: false,
+          },
         },
+        quzFeature: {
+          foo: true,
+          bar: true,
+        }
       });
       expect(mockServer.log).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -429,6 +497,12 @@ describe('all', () => {
           app: [],
           privileges: {},
         },
+        {
+          id: 'barFeature',
+          name: 'Bar Feature',
+          app: [],
+          privileges: {},
+        },
       ],
     });
     const { all } = disableUICapabilitesFactory(mockServer, mockRequest);
@@ -437,18 +511,32 @@ describe('all', () => {
         navLinks: {
           foo: true,
           bar: true,
+          quz: true,
         },
         management: {
           kibana: {
             indices: true,
           },
         },
-        catalogue: {},
+        catalogue: {
+          foo: true,
+          bar: true,
+        },
         fooFeature: {
           foo: true,
           bar: true,
         },
         barFeature: {
+          foo: {
+            quz: true,
+            baz: true,
+          },
+          bar: {
+            quz: true,
+            baz: true,
+          },
+        },
+        quzFeature: {
           foo: true,
           bar: true,
         },
@@ -458,21 +546,35 @@ describe('all', () => {
       navLinks: {
         foo: false,
         bar: true,
+        quz: true,
       },
       management: {
         kibana: {
           indices: false,
         },
       },
-      catalogue: {},
+      catalogue: {
+        foo: false,
+        bar: false,
+      },
       fooFeature: {
         foo: false,
         bar: false,
       },
       barFeature: {
-        foo: false,
-        bar: false,
+        foo: {
+          quz: false,
+          baz: false,
+        },
+        bar: {
+          quz: false,
+          baz: false,
+        },
       },
+      quzFeature: {
+        foo: true,
+        bar: true,
+      }
     });
   });
 });
