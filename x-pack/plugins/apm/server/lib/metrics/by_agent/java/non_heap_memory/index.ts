@@ -36,15 +36,6 @@ const chartBase: ChartBase<NonHeapMemoryMetrics> = {
         }
       ),
       color: theme.euiColorVis1
-    },
-    nonHeapMemoryMax: {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.java.nonHeapMemorySeriesMax',
-        {
-          defaultMessage: 'Max'
-        }
-      ),
-      color: theme.euiColorVis2
     }
   }
 };

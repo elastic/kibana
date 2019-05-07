@@ -9,8 +9,13 @@ import { GenericMetricsChart } from '../../../../server/lib/metrics/transform_me
 // @ts-ignore
 import CustomPlot from '../../shared/charts/CustomPlot';
 import { HoverXHandlers } from '../../shared/charts/SyncChartGroup';
-import { asBytes, asPercent, roundToPlaces } from '../../../utils/formatters';
-import { YUnit, Coordinate } from '../../../../typings/timeseries';
+import {
+  asDynamicBytes,
+  asPercent,
+  getFixedByteFormatter,
+  roundToPlaces
+} from '../../../utils/formatters';
+import { Coordinate } from '../../../../typings/timeseries';
 
 interface Props {
   chart: GenericMetricsChart;
@@ -18,8 +23,8 @@ interface Props {
 }
 
 export function MetricsChart({ chart, hoverXHandlers }: Props) {
-  const formatYValue = getYTickFormatter(chart.yUnit);
-  const formatTooltip = getTooltipFormatter(chart.yUnit);
+  const formatYValue = getYTickFormatter(chart);
+  const formatTooltip = getTooltipFormatter(chart);
 
   const transformedSeries = chart.series.map(series => ({
     ...series,
@@ -43,10 +48,15 @@ export function MetricsChart({ chart, hoverXHandlers }: Props) {
   );
 }
 
-function getYTickFormatter(unit: YUnit) {
-  switch (unit) {
+function getYTickFormatter(chart: GenericMetricsChart) {
+  switch (chart.yUnit) {
     case 'bytes': {
-      return (value: number | null) => (value === 0 ? '0' : asBytes(value));
+      const max = Math.max(
+        ...chart.series.flatMap(series =>
+          series.data.map(coord => coord.y || 0)
+        )
+      );
+      return getFixedByteFormatter(max);
     }
     case 'percent': {
       return (y: number | null) => asPercent(y || 0, 1);
@@ -57,10 +67,10 @@ function getYTickFormatter(unit: YUnit) {
   }
 }
 
-function getTooltipFormatter(unit: YUnit) {
-  switch (unit) {
+function getTooltipFormatter({ yUnit }: GenericMetricsChart) {
+  switch (yUnit) {
     case 'bytes': {
-      return (c: Coordinate) => asBytes(c.y);
+      return (c: Coordinate) => asDynamicBytes(c.y);
     }
     case 'percent': {
       return (c: Coordinate) => asPercent(c.y || 0, 1);

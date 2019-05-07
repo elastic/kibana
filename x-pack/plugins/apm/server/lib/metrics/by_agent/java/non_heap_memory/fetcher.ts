@@ -18,7 +18,6 @@ import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { rangeFilter } from '../../../../helpers/range_filter';
 
 export interface NonHeapMemoryMetrics extends MetricSeriesKeys {
-  nonHeapMemoryMax: AggValue;
   nonHeapMemoryCommitted: AggValue;
   nonHeapMemoryUsed: AggValue;
 }
@@ -52,7 +51,11 @@ export async function fetch(setup: Setup, serviceName: string) {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       size: 0,
-      query: { bool: { filter: filters } },
+      query: {
+        bool: {
+          filter: filters
+        }
+      },
       aggs: {
         timeseriesData: {
           date_histogram: getMetricsDateHistogramParams(start, end),

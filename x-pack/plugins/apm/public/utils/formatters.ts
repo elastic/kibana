@@ -142,31 +142,87 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
-export function roundToPlaces(value: number, places: number) {
-  const multiplier = 10 * places;
-  return Math.floor(value * multiplier) / multiplier;
+type ByteFormatter = (value: number | null) => string;
+
+function asKilobytes(value: number | null) {
+  if (value === null || isNaN(value)) {
+    return '';
+  }
+  return `${asDecimal(value / 1000)} KB`;
 }
 
-export function asBytes(value: number | null, places = 2) {
+function asMegabytes(value: number | null) {
+  if (value === null || isNaN(value)) {
+    return '';
+  }
+  return `${asDecimal(value / 1e6)} MB`;
+}
+
+function asGigabytes(value: number | null) {
+  if (value === null || isNaN(value)) {
+    return '';
+  }
+  return `${asDecimal(value / 1e9)} GB`;
+}
+
+function asTerabytes(value: number | null) {
+  if (value === null || isNaN(value)) {
+    return '';
+  }
+  return `${asDecimal(value / 1e12)} TB`;
+}
+
+export function asBytes(value: number | null) {
+  if (value === null || isNaN(value)) {
+    return '';
+  }
+  return `${asDecimal(value)} B`;
+}
+
+export function asDynamicBytes(value: number | null) {
   if (value === null || isNaN(value)) {
     return '';
   }
 
   if (value > 1e12) {
-    return `${roundToPlaces(value / 1e12, places)} TB`;
+    return asTerabytes(value);
   }
 
   if (value > 1e9) {
-    return `${roundToPlaces(value / 1e9, places)} GB`;
+    return asGigabytes(value);
   }
 
   if (value > 1e6) {
-    return `${roundToPlaces(value / 1e6, places)} MB`;
+    return asMegabytes(value);
   }
 
   if (value > 1000) {
-    return `${roundToPlaces(value / 1000, places)} KB`;
+    return asKilobytes(value);
   }
 
-  return `${roundToPlaces(value, places)} B`;
+  return asBytes(value);
 }
+
+type GetByteFormatter = (max: number) => ByteFormatter;
+
+export const getFixedByteFormatter: GetByteFormatter = memoize(
+  (max: number) => {
+    if (max > 1e12) {
+      return asTerabytes;
+    }
+
+    if (max > 1e9) {
+      return asGigabytes;
+    }
+
+    if (max > 1e6) {
+      return asMegabytes;
+    }
+
+    if (max > 1000) {
+      return asKilobytes;
+    }
+
+    return asBytes;
+  }
+);
