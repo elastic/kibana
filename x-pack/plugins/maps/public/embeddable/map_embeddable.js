@@ -42,9 +42,10 @@ export class MapEmbeddable extends Embeddable {
     embeddableConfig,
     savedMap,
     editUrl,
+    editable,
     indexPatterns = []
   }) {
-    super({ title: savedMap.title, editUrl, indexPatterns });
+    super({ title: savedMap.title, editUrl, editable, indexPatterns });
 
     this._onEmbeddableStateChanged = onEmbeddableStateChanged;
     this._embeddableConfig = _.cloneDeep(embeddableConfig);
