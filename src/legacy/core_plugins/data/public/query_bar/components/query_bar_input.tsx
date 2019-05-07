@@ -377,8 +377,10 @@ export class QueryBarInputUI extends Component<Props, State> {
       : getQueryLog(this.props.appName, this.props.query.language);
     this.updateSuggestions();
 
-    if (this.state.selectionStart && this.state.selectionEnd) {
+    if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
       if (this.inputRef) {
+        // For some reason the type guard above does not make the compiler happy
+        // @ts-ignore
         this.inputRef.setSelectionRange(this.state.selectionStart, this.state.selectionEnd);
       }
       this.setState({
