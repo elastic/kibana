@@ -114,7 +114,7 @@ export const getMouseTransformGesturePrev = ({ mouseTransformState }) =>
   mouseTransformState || initialTransformTuple;
 
 export const getMouseTransformState = (prev, dragging, { x0, y0, x1, y1 }) => {
-  if (dragging) {
+  if (dragging && !isNaN(x0) && !isNaN(y0) && !isNaN(x1) && !isNaN(y1)) {
     const deltaX = x1 - x0;
     const deltaY = y1 - y0;
     const transform = translate(deltaX - prev.deltaX, deltaY - prev.deltaY, 0);

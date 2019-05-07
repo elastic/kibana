@@ -52,8 +52,9 @@ export class LegacyPlatformService {
 
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public async setup({ core }: SetupDeps) {
+  public setup({ core }: SetupDeps) {
     const {
+      application,
       i18n,
       injectedMetadata,
       fatalErrors,
@@ -81,6 +82,17 @@ export class LegacyPlatformService {
     require('ui/chrome/api/breadcrumbs').__newPlatformSetup__(chrome);
     require('ui/chrome/services/global_nav_state').__newPlatformSetup__(chrome);
 
+    injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
+      application.registerLegacyApp({
+        id: navLink.id,
+        order: navLink.order,
+        title: navLink.title,
+        euiIconType: navLink.euiIconType,
+        icon: navLink.icon,
+        appUrl: navLink.url,
+      })
+    );
+
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
     this.bootstrapModule = this.loadBootstrapModule();
@@ -97,7 +109,7 @@ export class LegacyPlatformService {
     this.targetDomElement = targetDomElement;
 
     require('ui/new_platform').__newPlatformStart__(core);
-    require('ui/capabilities').__newPlatformStart__(core.capabilities);
+    require('ui/capabilities').__newPlatformStart__(core.application.capabilities);
 
     this.bootstrapModule.bootstrap(this.targetDomElement);
   }
