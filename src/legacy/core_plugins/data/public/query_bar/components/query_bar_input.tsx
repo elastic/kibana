@@ -63,6 +63,8 @@ interface State {
   index: number | null;
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
+  selectionStart: number | null;
+  selectionEnd: number | null;
 }
 
 const KEY_CODES = {
@@ -86,6 +88,8 @@ export class QueryBarInputUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     suggestionLimit: 50,
+    selectionStart: null,
+    selectionEnd: null,
   };
 
   private inputRef: HTMLInputElement | null = null;
@@ -213,7 +217,10 @@ export class QueryBarInputUI extends Component<Props, State> {
       const { value, selectionStart, selectionEnd } = target;
       const updateQuery = (query: string, newSelectionStart: number, newSelectionEnd: number) => {
         this.onQueryStringChange(query);
-        target.setSelectionRange(newSelectionStart, newSelectionEnd);
+        this.setState({
+          selectionStart: newSelectionStart,
+          selectionEnd: newSelectionEnd,
+        });
       };
 
       switch (event.keyCode) {
@@ -293,12 +300,6 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.onQueryStringChange(newQueryString);
 
-    if (!this.inputRef) {
-      return;
-    }
-
-    this.inputRef.setSelectionRange(start + text.length, start + text.length);
-
     if (type === recentSearchType) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
@@ -375,6 +376,16 @@ export class QueryBarInputUI extends Component<Props, State> {
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
     this.updateSuggestions();
+
+    if (this.state.selectionStart && this.state.selectionEnd) {
+      if (this.inputRef) {
+        this.inputRef.setSelectionRange(this.state.selectionStart, this.state.selectionEnd);
+      }
+      this.setState({
+        selectionStart: null,
+        selectionEnd: null,
+      });
+    }
   }
 
   public componentWillUnmount() {
