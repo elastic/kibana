@@ -15,7 +15,7 @@ import { decode, encode, RisonValue } from 'rison-node';
 import { QueryString } from 'ui/utils/query_string';
 import { ActionCreator } from 'typescript-fsa';
 import { inputsActions, inputsSelectors, State } from '../../store';
-import { InputsModel, InputsModelId, TimeRangeKinds, RelativeTimeRange } from '../../store/inputs/model';
+import { UrlInputsModel, InputsModelId, TimeRangeKinds, TimeRange } from '../../store/inputs/model';
 
 interface UrlState {
   global: any;
@@ -111,11 +111,12 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
       if (newUrlStateString) {
         switch (key) {
           case 'timerange':
-            const urlStateData: InputsModel = decodeRisonUrlState(newUrlStateString)
+            const urlStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString)
             const globalType: TimeRangeKinds = get('global.kind', urlStateData);
-            const globalRange: RelativeTimeRange = urlStateData.global;
+            const globalRange: TimeRange = urlStateData.global;
+            const globalId: InputsModelId = 'global';
             if (globalType !== null) {
-              return this.urlStateMappedToActions.timerange[globalType](globalRange);
+              return this.urlStateMappedToActions.timerange[globalType]({...globalRange, id: globalId});
             }
         }
         return;

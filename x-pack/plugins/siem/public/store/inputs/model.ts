@@ -49,3 +49,7 @@ export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
 }
+export interface UrlInputsModel {
+  global: TimeRange;
+  timeline: TimeRange;
+}
