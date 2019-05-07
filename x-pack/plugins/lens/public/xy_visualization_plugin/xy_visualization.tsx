@@ -13,7 +13,7 @@ export interface XyVisualizationState {
 }
 
 export const xyVisualization: Visualization<XyVisualizationState> = {
-  async initialize() {
+  initialize() {
     return {
       roles: [],
     };

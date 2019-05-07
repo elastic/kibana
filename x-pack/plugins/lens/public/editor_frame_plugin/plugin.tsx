@@ -43,8 +43,6 @@ class EditorFramePlugin {
         // on it's own because we are loosing type information here.
         // So it's basically explicitly saying "I'm dropping the information about type T here
         // because this information isn't useful to me." but without using any which can leak
-        // const state = await datasource.initialize();
-
         this.datasources[name] = datasource as Datasource<unknown>;
 
         if (!this.activeDatasource) {
@@ -52,8 +50,7 @@ class EditorFramePlugin {
         }
       },
       registerVisualization: (name, visualization) => {
-        // this.visualizations[name] = visualization as Visualization<unknown>;
-        this.visualizations[name] = visualization as Visualization<unknown>;
+        this.visualizations[name] = visualization as Visualization<unknown, unknown>;
       },
     };
   }

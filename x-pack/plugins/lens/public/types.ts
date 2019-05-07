@@ -7,8 +7,8 @@
 export interface EditorFrameSetup {
   render: (domElement: Element) => void;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T>(name: string, datasource: Datasource<T>) => void;
-  registerVisualization: <T>(name: string, visualization: Visualization<T>) => void;
+  registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
+  registerVisualization: <T, P>(name: string, visualization: Visualization<T, P>) => void;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -37,9 +37,14 @@ export interface DatasourceSuggestion<T = unknown> {
 /**
  * Interface for the datasource registry
  */
-export interface Datasource<T = unknown> {
-  // For initializing from saved object
-  initialize: (state?: T) => Promise<T>;
+export interface Datasource<T = unknown, P = unknown> {
+  // For initializing, either from an empty state or from persisted state
+  // Because this will be called at runtime, state might have a type of `any` and
+  // datasources should validate their arguments
+  initialize: (state?: P) => Promise<T>;
+
+  // Given the current state, which parts should be saved?
+  getPersistableState: (state: T) => P;
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
@@ -56,7 +61,7 @@ export interface Datasource<T = unknown> {
  */
 export interface DatasourcePublicAPI {
   getTableSpec: () => TableSpec;
-  getOperationForColumnId: (columnId: string) => Operation;
+  getOperationForColumnId: (columnId: string) => Operation | null;
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
@@ -133,11 +138,16 @@ export interface VisualizationSuggestion<T = unknown> {
   datasourceSuggestionId: string;
 }
 
-export interface Visualization<T = unknown> {
-  // For initializing from saved object
-  initialize: (state?: T) => Promise<T>;
+export interface Visualization<T = unknown, P = unknown> {
+  // For initializing, either from an empty state or from persisted state
+  // Because this will be called at runtime, state might have a type of `any` and
+  // visualizations should validate their arguments
+  initialize: (state?: P) => T;
 
-  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
+  // Given the current state, which parts should be saved?
+  getPersistableState: (state: T) => P;
+
+  renderConfigPanel: (props: VisualizationProps<T>) => void;
 
   toExpression: (state: T, datasource: DatasourcePublicAPI) => string;
 
