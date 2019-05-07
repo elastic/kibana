@@ -183,46 +183,27 @@ export function asDynamicBytes(value: number | null) {
   if (value === null || isNaN(value)) {
     return '';
   }
-
-  if (value > 1e12) {
-    return asTerabytes(value);
-  }
-
-  if (value > 1e9) {
-    return asGigabytes(value);
-  }
-
-  if (value > 1e6) {
-    return asMegabytes(value);
-  }
-
-  if (value > 1000) {
-    return asKilobytes(value);
-  }
-
-  return asBytes(value);
+  return getFixedByteFormatter(value)(value);
 }
 
 type GetByteFormatter = (max: number) => ByteFormatter;
 
-export const getFixedByteFormatter: GetByteFormatter = memoize(
-  (max: number) => {
-    if (max > 1e12) {
-      return asTerabytes;
-    }
-
-    if (max > 1e9) {
-      return asGigabytes;
-    }
-
-    if (max > 1e6) {
-      return asMegabytes;
-    }
-
-    if (max > 1000) {
-      return asKilobytes;
-    }
-
-    return asBytes;
+export const getFixedByteFormatter: GetByteFormatter = memoize(max => {
+  if (max > 1e12) {
+    return asTerabytes;
   }
-);
+
+  if (max > 1e9) {
+    return asGigabytes;
+  }
+
+  if (max > 1e6) {
+    return asMegabytes;
+  }
+
+  if (max > 1000) {
+    return asKilobytes;
+  }
+
+  return asBytes;
+});

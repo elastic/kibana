@@ -69,6 +69,8 @@ describe('formatters', () => {
       expect(asDynamicBytes(mb)).toEqual('1.0 MB');
       expect(asDynamicBytes(gb)).toEqual('1.0 GB');
       expect(asDynamicBytes(tb)).toEqual('1.0 TB');
+      expect(asDynamicBytes(null)).toEqual('');
+      expect(asDynamicBytes(NaN)).toEqual('');
     });
 
     describe('fixed', () => {
@@ -79,6 +81,8 @@ describe('formatters', () => {
         expect(formatInBytes(mb)).toEqual('1,000,001.0 B');
         expect(formatInBytes(gb)).toEqual('1,000,000,001.0 B');
         expect(formatInBytes(tb)).toEqual('1,000,000,000,001.0 B');
+        expect(formatInBytes(null)).toEqual('');
+        expect(formatInBytes(NaN)).toEqual('');
       });
 
       test('in kb', () => {
@@ -97,6 +101,8 @@ describe('formatters', () => {
         expect(formatInMB(mb)).toEqual('1.0 MB');
         expect(formatInMB(gb)).toEqual('1,000.0 MB');
         expect(formatInMB(tb)).toEqual('1,000,000.0 MB');
+        expect(formatInMB(null)).toEqual('');
+        expect(formatInMB(NaN)).toEqual('');
       });
 
       test('in gb', () => {
@@ -106,6 +112,8 @@ describe('formatters', () => {
         expect(formatInGB(mb)).toEqual('0.0 GB');
         expect(formatInGB(gb)).toEqual('1.0 GB');
         expect(formatInGB(tb)).toEqual('1,000.0 GB');
+        expect(formatInGB(null)).toEqual('');
+        expect(formatInGB(NaN)).toEqual('');
       });
 
       test('in tb', () => {
@@ -115,6 +123,8 @@ describe('formatters', () => {
         expect(formatInTB(mb)).toEqual('0.0 TB');
         expect(formatInTB(gb)).toEqual('0.0 TB');
         expect(formatInTB(tb)).toEqual('1.0 TB');
+        expect(formatInTB(null)).toEqual('');
+        expect(formatInTB(NaN)).toEqual('');
       });
     });
   });
