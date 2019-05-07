@@ -177,6 +177,7 @@ export class LegacyService implements CoreService {
   }
 
   private setupProxyListener(server: HapiServer) {
+    console.log('----server.listener---', server.listener);
     const legacyProxy = new LegacyPlatformProxy(
       this.coreContext.logger.get('legacy-proxy'),
       server.listener

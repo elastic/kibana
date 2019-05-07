@@ -89,8 +89,6 @@ export interface CoreSetup {
 // 
 // @public (undocumented)
 export interface CoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
     // Warning: (ae-incompatible-release-tags) The symbol "plugins" is marked as @public, but its signature references "PluginsServiceStart" which is marked as @internal
     // 
     // (undocumented)
@@ -135,12 +133,12 @@ export type Headers = Record<string, string | string[] | undefined>;
 // Warning: (ae-forgotten-export) The symbol "HttpServerSetup" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type HttpServiceSetup = HttpServerSetup;
+export type HttpServiceSetup = HttpServerSetup & {
+    shouldListen: () => boolean;
+};
 
 // @public (undocumented)
-export interface HttpServiceStart {
-    isListening: () => boolean;
-}
+export type HttpServiceStart = void;
 
 // @public (undocumented)
 export class KibanaRequest<Params, Query, Body> {

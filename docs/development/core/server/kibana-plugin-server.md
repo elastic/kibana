@@ -23,7 +23,6 @@
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) |  |
 |  [CoreStart](./kibana-plugin-server.corestart.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
-|  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
@@ -42,6 +41,7 @@
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [Headers](./kibana-plugin-server.headers.md) |  |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
+|  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [OnRequestHandler](./kibana-plugin-server.onrequesthandler.md) |  |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
