@@ -25,7 +25,10 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
 
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
-        const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
+        const uiCapabilities = await uiCapabilitiesService.get({
+          navLinks: navLinksBuilder.all(),
+          spaceId: scenario.id,
+        });
         switch (scenario.id) {
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);
