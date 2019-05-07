@@ -186,12 +186,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['A Dashboard', 'logstash-*', 'A Pie']);
+          expect(objects).to.eql([
+            'Advanced Settings [6.0.0]',
+            `Advanced Settings [${version}]`,
+            'A Dashboard',
+            'logstash-*',
+            'A Pie',
+          ]);
         });
 
         it('cannot view any saved objects in applications', async () => {
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
+            {
+              title: 'Advanced Settings [6.0.0]',
+              canViewInApp: false,
+            },
+            {
+              title: `Advanced Settings [${version}]`,
+              canViewInApp: false,
+            },
             {
               title: 'A Dashboard',
               canViewInApp: false,

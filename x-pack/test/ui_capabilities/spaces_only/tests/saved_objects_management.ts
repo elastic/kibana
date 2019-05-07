@@ -25,7 +25,9 @@ export default function savedObjectsManagementTests({
         switch (scenario.id) {
           case 'nothing_space':
             // Saved Objects Managment is not available when everything is disabled.
-            const nothingSpaceCapabilities = await uiCapabilitiesService.get(null, scenario.id);
+            const nothingSpaceCapabilities = await uiCapabilitiesService.get({
+              spaceId: scenario.id,
+            });
             expect(nothingSpaceCapabilities.success).to.be(true);
             expect(nothingSpaceCapabilities.value).to.have.property('savedObjectsManagement');
             const nothingSpaceExpected = mapValues(
@@ -38,7 +40,7 @@ export default function savedObjectsManagementTests({
             break;
           default:
             // Otherwise it's available without restriction
-            const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
+            const uiCapabilities = await uiCapabilitiesService.get({ spaceId: scenario.id });
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
