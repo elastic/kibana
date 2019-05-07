@@ -22,7 +22,8 @@ describe('CancellationToken', function () {
     });
 
     it('accepts a function', function () {
-      expect(cancellationToken.on).withArgs(function () {}).to.not.throwError();
+      const boundOn = cancellationToken.on.bind(cancellationToken);
+      expect(boundOn).withArgs(function () {}).not.to.throwError();
     });
 
     it(`calls function if cancel has previously been called`, function () {
@@ -35,7 +36,8 @@ describe('CancellationToken', function () {
 
   describe('cancel', function () {
     it('should be a function accepting no parameters', function () {
-      expect(cancellationToken.cancel).withArgs().to.not.throwError();
+      const boundCancel = cancellationToken.cancel.bind(cancellationToken);
+      expect(boundCancel).withArgs().to.not.throwError();
     });
 
     it('should call a single callback', function () {
