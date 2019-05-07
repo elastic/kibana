@@ -19,75 +19,41 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
-import { ConfirmDelete } from './confirm_delete';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { UserAPIClient } from '../../../lib/api';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { ConfirmDeleteUsers } from '../../../../components/management/users';
+import { User } from '../../../../../common/model';
+import { UserAPIClient } from '../../../../lib/api';
 
-class UsersUI extends Component {
-  constructor(props) {
+interface Props {
+  intl: InjectedIntl;
+  apiClient: UserAPIClient;
+}
+
+interface State {
+  users: User[];
+  selection: User[];
+  showDeleteConfirmation: boolean;
+  permissionDenied: boolean;
+  filter: string;
+}
+
+class UsersListPageUI extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       users: [],
       selection: [],
       showDeleteConfirmation: false,
+      permissionDenied: false,
+      filter: '',
     };
   }
-  componentDidMount() {
+
+  public componentDidMount() {
     this.loadUsers();
   }
-  handleDelete = (usernames, errors) => {
-    const { users } = this.state;
-    this.setState({
-      selection: [],
-      showDeleteConfirmation: false,
-      users: users.filter(({ username }) => {
-        return !usernames.includes(username) || errors.includes(username);
-      }),
-    });
-  };
-  async loadUsers() {
-    try {
-      const users = await UserAPIClient.getUsers();
-      this.setState({ users });
-    } catch (e) {
-      if (e.body.statusCode === 403) {
-        this.setState({ permissionDenied: true });
-      } else {
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage({
-            id: 'xpack.security.management.users.fetchingUsersErrorMessage',
-            defaultMessage: 'Error fetching users: {message}'
-          }, { message: e.body.message })
-        );
-      }
-    }
-  }
-  renderToolsLeft() {
-    const { selection } = this.state;
-    if (selection.length === 0) {
-      return;
-    }
-    const numSelected = selection.length;
-    return (
-      <EuiButton
-        data-test-subj="deleteUserButton"
-        color="danger"
-        onClick={() => this.setState({ showDeleteConfirmation: true })}
-      >
-        <FormattedMessage
-          id="xpack.security.management.users.deleteUsersButtonLabel"
-          defaultMessage="Delete {numSelected} user{numSelected, plural, one { } other {s}}"
-          values={{
-            numSelected: numSelected,
-          }}
-        />
-      </EuiButton>
-    );
-  }
-  onCancelDelete = () => {
-    this.setState({ showDeleteConfirmation: false });
-  }
-  render() {
+
+  public render() {
     const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
     const { intl } = this.props;
     if (permissionDenied) {
@@ -121,19 +87,25 @@ class UsersUI extends Component {
     const columns = [
       {
         field: 'full_name',
-        name: intl.formatMessage({ id: 'xpack.security.management.users.fullNameColumnName', defaultMessage: 'Full Name' }),
+        name: intl.formatMessage({
+          id: 'xpack.security.management.users.fullNameColumnName',
+          defaultMessage: 'Full Name',
+        }),
         sortable: true,
         truncateText: true,
-        render: fullName => {
+        render: (fullName: string) => {
           return <div data-test-subj="userRowFullName">{fullName}</div>;
         },
       },
       {
         field: 'username',
-        name: intl.formatMessage({ id: 'xpack.security.management.users.userNameColumnName', defaultMessage: 'User Name' }),
+        name: intl.formatMessage({
+          id: 'xpack.security.management.users.userNameColumnName',
+          defaultMessage: 'User Name',
+        }),
         sortable: true,
         truncateText: true,
-        render: username => (
+        render: (username: string) => (
           <EuiLink data-test-subj="userRowUserName" href={`${path}users/edit/${username}`}>
             {username}
           </EuiLink>
@@ -143,18 +115,21 @@ class UsersUI extends Component {
         field: 'email',
         name: intl.formatMessage({
           id: 'xpack.security.management.users.emailAddressColumnName',
-          defaultMessage: 'Email Address'
+          defaultMessage: 'Email Address',
         }),
         sortable: true,
         truncateText: true,
-        render: email => {
+        render: (email: string) => {
           return <div data-test-subj="userRowEmail">{email}</div>;
         },
       },
       {
         field: 'roles',
-        name: intl.formatMessage({ id: 'xpack.security.management.users.rolesColumnName', defaultMessage: 'Roles' }),
-        render: rolenames => {
+        name: intl.formatMessage({
+          id: 'xpack.security.management.users.rolesColumnName',
+          defaultMessage: 'Roles',
+        }),
+        render: (rolenames: string[]) => {
           const roleLinks = rolenames.map((rolename, index) => {
             return (
               <Fragment key={rolename}>
@@ -168,16 +143,19 @@ class UsersUI extends Component {
       },
       {
         field: 'metadata._reserved',
-        name: intl.formatMessage({ id: 'xpack.security.management.users.reservedColumnName', defaultMessage: 'Reserved' }),
+        name: intl.formatMessage({
+          id: 'xpack.security.management.users.reservedColumnName',
+          defaultMessage: 'Reserved',
+        }),
         sortable: false,
         width: '100px',
         align: 'right',
-        description:
-          intl.formatMessage({
-            id: 'xpack.security.management.users.reservedColumnDescription',
-            defaultMessage: 'Reserved users are built-in and cannot be removed. Only the password can be changed.'
-          }),
-        render: reserved =>
+        description: intl.formatMessage({
+          id: 'xpack.security.management.users.reservedColumnDescription',
+          defaultMessage:
+            'Reserved users are built-in and cannot be removed. Only the password can be changed.',
+        }),
+        render: (reserved?: boolean) =>
           reserved ? (
             <EuiIcon aria-label="Reserved user" data-test-subj="reservedUser" type="check" />
           ) : null,
@@ -190,16 +168,18 @@ class UsersUI extends Component {
 
     const selectionConfig = {
       itemId: 'username',
-      selectable: user => !user.metadata._reserved,
-      selectableMessage: selectable => (!selectable ? 'User is a system user' : undefined),
-      onSelectionChange: selection => this.setState({ selection }),
+      selectable: (user: User) => !(user.metadata && user.metadata._reserved),
+      selectableMessage: (selectable: boolean) =>
+        !selectable ? 'User is a system user' : undefined,
+      onSelectionChange: (updatedSelection: User[]) =>
+        this.setState({ selection: updatedSelection }),
     };
     const search = {
       toolsLeft: this.renderToolsLeft(),
       box: {
         incremental: true,
       },
-      onChange: query => {
+      onChange: (query: any) => {
         this.setState({
           filter: query.queryText,
         });
@@ -218,10 +198,11 @@ class UsersUI extends Component {
     };
     const usersToShow = filter
       ? users.filter(({ username, roles, full_name: fullName = '', email = '' }) => {
-        const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
-        const normalizedQuery = filter.toLowerCase();
-        return normalized.indexOf(normalizedQuery) !== -1;
-      }) : users;
+          const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
+          const normalizedQuery = filter.toLowerCase();
+          return normalized.indexOf(normalizedQuery) !== -1;
+        })
+      : users;
     return (
       <div className="secUsersListingPage">
         <EuiPageContent className="secUsersListingPage__content">
@@ -237,10 +218,7 @@ class UsersUI extends Component {
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButton
-                data-test-subj="createUserButton"
-                href="#/management/security/users/edit"
-              >
+              <EuiButton data-test-subj="createUserButton" href="#/management/security/users/edit">
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"
                   defaultMessage="Create user"
@@ -249,33 +227,95 @@ class UsersUI extends Component {
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-
             {showDeleteConfirmation ? (
-              <ConfirmDelete
+              <ConfirmDeleteUsers
                 onCancel={this.onCancelDelete}
-                usersToDelete={selection.map((user) => user.username)}
+                usersToDelete={selection.map(user => user.username)}
                 callback={this.handleDelete}
+                apiClient={this.props.apiClient}
               />
             ) : null}
 
-            <EuiInMemoryTable
-              itemId="username"
-              columns={columns}
-              selection={selectionConfig}
-              pagination={pagination}
-              items={usersToShow}
-              loading={users.length === 0}
-              search={search}
-              sorting={sorting}
-              rowProps={rowProps}
-              isSelectable
-            />
-
+            {
+              // @ts-ignore missing responsive from typedef
+              <EuiInMemoryTable
+                itemId="username"
+                columns={columns}
+                selection={selectionConfig}
+                pagination={pagination}
+                items={usersToShow}
+                loading={users.length === 0}
+                search={search}
+                sorting={sorting}
+                // @ts-ignore missing responsive from typedef
+                rowProps={rowProps}
+                isSelectable
+              />
+            }
           </EuiPageContentBody>
         </EuiPageContent>
       </div>
     );
   }
+
+  private handleDelete = (usernames: string[], errors: string[]) => {
+    const { users } = this.state;
+    this.setState({
+      selection: [],
+      showDeleteConfirmation: false,
+      users: users.filter(({ username }) => {
+        return !usernames.includes(username) || errors.includes(username);
+      }),
+    });
+  };
+
+  private async loadUsers() {
+    try {
+      const users = await this.props.apiClient.getUsers();
+      this.setState({ users });
+    } catch (e) {
+      if (e.body.statusCode === 403) {
+        this.setState({ permissionDenied: true });
+      } else {
+        toastNotifications.addDanger(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.security.management.users.fetchingUsersErrorMessage',
+              defaultMessage: 'Error fetching users: {message}',
+            },
+            { message: e.body.message }
+          )
+        );
+      }
+    }
+  }
+
+  private renderToolsLeft() {
+    const { selection } = this.state;
+    if (selection.length === 0) {
+      return;
+    }
+    const numSelected = selection.length;
+    return (
+      <EuiButton
+        data-test-subj="deleteUserButton"
+        color="danger"
+        onClick={() => this.setState({ showDeleteConfirmation: true })}
+      >
+        <FormattedMessage
+          id="xpack.security.management.users.deleteUsersButtonLabel"
+          defaultMessage="Delete {numSelected} user{numSelected, plural, one { } other {s}}"
+          values={{
+            numSelected,
+          }}
+        />
+      </EuiButton>
+    );
+  }
+
+  private onCancelDelete = () => {
+    this.setState({ showDeleteConfirmation: false });
+  };
 }
 
-export const Users = injectI18n(UsersUI);
+export const UsersListPage = injectI18n(UsersListPageUI);
