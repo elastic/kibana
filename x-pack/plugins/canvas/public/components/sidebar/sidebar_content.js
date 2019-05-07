@@ -20,12 +20,6 @@ const mapStateToProps = state => ({
   selectedElementId: getSelectedElementId(state),
 });
 
-const GlobalSidebar = () => (
-  <Fragment>
-    <GlobalConfig />
-  </Fragment>
-);
-
 const MultiElementSidebar = () => (
   <Fragment>
     <SidebarHeader title="Multiple elements" />
@@ -42,20 +36,15 @@ const GroupedElementSidebar = () => (
   </Fragment>
 );
 
-const SingleElementSidebar = () => (
+const SingleElementSidebar = ({ selectedElementId }) => (
   <Fragment>
     <SidebarHeader title="Selected element" showLayerControls />
-    <ElementSettings />
+    <ElementSettings selectedElementId={selectedElementId} />
   </Fragment>
 );
 
 const branches = [
-  // no elements selected
-  branch(
-    ({ selectedToplevelNodes }) => !selectedToplevelNodes.length,
-    renderComponent(GlobalSidebar)
-  ),
-  // multiple elements selected
+  // multiple elements are selected
   branch(
     ({ selectedToplevelNodes }) => selectedToplevelNodes.length > 1,
     renderComponent(MultiElementSidebar)
@@ -66,9 +55,14 @@ const branches = [
       selectedToplevelNodes.length === 1 && selectedToplevelNodes[0].includes('group'),
     renderComponent(GroupedElementSidebar)
   ),
+  // a single element is selected
+  branch(
+    ({ selectedToplevelNodes }) => selectedToplevelNodes.length === 1,
+    renderComponent(SingleElementSidebar)
+  ),
 ];
 
 export const SidebarContent = compose(
   connect(mapStateToProps),
   ...branches
-)(SingleElementSidebar);
+)(GlobalConfig);
