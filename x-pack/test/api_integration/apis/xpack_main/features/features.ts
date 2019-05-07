@@ -125,6 +125,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             'timelion',
             'graph',
             'monitoring',
+            'savedObjectsManagement',
             'ml',
             'apm',
             'canvas',

@@ -60,6 +60,21 @@ function toggleDisabledFeatures(
       });
     });
 
+    // TODO: Revisit if/when savedObjectsManagement UI Capabilities are refactored
+    if (feature.id === 'savedObjectsManagement') {
+      const capability: Record<string, Record<string, boolean>> = uiCapabilities[
+        feature.id
+      ] as Record<string, Record<string, boolean>>;
+
+      Object.keys(capability).forEach(savedObjectType => {
+        Object.keys(capability[savedObjectType]).forEach(typeCapability => {
+          capability[savedObjectType][typeCapability] = false;
+        });
+      });
+
+      continue;
+    }
+
     // Disable "sub features" that match the disabled feature
     if (uiCapabilities.hasOwnProperty(feature.id)) {
       const capability = uiCapabilities[feature.id];

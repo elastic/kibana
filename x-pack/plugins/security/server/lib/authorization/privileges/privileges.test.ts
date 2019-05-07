@@ -205,14 +205,6 @@ describe('features', () => {
         actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
         actions.savedObject.get('all-savedObject-read-2', 'get'),
         actions.savedObject.get('all-savedObject-read-2', 'find'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-2', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-2', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-2', 'read'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-read-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'all-ui-1'),
         actions.ui.get('foo', 'all-ui-2'),
         actions.allHack,
@@ -240,14 +232,6 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
         actions.savedObject.get('read-savedObject-read-2', 'get'),
         actions.savedObject.get('read-savedObject-read-2', 'find'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-read-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
       ],
@@ -445,14 +429,6 @@ describe('features', () => {
         actions.savedObject.get('bar-savedObject-read-2', 'bulk_get'),
         actions.savedObject.get('bar-savedObject-read-2', 'get'),
         actions.savedObject.get('bar-savedObject-read-2', 'find'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-all-1', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-all-1', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-all-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-all-2', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-all-2', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-all-2', 'read'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-read-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'bar-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'bar-ui-1'),
         actions.ui.get('foo', 'bar-ui-2'),
         actions.ui.get('catalogue', 'all-catalogue-1'),
@@ -479,14 +455,6 @@ describe('features', () => {
         actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
         actions.savedObject.get('all-savedObject-read-2', 'get'),
         actions.savedObject.get('all-savedObject-read-2', 'find'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-2', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-2', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-all-2', 'read'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-read-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'all-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'all-ui-1'),
         actions.ui.get('foo', 'all-ui-2'),
         actions.ui.get('catalogue', 'read-catalogue-1'),
@@ -513,14 +481,6 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
         actions.savedObject.get('read-savedObject-read-2', 'get'),
         actions.savedObject.get('read-savedObject-read-2', 'find'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-read-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
         actions.allHack,
@@ -612,14 +572,6 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
         actions.savedObject.get('read-savedObject-read-2', 'get'),
         actions.savedObject.get('read-savedObject-read-2', 'find'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'delete'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'edit'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-all-2', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-read-1', 'read'),
-        actions.ui.get('savedObjectsManagement', 'read-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
       ]);
@@ -667,6 +619,90 @@ describe('features', () => {
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
+  });
+});
+
+describe('savedObjectsManagement feature', () => {
+  test(`saved objects privileges create 'savedObjectsManagement' actions`, () => {
+    const features: Feature[] = [
+      {
+        id: 'savedObjectsManagement',
+        name: 'Saved Objects Management',
+        icon: 'arrowDown',
+        app: [],
+        catalogue: [],
+        management: {},
+        privileges: {
+          all: {
+            ui: [],
+            savedObject: {
+              all: ['all-savedObject-all-1'],
+              read: ['all-savedObject-read-1'],
+            },
+          },
+          read: {
+            ui: [],
+            savedObject: {
+              all: ['read-savedObject-all-1'],
+              read: ['read-savedObject-read-1'],
+            },
+          },
+        },
+      },
+    ];
+
+    const mockXPackMainPlugin = {
+      getFeatures: jest.fn().mockReturnValue(features),
+    };
+
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('features.savedObjectsManagement.all', [
+      actions.login,
+      actions.version,
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-1', 'get'),
+      actions.savedObject.get('all-savedObject-all-1', 'find'),
+      actions.savedObject.get('all-savedObject-all-1', 'create'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-1', 'update'),
+      actions.savedObject.get('all-savedObject-all-1', 'delete'),
+
+      actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-1', 'get'),
+      actions.savedObject.get('all-savedObject-read-1', 'find'),
+
+      actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'delete'),
+      actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'edit'),
+      actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'read'),
+
+      actions.ui.get('savedObjectsManagement', 'all-savedObject-read-1', 'read'),
+
+      actions.allHack,
+    ]);
+
+    expect(actual).toHaveProperty('features.savedObjectsManagement.read', [
+      actions.login,
+      actions.version,
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-1', 'get'),
+      actions.savedObject.get('read-savedObject-all-1', 'find'),
+      actions.savedObject.get('read-savedObject-all-1', 'create'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-1', 'update'),
+      actions.savedObject.get('read-savedObject-all-1', 'delete'),
+
+      actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-1', 'get'),
+      actions.savedObject.get('read-savedObject-read-1', 'find'),
+
+      actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'delete'),
+      actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'edit'),
+      actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'read'),
+
+      actions.ui.get('savedObjectsManagement', 'read-savedObject-read-1', 'read'),
+    ]);
   });
 });
 
@@ -814,14 +850,6 @@ describe('reserved', () => {
       actions.savedObject.get('savedObject-read-2', 'bulk_get'),
       actions.savedObject.get('savedObject-read-2', 'get'),
       actions.savedObject.get('savedObject-read-2', 'find'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-all-1', 'delete'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-all-1', 'edit'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-all-1', 'read'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-all-2', 'delete'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-all-2', 'edit'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-all-2', 'read'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-read-1', 'read'),
-      actions.ui.get('savedObjectsManagement', 'savedObject-read-2', 'read'),
       actions.ui.get('foo', 'ui-1'),
       actions.ui.get('foo', 'ui-2'),
     ]);
