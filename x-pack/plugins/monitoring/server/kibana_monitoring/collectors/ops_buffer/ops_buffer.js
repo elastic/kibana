@@ -30,9 +30,7 @@ export function opsBuffer(server) {
     },
 
     hasEvents() {
-      const hasEvents = eventRoller.hasEvents();
-      console.log({ hasEvents });
-      return hasEvents;
+      return eventRoller.hasEvents();
     },
 
     async flush() {
