@@ -52,6 +52,7 @@ export class SavedObjectsManagementBuilder {
       'timelion-sheet',
       'ui-metric',
       'sample-data-telemetry',
+      'action',
     ];
   }
 
