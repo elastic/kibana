@@ -205,7 +205,7 @@ export class ElementTypes extends Component {
 
     return (
       <Fragment>
-        <EuiModalBody>
+        <EuiModalBody style={{ paddingRight: '1px' }}>
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </EuiModalBody>
 

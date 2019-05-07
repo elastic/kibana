@@ -10,7 +10,7 @@ import { Tag } from '../components/tag';
 import { getId } from './get_id';
 import { tagsRegistry } from './tags_registry';
 
-// EUI helper functions
+// EUI helper function
 // generates the FieldValueSelectionFilter object for EuiSearchBar for tag filtering
 export const getTagsFilter = (type: 'health' | 'badge') => {
   const uniqueTags = sortBy(Object.values(tagsRegistry.toJS()), 'name');
