@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useCallback } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { Datasource, Visualization } from '../types';
 
 interface EditorFrameProps {
@@ -62,14 +62,15 @@ export function EditorFrame(props: EditorFrameProps) {
     visualizationState: null,
   });
 
-  useCallback(async () => {
+  useEffect(() => {
     const vState = props.visualizations[state.visualizationName].initialize();
-    const dsState = await props.datasources[state.datasourceName].initialize();
-
-    dispatch({
-      type: 'UPDATE_DATASOURCE',
-      payload: dsState,
+    props.datasources[state.datasourceName].initialize().then(dsState => {
+      dispatch({
+        type: 'UPDATE_DATASOURCE',
+        payload: dsState,
+      });
     });
+
     dispatch({
       type: 'UPDATE_VISUALIZATION',
       payload: vState,
@@ -107,7 +108,7 @@ export function EditorFrame(props: EditorFrameProps) {
                     payload: newState,
                   })
               ),
-              state: state.datasourceState,
+              state: state.visualizationState,
               setState: newState =>
                 dispatch({
                   type: 'UPDATE_VISUALIZATION',
