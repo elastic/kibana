@@ -47,7 +47,7 @@ export class TOCEntry extends React.Component {
   }
 
   _toggleLayerDetailsVisibility = () => {
-    if (this.props.isLayerDetailsOpen) {
+    if (this.props.isLegendDetailsOpen) {
       this.props.hideTOCDetails(this.props.layer.getId());
     } else {
       this.props.showTOCDetails(this.props.layer.getId());
@@ -162,12 +162,16 @@ export class TOCEntry extends React.Component {
   }
 
   _renderDetailsToggle() {
-    const { isLayerDetailsOpen } = this.props;
+    if (!this.props.layer.hasLegendDetails()) {
+      return null;
+    }
+
+    const { isLegendDetailsOpen } = this.props;
     return (
       <span className="mapTocEntry__detailsToggle">
         <button
           className="mapTocEntry__detailsToggleButton"
-          aria-label={isLayerDetailsOpen
+          aria-label={isLegendDetailsOpen
             ? i18n.translate('xpack.maps.layerControl.tocEntry.hideDetailsButtonAriaLabel', {
               defaultMessage: 'Hide layer details'
             })
@@ -175,7 +179,7 @@ export class TOCEntry extends React.Component {
               defaultMessage: 'Show layer details'
             })
           }
-          title={isLayerDetailsOpen
+          title={isLegendDetailsOpen
             ? i18n.translate('xpack.maps.layerControl.tocEntry.hideDetailsButtonTitle', {
               defaultMessage: 'Hide layer details'
             })
@@ -185,7 +189,7 @@ export class TOCEntry extends React.Component {
           }
           onClick={this._toggleLayerDetailsVisibility}
         >
-          <EuiIcon className="eui-alignBaseline" type={isLayerDetailsOpen ? 'arrowUp' : 'arrowDown'} size="s" />
+          <EuiIcon className="eui-alignBaseline" type={isLegendDetailsOpen ? 'arrowUp' : 'arrowDown'} size="s" />
         </button>
       </span>
     );
@@ -231,12 +235,12 @@ export class TOCEntry extends React.Component {
     );
   }
 
-  _renderLayerDetails = () => {
-    if (!this.props.isLayerDetailsOpen) {
+  _renderLegendDetails = () => {
+    if (!this.props.isLegendDetailsOpen) {
       return null;
     }
 
-    const tocDetails = this.props.layer.getTOCDetails();
+    const tocDetails = this.props.layer.getLegendDetails();
     if (!tocDetails) {
       return null;
     }
@@ -268,7 +272,7 @@ export class TOCEntry extends React.Component {
       >
         {this._renderLayerHeader()}
 
-        {this._renderLayerDetails()}
+        {this._renderLegendDetails()}
 
         {this._renderDetailsToggle()}
 

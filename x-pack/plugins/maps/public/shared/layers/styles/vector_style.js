@@ -131,7 +131,7 @@ export class VectorStyle extends AbstractStyle {
       return {};
     }
 
-    const scaledFields = this._getDynamicPropertiesArray()
+    const scaledFields = this.getDynamicPropertiesArray()
       .map(({ options }) => {
         return {
           name: options.field.name,
@@ -194,7 +194,7 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties || {};
   }
 
-  _getDynamicPropertiesArray() {
+  getDynamicPropertiesArray() {
     const styles = this.getProperties();
     return Object.keys(styles)
       .map(styleName => {
@@ -234,7 +234,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  getTOCDetails() {
+  getLegendDetails() {
     const styles = this.getProperties();
     const styleProperties = Object.keys(styles).map(styleName => {
       const { type, options } = styles[styleName];
@@ -254,7 +254,7 @@ export class VectorStyle extends AbstractStyle {
       return false;
     }
 
-    const scaledFields = this._getDynamicPropertiesArray()
+    const scaledFields = this.getDynamicPropertiesArray()
       .map(({ options }) => {
         const name = options.field.name;
         return {

@@ -19,8 +19,9 @@ exports[`TOCEntry is rendered 1`] = `
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
-          "getTOCDetails": [Function],
+          "getLegendDetails": [Function],
           "hasErrors": [Function],
+          "hasLegendDetails": [Function],
           "isVisible": [Function],
           "showAtZoomLevel": [Function],
         }
@@ -90,8 +91,9 @@ exports[`TOCEntry props isReadOnly 1`] = `
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
-          "getTOCDetails": [Function],
+          "getLegendDetails": [Function],
           "hasErrors": [Function],
+          "hasLegendDetails": [Function],
           "isVisible": [Function],
           "showAtZoomLevel": [Function],
         }
@@ -119,7 +121,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
 </div>
 `;
 
-exports[`TOCEntry props should display layer details when isLayerDetailsOpen is true 1`] = `
+exports[`TOCEntry props should display layer details when isLegendDetailsOpen is true 1`] = `
 <div
   className="mapTocEntry"
   data-layerid="1"
@@ -138,8 +140,9 @@ exports[`TOCEntry props should display layer details when isLayerDetailsOpen is 
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
-          "getTOCDetails": [Function],
+          "getLegendDetails": [Function],
           "hasErrors": [Function],
+          "hasLegendDetails": [Function],
           "isVisible": [Function],
           "showAtZoomLevel": [Function],
         }

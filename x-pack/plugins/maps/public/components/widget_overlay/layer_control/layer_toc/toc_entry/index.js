@@ -31,7 +31,7 @@ function mapStateToProps(state = {}, ownProps) {
     zoom: _.get(state, 'map.mapState.zoom', 0),
     selectedLayer: getSelectedLayer(state),
     hasDirtyStateSelector: hasDirtyState(state),
-    isLayerDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
+    isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
   };
 }
 

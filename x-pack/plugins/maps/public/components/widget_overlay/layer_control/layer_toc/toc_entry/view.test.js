@@ -13,11 +13,12 @@ const LAYER_ID = '1';
 
 const mockLayer = {
   getId: () => { return LAYER_ID; },
-  getTOCDetails: () => { return (<div>TOC details mock</div>); },
+  getLegendDetails: () => { return (<div>TOC details mock</div>); },
   getDisplayName: () => { return 'layer 1'; },
   isVisible: () => { return true; },
   showAtZoomLevel: () => { return true; },
   hasErrors: () => { return false; },
+  hasLegendDetails: () => { return true; },
 };
 
 const defaultProps = {
@@ -28,7 +29,7 @@ const defaultProps = {
   getSelectedLayerSelector: () => {},
   hasDirtyStateSelector: () => {},
   zoom: 0,
-  isLayerDetailsOpen: false,
+  isLegendDetailsOpen: false,
 };
 
 describe('TOCEntry', () => {
@@ -66,11 +67,11 @@ describe('TOCEntry', () => {
         .toMatchSnapshot();
     });
 
-    test('should display layer details when isLayerDetailsOpen is true', async () => {
+    test('should display layer details when isLegendDetailsOpen is true', async () => {
       const component = shallowWithIntl(
         <TOCEntry
           {...defaultProps}
-          isLayerDetailsOpen={true}
+          isLegendDetailsOpen={true}
         />
       );
 
