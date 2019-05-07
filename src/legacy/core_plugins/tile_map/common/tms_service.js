@@ -71,10 +71,10 @@ export class TMSService {
     const attributions = this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
-      const html = url ? `<a href=${url}>${label}</a>` : label;
-      return this._emsClient.sanitizeHtml(html);
+      const html = url ? `<a href="${url}">${label}</a>` : label;
+      return this._emsClient.sanitizeHtml(`${html}`);
     });
-    return attributions.join(' | ');//!!!this is the current convention used in Kibana
+    return `<p>${attributions.join(' | ')}</p>`;//!!!this is the current convention used in Kibana
   }
 
   getMarkdownAttribution() {
