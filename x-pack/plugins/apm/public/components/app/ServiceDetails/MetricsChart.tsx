@@ -46,7 +46,7 @@ export function MetricsChart({ chart, hoverXHandlers }: Props) {
 function getYTickFormatter(unit: YUnit) {
   switch (unit) {
     case 'bytes': {
-      return (value: number | null) => asBytes(value);
+      return (value: number | null) => (value === 0 ? '0' : asBytes(value));
     }
     case 'percent': {
       return (y: number | null) => asPercent(y || 0, 1);

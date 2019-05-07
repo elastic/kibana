@@ -132,7 +132,6 @@ Object {
   ],
   "title": "Test Chart Title",
   "totalHits": 5000,
-  "type": "linemark",
   "yUnit": "number",
 }
 `);
