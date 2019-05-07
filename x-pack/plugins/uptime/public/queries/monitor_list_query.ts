@@ -37,6 +37,12 @@ export const monitorListQueryString = `
             name
             status
           }
+          observer {
+            geo {
+              location
+              name
+            }
+          }
           url {
             domain
             full

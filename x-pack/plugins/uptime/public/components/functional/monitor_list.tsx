@@ -124,6 +124,30 @@ export const MonitorListComponent = ({
             ),
           },
           {
+            field: 'ping.observer.geo.name',
+            name: i18n.translate('xpack.uptime.monitorList.geoName', {
+              defaultMessage: 'Location',
+              description: 'Users can specify a name for a location',
+            }),
+            render: (locationName: string | null | undefined) =>
+              !!locationName ? (
+                locationName
+              ) : (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/add-host-metadata.html#add-host-metadata"
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
+                    defaultMessage: 'Add location',
+                    description:
+                      'Text that instructs the user to navigate to our docs to add a geographic location to their data',
+                  })}
+                  &nbsp;
+                  <EuiIcon size="s" type="popout" />
+                </EuiLink>
+              ),
+          },
+          {
             field: 'ping.url.full',
             name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
               defaultMessage: 'URL',

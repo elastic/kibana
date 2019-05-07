@@ -77,7 +77,16 @@ export const ErrorListComponent = ({ data, linkParameters, loading }: Props) => 
               <Link to={`/monitor/${id}${linkParameters}`}>{name || id}</Link>
             </EuiLink>
           ),
-          width: '25%',
+          width: '12.5%',
+        },
+        {
+          field: 'location',
+          name: i18n.translate('xpack.uptime.errorList.location', {
+            defaultMessage: 'Location',
+            description:
+              "The heading of a column that displays the location of a Heartbeat instance's host machine.",
+          }),
+          width: '12.5%',
         },
         {
           field: 'statusCode',
