@@ -17,6 +17,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
 
+  function escapeLayerName(layerName) {
+    return layerName.split(' ').join('_');
+  }
+
   class GisPage {
 
     constructor() {
@@ -248,16 +252,21 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openLayerTocActionsPanel(layerName) {
-      const cleanLayerName = layerName.split(' ').join('');
-      const isOpen = await testSubjects.exists(`layerTocActionsPanel${cleanLayerName}`);
+      const escapedDisplayName = escapeLayerName(layerName);
+      const isOpen = await testSubjects.exists(`layerTocActionsPanel${escapedDisplayName}`);
       if (!isOpen) {
-        await testSubjects.click(`layerTocActionsPanelToggleButton${cleanLayerName}`);
+        await testSubjects.click(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
       }
     }
 
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
-      await testSubjects.click(`mapOpenLayerButton${layerName}`);
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('editLayerButton');
+    }
+
+    async getLayerTOCDetails(layerName) {
+      return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapeLayerName(layerName)}`);
     }
 
     async disableApplyGlobalQuery() {
@@ -277,9 +286,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async doesLayerExist(layerName) {
-      layerName = layerName.replace(' ', '_');
-      log.debug(`does layer exist, layer: ${layerName}`);
-      return await testSubjects.exists(`mapOpenLayerButton${layerName}`);
+      return await testSubjects.exists(`layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`);
     }
 
     /*

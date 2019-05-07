@@ -27,19 +27,22 @@ const mapDispatchToProps = dispatch => ({
   selectToplevelNodes: nodes =>
     dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
   insertNodes: (selectedNodes, pageId) => dispatch(insertNodes(selectedNodes, pageId)),
-  addElement: pageId => partialElement => dispatch(addElement(pageId, partialElement)),
+  addElement: (pageId, partialElement) => dispatch(addElement(pageId, partialElement)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { pageId, ...remainingStateProps } = stateProps;
   const { addElement, insertNodes, selectToplevelNodes } = dispatchProps;
-  const { search, setCustomElements } = ownProps;
+  const { search, setCustomElements, onClose } = ownProps;
 
   return {
     ...remainingStateProps,
     ...ownProps,
     // add built-in element to the page
-    addElement: addElement(pageId),
+    addElement: element => {
+      addElement(pageId, element);
+      onClose();
+    },
     // add custom element to the page
     addCustomElement: customElement => {
       const { selectedNodes = [] } = JSON.parse(customElement.content) || {};
@@ -48,6 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         insertNodes(clonedNodes, pageId); // first clone and persist the new node(s)
         selectToplevelNodes(clonedNodes); // then select the cloned node(s)
       }
+      onClose();
     },
     // custom element search
     findCustomElements: async text => {
@@ -61,7 +65,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     // remove custom element
     removeCustomElement: async id => {
       try {
-        await customElementService.remove(id);
+        await customElementService.remove(id).then();
         const { customElements } = await customElementService.find(search);
         setCustomElements(customElements);
       } catch (err) {
@@ -69,7 +73,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       }
     },
     // update custom element
-    updateCustomElement: id => async (name, description, image) => {
+    updateCustomElement: async (id, name, description, image) => {
       try {
         await customElementService.update(id, {
           name: camelCase(name),

@@ -45,6 +45,17 @@ export default function ({ getPageObjects, getService }) {
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
+    it('should show dynamic data range in legend', async () => {
+      const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+      const split = layerTOCDetails.trim().split('\n');
+
+      const min = split[0];
+      expect(min).to.equal('3');
+
+      const max = split[2];
+      expect(max).to.equal('12');
+    });
+
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
@@ -59,7 +70,6 @@ export default function ({ getPageObjects, getService }) {
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
       });
     });
-
 
     it('should style fills, points and lines independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
