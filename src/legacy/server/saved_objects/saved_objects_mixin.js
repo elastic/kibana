@@ -26,6 +26,7 @@ import {
   ScopedSavedObjectsClientProvider,
 } from './service';
 import { getRootPropertiesObjects } from '../mappings';
+import { SavedObjectsManagement } from './management';
 
 import {
   createBulkCreateRoute,
@@ -41,10 +42,29 @@ import {
   createLogLegacyImportRoute,
 } from './routes';
 
+function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
+  const { savedObjectsManagement = {} } = kbnServer.uiExports;
+  return visibleTypes.filter(
+    type =>
+      savedObjectsManagement[type] &&
+      savedObjectsManagement[type].isImportableAndExportable === true
+  );
+}
+
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = new KibanaMigrator({ kbnServer });
+  const mappings = migrator.getActiveMappings();
+  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
+  const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
 
   server.decorate('server', 'kibanaMigrator', migrator);
+  server.decorate(
+    'server',
+    'getSavedObjectsManagement',
+    () => new SavedObjectsManagement(kbnServer.uiExports.savedObjectsManagement)
+  );
 
   const warn = message => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if
@@ -69,16 +89,12 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
-  server.route(createExportRoute(prereqs, server));
-  server.route(createImportRoute(prereqs, server));
-  server.route(createResolveImportErrorsRoute(prereqs, server));
+  server.route(createExportRoute(prereqs, server, importableAndExportableTypes));
+  server.route(createImportRoute(prereqs, server, importableAndExportableTypes));
+  server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
   server.route(createLogLegacyImportRoute());
 
-  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
-  const mappings = migrator.getActiveMappings();
-  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {

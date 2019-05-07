@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { get } from 'lodash';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 // @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
@@ -15,39 +16,88 @@ import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
  * @param callCluster
  * @param server
  * @param {boolean} spacesAvailable
- * @param withinDayRange
- * @return {ReportingUsageStats}
+ * @return {UsageStats}
  */
 async function getSpacesUsage(
   callCluster: any,
-  savedObjects: SavedObjectsService,
+  kibanaIndex: string,
+  xpackMainPlugin: XPackMainPlugin,
   spacesAvailable: boolean
 ) {
   if (!spacesAvailable) {
-    return {};
+    return {} as UsageStats;
   }
 
-  const { getSavedObjectsRepository } = savedObjects;
+  const knownFeatureIds = xpackMainPlugin.getFeatures().map(feature => feature.id);
 
-  const savedObjectsRepository = getSavedObjectsRepository(callCluster);
+  const resp = await callCluster('search', {
+    index: kibanaIndex,
+    body: {
+      track_total_hits: true,
+      query: {
+        term: {
+          type: {
+            value: 'space',
+          },
+        },
+      },
+      aggs: {
+        disabledFeatures: {
+          terms: {
+            field: 'space.disabledFeatures',
+            include: knownFeatureIds,
+            size: knownFeatureIds.length,
+          },
+        },
+      },
+      size: 0,
+    },
+  });
 
-  const { saved_objects: spaces } = await savedObjectsRepository.find({ type: 'space' });
+  const { hits, aggregations } = resp;
+
+  const count = get(hits, 'total.value', 0);
+  const disabledFeatureBuckets = get(aggregations, 'disabledFeatures.buckets', []);
+
+  const initialCounts = knownFeatureIds.reduce(
+    (acc, featureId) => ({ ...acc, [featureId]: 0 }),
+    {}
+  );
+
+  const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
+    (acc, { key, doc_count }) => {
+      return {
+        ...acc,
+        [key]: doc_count,
+      };
+    },
+    initialCounts
+  );
+
+  const usesFeatureControls = Object.values(disabledFeatures).some(
+    disabledSpaceCount => disabledSpaceCount > 0
+  );
 
   return {
-    count: spaces.length,
-  };
+    count,
+    usesFeatureControls,
+    disabledFeatures,
+  } as UsageStats;
 }
 
 export interface UsageStats {
   available: boolean;
   enabled: boolean;
   count?: number;
+  usesFeatureControls?: boolean;
+  disabledFeatures?: {
+    [featureId: string]: number;
+  };
 }
 
 interface CollectorDeps {
-  config: any;
+  config: KibanaConfig;
   usage: { collectorSet: any };
-  savedObjects: SavedObjectsService;
   xpackMain: XPackMainPlugin;
 }
 
@@ -63,11 +113,12 @@ export function getSpacesUsageCollector(deps: CollectorDeps) {
       const xpackInfo = deps.xpackMain.info;
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses
       const enabled = deps.config.get('xpack.spaces.enabled');
-      const spacesAvailableAndEnabled = available && enabled;
+      const spacesAvailableAndEnabled = Boolean(available && enabled);
 
       const usageStats = await getSpacesUsage(
         callCluster,
-        deps.savedObjects,
+        deps.config.get('kibana.index'),
+        deps.xpackMain,
         spacesAvailableAndEnabled
       );
 

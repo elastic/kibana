@@ -41,6 +41,14 @@ export const spaces = (kibana: Record<string, any>) =>
       }).default();
     },
 
+    uiCapabilities() {
+      return {
+        spaces: {
+          manage: true,
+        },
+      };
+    },
+
     uiExports: {
       chromeNavControls: ['plugins/spaces/views/nav_control'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -72,11 +80,6 @@ export const spaces = (kibana: Record<string, any>) =>
           spaces: [],
           activeSpace: null,
           spaceSelectorURL: getSpaceSelectorUrl(server.config()),
-          uiCapabilities: {
-            spaces: {
-              manage: true,
-            },
-          },
         };
       },
       async replaceInjectedVars(
@@ -99,15 +102,6 @@ export const spaces = (kibana: Record<string, any>) =>
             valid: false,
             error: wrapError(e).output.payload,
           };
-        }
-
-        if (vars.activeSpace.space) {
-          const features = server.plugins.xpack_main.getFeatures();
-          vars.uiCapabilities = toggleUICapabilities(
-            features,
-            vars.uiCapabilities,
-            vars.activeSpace.space
-          );
         }
 
         return vars;
@@ -173,5 +167,21 @@ export const spaces = (kibana: Record<string, any>) =>
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
       server.expose('spacesClient', spacesService);
+
+      server.registerCapabilitiesModifier(async (request, uiCapabilities) => {
+        const spacesClient = spacesService.scopedClient(request);
+        try {
+          const activeSpace = await getActiveSpace(
+            spacesClient,
+            request.getBasePath(),
+            initializerContext.legacyConfig.get('server.basePath')
+          );
+
+          const features = plugins.xpackMain.getFeatures();
+          return toggleUICapabilities(features, uiCapabilities, activeSpace);
+        } catch (e) {
+          return uiCapabilities;
+        }
+      });
     },
   });
