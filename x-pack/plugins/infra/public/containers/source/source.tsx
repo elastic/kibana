@@ -9,7 +9,6 @@ import { useEffect, useMemo, useState } from 'react';
 
 import {
   CreateSourceConfigurationMutation,
-  CreateSourceInput,
   SourceQuery,
   UpdateSourceInput,
   UpdateSourceMutation,
@@ -51,7 +50,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   const [createSourceConfigurationRequest, createSourceConfiguration] = useTrackedPromise(
     {
-      createPromise: async (newSourceConfiguration: CreateSourceInput) => {
+      createPromise: async (sourceProperties: UpdateSourceInput) => {
         if (!apolloClient) {
           throw new DependencyError(
             'Failed to create source configuration: No apollo client available.'
@@ -66,21 +65,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           fetchPolicy: 'no-cache',
           variables: {
             sourceId,
-            sourceConfiguration: {
-              name: newSourceConfiguration.name,
-              description: newSourceConfiguration.description,
-              metricAlias: newSourceConfiguration.metricAlias,
-              logAlias: newSourceConfiguration.logAlias,
-              fields: newSourceConfiguration.fields
-                ? {
-                    container: newSourceConfiguration.fields.container,
-                    host: newSourceConfiguration.fields.host,
-                    pod: newSourceConfiguration.fields.pod,
-                    tiebreaker: newSourceConfiguration.fields.tiebreaker,
-                    timestamp: newSourceConfiguration.fields.timestamp,
-                  }
-                : undefined,
-            },
+            sourceProperties,
           },
         });
       },
@@ -95,7 +80,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
     {
-      createPromise: async (changes: UpdateSourceInput[]) => {
+      createPromise: async (sourceProperties: UpdateSourceInput) => {
         if (!apolloClient) {
           throw new DependencyError(
             'Failed to update source configuration: No apollo client available.'
@@ -110,7 +95,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           fetchPolicy: 'no-cache',
           variables: {
             sourceId,
-            changes,
+            sourceProperties,
           },
         });
       },

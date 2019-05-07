@@ -51,11 +51,6 @@ const configuration = {
   tooltipZ: 1100,
 };
 
-const groupHandlerCreators = {
-  groupNodes: ({ commit }) => () => commit('actionEvent', { event: 'group' }),
-  ungroupNodes: ({ commit }) => () => commit('actionEvent', { event: 'ungroup' }),
-};
-
 const componentLayoutState = ({ aeroStore, setAeroStore, elements, selectedToplevelNodes }) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
@@ -111,13 +106,13 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
   dispatch,
-  insertNodes: pageId => selectedNodes => dispatch(insertNodes(selectedNodes, pageId)),
-  removeNodes: pageId => nodeIds => dispatch(removeElements(nodeIds, pageId)),
+  insertNodes: (selectedNodes, pageId) => dispatch(insertNodes(selectedNodes, pageId)),
+  removeNodes: (nodeIds, pageId) => dispatch(removeElements(nodeIds, pageId)),
   selectToplevelNodes: nodes =>
     dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
   // TODO: Abstract this out, this is similar to layering code in sidebar/index.js:
-  elementLayer: (pageId, selectedElement, movement) => {
-    dispatch(elementLayer({ pageId, elementId: selectedElement.id, movement }));
+  elementLayer: (pageId, elementId, movement) => {
+    dispatch(elementLayer({ pageId, elementId, movement }));
   },
 });
 
@@ -164,7 +159,6 @@ export const InteractivePage = compose(
   withProps(({ commit, forceRerender }) => ({
     commit: (...args) => forceRerender(commit(...args)),
   })),
-  withHandlers(groupHandlerCreators),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent
 );

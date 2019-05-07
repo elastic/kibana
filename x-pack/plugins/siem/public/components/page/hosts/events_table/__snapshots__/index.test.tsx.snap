@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Load More Events Table Component rendering it renders the default Events table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "_id": "Fo8nKWgBiyhPd5Zo3cib",
+        "_index": "auditbeat-7.0.0-2019.01.07",
+        "destination": Object {
+          "ip": Array [
+            "24.168.54.169",
+          ],
+          "port": Array [
+            62123,
+          ],
+        },
+        "event": Object {
+          "category": null,
+          "id": null,
+          "module": Array [
+            "system",
+          ],
+          "severity": null,
+          "type": null,
+        },
+        "geo": null,
+        "host": Object {
+          "ip": null,
+          "name": Array [
+            "siem-general",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "10.142.0.6",
+          ],
+          "port": Array [
+            9200,
+          ],
+        },
+        "suricata": null,
+        "timestamp": "2019-01-07T16:31:44.036Z",
+      },
+      Object {
+        "_id": "F48nKWgBiyhPd5Zo3cib",
+        "_index": "auditbeat-7.0.0-2019.01.07",
+        "destination": Object {
+          "ip": Array [
+            "24.168.54.169",
+          ],
+          "port": Array [
+            62145,
+          ],
+        },
+        "event": Object {
+          "category": null,
+          "id": null,
+          "module": Array [
+            "system",
+          ],
+          "severity": null,
+          "type": null,
+        },
+        "geo": null,
+        "host": Object {
+          "ip": null,
+          "name": Array [
+            "siem-general",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "10.142.0.6",
+          ],
+          "port": Array [
+            9200,
+          ],
+        },
+        "suricata": null,
+        "timestamp": "2019-01-07T16:31:44.036Z",
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="1546878704036"
+  tiebreaker="10624"
+  totalCount={15546}
+  type="page"
+/>
+`;
