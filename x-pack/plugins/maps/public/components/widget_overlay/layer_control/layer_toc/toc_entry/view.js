@@ -236,7 +236,7 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLegendDetails = () => {
-    if (!this.props.isLegendDetailsOpen) {
+    if (!this.props.isLegendDetailsOpen || !this.props.layer.hasLegendDetails()) {
       return null;
     }
 

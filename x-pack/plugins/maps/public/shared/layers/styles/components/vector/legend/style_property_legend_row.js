@@ -23,36 +23,28 @@ import {
 } from '@elastic/eui';
 
 function getLineWidthIcons() {
-  function getStyle(strokeWidth) {
-    return {
-      stroke: 'grey',
-      strokeWidth,
-      fill: 'none',
-      width: '12px',
-    };
-  }
-
+  const defaultStyle = {
+    stroke: 'grey',
+    fill: 'none',
+    width: '12px',
+  };
   return [
-    <FillableCircle style={getStyle('1px')}/>,
-    <FillableCircle style={getStyle('2px')}/>,
-    <FillableCircle style={getStyle('3px')}/>,
+    <FillableCircle style={{ ...defaultStyle, strokeWidth: '1px' }}/>,
+    <FillableCircle style={{ ...defaultStyle, strokeWidth: '2px' }}/>,
+    <FillableCircle style={{ ...defaultStyle, strokeWidth: '3px' }}/>,
   ];
 }
 
 function getSymbolSizeIcons() {
-  function getStyle(width) {
-    return {
-      stroke: 'grey',
-      strokeWidth: 'none',
-      fill: 'grey',
-      width,
-    };
-  }
-
+  const defaultStyle = {
+    stroke: 'grey',
+    strokeWidth: 'none',
+    fill: 'grey',
+  };
   return [
-    <FillableCircle style={getStyle('4px')}/>,
-    <FillableCircle style={getStyle('8px')}/>,
-    <FillableCircle style={getStyle('12px')}/>,
+    <FillableCircle style={{ ...defaultStyle, width: '4px' }}/>,
+    <FillableCircle style={{ ...defaultStyle, width: '8px' }}/>,
+    <FillableCircle style={{ ...defaultStyle, width: '12px' }}/>,
   ];
 }
 
