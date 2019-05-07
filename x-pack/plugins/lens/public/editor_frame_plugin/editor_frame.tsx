@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Datasource, Visualization } from '../types';
+import { NativeRenderer } from '../utils/native_renderer/native_renderer';
 
 interface EditorFrameProps {
   datasources: { [key: string]: Datasource };
@@ -20,15 +21,12 @@ export function EditorFrame(props: EditorFrameProps) {
       <h2>Editor Frame</h2>
 
       {keys.map(key => (
-        <div
+        <NativeRenderer
           key={key}
-          ref={domElement => {
-            if (domElement) {
-              props.datasources[key].renderDataPanel(domElement, {
-                state: {},
-                setState: () => {},
-              });
-            }
+          render={props.datasources[key].renderDataPanel}
+          actualProps={{
+            state: {},
+            setState: () => {},
           }}
         />
       ))}

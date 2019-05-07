@@ -5,7 +5,7 @@
  */
 
 import { I18nProvider } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { EditorFrameSetup } from '../types';
 import { NativeRenderer } from '../utils/native_renderer/native_renderer';
