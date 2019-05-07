@@ -40,12 +40,12 @@ export const metric = () => ({
         defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.'
       })
     },
-    colorSchema: {
+    colorScheme: {
       types: ['string'],
       default: '"Green to Red"',
       options: Object.values(vislibColorMaps).map(value => value.id),
-      help: i18n.translate('metricVis.function.colorSchema.help', {
-        defaultMessage: 'Color schema to use'
+      help: i18n.translate('metricVis.function.colorScheme.help', {
+        defaultMessage: 'Color scheme to use'
       })
     },
     colorMode: {
@@ -57,8 +57,8 @@ export const metric = () => ({
       })
     },
     colorRange: {
-      types: ['string'],
-      default: `'[{ "from": 0, "to": 10000 }]'`,
+      types: ['range'],
+      multi: true,
       help: i18n.translate('metricVis.function.colorRange.help', {
         defaultMessage: 'Color ranges: array of objects with from and to property.'
       })
@@ -66,28 +66,42 @@ export const metric = () => ({
     useRanges: {
       types: ['boolean'],
       default: false,
+      help: i18n.translate('metricVis.function.useRanges.help', {
+        defaultMessage: 'Enabled color ranges.'
+      })
     },
     invertColors: {
       types: ['boolean'],
       default: false,
+      help: i18n.translate('metricVis.function.invertColors.help', {
+        defaultMessage: 'Inverts the color ranges'
+      })
     },
     showLabels: {
       types: ['boolean'],
       default: true,
+      help: i18n.translate('metricVis.function.showLabels.help', {
+        defaultMessage: 'Shows labels under the metric values.'
+      })
     },
     bgFill: {
       types: ['string'],
       default: '"#000"',
-      help: i18n.translate('metricVis.function.subText.help', {
+      aliases: ['backgroundFill', 'bgColor', 'backgroundColor'],
+      help: i18n.translate('metricVis.function.bgFill.help', {
         defaultMessage: 'Color as html hex code (#123456), html color (red, blue) or rgba value (rgba(255,255,255,1)).'
       })
     },
-    fontSize: {
-      types: ['number'],
-      default: 60,
+    font: {
+      types: ['style'],
+      help: i18n.translate('metricVis.function.bgFill.help', {
+        defaultMessage: 'Font settings.'
+      }),
+      default: `{font size=60}`,
     },
     subText: {
       types: ['string'],
+      aliases: ['label', 'text', 'description'],
       default: '""',
       help: i18n.translate('metricVis.function.subText.help', {
         defaultMessage: 'Custom text to show under the metric'
@@ -118,6 +132,10 @@ export const metric = () => ({
       dimensions.bucket = args.bucket;
     }
 
+    if (args.percentage && args.colorRange.length === 0) {
+      throw new Error ('colorRange must be provided when using percentage');
+    }
+
     return {
       type: 'render',
       as: 'visualization',
@@ -128,9 +146,9 @@ export const metric = () => ({
           metric: {
             percentageMode: args.percentage,
             useRanges: args.useRanges,
-            colorSchema: args.colorSchema,
+            colorSchema: args.colorScheme,
             metricColorMode: args.colorMode,
-            colorsRange: JSON.parse(args.colorRange),
+            colorsRange: args.colorRange,
             labels: {
               show: args.showLabels,
             },
@@ -138,9 +156,9 @@ export const metric = () => ({
             style: {
               bgFill: args.bgFill,
               bgColor: args.colorMode === 'Background',
-              labelColor: args.colorMode === 'Label',
+              labelColor: args.colorMode === 'Labels',
               subText: args.subText,
-              fontSize: args.fontSize,
+              fontSize: parseInt(args.font.spec.fontSize),
             }
           },
           dimensions,

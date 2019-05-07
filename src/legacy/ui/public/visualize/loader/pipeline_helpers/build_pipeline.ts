@@ -212,9 +212,12 @@ export const prepareString = (variable: string, data: string): string => {
   return `${variable}='${escapeString(data)}' `;
 };
 
-export const prepareValue = (variable: string, data: any) => {
+export const prepareValue = (variable: string, data: any, raw: boolean = false) => {
   if (data === undefined) {
     return '';
+  }
+  if (raw) {
+    return `${variable}=${data} `;
   }
   switch (typeof data) {
     case 'string':
@@ -266,7 +269,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       escapedMarkdown = escapeString(markdown.toString());
     }
     let expr = `markdownvis '${escapedMarkdown}' `;
-    expr += prepareValue('fontSize', fontSize);
+    expr += prepareValue('font', `{font size=${fontSize}}`, true);
     expr += prepareValue(openLinksInNewTab, openLinksInNewTab);
     return expr;
   },
@@ -292,16 +295,23 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 
     let expr = `metricvis `;
     expr += prepareValue('percentage', percentageMode);
-    expr += prepareValue('colorSchema', colorSchema);
+    expr += prepareValue('colorScheme', colorSchema);
     expr += prepareValue('colorMode', metricColorMode);
     expr += prepareValue('useRanges', useRanges);
-    expr += prepareValue('colorRange', colorsRange);
     expr += prepareValue('invertColors', invertColors);
-    expr += prepareValue('showLabels', labels.show);
-    expr += prepareValue('bgFill', style.bgFill);
-    expr += prepareValue('fontSize', style.fontSize);
-    expr += prepareValue('subText', style.subText);
-    expr += prepareDimension('bucket', bucket);
+    expr += prepareValue('showLabels', labels && labels.show);
+    if (style) {
+      expr += prepareValue('bgFill', style.bgFill);
+      expr += prepareValue('font', `{font size=${style.fontSize}}`, true);
+      expr += prepareValue('subText', style.subText);
+      expr += prepareDimension('bucket', bucket);
+    }
+
+    if (colorsRange) {
+      colorsRange.forEach(range => {
+        expr += prepareValue('colorRange', `{range from=${range.from} to=${range.to}}`, true);
+      });
+    }
 
     metrics.forEach((metric: any) => {
       expr += prepareDimension('metric', metric);

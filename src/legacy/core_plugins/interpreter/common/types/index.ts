@@ -25,6 +25,7 @@ import { image } from './image';
 import { nullType } from './null';
 import { number } from './number';
 import { pointseries } from './pointseries';
+import { range } from './range';
 import { render } from './render';
 import { shape } from './shape';
 import { string } from './string';
@@ -41,6 +42,7 @@ export const typeSpecs = [
   number,
   nullType,
   pointseries,
+  range,
   render,
   shape,
   string,
