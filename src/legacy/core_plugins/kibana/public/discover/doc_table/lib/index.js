@@ -17,13 +17,5 @@
  * under the License.
  */
 
-export { SearchSourceProvider } from './search_source';
-export { getRequestInspectorStats, getResponseInspectorStats } from './utils/courier_inspector_utils';
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchError,
-  getSearchErrorType,
-} from './search_strategy';
+export { getSort } from './get_sort';

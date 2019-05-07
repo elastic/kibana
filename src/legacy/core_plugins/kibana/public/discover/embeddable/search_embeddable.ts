@@ -31,15 +31,21 @@ import { Filters, Query } from 'ui/embeddable/types';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
 import { getTime } from 'ui/timefilter/get_time';
+import { IndexPattern } from 'ui/index_patterns';
+import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier';
 import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
+import { getSort } from '../doc_table/lib';
+
+const config = chrome.getUiSettingsClient();
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
   description?: string;
   sort?: string[];
-  searchSource?: SearchSource;
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
   setSortOrder?: (column: string, columnDirection: string) => void;
@@ -47,6 +53,9 @@ interface SearchScope extends ng.IScope {
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
   filter?: (field: string, value: string, operator: string) => void;
+  hits?: any[];
+  indexPattern?: IndexPattern;
+  totalHitCount?: number;
 }
 
 interface SearchEmbeddableCustomization {
@@ -66,10 +75,10 @@ interface SearchEmbeddableConfig {
 export class SearchEmbeddable extends Embeddable {
   private readonly onEmbeddableStateChanged: OnEmbeddableStateChanged;
   private readonly savedSearch: SavedSearch;
+  private readonly inspectorAdaptors: Adapters;
+  private readonly $compile: ng.ICompileService;
   private $rootScope: ng.IRootScopeService;
-  private $compile: ng.ICompileService;
   private customization: SearchEmbeddableCustomization;
-  private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
   private filtersSearchSource: SearchSource;
@@ -100,6 +109,8 @@ export class SearchEmbeddable extends Embeddable {
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
     };
+    this.initializeSearchScope();
+    this.fetch();
   }
 
   public getInspectorAdapters() {
@@ -122,19 +133,13 @@ export class SearchEmbeddable extends Embeddable {
     if (this.searchScope) {
       this.pushContainerStateParamsToScope(this.searchScope);
     }
+
+    this.fetch();
   }
 
-  /**
-   *
-   * @param {Element} domNode
-   * @param {ContainerState} containerState
-   */
   public render(domNode: HTMLElement, containerState: ContainerState) {
-    this.onContainerStateChanged(containerState);
-    this.initializeSearchScope();
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
-      return;
     }
     this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
     const rootNode = angular.element(domNode);
@@ -156,21 +161,21 @@ export class SearchEmbeddable extends Embeddable {
     const searchScope: SearchScope = this.$rootScope.$new();
 
     searchScope.description = this.savedSearch.description;
-    searchScope.searchSource = this.savedSearch.searchSource;
-    searchScope.inspectorAdapters = this.inspectorAdaptors;
+    const { searchSource } = this.savedSearch;
+    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'));
 
-    const timeRangeSearchSource = searchScope.searchSource.create();
+    const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchScope || !this.timeRange) {
         return;
       }
-      return getTime(this.searchScope.searchSource.getField('index'), this.timeRange);
+      return getTime(indexPattern, this.timeRange);
     });
 
-    this.filtersSearchSource = searchScope.searchSource.create();
+    this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
 
-    searchScope.searchSource.setParent(this.filtersSearchSource);
+    searchSource.setParent(this.filtersSearchSource);
 
     this.pushContainerStateParamsToScope(searchScope);
 
@@ -183,7 +188,7 @@ export class SearchEmbeddable extends Embeddable {
       if (!searchScope.columns) {
         return;
       }
-      this.savedSearch.searchSource.getField('index').popularizeField(columnName, 1);
+      searchSource.getField('index').popularizeField(columnName, 1);
       columnActions.addColumn(searchScope.columns, columnName);
       searchScope.columns = this.customization.columns = searchScope.columns;
       this.emitEmbeddableStateChange(this.getEmbeddableState());
@@ -238,12 +243,54 @@ export class SearchEmbeddable extends Embeddable {
   private pushContainerStateParamsToScope(searchScope: SearchScope) {
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
-
     searchScope.columns = this.customization.columns || this.savedSearch.columns;
     searchScope.sort = this.customization.sort || this.savedSearch.sort;
     searchScope.sharedItemTitle = this.panelTitle;
 
     this.filtersSearchSource.setField('filter', this.filters);
     this.filtersSearchSource.setField('query', this.query);
+  }
+
+  public reload() {
+    this.fetch();
+  }
+
+  private async fetch() {
+    if (!this.searchScope) return;
+
+    this.savedSearch.searchSource.setField('size', config.get('discover:sampleSize'));
+    this.savedSearch.searchSource.setField(
+      'sort',
+      getSort(this.searchScope.sort, this.searchScope.indexPattern)
+    );
+
+    // Log request to inspector
+    this.inspectorAdaptors.requests.reset();
+    const title = i18n.translate('kbn.docTable.inspectorRequestDataTitle', {
+      defaultMessage: 'Data',
+    });
+    const description = i18n.translate('kbn.docTable.inspectorRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+    });
+    const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
+    inspectorRequest.stats(getRequestInspectorStats(this.savedSearch.searchSource));
+    this.savedSearch.searchSource.getSearchRequestBody().then((body: any) => {
+      inspectorRequest.json(body);
+    });
+
+    // Make the request
+    const resp = await this.savedSearch.searchSource.fetch();
+
+    // Log response to inspector
+    inspectorRequest
+      .stats(getResponseInspectorStats(this.savedSearch.searchSource, resp))
+      .ok({ json: resp });
+
+    // Apply the changes to the angular scope
+    this.searchScope.$apply(() => {
+      if (!this.searchScope) return;
+      this.searchScope.hits = resp.hits.hits;
+      this.searchScope.totalHitCount = resp.hits.total;
+    });
   }
 }

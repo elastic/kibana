@@ -234,15 +234,13 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-        timefilter.setTime(dateRange);
-
-        const oldQuery = $scope.model.query;
-        if (_.isEqual(oldQuery, query)) {
+        if (_.isEqual($scope.model.query, query) && _.isEqual($scope.model.timeRange, dateRange)) {
           // The user can still request a reload in the query bar, even if the
           // query is the same, and in that case, we have to explicitly ask for
           // a reload, since no state changes will cause it.
           dashboardStateManager.requestReload();
         } else {
+          timefilter.setTime(dateRange);
           $scope.model.query = query;
           dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         }

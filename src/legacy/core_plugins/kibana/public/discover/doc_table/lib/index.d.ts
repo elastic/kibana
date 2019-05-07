@@ -17,13 +17,10 @@
  * under the License.
  */
 
-export { SearchSourceProvider } from './search_source';
-export { getRequestInspectorStats, getResponseInspectorStats } from './utils/courier_inspector_utils';
+import { IndexPattern } from 'ui/index_patterns';
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchError,
-  getSearchErrorType,
-} from './search_strategy';
+export function getSort(
+  sort?: string[],
+  indexPattern?: IndexPattern,
+  defaultSortOrder?: string
+): any;
