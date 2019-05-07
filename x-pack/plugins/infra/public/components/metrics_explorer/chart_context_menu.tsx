@@ -41,7 +41,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
         }
         setPopoverState(false);
       },
-      [options, series.id, onFilter]
+      [supportFiltering, options.groupBy, series.id, onFilter]
     );
 
     const tsvbUrl = createTSVBLink(source, options, series, timeRange);
