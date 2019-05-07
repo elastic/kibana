@@ -9,13 +9,14 @@ import { AutoFollowPatternList } from '../../../public/app/sections/home/auto_fo
 import { ccrStore } from '../../../public/app/store';
 import routing from '../../../public/app/services/routing';
 
-const testBedOptions = {
+const testBedConfig = {
+  store: ccrStore,
   memoryRouter: {
     onRouter: (router) => routing.reactRouter = router
   }
 };
 
-const initTestBed = registerTestBed(AutoFollowPatternList, { options: testBedOptions, store: ccrStore });
+const initTestBed = registerTestBed(AutoFollowPatternList, testBedConfig);
 
 export const setup = (props) => {
   const testBed = initTestBed(props);

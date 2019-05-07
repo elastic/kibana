@@ -16,9 +16,10 @@
 
 |  Interface | Description |
 |  --- | --- |
+|  [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |  |
+|  [ApplicationStart](./kibana-plugin-public.applicationstart.md) |  |
 |  [BasePathSetup](./kibana-plugin-public.basepathsetup.md) | Provides access to the 'server.basePath' configuration option in kibana.yml |
 |  [Capabilities](./kibana-plugin-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
-|  [CapabilitiesStart](./kibana-plugin-public.capabilitiesstart.md) | Capabilities Setup. |
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
@@ -27,6 +28,7 @@
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [I18nSetup](./kibana-plugin-public.i18nsetup.md) | I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md) | Provides access to the metadata injected by the server into the page |
+|  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
@@ -38,6 +40,7 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [BasePathStart](./kibana-plugin-public.basepathstart.md) | Provides access to the 'server.basePath' configuration option in kibana.yml |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
