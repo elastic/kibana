@@ -39,6 +39,7 @@ import { translations } from './plugins/translations';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { ossTelemetry } from './plugins/oss_telemetry';
+import { telemetry } from './plugins/telemetry';
 import { encryptedSavedObjects } from './plugins/encrypted_saved_objects';
 
 module.exports = function (kibana) {
@@ -78,6 +79,7 @@ module.exports = function (kibana) {
     upgradeAssistant(kibana),
     uptime(kibana),
     ossTelemetry(kibana),
+    telemetry(kibana),
     encryptedSavedObjects(kibana),
   ];
 };
