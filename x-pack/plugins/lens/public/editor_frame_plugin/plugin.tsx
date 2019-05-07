@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Datasource, Visualization, EditorFrameSetup, DatasourcePublicAPI } from '../types';
+import { Datasource, Visualization, EditorFrameSetup } from '../types';
 
 import { EditorFrame } from './editor_frame';
 
@@ -20,7 +20,7 @@ class EditorFramePlugin {
     [key: string]: Visualization;
   } = {};
 
-  private activeDatasource: string | null = null;
+  private initialDatasource?: string;
 
   private element: Element | null = null;
 
@@ -32,12 +32,12 @@ class EditorFramePlugin {
           <EditorFrame
             datasources={this.datasources}
             visualizations={this.visualizations}
-            activeDatasource={this.activeDatasource}
+            initialDatasource={this.initialDatasource}
           />,
           domElement
         );
       },
-      registerDatasource: async (name, datasource) => {
+      registerDatasource: (name, datasource) => {
         // casting it to an unknown datasource. This doesn't introduce runtime errors
         // because each type T is always also an unknown, but typescript won't do it
         // on it's own because we are loosing type information here.
@@ -45,8 +45,8 @@ class EditorFramePlugin {
         // because this information isn't useful to me." but without using any which can leak
         this.datasources[name] = datasource as Datasource<unknown>;
 
-        if (!this.activeDatasource) {
-          this.activeDatasource = name;
+        if (!this.initialDatasource) {
+          this.initialDatasource = name;
         }
       },
       registerVisualization: (name, visualization) => {
