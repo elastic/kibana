@@ -17,7 +17,8 @@ describe('CancellationToken', function () {
   describe('on', function () {
     [true, null, undefined, 1, 'string', {}, []].forEach(function (value) {
       it(`should throw an Error if value is ${value}`, function () {
-        expect(cancellationToken.on).withArgs(value).to.throwError();
+        const boundOn = cancellationToken.on.bind(cancellationToken);
+        expect(boundOn).withArgs(value).to.throwError();
       });
     });
 
