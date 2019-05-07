@@ -41,6 +41,9 @@ After installation you should update the [global config](https://github.com/sqre
 ## Run via Docker
 
 If you don't have Node.js or git installed locally, you can run `backport` via Docker.
+
+<details>
+  <summary>Click to expand</summary>
 The easiest way is to add the following snippet to your bash profile:
 
 ```sh
@@ -58,6 +61,7 @@ Where:
 - `GIT_CONFIG_FILE`: Must point to a local [`.gitconfig`](https://gist.github.com/sqren/618ab2f77ffb8b5388d675fe705ed6da) file that contains the user's name and email.
 
 You can now use `backport` as if it was installed on the host machine.
+</details>
 
 ## Usage
 
