@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useEffect, useState } from 'react';
+import React, { SFC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
@@ -13,20 +13,20 @@ import { EuiSwitch, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { DataFrameJobConfig } from '../../common';
-import { JobId, TargetIndex } from './common';
+import { DataFrameJobConfig, KibanaContext, isKibanaContext } from '../../common';
+import { EsIndexName, IndexPatternTitle, JobId } from './common';
 
 export interface JobDetailsExposedState {
   createIndexPattern: boolean;
   jobId: JobId;
-  targetIndex: TargetIndex;
+  targetIndex: EsIndexName;
   touched: boolean;
   valid: boolean;
 }
 
 export function getDefaultJobDetailsState(): JobDetailsExposedState {
   return {
-    createIndexPattern: false,
+    createIndexPattern: true,
     jobId: '',
     targetIndex: '',
     touched: false,
@@ -40,12 +40,19 @@ interface Props {
 }
 
 export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
+  const kibanaContext = useContext(KibanaContext);
+
+  if (!isKibanaContext(kibanaContext)) {
+    return null;
+  }
+
   const defaults = { ...getDefaultJobDetailsState(), ...overrides };
 
-  const [jobId, setJobId] = useState(defaults.jobId);
-  const [targetIndex, setTargetIndex] = useState(defaults.targetIndex);
-  const [jobIds, setJobIds] = useState([]);
-  const [indexNames, setIndexNames] = useState([] as string[]);
+  const [jobId, setJobId] = useState<JobId>(defaults.jobId);
+  const [targetIndex, setTargetIndex] = useState<EsIndexName>(defaults.targetIndex);
+  const [jobIds, setJobIds] = useState<JobId[]>([]);
+  const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
+  const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
   const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
 
   // fetch existing job IDs and indices once for form validation
@@ -77,12 +84,29 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           })
         );
       }
+
+      try {
+        setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
+      } catch (e) {
+        toastNotifications.addDanger(
+          i18n.translate('xpack.ml.dataframe.jobDetailsForm.errorGettingIndexPatternTitles', {
+            defaultMessage: 'An error occurred getting the existing index pattern titles: {error}',
+            values: { error: JSON.stringify(e) },
+          })
+        );
+      }
     })();
   }, []);
 
   const jobIdExists = jobIds.some(id => jobId === id);
   const indexNameExists = indexNames.some(name => targetIndex === name);
-  const valid = jobId !== '' && targetIndex !== '' && !jobIdExists && !indexNameExists;
+  const indexPatternTitleExists = indexPatternTitles.some(name => targetIndex === name);
+  const valid =
+    jobId !== '' &&
+    targetIndex !== '' &&
+    !jobIdExists &&
+    !indexNameExists &&
+    !indexPatternTitleExists;
 
   // expose state to wizard
   useEffect(
@@ -143,7 +167,17 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           isInvalid={indexNameExists}
         />
       </EuiFormRow>
-      <EuiFormRow>
+      <EuiFormRow
+        isInvalid={createIndexPattern && indexPatternTitleExists}
+        error={
+          createIndexPattern &&
+          indexPatternTitleExists && [
+            i18n.translate('xpack.ml.dataframe.jobDetailsForm.indexPatternTitleError', {
+              defaultMessage: 'An index pattern with this title already exists.',
+            }),
+          ]
+        }
+      >
         <EuiSwitch
           name="mlDataFrameCreateIndexPattern"
           label={i18n.translate('xpack.ml.dataframe.jobCreateForm.createIndexPatternLabel', {
