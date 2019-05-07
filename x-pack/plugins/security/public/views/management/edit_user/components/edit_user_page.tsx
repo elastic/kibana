@@ -250,7 +250,7 @@ class EditUserPageUI extends Component<Props, State> {
           </Fragment>
         ) : null}
         <ChangePasswordForm
-          user={this.state.user as User}
+          user={this.state.user}
           isUserChangingOwnPassword={userIsLoggedInUser}
           onChangePassword={this.toggleChangePasswordForm}
           apiClient={this.props.apiClient}
