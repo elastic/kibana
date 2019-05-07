@@ -57,9 +57,13 @@ export const Expression = ({
     <EuiPanel
       className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
     >
-      {shortcut('RUN', () => setExpression(formState.expression))}
+      {shortcut('RUN', () => {
+        if (!error) {
+          setExpression(formState.expression);
+        }
+      })}
       {shortcut('RUN_SELECTION', () => {
-        if (refExpressionInput.current) {
+        if (!error && refExpressionInput.current) {
           const selection = refExpressionInput.current.getSelection();
           if (selection) {
             setExpression(selection);
