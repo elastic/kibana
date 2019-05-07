@@ -6,29 +6,28 @@
 
 import { bisector } from 'd3-array';
 
-import { getLogEntryKey, LogEntry } from '../../../../common/log_entry';
-import { SearchResult } from '../../../../common/log_search_result';
 import { compareToTimeKey, TimeKey } from '../../../../common/time';
+import { LogEntry } from '../../../utils/log_entry';
 
 export type StreamItem = LogEntryStreamItem;
 
 export interface LogEntryStreamItem {
   kind: 'logEntry';
   logEntry: LogEntry;
-  searchResult: SearchResult | undefined;
 }
 
 export function getStreamItemTimeKey(item: StreamItem) {
   switch (item.kind) {
     case 'logEntry':
-      return getLogEntryKey(item.logEntry);
+      return item.logEntry.key;
   }
 }
 
 export function getStreamItemId(item: StreamItem) {
-  const { time, tiebreaker, gid } = getStreamItemTimeKey(item);
-
-  return `${time}:${tiebreaker}:${gid}`;
+  switch (item.kind) {
+    case 'logEntry':
+      return `${item.logEntry.key.time}:${item.logEntry.key.tiebreaker}:${item.logEntry.gid}`;
+  }
 }
 
 export function parseStreamItemId(id: string) {

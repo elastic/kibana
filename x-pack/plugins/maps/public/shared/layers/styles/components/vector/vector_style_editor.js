@@ -13,7 +13,6 @@ import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../v
 import { VECTOR_FEATURE_TYPES } from '../../../sources/vector_source';
 
 import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export class VectorStyleEditor extends Component {
   state = {
@@ -190,11 +189,6 @@ export class VectorStyleEditor extends Component {
 
         <VectorStyleColorEditor
           styleProperty="fillColor"
-          stylePropertyName={
-            i18n.translate('xpack.maps.styles.vector.fillColorLabel', {
-              defaultMessage: 'Fill color'
-            })
-          }
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.fillColor}
           ordinalFields={this.state.ordinalFields}
@@ -206,11 +200,6 @@ export class VectorStyleEditor extends Component {
 
         <VectorStyleColorEditor
           styleProperty="lineColor"
-          stylePropertyName={
-            i18n.translate('xpack.maps.styles.vector.borderColorLabel', {
-              defaultMessage: 'Border color'
-            })
-          }
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.lineColor}
           ordinalFields={this.state.ordinalFields}
@@ -222,11 +211,6 @@ export class VectorStyleEditor extends Component {
 
         <VectorStyleSizeEditor
           styleProperty="lineWidth"
-          stylePropertyName={
-            i18n.translate('xpack.maps.styles.vector.borderWidthLabel', {
-              defaultMessage: 'Border width'
-            })
-          }
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.lineWidth}
           ordinalFields={this.state.ordinalFields}
@@ -238,11 +222,6 @@ export class VectorStyleEditor extends Component {
 
         <VectorStyleSizeEditor
           styleProperty="iconSize"
-          stylePropertyName={
-            i18n.translate('xpack.maps.styles.vector.symbolSizeLabel', {
-              defaultMessage: 'Symbol size'
-            })
-          }
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.iconSize}
           ordinalFields={this.state.ordinalFields}

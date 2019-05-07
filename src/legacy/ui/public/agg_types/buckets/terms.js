@@ -24,7 +24,9 @@ import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
 import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
-import orderAndSizeTemplate from '../controls/order_and_size.html';
+import { OrderParamEditor } from '../controls/order';
+import { SizeParamEditor } from '../controls/size';
+import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import { i18n } from '@kbn/i18n';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
@@ -57,7 +59,7 @@ export const termsBucketAgg = new BucketAggType({
   }),
   makeLabel: function (agg) {
     const params = agg.params;
-    return agg.getFieldDisplayName() + ': ' + params.order.display;
+    return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
   getFormat: function (bucket) {
     return {
@@ -117,10 +119,6 @@ export const termsBucketAgg = new BucketAggType({
       name: 'field',
       type: 'field',
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
-    },
-    {
-      name: 'size',
-      default: 5
     },
     {
       name: 'orderAgg',
@@ -204,7 +202,7 @@ export const termsBucketAgg = new BucketAggType({
         }
       },
       write: function (agg, output, aggs) {
-        const dir = agg.params.order.val;
+        const dir = agg.params.order.value;
         const order = output.params.order = {};
 
         let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
@@ -241,24 +239,29 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'order',
-      type: 'optioned',
+      type: 'select',
       default: 'desc',
-      editor: orderAndSizeTemplate,
+      editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
             defaultMessage: 'Descending',
           }),
-          val: 'desc'
+          value: 'desc'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
             defaultMessage: 'Ascending',
           }),
-          val: 'asc'
+          value: 'asc'
         }
       ],
       write: _.noop // prevent default write, it's handled by orderAgg
+    },
+    {
+      name: 'size',
+      editorComponent: wrapWithInlineComp(SizeParamEditor),
+      default: 5
     },
     {
       name: 'orderBy',

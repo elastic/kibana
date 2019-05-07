@@ -7,7 +7,7 @@
 import { get, map } from 'lodash';
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { Style, Ticks, DatatableColumn, AxisConfig, isAxisConfig } from '../../types';
+import { Style, Ticks, AxisConfig, isAxisConfig, PointSeriesColumns } from '../../types';
 
 type Position = 'bottom' | 'top' | 'left' | 'right';
 interface Config {
@@ -22,7 +22,7 @@ interface Config {
 }
 
 interface Options {
-  columns?: DatatableColumn[];
+  columns?: PointSeriesColumns;
   ticks?: Ticks;
   font?: Style | {};
 }

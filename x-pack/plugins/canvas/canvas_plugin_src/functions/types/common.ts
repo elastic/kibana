@@ -90,10 +90,29 @@ export interface Datatable {
 export type Legend = 'nw' | 'sw' | 'ne' | 'se';
 
 /**
+ * Allowed column names in a PointSeries
+ */
+export type PointSeriesColumnName = 'x' | 'y' | 'color' | 'size' | 'text';
+
+/**
+ * Column in a PointSeries
+ */
+export interface PointSeriesColumn {
+  type: 'number' | 'string';
+  role: 'measure' | 'dimension';
+  expression: string;
+}
+
+/**
+ * Represents a collection of valid Columns in a PointSeries
+ */
+export type PointSeriesColumns = { [key in PointSeriesColumnName]: PointSeriesColumn };
+
+/**
  * A `PointSeries` in Canvas is a unique structure that represents dots on a chart.
  */
 export interface PointSeries {
-  columns: DatatableColumn[];
+  columns: PointSeriesColumns;
   rows: Array<Record<string, any>>;
   type: 'pointseries';
 }
