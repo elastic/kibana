@@ -19,7 +19,7 @@ import { RequestExpander } from './request_expander';
 
 export class JavaLauncher implements ILanguageServerLauncher {
   private isRunning: boolean = false;
-  private needExtraOptions: boolean = true;
+  private needModuleArguments: boolean = true;
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
@@ -118,7 +118,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
       const javaHomePath = this.getSystemJavaHome();
       const javaVersion = await this.getJavaVersion(javaHomePath);
       if (javaVersion == 8) {
-        this.needExtraOptions = false;
+        this.needModuleArguments = false;
       }
       if (javaVersion >= 8) {
         return javaHomePath;
@@ -162,7 +162,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
       this.options.jdtWorkspacePath,
     ];
 
-    if (this.needExtraOptions) {
+    if (this.needModuleArguments) {
       params.push('--add-modules=ALL-SYSTEM',
                   '--add-opens',
                   'java.base/java.util=ALL-UNNAMED',
