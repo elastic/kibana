@@ -23,7 +23,6 @@ export const useUrlState = <State>({
   urlStateKey: string;
 }) => {
   const history = useHistory();
-  // const [urlState, internalSetUrlState] = useState(defaultState);
 
   const urlStateString = useMemo(
     () => {
