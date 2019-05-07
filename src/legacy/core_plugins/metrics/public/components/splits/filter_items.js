@@ -90,6 +90,8 @@ class FilterItemsUi extends Component {
           <QueryBar
             query={{ language: model.filter.language ? model.filter.language : this.state.uiQuerylanguage, query: model.filter.query }}
             screenTitle={'DataMetricsGroupByFiltersFilter'}
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
             onSubmit={(query) => this.handleSubmit(model, query)}
             appName={'VisEditor'}
             indexPatterns={indexPatterns}
