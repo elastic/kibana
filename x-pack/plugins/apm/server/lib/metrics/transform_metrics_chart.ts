@@ -5,7 +5,7 @@
  */
 import { AggregationSearchResponse } from 'elasticsearch';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ChartBase, Chart, MetricsAggs, MetricsKeys } from './types';
+import { ChartBase, MetricsAggs, MetricsKeys } from './types';
 
 const colors = [
   theme.euiColorVis0,
@@ -17,6 +17,7 @@ const colors = [
   theme.euiColorVis6
 ];
 
+export type GenericMetricsChart = ReturnType<typeof transformDataToChart>;
 export function transformDataToChart<T extends MetricsKeys>(
   result: AggregationSearchResponse<void, MetricsAggs<T>>,
   chartBase: ChartBase<T>
@@ -24,8 +25,10 @@ export function transformDataToChart<T extends MetricsKeys>(
   const { aggregations, hits } = result;
   const { timeseriesData } = aggregations;
 
-  const chart: Chart<T> = {
-    ...chartBase,
+  return {
+    title: chartBase.title,
+    key: chartBase.key,
+    yUnit: chartBase.yUnit,
     totalHits: hits.total,
     series: Object.keys(chartBase.series).map((seriesKey, i) => ({
       title: chartBase.series[seriesKey].title,
@@ -43,6 +46,4 @@ export function transformDataToChart<T extends MetricsKeys>(
       })
     }))
   };
-
-  return chart;
 }

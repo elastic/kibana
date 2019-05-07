@@ -5,7 +5,7 @@
  */
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { GenericMetricsChart } from '../../../../server/lib/metrics/types';
+import { GenericMetricsChart } from '../../../../server/lib/metrics/transform_metrics_chart';
 // @ts-ignore
 import CustomPlot from '../../shared/charts/CustomPlot';
 import { HoverXHandlers } from '../../shared/charts/SyncChartGroup';
