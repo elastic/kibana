@@ -65,9 +65,11 @@ export class Server {
 
   public async start() {
     const httpStart = await this.http.start();
+    const plugins = await this.plugins.start({});
 
     const startDeps = {
       http: httpStart,
+      plugins,
     };
 
     await this.legacy.start(startDeps);

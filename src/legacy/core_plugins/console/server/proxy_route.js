@@ -31,7 +31,9 @@ function resolveUri(base, path) {
   } else {
     // pathToUse has query string, append '&pretty'
     pathToUse = `${pathToUse}&pretty`;
-  }
+  } // appending pretty here to have Elasticsearch do the JSON formatting, as doing
+  // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
+  // measurement precision)
   return pathToUse;
 }
 
@@ -132,6 +134,8 @@ export const createProxyRoute = ({
           .type('text/plain')
           .header('warning', esResponse.headers.warning);
       };
+      // Wreck assumes that DELETE requests will not have a body, and thus it does not
+      // parse the payload to pass it along, so we have to do this manually here.
       if (method.toUpperCase() === 'DELETE') {
         const data = await Wreck.read(payload);
         return await makeRequest(data);
