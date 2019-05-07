@@ -14,6 +14,7 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
 import { getLocalizationUsageCollector } from './server/lib/get_localization_usage_collector';
+import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
 import {
   xpackInfoRoute,
   telemetryRoute,
@@ -61,6 +62,10 @@ export const xpackMain = (kibana) => {
       }).default();
     },
 
+    uiCapabilities(server) {
+      return uiCapabilitiesForFeatures(server.plugins.xpack_main);
+    },
+
     uiExports: {
       managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
@@ -92,6 +97,7 @@ export const xpackMain = (kibana) => {
       },
       injectDefaultVars(server) {
         const config = server.config();
+
         return {
           telemetryUrl: config.get('xpack.xpack_main.telemetry.url'),
           telemetryEnabled: isTelemetryEnabled(config),
@@ -122,7 +128,8 @@ export const xpackMain = (kibana) => {
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
       setupXPackMain(server);
-      registerOssFeatures(server.plugins.xpack_main.registerFeature);
+      const { types: savedObjectTypes } = server.savedObjects;
+      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes);
 
       // register routes
       xpackInfoRoute(server);
