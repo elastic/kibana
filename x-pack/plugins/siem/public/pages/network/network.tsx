@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
