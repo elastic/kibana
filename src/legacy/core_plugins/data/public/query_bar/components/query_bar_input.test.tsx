@@ -22,14 +22,13 @@ import {
   mockGetAutocompleteSuggestions,
   mockPersistedLog,
   mockPersistedLogFactory,
-} from './query_bar.test.mocks';
+} from './query_bar_input.test.mocks';
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { QueryBarUI } from './query_bar';
-import { QueryBarInput } from './query_bar_input';
+import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
 
 const noop = () => {
   return;
@@ -83,7 +82,7 @@ describe('QueryBarInput', () => {
   });
 
   it('Should render the given query', () => {
-    const component = shallowWithIntl(
+    const component = mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
@@ -99,7 +98,7 @@ describe('QueryBarInput', () => {
   });
 
   it('Should pass the query language to the language switcher', () => {
-    const component = shallowWithIntl(
+    const component = mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={luceneQuery}
         onSubmit={noop}
@@ -115,7 +114,7 @@ describe('QueryBarInput', () => {
   });
 
   it('Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true', () => {
-    const component = shallowWithIntl(
+    const component = mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
@@ -132,7 +131,7 @@ describe('QueryBarInput', () => {
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
-    shallowWithIntl(
+    mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
@@ -189,7 +188,7 @@ describe('QueryBarInput', () => {
       />
     );
 
-    const instance = component.instance() as QueryBarUI;
+    const instance = component.instance() as QueryBarInputUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -212,7 +211,7 @@ describe('QueryBarInput', () => {
       />
     );
 
-    const instance = component.instance() as QueryBarUI;
+    const instance = component.instance() as QueryBarInputUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });

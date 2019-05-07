@@ -92,7 +92,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     selectionEnd: null,
   };
 
-  private inputRef: HTMLInputElement | null = null;
+  public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
   private componentIsUnmounting = false;

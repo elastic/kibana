@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockPersistedLogFactory } from './query_bar.test.mocks';
+import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
