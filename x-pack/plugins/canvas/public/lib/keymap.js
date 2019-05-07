@@ -108,7 +108,6 @@ export const keymap = {
     EDITING: { ...getShortcuts('e', ['alt']), help: 'Toggle edit mode' },
     GRID: { ...getShortcuts('g', ['alt']), help: 'Show grid' },
     REFRESH: refreshShortcut,
-    RUN: { ...getShortcuts('enter', ['ctrl']), help: 'Run expression' },
   },
   PRESENTATION: {
     displayName: 'Presentation controls',
@@ -121,5 +120,10 @@ export const keymap = {
       key === 'help' ? osShortcuts : osShortcuts.concat(['space', 'right'])
     ),
     REFRESH: refreshShortcut,
+  },
+  EXPRESSION: {
+    displayName: 'Expression controls',
+    RUN: { ...getShortcuts('enter', ['ctrl']), help: 'Run whole expression' },
+    RUN_SELECTION: { ...getShortcuts('enter', ['ctrl', 'shift']), help: 'Run selection' },
   },
 };

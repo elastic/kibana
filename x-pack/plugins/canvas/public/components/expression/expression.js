@@ -17,28 +17,8 @@ import {
   EuiRange,
   EuiToolTip,
 } from '@elastic/eui';
+import { Shortcuts } from 'react-shortcuts';
 import { ExpressionInput } from '../expression_input';
-
-const { useEffect, useRef, useCallback } = React;
-
-const useExecOnCtrlEnter = action => {
-  useEffect(
-    () => {
-      const handler = ({ ctrlKey, metaKey, keyCode }) => {
-        const isModifierPressed = ctrlKey || metaKey; // ⌃ or ⌘
-        const isEnter = keyCode === 13;
-        if (isModifierPressed && isEnter) {
-          action();
-        }
-      };
-      document.addEventListener('keydown', handler);
-      return () => {
-        document.removeEventListener('keydown', handler);
-      };
-    },
-    [action]
-  );
-};
 
 const minFontSize = 12;
 const maxFontSize = 32;
@@ -57,15 +37,21 @@ export const Expression = ({
   isCompact,
   toggleCompactView,
 }) => {
-  const refForm = useRef(null);
-  refForm.current = formState;
-  const run = useCallback(() => setExpression(refForm.current.expression), [setExpression]);
-  useExecOnCtrlEnter(run);
-
   return (
     <EuiPanel
       className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
     >
+      <Shortcuts
+        name="EXPRESSION"
+        handler={command => {
+          if (command === 'RUN') {
+            setExpression(formState.expression);
+            return;
+          }
+        }}
+        targetNodeSelector="body"
+        global
+      />
       <ExpressionInput
         fontSize={fontSize}
         isCompact={isCompact}
@@ -132,7 +118,12 @@ export const Expression = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill disabled={!!error} onClick={run} size="s">
+              <EuiButton
+                fill
+                disabled={!!error}
+                onClick={() => setExpression(formState.expression)}
+                size="s"
+              >
                 Run
               </EuiButton>
             </EuiFlexItem>
