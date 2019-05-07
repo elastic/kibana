@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
 import React, { useEffect, useRef } from 'react';
 
 export interface NativeRendererProps<T> {
@@ -34,9 +33,9 @@ export function NativeRenderer<T>({ render, actualProps, tag }: NativeRendererPr
   const propsRef = useRef<T | null>(null);
 
   function renderAndUpdate(element: Element) {
-        elementRef.current = element;
-        propsRef.current = actualProps;
-        render(element, actualProps);
+    elementRef.current = element;
+    propsRef.current = actualProps;
+    render(element, actualProps);
   }
 
   useEffect(
@@ -56,10 +55,3 @@ export function NativeRenderer<T>({ render, actualProps, tag }: NativeRendererPr
     },
   });
 }
-
-NativeRenderer.propTypes = {
-  render: PropTypes.func.isRequired,
-  actualProps: PropTypes.object,
-  
-  tag: PropTypes.string
-};
