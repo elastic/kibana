@@ -36,18 +36,11 @@ describe('create()', () => {
     });
     const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.create(
-      savedObjectsClient,
-      {
-        description: 'my description',
-        connectorId: 'my-connector',
-        connectorOptions: {},
-      },
-      {
-        id: 'my-alert',
-        overwrite: true,
-      }
-    );
+    const result = await actionService.create(savedObjectsClient, {
+      description: 'my description',
+      connectorId: 'my-connector',
+      connectorOptions: {},
+    });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -59,10 +52,6 @@ describe('create()', () => {
         "connectorOptions": Object {},
         "connectorOptionsSecrets": Object {},
         "description": "my description",
-      },
-      Object {
-        "id": "my-alert",
-        "overwrite": true,
       },
     ],
   ],
@@ -92,15 +81,11 @@ describe('create()', () => {
       async executor() {},
     });
     await expect(
-      actionService.create(
-        savedObjectsClient,
-        {
-          description: 'my description',
-          connectorId: 'my-connector',
-          connectorOptions: {},
-        },
-        { id: 'my-alert' }
-      )
+      actionService.create(savedObjectsClient, {
+        description: 'my description',
+        connectorId: 'my-connector',
+        connectorOptions: {},
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -110,15 +95,11 @@ describe('create()', () => {
     const connectorService = new ConnectorService();
     const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
     await expect(
-      actionService.create(
-        savedObjectsClient,
-        {
-          description: 'my description',
-          connectorId: 'unregistered-connector',
-          connectorOptions: {},
-        },
-        { id: 'my-alert' }
-      )
+      actionService.create(savedObjectsClient, {
+        description: 'my description',
+        connectorId: 'unregistered-connector',
+        connectorOptions: {},
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Connector \\"unregistered-connector\\" is not registered."`
     );
@@ -135,22 +116,15 @@ describe('create()', () => {
     });
     const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.create(
-      savedObjectsClient,
-      {
-        description: 'my description',
-        connectorId: 'my-connector',
-        connectorOptions: {
-          a: true,
-          b: true,
-          c: true,
-        },
+    const result = await actionService.create(savedObjectsClient, {
+      description: 'my description',
+      connectorId: 'my-connector',
+      connectorOptions: {
+        a: true,
+        b: true,
+        c: true,
       },
-      {
-        id: 'my-alert',
-        overwrite: true,
-      }
-    );
+    });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -167,10 +141,6 @@ describe('create()', () => {
           "b": true,
         },
         "description": "my description",
-      },
-      Object {
-        "id": "my-alert",
-        "overwrite": true,
       },
     ],
   ],

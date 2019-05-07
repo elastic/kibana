@@ -56,21 +56,14 @@ export class ActionService {
     this.encryptedSavedObjects = encryptedSavedObjects;
   }
 
-  public async create(
-    savedObjectsClient: SavedObjectsClient,
-    data: Action,
-    { id, overwrite }: { id?: string; overwrite?: boolean } = {}
-  ) {
+  public async create(savedObjectsClient: SavedObjectsClient, data: Action) {
     const { connectorId } = data;
     if (!this.connectorService.has(connectorId)) {
       throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
     }
     this.connectorService.validateConnectorOptions(connectorId, data.connectorOptions);
     const actionWithSplitConnectorOptions = this.applyEncryptedAttributes(data);
-    return await savedObjectsClient.create<any>('action', actionWithSplitConnectorOptions, {
-      id,
-      overwrite,
-    });
+    return await savedObjectsClient.create<any>('action', actionWithSplitConnectorOptions);
   }
 
   public async get(savedObjectsClient: SavedObjectsClient, id: string) {

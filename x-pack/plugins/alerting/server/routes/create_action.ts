@@ -42,19 +42,9 @@ interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
 export function createActionRoute(server: Hapi.Server) {
   server.route({
     method: 'POST',
-    path: `/api/${APP_ID}/action/{id?}`,
+    path: `/api/${APP_ID}/action`,
     options: {
       validate: {
-        query: Joi.object()
-          .keys({
-            overwrite: Joi.boolean().default(false),
-          })
-          .default(),
-        params: Joi.object()
-          .keys({
-            id: Joi.string(),
-          })
-          .required(),
         payload: Joi.object().keys({
           attributes: Joi.object()
             .keys({
@@ -80,10 +70,7 @@ export function createActionRoute(server: Hapi.Server) {
       const savedObjectsClient = request.getSavedObjectsClient();
       return await request.server
         .alerting()
-        .actions.create(savedObjectsClient, request.payload.attributes, {
-          id: request.params.id,
-          overwrite: request.query.overwrite,
-        });
+        .actions.create(savedObjectsClient, request.payload.attributes);
     },
   });
 }
