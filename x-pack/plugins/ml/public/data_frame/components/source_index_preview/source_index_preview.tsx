@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -41,6 +42,7 @@ import { IndexPatternContext, SimpleQuery } from '../../common';
 import {
   EsDoc,
   EsFieldName,
+  getSourceIndexDevConsoleStatement,
   getSelectableFields,
   MAX_COLUMNS,
   toggleSelectedField,
@@ -253,6 +255,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     });
   }
 
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
+  });
+
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -260,7 +266,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -314,6 +320,16 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                   </div>
                 </EuiPopover>
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy
+                beforeMessage={euiCopyText}
+                textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
+              >
+                {(copy: () => void) => (
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+                )}
+              </EuiCopy>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
