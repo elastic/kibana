@@ -27,6 +27,7 @@ export const source = {
   description: '',
   logAlias: 'filebeat-*',
   metricAlias: 'metricbeat-*',
+  logColumns: [],
   fields: {
     host: 'host.name',
     container: 'container.id',

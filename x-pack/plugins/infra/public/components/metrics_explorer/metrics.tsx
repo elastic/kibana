@@ -85,7 +85,7 @@ export const MetricsExplorerMetrics = injectI18n(
         placeholder={placeholderText}
         fullWidth
         options={comboOptions}
-        selectedOptions={selectedOptios}
+        selectedOptions={selectedOptions}
         onChange={handleChange}
         isClearable={false}
         inputRef={handleInputRef}
