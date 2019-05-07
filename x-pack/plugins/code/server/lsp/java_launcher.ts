@@ -117,11 +117,15 @@ export class JavaLauncher implements ILanguageServerLauncher {
     if (this.getSystemJavaHome()) {
       const javaHomePath = this.getSystemJavaHome();
       const javaVersion = await this.getJavaVersion(javaHomePath);
-      if (javaVersion == 8) {
-        this.needModuleArguments = false;
-      }
-      if (javaVersion >= 8) {
+      if (javaVersion > 8) {
+        // for JDK's versiob > 8, we need extra arguments as default
         return javaHomePath;
+      } else if (javaVersion === 8) {
+        // JDK's version = 8, needn't extra arguments
+        this.needModuleArguments = false;
+        return javaHomePath;
+      } else {
+        // JDK's version < 8, use bundled JDK instead, whose version > 8, so need extra arguments as default
       }
     }
 
