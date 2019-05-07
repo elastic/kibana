@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import { boomify } from 'boom';
+import boom, { boomify } from 'boom';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
 
@@ -42,11 +42,6 @@ export function registerStatsApi(kbnServer, server, config) {
   };
 
   const getUsage = async callCluster => {
-    const collectorsReady = await collectorSet.areAllCollectorsReady();
-    if (!collectorsReady) {
-      return {};
-    }
-
     const usage = await collectorSet.bulkFetchUsage(callCluster);
     return collectorSet.toObject(usage);
   };
@@ -74,6 +69,11 @@ export function registerStatsApi(kbnServer, server, config) {
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
+          const collectorsReady = await collectorSet.areAllCollectorsReady();
+
+          if (shouldGetUsage && !collectorsReady) {
+            return boom.serverUnavailable('Not all collectors are ready.');
+          }
 
           const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve();
           try {
@@ -136,6 +136,9 @@ export function registerStatsApi(kbnServer, server, config) {
          * for health-checking Kibana and fetch does not rely on fetching data
          * from ES */
         const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
+        if (!await kibanaStatsCollector.isReady()) {
+          return boom.serverUnavailable('Not all collectors are ready.');
+        }
         let kibanaStats = await kibanaStatsCollector.fetch();
         kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
 
