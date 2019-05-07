@@ -26,7 +26,8 @@ const layerMock = {
 };
 
 const defaultProps = {
-  displayName: 'layer1',
+  displayName: 'layer 1',
+  escapedDisplayName: 'layer1',
   zoom: 0,
   layer: layerMock,
 };
