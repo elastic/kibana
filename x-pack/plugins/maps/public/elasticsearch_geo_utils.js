@@ -228,8 +228,11 @@ export function createShapeFilter(geojsonPolygon, indexPatternId, geoFieldName, 
     meta: {
       negate: false,
       index: indexPatternId,
-      // eslint-disable-next-line max-len
-      alias: `geo polygon at ${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}`
+      alias: i18n.translate('xpack.maps.elasticsearch_geo_utils.filter.aliasTitle', {
+        defaultMessage: `geo polygon at {coordinate}`,
+        // eslint-disable-next-line max-len
+        values: { coordinate: `${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}` }
+      })
     }
   };
 

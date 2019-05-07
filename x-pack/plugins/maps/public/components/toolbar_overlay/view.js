@@ -85,8 +85,8 @@ export class ToolbarOverlay extends React.Component {
   }
 
   async _getuniqueIndexPatternAndFieldCombos() {
-    const indexPatterns = await getIndexPatternsFromIds(this.props.uniqueIndexPatternIds);
     try {
+      const indexPatterns = await getIndexPatternsFromIds(this.props.uniqueIndexPatternIds);
       const uniqueIndexPatternsAndGeofields = [];
       indexPatterns.forEach((indexPattern) => {
         indexPattern.fields.forEach(field => {
