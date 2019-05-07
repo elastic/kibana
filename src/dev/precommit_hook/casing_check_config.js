@@ -31,6 +31,7 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/LICENSE',
   '**/*.txt',
   '**/Gruntfile.js',
   'tasks/config/**/*',
