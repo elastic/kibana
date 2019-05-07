@@ -123,6 +123,7 @@ uiModules.get('kibana')
             const shim = {
               origin: service.getOrigin(),
               id: service.getId(),
+              name: await service.getDisplayName(),
               minZoom: await service.getMinZoom(),
               maxZoom: await service.getMaxZoom(),
               attribution: service.getHTMLAttribution()
@@ -160,7 +161,7 @@ uiModules.get('kibana')
         const tmsService = tmsServices.find(service => {
           return service.getId() === tmsServiceConfig.id;
         });
-        return tmsService.getUrlTemplate();
+        return await tmsService.getUrlTemplate();
       }
 
       async getUrlTemplateForTMSLayer(tmsServiceConfig) {
