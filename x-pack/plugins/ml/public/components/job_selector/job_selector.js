@@ -6,7 +6,7 @@
 
 
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
 
@@ -140,26 +140,34 @@ export function JobSelector({
     setNewSelection(selectedIds);
   }, [isFlyoutVisible]); // eslint-disable-line
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (jobs.length > 0 && flyoutEl && flyoutEl.current && flyoutEl.current.flyout) {
-        const tzConfig = config.get('dateFormat:tz');
-        const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
-        const derivedWidth = Math.round(flyoutEl.current.flyout.offsetWidth / 4);
-        const normalizedJobs = normalizeTimes(jobs, dateFormatTz, derivedWidth);
-        setJobs(normalizedJobs);
-        const { groups: updatedGroups } = getGroupsFromJobs(normalizedJobs);
-        setGroups(updatedGroups);
-        setGanttBarWidth(derivedWidth);
-      }
-    };
+  // Wrap handleResize in useCallback as it is a dependency for useEffect on line 166 below.
+  // Not wrapping it would cause this dependency to change on every render
+  const handleResize = useCallback(() => {
+    if (jobs.length > 0 && flyoutEl && flyoutEl.current && flyoutEl.current.flyout) {
+      const tzConfig = config.get('dateFormat:tz');
+      const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+      // Give the ganttBar a little more than a 3rd of the width of the flyout
+      const derivedWidth = Math.round(flyoutEl.current.flyout.offsetWidth / 3.6);
+      const normalizedJobs = normalizeTimes(jobs, dateFormatTz, derivedWidth);
+      setJobs(normalizedJobs);
+      const { groups: updatedGroups } = getGroupsFromJobs(normalizedJobs);
+      setGroups(updatedGroups);
+      setGanttBarWidth(derivedWidth);
+    }
+  }, [config, jobs]);
 
+  useEffect(() => {
+    // Ensure ganttBar width gets calculated on resize
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [config, jobs]);
+  }, [handleResize]);
+
+  useEffect(() => {
+    handleResize();
+  }, [handleResize, jobs]);
 
   function closeFlyout() {
     setIsFlyoutVisible(false);
@@ -386,18 +394,20 @@ export function JobSelector({
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={handleJobSelectionClick}
-          >
-            {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
-              defaultMessage: 'Job Selection'
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
             {renderIdBadges()}
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="pencil"
+            onClick={handleJobSelectionClick}
+          >
+            {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
+              defaultMessage: 'Edit job selection'
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
