@@ -42,9 +42,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
-
+import chrome from 'ui/chrome';
 const { QueryBar } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
+const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 class MetricPanelConfig extends Component {
   constructor(props) {
@@ -52,6 +53,7 @@ class MetricPanelConfig extends Component {
     this.state = {
       selectedTab: 'data',
       indexPatternForQuery: {},
+      uiQueryLanguage: uiSettingsQueryLanguage,
     };
   }
 
@@ -136,7 +138,7 @@ class MetricPanelConfig extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : 'kuery',
+                      language: model.filter.language ? model.filter.language : this.state.uiQueryLanguage,
                       query: model.filter.query,
                     }}
                     screenTitle={'MetricPanelConfigQuery'}
