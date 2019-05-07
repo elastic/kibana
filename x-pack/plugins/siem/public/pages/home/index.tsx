@@ -33,7 +33,6 @@ import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 import { Timelines } from '../timelines';
-import { WithGlobalTime, WithGlobalTimeUrlState } from '../../utils/with_global_time';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -89,30 +88,7 @@ export const HomePage = pure(() => (
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
                         <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                          <WithGlobalTimeUrlState />
-
-                          <WithGlobalTime>
-                            {({
-                              timeRange,
-                              setTimeRange,
-                              refreshInterval,
-                              setRefreshInterval,
-                              isAutoReloading,
-                              setAutoReload,
-                            }) => (
-                              <SuperDatePicker
-                                id="global"
-                                {...{
-                                  timeRange,
-                                  setTimeRange,
-                                  refreshInterval,
-                                  setRefreshInterval,
-                                  isAutoReloading,
-                                  setAutoReload,
-                                }}
-                              />
-                            )}
-                          </WithGlobalTime>
+                          <SuperDatePicker id="global" />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} data-test-subj="appSettingsContainer">
                           <AppSettings />

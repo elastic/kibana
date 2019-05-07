@@ -18,7 +18,6 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsActions, inputsModel, State } from '../../store';
-import { GlobalTimeState } from '../../utils/with_global_time';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -33,7 +32,7 @@ type MyEuiSuperDatePickerProps = Pick<
   | 'refreshInterval'
   | 'showUpdateButton'
   | 'start'
-> & {
+  > & {
   isLoading?: boolean;
 };
 const MyEuiSuperDatePicker: React.SFC<MyEuiSuperDatePickerProps> = EuiSuperDatePicker;
@@ -79,7 +78,6 @@ interface TimeArgs {
 
 export type SuperDatePickerProps = OwnProps &
   SuperDatePickerDispatchProps &
-  GlobalTimeState &
   SuperDatePickerStateRedux;
 
 export interface SuperDatePickerState {
@@ -91,7 +89,7 @@ export interface SuperDatePickerState {
 export const SuperDatePickerComponent = class extends Component<
   SuperDatePickerProps,
   SuperDatePickerState
-> {
+  > {
   constructor(props: SuperDatePickerProps) {
     super(props);
 
@@ -103,16 +101,9 @@ export const SuperDatePickerComponent = class extends Component<
   }
 
   public render() {
-    const { duration, end, start, kind, fromStr, policy, toStr, isLoading, timeRange } = this.props;
-    let endDate;
-    let startDate;
-    if (!end && !start && timeRange) {
-      endDate = new Date(timeRange.from).toISOString();
-      startDate = new Date(timeRange.to).toISOString();
-    } else {
-      endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
-      startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
-    }
+    const { duration, end, start, kind, fromStr, policy, toStr, isLoading } = this.props;
+    const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
+    const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
     return (
       <MyEuiSuperDatePicker
@@ -156,11 +147,8 @@ export const SuperDatePickerComponent = class extends Component<
     }
 
     if (isPaused && policy === 'interval') {
-      this.props.setAutoReload(false);
       stopAutoReload({ id });
     } else if (!isPaused && policy === 'manual') {
-      this.props.setRefreshInterval(refreshInterval);
-      this.props.setAutoReload(true);
       startAutoReload({ id });
     }
 
@@ -189,12 +177,6 @@ export const SuperDatePickerComponent = class extends Component<
   private onTimeChange = ({ start, end, isQuickSelection, isInvalid }: OnTimeChangeProps) => {
     if (!isInvalid) {
       this.updateReduxTime({ start, end, isQuickSelection, isInvalid });
-      console.log('this.props', this.props);
-      this.props.setTimeRange({
-        from: this.formatDate(start),
-        to: this.formatDate(end),
-        interval: '>=1m',
-      });
       this.setState((prevState: SuperDatePickerState) => {
         const recentlyUsedRanges = [
           { start, end },
