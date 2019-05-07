@@ -133,7 +133,7 @@ describe('ServerStatus class', function () {
       const json = JSON.parse(JSON.stringify(serverStatus));
       expect(json).toHaveProperty('overall');
       expect(json.overall.state).toEqual(serverStatus.overall().state);
-      expect(json.statuses).toHaveLength(3);
+      expect(json.statuses).toHaveLength(4);
 
       const out = status => find(json.statuses, { id: status.id });
       expect(out(service)).toHaveProperty('state', 'green');
