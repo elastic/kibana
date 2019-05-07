@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { BasePathSetup } from './base_path';
-import { Capabilities, CapabilitiesStart } from './capabilities';
+import { BasePathSetup, BasePathStart } from './base_path';
 import {
   ChromeBadge,
   ChromeBrand,
@@ -33,6 +32,7 @@ import {
   InjectedMetadataParams,
   InjectedMetadataSetup,
   InjectedMetadataStart,
+  LegacyNavLink,
 } from './injected_metadata';
 import {
   NotificationsSetup,
@@ -50,6 +50,7 @@ import {
   PluginStartContext,
 } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
 
@@ -63,6 +64,8 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
   /** {@link I18nSetup} */
   i18n: I18nSetup;
   /** {@link InjectedMetadataSetup} */
@@ -91,8 +94,10 @@ export interface CoreSetup {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreStart {
-  /** {@link CapabilitiesStart} */
-  capabilities: CapabilitiesStart;
+  /** {@link ApplicationStart} */
+  application: ApplicationStart;
+  /** {@link BasePathStart} */
+  basePath: BasePathStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link InjectedMetadataStart} */
@@ -104,12 +109,14 @@ export interface CoreStart {
 }
 
 export {
+  ApplicationSetup,
+  ApplicationStart,
   BasePathSetup,
+  BasePathStart,
   HttpSetup,
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,
-  CapabilitiesStart,
   ChromeSetup,
   ChromeBadge,
   ChromeBreadcrumb,
@@ -120,6 +127,7 @@ export {
   InjectedMetadataSetup,
   InjectedMetadataStart,
   InjectedMetadataParams,
+  LegacyNavLink,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,

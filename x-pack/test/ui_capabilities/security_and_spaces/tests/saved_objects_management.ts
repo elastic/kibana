@@ -7,11 +7,9 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
+import { assertDeeplyFalse } from '../../common/lib/assert_deeply_false';
 
 const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder(true);
 
@@ -26,15 +24,15 @@ export default function savedObjectsManagementTests({
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
-        const uiCapabilities = await uiCapabilitiesService.get(
-          { username: user.username, password: user.password },
-          space.id
-        );
+        const uiCapabilities = await uiCapabilitiesService.get({
+          credentials: { username: user.username, password: user.password },
+          spaceId: space.id,
+        });
+        expect(uiCapabilities.success).to.be(true);
+        expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
         switch (scenario.id) {
           case 'superuser at everything_space':
           case 'superuser at nothing_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
               savedObjectsManagementBuilder.uiCapabilities('all')
             );
@@ -46,8 +44,6 @@ export default function savedObjectsManagementTests({
           case 'global_all at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'nothing_space_all at nothing_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.build({
                 all: [
@@ -74,8 +70,6 @@ export default function savedObjectsManagementTests({
           case 'dual_privileges_read at nothing_space':
           case 'global_read at nothing_space':
           case 'nothing_space_read at nothing_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.build({
                 read: [
@@ -95,6 +89,8 @@ export default function savedObjectsManagementTests({
               })
             );
             break;
+          // if we don't have access at the space itself, all ui
+          // capabilities should be false
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -103,10 +99,7 @@ export default function savedObjectsManagementTests({
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToRoot
-            );
+            assertDeeplyFalse(uiCapabilities.value!.savedObjectsManagement);
             break;
           default:
             throw new UnreachableError(scenario);

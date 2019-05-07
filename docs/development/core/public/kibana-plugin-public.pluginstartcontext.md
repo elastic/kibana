@@ -16,7 +16,8 @@ export interface PluginStartContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [capabilities](./kibana-plugin-public.pluginstartcontext.capabilities.md) | <code>CapabilitiesStart</code> |  |
+|  [application](./kibana-plugin-public.pluginstartcontext.application.md) | <code>Pick&lt;ApplicationStart, 'capabilities'&gt;</code> |  |
+|  [basePath](./kibana-plugin-public.pluginstartcontext.basepath.md) | <code>BasePathStart</code> |  |
 |  [i18n](./kibana-plugin-public.pluginstartcontext.i18n.md) | <code>I18nStart</code> |  |
 |  [notifications](./kibana-plugin-public.pluginstartcontext.notifications.md) | <code>NotificationsStart</code> |  |
 |  [overlays](./kibana-plugin-public.pluginstartcontext.overlays.md) | <code>OverlayStart</code> |  |
