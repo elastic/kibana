@@ -73,6 +73,7 @@ export class Server {
     await this.legacy.start(startDeps);
 
     await this.http.start();
+    this.log.info('The core is running');
 
     return startDeps;
   }
