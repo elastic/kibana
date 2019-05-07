@@ -35,7 +35,7 @@ export const WithMetricsExplorerOptionsUrlState = () => {
       options,
       timerange: currentTimerange,
     }),
-    [{ options, currentTimerange }]
+    [options, currentTimerange]
   );
 
   return (
