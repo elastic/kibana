@@ -12,7 +12,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   let version: string;
 
-  describe('Privileges', () => {
+  describe.skip('Privileges', () => {
     before(async () => {
       const versionService = getService('kibanaServer').version;
       version = await versionService.get();
@@ -678,6 +678,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   `ui:${version}:savedObjectsManagement/index-pattern/read`,
                   `ui:${version}:savedObjectsManagement/config/read`,
                   `ui:${version}:maps/save`,
+                  `ui:${version}:maps/show`,
                   'allHack:',
                 ],
                 read: [
@@ -699,6 +700,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   `ui:${version}:savedObjectsManagement/map/read`,
                   `ui:${version}:savedObjectsManagement/index-pattern/read`,
                   `ui:${version}:savedObjectsManagement/config/read`,
+                  `ui:${version}:maps/show`,
                 ],
               },
               canvas: {
@@ -748,6 +750,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   `ui:${version}:savedObjectsManagement/index-pattern/read`,
                   `ui:${version}:savedObjectsManagement/config/read`,
                   `ui:${version}:canvas/save`,
+                  `ui:${version}:canvas/show`,
                   'allHack:',
                 ],
                 read: [
@@ -773,6 +776,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   `ui:${version}:savedObjectsManagement/canvas-workpad/read`,
                   `ui:${version}:savedObjectsManagement/canvas-element/read`,
                   `ui:${version}:savedObjectsManagement/config/read`,
+                  `ui:${version}:canvas/show`,
                 ],
               },
               infrastructure: {
@@ -1138,6 +1142,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:savedObjectsManagement/map/delete`,
                 `ui:${version}:savedObjectsManagement/map/edit`,
                 `ui:${version}:maps/save`,
+                `ui:${version}:maps/show`,
                 `app:${version}:canvas`,
                 `ui:${version}:catalogue/canvas`,
                 `ui:${version}:navLinks/canvas`,
@@ -1158,6 +1163,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:savedObjectsManagement/canvas-element/edit`,
                 `ui:${version}:savedObjectsManagement/canvas-element/read`,
                 `ui:${version}:canvas/save`,
+                `ui:${version}:canvas/show`,
                 `api:${version}:infra`,
                 `app:${version}:infra`,
                 `ui:${version}:catalogue/infraops`,
@@ -1274,6 +1280,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `app:${version}:maps`,
                 `ui:${version}:catalogue/maps`,
                 `ui:${version}:navLinks/maps`,
+                `ui:${version}:maps/show`,
                 `app:${version}:canvas`,
                 `ui:${version}:catalogue/canvas`,
                 `ui:${version}:navLinks/canvas`,
@@ -1281,6 +1288,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `saved_object:${version}:canvas-element/get`,
                 `saved_object:${version}:canvas-element/find`,
                 `ui:${version}:savedObjectsManagement/canvas-element/read`,
+                `ui:${version}:canvas/show`,
                 `api:${version}:infra`,
                 `app:${version}:infra`,
                 `ui:${version}:catalogue/infraops`,
@@ -1468,6 +1476,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:savedObjectsManagement/map/delete`,
                 `ui:${version}:savedObjectsManagement/map/edit`,
                 `ui:${version}:maps/save`,
+                `ui:${version}:maps/show`,
                 `app:${version}:canvas`,
                 `ui:${version}:catalogue/canvas`,
                 `ui:${version}:navLinks/canvas`,
@@ -1488,6 +1497,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `ui:${version}:savedObjectsManagement/canvas-element/edit`,
                 `ui:${version}:savedObjectsManagement/canvas-element/read`,
                 `ui:${version}:canvas/save`,
+                `ui:${version}:canvas/show`,
                 `api:${version}:infra`,
                 `app:${version}:infra`,
                 `ui:${version}:catalogue/infraops`,
@@ -1604,6 +1614,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `app:${version}:maps`,
                 `ui:${version}:catalogue/maps`,
                 `ui:${version}:navLinks/maps`,
+                `ui:${version}:maps/show`,
                 `app:${version}:canvas`,
                 `ui:${version}:catalogue/canvas`,
                 `ui:${version}:navLinks/canvas`,
@@ -1611,6 +1622,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 `saved_object:${version}:canvas-element/get`,
                 `saved_object:${version}:canvas-element/find`,
                 `ui:${version}:savedObjectsManagement/canvas-element/read`,
+                `ui:${version}:canvas/show`,
                 `api:${version}:infra`,
                 `app:${version}:infra`,
                 `ui:${version}:catalogue/infraops`,
