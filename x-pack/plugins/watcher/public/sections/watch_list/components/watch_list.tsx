@@ -68,10 +68,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       }),
       sortable: true,
       truncateText: true,
-      render: (id: string, watch: any) => {
-        if (watch.isSystemWatch) {
-          return id;
-        }
+      render: (id: string) => {
         return (
           <EuiLink
             className="indTable__link euiTableCellContent"
@@ -136,11 +133,9 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       actions: [
         {
           render: (watch: any) => {
-            const disabled = watch.isSystemWatch;
             return (
               <EuiButtonEmpty
                 iconType="pencil"
-                isDisabled={disabled}
                 aria-label={intl.formatMessage({
                   id: 'xpack.watcher.sections.watchList.watchTable.menuEditButtonDescription',
                   defaultMessage: 'Edit watch',

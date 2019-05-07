@@ -316,24 +316,30 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
                 )}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => toggleWatchActivation()}>{activationButtonText}</EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="btnDeleteWatch"
-                onClick={() => {
-                  setWatchesToDelete([watchId]);
-                }}
-                color="danger"
-                disabled={false}
-              >
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchHistory.deleteWatchButtonLabel"
-                  defaultMessage="Delete"
-                />
-              </EuiButton>
-            </EuiFlexItem>
+            {loadedWatch && !loadedWatch.isSystemWatch && (
+              <Fragment>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={() => toggleWatchActivation()}>
+                    {activationButtonText}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="btnDeleteWatch"
+                    onClick={() => {
+                      setWatchesToDelete([watchId]);
+                    }}
+                    color="danger"
+                    disabled={false}
+                  >
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchHistory.deleteWatchButtonLabel"
+                      defaultMessage="Delete"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </Fragment>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -14,11 +14,14 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiButtonEmpty,
+  EuiBadge,
   EuiToolTip,
   EuiCallOut,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { loadWatchDetail, ackWatchAction } from '../../../lib/api';
 import { getPageErrorCode, WatchStatus } from '../../../components';
@@ -210,15 +213,38 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
-      <EuiTitle size="m">
-        <h1>
-          <FormattedMessage
-            id="xpack.watcher.sections.watchDetail.header"
-            defaultMessage="Current status for '{watchId}'"
-            values={{ watchId }}
-          />
-        </h1>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="m">
+            <h1>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchDetail.header"
+                defaultMessage="Current status for '{watchId}'"
+                values={{ watchId }}
+              />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        {watchDetail && watchDetail.isSystemWatch && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchDetail.headerBadgeToolipText"
+                  defaultMessage="System watches cannot be deactivated or deleted."
+                />
+              }
+            >
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchDetail.headerBadgeText"
+                  defaultMessage="System watch"
+                />
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
