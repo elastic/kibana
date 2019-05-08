@@ -174,6 +174,7 @@ describe.skip('onPostAuthRequestInterceptor', () => {
       initSpacesOnRequestInterceptor({
         config: server.config(),
         legacyServer: server,
+        http: null as any,
         log,
         xpackMain: server.plugins.xpack_main,
         spacesService,
@@ -181,6 +182,7 @@ describe.skip('onPostAuthRequestInterceptor', () => {
       initSpacesOnPostAuthRequestInterceptor({
         config: server.config(),
         legacyServer: server,
+        http: null as any,
         log,
         xpackMain: server.plugins.xpack_main,
         spacesService,
