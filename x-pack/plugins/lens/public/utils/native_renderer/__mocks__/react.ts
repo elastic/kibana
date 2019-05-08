@@ -9,4 +9,6 @@ import React from 'react';
 // This mock overwrites react to use the layout effect hook instead of the normal one.
 // This is done to have effects executed synchronously to be able to test them without
 // setTimeout hacks.
+
+// eslint-disable-next-line import/no-default-export
 export default { ...React, useEffect: React.useLayoutEffect };

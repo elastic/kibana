@@ -46,6 +46,28 @@ describe('agnostic_renderer', () => {
     expect(renderSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('should not render again for unchanged callback functions', () => {
+    const renderSpy = jest.fn();
+    const testCallback = () => {};
+    const testState = { a: 'abc' };
+
+    render(
+      <NativeRenderer
+        render={renderSpy}
+        actualProps={{ state: testState, setState: testCallback }}
+      />,
+      mountpoint
+    );
+    render(
+      <NativeRenderer
+        render={renderSpy}
+        actualProps={{ state: testState, setState: testCallback }}
+      />,
+      mountpoint
+    );
+    expect(renderSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('should render again once if props change', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
