@@ -12,10 +12,10 @@ import { escapeQueryValue } from '../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
-import { parseValue } from '../timeline/body/renderers/plain_column_renderer';
 import { Provider } from '../timeline/data_providers/provider';
 
 import * as i18n from './translations';
+import { parseValue } from '../timeline/body/renderers/parse_value';
 
 /**
  * Defines the behavior of the search input that appears above the table of data

@@ -12,28 +12,9 @@ import { plainColumnRenderer } from './plain_column_renderer';
 import { plainRowRenderer } from './plain_row_renderer';
 import { RowRenderer } from './row_renderer';
 import { suricataRowRenderer } from './suricata/suricata_row_renderer';
-import { systemRowRenderers } from './system';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { zeekRowRenderer } from './zeek/zeek_row_renderer';
-
-export * from './args';
-export * from './auditd';
-export * from './column_renderer';
-export * from './empty_column_renderer';
-export * from './formatted_field';
-export * from './get_column_renderer';
-export * from './get_row_renderer';
-export * from './helpers';
-export * from './host_working_dir';
-export * from './netflow';
-export * from './plain_column_renderer';
-export * from './plain_row_renderer';
-export * from './process_draggable';
-export * from './row_renderer';
-export * from './suricata';
-export * from './unknown_column_renderer';
-export * from './user_host_working_dir';
-export * from './zeek';
+import { systemRowRenderers } from './system/generic_row_renderer';
 
 export const rowRenderers: RowRenderer[] = [
   ...auditdRowRenderers,
