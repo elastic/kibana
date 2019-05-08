@@ -24,8 +24,6 @@ import {
 } from './field_renderers';
 import * as i18n from './translations';
 
-export const IpOverviewId = 'ip-overview';
-
 interface DescriptionList {
   title: string;
   description: JSX.Element;

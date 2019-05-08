@@ -9,7 +9,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import { CustomSelectionTable } from '../custom_selection_table';
-import { getBadge } from '../job_selector';
+import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar/';
 
 import {
@@ -55,7 +55,7 @@ export function JobSelectorTable({
         },
         {
           name: 'groups',
-          getValue: item => (item.groups ? item.groups[0].toLowerCase() : ''),
+          getValue: item => (item.groups && item.groups[0] ? item.groups[0].toLowerCase() : ''),
           isAscending: true,
         }
       ];
@@ -97,7 +97,7 @@ export function JobSelectorTable({
         <Fragment>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem key={g.id} grow={false}>
-              {getBadge({ id: g.id, isGroup: true })}
+              <JobSelectorBadge id={g.id} isGroup={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.ml.jobSelector.filterBar.jobGroupTitle', {
@@ -131,7 +131,7 @@ export function JobSelectorTable({
         isSortable: true,
         alignment: LEFT_ALIGNMENT,
         render: ({ groups = [] }) => (
-          groups.map((group) => getBadge({ id: group, isGroup: true }))
+          groups.map((group) => <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />)
         ),
       },
       {
@@ -187,7 +187,7 @@ export function JobSelectorTable({
         id: 'id',
         isSortable: true,
         alignment: LEFT_ALIGNMENT,
-        render: ({ id }) => getBadge({ id, isGroup: true })
+        render: ({ id }) => <JobSelectorBadge id={id} isGroup={true} />
       },
       {
         id: 'jobs in group',

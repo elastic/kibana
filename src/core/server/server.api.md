@@ -16,6 +16,7 @@ import { Server } from 'hapi';
 import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { Url } from 'url';
 
 // @public (undocumented)
 export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
@@ -143,8 +144,8 @@ export interface HttpServiceStart {
 }
 
 // @public (undocumented)
-export class KibanaRequest<Params, Query, Body> {
-    constructor(req: Request, params: Params, query: Query, body: Body);
+export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+    constructor(request: Request, params: Params, query: Query, body: Body);
     // (undocumented)
     readonly body: Body;
     // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
@@ -159,6 +160,8 @@ export class KibanaRequest<Params, Query, Body> {
     readonly path: string;
     // (undocumented)
     readonly query: Query;
+    // (undocumented)
+    unstable_getIncomingMessage(): import("http").IncomingMessage;
     }
 
 // @public
@@ -242,6 +245,7 @@ export interface OnRequestToolkit {
     rejected: (error: Error, options?: {
         statusCode?: number;
     }) => OnRequestResult;
+    setUrl: (newUrl: string | Url) => void;
 }
 
 // @public
@@ -286,6 +290,8 @@ export interface PluginSetupContext {
     http: {
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnRequest: HttpServiceSetup['registerOnRequest'];
+        getBasePathFor: HttpServiceSetup['getBasePathFor'];
+        setBasePathFor: HttpServiceSetup['setBasePathFor'];
     };
 }
 
