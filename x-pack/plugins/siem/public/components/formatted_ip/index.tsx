@@ -13,10 +13,10 @@ import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrappe
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { IPDetailsLink } from '../links';
-import { parseQueryValue } from '../timeline/body/renderers';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import { TruncatableText } from '../truncatable_text';
+import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
 
 const getUniqueId = ({
   contextId,

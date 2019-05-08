@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, isObject } from 'lodash/fp';
+import { isNumber } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
@@ -15,8 +15,10 @@ import { getEmptyTagValue } from '../../../empty_value';
 import { FormattedIp } from '../../../formatted_ip';
 import { Provider } from '../../data_providers/provider';
 import { ColumnHeader } from '../column_headers/column_header';
-
-import { ColumnRenderer, FormattedFieldValue, IP_FIELD_TYPE } from '.';
+import { IP_FIELD_TYPE, FormattedFieldValue } from './formatted_field';
+import { ColumnRenderer } from './column_renderer';
+import { parseQueryValue } from './parse_query_value';
+import { parseValue } from './parse_value';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) !== -1;
@@ -95,26 +97,4 @@ export const plainColumnRenderer: ColumnRenderer = {
           );
         })
       : getEmptyTagValue(),
-};
-
-export const parseQueryValue = (
-  value: string | number | object | undefined | null
-): string | number => {
-  if (value == null) {
-    return '';
-  } else if (isObject(value)) {
-    return JSON.stringify(value);
-  } else if (isNumber(value)) {
-    return value;
-  }
-  return value.toString();
-};
-
-export const parseValue = (
-  value: string | number | object | undefined | null
-): string | number | undefined | null => {
-  if (isObject(value)) {
-    return JSON.stringify(value);
-  }
-  return value as string | number | undefined | null;
 };

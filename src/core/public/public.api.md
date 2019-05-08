@@ -162,7 +162,7 @@ export class CoreSystem {
     constructor(params: Params);
     // (undocumented)
     setup(): Promise<{
-        fatalErrors: import(".").FatalErrorsSetup;
+        fatalErrors: FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
     start(): Promise<void>;
@@ -252,6 +252,8 @@ export interface InjectedMetadataSetup {
     getInjectedVars: () => {
         [key: string]: unknown;
     };
+    // (undocumented)
+    getKibanaBuildNumber: () => number;
     // (undocumented)
     getKibanaVersion: () => string;
     // (undocumented)
