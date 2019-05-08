@@ -5,6 +5,7 @@
  */
 
 import { UICapabilities } from 'ui/capabilities';
+import { Feature } from '../../../../../xpack_main/types';
 import { UICapabilitiesGroup } from './ui_capabilities_group';
 import { Actions } from '../actions';
 import { CheckPrivilegesAtResourceResponse } from '../check_privileges';
@@ -15,6 +16,16 @@ export class CatalogueUICapabilitiesGroup implements UICapabilitiesGroup {
   disable(uiCapabilities: UICapabilities) {
     for (const catalogueId of Object.keys(uiCapabilities.catalogue)) {
       uiCapabilities.catalogue[catalogueId] = false;
+    }
+  }
+
+  disableForFeatures(uiCapabilities: UICapabilities, features: Feature[]) {
+    for (const feature of features) {
+      if (feature.catalogue) {
+        for (const catalogueId of feature.catalogue) {
+          uiCapabilities.catalogue[catalogueId] = false;
+        }
+      }
     }
   }
 

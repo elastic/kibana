@@ -5,6 +5,7 @@
  */
 
 import { UICapabilities } from 'ui/capabilities';
+import { Feature } from '../../../../../xpack_main/types';
 import { CheckPrivilegesAtResourceResponse } from '../check_privileges';
 
 export interface UICapabilitiesGroup {
@@ -13,5 +14,6 @@ export interface UICapabilitiesGroup {
     uiCapabilities: UICapabilities,
     checkPrivilegesResponse: CheckPrivilegesAtResourceResponse
   ): void;
+  disableForFeatures(uiCapabilities: UICapabilities, disabledFeatures: Feature[]): void;
   getActions(uiCapabilities: UICapabilities): string[];
 }

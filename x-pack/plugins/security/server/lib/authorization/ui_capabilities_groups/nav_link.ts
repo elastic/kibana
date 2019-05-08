@@ -30,6 +30,14 @@ export class NavLinkUICapabilitiesGroup implements UICapabilitiesGroup {
     }
   }
 
+  disableForFeatures(uiCapabilities: UICapabilities, features: Feature[]) {
+    for (const feature of features) {
+      if (feature.navLinkId) {
+        uiCapabilities.navLinks[feature.navLinkId] = false;
+      }
+    }
+  }
+
   disableUsingPrivileges(
     uiCapabilities: UICapabilities,
     checkPrivilegesResponse: CheckPrivilegesAtResourceResponse

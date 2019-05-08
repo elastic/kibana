@@ -7,80 +7,37 @@ import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../../xpack_main/types';
 import { Space } from '../../common/model/space';
+import {
+  uiCapabilitiesGroupsFactory,
+  UICapabilitiesGroup,
+} from '../../../security/server/lib/authorization/ui_capabilities_groups';
 
 export function toggleUICapabilities(
   features: Feature[],
   uiCapabilities: UICapabilities,
   activeSpace: Space
 ) {
+  const uiCapabilitiesGroups = uiCapabilitiesGroupsFactory(null as any, features);
   const clonedCapabilities = _.cloneDeep(uiCapabilities);
 
-  toggleDisabledFeatures(features, clonedCapabilities, activeSpace);
+  toggleDisabledFeatures(uiCapabilitiesGroups, features, clonedCapabilities, activeSpace);
 
   return clonedCapabilities;
 }
 
 function toggleDisabledFeatures(
+  uiCapabilitiesGroups: UICapabilitiesGroup[],
   features: Feature[],
   uiCapabilities: UICapabilities,
   activeSpace: Space
 ) {
-  const disabledFeatureKeys: string[] = activeSpace.disabledFeatures;
+  const disabledFeatureIds: string[] = activeSpace.disabledFeatures;
 
-  const disabledFeatures: Feature[] = disabledFeatureKeys
+  const disabledFeatures: Feature[] = disabledFeatureIds
     .map(key => features.find(feature => feature.id === key))
     .filter(feature => typeof feature !== 'undefined') as Feature[];
 
-  const navLinks: Record<string, boolean> = uiCapabilities.navLinks;
-  const catalogueEntries: Record<string, boolean> = uiCapabilities.catalogue;
-  const managementItems: Record<string, Record<string, boolean>> = uiCapabilities.management;
-
-  for (const feature of disabledFeatures) {
-    // Disable associated navLink, if one exists
-    if (feature.navLinkId && navLinks.hasOwnProperty(feature.navLinkId)) {
-      navLinks[feature.navLinkId] = false;
-    }
-
-    // Disable associated catalogue entries
-    const privilegeCatalogueEntries: string[] = feature.catalogue || [];
-    privilegeCatalogueEntries.forEach(catalogueEntryId => {
-      catalogueEntries[catalogueEntryId] = false;
-    });
-
-    // Disable associated management items
-    const privilegeManagementSections: Record<string, string[]> = feature.management || {};
-    Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
-      sectionItems.forEach(item => {
-        if (
-          managementItems.hasOwnProperty(sectionId) &&
-          managementItems[sectionId].hasOwnProperty(item)
-        ) {
-          managementItems[sectionId][item] = false;
-        }
-      });
-    });
-
-    // TODO: Revisit if/when savedObjectsManagement UI Capabilities are refactored
-    if (feature.id === 'savedObjectsManagement') {
-      const capability: Record<string, Record<string, boolean>> = uiCapabilities[
-        feature.id
-      ] as Record<string, Record<string, boolean>>;
-
-      Object.keys(capability).forEach(savedObjectType => {
-        Object.keys(capability[savedObjectType]).forEach(typeCapability => {
-          capability[savedObjectType][typeCapability] = false;
-        });
-      });
-
-      continue;
-    }
-
-    // Disable "sub features" that match the disabled feature
-    if (uiCapabilities.hasOwnProperty(feature.id)) {
-      const capability = uiCapabilities[feature.id];
-      Object.keys(capability).forEach(featureKey => {
-        capability[featureKey] = false;
-      });
-    }
+  for (const group of uiCapabilitiesGroups) {
+    group.disableForFeatures(uiCapabilities, disabledFeatures);
   }
 }

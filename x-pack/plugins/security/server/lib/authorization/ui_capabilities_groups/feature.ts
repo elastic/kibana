@@ -31,6 +31,16 @@ export class FeatureUICapabilitiesGroup implements UICapabilitiesGroup {
     }
   }
 
+  disableForFeatures(uiCapabilities: UICapabilities, features: Feature[]) {
+    for (const feature of features) {
+      if (feature.id !== this.feature.id) {
+        continue;
+      }
+
+      this.disable(uiCapabilities);
+    }
+  }
+
   disableUsingPrivileges(
     uiCapabilities: UICapabilities,
     checkPrivilegesResponse: CheckPrivilegesAtResourceResponse

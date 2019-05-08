@@ -5,6 +5,7 @@
  */
 
 import { UICapabilities } from 'ui/capabilities';
+import { Feature } from '../../../../../xpack_main/types';
 import { UICapabilitiesGroup } from './ui_capabilities_group';
 import { Actions } from '../actions';
 import { CheckPrivilegesAtResourceResponse } from '../check_privileges';
@@ -16,6 +17,18 @@ export class ManagementCapabilitiesGroup implements UICapabilitiesGroup {
     for (const section of Object.keys(uiCapabilities.management)) {
       for (const capability of Object.keys(uiCapabilities.management[section])) {
         uiCapabilities.management[section][capability] = false;
+      }
+    }
+  }
+
+  disableForFeatures(uiCapabilities: UICapabilities, features: Feature[]) {
+    for (const feature of features) {
+      if (feature.management) {
+        for (const section of Object.keys(feature.management)) {
+          for (const capability of feature.management[section]) {
+            uiCapabilities.management[section][capability] = false;
+          }
+        }
       }
     }
   }
