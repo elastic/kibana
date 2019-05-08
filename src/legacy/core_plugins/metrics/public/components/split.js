@@ -21,9 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
-// import chrome from 'ui/chrome';
-// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
-
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
 import { SplitByFilters } from './splits/filters';
@@ -43,7 +40,7 @@ class Split extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      indexPatternForQuery: '',
+      indexPatternForQuery: {},
     };
   }
   async componentDidMount() {
@@ -52,27 +49,32 @@ class Split extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
-    const mainFilterLanguage =
-      this.props.panel.filter && this.props.panel.filter.language
-        ? this.props.panel.filter.language
-        : 'kuery';
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
         split_filters: [
           {
             color: model.color,
             id: uuid.v1(),
-            filter: { language: mainFilterLanguage, query: '' },
           },
         ],
       });
     }
   }
+
   fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
-        (this.props.panel.index_pattern);
+    const searchIndexPattern = this.indexPatternFromProps();
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
+  }
+
+  indexPatternFromProps() {
+    let searchIndexPattern = this.props.panel.default_index_pattern;
+    if (this.props.model.override_index_pattern && this.props.model.series_index_pattern) {
+      searchIndexPattern = this.props.model.series_index_pattern;
+    } else if (this.props.panel.index_pattern) {
+      searchIndexPattern = this.props.panel.index_pattern;
+    }
+    return searchIndexPattern;
   }
 
   getComponent(splitMode, uiRestrictions) {
