@@ -4,29 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { StickyContainer, Sticky } from 'react-sticky';
+import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
+import { FiltersGlobal } from '../../components/filters_global';
+import { HeaderPage } from '../../components/header_page';
+import { LastEventTime } from '../../components/last_event_time';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
-import { SuperDatePicker } from '../../components/super_date_picker';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType } from '../../graphql/types';
+import { IndexType, LastEventIndexKey } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsKql } from './kql';
@@ -45,52 +44,19 @@ interface HostsComponentReduxProps {
 
 type HostsComponentProps = HostsComponentReduxProps;
 
-const paddingTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
-
-const GlobalFilters = styled.aside<{ isSticky?: boolean }>`
-  border-bottom: 1px solid transparent;
-  box-sizing: content-box;
-  margin: 0 -${paddingTimeline} 0 -${euiLightVars.euiSizeL};
-  padding: ${euiLightVars.euiSize} ${paddingTimeline} ${euiLightVars.euiSize}
-    ${euiLightVars.euiSizeL};
-  transition: background 0.3s ease, border-bottom 0.3s ease;
-
-  ${props =>
-    props.isSticky &&
-    `
-      background: ${
-        props.theme.darkMode ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiColorEmptyShade
-      };
-      border-bottom: ${
-        props.theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin
-      };
-      top: 49px !important;
-      z-index: 100;
-    `}
-`;
-
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
   <WithSource sourceId="default" indexTypes={[IndexType.AUDITBEAT]}>
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <StickyContainer>
-          <Sticky topOffset={-49}>
-            {({ style, isSticky }) => (
-              <GlobalFilters isSticky={isSticky} style={style}>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
-                  </EuiFlexItem>
+          <FiltersGlobal>
+            <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+          </FiltersGlobal>
 
-                  <EuiFlexItem grow={false}>
-                    <SuperDatePicker id="global" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </GlobalFilters>
-            )}
-          </Sticky>
-
-          <EuiSpacer />
+          <HeaderPage
+            subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+            title={i18n.HOSTS}
+          />
 
           <GlobalTime>
             {({ to, from, setQuery }) => (

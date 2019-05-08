@@ -9,6 +9,7 @@ import React from 'react';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
+import { HeaderPage } from '../../components/header_page';
 import { OverviewHost } from '../../components/page/overview/overview_host';
 import { OverviewNetwork } from '../../components/page/overview/overview_network';
 import { GlobalTime } from '../../containers/global_time';
@@ -30,15 +31,19 @@ export const OverviewComponent = pure(() => (
     {({ auditbeatIndicesExist, filebeatIndicesExist }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) &&
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
-        <GlobalTime>
-          {({ to, from, setQuery }) => (
-            <EuiFlexGroup>
-              <Summary />
-              <OverviewHost endDate={to} startDate={from} setQuery={setQuery} />
-              <OverviewNetwork endDate={to} startDate={from} setQuery={setQuery} />
-            </EuiFlexGroup>
-          )}
-        </GlobalTime>
+        <>
+          <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE} />
+
+          <GlobalTime>
+            {({ to, from, setQuery }) => (
+              <EuiFlexGroup>
+                <Summary />
+                <OverviewHost endDate={to} startDate={from} setQuery={setQuery} />
+                <OverviewNetwork endDate={to} startDate={from} setQuery={setQuery} />
+              </EuiFlexGroup>
+            )}
+          </GlobalTime>
+        </>
       ) : (
         <EmptyPage
           title={i18n.NO_FILEBEAT_INDICES}

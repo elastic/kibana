@@ -11,14 +11,13 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-export interface PageHeadlineProps {
+export interface HeaderPageProps {
   children?: React.ReactNode;
-  statType?: string;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
 }
 
-export const PageHeadlineComponent = pure<PageHeadlineProps>(({ children, subtitle, title }) => (
+export const HeaderPage = pure<HeaderPageProps>(({ children, subtitle, title }) => (
   <Header>
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -40,5 +39,5 @@ const Header = styled.header`
   border-bottom: ${({ theme }) =>
     theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
   padding-bottom: ${euiLightVars.euiSizeL};
-  margin-bottom: ${euiLightVars.euiSizeL};
+  margin: ${euiLightVars.euiSizeL} 0;
 `;

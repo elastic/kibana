@@ -20,8 +20,6 @@ import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { HelpMenu } from '../../components/help_menu';
 import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
-import { PageHeadline } from '../../components/page_headline';
-import { SuperDatePicker } from '../../components/super_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
@@ -76,36 +74,23 @@ export const HomePage = pure(() => (
             </Flyout>
 
             <EuiPageBody>
-              <GlobalHeader data-test-subj="globalHeader">
+              <NavGlobal>
                 <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
                   <EuiFlexItem>
                     <SiemNavigation />
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-                      <EuiFlexItem data-test-subj="datePickerContainer">
-                        {/* <SuperDatePicker id="global" /> */}
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj="add-data"
-                          href="kibana#home/tutorial_directory/security"
-                          iconType="plusInCircle"
-                        >
-                          <FormattedMessage
-                            id="xpack.siem.global.addData"
-                            defaultMessage="Add data"
-                          />
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiButton
+                      data-test-subj="add-data"
+                      href="kibana#home/tutorial_directory/security"
+                      iconType="plusInCircle"
+                    >
+                      <FormattedMessage id="xpack.siem.global.addData" defaultMessage="Add data" />
+                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </GlobalHeader>
-
-              <PageHeadline />
+              </NavGlobal>
 
               <Switch>
                 <Redirect from="/" exact={true} to="/overview" />
@@ -124,18 +109,18 @@ export const HomePage = pure(() => (
   </AutoSizer>
 ));
 
-const paddingTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
+const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const Page = styled(EuiPage)`
-  padding: 0 ${paddingTimeline} ${euiLightVars.euiSizeL} ${euiLightVars.euiSizeL};
+  padding: 0 ${gutterTimeline} ${euiLightVars.euiSizeL} ${euiLightVars.euiSizeL};
 `;
 
-const GlobalHeader = styled.header`
+const NavGlobal = styled.nav`
   background: ${({ theme }) =>
     theme.darkMode ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiColorEmptyShade};
   border-bottom: ${({ theme }) =>
     theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
-  margin: 0 -${paddingTimeline} ${euiLightVars.euiSizeL} -${euiLightVars.euiSizeL};
-  padding: ${euiLightVars.euiSize} ${paddingTimeline} ${euiLightVars.euiSize}
+  margin: 0 -${gutterTimeline} 0 -${euiLightVars.euiSizeL};
+  padding: ${euiLightVars.euiSize} ${gutterTimeline} ${euiLightVars.euiSize}
     ${euiLightVars.euiSizeL};
 `;
