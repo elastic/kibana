@@ -20,18 +20,21 @@ import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embedd
 
 class SamplePanelLink extends ContextMenuAction {
   constructor() {
-    super({
-      id: 'samplePanelLink',
-      parentPanelId: 'mainMenu',
-    });
+    super(
+      {
+        id: 'samplePanelLink',
+        parentPanelId: 'mainMenu',
+      },
+      {
+        getDisplayName: () => {
+          return 'Sample Panel Link';
+        },
+      }
+    );
   }
 
   public getHref = () => {
     return 'https://example.com/kibana/test';
-  };
-
-  public getDisplayName = () => {
-    return 'Sample Panel Link';
   };
 }
 

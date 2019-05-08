@@ -28,10 +28,17 @@ import {
 
 class SamplePanelAction extends ContextMenuAction {
   constructor() {
-    super({
-      id: 'samplePanelAction',
-      parentPanelId: 'mainMenu',
-    });
+    super(
+      {
+        id: 'samplePanelAction',
+        parentPanelId: 'mainMenu',
+      },
+      {
+        getDisplayName: () => {
+          return 'Sample Panel Action';
+        },
+      }
+    );
   }
   public onClick = ({ embeddable }: PanelActionAPI) => {
     if (!embeddable) {
@@ -52,9 +59,6 @@ class SamplePanelAction extends ContextMenuAction {
         'data-test-subj': 'samplePanelActionFlyout',
       }
     );
-  };
-  public getDisplayName = () => {
-    return 'Sample Panel Action';
   };
 }
 
