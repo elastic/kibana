@@ -118,7 +118,7 @@ export class LayerTocActions extends Component {
         icon: (
           <EuiIcon
             size="m"
-            type="eyeClosed"
+            type="minusInCircle"
           />
         ),
         tooltipContent: i18n.translate('xpack.maps.layerTocActions.zoomFeedbackTooltip', {
