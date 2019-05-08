@@ -113,6 +113,8 @@ export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
 
+export const getDrawState = ({ map }) => map.mapState.drawState;
+
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
     return map.mapState.refreshConfig;
