@@ -38,7 +38,7 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
         {uiCapabilities.infrastructure.show && (
           <Route path="/infrastructure" component={InfrastructurePage} />
         )}
-        <Route path="/:sourceId?/link-to" component={LinkToPage} />
+        <Route path="/link-to" component={LinkToPage} />
         {uiCapabilities.infrastructure.show && (
           <Route path="/metrics/:type/:node" component={MetricDetail} />
         )}

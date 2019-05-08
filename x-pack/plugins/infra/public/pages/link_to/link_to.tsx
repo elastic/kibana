@@ -7,38 +7,31 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
-import { Source } from '../../containers/source';
 import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
 
 interface LinkToPageProps {
-  match: RouteMatch<{
-    sourceId?: string;
-  }>;
+  match: RouteMatch<{}>;
 }
 
 export class LinkToPage extends React.Component<LinkToPageProps> {
   public render() {
     const { match } = this.props;
 
-    const sourceId = match.params.sourceId || 'default';
-
     return (
-      <Source.Provider sourceId={sourceId}>
-        <Switch>
-          <Route
-            path={`${match.url}/:nodeType(host|container|pod)-logs/:nodeId`}
-            component={RedirectToNodeLogs}
-          />
-          <Route
-            path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
-            component={RedirectToNodeDetail}
-          />
-          <Route path={`${match.url}/logs`} component={RedirectToLogs} />
-          <Redirect to="/infrastructure" />
-        </Switch>
-      </Source.Provider>
+      <Switch>
+        <Route
+          path={`${match.url}/:sourceId?/:nodeType(host|container|pod)-logs/:nodeId`}
+          component={RedirectToNodeLogs}
+        />
+        <Route
+          path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
+          component={RedirectToNodeDetail}
+        />
+        <Route path={`${match.url}/:sourceId?/logs`} component={RedirectToLogs} />
+        <Redirect to="/infrastructure" />
+      </Switch>
     );
   }
 }
