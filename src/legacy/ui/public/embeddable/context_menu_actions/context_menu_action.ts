@@ -127,7 +127,7 @@ export class ContextMenuAction {
    */
   public constructor(
     config: ContextMenuActionsConfig,
-    options: ContextMenuButtonOptions | ContextMenuLinkOptions = {}
+    options: ContextMenuButtonOptions | ContextMenuLinkOptions
   ) {
     this.id = config.id;
     this.parentPanelId = config.parentPanelId;
