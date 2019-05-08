@@ -25,8 +25,6 @@ import * as i18n from './translations';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
 
-export const IpOverviewId = 'ip-overview';
-
 interface DescriptionList {
   title: string;
   description: JSX.Element;

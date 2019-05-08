@@ -17,29 +17,14 @@
  * under the License.
  */
 
-import { kfetch, KFetchKibanaOptions, KFetchOptions } from './kfetch';
+export class HttpFetchError extends Error {
+  constructor(message: string, public readonly response?: Response, public readonly body?: any) {
+    super(message);
 
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
-
-function createAbortable() {
-  const abortController = new AbortController();
-  const { signal, abort } = abortController;
-
-  return {
-    signal,
-    abort: abort.bind(abortController),
-  };
-}
-
-export function kfetchAbortable(
-  fetchOptions?: Omit<KFetchOptions, 'signal'>,
-  kibanaOptions?: KFetchKibanaOptions
-) {
-  const { signal, abort } = createAbortable();
-  const fetching = kfetch({ ...fetchOptions, signal }, kibanaOptions);
-
-  return {
-    fetching,
-    abort,
-  };
+    // captureStackTrace is only available in the V8 engine, so any browser using
+    // a different JS engine won't have access to this method.
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, HttpFetchError);
+    }
+  }
 }

@@ -5,8 +5,7 @@
  */
 
 import { AnyAction, applyMiddleware, compose, createStore as createReduxStore, Store } from 'redux';
-
-import { initialState, reducer, State } from '.';
+import { initialState, State, reducer } from './reducer';
 
 declare global {
   interface Window {
