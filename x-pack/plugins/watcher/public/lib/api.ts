@@ -12,7 +12,7 @@ import { __await } from 'tslib';
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../common/constants';
 import { BaseWatch, ExecutedWatchDetails } from '../../common/types/watch_types';
-import { useRequest } from './use_request';
+import { useRequest, sendRequest } from './use_request';
 
 let httpClient: ng.IHttpService;
 
@@ -89,27 +89,17 @@ export const deleteWatches = async (watchIds: string[]) => {
 };
 
 export const deactivateWatch = async (id: string) => {
-  const {
-    data: { watchStatus },
-  } = await getHttpClient().put(`${basePath}/watch/${id}/deactivate`, null);
-  return WatchStatus.fromUpstreamJson(watchStatus);
+  return sendRequest({
+    path: `${basePath}/watch/${id}/deactivate`,
+    method: 'put',
+  });
 };
 
 export const activateWatch = async (id: string) => {
-  const {
-    data: { watchStatus },
-  } = await getHttpClient().put(`${basePath}/watch/${id}/activate`, null);
-  return WatchStatus.fromUpstreamJson(watchStatus);
-};
-
-export const fetchWatch = async (watchId: string) => {
-  const body = {
-    watchId,
-  };
-  const {
-    data: { results },
-  } = await getHttpClient().post(`${basePath}/watches/`, body);
-  return results;
+  return sendRequest({
+    path: `${basePath}/watch/${id}/activate`,
+    method: 'put',
+  });
 };
 
 export const loadWatch = async (id: string) => {
@@ -143,11 +133,14 @@ export const createWatch = async (watch: BaseWatch) => {
 };
 
 export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, watch: BaseWatch) => {
-  const { data } = await getHttpClient().put(`${basePath}/watch/execute`, {
-    executeDetails: executeWatchDetails.upstreamJson,
-    watch: watch.upstreamJson,
+  return sendRequest({
+    path: `${basePath}/watch/execute`,
+    method: 'put',
+    body: {
+      executeDetails: executeWatchDetails.upstreamJson,
+      watch: watch.upstreamJson,
+    },
   });
-  return data;
 };
 
 export const loadIndexPatterns = async () => {

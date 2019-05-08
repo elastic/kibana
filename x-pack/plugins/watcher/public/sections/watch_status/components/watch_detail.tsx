@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
@@ -23,9 +23,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { loadWatchDetail, ackWatchAction } from '../../../lib/api';
-import { getPageErrorCode, WatchStatus } from '../../../components';
+import { ackWatchAction } from '../../../lib/api';
+import { WatchStatus } from '../../../components';
 import { PAGINATION } from '../../../../common/constants';
+import { WatchDetailsContext } from '../watch_details_context';
 
 interface ActionError {
   code: string;
@@ -38,31 +39,29 @@ interface ActionStatus {
   errors: ActionError[];
 }
 
-const WatchDetailUi = ({ watchId }: { watchId: string }) => {
-  const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
+const WatchDetailUi = () => {
+  const { watchDetail } = useContext(WatchDetailsContext);
 
   const [actionStatuses, setActionStatuses] = useState<ActionStatus[]>([]);
   const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
 
   const [selectedErrorAction, setSelectedErrorAction] = useState<string | null>(null);
 
-  const actionErrors = watchDetail && watchDetail.watchErrors.actionErrors;
+  const actionErrors = watchDetail.watchErrors.actionErrors;
   const hasActionErrors = actionErrors && Object.keys(actionErrors).length > 0;
 
   useEffect(
     () => {
-      if (watchDetail) {
-        const currentActionStatuses = watchDetail.watchStatus.actionStatuses;
-        const actionStatusesWithErrors =
-          currentActionStatuses &&
-          currentActionStatuses.map((currentActionStatus: ActionStatus) => {
-            return {
-              ...currentActionStatus,
-              errors: actionErrors ? actionErrors[currentActionStatus.id] : [],
-            };
-          });
-        setActionStatuses(actionStatusesWithErrors);
-      }
+      const currentActionStatuses = watchDetail.watchStatus.actionStatuses;
+      const actionStatusesWithErrors =
+        currentActionStatuses &&
+        currentActionStatuses.map((currentActionStatus: ActionStatus) => {
+          return {
+            ...currentActionStatus,
+            errors: actionErrors ? actionErrors[currentActionStatus.id] : [],
+          };
+        });
+      setActionStatuses(actionStatusesWithErrors);
     },
     [watchDetail]
   );
@@ -71,7 +70,7 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
     {
       field: 'id',
       name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.actionHeader', {
-        defaultMessage: 'Action',
+        defaultMessage: 'Name',
       }),
       sortable: true,
       truncateText: true,
@@ -172,11 +171,6 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
     ? [...baseColumns, errorColumn, actionColumn]
     : [...baseColumns, actionColumn];
 
-  // Another part of the UI will surface the error.
-  if (getPageErrorCode(error)) {
-    return null;
-  }
-
   return (
     <Fragment>
       {selectedErrorAction && (
@@ -220,12 +214,12 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
               <FormattedMessage
                 id="xpack.watcher.sections.watchDetail.header"
                 defaultMessage="Current status for '{watchId}'"
-                values={{ watchId }}
+                values={{ watchId: watchDetail.id }}
               />
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        {watchDetail && watchDetail.isSystemWatch && (
+        {watchDetail.isSystemWatch && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
@@ -265,11 +259,10 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
         columns={columns}
         pagination={PAGINATION}
         sorting={true}
-        loading={isLoading}
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
-            defaultMessage="No current status"
+            defaultMessage="No actions to show"
           />
         }
       />

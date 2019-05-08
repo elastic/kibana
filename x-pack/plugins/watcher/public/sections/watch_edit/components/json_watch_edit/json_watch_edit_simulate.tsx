@@ -26,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
-import { toastNotifications } from 'ui/notify';
 import { ACTION_MODES, TIME_UNITS } from '../../../../../common/constants';
 import {
   ExecutedWatchDetails,
@@ -57,8 +56,12 @@ export const JsonWatchEditSimulate = ({
   }>;
 }) => {
   const { watch } = useContext(WatchContext);
+
   // hooks
   const [executeResults, setExecuteResults] = useState<ExecutedWatchResults | null>(null);
+  const [isExecuting, setIsExecuting] = useState<boolean>(false);
+  const [executeResultsError, setExecuteResultsError] = useState<any>(null);
+
   const { errors: watchErrors } = watch.validate();
   const hasWatchJsonError = watchErrors.json.length >= 1;
 
@@ -85,28 +88,10 @@ export const JsonWatchEditSimulate = ({
       }),
       render: ({}, row: { actionId: string }) => (
         <EuiSelect
-          options={[
-            {
-              value: ACTION_MODES.SIMULATE,
-              text: ACTION_MODES.SIMULATE,
-            },
-            {
-              value: ACTION_MODES.FORCE_SIMULATE,
-              text: ACTION_MODES.FORCE_SIMULATE,
-            },
-            {
-              value: ACTION_MODES.EXECUTE,
-              text: ACTION_MODES.EXECUTE,
-            },
-            {
-              value: ACTION_MODES.FORCE_EXECUTE,
-              text: ACTION_MODES.FORCE_EXECUTE,
-            },
-            {
-              value: ACTION_MODES.SKIP,
-              text: ACTION_MODES.SKIP,
-            },
-          ]}
+          options={Object.keys(ACTION_MODES).map(mode => ({
+            text: ACTION_MODES[mode],
+            value: ACTION_MODES[mode],
+          }))}
           value={executeDetails.actionModes[row.actionId]}
           onChange={e => {
             setExecuteDetails(
@@ -129,13 +114,15 @@ export const JsonWatchEditSimulate = ({
 
   return (
     <Fragment>
-      {executeResults && (
-        <JsonWatchEditSimulateResults
-          executeResults={executeResults}
-          executeDetails={executeDetails}
-          onCloseFlyout={() => setExecuteResults(null)}
-        />
-      )}
+      <JsonWatchEditSimulateResults
+        executeResults={executeResults}
+        executeDetails={executeDetails}
+        error={executeResultsError}
+        onCloseFlyout={() => {
+          setExecuteResults(null);
+          setExecuteResultsError(null);
+        }}
+      />
       <EuiText>
         <p>
           {i18n.translate('xpack.watcher.sections.watchEdit.simulate.pageDescription', {
@@ -406,17 +393,21 @@ export const JsonWatchEditSimulate = ({
           iconType="play"
           fill
           type="submit"
+          isLoading={isExecuting}
           isDisabled={hasExecuteWatchErrors || hasWatchJsonError}
           onClick={async () => {
-            try {
-              const executedWatch = await executeWatch(executeDetails, watch);
-              const formattedResults = WatchHistoryItem.fromUpstreamJson(
-                executedWatch.watchHistoryItem
-              );
-              setExecuteResults(formattedResults);
-            } catch (e) {
-              return toastNotifications.addDanger(e.data.message);
+            setIsExecuting(true);
+
+            const { data, error } = await executeWatch(executeDetails, watch);
+
+            setIsExecuting(false);
+
+            if (error) {
+              return setExecuteResultsError(error);
             }
+
+            const formattedResults = WatchHistoryItem.fromUpstreamJson(data.watchHistoryItem);
+            setExecuteResults(formattedResults);
           }}
         >
           {i18n.translate('xpack.watcher.sections.watchEdit.simulate.form.saveButtonLabel', {

@@ -17,30 +17,34 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../common/types/watch_types';
 import { getTypeFromAction } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
-import { WatchStatus } from '../../../../components/watch_status';
+import { WatchStatus, SectionError } from '../../../../components';
 
 export const JsonWatchEditSimulateResults = ({
   executeResults,
   executeDetails,
   onCloseFlyout,
+  error,
 }: {
-  executeResults: ExecutedWatchResults;
+  executeResults: ExecutedWatchResults | null;
   executeDetails: ExecutedWatchDetails;
   onCloseFlyout: () => void;
+  error: any;
 }) => {
   const { watch } = useContext(WatchContext);
 
   const getTableData = () => {
-    const actionStatuses = executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
-    const actionModes = executeDetails.actionModes;
     const actions = watch.watch && watch.watch.actions;
-    if (actions) {
+    if (executeResults && actions) {
+      const actionStatuses =
+        executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
+      const actionModes = executeDetails.actionModes;
       return Object.keys(actions).map(actionKey => {
         const actionStatus = actionStatuses.find(status => status.id === actionKey);
         return {
@@ -110,21 +114,55 @@ export const JsonWatchEditSimulateResults = ({
     },
   ];
 
+  const flyoutTitle = (
+    <EuiTitle size="s">
+      <h2 id="simulateResultsFlyOutTitle">
+        {i18n.translate('xpack.watcher.sections.watchEdit.simulateResults.title', {
+          defaultMessage: 'Simulation results',
+        })}
+      </h2>
+    </EuiTitle>
+  );
+
+  if (error) {
+    return (
+      <EuiFlyout
+        onClose={() => {
+          onCloseFlyout();
+        }}
+        size="s"
+        aria-labelledby="simulateResultsFlyOutTitle"
+      >
+        <EuiFlyoutHeader hasBorder>{flyoutTitle}</EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <SectionError
+            title={
+              <FormattedMessage
+                id="xpack.watcher.sections.watchEdit.simulateResults.errorTitle"
+                defaultMessage="Cannot simulate watch"
+              />
+            }
+            error={error}
+          />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
+  }
+
+  if (!executeResults) {
+    return null;
+  }
+
   return (
     <EuiFlyout
       onClose={() => {
         onCloseFlyout();
       }}
+      size="s"
       aria-labelledby="simulateResultsFlyOutTitle"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="simulateResultsFlyOutTitle">
-            {i18n.translate('xpack.watcher.sections.watchEdit.simulateResults.title', {
-              defaultMessage: 'Simulation results',
-            })}
-          </h2>
-        </EuiTitle>
+        {flyoutTitle}
         <EuiSpacer size="xs" />
         <WatchStatus status={executeResults.watchStatus.state} />
       </EuiFlyoutHeader>
