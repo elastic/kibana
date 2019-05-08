@@ -57,7 +57,22 @@ function createNewDashboardCtrl($scope, i18n) {
 uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true,
-    requireUICapability: 'dashboard.show'
+    requireUICapability: 'dashboard.show',
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.dashboard.showWriteControls) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.dashboard.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.dashboard.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save dashboards',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,

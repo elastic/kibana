@@ -105,7 +105,7 @@ export class StaticDynamicStyleRow extends React.Component {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}>
-          <EuiFormRow label={this.props.name && this.props.name}>
+          <EuiFormRow label={this.props.label && this.props.label}>
             {this._renderStyleSelector()}
           </EuiFormRow>
         </EuiFlexItem>

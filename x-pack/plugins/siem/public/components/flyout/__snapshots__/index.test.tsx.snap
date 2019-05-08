@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Flyout rendering it renders correctly against snapshot 1`] = `
+<Component>
+  <Connect(pure(Component))
+    flyoutHeight={980}
+    headerHeight={48}
+    timelineId="test"
+    usersViewing={
+      Array [
+        "elastic",
+      ]
+    }
+  />
+</Component>
+`;

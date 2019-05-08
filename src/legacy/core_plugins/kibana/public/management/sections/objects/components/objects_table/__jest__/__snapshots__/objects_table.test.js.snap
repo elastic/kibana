@@ -2,7 +2,7 @@
 
 exports[`ObjectsTable delete should show a confirm modal 1`] = `
 <EuiConfirmModal
-  buttonColor="primary"
+  buttonColor="danger"
   cancelButtonText={
     <FormattedMessage
       defaultMessage="Cancel"
@@ -49,7 +49,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
           "name": "Id",
         },
         Object {
-          "field": "title",
+          "field": "meta.title",
           "name": "Title",
         },
       ]
@@ -95,14 +95,19 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiText>
-      <p>
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      label={
         <FormattedMessage
-          defaultMessage="Select which types to export."
+          defaultMessage="Select which types to export"
           id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
           values={Object {}}
         />
-      </p>
+      }
+      labelType="legend"
+    >
       <EuiCheckboxGroup
         idToSelectedMap={
           Object {
@@ -134,26 +139,24 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
           ]
         }
       />
-    </EuiText>
+    </EuiFormRow>
+    <EuiSwitch
+      checked={true}
+      label={
+        <FormattedMessage
+          defaultMessage="Include related objects"
+          id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+          values={Object {}}
+        />
+      }
+      name="includeReferencesDeep"
+      onChange={[Function]}
+    />
   </EuiModalBody>
   <EuiModalFooter>
     <EuiFlexGroup
-      justifyContent="spaceBetween"
+      justifyContent="flexEnd"
     >
-      <EuiFlexItem>
-        <EuiSwitch
-          checked={true}
-          label={
-            <FormattedMessage
-              defaultMessage="Include related objects"
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-              values={Object {}}
-            />
-          }
-          name="includeReferencesDeep"
-          onChange={[Function]}
-        />
-      </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
@@ -217,14 +220,24 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 
 exports[`ObjectsTable relationships should show the flyout 1`] = `
 <InjectIntl(RelationshipsUI)
-  canGoInApp={[Function]}
   close={[Function]}
-  getEditUrl={[Function]}
   getRelationships={[Function]}
-  goInApp={[Function]}
-  id="1"
-  title="MySearch"
-  type="search"
+  goInspectObject={[Function]}
+  savedObject={
+    Object {
+      "id": "2",
+      "meta": Object {
+        "editUrl": "#/management/kibana/objects/savedSearches/2",
+        "icon": "search",
+        "inAppUrl": Object {
+          "path": "/discover/2",
+          "uiCapabilitiesPath": "discover.show",
+        },
+        "title": "MySearch",
+      },
+      "type": "search",
+    }
+  }
 />
 `;
 
@@ -244,7 +257,6 @@ exports[`ObjectsTable should render normally 1`] = `
   />
   <InjectIntl(TableUI)
     canDeleteSavedObjectTypes={Array []}
-    canGoInApp={[Function]}
     filterOptions={
       Array [
         Object {
@@ -269,34 +281,61 @@ exports[`ObjectsTable should render normally 1`] = `
         },
       ]
     }
-    getEditUrl={[Function]}
-    goInApp={[Function]}
+    goInspectObject={[Function]}
     isSearching={false}
     itemId="id"
     items={
       Array [
         Object {
-          "icon": "indexPatternApp",
           "id": "1",
-          "title": "MyIndexPattern*",
+          "meta": Object {
+            "editUrl": "#/management/kibana/index_patterns/1",
+            "icon": "indexPatternApp",
+            "inAppUrl": Object {
+              "path": "/management/kibana/index_patterns/1",
+              "uiCapabilitiesPath": "management.kibana.index_patterns",
+            },
+            "title": "MyIndexPattern*",
+          },
           "type": "index-pattern",
         },
         Object {
-          "icon": "search",
           "id": "2",
-          "title": "MySearch",
+          "meta": Object {
+            "editUrl": "#/management/kibana/objects/savedSearches/2",
+            "icon": "search",
+            "inAppUrl": Object {
+              "path": "/discover/2",
+              "uiCapabilitiesPath": "discover.show",
+            },
+            "title": "MySearch",
+          },
           "type": "search",
         },
         Object {
-          "icon": "dashboardApp",
           "id": "3",
-          "title": "MyDashboard",
+          "meta": Object {
+            "editUrl": "#/management/kibana/objects/savedDashboards/3",
+            "icon": "dashboardApp",
+            "inAppUrl": Object {
+              "path": "/dashboard/3",
+              "uiCapabilitiesPath": "dashboard.show",
+            },
+            "title": "MyDashboard",
+          },
           "type": "dashboard",
         },
         Object {
-          "icon": "visualizeApp",
           "id": "4",
-          "title": "MyViz",
+          "meta": Object {
+            "editUrl": "#/management/kibana/objects/savedVisualizations/4",
+            "icon": "visualizeApp",
+            "inAppUrl": Object {
+              "path": "/visualize/edit/4",
+              "uiCapabilitiesPath": "visualize.show",
+            },
+            "title": "MyViz",
+          },
           "type": "visualization",
         },
       ]

@@ -9,7 +9,7 @@ import { schemas } from './graphql';
 import { createLogEntriesResolvers } from './graphql/log_entries';
 import { createMetadataResolvers } from './graphql/metadata';
 import { createMetricResolvers } from './graphql/metrics/resolvers';
-import { createNodeResolvers } from './graphql/nodes';
+import { createSnapshotResolvers } from './graphql/snapshot';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
@@ -20,7 +20,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
     resolvers: [
       createMetadataResolvers(libs) as IResolvers,
       createLogEntriesResolvers(libs) as IResolvers,
-      createNodeResolvers(libs) as IResolvers,
+      createSnapshotResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
       createMetricResolvers(libs) as IResolvers,

@@ -8,11 +8,9 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
+import { assertDeeplyFalse } from '../../common/lib/assert_deeply_false';
 
 const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder(false);
 
@@ -26,11 +24,17 @@ export default function savedObjectsManagementTests({
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
-          username: scenario.username,
-          password: scenario.password,
+          credentials: {
+            username: scenario.username,
+            password: scenario.password,
+          },
         });
+        expect(uiCapabilities.success).to.be(true);
+        expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
         switch (scenario.username) {
           case 'superuser':
+          case 'all':
+          case 'dual_privileges_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
@@ -38,73 +42,29 @@ export default function savedObjectsManagementTests({
             );
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
             break;
-          case 'all':
-          case 'dual_privileges_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                all: [
-                  'config',
-                  'graph-workspace',
-                  'map',
-                  'canvas-workpad',
-                  'index-pattern',
-                  'visualization',
-                  'search',
-                  'dashboard',
-                  'timelion-sheet',
-                  'url',
-                  'infrastructure-ui-source',
-                ],
-              })
-            );
-            break;
           case 'read':
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                read: [
-                  'config',
-                  'graph-workspace',
-                  'map',
-                  'canvas-workpad',
-                  'index-pattern',
-                  'visualization',
-                  'search',
-                  'dashboard',
-                  'timelion-sheet',
-                  'url',
-                  'infrastructure-ui-source',
-                ],
-              })
+            const expectedRead = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+              savedObjectsManagementBuilder.uiCapabilities('read')
             );
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expectedRead);
             break;
           case 'foo_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                all: ['foo'],
-                read: ['index-pattern', 'config'],
-              })
-            );
-            break;
           case 'foo_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.build({
-                read: ['foo', 'index-pattern', 'config'],
+                all: [],
+                read: [],
               })
             );
             break;
           case 'no_kibana_privileges':
+          // these users have no access to any ui capabilities
           case 'legacy_all':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+          case 'no_kibana_privileges':
+            assertDeeplyFalse(uiCapabilities.value!.savedObjectsManagement);
             break;
           default:
             throw new UnreachableError(scenario);

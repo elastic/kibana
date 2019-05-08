@@ -81,6 +81,8 @@ export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapR
   ? map.waitingForMapReadyLayerList
   : [];
 
+export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
+
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
@@ -110,6 +112,8 @@ export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
 export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
+
+export const getDrawState = ({ map }) => map.mapState.drawState;
 
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
@@ -170,12 +174,25 @@ export const getSelectedLayerJoinDescriptors = createSelector(
     });
   });
 
+// Get list of unique index patterns used by all layers
 export const getUniqueIndexPatternIds = createSelector(
   getLayerList,
   (layerList) => {
     const indexPatternIds = [];
     layerList.forEach(layer => {
       indexPatternIds.push(...layer.getIndexPatternIds());
+    });
+    return _.uniq(indexPatternIds);
+  }
+);
+
+// Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  (layerList) => {
+    const indexPatternIds = [];
+    layerList.forEach(layer => {
+      indexPatternIds.push(...layer.getQueryableIndexPatternIds());
     });
     return _.uniq(indexPatternIds);
   }

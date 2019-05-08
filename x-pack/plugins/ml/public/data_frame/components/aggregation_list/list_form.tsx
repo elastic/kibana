@@ -4,80 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiListGroup,
-  EuiListGroupItem,
-} from '@elastic/eui';
+import { AggName, PivotAggsConfig, PivotAggsConfigDict } from '../../common';
 
-import { Dictionary } from '../../../../common/types/common';
+import { AggLabelForm } from './agg_label_form';
 
-interface OptionsDataElement {
-  agg: string;
-  field: string;
-  formRowLabel: string;
+export interface ListProps {
+  list: PivotAggsConfigDict;
+  options: PivotAggsConfigDict;
+  deleteHandler(l: string): void;
+  onChange(previousAggName: AggName, item: PivotAggsConfig): void;
 }
 
-interface ListProps {
-  list: string[];
-  optionsData: Dictionary<OptionsDataElement>;
-  deleteHandler?(l: string): void;
-}
-
-export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
-  <EuiListGroup flush={true}>
-    {list.map((optionsDataId: string) => (
-      <EuiListGroupItem
-        key={optionsDataId}
-        label={
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.aggregationListForm.customNameLabel', {
-                  defaultMessage: 'Custom name',
-                })}
-              >
-                <EuiFieldText defaultValue={optionsData[optionsDataId].formRowLabel} />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.aggregationListForm.aggregationLabel', {
-                  defaultMessage: 'Aggregation',
-                })}
-              >
-                <EuiFieldText defaultValue={optionsData[optionsDataId].agg} />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.aggregationListForm.fieldLabel', {
-                  defaultMessage: 'Field',
-                })}
-              >
-                <EuiFieldText defaultValue={optionsData[optionsDataId].field} />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          (deleteHandler && {
-            onClick: () => deleteHandler(optionsDataId),
-            iconType: 'cross',
-            iconSize: 's',
-            'aria-label': optionsDataId,
-            alwaysShow: false,
-          }) ||
-          undefined
-        }
-      />
-    ))}
-  </EuiListGroup>
-);
+export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, onChange, options }) => {
+  const listKeys = Object.keys(list);
+  return (
+    <Fragment>
+      {listKeys.map((aggName: AggName) => {
+        const otherAggNames = listKeys.filter(k => k !== aggName);
+        return (
+          <Fragment key={aggName}>
+            <EuiPanel paddingSize="s">
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <AggLabelForm
+                    deleteHandler={deleteHandler}
+                    item={list[aggName]}
+                    onChange={item => onChange(aggName, item)}
+                    otherAggNames={otherAggNames}
+                    options={options}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            {listKeys.length > 0 && <EuiSpacer size="s" />}
+          </Fragment>
+        );
+      })}
+    </Fragment>
+  );
+};

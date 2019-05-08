@@ -16,6 +16,7 @@
   @import 'app';
 
   // Sub applications
+  @import 'data_frame/index';
   @import 'datavisualizer/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
   @import 'file_datavisualizer/index';
@@ -39,8 +40,7 @@
   @import 'components/form_label/index';
   @import 'components/influencers_list/index';
   @import 'components/items_grid/index';
-  @import 'components/job_group_select/index'; // SASSTODO: This file does some dangerous overwrites
-  @import 'components/job_select_list/index'; // SASSTODO: This file does EXTREMELY DANGEROUS overwrites
+  @import 'components/job_selector/index'; // TODO: remove above two once react conversion of job selector is done
   @import 'components/json_tooltip/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/loading_indicator/index'; // SASSTODO: This component should be replaced with EuiLoadingSpinner
   @import 'components/messagebar/index';

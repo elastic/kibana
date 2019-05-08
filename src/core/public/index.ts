@@ -17,9 +17,14 @@
  * under the License.
  */
 
-import { BasePathSetup } from './base_path';
-import { Capabilities, CapabilitiesStart } from './capabilities';
-import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
+import { BasePathSetup, BasePathStart } from './base_path';
+import {
+  ChromeBadge,
+  ChromeBrand,
+  ChromeBreadcrumb,
+  ChromeHelpExtension,
+  ChromeSetup,
+} from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
 import { I18nSetup, I18nStart } from './i18n';
@@ -27,6 +32,7 @@ import {
   InjectedMetadataParams,
   InjectedMetadataSetup,
   InjectedMetadataStart,
+  LegacyNavLink,
 } from './injected_metadata';
 import {
   NotificationsSetup,
@@ -38,6 +44,7 @@ import {
 import { FlyoutRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
@@ -52,6 +59,8 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
   /** {@link I18nSetup} */
   i18n: I18nSetup;
   /** {@link InjectedMetadataSetup} */
@@ -71,8 +80,10 @@ export interface CoreSetup {
 }
 
 export interface CoreStart {
-  /** {@link CapabilitiesStart} */
-  capabilities: CapabilitiesStart;
+  /** {@link ApplicationStart} */
+  application: ApplicationStart;
+  /** {@link BasePathStart} */
+  basePath: BasePathStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link InjectedMetadataStart} */
@@ -84,12 +95,15 @@ export interface CoreStart {
 }
 
 export {
+  ApplicationSetup,
+  ApplicationStart,
   BasePathSetup,
+  BasePathStart,
   HttpSetup,
   FatalErrorsSetup,
   Capabilities,
-  CapabilitiesStart,
   ChromeSetup,
+  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
@@ -98,6 +112,7 @@ export {
   InjectedMetadataSetup,
   InjectedMetadataStart,
   InjectedMetadataParams,
+  LegacyNavLink,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
