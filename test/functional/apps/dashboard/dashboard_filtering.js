@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
-        await filterBar.q('bytes');
+        await filterBar.toggleFilterEnabled('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
