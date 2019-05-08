@@ -30,7 +30,7 @@ export interface Query {
   getSnapshot?: Snapshot | null;
 
   getMonitorChartsData?: MonitorChart | null;
-
+  /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
 
   getFilterBar?: FilterBar | null;
@@ -495,17 +495,20 @@ export interface DataPoint {
 // ====================================================
 
 export interface AllPingsQueryArgs {
+  /** Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'. */
   sort?: string | null;
-
+  /** Optional: the number of results to return. */
   size?: number | null;
-
+  /** Optional: the monitor ID filter. */
   monitorId?: string | null;
-
+  /** Optional: the check status to filter by. */
   status?: string | null;
-
+  /** The lower limit of the date range. */
   dateRangeStart: string;
-
+  /** The upper limit of the date range. */
   dateRangeEnd: string;
+  /** Optional: agent location to filter by. */
+  location?: string | null;
 }
 export interface GetMonitorsQueryArgs {
   dateRangeStart: string;
@@ -527,13 +530,18 @@ export interface GetMonitorChartsDataQueryArgs {
   dateRangeStart: string;
 
   dateRangeEnd: string;
+
+  location?: string | null;
 }
 export interface GetLatestMonitorsQueryArgs {
+  /** The lower limit of the date range. */
   dateRangeStart: string;
-
+  /** The upper limit of the date range. */
   dateRangeEnd: string;
-
+  /** Optional: a specific monitor ID filter. */
   monitorId?: string | null;
+  /** Optional: a specific instance location filter. */
+  location?: string | null;
 }
 export interface GetFilterBarQueryArgs {
   dateRangeStart: string;

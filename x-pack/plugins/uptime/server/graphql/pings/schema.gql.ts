@@ -19,12 +19,20 @@ export const pingsSchema = gql`
   type Query {
     "Get a list of all recorded pings for all monitors"
     allPings(
+      "Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'."
       sort: String
+      "Optional: the number of results to return."
       size: Int
+      "Optional: the monitor ID filter."
       monitorId: String
+      "Optional: the check status to filter by."
       status: String
+      "The lower limit of the date range."
       dateRangeStart: String!
+      "The upper limit of the date range."
       dateRangeEnd: String!
+      "Optional: agent location to filter by."
+      location: String
     ): PingResults!
 
     "Gets the number of documents in the target index"

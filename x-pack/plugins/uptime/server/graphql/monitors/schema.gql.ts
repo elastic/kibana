@@ -152,9 +152,20 @@ export const monitorsSchema = gql`
       monitorId: String!
       dateRangeStart: String!
       dateRangeEnd: String!
+      location: String
     ): MonitorChart
 
-    getLatestMonitors(dateRangeStart: String!, dateRangeEnd: String!, monitorId: String): [Ping!]!
+    "Fetch the most recent event data for a monitor ID, date range, location."
+    getLatestMonitors(
+      "The lower limit of the date range."
+      dateRangeStart: String!
+      "The upper limit of the date range."
+      dateRangeEnd: String!
+      "Optional: a specific monitor ID filter."
+      monitorId: String
+      "Optional: a specific instance location filter."
+      location: String
+    ): [Ping!]!
 
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 

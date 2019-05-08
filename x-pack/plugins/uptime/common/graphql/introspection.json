@@ -15,31 +15,31 @@
             "args": [
               {
                 "name": "sort",
-                "description": "",
+                "description": "Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "size",
-                "description": "",
+                "description": "Optional: the number of results to return.",
                 "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "monitorId",
-                "description": "",
+                "description": "Optional: the monitor ID filter.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "status",
-                "description": "",
+                "description": "Optional: the check status to filter by.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "dateRangeStart",
-                "description": "",
+                "description": "The lower limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -49,12 +49,18 @@
               },
               {
                 "name": "dateRangeEnd",
-                "description": "",
+                "description": "The upper limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "location",
+                "description": "Optional: agent location to filter by.",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -181,6 +187,12 @@
                   "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "location",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "MonitorChart", "ofType": null },
@@ -189,11 +201,11 @@
           },
           {
             "name": "getLatestMonitors",
-            "description": "",
+            "description": "Fetch the most recent event data for a monitor ID, date range, location.",
             "args": [
               {
                 "name": "dateRangeStart",
-                "description": "",
+                "description": "The lower limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -203,7 +215,7 @@
               },
               {
                 "name": "dateRangeEnd",
-                "description": "",
+                "description": "The upper limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -213,7 +225,13 @@
               },
               {
                 "name": "monitorId",
-                "description": "",
+                "description": "Optional: a specific monitor ID filter.",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "location",
+                "description": "Optional: a specific instance location filter.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
