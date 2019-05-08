@@ -25,7 +25,7 @@ import { Moment } from 'moment';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import { REFRESH_INTERVALS } from '../../../../common/constants';
+import { REFRESH_INTERVALS, PAGINATION } from '../../../../common/constants';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
 import { getPageErrorCode, PageError, DeleteWatchesModal, WatchStatus } from '../../../components';
 import { loadWatches } from '../../../lib/api';
@@ -160,11 +160,6 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
     onSelectionChange: setSelection,
   };
 
-  const pagination = {
-    initialPageSize: 10,
-    pageSizeOptions: [10, 50, 100],
-  };
-
   const searchConfig = {
     box: {
       incremental: true,
@@ -277,7 +272,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
         itemId="id"
         columns={columns}
         search={searchConfig}
-        pagination={pagination}
+        pagination={PAGINATION}
         sorting={true}
         selection={selectionConfig}
         isSelectable={true}

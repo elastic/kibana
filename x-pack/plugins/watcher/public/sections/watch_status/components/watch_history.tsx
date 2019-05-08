@@ -26,6 +26,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { PAGINATION } from '../../../../common/constants';
 import { goToWatchList } from '../../../lib/navigation';
 import { getPageErrorCode, PageError, WatchStatus, DeleteWatchesModal } from '../../../components';
 import {
@@ -108,11 +109,6 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   if (errorCode) {
     return <PageError errorCode={errorCode} id={watchId} />;
   }
-
-  const pagination = {
-    initialPageSize: 10,
-    pageSizeOptions: [10, 50, 100],
-  };
 
   const columns = [
     {
@@ -347,7 +343,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       <EuiInMemoryTable
         items={history}
         columns={columns}
-        pagination={pagination}
+        pagination={PAGINATION}
         sorting={true}
         loading={isLoading}
         message={

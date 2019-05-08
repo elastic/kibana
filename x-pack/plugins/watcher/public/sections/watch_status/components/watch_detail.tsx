@@ -12,35 +12,59 @@ import { toastNotifications } from 'ui/notify';
 import {
   EuiInMemoryTable,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
 } from '@elastic/eui';
 import { loadWatchDetail, ackWatchAction } from '../../../lib/api';
 import { getPageErrorCode, WatchStatus } from '../../../components';
+import { PAGINATION } from '../../../../common/constants';
+
+interface ActionError {
+  code: string;
+  message: string;
+}
+interface ActionStatus {
+  id: string;
+  isAckable: boolean;
+  state: string;
+  errors: ActionError[];
+}
 
 const WatchDetailUi = ({ watchId }: { watchId: string }) => {
-  const pagination = {
-    initialPageSize: 10,
-    pageSizeOptions: [10, 50, 100],
-  };
-
   const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
 
-  const [actionStatuses, setActionStatuses] = useState<any[]>([]);
+  const [actionStatuses, setActionStatuses] = useState<ActionStatus[]>([]);
   const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
+
+  const [selectedErrorAction, setSelectedErrorAction] = useState<string | null>(null);
+
+  const actionErrors = watchDetail && watchDetail.watchErrors.actionErrors;
+  const hasActionErrors = actionErrors && Object.keys(actionErrors).length > 0;
 
   useEffect(
     () => {
       if (watchDetail) {
-        setActionStatuses(watchDetail.watchStatus.actionStatuses);
+        const currentActionStatuses = watchDetail.watchStatus.actionStatuses;
+        const actionStatusesWithErrors =
+          currentActionStatuses &&
+          currentActionStatuses.map((currentActionStatus: ActionStatus) => {
+            return {
+              ...currentActionStatus,
+              errors: actionErrors ? actionErrors[currentActionStatus.id] : [],
+            };
+          });
+        setActionStatuses(actionStatusesWithErrors);
       }
     },
     [watchDetail]
   );
 
-  const columns = [
+  const baseColumns = [
     {
       field: 'id',
       name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.actionHeader', {
@@ -48,9 +72,6 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
       }),
       sortable: true,
       truncateText: true,
-      render: (action: string) => {
-        return <EuiText>{action}</EuiText>;
-      },
     },
     {
       field: 'state',
@@ -61,59 +82,92 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
       truncateText: true,
       render: (state: string) => <WatchStatus status={state} />,
     },
-    {
-      actions: [
-        {
-          render: (action: any) => {
-            if (action.isAckable) {
-              return (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.watcher.sections.watchDetail.watchTable.ackActionCellTooltipTitle',
-                    {
-                      defaultMessage: 'Acknowledge this watch action',
-                    }
-                  )}
-                >
-                  <EuiButtonEmpty
-                    iconType="check"
-                    isLoading={isActionStatusLoading}
-                    onClick={async () => {
-                      setIsActionStatusLoading(true);
-                      try {
-                        const watchStatus = await ackWatchAction(watchDetail.id, action.id);
-                        setIsActionStatusLoading(false);
-                        return setActionStatuses(watchStatus.actionStatuses);
-                      } catch (e) {
-                        setIsActionStatusLoading(false);
-                        toastNotifications.addDanger(
-                          i18n.translate(
-                            'xpack.watcher.sections.watchDetail.watchTable.ackActionErrorMessage',
-                            {
-                              defaultMessage: 'Error acknowledging action {actionId}',
-                              values: {
-                                actionId: action.id,
-                              },
-                            }
-                          )
-                        );
-                      }
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.watcher.sections.watchDetail.watchTable.ackActionCellTitle"
-                      defaultMessage="Acknowledge"
-                    />
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              );
-            }
-            return <Fragment />;
-          },
-        },
-      ],
-    },
   ];
+
+  const errorColumn = {
+    field: 'errors',
+    name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.errorsHeader', {
+      defaultMessage: 'Errors',
+    }),
+    render: (errors: ActionError[], action: ActionStatus) => {
+      if (errors && errors.length > 0) {
+        return (
+          <EuiButtonEmpty onClick={() => setSelectedErrorAction(action.id)}>
+            {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.errorsCellText', {
+              defaultMessage: '{total, number} {total, plural, one {error} other {errors}}',
+              values: {
+                total: errors.length,
+              },
+            })}
+          </EuiButtonEmpty>
+        );
+      }
+      return <Fragment />;
+    },
+  };
+
+  const actionColumn = {
+    actions: [
+      {
+        available: (action: ActionStatus) => action.isAckable,
+        render: (action: ActionStatus) => {
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.watcher.sections.watchDetail.watchTable.ackActionCellTooltipTitle',
+                {
+                  defaultMessage: 'Acknowledge this watch action',
+                }
+              )}
+            >
+              <EuiButtonEmpty
+                iconType="check"
+                isLoading={isActionStatusLoading}
+                onClick={async () => {
+                  setIsActionStatusLoading(true);
+                  try {
+                    const watchStatus = await ackWatchAction(watchDetail.id, action.id);
+                    const newActionStatusesWithErrors = watchStatus.actionStatuses.map(
+                      (newActionStatus: ActionStatus) => {
+                        return {
+                          ...newActionStatus,
+                          errors: actionErrors ? actionErrors[newActionStatus.id] : [],
+                        };
+                      }
+                    );
+                    setIsActionStatusLoading(false);
+                    return setActionStatuses(newActionStatusesWithErrors);
+                  } catch (e) {
+                    setIsActionStatusLoading(false);
+                    toastNotifications.addDanger(
+                      i18n.translate(
+                        'xpack.watcher.sections.watchDetail.watchTable.ackActionErrorMessage',
+                        {
+                          defaultMessage: 'Error acknowledging action {actionId}',
+                          values: {
+                            actionId: action.id,
+                          },
+                        }
+                      )
+                    );
+                  }
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchDetail.watchTable.ackActionCellTitle"
+                  defaultMessage="Acknowledge"
+                />
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          );
+        },
+      },
+    ],
+  };
+
+  const columns = hasActionErrors
+    ? [...baseColumns, errorColumn, actionColumn]
+    : [...baseColumns, actionColumn];
 
   // Another part of the UI will surface the error.
   if (getPageErrorCode(error)) {
@@ -122,6 +176,40 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
 
   return (
     <Fragment>
+      {selectedErrorAction && (
+        <EuiFlyout
+          size="s"
+          aria-labelledby="flyoutActionErrorTitle"
+          onClose={() => setSelectedErrorAction(null)}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="s">
+              <h2 id="flyoutActionErrorTitle">{selectedErrorAction}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiCallOut
+              title={i18n.translate('xpack.watcher.sections.watchDetail.actionErrorsCalloutTitle', {
+                defaultMessage: 'This action contains errors.',
+              })}
+              color="danger"
+              iconType="cross"
+            >
+              {actionErrors[selectedErrorAction].length > 1 ? (
+                <ul>
+                  {actionErrors[selectedErrorAction].map(
+                    (actionError: ActionError, errorIndex: number) => (
+                      <li key={`action-error-${errorIndex}`}>{actionError.message}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <p>{actionErrors[selectedErrorAction][0].message}</p>
+              )}
+            </EuiCallOut>
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
       <EuiTitle size="m">
         <h1>
           <FormattedMessage
@@ -149,7 +237,7 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
         items={actionStatuses}
         itemId="id"
         columns={columns}
-        pagination={pagination}
+        pagination={PAGINATION}
         sorting={true}
         loading={isLoading}
         message={
