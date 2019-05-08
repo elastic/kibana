@@ -33,6 +33,19 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 
+// listen to data on stream until map returns anything but undefined
+const first = (stream, map) =>
+  new Promise(resolve => {
+    const onData = data => {
+      const result = map(data);
+      if (data !== undefined) {
+        resolve(result);
+        stream.removeListener('data', onData);
+      }
+    };
+    stream.on('data', onData);
+  });
+
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
     this._log = log;
@@ -157,19 +170,8 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     await Promise.race([
-      Promise.all([
-        // wait for native realm to be setup
-        this._nativeRealmSetup,
-
-        // await the "started" log message
-        new Promise(resolve => {
-          this._process.stdout.on('data', data => {
-            if (/started/.test(data)) {
-              resolve();
-            }
-          });
-        }),
-      ]),
+      // wait for native realm to be setup and es to be started
+      Promise.all([this._nativeRealmSetup, this._started]),
 
       // await the outcome of the process in case it exits before starting
       this._outcome.then(() => {
@@ -245,19 +247,18 @@ exports.Cluster = class Cluster {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    this._httpPort = new Promise(resolve => {
-      const onData = data => {
-        const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
+    this._started = first(this._process.stdout, data => {
+      if (/started/.test(data)) {
+        return true;
+      }
+    });
 
-        if (!match) {
-          return;
-        }
+    this._httpPort = first(this._process.stdout, data => {
+      const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
-        this._process.stdout.removeListener('data', onData);
-        resolve(match[1]);
-      };
-
-      this._process.stdout.on('data', onData);
+      if (match) {
+        return match[1];
+      }
     });
 
     this._process.stdout.on('data', data => {
