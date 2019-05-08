@@ -58,6 +58,8 @@ export interface PluginSetupContext {
   http: {
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnRequest: HttpServiceSetup['registerOnRequest'];
+    getBasePathFor: HttpServiceSetup['getBasePathFor'];
+    setBasePathFor: HttpServiceSetup['setBasePathFor'];
   };
 }
 
@@ -148,6 +150,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     http: {
       registerAuth: deps.http.registerAuth,
       registerOnRequest: deps.http.registerOnRequest,
+      getBasePathFor: deps.http.getBasePathFor,
+      setBasePathFor: deps.http.setBasePathFor,
     },
   };
 }
