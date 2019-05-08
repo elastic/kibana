@@ -8,6 +8,7 @@ import { spy, stub } from 'sinon';
 import expect from '@kbn/expect';
 import { MonitoringViewBaseController } from '../';
 import { timefilter } from 'ui/timefilter';
+import { PromiseWithCancel,  Status } from '../../../common/cancel-promise';
 
 /*
  * Mostly copied from base_table_controller test, with modifications
@@ -36,7 +37,8 @@ describe('MonitoringViewBaseController', function () {
 
     $scope = {
       cluster: { cluster_uuid: 'foo' },
-      $on: stub()
+      $on: stub(),
+      $apply: stub()
     };
 
     opts = {
@@ -139,6 +141,30 @@ describe('MonitoringViewBaseController', function () {
 
       expect(timefilter.isTimeRangeSelectorEnabled).to.be(false);
       expect(timefilter.isAutoRefreshSelectorEnabled).to.be(false);
+    });
+
+    it('disables timepicker and auto refresh', (done) => {
+      const httpCall = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+      opts = {
+        title: 'test',
+        getPageData: () => httpCall(60),
+        $injector,
+        $scope
+      };
+
+      ctrl = new MonitoringViewBaseController({ ...opts });
+      ctrl.updateDataPromise = new PromiseWithCancel(httpCall(50));
+
+      let shouldBeFalse = false;
+      ctrl.updateDataPromise.promise().then(() => (shouldBeFalse = true));
+
+      const lastUpdateDataPromise = ctrl.updateDataPromise;
+
+      ctrl.updateData().then(() => {
+        expect(shouldBeFalse).to.be(false);
+        expect(lastUpdateDataPromise.status()).to.be(Status.Canceled);
+        done();
+      });
     });
   });
 
