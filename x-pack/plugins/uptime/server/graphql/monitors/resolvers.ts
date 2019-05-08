@@ -112,27 +112,39 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     },
     async getMonitorChartsData(
       resolver,
-      { monitorId, dateRangeStart, dateRangeEnd },
+      { monitorId, dateRangeStart, dateRangeEnd, location },
       { req }
     ): Promise<MonitorChart> {
-      return await libs.monitors.getMonitorChartsData(req, monitorId, dateRangeStart, dateRangeEnd);
+      return await libs.monitors.getMonitorChartsData(
+        req,
+        monitorId,
+        dateRangeStart,
+        dateRangeEnd,
+        location
+      );
     },
     async getLatestMonitors(
       resolver,
-      { dateRangeStart, dateRangeEnd, monitorId },
+      { dateRangeStart, dateRangeEnd, monitorId, location },
       { req }
     ): Promise<Ping[]> {
-      return libs.pings.getLatestMonitorDocs(req, dateRangeStart, dateRangeEnd, monitorId);
+      return await libs.pings.getLatestMonitorDocs(
+        req,
+        dateRangeStart,
+        dateRangeEnd,
+        monitorId,
+        location
+      );
     },
     async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<FilterBar> {
-      return libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
+      return await libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
     },
     async getErrorsList(
       resolver,
       { dateRangeStart, dateRangeEnd, filters },
       { req }
     ): Promise<any> {
-      return libs.monitors.getErrorsList(req, dateRangeStart, dateRangeEnd, filters);
+      return await libs.monitors.getErrorsList(req, dateRangeStart, dateRangeEnd, filters);
     },
     async getMonitorPageTitle(
       resolver: any,

@@ -19,7 +19,8 @@ export class UMPingsDomain {
     monitorId?: string | null,
     status?: string | null,
     sort?: string | null,
-    size?: number | null
+    size?: number | null,
+    location?: string | null
   ): Promise<PingResults> {
     return this.adapter.getAll(
       request,
@@ -28,7 +29,8 @@ export class UMPingsDomain {
       monitorId,
       status,
       sort,
-      size
+      size,
+      location
     );
   }
 
@@ -36,9 +38,16 @@ export class UMPingsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string | null
+    monitorId?: string | null,
+    location?: string | null
   ): Promise<Ping[]> {
-    return this.adapter.getLatestMonitorDocs(request, dateRangeStart, dateRangeEnd, monitorId);
+    return this.adapter.getLatestMonitorDocs(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      monitorId,
+      location
+    );
   }
 
   public async getPingHistogram(

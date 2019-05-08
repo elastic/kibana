@@ -7,11 +7,12 @@
 import gql from 'graphql-tag';
 
 export const monitorChartsQueryString = `
-query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId: String!) {
+query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId: String!, $location: String) {
   monitorChartsData: getMonitorChartsData(
     monitorId: $monitorId
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
+    location: $location
   ) {
     durationArea {
       x

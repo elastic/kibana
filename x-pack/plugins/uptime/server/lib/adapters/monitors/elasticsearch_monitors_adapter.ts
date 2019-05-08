@@ -16,7 +16,12 @@ import {
   MonitorSeriesPoint,
   Ping,
 } from '../../../../common/graphql/types';
-import { dropLatestBucket, getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
+import {
+  dropLatestBucket,
+  getFilteredQuery,
+  getFilteredQueryAndStatusFilter,
+  getHistogramInterval,
+} from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
@@ -57,7 +62,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     monitorId: string,
     dateRangeStart: string,
-    dateRangeEnd: string
+    dateRangeEnd: string,
+    location?: string | null
   ): Promise<MonitorChart> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -67,6 +73,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             filter: [
               { range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } },
               { term: { 'monitor.id': monitorId } },
+              // if location is truthy, add it as a filter. otherwise add nothing
+              ...(!!location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
           },
         },
@@ -170,6 +178,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   location: {
                     terms: {
                       field: 'observer.geo.name',
+                      missing_bucket: true,
                     },
                   },
                 },
@@ -268,11 +277,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   location: {
                     terms: {
                       field: 'observer.geo.name',
+                      missing_bucket: true,
                     },
                   },
                 },
               ],
-              size: 50,
+              size: 40,
             },
             aggs: {
               latest: {
@@ -289,6 +299,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                 date_histogram: {
                   field: '@timestamp',
                   interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+                  missing: 0,
                 },
                 aggs: {
                   status: {
@@ -487,6 +498,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   location: {
                     terms: {
                       field: 'observer.geo.name',
+                      missing_bucket: true,
                     },
                   },
                 },

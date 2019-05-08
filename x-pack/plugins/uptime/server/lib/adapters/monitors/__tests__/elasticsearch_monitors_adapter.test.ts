@@ -62,4 +62,32 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchSnapshot();
   });
+
+  it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
+    expect.assertions(2);
+    const searchMock = jest.fn();
+    const search = searchMock.bind({});
+    const database = {
+      search,
+      count: async (request: any, params: any) => null,
+    };
+    const adapter = new ElasticsearchMonitorsAdapter(database);
+    await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now');
+    expect(searchMock).toHaveBeenCalledTimes(1);
+    expect(searchMock.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('getMonitorChartsData will provide expected filters when a location is specified', async () => {
+    expect.assertions(2);
+    const searchMock = jest.fn();
+    const search = searchMock.bind({});
+    const database = {
+      search,
+      count: async (request: any, params: any) => null,
+    };
+    const adapter = new ElasticsearchMonitorsAdapter(database);
+    await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now', 'Philadelphia');
+    expect(searchMock).toHaveBeenCalledTimes(1);
+    expect(searchMock.mock.calls[0]).toMatchSnapshot();
+  });
 });
