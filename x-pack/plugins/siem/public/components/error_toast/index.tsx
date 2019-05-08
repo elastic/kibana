@@ -10,7 +10,8 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { appActions, appModel, appSelectors, State } from '../../store';
+import { appModel, appSelectors, State } from '../../store';
+import { appActions } from '../../store/app';
 
 interface OwnProps {
   toastLifeTimeMs?: number;

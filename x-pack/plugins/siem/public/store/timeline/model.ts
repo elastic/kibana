@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Direction } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';

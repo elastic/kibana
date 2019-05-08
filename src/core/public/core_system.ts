@@ -22,7 +22,7 @@ import './core.css';
 import { CoreSetup, CoreStart } from '.';
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
-import { FatalErrorsService } from './fatal_errors';
+import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
@@ -69,6 +69,7 @@ export class CoreSystem {
 
   private readonly rootDomElement: HTMLElement;
   private readonly overlayTargetDomElement: HTMLDivElement;
+  private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
     const {
@@ -87,12 +88,9 @@ export class CoreSystem {
       injectedMetadata,
     });
 
-    this.fatalErrors = new FatalErrorsService({
-      rootDomElement,
-      injectedMetadata: this.injectedMetadata,
-      stopCoreSystem: () => {
-        this.stop();
-      },
+    this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
+      // Stop Core before rendering any fatal errors into the DOM
+      this.stop();
     });
 
     this.notifications = new NotificationsService();
@@ -115,11 +113,17 @@ export class CoreSystem {
 
   public async setup() {
     try {
+      // Setup FatalErrorsService and it's dependencies first so that we're
+      // able to render any errors.
       const i18n = this.i18n.setup();
       const injectedMetadata = this.injectedMetadata.setup();
-      const fatalErrors = this.fatalErrors.setup({ i18n });
-      const http = this.http.setup({ fatalErrors });
+      this.fatalErrorsSetup = this.fatalErrors.setup({ injectedMetadata, i18n });
       const basePath = this.basePath.setup({ injectedMetadata });
+      const http = this.http.setup({
+        basePath,
+        injectedMetadata,
+        fatalErrors: this.fatalErrorsSetup,
+      });
       const uiSettings = this.uiSettings.setup({
         http,
         injectedMetadata,
@@ -136,7 +140,7 @@ export class CoreSystem {
         application,
         basePath,
         chrome,
-        fatalErrors,
+        fatalErrors: this.fatalErrorsSetup,
         http,
         i18n,
         injectedMetadata,
@@ -148,9 +152,15 @@ export class CoreSystem {
       await this.plugins.setup(core);
       await this.legacyPlatform.setup({ core });
 
-      return { fatalErrors };
+      return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
-      this.fatalErrors.add(error);
+      if (this.fatalErrorsSetup) {
+        this.fatalErrorsSetup.add(error);
+      } else {
+        // If the FatalErrorsService has not yet been setup, log error to console
+        // eslint-disable-next-line no-console
+        console.log(error);
+      }
     }
   }
 
@@ -189,7 +199,13 @@ export class CoreSystem {
       await this.plugins.start(core);
       await this.legacyPlatform.start({ core, targetDomElement: legacyPlatformTargetDomElement });
     } catch (error) {
-      this.fatalErrors.add(error);
+      if (this.fatalErrorsSetup) {
+        this.fatalErrorsSetup.add(error);
+      } else {
+        // If the FatalErrorsService has not yet been setup, log error to console
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
     }
   }
 

@@ -128,7 +128,8 @@ export const xpackMain = (kibana) => {
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
       setupXPackMain(server);
-      registerOssFeatures(server.plugins.xpack_main.registerFeature);
+      const { types: savedObjectTypes } = server.savedObjects;
+      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes);
 
       // register routes
       xpackInfoRoute(server);
