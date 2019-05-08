@@ -106,9 +106,6 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    // If normal add layer, adds layer
-    // If import, adds transient (new) layer
-    // If import complete, just moves to layer settings, removes transience
     const {
       indexingTriggered, indexingComplete, importView, layer,
       importIndexingReady
@@ -118,10 +115,13 @@ export class AddLayerPanel extends Component {
     const isImportCompleted = importView && indexingTriggered && indexingComplete;
 
     const buttonEnabled = isLayerAddReady || isImportPreviewReady || isImportCompleted;
+    const buttonText = importView && !indexingTriggered && 'Import file'
+      || 'Add layer';
     return (
       <FlyoutFooter
         onClick={this._layerAddHandler}
         disableButton={!buttonEnabled}
+        buttonText={buttonText}
       />
     );
   }
