@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './suricata_details';
-export * from './suricata_links';
-export * from './suricata_refs';
-export * from './suricata_row_renderer';
-export * from './suricata_signature';
+export const NOTES_PANEL_WIDTH = 1024;
+export const NOTES_PANEL_HEIGHT = 633;

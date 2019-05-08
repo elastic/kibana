@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './zeek_details';
-export * from './zeek_row_renderer';
-export * from './zeek_signature';
+import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
+
+export const createMetricLabel = (metric: MetricsExplorerMetric) => {
+  return `${metric.aggregation}(${metric.field || ''})`;
+};

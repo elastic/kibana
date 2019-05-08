@@ -597,13 +597,7 @@ export namespace FlyoutItemQuery {
     fields: Fields[];
   };
 
-  export type Key = {
-    __typename?: 'InfraTimeKey';
-
-    time: number;
-
-    tiebreaker: number;
-  };
+  export type Key = InfraTimeKeyFields.Fragment;
 
   export type Fields = {
     __typename?: 'InfraLogItemField';

@@ -118,9 +118,12 @@ export class CoreSystem {
       const i18n = this.i18n.setup();
       const injectedMetadata = this.injectedMetadata.setup();
       this.fatalErrorsSetup = this.fatalErrors.setup({ injectedMetadata, i18n });
-
-      const http = this.http.setup({ fatalErrors: this.fatalErrorsSetup });
       const basePath = this.basePath.setup({ injectedMetadata });
+      const http = this.http.setup({
+        basePath,
+        injectedMetadata,
+        fatalErrors: this.fatalErrorsSetup,
+      });
       const uiSettings = this.uiSettings.setup({
         http,
         injectedMetadata,
