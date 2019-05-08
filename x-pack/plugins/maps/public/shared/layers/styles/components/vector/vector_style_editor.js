@@ -10,7 +10,7 @@ import React, { Component, Fragment } from 'react';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
-import { VECTOR_FEATURE_TYPES } from '../../../sources/vector_source';
+import { VECTOR_FEATURE_TYPES } from '../../../sources/vector_feature_types';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
@@ -21,7 +21,6 @@ export class VectorStyleEditor extends Component {
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
-    isInitialized: false,
     selectedFeatureType: undefined,
   }
 
@@ -32,11 +31,12 @@ export class VectorStyleEditor extends Component {
   componentDidMount() {
     this._isMounted = true;
     this._loadOrdinalFields();
-    this._init();
+    this._loadSupportedFeatures();
   }
 
   componentDidUpdate() {
     this._loadOrdinalFields();
+    this._loadSupportedFeatures();
   }
 
   async _loadOrdinalFields() {
@@ -49,7 +49,7 @@ export class VectorStyleEditor extends Component {
     }
   }
 
-  async _init() {
+  async _loadSupportedFeatures() {
     const supportedFeatures = await this.props.layer.getSource().getSupportedFeatures();
     const isPointsOnly = await this.props.loadIsPointsOnly();
     const isLinesOnly = await this.props.loadIsLinesOnly();
@@ -61,9 +61,13 @@ export class VectorStyleEditor extends Component {
       selectedFeature = VECTOR_FEATURE_TYPES.LINE;
     }
 
-    if (this._isMounted) {
+    if (!this._isMounted) {
+      return;
+    }
+
+    if (!_.isEqual(supportedFeatures, this.state.supportedFeatures) ||
+      selectedFeature !== this.state.selectedFeature) {
       this.setState({
-        isInitialized: true,
         supportedFeatures,
         selectedFeature,
       });
@@ -170,12 +174,11 @@ export class VectorStyleEditor extends Component {
 
   render() {
     const {
-      isInitialized,
       supportedFeatures,
       selectedFeature,
     } = this.state;
 
-    if (!isInitialized) {
+    if (!supportedFeatures) {
       return null;
     }
 

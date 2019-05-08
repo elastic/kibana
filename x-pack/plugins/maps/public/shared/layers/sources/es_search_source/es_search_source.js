@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VECTOR_FEATURE_TYPES } from '../vector_source';
+import { VECTOR_FEATURE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';

@@ -6,6 +6,7 @@
 
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../util/data_request';
+import { VECTOR_FEATURE_TYPES } from '../sources/vector_feature_types';
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
@@ -70,8 +71,14 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
 
 describe('pluckStyleMetaFromSourceDataRequest', () => {
 
-  describe('isPointsOnly', () => {
-    it('Should identify when feature collection only contains points', () => {
+  const sourceMock = {
+    getSupportedFeatures: () => {
+      return Object.values(VECTOR_FEATURE_TYPES);
+    }
+  };
+
+  describe('has features', () => {
+    it('Should identify when feature collection only contains points', async () => {
       const sourceDataRequest = new DataRequest({
         data: {
           type: 'FeatureCollection',
@@ -91,41 +98,15 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
           ],
         }
       });
-      const vectorStyle = new VectorStyle({});
+      const vectorStyle = new VectorStyle({}, sourceMock);
 
-      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.isPointsOnly).toBe(true);
+      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta.hasPoints).toBe(true);
+      expect(featuresMeta.hasLines).toBe(false);
+      expect(featuresMeta.hasPolygons).toBe(false);
     });
 
-    it('Should identify when feature collection contains features other than points', () => {
-      const sourceDataRequest = new DataRequest({
-        data: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              geometry: {
-                type: 'Point'
-              },
-              properties: {}
-            },
-            {
-              geometry: {
-                type: 'Polygon'
-              },
-              properties: {}
-            }
-          ],
-        }
-      });
-      const vectorStyle = new VectorStyle({});
-
-      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.isPointsOnly).toBe(false );
-    });
-  });
-
-  describe('isLinesOnly', () => {
-    it('Should identify when feature collection only contains lines', () => {
+    it('Should identify when feature collection only contains lines', async () => {
       const sourceDataRequest = new DataRequest({
         data: {
           type: 'FeatureCollection',
@@ -145,36 +126,12 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
           ],
         }
       });
-      const vectorStyle = new VectorStyle({});
+      const vectorStyle = new VectorStyle({}, sourceMock);
 
-      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.isLinesOnly).toBe(true);
-    });
-
-    it('Should identify when feature collection contains features other than lines', () => {
-      const sourceDataRequest = new DataRequest({
-        data: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              geometry: {
-                type: 'LineString'
-              },
-              properties: {}
-            },
-            {
-              geometry: {
-                type: 'Polygon'
-              },
-              properties: {}
-            }
-          ],
-        }
-      });
-      const vectorStyle = new VectorStyle({});
-
-      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.isLinesOnly).toBe(false );
+      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta.hasPoints).toBe(false);
+      expect(featuresMeta.hasLines).toBe(true);
+      expect(featuresMeta.hasPolygons).toBe(false);
     });
   });
 
@@ -203,7 +160,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       }
     });
 
-    it('Should not extract scaled field range when scaled field has not values', () => {
+    it('Should not extract scaled field range when scaled field has not values', async () => {
       const vectorStyle = new VectorStyle({
         properties: {
           fillColor: {
@@ -215,13 +172,13 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
             }
           }
         }
-      });
+      }, sourceMock);
 
-      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta).toEqual({ isLinesOnly: false, isPointsOnly: true });
+      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta).toEqual({ hasLines: false, hasPoints: true, hasPolygons: false, });
     });
 
-    it('Should extract scaled field range', () => {
+    it('Should extract scaled field range', async () => {
       const vectorStyle = new VectorStyle({
         properties: {
           fillColor: {
@@ -233,17 +190,13 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
             }
           }
         }
-      });
+      }, sourceMock);
 
-      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta).toEqual({
-        isLinesOnly: false,
-        isPointsOnly: true,
-        myDynamicField: {
-          delta: 9,
-          max: 10,
-          min: 1
-        }
+      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta.myDynamicField).toEqual({
+        delta: 9,
+        max: 10,
+        min: 1
       });
     });
   });

@@ -14,7 +14,7 @@ import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
-import { VECTOR_FEATURE_TYPES } from '../sources/vector_source';
+import { VECTOR_FEATURE_TYPES } from '../sources/vector_feature_types';
 
 export class VectorStyle extends AbstractStyle {
 

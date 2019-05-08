@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource, VECTOR_FEATURE_TYPES } from '../vector_source';
+import { AbstractVectorSource } from '../vector_source';
+import { VECTOR_FEATURE_TYPES } from '../vector_feature_types';
 import React from 'react';
 import { GIS_API_PATH, EMS_FILE } from '../../../../../common/constants';
 import { getEmsVectorFilesMeta } from '../../../../meta';

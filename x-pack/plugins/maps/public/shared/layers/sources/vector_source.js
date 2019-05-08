@@ -12,12 +12,7 @@ import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-
-export const VECTOR_FEATURE_TYPES = {
-  POINT: 'POINT',
-  LINE: 'LINE',
-  POLYGON: 'POLYGON'
-};
+import { VECTOR_FEATURE_TYPES } from './vector_feature_types';
 
 export class AbstractVectorSource extends AbstractSource {
 
@@ -122,6 +117,6 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   async getSupportedFeatures() {
-    return [Object.values(VECTOR_FEATURE_TYPES)];
+    return Object.values(VECTOR_FEATURE_TYPES);
   }
 }

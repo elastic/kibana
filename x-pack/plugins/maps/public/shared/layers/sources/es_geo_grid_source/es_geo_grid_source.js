@@ -7,7 +7,7 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VECTOR_FEATURE_TYPES } from '../vector_source';
+import { VECTOR_FEATURE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
