@@ -14,32 +14,23 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
     size="m"
     type="iInCircle"
   >
-    <iInCircle
+    <EuiIconEmpty
       aria-hidden="true"
-      className="euiIcon euiIcon--medium euiButtonIcon__icon"
+      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
       focusable="false"
-      height="16"
       style={null}
-      viewBox="0 0 16 16"
-      width="16"
-      xmlns="http://www.w3.org/2000/svg"
     >
       <svg
         aria-hidden="true"
-        className="euiIcon euiIcon--medium euiButtonIcon__icon"
+        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
         focusable="false"
-        height="16"
+        height={16}
         style={null}
         viewBox="0 0 16 16"
-        width="16"
+        width={16}
         xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M7.5 11.508L7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568zM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"
-          fillRule="evenodd"
-        />
-      </svg>
-    </iInCircle>
+      />
+    </EuiIconEmpty>
   </EuiIcon>
 </button>
 `;
@@ -162,17 +153,13 @@ Array [
                           >
                             <svg
                               aria-hidden="true"
-                              class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                               focusable="false"
                               height="16"
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                              />
-                            </svg>
+                            />
                           </button>
                           <div
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
@@ -226,17 +213,13 @@ Array [
                             >
                               <svg
                                 aria-hidden="true"
-                                class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                                 focusable="false"
                                 height="16"
                                 viewBox="0 0 16 16"
                                 width="16"
                                 xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                                />
-                              </svg>
+                              />
                             </button>
                             <div
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
@@ -299,31 +282,23 @@ Array [
                           size="m"
                           type="cross"
                         >
-                          <cross
+                          <EuiIconEmpty
                             aria-hidden="true"
-                            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
-                            height="16"
                             style={null}
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
                           >
                             <svg
                               aria-hidden="true"
-                              className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                               focusable="false"
-                              height="16"
+                              height={16}
                               style={null}
                               viewBox="0 0 16 16"
-                              width="16"
+                              width={16}
                               xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                              />
-                            </svg>
-                          </cross>
+                            />
+                          </EuiIconEmpty>
                         </EuiIcon>
                       </button>
                     </EuiButtonIcon>
@@ -416,31 +391,23 @@ Array [
           size="m"
           type="cross"
         >
-          <cross
+          <EuiIconEmpty
             aria-hidden="true"
-            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
-            height="16"
             style={null}
-            viewBox="0 0 16 16"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
           >
             <svg
               aria-hidden="true"
-              className="euiIcon euiIcon--medium euiButtonIcon__icon"
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
               focusable="false"
-              height="16"
+              height={16}
               style={null}
               viewBox="0 0 16 16"
-              width="16"
+              width={16}
               xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-              />
-            </svg>
-          </cross>
+            />
+          </EuiIconEmpty>
         </EuiIcon>
       </button>
     </EuiButtonIcon>
@@ -601,17 +568,13 @@ Array [
                           >
                             <svg
                               aria-hidden="true"
-                              class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                               focusable="false"
                               height="16"
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                              />
-                            </svg>
+                            />
                           </button>
                           <div
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
@@ -663,17 +626,13 @@ Array [
                             >
                               <svg
                                 aria-hidden="true"
-                                class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                                 focusable="false"
                                 height="16"
                                 viewBox="0 0 16 16"
                                 width="16"
                                 xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                                />
-                              </svg>
+                              />
                             </button>
                             <div
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
@@ -734,31 +693,23 @@ Array [
                           size="m"
                           type="cross"
                         >
-                          <cross
+                          <EuiIconEmpty
                             aria-hidden="true"
-                            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
-                            height="16"
                             style={null}
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
                           >
                             <svg
                               aria-hidden="true"
-                              className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                               focusable="false"
-                              height="16"
+                              height={16}
                               style={null}
                               viewBox="0 0 16 16"
-                              width="16"
+                              width={16}
                               xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                              />
-                            </svg>
-                          </cross>
+                            />
+                          </EuiIconEmpty>
                         </EuiIcon>
                       </button>
                     </EuiButtonIcon>
@@ -849,31 +800,23 @@ Array [
           size="m"
           type="cross"
         >
-          <cross
+          <EuiIconEmpty
             aria-hidden="true"
-            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
-            height="16"
             style={null}
-            viewBox="0 0 16 16"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
           >
             <svg
               aria-hidden="true"
-              className="euiIcon euiIcon--medium euiButtonIcon__icon"
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
               focusable="false"
-              height="16"
+              height={16}
               style={null}
               viewBox="0 0 16 16"
-              width="16"
+              width={16}
               xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-              />
-            </svg>
-          </cross>
+            />
+          </EuiIconEmpty>
         </EuiIcon>
       </button>
     </EuiButtonIcon>

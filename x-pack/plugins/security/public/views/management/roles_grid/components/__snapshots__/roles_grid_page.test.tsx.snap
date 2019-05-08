@@ -53,22 +53,18 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   size="xxl"
                   type="securityApp"
                 >
-                  <securityApp
-                    className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                  <EuiIconAppSecurity
+                    className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoaded"
                     focusable="false"
-                    height="32"
                     style={null}
-                    viewBox="0 0 32 32"
-                    width="32"
-                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <svg
-                      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoaded"
                       focusable="false"
-                      height="32"
+                      height={32}
                       style={null}
                       viewBox="0 0 32 32"
-                      width="32"
+                      width={32}
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -79,7 +75,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                         d="M11 17.83h2V23h-2zM13 10.18V7h-2v3.18a3 3 0 1 0 2 0zM12 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM19 7h2v5.17h-2zM23 17a3 3 0 1 0-4 2.82V23h2v-3.18A3 3 0 0 0 23 17zm-3 1a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
                       />
                     </svg>
-                  </securityApp>
+                  </EuiIconAppSecurity>
                 </EuiIcon>
                 <EuiSpacer
                   size="s"

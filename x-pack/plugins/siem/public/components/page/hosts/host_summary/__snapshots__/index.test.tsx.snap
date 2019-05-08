@@ -177,7 +177,7 @@ exports[`Host Summary Component #getEuiDescriptionList if IP is an empty list in
       >
         <svg
           aria-describedby="firstLastSeenError-siem-kibana-first-seen"
-          class="euiIcon euiIcon--medium"
+          class="euiIcon euiIcon--medium euiIcon-isLoaded"
           focusable="false"
           height="16"
           viewBox="0 0 16 16"
@@ -202,7 +202,7 @@ exports[`Host Summary Component #getEuiDescriptionList if IP is an empty list in
       >
         <svg
           aria-describedby="firstLastSeenError-siem-kibana-last-seen"
-          class="euiIcon euiIcon--medium"
+          class="euiIcon euiIcon--medium euiIcon-isLoaded"
           focusable="false"
           height="16"
           viewBox="0 0 16 16"

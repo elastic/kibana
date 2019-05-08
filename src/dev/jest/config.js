@@ -88,7 +88,8 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    '[/\\\\]node_modules[/\\\\].+\\.js$',
+    // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
+    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [

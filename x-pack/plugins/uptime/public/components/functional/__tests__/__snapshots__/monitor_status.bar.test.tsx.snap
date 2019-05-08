@@ -22,26 +22,13 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <svg
-              class="euiIcon euiIcon--medium euiIcon--success"
+              class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
               focusable="false"
               height="16"
               viewBox="0 0 16 16"
               width="16"
-              xlink="http://www.w3.org/1999/xlink"
               xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <circle
-                  cx="8"
-                  cy="8"
-                  id="dot-a"
-                  r="4"
-                />
-              </defs>
-              <use
-                href="#dot-a"
-              />
-            </svg>
+            />
           </div>
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
