@@ -48,9 +48,9 @@ describe('create()', () => {
     Array [
       "action",
       Object {
-        "actionTypeId": "my-action-type",
         "actionTypeConfig": Object {},
         "actionTypeConfigSecrets": Object {},
+        "actionTypeId": "my-action-type",
         "description": "my description",
       },
     ],
@@ -132,7 +132,6 @@ describe('create()', () => {
     Array [
       "action",
       Object {
-        "actionTypeId": "my-action-type",
         "actionTypeConfig": Object {
           "a": true,
           "c": true,
@@ -140,6 +139,7 @@ describe('create()', () => {
         "actionTypeConfigSecrets": Object {
           "b": true,
         },
+        "actionTypeId": "my-action-type",
         "description": "my description",
       },
     ],
@@ -266,9 +266,9 @@ describe('update()', () => {
       "action",
       "my-alert",
       Object {
-        "actionTypeId": "my-action-type",
         "actionTypeConfig": Object {},
         "actionTypeConfigSecrets": Object {},
+        "actionTypeId": "my-action-type",
         "description": "my description",
       },
       Object {},
@@ -367,7 +367,6 @@ describe('update()', () => {
       "action",
       "my-alert",
       Object {
-        "actionTypeId": "my-action-type",
         "actionTypeConfig": Object {
           "a": true,
           "c": true,
@@ -375,6 +374,7 @@ describe('update()', () => {
         "actionTypeConfigSecrets": Object {
           "b": true,
         },
+        "actionTypeId": "my-action-type",
         "description": "my description",
       },
       Object {},
@@ -421,10 +421,12 @@ describe('fire()', () => {
   "calls": Array [
     Array [
       Object {
-        "foo": true,
-      },
-      Object {
-        "baz": false,
+        "actionTypeConfig": Object {
+          "foo": true,
+        },
+        "params": Object {
+          "baz": false,
+        },
       },
     ],
   ],
@@ -494,12 +496,14 @@ describe('fire()', () => {
   "calls": Array [
     Array [
       Object {
-        "a": true,
-        "b": true,
-        "c": true,
-      },
-      Object {
-        "baz": false,
+        "actionTypeConfig": Object {
+          "a": true,
+          "b": true,
+          "c": true,
+        },
+        "params": Object {
+          "baz": false,
+        },
       },
     ],
   ],
