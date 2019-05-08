@@ -12,11 +12,18 @@ import { i18n } from '@kbn/i18n';
 export class FeatureTooltip extends React.Component {
 
   state = {
-    hasLoadedProperties: false
+    properties: undefined,
+    loadPropertiesErrorMsg: undefined,
   };
 
   componentDidMount() {
     this._isMounted = true;
+    this.prevLayerId = undefined;
+    this.prevFeatureId = undefined;
+    this._loadProperties();
+  }
+
+  componentDidUpdate() {
     this._loadProperties();
   }
 
@@ -24,23 +31,49 @@ export class FeatureTooltip extends React.Component {
     this._isMounted = false;
   }
 
-  _loadProperties = async () => {
+  _loadProperties = () => {
+    this._fetchProperties({
+      nextFeatureId: this.props.tooltipState.featureId,
+      nextLayerId: this.props.tooltipState.layerId,
+    });
+  }
+
+  _fetchProperties = async ({ nextLayerId, nextFeatureId }) => {
+    if (this.prevLayerId === nextLayerId && this.prevFeatureId === nextFeatureId) {
+      // do not reload same feature properties
+      return;
+    }
+
+    this.prevLayerId = nextLayerId;
+    this.prevFeatureId = nextFeatureId;
+    this.setState({
+      properties: undefined,
+      loadPropertiesErrorMsg: undefined,
+    });
+
     let properties;
     try {
-      properties = await this.props.loadProperties();
+      const tooltipLayer = this.props.layerList.find(layer => {
+        return layer.getId() === this.props.tooltipState.layerId;
+      });
+      const targetFeature = tooltipLayer.getFeatureById(this.props.tooltipState.featureId);
+      properties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
     } catch(error) {
       if (this._isMounted) {
         this.setState({
-          hasLoadedProperties: true,
           loadPropertiesErrorMsg: error.message
         });
       }
       return;
     }
 
+    if (this.prevLayerId !== nextLayerId && this.prevFeatureId !== nextFeatureId) {
+      // ignore results for old request
+      return;
+    }
+
     if (this._isMounted) {
       this.setState({
-        hasLoadedProperties: true,
         properties
       });
     }
@@ -125,7 +158,7 @@ export class FeatureTooltip extends React.Component {
   }
 
   render() {
-    if (!this.state.hasLoadedProperties) {
+    if (!this.state.properties) {
       return (
         <div>
           <EuiLoadingSpinner size="m" /> {' loading content'}

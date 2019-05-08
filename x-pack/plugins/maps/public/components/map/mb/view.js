@@ -364,7 +364,8 @@ export class MBMapContainer extends React.Component {
     const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
     ReactDOM.render((
       <FeatureTooltip
-        loadProperties={() => { return this._loadTooltipProperties(); }}
+        layerList={this.props.layerList}
+        tooltipState={this.props.tooltipState}
         closeTooltip={this._onTooltipClose}
         showFilterButtons={this.props.isFilterable && isLocked}
         showCloseButton={isLocked}
@@ -374,14 +375,6 @@ export class MBMapContainer extends React.Component {
     this._mbPopup.setLngLat(this.props.tooltipState.location)
       .setDOMContent(this._tooltipContainer)
       .addTo(this._mbMap);
-  }
-
-  async _loadTooltipProperties()  {
-    const tooltipLayer = this.props.layerList.find(layer => {
-      return layer.getId() === this.props.tooltipState.layerId;
-    });
-    const targetFeature = tooltipLayer.getFeatureById(this.props.tooltipState.featureId);
-    return tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
   }
 
   _syncTooltipState() {
