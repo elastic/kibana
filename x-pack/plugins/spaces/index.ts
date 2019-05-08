@@ -160,6 +160,7 @@ export const spaces = (kibana: Record<string, any>) =>
 
       initSpacesRequestInterceptors({
         config: initializerContext.legacyConfig,
+        http: core.http,
         legacyServer: server,
         log,
         spacesService,

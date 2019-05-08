@@ -10,10 +10,12 @@ import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
+import { SpacesHttpServiceSetup } from '../../new_platform/plugin';
 
 export interface InterceptorDeps {
   config: KibanaConfig;
   legacyServer: Server;
+  http: SpacesHttpServiceSetup;
   xpackMain: XPackMainPlugin;
   spacesService: SpacesServiceSetup;
   log: Logger;
