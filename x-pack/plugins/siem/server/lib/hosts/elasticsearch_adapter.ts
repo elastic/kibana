@@ -104,16 +104,14 @@ export const formatHostEdgesData = (
     }
   );
 
-const formatHostItem = (fields: ReadonlyArray<string>, bucket: HostAggEsItem): HostItem => {
-  const a = fields.reduce<HostItem>((flattenedFields, fieldName) => {
+const formatHostItem = (fields: ReadonlyArray<string>, bucket: HostAggEsItem): HostItem =>
+  fields.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
       return set(fieldName, fieldValue, flattenedFields);
     }
     return flattenedFields;
   }, {});
-  return a;
-};
 
 const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | string[] | null => {
   const aggField = hostFieldsMap[fieldName]

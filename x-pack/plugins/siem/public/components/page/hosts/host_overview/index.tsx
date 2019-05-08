@@ -30,13 +30,11 @@ interface OwnProps {
 
 type HostSummaryProps = OwnProps;
 
-const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
-  return (
-    <EuiFlexItem key={key}>
-      <EuiDescriptionList listItems={descriptionList} />
-    </EuiFlexItem>
-  );
-};
+const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
+  <EuiFlexItem key={key}>
+    <EuiDescriptionList listItems={descriptionList} />
+  </EuiFlexItem>
+);
 
 export const HostOverview = pure<HostSummaryProps>(({ data, loading }) => {
   const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
@@ -51,7 +49,7 @@ export const HostOverview = pure<HostSummaryProps>(({ data, loading }) => {
     [
       {
         title: i18n.HOST_ID,
-        description: data && data.host ? hostIdRenderer(data.host) : getEmptyTagValue(),
+        description: data.host ? hostIdRenderer(data.host) : getEmptyTagValue(),
       },
       {
         title: i18n.FIRST_SEEN,

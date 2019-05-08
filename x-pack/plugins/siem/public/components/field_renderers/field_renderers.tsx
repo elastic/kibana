@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useState } from 'react';
 
@@ -18,7 +18,7 @@ import {
   Overview,
 } from '../../graphql/types';
 import { DefaultDraggable } from '../draggables';
-import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
+import { getEmptyTagValue } from '../empty_value';
 import { ExternalLinkIcon } from '../external_link_icon';
 import { FormattedDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
@@ -144,7 +144,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
         const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
         return (
           <EuiFlexItem key={id} grow={false}>
-            {index !== 0 ? <>,&nbsp;</> : null}
+            {index !== 0 && <>,&nbsp;</>}
             <DefaultDraggable id={id} field={attrName} value={rowItem}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
@@ -159,6 +159,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
             <DefaultFieldRendererOverflow
               rowItems={rowItems}
               idPrefix={idPrefix}
+              render={render}
               overflowIndexStart={displayCount}
               maxOverflowItems={maxOverflow}
             />
@@ -176,12 +177,13 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
 interface DefaultFieldRendererOverflowProps {
   rowItems: string[];
   idPrefix: string;
+  render?: (item: string) => JSX.Element;
   overflowIndexStart?: number;
   maxOverflowItems?: number;
 }
 
 export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowProps>(
-  ({ rowItems, idPrefix, overflowIndexStart = 5, maxOverflowItems = 5 }): JSX.Element => {
+  ({ rowItems, idPrefix, render, overflowIndexStart = 5, maxOverflowItems = 5 }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);
     return (
       <>
@@ -192,7 +194,7 @@ export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowPro
               <>
                 {' ,'}
                 <EuiButtonEmpty size="xs" onClick={() => setIsOpen(!isOpen)}>
-                  {`+${rowItems.length} `}
+                  {`+${rowItems.length - overflowIndexStart} `}
                   <FormattedMessage
                     id="xpack.siem.fieldRenderers.moreLabel"
                     defaultMessage="More"
@@ -207,10 +209,9 @@ export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowPro
               {rowItems
                 .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
                 .map(rowItem => (
-                  <span key={`${idPrefix}-${rowItem}`}>
-                    {defaultToEmptyTag(rowItem)}
-                    <br />
-                  </span>
+                  <EuiText key={`${idPrefix}-${rowItem}`}>
+                    {render ? render(rowItem) : rowItem}
+                  </EuiText>
                 ))}
               {rowItems.length > overflowIndexStart + maxOverflowItems && (
                 <b>

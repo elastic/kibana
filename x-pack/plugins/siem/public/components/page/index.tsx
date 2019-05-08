@@ -107,7 +107,7 @@ export const OverviewWrapper = styled(EuiFlexGroup)`
 export const LoadingOverlay = styled.div`
   background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
   margin: -4px 5px;
-  height: calc(100%);
+  height: 100%;
   opacity: 0.7;
   width: calc(100% - 10px);
   position: absolute;
