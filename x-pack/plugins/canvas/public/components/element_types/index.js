@@ -17,10 +17,6 @@ import { insertNodes, addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { ElementTypes as Component } from './element_types';
 
-const elementTypesState = withState('search', 'setSearch', '');
-const customElementsState = withState('customElements', 'setCustomElements', []);
-const elementTypeProps = withProps(() => ({ elements: elementsRegistry.toJS() }));
-
 const mapStateToProps = state => ({ pageId: getSelectedPage(state) });
 
 const mapDispatchToProps = dispatch => ({
@@ -91,9 +87,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const ElementTypes = compose(
-  elementTypesState,
-  elementTypeProps,
-  customElementsState,
+  withState('search', 'setSearch', ''),
+  withState('customElements', 'setCustomElements', []),
+  withState('filterTags', 'setFilterTags', []),
+  withProps(() => ({ elements: elementsRegistry.toJS() })),
   connect(
     mapStateToProps,
     mapDispatchToProps,

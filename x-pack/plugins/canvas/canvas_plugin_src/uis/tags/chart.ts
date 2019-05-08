@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const report = () => ({ name: 'report', color: '#DB1374' });
+import { TagFactory } from '../../../public/lib/tag';
+
+export const chart: TagFactory = () => ({ name: 'chart', color: '#FEB6DB' });
