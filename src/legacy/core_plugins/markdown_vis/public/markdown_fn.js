@@ -37,7 +37,7 @@ export const kibanaMarkdown = () => ({
     },
     font: {
       types: ['style'],
-      help: i18n.translate('metricVis.function.bgFill.help', {
+      help: i18n.translate('markdownVis.function.font.help', {
         defaultMessage: 'Font settings.'
       }),
       default: `{font size=12}`,

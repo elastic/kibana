@@ -95,12 +95,11 @@ export default function ({ getService, updateBaselines }) {
 
         // we reuse that response to render 3 different charts and compare screenshots with baselines
         const tagCloudExpr =
-          `tagcloud visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
+          `tagcloud metric={vis_dimension 1 format="number"} bucket={vis_dimension 0}'`;
         await expectExpression('partial_test_1', tagCloudExpr, context).toMatchScreenshot();
 
         const metricExpr =
-          `metricVis 
-          visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"}}],"bucket":{"accessor":0}}}'`;
+          `metricVis metric={vis_dimension 1 format="number"} bucket={vis_dimension 0}'`;
         await expectExpression('partial_test_2', metricExpr, context).toMatchScreenshot();
 
         const regionMapExpr =

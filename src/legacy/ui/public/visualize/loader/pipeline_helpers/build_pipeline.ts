@@ -270,7 +270,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     }
     let expr = `markdownvis '${escapedMarkdown}' `;
     expr += prepareValue('font', `{font size=${fontSize}}`, true);
-    expr += prepareValue(openLinksInNewTab, openLinksInNewTab);
+    expr += prepareValue('openLinksInNewTab', openLinksInNewTab);
     return expr;
   },
   table: (visState, schemas) => {
