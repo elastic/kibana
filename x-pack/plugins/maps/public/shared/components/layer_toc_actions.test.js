@@ -57,7 +57,7 @@ describe('LayerTocActions', () => {
       .toMatchSnapshot();
   });
 
-  test('should not show edit actions in read only mode', async () => {
+  test('should not show write actions in read only mode', async () => {
     const component = shallowWithIntl(
       <LayerTocActions
         {...defaultProps}
