@@ -17,8 +17,10 @@ describe('OpenIdConnectAuthenticationProvider', () => {
   let callWithRequest: sinon.SinonStub;
   let callWithInternalUser: sinon.SinonStub;
   beforeEach(() => {
-    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' },
-      { realm: 'oidc1' });
+    const providerOptions = mockAuthenticationProviderOptions(
+      { basePath: '/test-base-path' },
+      { realm: 'oidc1' }
+    );
     callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
     callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
 
@@ -37,72 +39,78 @@ describe('OpenIdConnectAuthenticationProvider', () => {
     it('redirects non-AJAX request that can not be authenticated to the OpenId Connect Provider.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
-      callWithInternalUser
-        .withArgs('shield.oidcPrepare')
-        .returns(Promise.resolve({
+      callWithInternalUser.withArgs('shield.oidcPrepare').returns(
+        Promise.resolve({
           state: 'statevalue',
           nonce: 'noncevalue',
-          redirect: 'https://op-host/path/login?response_type=code' +
+          redirect:
+            'https://op-host/path/login?response_type=code' +
             '&scope=openid%20profile%20email' +
             '&client_id=s6BhdRkqt3' +
             '&state=statevalue' +
-            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
-        }));
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
+        })
+      );
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcPrepare',
-        { body: { realm: `oidc1` } }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcPrepare', {
+        body: { realm: `oidc1` },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('https://op-host/path/login?response_type=code' +
-        '&scope=openid%20profile%20email' +
-        '&client_id=s6BhdRkqt3' +
-        '&state=statevalue' +
-        '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc');
+      expect(authenticationResult.redirectURL).toBe(
+        'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
+      );
       expect(authenticationResult.state).toEqual({
         state: 'statevalue',
         nonce: 'noncevalue',
-        nextURL: `/s/foo/some-path`
+        nextURL: `/s/foo/some-path`,
       });
     });
 
     it('redirects third party initiated authentications to the OpenId Connect Provider.', async () => {
-      const request = requestFixture({ path: '/api/security/v1/oidc', search: '?iss=theissuer', basePath: '/s/foo' });
+      const request = requestFixture({
+        path: '/api/security/v1/oidc',
+        search: '?iss=theissuer',
+        basePath: '/s/foo',
+      });
 
-      callWithInternalUser
-        .withArgs('shield.oidcPrepare')
-        .returns(Promise.resolve({
+      callWithInternalUser.withArgs('shield.oidcPrepare').returns(
+        Promise.resolve({
           state: 'statevalue',
           nonce: 'noncevalue',
-          redirect: 'https://op-host/path/login?response_type=code' +
+          redirect:
+            'https://op-host/path/login?response_type=code' +
             '&scope=openid%20profile%20email' +
             '&client_id=s6BhdRkqt3' +
             '&state=statevalue' +
-            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
-        }));
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
+        })
+      );
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcPrepare',
-        { body: { iss: `theissuer` } }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcPrepare', {
+        body: { iss: `theissuer` },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('https://op-host/path/login?response_type=code' +
-        '&scope=openid%20profile%20email' +
-        '&client_id=s6BhdRkqt3' +
-        '&state=statevalue' +
-        '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc');
+      expect(authenticationResult.redirectURL).toBe(
+        'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
+      );
       expect(authenticationResult.state).toEqual({
         state: 'statevalue',
         nonce: 'noncevalue',
-        nextURL: `/s/foo`
+        nextURL: `/s/foo`,
       });
     });
 
@@ -110,17 +118,13 @@ describe('OpenIdConnectAuthenticationProvider', () => {
       const request = requestFixture({ path: '/some-path' });
 
       const failureReason = new Error('Realm is misconfigured!');
-      callWithInternalUser
-        .withArgs('shield.oidcPrepare')
-        .returns(Promise.reject(failureReason));
+      callWithInternalUser.withArgs('shield.oidcPrepare').returns(Promise.reject(failureReason));
 
       const authenticationResult = await provider.authenticate(request, null);
 
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcPrepare',
-        { body: { realm: `oidc1` } }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcPrepare', {
+        body: { realm: `oidc1` },
+      });
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
@@ -129,58 +133,61 @@ describe('OpenIdConnectAuthenticationProvider', () => {
     it('gets token and redirects user to requested URL if OIDC authentication response is valid.', async () => {
       const request = requestFixture({
         path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
-        search: '?code=somecodehere&state=somestatehere'
+        search: '?code=somecodehere&state=somestatehere',
       });
 
       callWithInternalUser
         .withArgs('shield.oidcAuthenticate')
-        .returns(Promise.resolve({ access_token: 'some-token', refresh_token: 'some-refresh-token' }));
+        .returns(
+          Promise.resolve({ access_token: 'some-token', refresh_token: 'some-refresh-token' })
+        );
 
       const authenticationResult = await provider.authenticate(request, {
         state: 'statevalue',
         nonce: 'noncevalue',
-        nextURL: '/test-base-path/some-path'
+        nextURL: '/test-base-path/some-path',
       });
 
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcAuthenticate',
-        {
-          body: {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirect_uri: '/api/security/v1/oidc?code=somecodehere&state=somestatehere'
-          }
-        }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcAuthenticate', {
+        body: {
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          redirect_uri: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/test-base-path/some-path');
-      expect(authenticationResult.state).toEqual({ accessToken: 'some-token', refreshToken: 'some-refresh-token' });
+      expect(authenticationResult.state).toEqual({
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+      });
     });
 
     it('fails if authentication response is presented but session state does not contain the state parameter.', async () => {
       const request = requestFixture({
         path: '/api/security/v1/oidc',
-        search: '?code=somecodehere&state=somestatehere'
+        search: '?code=somecodehere&state=somestatehere',
       });
 
       const authenticationResult = await provider.authenticate(request, {
-        nextURL: '/test-base-path/some-path'
+        nextURL: '/test-base-path/some-path',
       });
 
       sinon.assert.notCalled(callWithInternalUser);
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toEqual(
-        Boom.badRequest('Response session state does not have corresponding state or nonce parameters or redirect URL.')
+        Boom.badRequest(
+          'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+        )
       );
     });
 
     it('fails if authentication response is presented but session state does not contain redirect URL.', async () => {
       const request = requestFixture({
         path: '/api/security/v1/oidc',
-        search: '?code=somecodehere&state=somestatehere'
+        search: '?code=somecodehere&state=somestatehere',
       });
 
       const authenticationResult = await provider.authenticate(request, {
@@ -192,14 +199,16 @@ describe('OpenIdConnectAuthenticationProvider', () => {
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toEqual(
-        Boom.badRequest('Response session state does not have corresponding state or nonce parameters or redirect URL.')
+        Boom.badRequest(
+          'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+        )
       );
     });
 
     it('fails if session state is not presented.', async () => {
       const request = requestFixture({
         path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
-        search: '?code=somecodehere&state=somestatehere'
+        search: '?code=somecodehere&state=somestatehere',
       });
 
       const authenticationResult = await provider.authenticate(request, {});
@@ -212,10 +221,12 @@ describe('OpenIdConnectAuthenticationProvider', () => {
     it('fails if code is invalid.', async () => {
       const request = requestFixture({
         path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
-        search: '?code=somecodehere&state=somestatehere'
+        search: '?code=somecodehere&state=somestatehere',
       });
 
-      const failureReason = new Error('Failed to exchange code for Id Token using the Token Endpoint.');
+      const failureReason = new Error(
+        'Failed to exchange code for Id Token using the Token Endpoint.'
+      );
       callWithInternalUser
         .withArgs('shield.oidcAuthenticate')
         .returns(Promise.reject(failureReason));
@@ -223,20 +234,16 @@ describe('OpenIdConnectAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, {
         state: 'statevalue',
         nonce: 'noncevalue',
-        nextURL: '/test-base-path/some-path'
+        nextURL: '/test-base-path/some-path',
       });
 
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcAuthenticate',
-        {
-          body: {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirect_uri: '/api/security/v1/oidc?code=somecodehere&state=somestatehere'
-          }
-        }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcAuthenticate', {
+        body: {
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          redirect_uri: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        },
+      });
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
@@ -246,13 +253,11 @@ describe('OpenIdConnectAuthenticationProvider', () => {
       const user = { username: 'user' };
       const request = requestFixture();
 
-      callWithRequest
-        .withArgs(request, 'shield.authenticate')
-        .returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').returns(Promise.resolve(user));
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token'
+        refreshToken: 'some-valid-refresh-token',
       });
 
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
@@ -266,7 +271,7 @@ describe('OpenIdConnectAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token'
+        refreshToken: 'some-valid-refresh-token',
       });
 
       sinon.assert.notCalled(callWithRequest);
@@ -284,7 +289,7 @@ describe('OpenIdConnectAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-invalid-token',
-        refreshToken: 'some-invalid-refresh-token'
+        refreshToken: 'some-invalid-refresh-token',
       });
 
       expect(request.headers).not.toHaveProperty('authorization');
@@ -312,15 +317,16 @@ describe('OpenIdConnectAuthenticationProvider', () => {
         .returns(Promise.resolve(user));
 
       callWithInternalUser
-        .withArgs(
-          'shield.getAccessToken',
-          { body: { grant_type: 'refresh_token', refresh_token: 'valid-refresh-token' } }
-        )
-        .returns(Promise.resolve({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' }));
+        .withArgs('shield.getAccessToken', {
+          body: { grant_type: 'refresh_token', refresh_token: 'valid-refresh-token' },
+        })
+        .returns(
+          Promise.resolve({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' })
+        );
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
-        refreshToken: 'valid-refresh-token'
+        refreshToken: 'valid-refresh-token',
       });
 
       expect(request.headers.authorization).toBe('Bearer new-access-token');
@@ -328,7 +334,7 @@ describe('OpenIdConnectAuthenticationProvider', () => {
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toEqual({
         accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token'
+        refreshToken: 'new-refresh-token',
       });
     });
 
@@ -347,15 +353,14 @@ describe('OpenIdConnectAuthenticationProvider', () => {
         message: 'Something is wrong with refresh token.',
       };
       callWithInternalUser
-        .withArgs(
-          'shield.getAccessToken',
-          { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
-        )
+        .withArgs('shield.getAccessToken', {
+          body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' },
+        })
         .returns(Promise.reject(refreshFailureReason));
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
-        refreshToken: 'invalid-refresh-token'
+        refreshToken: 'invalid-refresh-token',
       });
 
       expect(request.headers).not.toHaveProperty('authorization');
@@ -366,17 +371,18 @@ describe('OpenIdConnectAuthenticationProvider', () => {
     it('redirects to OpenID Connect Provider for non-AJAX requests if refresh token is expired or already refreshed.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
-      callWithInternalUser
-        .withArgs('shield.oidcPrepare')
-        .returns(Promise.resolve({
+      callWithInternalUser.withArgs('shield.oidcPrepare').returns(
+        Promise.resolve({
           state: 'statevalue',
           nonce: 'noncevalue',
-          redirect: 'https://op-host/path/login?response_type=code' +
+          redirect:
+            'https://op-host/path/login?response_type=code' +
             '&scope=openid%20profile%20email' +
             '&client_id=s6BhdRkqt3' +
             '&state=statevalue' +
-            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
-        }));
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
+        })
+      );
 
       callWithRequest
         .withArgs(
@@ -386,33 +392,32 @@ describe('OpenIdConnectAuthenticationProvider', () => {
         .rejects({ statusCode: 401 });
 
       callWithInternalUser
-        .withArgs(
-          'shield.getAccessToken',
-          { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
-        )
+        .withArgs('shield.getAccessToken', {
+          body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' },
+        })
         .rejects({ statusCode: 400 });
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token'
+        refreshToken: 'expired-refresh-token',
       });
 
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcPrepare',
-        { body: { realm: `oidc1` } }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcPrepare', {
+        body: { realm: `oidc1` },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('https://op-host/path/login?response_type=code' +
-        '&scope=openid%20profile%20email' +
-        '&client_id=s6BhdRkqt3' +
-        '&state=statevalue' +
-        '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc');
+      expect(authenticationResult.redirectURL).toBe(
+        'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
+      );
       expect(authenticationResult.state).toEqual({
         state: 'statevalue',
         nonce: 'noncevalue',
-        nextURL: `/s/foo/some-path`
+        nextURL: `/s/foo/some-path`,
       });
     });
 
@@ -427,29 +432,28 @@ describe('OpenIdConnectAuthenticationProvider', () => {
         .rejects({ statusCode: 401 });
 
       callWithInternalUser
-        .withArgs(
-          'shield.getAccessToken',
-          { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
-        )
+        .withArgs('shield.getAccessToken', {
+          body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' },
+        })
         .rejects({ statusCode: 400 });
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token'
+        refreshToken: 'expired-refresh-token',
       });
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(Boom.badRequest('Both access and refresh tokens are expired.'));
+      expect(authenticationResult.error).toEqual(
+        Boom.badRequest('Both access and refresh tokens are expired.')
+      );
     });
 
     it('succeeds if `authorization` contains a valid token.', async () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'Bearer some-valid-token' } });
 
-      callWithRequest
-        .withArgs(request, 'shield.authenticate')
-        .returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').returns(Promise.resolve(user));
 
       const authenticationResult = await provider.authenticate(request);
 
@@ -488,7 +492,7 @@ describe('OpenIdConnectAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token'
+        refreshToken: 'some-valid-refresh-token',
       });
 
       expect(authenticationResult.failed()).toBe(true);
@@ -518,18 +522,17 @@ describe('OpenIdConnectAuthenticationProvider', () => {
       const refreshToken = 'x-oidc-refresh-token';
 
       const failureReason = new Error('Realm is misconfigured!');
-      callWithInternalUser
-        .withArgs('shield.oidcLogout')
-        .returns(Promise.reject(failureReason));
+      callWithInternalUser.withArgs('shield.oidcLogout').returns(Promise.reject(failureReason));
 
-      const authenticationResult = await provider.deauthenticate(request, { accessToken, refreshToken });
+      const authenticationResult = await provider.deauthenticate(request, {
+        accessToken,
+        refreshToken,
+      });
 
       sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcLogout',
-        { body: { token: accessToken, refresh_token: refreshToken } }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcLogout', {
+        body: { token: accessToken, refresh_token: refreshToken },
+      });
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
@@ -544,14 +547,15 @@ describe('OpenIdConnectAuthenticationProvider', () => {
         .withArgs('shield.oidcLogout')
         .returns(Promise.resolve({ redirect: null }));
 
-      const authenticationResult = await provider.deauthenticate(request, { accessToken, refreshToken });
+      const authenticationResult = await provider.deauthenticate(request, {
+        accessToken,
+        refreshToken,
+      });
 
       sinon.assert.calledOnce(callWithInternalUser);
-      sinon.assert.calledWithExactly(
-        callWithInternalUser,
-        'shield.oidcLogout',
-        { body: { token: accessToken, refresh_token: refreshToken } }
-      );
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcLogout', {
+        body: { token: accessToken, refresh_token: refreshToken },
+      });
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe('/test-base-path/logged_out');
@@ -566,10 +570,10 @@ describe('OpenIdConnectAuthenticationProvider', () => {
         .withArgs('shield.oidcLogout')
         .returns(Promise.resolve({ redirect: 'http://fake-idp/logout&id_token_hint=thehint' }));
 
-      const authenticationResult = await provider.deauthenticate(
-        request,
-        { accessToken, refreshToken }
-      );
+      const authenticationResult = await provider.deauthenticate(request, {
+        accessToken,
+        refreshToken,
+      });
 
       sinon.assert.calledOnce(callWithInternalUser);
       expect(authenticationResult.redirected()).toBe(true);

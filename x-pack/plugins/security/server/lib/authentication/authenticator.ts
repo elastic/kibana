@@ -64,7 +64,6 @@ function getProviderOptions(server: Legacy.Server) {
   };
 }
 
-
 /**
  * Prepares options object that is specific only to an authentication provider. This will be merged
  * with the general options
@@ -134,13 +133,16 @@ class Authenticator {
     const generalOptions = getProviderOptions(server);
 
     this.providers = new Map(
-      authProviders.map(
-        (providerType) => {
-          const providerOptions = Object.freeze({ ...generalOptions, ...getProviderSpecificOptions(server, providerType) });
-          return [providerType, instantiateProvider(providerType, providerOptions)] as
-            [string, BaseAuthenticationProvider];
-        }
-      )
+      authProviders.map(providerType => {
+        const providerOptions = Object.freeze({
+          ...generalOptions,
+          ...getProviderSpecificOptions(server, providerType),
+        });
+        return [providerType, instantiateProvider(providerType, providerOptions)] as [
+          string,
+          BaseAuthenticationProvider
+        ];
+      })
     );
   }
 
