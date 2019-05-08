@@ -20,6 +20,7 @@ import { loadWatch } from '../../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
 import { JsonWatchEdit } from './json_watch_edit';
 import { ThresholdWatchEdit } from './threshold_watch_edit';
+import { MonitoringWatchEdit } from './monitoring_watch_edit';
 import { WatchContext } from '../watch_context';
 
 const getTitle = (watch: BaseWatch) => {
@@ -153,10 +154,16 @@ export const WatchEdit = ({
 
   let EditComponent = null;
 
-  if (watch.type === WATCH_TYPES.THRESHOLD) {
-    EditComponent = ThresholdWatchEdit;
-  } else {
-    EditComponent = JsonWatchEdit;
+  switch (watch.type) {
+    case WATCH_TYPES.THRESHOLD:
+      EditComponent = ThresholdWatchEdit;
+      break;
+    case WATCH_TYPES.MONITORING:
+      EditComponent = MonitoringWatchEdit;
+      break;
+    case WATCH_TYPES.JSON:
+    default:
+      EditComponent = JsonWatchEdit;
   }
 
   return (

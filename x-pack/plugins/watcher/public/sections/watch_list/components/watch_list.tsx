@@ -133,11 +133,10 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       actions: [
         {
           render: (watch: any) => {
-            const disabled = watch.isSystemWatch;
             return (
               <EuiButtonEmpty
                 iconType="pencil"
-                disabled={disabled}
+                isDisabled={watch.isSystemWatch}
                 aria-label={intl.formatMessage({
                   id: 'xpack.watcher.sections.watchList.watchTable.menuEditButtonDescription',
                   defaultMessage: 'Edit watch',
@@ -158,6 +157,13 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
 
   const selectionConfig = {
     onSelectionChange: setSelection,
+    selectable: (watch: any) => !watch.isSystemWatch,
+    selectableMessage: (selectable: boolean) =>
+      !selectable
+        ? i18n.translate('xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText', {
+            defaultMessage: 'This watch is read-only',
+          })
+        : undefined,
   };
 
   const searchConfig = {
