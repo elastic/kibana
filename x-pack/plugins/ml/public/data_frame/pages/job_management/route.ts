@@ -17,7 +17,7 @@ import { getDataFrameBreadcrumbs } from '../../breadcrumbs';
 
 const template = `<ml-nav-menu name="data_frame" /><ml-data-frame-page />`;
 
-uiRoutes.when('/data_frame/?', {
+uiRoutes.when('/data_frames/?', {
   template,
   k7Breadcrumbs: getDataFrameBreadcrumbs,
   resolve: {
