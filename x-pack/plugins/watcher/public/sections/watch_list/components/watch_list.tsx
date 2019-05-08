@@ -136,6 +136,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
             return (
               <EuiButtonEmpty
                 iconType="pencil"
+                isDisabled={watch.isSystemWatch}
                 aria-label={intl.formatMessage({
                   id: 'xpack.watcher.sections.watchList.watchTable.menuEditButtonDescription',
                   defaultMessage: 'Edit watch',

@@ -154,12 +154,16 @@ export const WatchEdit = ({
 
   let EditComponent = null;
 
-  if (watch.type === WATCH_TYPES.THRESHOLD) {
-    EditComponent = ThresholdWatchEdit;
-  } else if (watch.type === WATCH_TYPES.MONITORING) {
-    EditComponent = MonitoringWatchEdit;
-  } else {
-    EditComponent = JsonWatchEdit;
+  switch (watch.type) {
+    case WATCH_TYPES.THRESHOLD:
+      EditComponent = ThresholdWatchEdit;
+      break;
+    case WATCH_TYPES.MONITORING:
+      EditComponent = MonitoringWatchEdit;
+      break;
+    case WATCH_TYPES.JSON:
+    default:
+      EditComponent = JsonWatchEdit;
   }
 
   return (
