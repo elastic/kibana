@@ -106,7 +106,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     targetIndex !== '' &&
     !jobIdExists &&
     !indexNameExists &&
-    !indexPatternTitleExists;
+    (!indexPatternTitleExists || !createIndexPattern);
 
   // expose state to wizard
   useEffect(
