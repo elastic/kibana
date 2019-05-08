@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
-import { Server } from './types';
+import { Server } from '../types';
 
 interface ListActionTypesRequest extends Hapi.Request {
   server: Server;

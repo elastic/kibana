@@ -7,30 +7,22 @@
 import Boom from 'boom';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ActionTypeService } from './action_type_service';
+import { SavedObjectReference } from './types';
 
 interface Action {
   description: string;
   actionTypeId: string;
-  actionTypeConfig: { [key: string]: any };
+  actionTypeConfig: Record<string, any>;
 }
 
 interface EncryptedAction extends Action {
-  description: string;
-  actionTypeId: string;
-  actionTypeConfig: { [key: string]: any };
-  actionTypeConfigSecrets: { [key: string]: any };
+  actionTypeConfigSecrets: Record<string, any>;
 }
 
 interface FireActionOptions {
   id: string;
-  params: { [key: string]: any };
+  params: Record<string, any>;
   savedObjectsClient: SavedObjectsClient;
-}
-
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
 }
 
 interface FindOptions {
@@ -56,20 +48,29 @@ export class ActionService {
     this.encryptedSavedObjects = encryptedSavedObjects;
   }
 
+  /**
+   * Create an action
+   */
   public async create(savedObjectsClient: SavedObjectsClient, data: Action) {
     const { actionTypeId } = data;
     if (!this.actionTypeService.has(actionTypeId)) {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
     this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
-    const actionWithSplitActionTypeConfig = this.applyEncryptedAttributes(data);
+    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
     return await savedObjectsClient.create<any>('action', actionWithSplitActionTypeConfig);
   }
 
+  /**
+   * Get an action
+   */
   public async get(savedObjectsClient: SavedObjectsClient, id: string) {
     return await savedObjectsClient.get('action', id);
   }
 
+  /**
+   * Find actions
+   */
   public async find(savedObjectsClient: SavedObjectsClient, options: FindOptions) {
     return await savedObjectsClient.find({
       ...options,
@@ -77,10 +78,16 @@ export class ActionService {
     });
   }
 
+  /**
+   * Delete action
+   */
   public async delete(savedObjectsClient: SavedObjectsClient, id: string) {
     return await savedObjectsClient.delete('action', id);
   }
 
+  /**
+   * Update action
+   */
   public async update(
     savedObjectsClient: SavedObjectsClient,
     id: string,
@@ -92,7 +99,7 @@ export class ActionService {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
     this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
-    const actionWithSplitActionTypeConfig = this.applyEncryptedAttributes(data);
+    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
     return await savedObjectsClient.update<any>(
       'action',
       id,
@@ -101,36 +108,43 @@ export class ActionService {
     );
   }
 
+  /**
+   * Fire an action
+   */
   public async fire({ id, params, savedObjectsClient }: FireActionOptions) {
     const action = await this.encryptedSavedObjects.getDecryptedAsInternalUser('action', id);
+    const mergedActionTypeConfig = {
+      ...action.attributes.actionTypeConfig,
+      ...action.attributes.actionTypeConfigSecrets,
+    };
     return await this.actionTypeService.execute(
       action.attributes.actionTypeId,
-      {
-        ...action.attributes.actionTypeConfig,
-        ...action.attributes.actionTypeConfigSecrets,
-      },
+      mergedActionTypeConfig,
       params
     );
   }
 
-  private applyEncryptedAttributes(action: Action): EncryptedAction {
+  /**
+   * Set actionTypeConfigSecrets values on a given action
+   */
+  private moveEncryptedAttributesToSecrets(action: Action): EncryptedAction {
     const unencryptedAttributes = this.actionTypeService.getUnencryptedAttributes(
       action.actionTypeId
     );
-    const encryptedActionTypeConfig: { [key: string]: any } = {};
-    const unencryptedActionTypeConfig: { [key: string]: any } = {};
-    for (const key of Object.keys(action.actionTypeConfig)) {
+    const config = { ...action.actionTypeConfig };
+    const configSecrets: Record<string, any> = {};
+    for (const key of Object.keys(config)) {
       if (unencryptedAttributes.includes(key)) {
-        unencryptedActionTypeConfig[key] = action.actionTypeConfig[key];
         continue;
       }
-      encryptedActionTypeConfig[key] = action.actionTypeConfig[key];
+      configSecrets[key] = config[key];
+      delete config[key];
     }
     return {
       ...action,
       // Important these overwrite attributes in data for encryption purposes
-      actionTypeConfig: unencryptedActionTypeConfig,
-      actionTypeConfigSecrets: encryptedActionTypeConfig,
+      actionTypeConfig: config,
+      actionTypeConfigSecrets: configSecrets,
     };
   }
 }

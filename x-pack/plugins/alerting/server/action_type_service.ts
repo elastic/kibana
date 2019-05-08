@@ -23,12 +23,18 @@ interface ActionType {
 }
 
 export class ActionTypeService {
-  private actionTypes: { [id: string]: ActionType } = {};
+  private actionTypes: Record<string, ActionType> = {};
 
+  /**
+   * Returns if the action type service has the given action type registered
+   */
   public has(id: string) {
     return !!this.actionTypes[id];
   }
 
+  /**
+   * Registers an action type to the action type service
+   */
   public register(actionType: ActionType) {
     if (this.has(actionType.id)) {
       throw Boom.badRequest(`Action type "${actionType.id}" is already registered.`);
@@ -36,27 +42,37 @@ export class ActionTypeService {
     this.actionTypes[actionType.id] = actionType;
   }
 
+  /**
+   * Returns an action type, throws if not registered
+   */
   public get(id: string) {
-    const actionType = this.actionTypes[id];
-    if (!actionType) {
+    if (!this.actionTypes[id]) {
       throw Boom.badRequest(`Action type "${id}" is not registered.`);
     }
-    return actionType;
+    return this.actionTypes[id];
   }
 
+  /**
+   * Returns attributes to be treated as unencrypted
+   */
   public getUnencryptedAttributes(id: string) {
     const actionType = this.get(id);
     return actionType.unencryptedAttributes || [];
   }
 
+  /**
+   * Returns a list of registered action types [{ id, name }]
+   */
   public list() {
-    const actionTypeIds = Object.keys(this.actionTypes);
-    return actionTypeIds.map(actionTypeId => ({
+    return Object.entries(this.actionTypes).map(([actionTypeId, actionType]) => ({
       id: actionTypeId,
-      name: this.actionTypes[actionTypeId].name,
+      name: actionType.name,
     }));
   }
 
+  /**
+   * Throws an error if params are invalid for given action type
+   */
   public validateParams(id: string, params: any) {
     const actionType = this.get(id);
     const validator = actionType.validate && actionType.validate.params;
@@ -68,6 +84,9 @@ export class ActionTypeService {
     }
   }
 
+  /**
+   * Throws an error if actionTypeConfig is invalid for given action type
+   */
   public validateActionTypeConfig(id: string, actionTypeConfig: any) {
     const actionType = this.get(id);
     const validator = actionType.validate && actionType.validate.actionTypeConfig;
@@ -79,6 +98,9 @@ export class ActionTypeService {
     }
   }
 
+  /**
+   * Executes an action type based on given parameters
+   */
   public async execute(id: string, actionTypeConfig: any, params: any) {
     const actionType = this.get(id);
     this.validateActionTypeConfig(id, actionTypeConfig);

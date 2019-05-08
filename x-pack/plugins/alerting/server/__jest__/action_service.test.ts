@@ -5,8 +5,8 @@
  */
 
 import Joi from 'joi';
-import { ActionTypeService } from './action_type_service';
-import { ActionService } from './action_service';
+import { ActionTypeService } from '../action_type_service';
+import { ActionService } from '../action_service';
 
 const savedObjectsClient = {
   errors: {} as any,

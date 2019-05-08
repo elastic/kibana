@@ -8,7 +8,7 @@ import Joi from 'joi';
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
-import { WithoutQueryAndParams, Server } from './types';
+import { WithoutQueryAndParams, Server } from '../types';
 
 interface FindActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   server: Server;

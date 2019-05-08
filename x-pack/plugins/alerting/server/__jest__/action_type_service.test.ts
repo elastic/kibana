@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { ActionTypeService } from './action_type_service';
+import { ActionTypeService } from '../action_type_service';
 
 describe('register()', () => {
   test('able to register action types', () => {

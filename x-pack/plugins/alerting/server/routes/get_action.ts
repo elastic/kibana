@@ -8,7 +8,7 @@ import Joi from 'joi';
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
-import { Server } from './types';
+import { Server } from '../types';
 
 interface GetActionRequest extends Hapi.Request {
   server: Server;

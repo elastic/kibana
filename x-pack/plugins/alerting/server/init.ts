@@ -5,6 +5,8 @@
  */
 
 import Hapi from 'hapi';
+import { ActionService } from './action_service';
+import { ActionTypeService } from './action_type_service';
 import {
   createActionRoute,
   deleteActionRoute,
@@ -12,9 +14,7 @@ import {
   getActionRoute,
   updateActionRoute,
   listActionTypesRoute,
-  ActionService,
-  ActionTypeService,
-} from './server';
+} from './routes';
 
 export function init(server: Hapi.Server) {
   const alertingEnabled = server.config().get('xpack.alerting.enabled');

@@ -5,7 +5,7 @@
  */
 
 import mappings from './mappings.json';
-import { init } from './init';
+import { init } from './server';
 
 import { APP_ID } from './common/constants';
 

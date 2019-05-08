@@ -8,7 +8,7 @@ import Joi from 'joi';
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
-import { SavedObjectReference, Server } from './types';
+import { SavedObjectReference, Server } from '../types';
 
 interface UpdateActionRequest extends Hapi.Request {
   server: Server;
@@ -16,7 +16,7 @@ interface UpdateActionRequest extends Hapi.Request {
     attributes: {
       description: string;
       actionTypeId: string;
-      actionTypeConfig: { [key: string]: any };
+      actionTypeConfig: Record<string, any>;
     };
     version?: string;
     references: SavedObjectReference[];

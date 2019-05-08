@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 import { APP_ID } from '../../common/constants';
-import { WithoutQueryAndParams, SavedObjectReference, Server } from './types';
+import { WithoutQueryAndParams, SavedObjectReference, Server } from '../types';
 
 interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   server: Server;
@@ -21,9 +21,9 @@ interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
     attributes: {
       description: string;
       actionTypeId: string;
-      actionTypeConfig: { [key: string]: any };
+      actionTypeConfig: Record<string, any>;
     };
-    migrationVersion?: { [key: string]: string };
+    migrationVersion?: Record<string, any>;
     references: SavedObjectReference[];
   };
 }

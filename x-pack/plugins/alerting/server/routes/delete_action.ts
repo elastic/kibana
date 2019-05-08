@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 
 import { APP_ID } from '../../common/constants';
-import { Server } from './types';
+import { Server } from '../types';
 
 interface DeleteActionRequest extends Hapi.Request {
   server: Server;

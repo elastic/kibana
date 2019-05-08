@@ -5,8 +5,8 @@
  */
 
 import Hapi from 'hapi';
-import { ActionService } from '../action_service';
-import { ActionTypeService } from '../action_type_service';
+import { ActionService } from './action_service';
+import { ActionTypeService } from './action_type_service';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 
