@@ -31,6 +31,22 @@ const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
 
+const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
+
+const Page = styled(EuiPage)`
+  padding: 0 ${gutterTimeline} ${euiLightVars.euiSizeL} ${euiLightVars.euiSizeL};
+`;
+
+const NavGlobal = styled.nav`
+  background: ${({ theme }) =>
+    theme.darkMode ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiColorEmptyShade};
+  border-bottom: ${({ theme }) =>
+    theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
+  margin: 0 -${gutterTimeline} 0 -${euiLightVars.euiSizeL};
+  padding: ${euiLightVars.euiSize} ${gutterTimeline} ${euiLightVars.euiSize}
+    ${euiLightVars.euiSizeL};
+`;
+
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
 /** Returns true if we are running with the k7 design */
@@ -108,19 +124,3 @@ export const HomePage = pure(() => (
     )}
   </AutoSizer>
 ));
-
-const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
-
-const Page = styled(EuiPage)`
-  padding: 0 ${gutterTimeline} ${euiLightVars.euiSizeL} ${euiLightVars.euiSizeL};
-`;
-
-const NavGlobal = styled.nav`
-  background: ${({ theme }) =>
-    theme.darkMode ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiColorEmptyShade};
-  border-bottom: ${({ theme }) =>
-    theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
-  margin: 0 -${gutterTimeline} 0 -${euiLightVars.euiSizeL};
-  padding: ${euiLightVars.euiSize} ${gutterTimeline} ${euiLightVars.euiSize}
-    ${euiLightVars.euiSizeL};
-`;

@@ -14,26 +14,7 @@ import styled from 'styled-components';
 
 import { SuperDatePicker } from '../super_date_picker';
 
-export interface FiltersGlobalProps {
-  children?: React.ReactNode;
-}
-
-export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
-  <Sticky topOffset={-49}>
-    {({ style, isSticky }) => (
-      <Aside isSticky={isSticky} style={style}>
-        <EuiFlexGroup>
-          {children && <EuiFlexItem>{children}</EuiFlexItem>}
-
-          <EuiFlexItem grow={false}>
-            <SuperDatePicker id="global" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Aside>
-    )}
-  </Sticky>
-));
-
+const offsetChrome = 49;
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
@@ -49,7 +30,27 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
   ${props =>
     props.isSticky &&
     `
-      top: 49px !important;
-      z-index: 100;
+      top: ${offsetChrome}px !important;
+      z-index: ${euiLightVars.euiZNavigation};
     `}
 `;
+
+export interface FiltersGlobalProps {
+  children?: React.ReactNode;
+}
+
+export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
+  <Sticky topOffset={-offsetChrome}>
+    {({ style, isSticky }) => (
+      <Aside isSticky={isSticky} style={style}>
+        <EuiFlexGroup>
+          {children && <EuiFlexItem>{children}</EuiFlexItem>}
+
+          <EuiFlexItem grow={false}>
+            <SuperDatePicker id="global" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Aside>
+    )}
+  </Sticky>
+));
