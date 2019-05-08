@@ -49,17 +49,12 @@ class Split extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
-    const mainFilterLanguage =
-      this.props.panel.filter && this.props.panel.filter.language
-        ? this.props.panel.filter.language
-        : 'kuery';
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
         split_filters: [
           {
             color: model.color,
             id: uuid.v1(),
-            filter: { language: mainFilterLanguage, query: '' },
           },
         ],
       });
