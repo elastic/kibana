@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
-
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
 import { SplitByFilters } from './splits/filters';
@@ -50,17 +49,12 @@ class Split extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
-    const mainFilterLanguage =
-      this.props.panel.filter && this.props.panel.filter.language
-        ? this.props.panel.filter.language
-        : 'kuery';
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
         split_filters: [
           {
             color: model.color,
             id: uuid.v1(),
-            filter: { language: mainFilterLanguage, query: '' },
           },
         ],
       });
@@ -82,24 +76,6 @@ class Split extends Component {
     }
     return searchIndexPattern;
   }
-  // fetchIndexPatterns = async () => {
-  //   const searchIndexPattern = this.state.indexPatternAsString;
-  //   let indexPatternForQuery = this.state.indexPatternForQuery;
-  //   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-  //     type: 'index-pattern',
-  //     fields: ['title', 'fields'],
-  //     search: `"${searchIndexPattern}"`,
-  //     search_fields: ['title'],
-  //   });
-  //   const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-  //     indexPattern => indexPattern.attributes.title === searchIndexPattern
-  //   );
-  //   if (exactMatch) {
-  //     indexPatternForQuery = getFromSavedObject(exactMatch);
-  //     this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
-  //   }
-  //   return indexPatternForQuery;
-  // }
 
   getComponent(splitMode, uiRestrictions) {
     if (!isGroupByFieldsEnabled(splitMode, uiRestrictions)) {
