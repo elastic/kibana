@@ -29,7 +29,6 @@ import {
 class SamplePanelAction extends ContextMenuAction {
   constructor() {
     super({
-      displayName: 'Sample Panel Action',
       id: 'samplePanelAction',
       parentPanelId: 'mainMenu',
     });
@@ -53,6 +52,9 @@ class SamplePanelAction extends ContextMenuAction {
         'data-test-subj': 'samplePanelActionFlyout',
       }
     );
+  };
+  public getDisplayName = () => {
+    return 'Sample Panel Action';
   };
 }
 

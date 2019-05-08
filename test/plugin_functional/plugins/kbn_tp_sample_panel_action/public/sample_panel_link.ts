@@ -21,7 +21,6 @@ import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embedd
 class SamplePanelLink extends ContextMenuAction {
   constructor() {
     super({
-      displayName: 'Sample Panel Link',
       id: 'samplePanelLink',
       parentPanelId: 'mainMenu',
     });
@@ -29,6 +28,10 @@ class SamplePanelLink extends ContextMenuAction {
 
   public getHref = () => {
     return 'https://example.com/kibana/test';
+  };
+
+  public getDisplayName = () => {
+    return 'Sample Panel Link';
   };
 }
 
