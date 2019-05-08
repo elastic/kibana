@@ -89,6 +89,7 @@ export class CapabilitiesService {
       body: JSON.stringify({ capabilities: mergedCapabilities }),
       headers: {
         'kbn-xsrf': 'xxx',
+        'kbn-system-api': 'true',
       },
       credentials: 'same-origin',
     });
