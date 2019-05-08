@@ -26,7 +26,7 @@ import {
   ChromeSetup,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpSetup } from './http';
+import { HttpSetup, HttpStart } from './http';
 import { I18nSetup, I18nStart } from './i18n';
 import {
   InjectedMetadataParams,
@@ -98,6 +98,8 @@ export interface CoreStart {
   application: ApplicationStart;
   /** {@link BasePathStart} */
   basePath: BasePathStart;
+  /** {@link HttpStart} */
+  http: HttpStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link InjectedMetadataStart} */
@@ -114,6 +116,7 @@ export {
   BasePathSetup,
   BasePathStart,
   HttpSetup,
+  HttpStart,
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,

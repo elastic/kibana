@@ -46,6 +46,7 @@
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
+|  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) |  |
 |  [InjectedMetadataStart](./kibana-plugin-public.injectedmetadatastart.md) |  |
 |  [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |  |

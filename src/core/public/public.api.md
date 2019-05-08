@@ -125,6 +125,8 @@ export interface CoreStart {
     // (undocumented)
     basePath: BasePathStart;
     // (undocumented)
+    http: HttpStart;
+    // (undocumented)
     i18n: I18nStart;
     // (undocumented)
     injectedMetadata: InjectedMetadataStart;
@@ -173,6 +175,9 @@ export class FlyoutRef {
 // 
 // @public (undocumented)
 export type HttpSetup = ReturnType<HttpService['setup']>;
+
+// @public (undocumented)
+export type HttpStart = ReturnType<HttpService['start']>;
 
 // @public
 export interface I18nSetup {
@@ -343,6 +348,8 @@ export interface PluginStartContext {
     application: Pick<ApplicationStart, 'capabilities'>;
     // (undocumented)
     basePath: BasePathStart;
+    // (undocumented)
+    http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
     // (undocumented)
