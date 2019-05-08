@@ -228,7 +228,27 @@ Object {
       "xsrfHeaderName": "X-XSRF-TOKEN",
     },
   ],
-  "head": Array [],
+  "head": Array [
+    Object {
+      "data": undefined,
+      "headers": Object {
+        "Accept": "application/json, text/plain, */*",
+      },
+      "maxContentLength": -1,
+      "method": "head",
+      "timeout": 0,
+      "transformRequest": Object {
+        "0": [Function],
+      },
+      "transformResponse": Object {
+        "0": [Function],
+      },
+      "url": "https://api.github.com/repos/elastic/kibana?access_token=myAccessToken",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
   "list": Array [],
   "options": Array [],
   "patch": Array [],

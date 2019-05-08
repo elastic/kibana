@@ -151,6 +151,44 @@ export async function addLabelsToPullRequest(
   }
 }
 
+export async function verifyAccessToken(
+  owner: string,
+  repoName: string,
+  accessToken: string
+) {
+  try {
+    return await axios.head(
+      `https://api.github.com/repos/${owner}/${repoName}?access_token=${accessToken}`
+    );
+  } catch (e) {
+    const error = e as GithubApiError;
+    const statusCode = error.response && error.response.status;
+
+    const grantedScopes = get(error, 'response.headers["x-oauth-scopes"]');
+    const requiredScopes = get(
+      error,
+      'response.headers["x-accepted-oauth-scopes"]'
+    );
+
+    switch (statusCode) {
+      case 401:
+        throw new HandledError(
+          `Please check your access token and make sure it is valid`
+        );
+      default:
+        if (grantedScopes === requiredScopes) {
+          throw new HandledError(
+            `The repository "${owner}/${repoName}" doesn't exist`
+          );
+        }
+
+        throw new HandledError(
+          `You do not have access to the repository "${owner}/${repoName}". Please make sure your access token has the required scopes.\n\nRequired scopes: ${requiredScopes}\nAccess token scopes: ${grantedScopes}`
+        );
+    }
+  }
+}
+
 export function setAccessToken(token: string) {
   accessToken = token;
 }

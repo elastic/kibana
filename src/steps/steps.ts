@@ -1,4 +1,4 @@
-import { setAccessToken } from '../services/github';
+import { setAccessToken, verifyAccessToken } from '../services/github';
 import { doBackportVersions } from './doBackportVersions';
 import { BackportOptions } from '../options/options';
 import { getCommits } from './getCommits';
@@ -7,6 +7,7 @@ import { maybeSetupRepo } from './maybeSetupRepo';
 
 export async function initSteps(options: BackportOptions) {
   const [owner, repoName] = options.upstream.split('/');
+  await verifyAccessToken(owner, repoName, options.accessToken);
   setAccessToken(options.accessToken);
 
   const commits = await getCommits(options);

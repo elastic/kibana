@@ -6,7 +6,7 @@ import { getOptions } from './options/options';
 async function init() {
   try {
     const options = await getOptions(process.argv);
-    return initSteps(options);
+    return await initSteps(options);
   } catch (e) {
     if (e.name === 'HandledError') {
       console.error(e.message);

@@ -27,6 +27,19 @@ function mockGetPullRequest(
     });
 }
 
+function mockVerifyAccessToken(
+  axiosMock: MockAdapter,
+  owner: string,
+  repoName: string,
+  accessToken: string
+) {
+  return axiosMock
+    .onHead(
+      `https://api.github.com/repos/${owner}/${repoName}?access_token=${accessToken}`
+    )
+    .reply(200);
+}
+
 function mockGetCommits(
   axiosMock: MockAdapter,
   {
@@ -111,6 +124,9 @@ describe('run through steps', () => {
       });
 
     axiosMock = new MockAdapter(axios);
+
+    mockVerifyAccessToken(axiosMock, owner, repoName, accessToken);
+
     mockGetCommits(axiosMock, {
       owner,
       repoName,
