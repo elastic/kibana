@@ -6,4 +6,4 @@
 
 import { TagFactory } from '../../../public/lib/tag';
 
-export const graphic: TagFactory = () => ({ name: 'graphic', color: '#DB1374' });
+export const graphic: TagFactory = () => ({ name: 'graphic', color: '#E6C220' });
