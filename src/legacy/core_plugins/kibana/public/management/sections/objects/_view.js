@@ -39,7 +39,8 @@ const location = 'SavedObject view';
 uiRoutes
   .when('/management/kibana/objects/:service/:id', {
     template: objectViewHTML,
-    k7Breadcrumbs: getViewBreadcrumbs
+    k7Breadcrumbs: getViewBreadcrumbs,
+    requireUICapability: 'management.kibana.objects',
   });
 
 uiModules.get('apps/management', ['monospaced.elastic'])
@@ -89,7 +90,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             field.type = 'boolean';
             field.value = field.value;
           } else if (_.isPlainObject(field.value)) {
-          // do something recursive
+            // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
           }
 

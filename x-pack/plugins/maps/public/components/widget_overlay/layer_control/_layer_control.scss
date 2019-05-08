@@ -2,6 +2,8 @@
   @include euiScrollBar;
   overflow-y: auto;
   flex-basis: auto !important; // Fixes IE and ensures the layer items are visible
+  padding-bottom: $euiSizeS + 1px;
+  border-top: 1px solid $euiColorLightestShade;
 }
 
 .mapLayerControl__addLayerButton,
@@ -18,5 +20,5 @@
 .mapLayerControl__openLayerTOCButton,
 .mapLayerControl__closeLayerTOCButton {
   @include size($euiSizeXL);
-  background-color: $euiColorEmptyShade;
+  background-color: $euiColorEmptyShade !important; // During all states
 }
