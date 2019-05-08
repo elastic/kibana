@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './zeek_details';
-export * from './zeek_row_renderer';
-export * from './zeek_signature';
+export const NOTES_PANEL_WIDTH = 1024;
+export const NOTES_PANEL_HEIGHT = 633;
