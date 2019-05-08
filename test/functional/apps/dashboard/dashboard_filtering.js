@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
-        await filterBar.toggleFilterEnabled('bytes');
+        await filterBar.q('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }) {
       it('tag cloud', async () => {
         await dashboardExpect.tagCloudWithValuesFound(['9,972', '4,886', '1,944', '9,025']);
       });
-
+      // failing
       it('tsvb metric', async () => {
         await dashboardExpect.tsvbMetricValuesExist(['50,465 custom template']);
       });
@@ -210,7 +210,7 @@ export default function ({ getService, getPageObjects }) {
       it('tsvb top n', async () => {
         await dashboardExpect.tsvbTopNValuesExist(['6,308.125', '6,308.125']);
       });
-
+      // failing
       it('tsvb markdown', async () => {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
