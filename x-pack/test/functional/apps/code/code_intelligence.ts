@@ -117,7 +117,7 @@ export default function codeIntelligenceFunctionalTests({
 
         // Clean up the imported repository
         await PageObjects.code.clickDeleteRepositoryButton();
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
         });
