@@ -92,9 +92,26 @@ export function adoptToHapiOnRequestFormat(fn: OnRequestHandler) {
         redirected: OnRequestResult.redirected,
         rejected: OnRequestResult.rejected,
         setUrl: (newUrl: string | Url) => {
-          request.setUrl(newUrl);
+          if (typeof newUrl === 'string') {
+            request.setUrl({
+              ...request.url,
+              pathname: newUrl,
+              path: newUrl,
+              href: newUrl,
+            });
+          } else {
+            request.setUrl(newUrl);
+          }
+
           // We should update raw request as well since it can be proxied to the old platform
-          request.raw.req.url = typeof newUrl === 'string' ? newUrl : newUrl.href;
+          let rawUrl;
+          if (typeof newUrl === 'string') {
+            rawUrl = newUrl + (request.url.search || '');
+          } else {
+            rawUrl = newUrl.href;
+          }
+
+          request.raw.req.url = rawUrl;
         },
       });
       if (OnRequestResult.isValidResult(result)) {
