@@ -119,28 +119,6 @@ export class LayerPanel extends React.Component {
     );
   }
 
-  _renderStyleSection() {
-    return (
-      <Fragment>
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.maps.layerPanel.filterEditor.title"
-                defaultMessage="Filter"
-              />
-            </h5>
-          </EuiTitle>
-
-          <EuiSpacer size="m"/>
-
-          {this.props.selectedLayer.renderStyleEditor()}
-        </EuiPanel>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-
   _renderSourceProperties() {
     return this.state.immutableSourceProps.map(({ label, value, link }) => {
       function renderValue() {
