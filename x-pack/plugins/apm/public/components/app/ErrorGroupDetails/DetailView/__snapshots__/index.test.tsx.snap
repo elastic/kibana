@@ -61,7 +61,6 @@ exports[`DetailView should render TabContent 1`] = `
 
 exports[`DetailView should render tabs 1`] = `
 <EuiTabs
-  display="default"
   expand={false}
   size="m"
 >
