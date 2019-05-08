@@ -92,6 +92,40 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         error={error}
       />
     );
+  } else if (Object.keys(errors).length && repositories.length === 0) {
+    content = (
+      <EuiEmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotList.emptyPrompt.errorRepositoriesTitle"
+              defaultMessage="Your repositories contain errors"
+            />
+          </h1>
+        }
+        body={
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
+                defaultMessage="Go to {repositoryLink} to fix the errors."
+                values={{
+                  repositoryLink: (
+                    <EuiLink href={linkToRepositories()}>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.repositoryWarningLinkText"
+                        defaultMessage="Repositories"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </Fragment>
+        }
+      />
+    );
   } else if (repositories.length === 0) {
     content = (
       <EuiEmptyPrompt
