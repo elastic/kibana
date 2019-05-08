@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { Legacy } from '../../../../../../../kibana';
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
