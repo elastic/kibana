@@ -12,12 +12,12 @@ import moment from 'moment';
 
 import { ml } from '../../services/ml_api_service';
 import { JobSelectorTable } from './job_selector_table/';
+import { IdBadges } from './id_badges';
+import { NewSelectionIdBadges } from './new_selection_id_badges';
 import { timefilter } from 'ui/timefilter';
-import { tabColor } from '../../../common/util/group_color_utils';
 import { getGroupsFromJobs, normalizeTimes, setGlobalState } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexItem,
@@ -26,42 +26,12 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLink,
   EuiSwitch,
-  EuiText,
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 
-export function getBadge({ id, icon, isGroup = false, removeId, numJobs }) {
-  const color = isGroup ? tabColor(id) : 'hollow';
-  let props = { color };
-  let jobCount;
-
-  if (icon === true) {
-    props = {
-      ...props,
-      iconType: 'cross',
-      iconSide: 'right',
-      onClick: () => removeId(id),
-      onClickAriaLabel: 'Remove id'
-    };
-  }
-
-  if (numJobs !== undefined) {
-    jobCount = i18n.translate('xpack.ml.jobSelector.selectedGroupJobs', {
-      defaultMessage: `({jobsCount, plural, one {# job} other {# jobs}})`,
-      values: { jobsCount: numJobs },
-    });
-  }
-
-  return (
-    <EuiBadge key={`${id}-id`} {...props} >
-      {`${id}${jobCount ? jobCount : ''}`}
-    </EuiBadge>
-  );
-}
 
 function mergeSelection(jobIds, groupObjs, singleSelection) {
   if (singleSelection) {
@@ -206,11 +176,13 @@ export function JobSelector({
 
   function applySelection() {
     closeFlyout();
+    // allNewSelection will be a list of all job ids (including those from groups) selected from the table
     const allNewSelection = [];
     const groupSelection = [];
 
     newSelection.forEach((id) => {
       if (maps.groupsMap[id] !== undefined) {
+        // Push all jobs from selected groups into the newSelection list
         allNewSelection.push(...maps.groupsMap[id]);
         // if it's a group - push group obj to set in global state
         groupSelection.push({ groupId: id, jobIds: maps.groupsMap[id] });
@@ -265,137 +237,18 @@ export function JobSelector({
     setNewSelection([]);
   }
 
-  function renderIdBadges() {
-    const badges = [];
-    const currentGroups = [];
-    // Create group badges. Skip job ids here.
-    for (let i = 0; i < selectedIds.length; i++) {
-      const currentId = selectedIds[i];
-      if (maps.groupsMap[currentId] !== undefined) {
-        currentGroups.push(currentId);
-
-        badges.push((
-          <EuiFlexItem grow={false} key={currentId}>
-            {getBadge({ id: currentId, isGroup: true, numJobs: maps.groupsMap[currentId].length })}
-          </EuiFlexItem>
-        ));
-      } else {
-        continue;
-      }
-    }
-    // Create jobId badges for jobs with no groups or with groups not selected
-    for (let i = 0; i < selectedIds.length; i++) {
-      const currentId = selectedIds[i];
-      if (maps.groupsMap[currentId] === undefined) {
-        const jobGroups = maps.jobsMap[currentId] || [];
-
-        if (jobGroups.some(g => currentGroups.includes(g)) === false) {
-          badges.push((
-            <EuiFlexItem grow={false} key={currentId}>
-              {getBadge({ id: currentId })}
-            </EuiFlexItem>
-          ));
-        } else {
-          continue;
-        }
-      } else {
-        continue;
-      }
-    }
-
-    if (showAllBarBadges || badges.length <= BADGE_LIMIT) {
-      if (badges.length > BADGE_LIMIT) {
-        badges.push(
-          <EuiLink
-            key="more-badges-bar-link"
-            onClick={() => setShowAllBarBadges(!showAllBarBadges)}
-          >
-            <EuiText grow={false} size="xs">
-              {i18n.translate('xpack.ml.jobSelector.hideBarBadges', {
-                defaultMessage: 'Hide'
-              })}
-            </EuiText>
-          </EuiLink>);
-      }
-
-      return badges;
-    } else {
-      const overFlow = (badges.length - BADGE_LIMIT);
-
-      badges.splice(BADGE_LIMIT);
-      badges.push(
-        <EuiLink
-          key="more-badges-bar-link"
-          onClick={() => setShowAllBarBadges(!showAllBarBadges)}
-        >
-          <EuiText grow={false} size="xs">
-            {i18n.translate('xpack.ml.jobSelector.showBarBadges', {
-              defaultMessage: `And {overFlow} more`,
-              values: { overFlow },
-            })}
-          </EuiText>
-        </EuiLink>);
-
-      return badges;
-    }
-  }
-
-  function renderNewSelectionIdBadges() {
-    const badges = [];
-
-    for (let i = 0; i < newSelection.length; i++) {
-      if (i >= BADGE_LIMIT && showAllBadges === false) {
-        break;
-      }
-
-      badges.push(
-        <EuiFlexItem grow={false} key={newSelection[i]}>
-          {getBadge({
-            id: newSelection[i],
-            icon: true,
-            removeId,
-            isGroup: (maps.groupsMap[newSelection[i]] !== undefined)
-          })}
-        </EuiFlexItem>
-      );
-    }
-
-    if (showAllBadges === false && newSelection.length > BADGE_LIMIT) {
-      badges.push(
-        <EuiLink
-          key="more-badges-link"
-          onClick={() => setShowAllBadges(!showAllBadges)}
-        >
-          <EuiText grow={false} size="xs">
-            {i18n.translate('xpack.ml.jobSelector.showFlyoutBadges', {
-              defaultMessage: `And {overFlow} more`,
-              values: { overFlow: newSelection.length - BADGE_LIMIT },
-            })}
-          </EuiText>
-        </EuiLink>);
-    } else if (showAllBadges === true && newSelection.length > BADGE_LIMIT) {
-      badges.push(
-        <EuiLink
-          key="hide-badges-link"
-          onClick={() => setShowAllBadges(!showAllBadges)}
-        >
-          <EuiText grow={false} size="xs">
-            {i18n.translate('xpack.ml.jobSelector.hideFlyoutBadges', {
-              defaultMessage: 'Hide'
-            })}
-          </EuiText>
-        </EuiLink>);
-    }
-
-    return badges;
-  }
-
   function renderJobSelectionBar() {
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
-            {renderIdBadges()}
+            <IdBadges
+              limit={BADGE_LIMIT}
+              maps={maps}
+              onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
+              selectedIds={selectedIds}
+              showAllBarBadges={showAllBarBadges}
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -419,14 +272,14 @@ export function JobSelector({
         <EuiFlyout
           ref={flyoutEl}
           onClose={closeFlyout}
-          aria-labelledby="Job Selection"
+          aria-labelledby="jobSelectorFlyout"
           size="l"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id="flyoutTitle">
                 {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
-                  defaultMessage: 'Job Selection'
+                  defaultMessage: 'Job selection'
                 })}
               </h2>
             </EuiTitle>
@@ -435,7 +288,14 @@ export function JobSelector({
             <EuiFlexGroup direction="column" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
-                  {renderNewSelectionIdBadges()}
+                  <NewSelectionIdBadges
+                    limit={BADGE_LIMIT}
+                    maps={maps}
+                    newSelection={newSelection}
+                    onDeleteClick={removeId}
+                    onLinkClick={() => setShowAllBadges(!showAllBadges)}
+                    showAllBadges={showAllBadges}
+                  />
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -447,7 +307,7 @@ export function JobSelector({
                       size="xs"
                     >
                       {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
-                        defaultMessage: 'Clear All'
+                        defaultMessage: 'Clear all'
                       })}
                     </EuiButtonEmpty>}
                   </EuiFlexItem>
