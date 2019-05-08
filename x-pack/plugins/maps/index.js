@@ -57,6 +57,22 @@ export function maps(kibana) {
           isNamespaceAgnostic: true
         }
       },
+      savedObjectsManagement: {
+        'map': {
+          icon: APP_ICON,
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: createMapPath(obj.id),
+              uiCapabilitiesPath: 'maps.show',
+            };
+          },
+        },
+      },
       mappings,
       migrations,
     },
@@ -94,14 +110,14 @@ export function maps(kibana) {
               all: ['map'],
               read: ['index-pattern']
             },
-            ui: ['save'],
+            ui: ['save', 'show'],
           },
           read: {
             savedObject: {
               all: [],
               read: ['map', 'index-pattern']
             },
-            ui: [],
+            ui: ['show'],
           },
         }
       });
