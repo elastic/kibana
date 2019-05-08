@@ -18,8 +18,8 @@
  */
 
 import {
-  elasticsearchService,
-  httpService,
+  mockElasticsearchService,
+  mockHttpService,
   mockLegacyService,
   mockPluginsService,
 } from './index.test.mocks';
@@ -44,11 +44,11 @@ afterEach(() => {
   jest.clearAllMocks();
 
   configService.atPath.mockReset();
-  httpService.setup.mockClear();
-  httpService.start.mockClear();
-  httpService.stop.mockReset();
-  elasticsearchService.setup.mockReset();
-  elasticsearchService.stop.mockReset();
+  mockHttpService.setup.mockClear();
+  mockHttpService.start.mockClear();
+  mockHttpService.stop.mockReset();
+  mockElasticsearchService.setup.mockReset();
+  mockElasticsearchService.stop.mockReset();
   mockPluginsService.setup.mockReset();
   mockPluginsService.stop.mockReset();
   mockLegacyService.setup.mockReset();
@@ -62,15 +62,15 @@ test('sets up services on "setup"', async () => {
 
   const server = new Server(configService as any, logger, env);
 
-  expect(httpService.setup).not.toHaveBeenCalled();
-  expect(elasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockHttpService.setup).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
 
   await server.setup();
 
-  expect(httpService.setup).toHaveBeenCalledTimes(1);
-  expect(elasticsearchService.setup).toHaveBeenCalledTimes(1);
+  expect(mockHttpService.setup).toHaveBeenCalledTimes(1);
+  expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
 });
 
@@ -80,14 +80,31 @@ test('runs services on "start"', async () => {
 
   const server = new Server(configService as any, logger, env);
 
-  expect(httpService.setup).not.toHaveBeenCalled();
+  expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
 
   await server.setup();
   await server.start();
 
-  expect(httpService.start).toHaveBeenCalledTimes(1);
+  expect(mockHttpService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
+});
+
+test('logs the message if core starts', async () => {
+  const server = new Server(configService as any, logger, env);
+
+  await server.setup();
+  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`Array []`);
+
+  await server.start();
+
+  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "The core is running",
+  ],
+]
+`);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -103,15 +120,15 @@ test('stops services on "stop"', async () => {
 
   await server.setup();
 
-  expect(httpService.stop).not.toHaveBeenCalled();
-  expect(elasticsearchService.stop).not.toHaveBeenCalled();
+  expect(mockHttpService.stop).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
-  expect(httpService.stop).toHaveBeenCalledTimes(1);
-  expect(elasticsearchService.stop).toHaveBeenCalledTimes(1);
+  expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
+  expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
 });
