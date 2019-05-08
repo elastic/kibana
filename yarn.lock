@@ -1398,6 +1398,7 @@
   integrity sha512-rGKlEmbwn+eKKyQC0LG1Mq9p4kXGNLE+yY4oyWzyQCHaNedkX213yc+cA/3PMAHFaGXlpO+Tsyy1hhJHGrmRkw==
   dependencies:
     "@octokit/app" "^2.2.2"
+    "@octokit/plugin-retry" "^2.2.0"
     "@octokit/request" "^2.4.2"
     "@octokit/rest" "^16.23.2"
     strip-ansi "^5.2.0"
