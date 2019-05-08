@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './auth_ssh';
-export * from './generic_details';
-export * from './generic_file_details';
-export * from './generic_row_renderer';
-export * from './package';
+import { TagFactory } from '../../../public/lib/tag';
+
+export const filter: TagFactory = () => ({ name: 'filter', color: '#3185FC' });

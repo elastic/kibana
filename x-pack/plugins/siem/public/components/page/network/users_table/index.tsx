@@ -9,8 +9,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
 
+import { networkActions } from '../../../../store/network';
 import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
-import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
 
 import { getUsersColumns } from './columns';

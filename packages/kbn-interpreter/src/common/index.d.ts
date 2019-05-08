@@ -17,23 +17,4 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: (path: string) => `http://localhost/myBase/${path}`,
-}));
-
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
-
-import { kfetchAbortable } from './kfetch_abortable';
-
-describe('kfetchAbortable', () => {
-  it('should return an object with a fetching promise and an abort callback', () => {
-    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
-    expect(typeof fetching.then).toBe('function');
-    expect(typeof fetching.catch).toBe('function');
-    expect(typeof abort).toBe('function');
-  });
-});
+export { Registry } from './lib/registry';

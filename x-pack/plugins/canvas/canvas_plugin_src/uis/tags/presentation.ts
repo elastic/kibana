@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './suricata_details';
-export * from './suricata_links';
-export * from './suricata_refs';
-export * from './suricata_row_renderer';
-export * from './suricata_signature';
+import { TagFactory } from '../../../public/lib/tag';
+
+export const presentation: TagFactory = () => ({ name: 'presentation', color: '#017D73' });

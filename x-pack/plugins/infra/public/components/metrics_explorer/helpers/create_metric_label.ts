@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const report = () => ({ name: 'report', color: '#DB1374' });
+import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
+
+export const createMetricLabel = (metric: MetricsExplorerMetric) => {
+  return `${metric.aggregation}(${metric.field || ''})`;
+};

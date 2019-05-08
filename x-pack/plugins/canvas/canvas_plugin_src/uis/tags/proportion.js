@@ -4,13 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Registry } from '@kbn/interpreter/common';
-import { Tag } from './tag';
-
-class TagRegistry extends Registry {
-  wrapper(obj) {
-    return new Tag(obj);
-  }
-}
-
-export const tagsRegistry = new TagRegistry();
+export const proportion = () => ({ name: 'proportion', color: '#490092' });

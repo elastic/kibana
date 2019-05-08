@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './zeek_details';
-export * from './zeek_row_renderer';
-export * from './zeek_signature';
+import { TagFactory } from '../../../public/lib/tag';
+
+export const chart: TagFactory = () => ({ name: 'chart', color: '#FEB6DB' });
