@@ -91,7 +91,7 @@ export function checkCreateDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileg
       } else {
         // if the user has no permission to create a data frame job,
         // redirect them back to the Data Frame Jobs Management page
-        kbnUrl.redirect('/data_frame');
+        kbnUrl.redirect('/data_frames');
         return reject();
       }
     });
