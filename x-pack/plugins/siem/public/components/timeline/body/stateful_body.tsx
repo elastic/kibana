@@ -12,14 +12,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
-import {
-  appActions,
-  appSelectors,
-  State,
-  timelineActions,
-  timelineModel,
-  timelineSelectors,
-} from '../../../store';
+import { appSelectors, State, timelineSelectors } from '../../../store';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -36,6 +29,8 @@ import { defaultHeaders } from './column_headers/default_headers';
 import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
+import { timelineActions, appActions } from '../../../store/actions';
+import { TimelineModel } from '../../../store/timeline/model';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -200,7 +195,7 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: timelineModel.TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id);
     const { columns, eventIdToNoteIds, pinnedEventIds } = timeline;
 
     return {

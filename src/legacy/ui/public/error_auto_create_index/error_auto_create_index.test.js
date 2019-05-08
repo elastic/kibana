@@ -17,20 +17,18 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: path => `myBase/${path}`,
-}));
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
-
+// @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { kfetch } from 'ui/kfetch';
+import { __newPlatformSetup__, kfetch } from '../kfetch';
+import { setup } from '../../../../test_utils/public/kfetch_test_setup';
+
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
 describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch', () => {
+  beforeAll(() => {
+    __newPlatformSetup__(setup().http);
+  });
+
   describe('404', () => {
     beforeEach(() => {
       fetchMock.post({
@@ -45,7 +43,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return false', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
@@ -66,7 +64,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return false', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
@@ -90,7 +88,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return true', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(true);
       }
