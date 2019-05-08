@@ -118,6 +118,7 @@ export class SearchEmbeddable extends Embeddable {
   }
 
   public onContainerStateChanged(containerState: ContainerState) {
+    const shouldFetch = this.isFetchNeeded(containerState);
     this.customization = containerState.embeddableCustomization || {};
     this.filters = containerState.filters;
     this.query = containerState.query;
@@ -134,7 +135,9 @@ export class SearchEmbeddable extends Embeddable {
       this.pushContainerStateParamsToScope(this.searchScope);
     }
 
-    this.fetch();
+    if (shouldFetch) {
+      this.fetch();
+    }
   }
 
   public render(domNode: HTMLElement, containerState: ContainerState) {
@@ -185,36 +188,30 @@ export class SearchEmbeddable extends Embeddable {
     };
 
     searchScope.addColumn = (columnName: string) => {
-      if (!searchScope.columns) {
-        return;
-      }
+      if (!searchScope.columns) return;
       searchSource.getField('index').popularizeField(columnName, 1);
       columnActions.addColumn(searchScope.columns, columnName);
-      searchScope.columns = this.customization.columns = searchScope.columns;
-      this.emitEmbeddableStateChange(this.getEmbeddableState());
+      const customization = { columns: searchScope.columns };
+      this.emitEmbeddableStateChange({ customization });
     };
 
     searchScope.removeColumn = (columnName: string) => {
-      if (!searchScope.columns) {
-        return;
-      }
-      this.savedSearch.searchSource.getField('index').popularizeField(columnName, 1);
+      if (!searchScope.columns) return;
+      searchSource.getField('index').popularizeField(columnName, 1);
       columnActions.removeColumn(searchScope.columns, columnName);
-      this.customization.columns = searchScope.columns;
-      this.emitEmbeddableStateChange(this.getEmbeddableState());
+      const customization = { columns: searchScope.columns };
+      this.emitEmbeddableStateChange({ customization });
     };
 
     searchScope.moveColumn = (columnName, newIndex: number) => {
-      if (!searchScope.columns) {
-        return;
-      }
+      if (!searchScope.columns) return;
       columnActions.moveColumn(searchScope.columns, columnName, newIndex);
-      this.customization.columns = searchScope.columns;
-      this.emitEmbeddableStateChange(this.getEmbeddableState());
+      const customization = { columns: searchScope.columns };
+      this.emitEmbeddableStateChange({ customization });
     };
 
     searchScope.filter = (field, value, operator) => {
-      const index = this.savedSearch.searchSource.getField('index').id;
+      const index = searchSource.getField('index').id;
       const stagedFilter = {
         field,
         value,
@@ -255,14 +252,28 @@ export class SearchEmbeddable extends Embeddable {
     this.fetch();
   }
 
+  /**
+   * We only need to re-fetch the data if filters, query, time range, or sort changes. Other things
+   * (e.g. reordering columns) shouldn't trigger a fetch.
+   * @param nextState The next container state
+   */
+  private isFetchNeeded(nextState: ContainerState) {
+    const { customization = {} } = this;
+    const { embeddableCustomization = {} } = nextState;
+    return (
+      !_.isEqual(this.filters, nextState.filters) ||
+      !_.isEqual(this.query, nextState.query) ||
+      !_.isEqual(this.timeRange, nextState.timeRange) ||
+      !_.isEqual(customization.sort, embeddableCustomization.sort)
+    );
+  }
+
   private async fetch() {
     if (!this.searchScope) return;
+    const { searchSource } = this.savedSearch;
 
-    this.savedSearch.searchSource.setField('size', config.get('discover:sampleSize'));
-    this.savedSearch.searchSource.setField(
-      'sort',
-      getSort(this.searchScope.sort, this.searchScope.indexPattern)
-    );
+    searchSource.setField('size', config.get('discover:sampleSize'));
+    searchSource.setField('sort', getSort(this.searchScope.sort, this.searchScope.indexPattern));
 
     // Log request to inspector
     this.inspectorAdaptors.requests.reset();
@@ -273,18 +284,16 @@ export class SearchEmbeddable extends Embeddable {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
-    inspectorRequest.stats(getRequestInspectorStats(this.savedSearch.searchSource));
-    this.savedSearch.searchSource.getSearchRequestBody().then((body: any) => {
+    inspectorRequest.stats(getRequestInspectorStats(searchSource));
+    searchSource.getSearchRequestBody().then((body: any) => {
       inspectorRequest.json(body);
     });
 
     // Make the request
-    const resp = await this.savedSearch.searchSource.fetch();
+    const resp = await searchSource.fetch();
 
     // Log response to inspector
-    inspectorRequest
-      .stats(getResponseInspectorStats(this.savedSearch.searchSource, resp))
-      .ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
 
     // Apply the changes to the angular scope
     this.searchScope.$apply(() => {
