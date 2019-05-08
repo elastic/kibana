@@ -308,7 +308,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     }
 
     if (colorsRange) {
-      colorsRange.forEach(range => {
+      colorsRange.forEach((range: any) => {
         expr += prepareValue('colorRange', `{range from=${range.from} to=${range.to}}`, true);
       });
     }
