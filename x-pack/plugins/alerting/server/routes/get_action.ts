@@ -8,17 +8,7 @@ import Joi from 'joi';
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
-import { ActionService } from '../action_service';
-import { AlertService } from '../alert_service';
-import { ConnectorService } from '../connector_service';
-
-interface Server extends Hapi.Server {
-  alerting: () => {
-    actions: ActionService;
-    alerts: AlertService;
-    connectors: ConnectorService;
-  };
-}
+import { Server } from './types';
 
 interface GetActionRequest extends Hapi.Request {
   server: Server;

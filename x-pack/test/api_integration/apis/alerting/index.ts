@@ -13,7 +13,7 @@ export default function alertingTests({ loadTestFile }: KibanaFunctionalTestDefa
     loadTestFile(require.resolve('./delete_action'));
     loadTestFile(require.resolve('./find_action'));
     loadTestFile(require.resolve('./get_action'));
-    loadTestFile(require.resolve('./list_connectors'));
+    loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update_action'));
   });
 }

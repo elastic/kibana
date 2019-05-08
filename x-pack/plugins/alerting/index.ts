@@ -12,10 +12,9 @@ import {
   findActionRoute,
   getActionRoute,
   updateActionRoute,
-  listconnectorsRoute,
-  AlertService,
+  listActionTypesRoute,
   ActionService,
-  ConnectorService,
+  ActionTypeService,
 } from './server';
 
 import { APP_ID } from './common/constants';
@@ -43,15 +42,14 @@ export function alerting(kibana: any) {
       // Encrypted attributes
       server.plugins.encrypted_saved_objects!.registerType({
         type: 'action',
-        attributesToEncrypt: new Set(['connectorOptionsSecrets']),
+        attributesToEncrypt: new Set(['actionTypeOptionsSecrets']),
       });
 
-      const connectorService = new ConnectorService();
+      const actionTypeService = new ActionTypeService();
       const actionService = new ActionService(
-        connectorService,
+        actionTypeService,
         server.plugins.encrypted_saved_objects
       );
-      const alertService = new AlertService();
 
       // Routes
       createActionRoute(server);
@@ -59,13 +57,12 @@ export function alerting(kibana: any) {
       getActionRoute(server);
       findActionRoute(server);
       updateActionRoute(server);
-      listconnectorsRoute(server);
+      listActionTypesRoute(server);
 
       // Register service to server
       server.decorate('server', 'alerting', () => ({
-        alerts: alertService,
         actions: actionService,
-        connectors: connectorService,
+        actionTypes: actionTypeService,
       }));
     },
     uiExports: {

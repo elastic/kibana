@@ -19,8 +19,8 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .send({
           attributes: {
             description: 'My action',
-            connectorId: 'test',
-            connectorOptions: {},
+            actionTypeId: 'test',
+            actionTypeOptions: {},
           },
         })
         .expect(200)
@@ -30,8 +30,8 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             id: resp.body.id,
             attributes: {
               description: 'My action',
-              connectorId: 'test',
-              connectorOptions: {},
+              actionTypeId: 'test',
+              actionTypeOptions: {},
             },
             references: [],
             updated_at: resp.body.updated_at,
@@ -41,15 +41,15 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
-    it(`should return 400 when connector isn't registered`, async () => {
+    it(`should return 400 when action type isn't registered`, async () => {
       await supertest
         .post('/api/alerting/action')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
             description: 'My action',
-            connectorId: 'unregistered-connector',
-            connectorOptions: {},
+            actionTypeId: 'unregistered-action-type',
+            actionTypeOptions: {},
           },
         })
         .expect(400)
@@ -57,7 +57,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Connector "unregistered-connector" is not registered.',
+            message: 'Action type "unregistered-action-type" is not registered.',
           });
         });
     });

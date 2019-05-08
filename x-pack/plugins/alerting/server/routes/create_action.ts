@@ -6,19 +6,8 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { ActionService } from '../action_service';
-import { AlertService } from '../alert_service';
-import { ConnectorService } from '../connector_service';
 import { APP_ID } from '../../common/constants';
-import { WithoutQueryAndParams, SavedObjectReference } from './types';
-
-interface Server extends Hapi.Server {
-  alerting: () => {
-    actions: ActionService;
-    alerts: AlertService;
-    connectors: ConnectorService;
-  };
-}
+import { WithoutQueryAndParams, SavedObjectReference, Server } from './types';
 
 interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   server: Server;
@@ -31,8 +20,8 @@ interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   payload: {
     attributes: {
       description: string;
-      connectorId: string;
-      connectorOptions: { [key: string]: any };
+      actionTypeId: string;
+      actionTypeOptions: { [key: string]: any };
     };
     migrationVersion?: { [key: string]: string };
     references: SavedObjectReference[];
@@ -49,8 +38,8 @@ export function createActionRoute(server: Hapi.Server) {
           attributes: Joi.object()
             .keys({
               description: Joi.string().required(),
-              connectorId: Joi.string().required(),
-              connectorOptions: Joi.object(),
+              actionTypeId: Joi.string().required(),
+              actionTypeOptions: Joi.object(),
             })
             .required(),
           migrationVersion: Joi.object().optional(),

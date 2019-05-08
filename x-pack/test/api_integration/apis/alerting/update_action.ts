@@ -22,9 +22,9 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            connectorId: 'test',
+            actionTypeId: 'test',
             description: 'My description updated',
-            connectorOptions: {},
+            actionTypeOptions: {},
           },
         })
         .expect(200)
@@ -36,9 +36,9 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             version: resp.body.version,
             updated_at: resp.body.updated_at,
             attributes: {
-              connectorId: 'test',
+              actionTypeId: 'test',
               description: 'My description updated',
-              connectorOptions: {},
+              actionTypeOptions: {},
             },
           });
         });
@@ -50,9 +50,9 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            connectorId: 'test',
+            actionTypeId: 'test',
             description: 'My description updated',
-            connectorOptions: {},
+            actionTypeOptions: {},
           },
         })
         .expect(404)

@@ -4,14 +4,14 @@
       "description": {
         "type": "text"
       },
-      "connectorId": {
+      "actionTypeId": {
         "type": "keyword"
       },
-      "connectorOptions": {
+      "actionTypeOptions": {
         "dynamic": "true",
         "type": "object"
       },
-      "connectorOptionsSecrets": {
+      "actionTypeOptionsSecrets": {
         "type": "binary"
       }
     }

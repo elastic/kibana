@@ -8,18 +8,7 @@ import Joi from 'joi';
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
-import { ActionService } from '../action_service';
-import { AlertService } from '../alert_service';
-import { ConnectorService } from '../connector_service';
-import { WithoutQueryAndParams } from './types';
-
-interface Server extends Hapi.Server {
-  alerting: () => {
-    actions: ActionService;
-    alerts: AlertService;
-    connectors: ConnectorService;
-  };
-}
+import { WithoutQueryAndParams, Server } from './types';
 
 interface FindActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   server: Server;

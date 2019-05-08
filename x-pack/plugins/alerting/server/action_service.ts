@@ -6,19 +6,19 @@
 
 import Boom from 'boom';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
-import { ConnectorService } from './connector_service';
+import { ActionTypeService } from './action_type_service';
 
 interface Action {
   description: string;
-  connectorId: string;
-  connectorOptions: { [key: string]: any };
+  actionTypeId: string;
+  actionTypeOptions: { [key: string]: any };
 }
 
 interface EncryptedAction extends Action {
   description: string;
-  connectorId: string;
-  connectorOptions: { [key: string]: any };
-  connectorOptionsSecrets: { [key: string]: any };
+  actionTypeId: string;
+  actionTypeOptions: { [key: string]: any };
+  actionTypeOptionsSecrets: { [key: string]: any };
 }
 
 interface FireActionOptions {
@@ -48,22 +48,22 @@ interface FindOptions {
 }
 
 export class ActionService {
-  private connectorService: ConnectorService;
+  private actionTypeService: ActionTypeService;
   private encryptedSavedObjects: any;
 
-  constructor(connectorService: ConnectorService, encryptedSavedObjects: any) {
-    this.connectorService = connectorService;
+  constructor(actionTypeService: ActionTypeService, encryptedSavedObjects: any) {
+    this.actionTypeService = actionTypeService;
     this.encryptedSavedObjects = encryptedSavedObjects;
   }
 
   public async create(savedObjectsClient: SavedObjectsClient, data: Action) {
-    const { connectorId } = data;
-    if (!this.connectorService.has(connectorId)) {
-      throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
+    const { actionTypeId } = data;
+    if (!this.actionTypeService.has(actionTypeId)) {
+      throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
-    this.connectorService.validateConnectorOptions(connectorId, data.connectorOptions);
-    const actionWithSplitConnectorOptions = this.applyEncryptedAttributes(data);
-    return await savedObjectsClient.create<any>('action', actionWithSplitConnectorOptions);
+    this.actionTypeService.validateActionTypeOptions(actionTypeId, data.actionTypeOptions);
+    const actionWithSplitActionTypeOptions = this.applyEncryptedAttributes(data);
+    return await savedObjectsClient.create<any>('action', actionWithSplitActionTypeOptions);
   }
 
   public async get(savedObjectsClient: SavedObjectsClient, id: string) {
@@ -87,48 +87,50 @@ export class ActionService {
     data: Action,
     options: { version?: string; references?: SavedObjectReference[] }
   ) {
-    const { connectorId } = data;
-    if (!this.connectorService.has(connectorId)) {
-      throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
+    const { actionTypeId } = data;
+    if (!this.actionTypeService.has(actionTypeId)) {
+      throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
-    this.connectorService.validateConnectorOptions(connectorId, data.connectorOptions);
-    const actionWithSplitConnectorOptions = this.applyEncryptedAttributes(data);
+    this.actionTypeService.validateActionTypeOptions(actionTypeId, data.actionTypeOptions);
+    const actionWithSplitActionTypeOptions = this.applyEncryptedAttributes(data);
     return await savedObjectsClient.update<any>(
       'action',
       id,
-      actionWithSplitConnectorOptions,
+      actionWithSplitActionTypeOptions,
       options
     );
   }
 
   public async fire({ id, params, savedObjectsClient }: FireActionOptions) {
     const action = await this.encryptedSavedObjects.getDecryptedAsInternalUser('action', id);
-    return await this.connectorService.execute(
-      action.attributes.connectorId,
+    return await this.actionTypeService.execute(
+      action.attributes.actionTypeId,
       {
-        ...action.attributes.connectorOptions,
-        ...action.attributes.connectorOptionsSecrets,
+        ...action.attributes.actionTypeOptions,
+        ...action.attributes.actionTypeOptionsSecrets,
       },
       params
     );
   }
 
   private applyEncryptedAttributes(action: Action): EncryptedAction {
-    const unencryptedAttributes = this.connectorService.getEncryptedAttributes(action.connectorId);
-    const encryptedConnectorOptions: { [key: string]: any } = {};
-    const unencryptedConnectorOptions: { [key: string]: any } = {};
-    for (const key of Object.keys(action.connectorOptions)) {
+    const unencryptedAttributes = this.actionTypeService.getUnencryptedAttributes(
+      action.actionTypeId
+    );
+    const encryptedActionTypeOptions: { [key: string]: any } = {};
+    const unencryptedActionTypeOptions: { [key: string]: any } = {};
+    for (const key of Object.keys(action.actionTypeOptions)) {
       if (unencryptedAttributes.includes(key)) {
-        unencryptedConnectorOptions[key] = action.connectorOptions[key];
+        unencryptedActionTypeOptions[key] = action.actionTypeOptions[key];
         continue;
       }
-      encryptedConnectorOptions[key] = action.connectorOptions[key];
+      encryptedActionTypeOptions[key] = action.actionTypeOptions[key];
     }
     return {
       ...action,
       // Important these overwrite attributes in data for encryption purposes
-      connectorOptions: unencryptedConnectorOptions,
-      connectorOptionsSecrets: encryptedConnectorOptions,
+      actionTypeOptions: unencryptedActionTypeOptions,
+      actionTypeOptionsSecrets: encryptedActionTypeOptions,
     };
   }
 }

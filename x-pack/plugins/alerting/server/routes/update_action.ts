@@ -8,26 +8,15 @@ import Joi from 'joi';
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
-import { ActionService } from '../action_service';
-import { AlertService } from '../alert_service';
-import { ConnectorService } from '../connector_service';
-import { SavedObjectReference } from './types';
-
-interface Server extends Hapi.Server {
-  alerting: () => {
-    actions: ActionService;
-    alerts: AlertService;
-    connectors: ConnectorService;
-  };
-}
+import { SavedObjectReference, Server } from './types';
 
 interface UpdateActionRequest extends Hapi.Request {
   server: Server;
   payload: {
     attributes: {
       description: string;
-      connectorId: string;
-      connectorOptions: { [key: string]: any };
+      actionTypeId: string;
+      actionTypeOptions: { [key: string]: any };
     };
     version?: string;
     references: SavedObjectReference[];
@@ -50,8 +39,8 @@ export function updateActionRoute(server: Hapi.Server) {
             attributes: Joi.object()
               .keys({
                 description: Joi.string().required(),
-                connectorId: Joi.string().required(),
-                connectorOptions: Joi.object(),
+                actionTypeId: Joi.string().required(),
+                actionTypeOptions: Joi.object(),
               })
               .required(),
             version: Joi.string(),

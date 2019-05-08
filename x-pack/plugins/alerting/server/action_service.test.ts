@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { ConnectorService } from './connector_service';
+import { ActionTypeService } from './action_type_service';
 import { ActionService } from './action_service';
 
 const savedObjectsClient = {
@@ -28,18 +28,18 @@ const mockEncryptedSavedObjects = {
 describe('create()', () => {
   test('creates an action with all given properties', async () => {
     const expectedResult = Symbol();
-    const connectorService = new ConnectorService();
-    connectorService.register({
-      id: 'my-connector',
-      name: 'My connector',
+    const actionTypeService = new ActionTypeService();
+    actionTypeService.register({
+      id: 'my-action-type',
+      name: 'My action type',
       async executor() {},
     });
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
     const result = await actionService.create(savedObjectsClient, {
       description: 'my description',
-      connectorId: 'my-connector',
-      connectorOptions: {},
+      actionTypeId: 'my-action-type',
+      actionTypeOptions: {},
     });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
@@ -48,9 +48,9 @@ describe('create()', () => {
     Array [
       "action",
       Object {
-        "connectorId": "my-connector",
-        "connectorOptions": Object {},
-        "connectorOptionsSecrets": Object {},
+        "actionTypeId": "my-action-type",
+        "actionTypeOptions": Object {},
+        "actionTypeOptionsSecrets": Object {},
         "description": "my description",
       },
     ],
@@ -65,14 +65,14 @@ describe('create()', () => {
 `);
   });
 
-  test('validates connectorOptions', async () => {
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
-    connectorService.register({
-      id: 'my-connector',
-      name: 'My connector',
+  test('validates actionTypeOptions', async () => {
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    actionTypeService.register({
+      id: 'my-action-type',
+      name: 'My action type',
       validate: {
-        connectorOptions: Joi.object()
+        actionTypeOptions: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })
@@ -83,43 +83,43 @@ describe('create()', () => {
     await expect(
       actionService.create(savedObjectsClient, {
         description: 'my description',
-        connectorId: 'my-connector',
-        connectorOptions: {},
+        actionTypeId: 'my-action-type',
+        actionTypeOptions: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
   });
 
-  test(`throws an error when connector doesn't exist`, async () => {
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+  test(`throws an error when an action type doesn't exist`, async () => {
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     await expect(
       actionService.create(savedObjectsClient, {
         description: 'my description',
-        connectorId: 'unregistered-connector',
-        connectorOptions: {},
+        actionTypeId: 'unregistered-action-type',
+        actionTypeOptions: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Connector \\"unregistered-connector\\" is not registered."`
+      `"Action type \\"unregistered-action-type\\" is not registered."`
     );
   });
 
-  test('encrypts connector options unless specified not to', async () => {
+  test('encrypts action type options unless specified not to', async () => {
     const expectedResult = Symbol();
-    const connectorService = new ConnectorService();
-    connectorService.register({
-      id: 'my-connector',
-      name: 'My connector',
+    const actionTypeService = new ActionTypeService();
+    actionTypeService.register({
+      id: 'my-action-type',
+      name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
       async executor() {},
     });
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
     const result = await actionService.create(savedObjectsClient, {
       description: 'my description',
-      connectorId: 'my-connector',
-      connectorOptions: {
+      actionTypeId: 'my-action-type',
+      actionTypeOptions: {
         a: true,
         b: true,
         c: true,
@@ -132,12 +132,12 @@ describe('create()', () => {
     Array [
       "action",
       Object {
-        "connectorId": "my-connector",
-        "connectorOptions": Object {
+        "actionTypeId": "my-action-type",
+        "actionTypeOptions": Object {
           "a": true,
           "c": true,
         },
-        "connectorOptionsSecrets": Object {
+        "actionTypeOptionsSecrets": Object {
           "b": true,
         },
         "description": "my description",
@@ -158,8 +158,8 @@ describe('create()', () => {
 describe('get()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.get.mockResolvedValueOnce(expectedResult);
     const result = await actionService.get(savedObjectsClient, '1');
     expect(result).toEqual(expectedResult);
@@ -185,8 +185,8 @@ describe('get()', () => {
 describe('find()', () => {
   test('calls savedObjectsClient with parameters', async () => {
     const expectedResult = Symbol();
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     const result = await actionService.find(savedObjectsClient, {});
     expect(result).toEqual(expectedResult);
@@ -213,8 +213,8 @@ describe('find()', () => {
 describe('delete()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionService.delete(savedObjectsClient, '1');
     expect(result).toEqual(expectedResult);
@@ -240,21 +240,21 @@ describe('delete()', () => {
 describe('update()', () => {
   test('updates an action with all given properties', async () => {
     const expectedResult = Symbol();
-    const connectorService = new ConnectorService();
-    connectorService.register({
-      id: 'my-connector',
-      name: 'My connector',
+    const actionTypeService = new ActionTypeService();
+    actionTypeService.register({
+      id: 'my-action-type',
+      name: 'My action type',
       async executor() {},
     });
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionService.update(
       savedObjectsClient,
       'my-alert',
       {
         description: 'my description',
-        connectorId: 'my-connector',
-        connectorOptions: {},
+        actionTypeId: 'my-action-type',
+        actionTypeOptions: {},
       },
       {}
     );
@@ -266,9 +266,9 @@ describe('update()', () => {
       "action",
       "my-alert",
       Object {
-        "connectorId": "my-connector",
-        "connectorOptions": Object {},
-        "connectorOptionsSecrets": Object {},
+        "actionTypeId": "my-action-type",
+        "actionTypeOptions": Object {},
+        "actionTypeOptionsSecrets": Object {},
         "description": "my description",
       },
       Object {},
@@ -284,14 +284,14 @@ describe('update()', () => {
 `);
   });
 
-  test('validates connectorOptions', async () => {
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
-    connectorService.register({
-      id: 'my-connector',
-      name: 'My connector',
+  test('validates actionTypeOptions', async () => {
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    actionTypeService.register({
+      id: 'my-action-type',
+      name: 'My action type',
       validate: {
-        connectorOptions: Joi.object()
+        actionTypeOptions: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })
@@ -305,8 +305,8 @@ describe('update()', () => {
         'my-alert',
         {
           description: 'my description',
-          connectorId: 'my-connector',
-          connectorOptions: {},
+          actionTypeId: 'my-action-type',
+          actionTypeOptions: {},
         },
         {}
       )
@@ -315,43 +315,43 @@ describe('update()', () => {
     );
   });
 
-  test(`throws an error when connector doesn't exist`, async () => {
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+  test(`throws an error when action type doesn't exist`, async () => {
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     await expect(
       actionService.update(
         savedObjectsClient,
         'my-alert',
         {
           description: 'my description',
-          connectorId: 'unregistered-connector',
-          connectorOptions: {},
+          actionTypeId: 'unregistered-action-type',
+          actionTypeOptions: {},
         },
         {}
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Connector \\"unregistered-connector\\" is not registered."`
+      `"Action type \\"unregistered-action-type\\" is not registered."`
     );
   });
 
-  test('encrypts connector options unless specified not to', async () => {
+  test('encrypts action type options unless specified not to', async () => {
     const expectedResult = Symbol();
-    const connectorService = new ConnectorService();
-    connectorService.register({
-      id: 'my-connector',
-      name: 'My connector',
+    const actionTypeService = new ActionTypeService();
+    actionTypeService.register({
+      id: 'my-action-type',
+      name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
       async executor() {},
     });
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionService.update(
       savedObjectsClient,
       'my-alert',
       {
         description: 'my description',
-        connectorId: 'my-connector',
-        connectorOptions: {
+        actionTypeId: 'my-action-type',
+        actionTypeOptions: {
           a: true,
           b: true,
           c: true,
@@ -367,12 +367,12 @@ describe('update()', () => {
       "action",
       "my-alert",
       Object {
-        "connectorId": "my-connector",
-        "connectorOptions": Object {
+        "actionTypeId": "my-action-type",
+        "actionTypeOptions": Object {
           "a": true,
           "c": true,
         },
-        "connectorOptionsSecrets": Object {
+        "actionTypeOptionsSecrets": Object {
           "b": true,
         },
         "description": "my description",
@@ -393,19 +393,19 @@ describe('update()', () => {
 
 describe('fire()', () => {
   test('fires an action with all given parameters', async () => {
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
-    const mockConnector = jest.fn().mockResolvedValueOnce({ success: true });
-    connectorService.register({
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
+    actionTypeService.register({
       id: 'mock',
       name: 'Mock',
-      executor: mockConnector,
+      executor: mockActionType,
     });
     mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: 'mock-action',
       attributes: {
-        connectorId: 'mock',
-        connectorOptionsSecrets: {
+        actionTypeId: 'mock',
+        actionTypeOptionsSecrets: {
           foo: true,
         },
       },
@@ -416,7 +416,7 @@ describe('fire()', () => {
       savedObjectsClient,
     });
     expect(result).toEqual({ success: true });
-    expect(mockConnector).toMatchInlineSnapshot(`
+    expect(mockActionType).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
@@ -441,14 +441,14 @@ describe('fire()', () => {
     ]);
   });
 
-  test(`throws an error when the connector isn't registered`, async () => {
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
+  test(`throws an error when the action type isn't registered`, async () => {
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: 'mock-action',
       attributes: {
-        connectorId: 'non-registered-connector',
-        connectorOptionsSecrets: {
+        actionTypeId: 'non-registered-action-type',
+        actionTypeOptionsSecrets: {
           foo: true,
         },
       },
@@ -456,29 +456,29 @@ describe('fire()', () => {
     await expect(
       actionService.fire({ savedObjectsClient, id: 'mock-action', params: { baz: false } })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Connector \\"non-registered-connector\\" is not registered."`
+      `"Action type \\"non-registered-action-type\\" is not registered."`
     );
   });
 
   test('merges encrypted and unencrypted attributes', async () => {
-    const connectorService = new ConnectorService();
-    const actionService = new ActionService(connectorService, mockEncryptedSavedObjects);
-    const mockConnector = jest.fn().mockResolvedValueOnce({ success: true });
-    connectorService.register({
+    const actionTypeService = new ActionTypeService();
+    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
+    actionTypeService.register({
       id: 'mock',
       name: 'Mock',
       unencryptedAttributes: ['a', 'c'],
-      executor: mockConnector,
+      executor: mockActionType,
     });
     mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: 'mock-action',
       attributes: {
-        connectorId: 'mock',
-        connectorOptions: {
+        actionTypeId: 'mock',
+        actionTypeOptions: {
           a: true,
           c: true,
         },
-        connectorOptionsSecrets: {
+        actionTypeOptionsSecrets: {
           b: true,
         },
       },
@@ -489,7 +489,7 @@ describe('fire()', () => {
       savedObjectsClient,
     });
     expect(result).toEqual({ success: true });
-    expect(mockConnector).toMatchInlineSnapshot(`
+    expect(mockActionType).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [

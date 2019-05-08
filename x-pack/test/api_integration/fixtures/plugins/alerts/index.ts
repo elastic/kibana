@@ -10,10 +10,10 @@ export default function(kibana: any) {
     require: ['alerting'],
     name: 'alerts',
     init(server: any) {
-      server.alerting().connectors.register({
+      server.alerting().actionTypes.register({
         id: 'test',
         name: 'Test',
-        async executor(connectorOptions: any, params: any) {},
+        async executor(actionTypeOptions: any, params: any) {},
       });
     },
   });
