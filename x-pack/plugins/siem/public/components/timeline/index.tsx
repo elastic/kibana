@@ -10,14 +10,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
-import {
-  inputsModel,
-  inputsSelectors,
-  State,
-  timelineActions,
-  timelineModel,
-  timelineSelectors,
-} from '../../store';
+import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Sort } from './body/sort';
@@ -31,6 +24,8 @@ import {
   OnToggleDataProviderExcluded,
 } from './events';
 import { Timeline } from './timeline';
+import { timelineActions } from '../../store/actions';
+import { KqlMode, TimelineModel } from '../../store/timeline/model';
 
 export interface OwnProps {
   id: string;
@@ -46,7 +41,7 @@ interface StateReduxProps {
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
-  kqlMode: timelineModel.KqlMode;
+  kqlMode: KqlMode;
   kqlQueryExpression: string;
   pageCount?: number;
   sort?: Sort;
@@ -207,7 +202,7 @@ const makeMapStateToProps = () => {
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: timelineModel.TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id);
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,

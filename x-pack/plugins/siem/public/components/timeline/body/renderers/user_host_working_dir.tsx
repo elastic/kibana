@@ -8,8 +8,8 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../draggables';
-
-import { HostWorkingDir, TokensFlexItem } from '.';
+import { TokensFlexItem } from './helpers';
+import { HostWorkingDir } from './host_working_dir';
 
 interface Props {
   contextId: string;
