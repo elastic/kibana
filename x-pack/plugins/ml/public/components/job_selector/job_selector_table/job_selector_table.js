@@ -55,7 +55,7 @@ export function JobSelectorTable({
         },
         {
           name: 'groups',
-          getValue: item => (item.groups ? item.groups[0].toLowerCase() : ''),
+          getValue: item => (item.groups && item.groups[0] ? item.groups[0].toLowerCase() : ''),
           isAscending: true,
         }
       ];
