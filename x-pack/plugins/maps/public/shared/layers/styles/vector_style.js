@@ -66,7 +66,8 @@ export class VectorStyle extends AbstractStyle {
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
         layer={layer}
-        source={this._source}
+        loadIsPointsOnly={this.getIsPointsOnly}
+        loadIsLinesOnly={this.getIsLinesOnly}
       />
     );
   }

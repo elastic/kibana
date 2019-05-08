@@ -11,8 +11,9 @@ import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
 import { VECTOR_FEATURE_TYPES } from '../../../sources/vector_source';
+import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
   state = {
@@ -20,6 +21,8 @@ export class VectorStyleEditor extends Component {
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
+    isInitialized: false,
+    selectedFeatureType: undefined,
   }
 
   componentWillUnmount() {
@@ -29,7 +32,7 @@ export class VectorStyleEditor extends Component {
   componentDidMount() {
     this._isMounted = true;
     this._loadOrdinalFields();
-    this._loadSupportedFeatures();
+    this._init();
   }
 
   componentDidUpdate() {
@@ -46,12 +49,25 @@ export class VectorStyleEditor extends Component {
     }
   }
 
-  async _loadSupportedFeatures() {
-    const supportedFeatures = await this.props.source.getSupportedFeatures();
-    if (!this._isMounted) {
-      return;
+  async _init() {
+    const supportedFeatures = await this.props.layer.getSource().getSupportedFeatures();
+    const isPointsOnly = await this.props.loadIsPointsOnly();
+    const isLinesOnly = await this.props.loadIsLinesOnly();
+
+    let selectedFeature = VECTOR_FEATURE_TYPES.POLYGON;
+    if (isPointsOnly) {
+      selectedFeature = VECTOR_FEATURE_TYPES.POINT;
+    } else if (isLinesOnly) {
+      selectedFeature = VECTOR_FEATURE_TYPES.LINE;
     }
-    this.setState({ supportedFeatures });
+
+    if (this._isMounted) {
+      this.setState({
+        isInitialized: true,
+        supportedFeatures,
+        selectedFeature,
+      });
+    }
   }
 
   _renderFillColor() {
@@ -148,13 +164,23 @@ export class VectorStyleEditor extends Component {
     );
   }
 
+  _handleSelectedFeatureChange = selectedFeature => {
+    this.setState({ selectedFeature });
+  }
+
   render() {
-    if (!this.state.supportedFeatures) {
+    const {
+      isInitialized,
+      supportedFeatures,
+      selectedFeature,
+    } = this.state;
+
+    if (!isInitialized) {
       return null;
     }
 
-    if (this.state.supportedFeatures.length === 1) {
-      switch (this.state.supportedFeatures[0]) {
+    if (supportedFeatures.length === 1) {
+      switch (supportedFeatures[0]) {
         case VECTOR_FEATURE_TYPES.POINT:
           return this._renderPointProperties();
         case VECTOR_FEATURE_TYPES.LINE:
@@ -164,51 +190,48 @@ export class VectorStyleEditor extends Component {
       }
     }
 
+    const featureButtons = [
+      {
+        id: VECTOR_FEATURE_TYPES.LINE,
+        label: i18n.translate('xpack.maps.vectorStyleEditor.lineLabel', {
+          defaultMessage: 'Lines'
+        })
+      },
+      {
+        id: VECTOR_FEATURE_TYPES.POINT,
+        label: i18n.translate('xpack.maps.vectorStyleEditor.pointLabel', {
+          defaultMessage: 'Points'
+        })
+      },
+      {
+        id: VECTOR_FEATURE_TYPES.POLYGON,
+        label: i18n.translate('xpack.maps.vectorStyleEditor.polygonLabel', {
+          defaultMessage: 'Polygons'
+        })
+      }
+    ];
+
+    let styleProperties = this._renderPolygonProperties();
+    if (selectedFeature === VECTOR_FEATURE_TYPES.LINE) {
+      styleProperties = this._renderLineProperties();
+    } else if (selectedFeature === VECTOR_FEATURE_TYPES.POINT) {
+      styleProperties = this._renderPointProperties();
+    }
+
     return (
       <Fragment>
-
-        <VectorStyleColorEditor
-          styleProperty="fillColor"
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleDescriptor={this.props.styleProperties.fillColor}
-          ordinalFields={this.state.ordinalFields}
-          defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
-          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.maps.vectorStyleEditor.featureTypeButtonGroupLegend', {
+            defaultMessage: 'vector feature button group'
+          })}
+          options={featureButtons}
+          idSelected={selectedFeature}
+          onChange={this._handleSelectedFeatureChange}
         />
 
         <EuiSpacer size="m" />
 
-        <VectorStyleColorEditor
-          styleProperty="lineColor"
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleDescriptor={this.props.styleProperties.lineColor}
-          ordinalFields={this.state.ordinalFields}
-          defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
-          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
-        />
-
-        <EuiSpacer size="m" />
-
-        <VectorStyleSizeEditor
-          styleProperty="lineWidth"
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleDescriptor={this.props.styleProperties.lineWidth}
-          ordinalFields={this.state.ordinalFields}
-          defaultStaticStyleOptions={this.state.defaultStaticProperties.lineWidth.options}
-          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineWidth.options}
-        />
-
-        <EuiSpacer size="m" />
-
-        <VectorStyleSizeEditor
-          styleProperty="iconSize"
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleDescriptor={this.props.styleProperties.iconSize}
-          ordinalFields={this.state.ordinalFields}
-          defaultStaticStyleOptions={this.state.defaultStaticProperties.iconSize.options}
-          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconSize.options}
-        />
-
+        {styleProperties}
       </Fragment>
     );
   }
