@@ -7,6 +7,7 @@ import React, { Fragment } from 'react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiCard,
   EuiDescribedFormGroup,
@@ -18,7 +19,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
@@ -29,8 +29,7 @@ import { documentationLinksService } from '../../services/documentation';
 import { loadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionError } from '../section_error';
-import { SectionLoading } from '../section_loading';
+import { SectionError, SectionLoading, RepositoryTypeLogo } from '../';
 
 interface Props {
   repository: Repository | EmptyRepository;
@@ -138,35 +137,27 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     const displayName = textService.getRepositoryTypeName(type);
 
     return (
-      <EuiFlexItem
-        className="ssrRepositoryFormTypeCardWrapper"
-        key={index}
-        tabIndex={0}
-        onClick={() => onTypeChange(type)}
-        onKeyDown={({ key }) => {
-          if (key === 'Enter') {
-            onTypeChange(type);
-          }
-        }}
-      >
+      <EuiFlexItem key={index}>
         <EuiCard
-          className={`ssrRepositoryFormTypeCard
-            ${isSelectedType ? 'ssrRepositoryFormTypeCard--selected' : ''}`}
           title={displayName}
-          description={
-            <EuiLink
-              onClick={e => e.stopPropagation()}
-              onKeyDown={(e: any) => e.stopPropagation()}
+          icon={<RepositoryTypeLogo type={type} size="l" />}
+          footer={
+            <EuiButtonEmpty
               href={documentationLinksService.getRepositoryTypeDocUrl(type)}
               target="_blank"
+              size="xs"
+              iconType="iInCircle"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.typeDocsLinkText"
                 defaultMessage="Learn more"
-              />{' '}
-              <EuiIcon type="link" />
-            </EuiLink>
+              />
+            </EuiButtonEmpty>
           }
+          selectable={{
+            onClick: () => onTypeChange(type),
+            isSelected: isSelectedType,
+          }}
         />
       </EuiFlexItem>
     );
