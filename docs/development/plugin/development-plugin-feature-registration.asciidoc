@@ -32,7 +32,7 @@ Registering a feature consists of the following fields. For more information, co
 |`id` (required)
 |`string`
 |`"sample_feature"`
-|A unique identifier for your feature. Usually, the name of your plugin is sufficient.
+|A unique identifier for your feature. Usually, the ID of your plugin is sufficient.
 
 |`name` (required)
 |`string`
@@ -115,12 +115,12 @@ init(server) {
 This shows how the Canvas application might register itself as a Kibana feature.
 Note that it specifies different `savedObject` access levels for each privilege: 
 
-- Users with read/write access (`all` privilege) need to be able to read/write `canvas-workdpad` saved objects, and they need read-only access to `index-pattern` saved objects.
+- Users with read/write access (`all` privilege) need to be able to read/write `canvas-workpad` saved objects, and they need read-only access to `index-pattern` saved objects.
 - Users with read-only access (`read` privilege) do not need to have read/write access to any saved objects, but instead get read-only access to `index-pattern`s and `canvas-workpad`s.
 
 Additionally, Canvas registers the `canvas` UI app and `canvas` catalogue entry. This tells Kibana that these entities are available for users with either the `read` or `all` privilege.
 
-The `all` privileges defines a single “save” UI Capability. To access this in the UI, Canvas could:
+The `all` privilege defines a single “save” UI Capability. To access this in the UI, Canvas could:
 
 ["source","javascript"]
 -----------
