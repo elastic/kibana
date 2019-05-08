@@ -18,15 +18,14 @@ import {
 } from '@elastic/eui';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
-import { Repository, RepositoryType, RepositoryVerification } from '../../../../../../common/types';
-import { RepositoryDeleteProvider, RepositoryVerificationBadge } from '../../../../components';
+import { Repository, RepositoryType } from '../../../../../../common/types';
+import { RepositoryDeleteProvider } from '../../../../components';
 import { BASE_PATH } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
 
 interface Props extends RouteComponentProps {
   repositories: Repository[];
-  verification: { [key: string]: RepositoryVerification };
   reload: () => Promise<void>;
   openRepositoryDetails: (name: Repository['name']) => void;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
@@ -34,7 +33,6 @@ interface Props extends RouteComponentProps {
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
-  verification,
   reload,
   openRepositoryDetails,
   onRepositoryDeleted,
@@ -71,19 +69,6 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
         }
         return textService.getRepositoryTypeName(type);
       },
-    },
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.snapshotRestore.repositoryList.table.verificationStatusColumnTitle',
-        {
-          defaultMessage: 'Status',
-        }
-      ),
-      truncateText: true,
-      render: (name: Repository['name']) => (
-        <RepositoryVerificationBadge verificationResults={verification[name] || null} />
-      ),
     },
     {
       name: i18n.translate('xpack.snapshotRestore.repositoryList.table.actionsColumnTitle', {

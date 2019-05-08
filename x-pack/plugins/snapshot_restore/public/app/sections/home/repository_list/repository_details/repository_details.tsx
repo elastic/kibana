@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
@@ -26,17 +26,20 @@ import 'brace/theme/textmate';
 
 import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
-import { loadRepository } from '../../../../services/http';
+import {
+  loadRepository,
+  verifyRepository as verifyRepositoryRequest,
+} from '../../../../services/http';
 import { textService } from '../../../../services/text';
 import { linkToSnapshots } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
-import { Repository } from '../../../../../../common/types';
+import { Repository, RepositoryVerification } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
-  RepositoryVerificationBadge,
   SectionError,
   SectionLoading,
+  RepositoryVerificationBadge,
 } from '../../../../components';
 import { BASE_PATH } from '../../../../constants';
 import { TypeDetails } from './type_details';
@@ -59,6 +62,25 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 
   const { FormattedMessage } = i18n;
   const { error, data: repositoryDetails } = loadRepository(repositoryName);
+  const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
+  const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
+
+  const verifyRepository = async () => {
+    setIsLoadingVerification(true);
+    const { data } = await verifyRepositoryRequest(repositoryName);
+    setVerification(data.verification);
+    setIsLoadingVerification(false);
+  };
+
+  // Reset verification state when repository name changes, either from adjust URL or clicking
+  // into a different repository in table list.
+  useEffect(
+    () => {
+      setVerification(undefined);
+      setIsLoadingVerification(false);
+    },
+    [repositoryName]
+  );
 
   const renderBody = () => {
     if (repositoryDetails) {
@@ -141,7 +163,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   };
 
   const renderRepository = () => {
-    const { repository, verification } = repositoryDetails;
+    const { repository } = repositoryDetails;
 
     if (!repository) {
       return null;
@@ -194,12 +216,12 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
-        {renderVerification(verification)}
+        {renderVerification()}
       </Fragment>
     );
   };
 
-  const renderVerification = (verification: any) => (
+  const renderVerification = () => (
     <Fragment>
       <EuiTitle size="s">
         <h3>
@@ -209,46 +231,71 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
           />
         </h3>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <RepositoryVerificationBadge verificationResults={verification || null} />
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryDetails.verificationDetailsTitle"
-            defaultMessage="Details"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       {verification ? (
-        <EuiCodeEditor
-          mode="json"
-          theme="textmate"
-          width="100%"
-          isReadOnly
-          value={JSON.stringify(verification.response || verification.error, null, 2)}
-          setOptions={{
-            showLineNumbers: false,
-            tabSize: 2,
-            maxLines: Infinity,
-          }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={false}
-          minLines={6}
-          aria-label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryDetails.verificationDetails"
-              defaultMessage="Verification details repository '{name}'"
-              values={{
-                name,
+        <Fragment>
+          <EuiSpacer size="s" />
+          <RepositoryVerificationBadge verificationResults={verification} />
+          <EuiSpacer size="s" />
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryDetails.verificationDetailsTitle"
+                defaultMessage="Details"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {verification ? (
+            <EuiCodeEditor
+              mode="json"
+              theme="textmate"
+              width="100%"
+              isReadOnly
+              value={JSON.stringify(
+                verification.valid ? verification.response : verification.error,
+                null,
+                2
+              )}
+              setOptions={{
+                showLineNumbers: false,
+                tabSize: 2,
+                maxLines: Infinity,
               }}
+              editorProps={{
+                $blockScrolling: Infinity,
+              }}
+              showGutter={false}
+              minLines={6}
+              aria-label={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.verificationDetails"
+                  defaultMessage="Verification details repository '{name}'"
+                  values={{
+                    name,
+                  }}
+                />
+              }
             />
-          }
-        />
-      ) : null}
+          ) : null}
+          <EuiSpacer size="m" />
+          <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.reverifyButtonLabel"
+              defaultMessage="Re-verify repository"
+            />
+          </EuiButton>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
+              defaultMessage="Verify repository"
+            />
+          </EuiButton>
+        </Fragment>
+      )}
     </Fragment>
   );
 

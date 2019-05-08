@@ -22,6 +22,7 @@ export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
   router.get('repository_types', getTypesHandler);
   router.get('repositories', getAllHandler);
   router.get('repositories/{name}', getOneHandler);
+  router.get('repositories/{name}/verify', getVerificationHandler);
   router.put('repositories', createHandler);
   router.put('repositories/{name}', updateHandler);
   router.delete('repositories/{names}', deleteHandler);
@@ -32,7 +33,6 @@ export const getAllHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<{
   repositories: Repository[];
-  verification: { [key: string]: RepositoryVerification };
 }> => {
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
@@ -46,30 +46,7 @@ export const getAllHandler: RouterRouteHandler = async (
       settings: deserializeRepositorySettings(settings),
     };
   });
-  const repositoryVerification = await Promise.all(
-    repositoryNames.map(name => {
-      return callWithRequest('snapshot.verifyRepository', { repository: name }).catch(e => ({
-        valid: false,
-        error: e.response ? JSON.parse(e.response) : e,
-      }));
-    })
-  );
-  return {
-    repositories,
-    verification: repositoryNames.reduce(
-      (acc: { [key: string]: RepositoryVerification }, name, index) => {
-        const verificationResults = repositoryVerification[index];
-        acc[name] = verificationResults.error
-          ? verificationResults
-          : {
-              valid: true,
-              response: verificationResults,
-            };
-        return acc;
-      },
-      {}
-    ),
-  };
+  return { repositories };
 };
 
 export const getOneHandler: RouterRouteHandler = async (
@@ -77,7 +54,6 @@ export const getOneHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<{
   repository: Repository | {};
-  verification: RepositoryVerification | {};
   snapshots: { count: number | undefined } | {};
 }> => {
   const { name } = req.params;
@@ -88,12 +64,6 @@ export const getOneHandler: RouterRouteHandler = async (
   }).catch(e => ({
     snapshots: null,
   }));
-  const verificationResults = await callWithRequest('snapshot.verifyRepository', {
-    repository: name,
-  }).catch(e => ({
-    valid: false,
-    error: e.response ? JSON.parse(e.response) : e,
-  }));
 
   if (repositoryByName[name]) {
     const { type = '', settings = {} } = repositoryByName[name];
@@ -103,12 +73,6 @@ export const getOneHandler: RouterRouteHandler = async (
         type,
         settings: deserializeRepositorySettings(settings),
       },
-      verification: verificationResults.error
-        ? verificationResults
-        : {
-            valid: true,
-            response: verificationResults,
-          },
       snapshots: {
         count: snapshots ? snapshots.length : null,
       },
@@ -116,10 +80,32 @@ export const getOneHandler: RouterRouteHandler = async (
   } else {
     return {
       repository: {},
-      verification: {},
       snapshots: {},
     };
   }
+};
+
+export const getVerificationHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<{
+  verification: RepositoryVerification | {};
+}> => {
+  const { name } = req.params;
+  const verificationResults = await callWithRequest('snapshot.verifyRepository', {
+    repository: name,
+  }).catch(e => ({
+    valid: false,
+    error: e.response ? JSON.parse(e.response) : e,
+  }));
+  return {
+    verification: verificationResults.error
+      ? verificationResults
+      : {
+          valid: true,
+          response: verificationResults,
+        },
+  };
 };
 
 export const getTypesHandler: RouterRouteHandler = async (req, callWithRequest) => {

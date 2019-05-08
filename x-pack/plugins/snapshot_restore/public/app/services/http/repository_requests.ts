@@ -25,6 +25,15 @@ export const loadRepository = (name: Repository['name']) => {
   });
 };
 
+export const verifyRepository = (name: Repository['name']) => {
+  return sendRequest({
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/verify`
+    ),
+    method: 'get',
+  });
+};
+
 export const loadRepositoryTypes = () => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repository_types`),

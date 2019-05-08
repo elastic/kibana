@@ -11,6 +11,7 @@ import {
   getAllHandler,
   getOneHandler,
   getTypesHandler,
+  getVerificationHandler,
   updateHandler,
 } from './repositories';
 
@@ -24,11 +25,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         fooRepository: {},
         barRepository: {},
       };
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({});
+      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
       const expectedResponse = {
         repositories: [
           {
@@ -42,10 +39,6 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
             settings: {},
           },
         ],
-        verification: {
-          fooRepository: { valid: true, response: {} },
-          barRepository: { valid: true, response: {} },
-        },
       };
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -54,48 +47,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      const mockEsVerificationResponse = {};
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce(mockEsVerificationResponse);
+      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
       const expectedResponse = {
         repositories: [],
-        verification: {},
-      };
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
-    });
-
-    it('should return failed verification from ES', async () => {
-      const mockEsResponse = {
-        fooRepository: {},
-        barRepository: {},
-      };
-      const verificationError = new Error('failed verification');
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({})
-        .mockRejectedValueOnce(verificationError);
-      const expectedResponse = {
-        repositories: [
-          {
-            name: 'fooRepository',
-            type: '',
-            settings: {},
-          },
-          {
-            name: 'barRepository',
-            type: '',
-            settings: {},
-          },
-        ],
-        verification: {
-          fooRepository: { valid: true, response: {} },
-          barRepository: { valid: false, error: verificationError },
-        },
       };
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -125,11 +79,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
-        verification: { valid: true, response: {} },
         snapshots: { count: null },
       };
       await expect(
@@ -142,11 +94,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
       const expectedResponse = {
         repository: {},
-        verification: {},
         snapshots: {},
       };
       await expect(
@@ -162,11 +112,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({})
-        .mockRejectedValueOnce(verificationError);
+        .mockResolvedValueOnce({});
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
-        verification: { valid: false, error: verificationError },
         snapshots: { count: null },
       };
       await expect(
@@ -184,11 +132,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce(mockEsSnapshotResponse)
-        .mockResolvedValueOnce({});
+        .mockResolvedValueOnce(mockEsSnapshotResponse);
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
-        verification: { valid: true, response: {} },
         snapshots: {
           count: 2,
         },
@@ -206,11 +152,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
-        .mockRejectedValueOnce(mockEsSnapshotError)
-        .mockResolvedValueOnce({});
+        .mockRejectedValueOnce(mockEsSnapshotError);
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
-        verification: { valid: true, response: {} },
         snapshots: {
           count: null,
         },
@@ -225,6 +169,37 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
+    });
+  });
+
+  describe('getVerificationHandler', () => {
+    const name = 'fooRepository';
+    const mockVerificationRequest = ({
+      params: {
+        name,
+      },
+    } as unknown) as Request;
+
+    it('should return repository verification response if returned from ES', async () => {
+      const mockEsResponse = { nodes: {} };
+      const callWithRequest = jest.fn().mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = {
+        verification: { valid: true, response: mockEsResponse },
+      };
+      await expect(
+        getVerificationHandler(mockVerificationRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return repository verification error if returned from ES', async () => {
+      const mockEsResponse = { error: {}, status: 500 };
+      const callWithRequest = jest.fn().mockRejectedValueOnce(mockEsResponse);
+      const expectedResponse = {
+        verification: { valid: false, error: mockEsResponse },
+      };
+      await expect(
+        getVerificationHandler(mockVerificationRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
     });
   });
 
