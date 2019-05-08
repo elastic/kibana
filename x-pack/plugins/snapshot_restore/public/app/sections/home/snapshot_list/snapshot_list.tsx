@@ -122,6 +122,19 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                 }}
               />
             </p>
+            <p>
+              <EuiLink
+                href={documentationLinksService.getSnapshotDocUrl()}
+                target="_blank"
+                data-test-subj="srSnapshotsEmptyPromptDocLink"
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
+                  defaultMessage="Learn how to create a snapshot"
+                />{' '}
+                <EuiIcon type="link" />
+              </EuiLink>
+            </p>
           </Fragment>
         }
       />
