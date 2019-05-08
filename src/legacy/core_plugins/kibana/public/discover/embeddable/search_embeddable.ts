@@ -179,9 +179,9 @@ export class SearchEmbeddable extends Embeddable {
 
     this.pushContainerStateParamsToScope(searchScope);
 
-    searchScope.setSortOrder = (columnName, direction) => {
-      searchScope.sort = this.customization.sort = [columnName, direction];
-      this.emitEmbeddableStateChange(this.getEmbeddableState());
+    searchScope.setSortOrder = (...sort) => {
+      const customization = { sort };
+      this.emitEmbeddableStateChange({ customization });
     };
 
     searchScope.addColumn = (columnName: string) => {
