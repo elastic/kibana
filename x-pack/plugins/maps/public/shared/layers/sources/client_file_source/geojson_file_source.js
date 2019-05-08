@@ -28,7 +28,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   }
 
-  static viewIndexedData = (addAndViewSource, inspectorAdapters) => {
+  static viewIndexedData = (addAndViewSource, inspectorAdapters, onIndexSuccess) => {
     return ({ fields, id, success }) => {
       if (!success) {
         console.error('Unable to view indexed data');
@@ -48,6 +48,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
           geoField,
         }, inspectorAdapters);
         addAndViewSource(source);
+        onIndexSuccess();
       }
     };
   };
@@ -65,7 +66,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   };
 
   static renderEditor({ onPreviewSource, inspectorAdapters, addAndViewSource,
-    boolIndexData, onRemove, onIndexReadyStatusChange, setFailures }) {
+    boolIndexData, onRemove, onIndexReadyStatusChange, setFailures, onIndexSuccess }) {
     return (
       <ClientFileCreateSourceEditor
         previewGeojsonFile={
@@ -77,7 +78,8 @@ export class GeojsonFileSource extends AbstractVectorSource {
         viewIndexedData={
           GeojsonFileSource.viewIndexedData(
             addAndViewSource,
-            inspectorAdapters
+            inspectorAdapters,
+            onIndexSuccess
           )
         }
         boolIndexData={boolIndexData}

@@ -14,6 +14,7 @@ import { indexData, createIndexPattern } from '../util/indexing_service';
 import { getGeoIndexTypesForFeatures } from '../util/geo_processing';
 import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
+import { JsonImportProgress } from './json_import_progress';
 import _ from 'lodash';
 
 export function JsonUploadAndParse({
@@ -149,27 +150,31 @@ export function JsonUploadAndParse({
   }, [parsedFile, transformDetails]);
 
   return (
-    <EuiForm>
-      <JsonIndexFilePicker
-        {...{
-          onFileUpload,
-          onFileRemove,
-          fileRef,
-          setFileRef,
-          setParsedFile,
-          transformDetails,
-          resetFileAndIndexSettings,
-        }}
-      />
-      <IndexSettings
-        disabled={!fileRef}
-        indexName={indexName}
-        setIndexName={setIndexName}
-        indexTypes={indexTypes}
-        setSelectedIndexType={setSelectedIndexType}
-        setHasIndexErrors={setHasIndexErrors}
-      />
-    </EuiForm>
+    boolIndexData
+      ? <JsonImportProgress />
+      : (
+        <EuiForm>
+          <JsonIndexFilePicker
+            {...{
+              onFileUpload,
+              onFileRemove,
+              fileRef,
+              setFileRef,
+              setParsedFile,
+              transformDetails,
+              resetFileAndIndexSettings,
+            }}
+          />
+          <IndexSettings
+            disabled={!fileRef}
+            indexName={indexName}
+            setIndexName={setIndexName}
+            indexTypes={indexTypes}
+            setSelectedIndexType={setSelectedIndexType}
+            setHasIndexErrors={setHasIndexErrors}
+          />
+        </EuiForm>
+      )
   );
 }
 

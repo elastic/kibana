@@ -4,33 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
-import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
+import React, { Component } from 'react';
+import { SourceSelect } from './source_select/source_select';
+import { FlyoutFooter } from './flyout_footer';
+import { SourceEditor } from './source_editor/view';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiTitle,
-  EuiPanel,
-  EuiSpacer,
-  EuiCard,
-  EuiIcon,
   EuiFlyoutHeader,
-  EuiFlyoutFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { GeojsonFileSource } from '../../shared/layers/sources/client_file_source';
-import _ from 'lodash';
 
 export class AddLayerPanel extends Component {
 
   state = {
     sourceType: null,
-    isLoading: false,
-    hasLayerSelected: false,
     layer: null,
     indexingTriggered: false,
+    indexingComplete: false,
     importIndexingReady: false,
     importView: false,
   }
@@ -55,9 +46,7 @@ export class AddLayerPanel extends Component {
   _addImportedLayer = async source => {
     await this.props.removeTransientLayer();
     if (!source) {
-      this.setState({ layer: null }, () => {
-        this.props.closeFlyout();
-      });
+      this.setState({ layer: null });
       console.error(`Failed to add source`);
       return;
     }
@@ -74,155 +63,67 @@ export class AddLayerPanel extends Component {
     this.props.removeTransientLayer();
   }
 
-  _onSourceTypeChange = (sourceType, isImportView) => {
-    this.setState({ sourceType, importView: isImportView });
+  _onSourceSelectionChange = ({ type, indexReadyFile }) => {
+    this.setState({ sourceType: type, importView: indexReadyFile });
   }
 
-  _renderNextBtn() {
-    if (!this.state.importView && !this.state.sourceType) {
+  _layerAddHandler = () => {
+    const layerSource = this.state.layer.getSource();
+    const boolIndexLayer = layerSource.shouldBeIndexed();
+    this.setState({ layer: null });
+    if (boolIndexLayer && !this.state.indexingTriggered) {
+      this.setState({ indexingTriggered: true });
+    } else {
+      this.props.selectLayerAndAdd();
+    }
+  }
+
+  _renderAddLayerPanel() {
+    if (!this.state.sourceType) {
+      return (
+        <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />
+      );
+    } else {
+      return (
+        <SourceEditor
+          isImport={this.state.importView}
+          clearSource={this._clearSource}
+          sourceType={this.state.sourceType}
+          previewLayer={source => this._viewLayer(source, this.state.importView)}
+          addImportLayer={source => this._addImportedLayer(source)}
+          indexingTriggered={this.state.indexingTriggered}
+          onIndexReady={
+            importIndexingReady => this.setState({ importIndexingReady })
+          }
+          onIndexSuccess={() => this.setState({ indexingComplete: true })}
+        />
+      );
+    }
+  }
+
+  _renderFooter() {
+    if (!this.state.sourceType) {
       return null;
     }
 
-    const { hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
+    // If normal add layer, adds layer
+    // If import, adds transient (new) layer
+    // If import complete, just moves to layer settings, removes transience
+    const {
+      indexingTriggered, indexingComplete, importView, layer,
+      importIndexingReady
+    } = this.state;
+    const isLayerAddReady = !importView && !!layer;
+    const isImportPreviewReady = importView && importIndexingReady;
+    const isImportCompleted = importView && indexingTriggered && indexingComplete;
+
+    const buttonEnabled = isLayerAddReady || isImportPreviewReady || isImportCompleted;
     return (
-      <EuiButton
-        disabled={
-          !hasLayerSelected || this.state.importView &&
-          !this.state.importIndexingReady
-        }
-        isLoading={hasLayerSelected && isLoading}
-        iconSide="right"
-        iconType={'sortRight'}
-        onClick={() => {
-          const layerSource = this.state.layer.getSource();
-          const boolIndexLayer = layerSource.shouldBeIndexed();
-          this.setState({ layer: null });
-          if (boolIndexLayer) {
-            this.setState({
-              indexingTriggered: true
-            });
-          } else {
-            selectLayerAndAdd();
-          }
-        }}
-        fill
-      >
-        <FormattedMessage
-          id="xpack.maps.addLayerPanel.addLayerButtonLabel"
-          defaultMessage="Add layer"
-        />
-      </EuiButton>
+      <FlyoutFooter
+        onClick={this._layerAddHandler}
+        disableButton={!buttonEnabled}
+      />
     );
-  }
-
-  _renderSourceCards() {
-    return ALL_SOURCES.map(Source => {
-      const icon = Source.icon
-        ? <EuiIcon type={Source.icon} size="l" />
-        : null;
-      return (
-        <Fragment key={Source.type}>
-          <EuiSpacer size="s" />
-          <EuiCard
-            className="mapLayerAddpanel__card"
-            title={Source.title}
-            icon={icon}
-            onClick={() => {
-              const isImportView = Source.indexReadyFile;
-              this._onSourceTypeChange(Source.type, isImportView);
-            }}
-            description={Source.description}
-            layout="horizontal"
-            data-test-subj={_.camelCase(Source.title)}
-          />
-        </Fragment>
-      );
-    });
-  }
-
-  _renderSourceSelect() {
-    return (
-      <Fragment>
-        <EuiTitle size="xs">
-          <h2>
-            <FormattedMessage
-              id="xpack.maps.addLayerPanel.chooseDataSourceTitle"
-              defaultMessage="Choose data source"
-            />
-          </h2>
-        </EuiTitle>
-        {this._renderSourceCards()}
-      </Fragment>
-    );
-  }
-
-  _getEditorProperties = (importView = false) => {
-    let editorProperties = {
-      onPreviewSource: this._viewLayer,
-      inspectorAdapters: this.props.inspectorAdapters,
-    };
-    if (importView) {
-      editorProperties = {
-        ...editorProperties,
-        onPreviewSource: source => this._viewLayer(source, true),
-        boolIndexData: this.state.indexingTriggered,
-        addAndViewSource: source => this._addImportedLayer(source),
-        onRemove: this.props.removeTransientLayer,
-        onIndexReadyStatusChange: indexReady => this.setState(
-          { importIndexingReady: indexReady }
-        ),
-      };
-    }
-    return editorProperties;
-  }
-
-  _renderSourceEditor() {
-    const Source = ALL_SOURCES.find(Source => {
-      return Source.type === this.state.sourceType;
-    });
-    if (!Source) {
-      throw new Error(`Unexpected source type: ${this.state.sourceType}`);
-    }
-
-    return (
-      <Fragment>
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          onClick={this._clearSource}
-          iconType="arrowLeft"
-        >
-          <FormattedMessage
-            id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
-            defaultMessage="Change data source"
-          />
-        </EuiButtonEmpty>
-        <EuiSpacer size="s" />
-        <EuiPanel>
-          {Source.renderEditor(this._getEditorProperties())}
-        </EuiPanel>
-      </Fragment>
-    );
-  }
-
-  _renderFileImportEditor() {
-    return (
-      <EuiPanel>
-        {
-          GeojsonFileSource.renderEditor(
-            this._getEditorProperties(true)
-          )
-        }
-      </EuiPanel>
-    );
-  }
-
-  _renderAddLayerForm() {
-    if (!this.state.sourceType) {
-      return this._renderSourceSelect();
-    }
-
-    return this._renderSourceEditor();
   }
 
   _renderFlyout() {
@@ -236,7 +137,7 @@ export class AddLayerPanel extends Component {
             <h2>
               <FormattedMessage
                 id="xpack.maps.addLayerPanel.panelTitle"
-                defaultMessage="Add layer"
+                defaultMessage={this.state.importView ? 'Import file' : 'Add layer'}
               />
             </h2>
           </EuiTitle>
@@ -244,33 +145,10 @@ export class AddLayerPanel extends Component {
 
         <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
           <div className="mapLayerPanel__bodyOverflow">
-            {
-              this.state.importView
-                ? this._renderFileImportEditor()
-                : this._renderAddLayerForm()
-            }
+            { this._renderAddLayerPanel() }
           </div>
         </div>
-
-        <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={this.props.closeFlyout}
-                flush="left"
-                data-test-subj="layerAddCancelButton"
-              >
-                <FormattedMessage
-                  id="xpack.maps.addLayerPanel.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {this._renderNextBtn()}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+        { this._renderFooter() }
       </EuiFlexGroup>
     );
   }
