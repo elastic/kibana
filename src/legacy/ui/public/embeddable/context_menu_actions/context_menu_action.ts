@@ -89,11 +89,6 @@ export class ContextMenuAction {
   public readonly icon?: EuiContextMenuItemIcon;
 
   /**
-   * Display name of the action in the menu
-   */
-  public readonly displayName: string;
-
-  /**
    * Optional child context menu to open when the action is clicked.
    */
   public readonly childContextMenuPanel?: ContextMenuPanel;
@@ -121,13 +116,13 @@ export class ContextMenuAction {
   /**
    *
    * @param {string} config.id
-   * @param {string} config.displayName
    * @param {string} config.parentPanelId - set if this action belongs on a nested child panel
    * @param {function} options.onClick
    * @param {ContextMenuPanel} options.childContextMenuPanel - optional child panel to open when clicked.
    * @param {function} options.isDisabled - optionally set a custom disabled function
    * @param {function} options.isVisible - optionally set a custom isVisible function
    * @param {function} options.getHref
+   * @param {function} options.getDisplayName
    * @param {Element} options.icon
    */
   public constructor(
