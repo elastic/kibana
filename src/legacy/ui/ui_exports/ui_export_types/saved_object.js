@@ -56,6 +56,8 @@ export const migrations = wrap(
 
 export const savedObjectSchemas = wrap(uniqueKeys(), mergeAtType);
 
+export const savedObjectsManagement = wrap(uniqueKeys(), mergeAtType);
+
 // Combines the `validations` property of each plugin,
 // ensuring that properties are unique across plugins.
 // See saved_objects/validation for more details.

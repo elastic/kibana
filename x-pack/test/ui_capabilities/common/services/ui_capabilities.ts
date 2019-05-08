@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import axios, { AxiosInstance } from 'axios';
-import cheerio from 'cheerio';
 import { UICapabilities } from 'ui/capabilities';
 import { format as formatUrl } from 'url';
 import util from 'util';
@@ -41,34 +40,28 @@ export class UICapabilitiesService {
     });
   }
 
-  public async get(
-    credentials: BasicCredentials | null,
-    spaceId?: string
-  ): Promise<GetUICapabilitiesResult> {
+  public async get({
+    credentials,
+    navLinks,
+    spaceId,
+  }: {
+    credentials?: BasicCredentials;
+    navLinks?: Record<string, boolean>;
+    spaceId?: string;
+  }): Promise<GetUICapabilitiesResult> {
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
-    this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
-    const requestHeaders = credentials
-      ? {
-          Authorization: `Basic ${Buffer.from(
-            `${credentials.username}:${credentials.password}`
-          ).toString('base64')}`,
-        }
-      : {};
-    const response = await this.axios.get(`${spaceUrlPrefix}/app/kibana`, {
-      headers: requestHeaders,
-    });
+    this.log.debug(`requesting ${spaceUrlPrefix}/api/capabilities to get the uiCapabilities`);
+    const requestOptions = credentials ? { auth: credentials } : {};
+    const response = await this.axios.post(
+      `${spaceUrlPrefix}/api/capabilities`,
+      { capabilities: { navLinks } },
+      requestOptions
+    );
 
     if (response.status === 302 && response.headers.location === '/') {
       return {
         success: false,
         failureReason: GetUICapabilitiesFailureReason.RedirectedToRoot,
-      };
-    }
-
-    if (response.status === 404) {
-      return {
-        success: false,
-        failureReason: GetUICapabilitiesFailureReason.NotFound,
       };
     }
 
@@ -80,25 +73,10 @@ export class UICapabilitiesService {
       );
     }
 
-    const dom = cheerio.load(response.data.toString());
-    const element = dom('kbn-injected-metadata');
-    if (!element) {
-      throw new Error('Unable to find "kbn-injected-metadata" element ');
-    }
-
-    const dataAttrJson = element.attr('data');
-
-    try {
-      const dataAttr = JSON.parse(dataAttrJson);
-      return {
-        success: true,
-        value: dataAttr.vars.uiCapabilities as UICapabilities,
-      };
-    } catch (err) {
-      throw new Error(
-        `Unable to parse JSON from the kbn-injected-metadata data attribute: ${dataAttrJson}`
-      );
-    }
+    return {
+      success: true,
+      value: response.data.capabilities,
+    };
   }
 }
 
