@@ -9,7 +9,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 
 import { SectionLoading, SectionError } from './components';
-import { BASE_PATH, DEFAULT_SECTION } from './constants';
+import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import { RepositoryAdd, RepositoryEdit, SnapshotRestoreHome } from './sections';
 import { loadPermissions } from './services/http';
 import { useAppDependencies } from './index';
@@ -87,17 +87,20 @@ export const App: React.FunctionComponent = () => {
     );
   }
 
+  const sections: Section[] = ['repositories', 'snapshots'];
+  const sectionsRegex = sections.join('|');
+
   return (
     <div>
       <Switch>
-        <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
         <Route exact path={`${BASE_PATH}/add_repository`} component={RepositoryAdd} />
         <Route exact path={`${BASE_PATH}/edit_repository/:name*`} component={RepositoryEdit} />
         <Route
           exact
-          path={`${BASE_PATH}/:section/:repositoryName?/:snapshotId*`}
+          path={`${BASE_PATH}/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
           component={SnapshotRestoreHome}
         />
+        <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
       </Switch>
     </div>
   );
