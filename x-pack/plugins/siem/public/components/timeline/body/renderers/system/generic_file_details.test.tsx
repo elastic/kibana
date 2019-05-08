@@ -12,8 +12,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
-
-import { SystemGenericFileDetails, SystemGenericFileLine } from '.';
+import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
 
 describe('SystemGenericFileDetails', () => {
   describe('rendering', () => {
