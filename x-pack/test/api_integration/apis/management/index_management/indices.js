@@ -15,11 +15,13 @@ export default function ({ getService }) {
 
   const {
     createIndex,
+    catIndex,
     cleanUp: cleanUpEsResources
   } = initElasticsearchHelpers(es);
 
   const {
     closeIndex,
+    flushIndex,
   } = registerHelpers({ supertest });
 
   describe('indices', () => {
@@ -29,19 +31,26 @@ export default function ({ getService }) {
       // TODO
     });
 
-    describe('close index', () => {
+    describe('close', () => {
       it('should close an index', async () => {
         const indexName = await createIndex();
 
         // Make sure the index is open
-        const [cat1] = await es.cat.indices({ index: indexName, format: 'json' });
+        const [cat1] = await catIndex(indexName);
         expect(cat1.status).to.be('open');
 
         await closeIndex(indexName).expect(200);
 
         // Make sure the index has been closed
-        const [cat2] = await es.cat.indices({ index: indexName, format: 'json' });
+        const [cat2] = await catIndex(indexName);
         expect(cat2.status).to.be('close');
+      });
+    });
+
+    describe('flush', () => {
+      it('should flush an index', async () => {
+        const indexName = await createIndex();
+        await flushIndex(indexName).expect(200);
       });
     });
   });

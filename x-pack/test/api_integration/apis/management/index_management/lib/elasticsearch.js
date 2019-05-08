@@ -27,6 +27,10 @@ export const initElasticsearchHelpers = (es) => {
     Promise.all(indicesCreated.map(deleteIndex)).then(() => indicesCreated = [])
   );
 
+  const catIndex = (index) => (
+    es.cat.indices({ index, format: 'json' })
+  );
+
   const cleanUp = () => (
     deleteAllIndices()
   );
@@ -35,6 +39,7 @@ export const initElasticsearchHelpers = (es) => {
     createIndex,
     deleteIndex,
     deleteAllIndices,
+    catIndex,
     cleanUp,
   });
 };

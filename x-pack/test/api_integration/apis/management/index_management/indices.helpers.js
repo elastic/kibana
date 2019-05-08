@@ -15,7 +15,16 @@ export const registerHelpers = ({ supertest }) => {
       .send({ indices });
   };
 
+  const flushIndex = (index) => {
+    const indices = Array.isArray(index) ? index : [index];
+
+    return supertest.post(`${API_BASE_PATH}/indices/flush`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ indices });
+  };
+
   return {
     closeIndex,
+    flushIndex,
   };
 };
