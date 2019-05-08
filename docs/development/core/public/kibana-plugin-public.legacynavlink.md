@@ -18,7 +18,6 @@ export interface LegacyNavLink
 |  [euiIconType](./kibana-plugin-public.legacynavlink.euiicontype.md) | <code>string</code> |  |
 |  [icon](./kibana-plugin-public.legacynavlink.icon.md) | <code>string</code> |  |
 |  [id](./kibana-plugin-public.legacynavlink.id.md) | <code>string</code> |  |
-|  [lastSubUrl](./kibana-plugin-public.legacynavlink.lastsuburl.md) | <code>string</code> |  |
 |  [order](./kibana-plugin-public.legacynavlink.order.md) | <code>number</code> |  |
 |  [title](./kibana-plugin-public.legacynavlink.title.md) | <code>string</code> |  |
 |  [url](./kibana-plugin-public.legacynavlink.url.md) | <code>string</code> |  |

@@ -290,8 +290,6 @@ export interface LegacyNavLink {
     // (undocumented)
     id: string;
     // (undocumented)
-    lastSubUrl?: string;
-    // (undocumented)
     order: number;
     // (undocumented)
     title: string;
@@ -423,8 +421,8 @@ export interface UiSettingsState {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/public/injected_metadata/injected_metadata_service.ts:49:7 - (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
-// src/core/public/injected_metadata/injected_metadata_service.ts:50:7 - (ae-forgotten-export) The symbol "DiscoveredPlugin" needs to be exported by the entry point index.d.ts
+// src/core/public/injected_metadata/injected_metadata_service.ts:48:7 - (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
+// src/core/public/injected_metadata/injected_metadata_service.ts:49:7 - (ae-forgotten-export) The symbol "DiscoveredPlugin" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
