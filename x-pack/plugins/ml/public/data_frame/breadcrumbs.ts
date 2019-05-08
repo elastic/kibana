@@ -31,7 +31,7 @@ const DATA_FRAME_HOME = {
   text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameLabel', {
     defaultMessage: 'Data Frames',
   }),
-  href: '#/data_frame',
+  href: '#/data_frames',
 };
 
 export function getDataFrameCreateBreadcrumbs() {
