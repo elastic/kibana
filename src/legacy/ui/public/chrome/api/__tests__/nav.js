@@ -75,7 +75,7 @@ describe('chrome nav apis', function () {
         id: appId,
         title: 'Discover',
         url: `${appUrl}?id=${deletedId}`,
-        appUrl
+        appUrl,
       }];
 
       const {
@@ -85,7 +85,7 @@ describe('chrome nav apis', function () {
         nav: [{
           id: appId,
           linkToLastSubUrl: true,
-        }]
+        }],
       });
 
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
@@ -99,7 +99,7 @@ describe('chrome nav apis', function () {
         id: appId,
         title: 'Discover',
         url: lastUrl,
-        appUrl
+        appUrl,
       }];
 
       const {
@@ -109,7 +109,7 @@ describe('chrome nav apis', function () {
         nav: [{
           id: appId,
           linkToLastSubUrl: true
-        }]
+        }],
       });
 
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
@@ -152,7 +152,7 @@ describe('chrome nav apis', function () {
             id: 'kibana:dashboard',
             subUrlBase: '/app/kibana#dashboard'
           },
-        ]
+        ],
       });
 
       internals.trackPossibleSubUrl('https://localhost:9200/app/kibana#dashboard?_g=globalstate');
@@ -181,8 +181,8 @@ describe('chrome nav apis', function () {
         appUrlStore,
         nav: [{
           id: 'kibana:visualize',
-          subUrlBase: '/app/kibana#visualize'
-        }]
+          subUrlBase: '/app/kibana#visualize',
+        }],
       });
 
       const basePath = '/xyz';

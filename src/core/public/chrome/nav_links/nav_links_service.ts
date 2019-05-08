@@ -31,14 +31,19 @@ export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application }: StartDeps) {
-    const navLinks$ = new BehaviorSubject<ReadonlyArray<NavLinkWrapper>>(
-      application.availableApps.map(
-        app =>
-          new NavLinkWrapper({
-            ...app,
-            // Either rootRoute or appUrl must be defined.
-            appUrl: (app.rootRoute || app.appUrl)!,
-          })
+    const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
+      new Map(
+        application.availableApps.map(
+          app =>
+            [
+              app.id,
+              new NavLinkWrapper({
+                ...app,
+                // Either rootRoute or appUrl must be defined.
+                appUrl: (app.rootRoute || app.appUrl)!,
+              }),
+            ] as [string, NavLinkWrapper]
+        )
       )
     );
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
@@ -59,8 +64,8 @@ export class NavLinksService {
        * @param id
        */
       get(id: string) {
-        const link = navLinks$.value.find(l => l.id === id);
-        return link ? link.properties : undefined;
+        const link = navLinks$.value.get(id);
+        return link && link.properties;
       },
 
       /**
@@ -74,8 +79,8 @@ export class NavLinksService {
        * Check whether or not a navlink exists.
        * @param id
        */
-      exists(id: string) {
-        return this.get(id) !== undefined;
+      has(id: string) {
+        return navLinks$.value.has(id);
       },
 
       /**
@@ -84,11 +89,11 @@ export class NavLinksService {
        * @param id
        */
       showOnly(id: string) {
-        if (!this.exists(id)) {
+        if (!this.has(id)) {
           return;
         }
 
-        navLinks$.next(navLinks$.value.filter(link => link.id === id));
+        navLinks$.next(new Map([...navLinks$.value.entries()].filter(([linkId]) => linkId === id)));
       },
 
       /**
@@ -98,14 +103,19 @@ export class NavLinksService {
        * @param values
        */
       update(id: string, values: NavLinkUpdateableFields) {
-        if (!this.exists(id)) {
+        if (!this.has(id)) {
           return;
         }
 
         navLinks$.next(
-          navLinks$.value.map(link => {
-            return link.id === id ? link.update(values) : link;
-          })
+          new Map(
+            [...navLinks$.value.entries()].map(([linkId, link]) => {
+              return [linkId, link.id === id ? link.update(values) : link] as [
+                string,
+                NavLinkWrapper
+              ];
+            })
+          )
         );
 
         return this.get(id);
@@ -139,6 +149,6 @@ export class NavLinksService {
   }
 }
 
-function sortNavLinks(navLinks: ReadonlyArray<NavLinkWrapper>) {
-  return sortBy(navLinks.map(link => link.properties), 'order');
+function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
+  return sortBy([...navLinks.values()].map(link => link.properties), 'order');
 }

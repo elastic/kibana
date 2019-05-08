@@ -65,10 +65,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
       const includedId = deletedIds.find(deletedId => {
         return url.includes(deletedId);
       });
-      if (includedId === undefined) {
-        return false;
-      }
-      return true;
+      return includedId !== undefined;
     }
 
     coreNavLinks.getAll().forEach(link => {

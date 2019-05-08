@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { pick } from '../../../utils';
+
 /**
  * @public
  */
@@ -109,6 +111,8 @@ export class NavLinkWrapper {
   }
 
   public update(newProps: NavLinkUpdateableFields) {
+    // Enforce limited properties at runtime for JS code
+    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }

@@ -54,21 +54,19 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
-const createStartContractMock = (): jest.Mocked<ChromeStart> => {
-  return {
-    navLinks: {
-      getNavLinks$: jest.fn(),
-      clear: jest.fn(),
-      exists: jest.fn(),
-      get: jest.fn(),
-      getAll: jest.fn(),
-      showOnly: jest.fn(),
-      update: jest.fn(),
-      enableForcedAppSwitcherNavigation: jest.fn(),
-      getForceAppSwitcherNavigation$: jest.fn(),
-    },
-  };
-};
+const createStartContractMock = (): jest.Mocked<ChromeStart> => ({
+  navLinks: {
+    getNavLinks$: jest.fn(),
+    clear: jest.fn(),
+    has: jest.fn(),
+    get: jest.fn(),
+    getAll: jest.fn(),
+    showOnly: jest.fn(),
+    update: jest.fn(),
+    enableForcedAppSwitcherNavigation: jest.fn(),
+    getForceAppSwitcherNavigation$: jest.fn(),
+  },
+});
 
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {

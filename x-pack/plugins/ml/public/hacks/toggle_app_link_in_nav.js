@@ -13,14 +13,13 @@ import { onStart } from 'ui/new_platform';
 uiModules.get('xpack/ml').run((Private) => {
   const xpackInfo = Private(XPackInfoProvider);
 
-  const navLinkUpdates = {};
-  // hide by default, only show once the xpackInfo is initialized
-  navLinkUpdates.hidden = true;
   const showAppLink = xpackInfo.get('features.ml.showLinks', false);
-  navLinkUpdates.hidden = !showAppLink;
-  if (showAppLink) {
-    navLinkUpdates.disabled = !xpackInfo.get('features.ml.isAvailable', false);
-  }
+
+  const navLinkUpdates = {
+    // hide by default, only show once the xpackInfo is initialized
+    hidden: !showAppLink,
+    disabled: !showAppLink || (showAppLink && !xpackInfo.get('features.ml.isAvailable', false))
+  };
 
   onStart(({ core }) => core.chrome.navLinks.update('ml', navLinkUpdates));
 });

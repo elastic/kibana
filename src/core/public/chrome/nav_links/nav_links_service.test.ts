@@ -86,15 +86,15 @@ describe('NavLinksService', () => {
     });
   });
 
-  describe('#exists()', () => {
+  describe('#has()', () => {
     it('returns true if exists', () => {
       const start = new NavLinksService().start({ application: mockAppService });
-      expect(start.exists('app1')).toBe(true);
+      expect(start.has('app1')).toBe(true);
     });
 
     it('returns false if it does not exist', () => {
       const start = new NavLinksService().start({ application: mockAppService });
-      expect(start.exists('phony')).toBe(false);
+      expect(start.has('phony')).toBe(false);
     });
   });
 

@@ -245,17 +245,14 @@ class HeaderUI extends Component<Props, State> {
         label: navLink.title,
         href: addBasePath(navLink.href),
         iconType: navLink.euiIconType,
-        icon:
-          !navLink.euiIconType && navLink.icon ? (
-            <EuiImage
-              size="s"
-              alt=""
-              aria-hidden={true}
-              url={chrome.addBasePath(`/${navLink.icon}`)}
-            />
-          ) : (
-            undefined
-          ),
+        icon: !navLink.euiIconType && navLink.icon && (
+          <EuiImage
+            size="s"
+            alt=""
+            aria-hidden={true}
+            url={chrome.addBasePath(`/${navLink.icon}`)}
+          />
+        ),
         isActive: navLink.active,
         'data-test-subj': 'navDrawerAppsMenuLink',
       }));
