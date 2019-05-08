@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import boom, { boomify } from 'boom';
+import boom from 'boom';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
 
@@ -84,7 +84,6 @@ export function registerStatsApi(kbnServer, server, config) {
               getClusterUuid(callCluster),
             ]);
 
-
             let modifiedUsage = usage;
             if (isLegacy) {
               // In an effort to make telemetry more easily augmented, we need to ensure
@@ -130,7 +129,7 @@ export function registerStatsApi(kbnServer, server, config) {
               });
             }
           } catch (e) {
-            throw boomify(e);
+            throw boom.boomify(e);
           }
         }
 
