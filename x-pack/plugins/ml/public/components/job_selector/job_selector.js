@@ -110,14 +110,16 @@ export function JobSelector({
     setNewSelection(selectedIds);
   }, [isFlyoutVisible]); // eslint-disable-line
 
-  // Wrap handleResize in useCallback as it is a dependency for useEffect on line 166 below.
+  // Wrap handleResize in useCallback as it is a dependency for useEffect on line 131 below.
   // Not wrapping it would cause this dependency to change on every render
   const handleResize = useCallback(() => {
     if (jobs.length > 0 && flyoutEl && flyoutEl.current && flyoutEl.current.flyout) {
       const tzConfig = config.get('dateFormat:tz');
       const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
-      // Give the ganttBar a little more than a 3rd of the width of the flyout
-      const derivedWidth = Math.round(flyoutEl.current.flyout.offsetWidth / 3.6);
+      // get all cols in flyout table
+      const tableHeaderCols = flyoutEl.current.flyout.querySelectorAll('table thead th');
+      // get the width of the last col
+      const derivedWidth = tableHeaderCols[tableHeaderCols.length - 1].offsetWidth - 16;
       const normalizedJobs = normalizeTimes(jobs, dateFormatTz, derivedWidth);
       setJobs(normalizedJobs);
       const { groups: updatedGroups } = getGroupsFromJobs(normalizedJobs);
