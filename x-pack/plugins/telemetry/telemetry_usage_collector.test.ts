@@ -23,7 +23,7 @@ const getMockServer = (exampleValue?: string): KibanaHapiServer =>
         get(path: string) {
           switch (path) {
             case 'xpack.telemetry.usage':
-              return exampleValue ? { example_field: exampleValue } : undefined;
+              return exampleValue ? { example_field: exampleValue } : { };
             default:
               throw Error(`server.config().get(${path}) should not be called by this collector.`);
           }
