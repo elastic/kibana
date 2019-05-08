@@ -19,9 +19,14 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
+
+import { Type } from '@kbn/config-schema';
+
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
 import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
+
+export type PluginConfigSchema = Type<unknown> | null;
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -179,6 +184,7 @@ export class PluginWrapper<
   constructor(
     public readonly path: string,
     public readonly manifest: PluginManifest,
+    public readonly schema: PluginConfigSchema,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.log = initializerContext.logger.get();

@@ -17,22 +17,17 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
 import { HttpServiceSetup } from '../http/http_service';
 import { Logger } from '../logging';
-import {
-  PluginDiscoveryError,
-  PluginDiscoveryErrorType,
-  DiscoveredPluginsDefinitions,
-} from './discovery';
+import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
-import { createPluginInitializerContext } from './plugin_context';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
-import { discover } from './discovery';
 
 /** @internal */
 export interface PluginsServiceSetup {
@@ -61,40 +56,23 @@ export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-e
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
-  private pluginDefinitions?: DiscoveredPluginsDefinitions;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
     this.pluginsSystem = new PluginsSystem(coreContext);
   }
 
-  public async preSetup(devPluginPaths: ReadonlyArray<string> = []) {
-    const { env, logger } = this.coreContext;
-    this.pluginDefinitions = await discover(env.pluginSearchPaths, devPluginPaths, env, logger);
-    return this.pluginDefinitions;
-  }
-
   public async setup(deps: PluginsServiceSetupDeps) {
-    if (!this.pluginDefinitions) {
-      throw new Error('pre-setup has not been run');
-    }
     this.log.debug('Setting up plugins service');
-    this.handleDiscoveryErrors(this.pluginDefinitions.errors);
-
-    const plugins = this.pluginDefinitions.pluginDefinitions.map(
-      ({ path, manifest }) =>
-        new PluginWrapper(
-          path,
-          manifest,
-          createPluginInitializerContext(this.coreContext, manifest)
-        )
-    );
-    await this.handleDiscoveredPlugins(plugins);
 
     const config = await this.coreContext.configService
       .atPath('plugins', PluginsConfig)
       .pipe(first())
       .toPromise();
+
+    const { error$, plugin$ } = discover(config, this.coreContext);
+    await this.handleDiscoveryErrors(error$);
+    await this.handleDiscoveredPlugins(plugin$);
 
     if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
@@ -121,40 +99,50 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await this.pluginsSystem.stopPlugins();
   }
 
-  private handleDiscoveryErrors(discoveryErrors: ReadonlyArray<PluginDiscoveryError>) {
+  private async handleDiscoveryErrors(error$: Observable<PluginDiscoveryError>) {
     // At this stage we report only errors that can occur when new platform plugin
     // manifest is present, otherwise we can't be sure that the plugin is for the new
     // platform and let legacy platform to handle it.
     const errorTypesToReport = [
       PluginDiscoveryErrorType.IncompatibleVersion,
       PluginDiscoveryErrorType.InvalidManifest,
-      PluginDiscoveryErrorType.InvalidConfigSchema,
     ];
 
-    const errors = discoveryErrors.filter(error => errorTypesToReport.includes(error.type));
+    const errors = await error$
+      .pipe(
+        filter(error => errorTypesToReport.includes(error.type)),
+        tap(pluginError => this.log.error(pluginError)),
+        toArray()
+      )
+      .toPromise();
     if (errors.length > 0) {
-      errors.forEach(pluginError => this.log.error(pluginError));
-
       throw new Error(
         `Failed to initialize plugins:${errors.map(err => `\n\t${err.message}`).join('')}`
       );
     }
   }
 
-  private async handleDiscoveredPlugins(plugins: ReadonlyArray<PluginWrapper>) {
+  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
     const pluginEnableStatuses = new Map<
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
-    for (const plugin of plugins) {
-      const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
+    await plugin$
+      .pipe(
+        mergeMap(async plugin => {
+          const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
+          if (plugin.schema) {
+            await this.coreContext.configService.setSchemaFor(plugin.configPath, plugin.schema);
+          }
 
-      if (pluginEnableStatuses.has(plugin.name)) {
-        throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
-      }
+          if (pluginEnableStatuses.has(plugin.name)) {
+            throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
+          }
 
-      pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
-    }
+          pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
+        })
+      )
+      .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       if (this.shouldEnablePlugin(pluginName, pluginEnableStatuses)) {

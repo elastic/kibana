@@ -26,7 +26,7 @@ import { mockPackage } from './config_service.test.mocks';
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 
-import { ConfigService, Env, ObjectToConfigAdapter } from '.';
+import { ConfigService, Env, ObjectToConfigAdapter, ConfigPath } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from './__mocks__/env';
 
@@ -40,12 +40,11 @@ class ExampleClassWithStringSchema {
   constructor(readonly value: string) {}
 }
 
-const stringSchemaFor = (key: string) => new Map([[key, schema.string()]]);
+const stringSchemaFor = (key: string): Array<[ConfigPath, Type<any>]> => [[key, schema.string()]];
 
 test('returns config at path as observable', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'foo' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  configService.preSetup(stringSchemaFor('key'));
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
 
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
   const exampleConfig = await configs.pipe(first()).toPromise();
@@ -58,8 +57,7 @@ test('throws if config at path does not match schema', async () => {
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 123 }));
 
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  configService.preSetup(stringSchemaFor('key'));
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
 
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
 
@@ -72,8 +70,12 @@ test('throws if config at path does not match schema', async () => {
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ foo: 'bar' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  configService.preSetup(stringSchemaFor('unique-name'));
+  const configService = new ConfigService(
+    config$,
+    defaultEnv,
+    logger,
+    stringSchemaFor('unique-name')
+  );
 
   const configs = configService.optionalAtPath('unique-name', ExampleClassWithStringSchema);
   const exampleConfig = await configs.pipe(first()).toPromise();
@@ -83,8 +85,7 @@ test("returns undefined if fetching optional config at a path that doesn't exist
 
 test('returns observable config at optional path if it exists', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ value: 'bar' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  configService.preSetup(stringSchemaFor('value'));
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('value'));
 
   const configs = configService.optionalAtPath('value', ExampleClassWithStringSchema);
   const exampleConfig: any = await configs.pipe(first()).toPromise();
@@ -95,8 +96,7 @@ test('returns observable config at optional path if it exists', async () => {
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  configService.preSetup(stringSchemaFor('key'));
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
 
   const valuesReceived: any[] = [];
   configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
@@ -110,8 +110,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
 
 test('pushes new config when reloading and config at path has changed', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  configService.preSetup(stringSchemaFor('key'));
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
 
   const valuesReceived: any[] = [];
   configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
@@ -123,28 +122,16 @@ test('pushes new config when reloading and config at path has changed', async ()
   expect(valuesReceived).toEqual(['value', 'new value']);
 });
 
-test('throws error if reads config before schema is set', async () => {
-  class ExampleClass {}
-
-  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  const configs = configService.atPath('key', ExampleClass as any);
-
-  expect(configs.pipe(first()).toPromise()).rejects.toMatchInlineSnapshot(
-    `[Error: No validation schema has been defined]`
-  );
-});
-
 test("throws error if 'schema' is not defined for a key", async () => {
   class ExampleClass {}
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
-  configService.preSetup(stringSchemaFor('no-key'));
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('no-key'));
+
   const configs = configService.atPath('key', ExampleClass as any);
 
   expect(configs.pipe(first()).toPromise()).rejects.toMatchInlineSnapshot(
-    `[Error: No config schema defined for key]`
+    `[Error: No validation schema has been defined for key]`
   );
 });
 
@@ -217,8 +204,7 @@ test('correctly passes context', async () => {
       defaultValue: schema.contextRef('version'),
     }),
   });
-  const configService = new ConfigService(config$, env, logger);
-  configService.preSetup(new Map([['foo', schemaDefinition]]));
+  const configService = new ConfigService(config$, env, logger, [['foo', schemaDefinition]]);
 
   const configs = configService.atPath('foo', createClassWithSchema(schemaDefinition));
 

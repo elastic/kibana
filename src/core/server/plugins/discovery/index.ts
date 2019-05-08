@@ -22,4 +22,4 @@ export { PluginDiscoveryError, PluginDiscoveryErrorType } from './plugin_discove
 /** @internal */
 export { isNewPlatformPlugin } from './plugin_manifest_parser';
 
-export { discover, DiscoveredPluginsDefinitions } from './plugins_discovery';
+export { discover } from './plugins_discovery';

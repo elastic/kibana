@@ -34,26 +34,36 @@ export class ConfigService {
    * then list all unhandled config paths when the startup process is completed.
    */
   private readonly handledPaths: ConfigPath[] = [];
-  private schemas?: Map<string, Type<any>>;
+  private schemas = new Map<string, Type<any>>();
 
   constructor(
     private readonly config$: Observable<Config>,
     private readonly env: Env,
-    logger: LoggerFactory
+    logger: LoggerFactory,
+    coreServiceSchemas: Array<[ConfigPath, Type<any>]> = []
   ) {
     this.log = logger.get('config');
+    for (const [path, schema] of coreServiceSchemas) {
+      this.setSchema(path, schema);
+    }
   }
+
   /**
-   * Defines a validation schema for an appropriate path in config object.
-   * Performs validation for initial values.
-   * @internal
+   * Set config schema for a path and performs its validation
    */
-  public async preSetup(schemas: Map<ConfigPath, Type<any>>) {
-    this.schemas = new Map();
-    for (const [path, schema] of schemas) {
-      const namespace = pathToString(path);
-      this.schemas.set(namespace, schema);
-      await this.getValidatedConfig(namespace)
+  public async setSchemaFor(path: ConfigPath, schema: Type<any>) {
+    this.setSchema(path, schema);
+    await this.validateConfig(path)
+      .pipe(first())
+      .toPromise();
+  }
+
+  /**
+   * Performs validation for all known validation schemas
+   */
+  public async validateAll() {
+    for (const namespace of this.schemas.keys()) {
+      await this.validateConfig(namespace)
         .pipe(first())
         .toPromise();
     }
@@ -79,9 +89,7 @@ export class ConfigService {
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
-    return this.getValidatedConfig(path).pipe(
-      map(config => this.createConfig(config, ConfigClass))
-    );
+    return this.validateConfig(path).pipe(map(config => this.createConfig(config, ConfigClass)));
   }
 
   /**
@@ -95,7 +103,11 @@ export class ConfigService {
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     return this.getDistinctConfig(path).pipe(
-      map(config => (config === undefined ? undefined : this.createConfig(config, ConfigClass)))
+      map(config => {
+        if (config === undefined) return undefined;
+        const validatedConfig = this.validate(path, config);
+        return this.createConfig(validatedConfig, ConfigClass);
+      })
     );
   }
 
@@ -136,16 +148,13 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
-  private validateConfig(path: ConfigPath, config: Record<string, any>) {
-    if (!this.schemas) {
-      throw new Error('No validation schema has been defined');
-    }
+  private validate(path: ConfigPath, config: Record<string, any>) {
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
-      throw new Error(`No config schema defined for ${namespace}`);
+      throw new Error(`No validation schema has been defined for ${namespace}`);
     }
-    const validatedConfig = schema.validate(
+    return schema.validate(
       config,
       {
         dev: this.env.mode.dev,
@@ -154,8 +163,6 @@ export class ConfigService {
       },
       namespace
     );
-
-    return validatedConfig;
   }
 
   private createConfig<TSchema extends Type<any>, TConfig>(
@@ -165,8 +172,8 @@ export class ConfigService {
     return new ConfigClass(validatedConfig, this.env);
   }
 
-  private getValidatedConfig(path: ConfigPath) {
-    return this.getDistinctConfig(path).pipe(map(config => this.validateConfig(path, config)));
+  private validateConfig(path: ConfigPath) {
+    return this.getDistinctConfig(path).pipe(map(config => this.validate(path, config)));
   }
 
   private getDistinctConfig(path: ConfigPath) {
@@ -181,6 +188,15 @@ export class ConfigService {
   private markAsHandled(path: ConfigPath) {
     this.log.debug(`Marking config path as handled: ${path}`);
     this.handledPaths.push(path);
+  }
+
+  /**
+   * Defines a validation schema for an appropriate path in config object.
+   * @internal
+   */
+  private setSchema(path: ConfigPath, schema: Type<any>) {
+    const namespace = pathToString(path);
+    this.schemas.set(namespace, schema);
   }
 }
 

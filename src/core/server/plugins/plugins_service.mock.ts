@@ -22,17 +22,10 @@ import { PluginsService } from './plugins_service';
 type ServiceContract = PublicMethodsOf<PluginsService>;
 const createServiceMock = () => {
   const mocked: jest.Mocked<ServiceContract> = {
-    preSetup: jest.fn(),
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.preSetup.mockResolvedValue({
-    pluginDefinitions: [],
-    errors: [],
-    searchPaths: [],
-    devPluginPaths: [],
-  });
   return mocked;
 };
 

@@ -20,9 +20,13 @@
 import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugin_discovery.test.mocks';
 
 import { resolve } from 'path';
-import { Env } from '../../config';
+import { BehaviorSubject } from 'rxjs';
+import { first, map, toArray } from 'rxjs/operators';
+import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { PluginWrapper } from '../plugin';
+import { PluginsConfig, configDefinition } from '../plugins_config';
 import { discover } from './plugins_discovery';
 
 const TEST_PLUGIN_SEARCH_PATHS = {
@@ -31,7 +35,6 @@ const TEST_PLUGIN_SEARCH_PATHS = {
   nonExistentKibanaExtra: resolve(process.cwd(), '..', 'kibana-extra'),
 };
 const TEST_EXTRA_PLUGIN_PATH = resolve(process.cwd(), 'my-extra-plugin');
-
 const pluginDefinition = {
   configDefinition: {
     schema: {
@@ -137,28 +140,50 @@ test('properly iterates through plugin search locations', async () => {
       cliArgs: { envName: 'development' },
     })
   );
-
-  const { pluginDefinitions, errors, searchPaths, devPluginPaths } = await discover(
-    Object.values(TEST_PLUGIN_SEARCH_PATHS),
-    [TEST_EXTRA_PLUGIN_PATH],
+  const configService = new ConfigService(
+    new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({ plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } })
+    ),
     env,
-    logger
+    logger,
+    [[configDefinition.configPath, configDefinition.schema]]
   );
 
-  expect(pluginDefinitions).toHaveLength(3);
+  const pluginsConfig = await configService
+    .atPath('plugins', PluginsConfig)
+    .pipe(first())
+    .toPromise();
+  const { plugin$, error$ } = discover(pluginsConfig, { configService, env, logger });
+
+  const plugins = await plugin$.pipe(toArray()).toPromise();
+  expect(plugins).toHaveLength(3);
 
   for (const path of [
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '1'),
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '3'),
     TEST_EXTRA_PLUGIN_PATH,
   ]) {
-    const discoveredPlugin = pluginDefinitions.find(plugin => plugin.path === path)!;
-    expect(discoveredPlugin.manifest.configPath).toEqual(['core', 'config']);
-    expect(discoveredPlugin.manifest.requiredPlugins).toEqual(['a', 'b']);
-    expect(discoveredPlugin.manifest.optionalPlugins).toEqual(['c', 'd']);
+    const discoveredPlugin = plugins.find(plugin => plugin.path === path)!;
+    expect(discoveredPlugin).toBeInstanceOf(PluginWrapper);
+    expect(discoveredPlugin.configPath).toEqual(['core', 'config']);
+    expect(discoveredPlugin.requiredPlugins).toEqual(['a', 'b']);
+    expect(discoveredPlugin.optionalPlugins).toEqual(['c', 'd']);
+    expect(discoveredPlugin.schema).toEqual(pluginDefinition.configDefinition.schema);
   }
 
-  await expect(errors.map(String)).toEqual([
+  await expect(
+    error$
+      .pipe(
+        map(error => error.toString()),
+        toArray()
+      )
+      .toPromise()
+  ).resolves.toEqual([
+    `Error: ENOENT (disappeared between "readdir" and "stat"). (invalid-plugin-path, ${resolve(
+      TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins,
+      '9-inaccessible-dir'
+    )})`,
+    `Error: ENOENT (invalid-search-path, ${TEST_PLUGIN_SEARCH_PATHS.nonExistentKibanaExtra})`,
     `Error: ENOENT (missing-manifest, ${resolve(
       TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins,
       '2-no-manifest',
@@ -174,17 +199,16 @@ test('properly iterates through plugin search locations', async () => {
       '5-invalid-manifest',
       'kibana.json'
     )})`,
-    `Error: The config definition for plugin did not contain \"schema\" field, which is required for config validation (invalid-config-schema, ${resolve(
-      TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins,
-      '6-no-schema',
-      'server'
-    )})`,
     `Error: Plugin "plugin" is only compatible with Kibana version "1", but used Kibana version is "1.2.3". (incompatible-version, ${resolve(
       TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins,
       '8-incompatible-manifest',
       'kibana.json'
     )})`,
-    `Error: ENOENT (invalid-search-path, ${TEST_PLUGIN_SEARCH_PATHS.nonExistentKibanaExtra})`,
+    `Error: The config definition for plugin did not contain \"schema\" field, which is required for config validation (invalid-config-schema, ${resolve(
+      TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins,
+      '6-no-schema',
+      'server'
+    )})`,
   ]);
 
   expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
@@ -194,6 +218,4 @@ Array [
   ],
 ]
 `);
-  expect(searchPaths).toEqual(Object.values(TEST_PLUGIN_SEARCH_PATHS));
-  expect(devPluginPaths).toEqual([TEST_EXTRA_PLUGIN_PATH]);
 });

@@ -17,7 +17,6 @@
  * under the License.
  */
 import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
@@ -25,16 +24,20 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService, HttpServiceSetup, Router } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
-import {
-  PluginsService,
-  DiscoveredPluginsDefinitions,
-  configDefinition as pluginsConfigDefinition,
-} from './plugins';
+import { PluginsService, configDefinition as pluginsConfigDefinition } from './plugins';
 
 import { configDefinition as elasticsearchConfigDefinition } from './elasticsearch';
 import { configDefinition as httpConfigDefinition } from './http';
 import { configDefinition as loggingConfigDefinition } from './logging';
 import { configDefinition as devConfigDefinition } from './dev';
+
+const schemas: Array<[ConfigPath, Type<any>]> = [
+  [elasticsearchConfigDefinition.configPath, elasticsearchConfigDefinition.schema],
+  [loggingConfigDefinition.configPath, loggingConfigDefinition.schema],
+  [httpConfigDefinition.configPath, httpConfigDefinition.schema],
+  [pluginsConfigDefinition.configPath, pluginsConfigDefinition.schema],
+  [devConfigDefinition.configPath, devConfigDefinition.schema],
+];
 
 export class Server {
   public readonly configService: ConfigService;
@@ -45,12 +48,12 @@ export class Server {
   private readonly log: Logger;
 
   constructor(
-    private readonly config$: Observable<Config>,
-    private readonly env: Env,
+    readonly config$: Observable<Config>,
+    readonly env: Env,
     private readonly logger: LoggerFactory
   ) {
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(config$, env, logger);
+    this.configService = new ConfigService(config$, env, logger, schemas);
 
     const core = { configService: this.configService, env, logger };
     this.http = new HttpService(core);
@@ -59,19 +62,8 @@ export class Server {
     this.elasticsearch = new ElasticsearchService(core);
   }
 
-  public async preSetup() {
-    this.log.debug('pre-setup server');
-    const config = await this.config$.pipe(first()).toPromise();
-    const hasDevPaths = Boolean(config.get('plugins') && config.get('plugins').paths);
-    const devPluginPaths = this.env.mode.dev && hasDevPaths ? config.get('plugins').paths : [];
-
-    const pluginDefinitions = await this.plugins.preSetup(devPluginPaths);
-    const schemas = this.getSchemas(pluginDefinitions);
-
-    await this.configService.preSetup(schemas);
-  }
-
   public async setup() {
+    await this.configService.validateAll();
     this.log.debug('setting up server');
 
     const httpSetup = await this.http.setup();
@@ -116,27 +108,6 @@ export class Server {
     await this.plugins.stop();
     await this.elasticsearch.stop();
     await this.http.stop();
-  }
-
-  private getSchemas(pluginDefinitions: DiscoveredPluginsDefinitions) {
-    const pluginConfigSchemas = new Map(
-      pluginDefinitions.pluginDefinitions
-        .filter(pluginDef => Boolean(pluginDef.schema))
-        .map(
-          pluginDef =>
-            [pluginDef.manifest.configPath, pluginDef.schema!] as [ConfigPath, Type<unknown>]
-        )
-    );
-
-    const coreConfigSchemas = new Map<ConfigPath, Type<unknown>>([
-      [elasticsearchConfigDefinition.configPath, elasticsearchConfigDefinition.schema],
-      [loggingConfigDefinition.configPath, loggingConfigDefinition.schema],
-      [httpConfigDefinition.configPath, httpConfigDefinition.schema],
-      [pluginsConfigDefinition.configPath, pluginsConfigDefinition.schema],
-      [devConfigDefinition.configPath, devConfigDefinition.schema],
-    ]);
-
-    return new Map([...pluginConfigSchemas, ...coreConfigSchemas]);
   }
 
   private registerDefaultRoute(httpSetup: HttpServiceSetup) {

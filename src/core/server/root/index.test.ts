@@ -145,11 +145,13 @@ test('fails and stops services if initial logger upgrade fails', async () => {
 
   expect(mockOnShutdown).not.toHaveBeenCalled();
   expect(logger.stop).not.toHaveBeenCalled();
+  expect(mockServer.setup).not.toHaveBeenCalled();
 
   await expect(root.setup()).rejects.toThrowError('logging config upgrade failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(loggingUpgradeError);
+  expect(mockServer.setup).not.toHaveBeenCalled();
   expect(logger.stop).toHaveBeenCalledTimes(1);
 
   expect(mockConsoleError.mock.calls).toMatchSnapshot();

@@ -20,4 +20,7 @@
 export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
+export const mockDiscover = jest.fn();
+jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
+
 jest.mock('./plugins_system');

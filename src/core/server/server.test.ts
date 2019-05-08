@@ -47,7 +47,6 @@ const config$ = new BehaviorSubject<Config>(new ObjectToConfigAdapter({}));
 test('sets up services on "setup"', async () => {
   const server = new Server(config$, env, logger);
 
-  await server.preSetup();
   expect(httpService.setup).not.toHaveBeenCalled();
   expect(elasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
@@ -63,7 +62,6 @@ test('sets up services on "setup"', async () => {
 
 test('runs services on "start"', async () => {
   const server = new Server(config$, env, logger);
-  await server.preSetup();
 
   expect(httpService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
@@ -82,14 +80,12 @@ test('does not fail on "setup" if there are unused paths detected', async () => 
   configService.getUnusedPaths.mockResolvedValue(['some.path', 'another.path']);
 
   const server = new Server(config$, env, logger);
-  await server.preSetup();
 
   await expect(server.setup()).resolves.toBeDefined();
 });
 
 test('stops services on "stop"', async () => {
   const server = new Server(config$, env, logger);
-  await server.preSetup();
 
   await server.setup();
 
@@ -107,11 +103,11 @@ test('stops services on "stop"', async () => {
 });
 
 test(`doesn't setup core services if config validation fails`, async () => {
-  configService.preSetup.mockImplementation(() => {
+  configService.validateAll.mockImplementation(() => {
     throw new Error('invalid config');
   });
   const server = new Server(config$, env, logger);
-  await expect(server.preSetup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
+  await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
   expect(httpService.setup).not.toHaveBeenCalled();
   expect(elasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();

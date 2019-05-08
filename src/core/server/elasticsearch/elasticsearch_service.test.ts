@@ -36,7 +36,6 @@ configService.atPath.mockReturnValue(
   new BehaviorSubject(
     new ElasticsearchConfig({
       hosts: ['http://1.2.3.4'],
-      username: 'jest',
       healthCheck: {},
       ssl: {},
     } as any)

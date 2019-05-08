@@ -67,7 +67,10 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo) {
+export async function parseManifest(
+  pluginPath: string,
+  packageInfo: PackageInfo
+): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;

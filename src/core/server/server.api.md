@@ -59,7 +59,8 @@ export class ClusterClient {
 export class ConfigService {
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
-    constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
+    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
+    constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory, coreServiceSchemas?: Array<[ConfigPath, Type<any>]>);
     // Warning: (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
     atPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
     getConfig$(): Observable<Config>;
@@ -70,10 +71,8 @@ export class ConfigService {
     // (undocumented)
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
     optionalAtPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig | undefined>;
-    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
-    // 
-    // @internal
-    preSetup(schemas: Map<ConfigPath, Type<any>>): Promise<void>;
+    setSchemaFor(path: ConfigPath, schema: Type<any>): Promise<void>;
+    validateAll(): Promise<void>;
     }
 
 // @public (undocumented)
@@ -342,7 +341,7 @@ export class ScopedClusterClient {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/plugins/plugin_context.ts:36:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:42:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

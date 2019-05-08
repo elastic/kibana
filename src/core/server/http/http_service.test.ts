@@ -38,10 +38,10 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
       })
     ),
     env,
-    logger
+    logger,
+    [[configDefinition.configPath, configDefinition.schema]]
   );
 
-  configService.preSetup(new Map([['server', configDefinition.schema]]));
   return configService;
 };
 

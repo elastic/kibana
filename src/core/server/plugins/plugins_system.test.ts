@@ -54,6 +54,7 @@ function createPlugin(
       server,
       ui: true,
     },
+    null,
     { logger } as any
   );
 }
