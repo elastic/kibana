@@ -7,33 +7,35 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiModalHeader,
   EuiModalBody,
   EuiTabbedContent,
   EuiEmptyPrompt,
+  EuiSearchBar,
   EuiSpacer,
   EuiOverlayMask,
 } from '@elastic/eui';
 import { map, sortBy } from 'lodash';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
+import { getTagsFilter } from '../../lib/get_tags_filter';
+import { extractSearch } from '../../lib/extract_search';
 import { ElementGrid } from './element_grid';
 
+const tagType = 'badge';
 export class ElementTypes extends Component {
   static propTypes = {
     addCustomElement: PropTypes.func.isRequired,
     addElement: PropTypes.func.isRequired,
     customElements: PropTypes.array.isRequired,
     elements: PropTypes.object,
+    filterTags: PropTypes.arrayOf(PropTypes.string).isRequired,
     findCustomElements: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired,
     removeCustomElement: PropTypes.func.isRequired,
     search: PropTypes.string,
     setCustomElements: PropTypes.func.isRequired,
     setSearch: PropTypes.func.isRequired,
+    setFilterTags: PropTypes.func.isRequired,
     updateCustomElement: PropTypes.func.isRequired,
   };
 
@@ -113,7 +115,14 @@ export class ElementTypes extends Component {
     sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
 
   render() {
-    const { search, setSearch, addElement, addCustomElement } = this.props;
+    const {
+      search,
+      setSearch,
+      addElement,
+      addCustomElement,
+      filterTags,
+      setFilterTags,
+    } = this.props;
     let { elements, customElements } = this.props;
     elements = this._sortElements(elements);
 
@@ -140,6 +149,13 @@ export class ElementTypes extends Component {
       );
     }
 
+    const filters = [getTagsFilter(tagType)];
+    const onSearch = ({ queryText }) => {
+      const { searchTerm, filterTags } = extractSearch(queryText);
+      setSearch(searchTerm);
+      setFilterTags(filterTags);
+    };
+
     const tabs = [
       {
         id: 'elements',
@@ -147,7 +163,22 @@ export class ElementTypes extends Component {
         content: (
           <Fragment>
             <EuiSpacer />
-            <ElementGrid elements={elements} filter={search} handleClick={addElement} />
+            <EuiSearchBar
+              defaultQuery={search}
+              box={{
+                placeholder: 'Find element',
+                incremental: true,
+              }}
+              filters={filters}
+              onChange={onSearch}
+            />
+            <EuiSpacer />
+            <ElementGrid
+              elements={elements}
+              filterText={search}
+              filterTags={filterTags}
+              handleClick={addElement}
+            />
           </Fragment>
         ),
       },
@@ -157,6 +188,15 @@ export class ElementTypes extends Component {
         content: (
           <Fragment>
             <EuiSpacer />
+            <EuiSearchBar
+              defaultQuery={search}
+              box={{
+                placeholder: 'Find element',
+                incremental: true,
+              }}
+              onChange={onSearch}
+            />
+            <EuiSpacer />
             {customElementContent}
           </Fragment>
         ),
@@ -165,19 +205,7 @@ export class ElementTypes extends Component {
 
     return (
       <Fragment>
-        <EuiModalHeader>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFieldSearch
-                className="canvasElements__filter"
-                placeholder="Filter elements"
-                onChange={e => setSearch(e.target.value)}
-                value={search}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeader>
-        <EuiModalBody>
+        <EuiModalBody style={{ paddingRight: '1px' }}>
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </EuiModalBody>
 
