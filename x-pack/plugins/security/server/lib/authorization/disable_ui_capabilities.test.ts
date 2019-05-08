@@ -7,6 +7,8 @@
 import { Actions } from '.';
 import { Feature } from '../../../../xpack_main/types';
 import { disableUICapabilitesFactory } from './disable_ui_capabilities';
+// @ts-ignore
+import { deepFreeze } from '../deep_freeze';
 
 interface MockServerOptions {
   checkPrivileges: {
@@ -85,7 +87,7 @@ describe('usingPrivileges', () => {
       });
       const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
       const result = await usingPrivileges(
-        Object.freeze({
+        deepFreeze({
           navLinks: {
             foo: true,
             bar: true,
@@ -203,7 +205,7 @@ describe('usingPrivileges', () => {
       });
       const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
       const result = await usingPrivileges(
-        Object.freeze({
+        deepFreeze({
           navLinks: {
             foo: true,
             bar: true,
@@ -359,7 +361,7 @@ describe('usingPrivileges', () => {
     });
     const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
     const result = await usingPrivileges(
-      Object.freeze({
+      deepFreeze({
         navLinks: {
           foo: true,
           bar: true,
@@ -472,7 +474,7 @@ describe('usingPrivileges', () => {
     });
     const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
     const result = await usingPrivileges(
-      Object.freeze({
+      deepFreeze({
         navLinks: {
           foo: false,
           bar: false,
@@ -571,7 +573,7 @@ describe('all', () => {
     });
     const { all } = disableUICapabilitesFactory(mockServer, mockRequest);
     const result = all(
-      Object.freeze({
+      deepFreeze({
         navLinks: {
           foo: true,
           bar: true,

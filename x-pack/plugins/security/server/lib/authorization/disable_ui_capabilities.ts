@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { clone } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
@@ -25,10 +26,11 @@ export function disableUICapabilitesFactory(
   const uiCapabilitiesGroups = uiCapabilitiesGroupsFactory(actions, features);
 
   const disableAll = (uiCapabilities: UICapabilities) => {
+    const mutableUICapabilities = clone(uiCapabilities, true);
     for (const group of uiCapabilitiesGroups) {
-      group.disable(uiCapabilities);
+      group.disable(mutableUICapabilities);
     }
-    return uiCapabilities;
+    return mutableUICapabilities;
   };
 
   const usingPrivileges = async (uiCapabilities: UICapabilities) => {
@@ -57,11 +59,11 @@ export function disableUICapabilitesFactory(
       throw err;
     }
 
+    const mutableUICapabilities = clone(uiCapabilities, true);
     for (const group of uiCapabilitiesGroups) {
-      group.disableUsingPrivileges(uiCapabilities, checkPrivilegesResponse);
+      group.disableUsingPrivileges(mutableUICapabilities, checkPrivilegesResponse);
     }
-
-    return uiCapabilities;
+    return mutableUICapabilities;
   };
 
   return {
