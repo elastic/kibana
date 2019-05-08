@@ -7,9 +7,9 @@
 import uiRoutes from 'ui/routes';
 
 // @ts-ignore
-import { checkFullLicense } from '../../../license/check_license';
+import { checkBasicLicense } from '../../../license/check_license';
 // @ts-ignore
-import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkCreateDataFrameJobsPrivilege } from '../../../privilege/check_privilege';
 // @ts-ignore
 import { loadCurrentIndexPattern } from '../../../util/index_utils';
 // @ts-ignore
@@ -17,12 +17,12 @@ import { getDataFrameCreateBreadcrumbs } from '../../breadcrumbs';
 
 const template = `<ml-nav-menu name="new_data_frame" /><ml-new-data-frame />`;
 
-uiRoutes.when('/data_frame/new_job/step/pivot?', {
+uiRoutes.when('/data_frames/new_job/step/pivot?', {
   template,
   k7Breadcrumbs: getDataFrameCreateBreadcrumbs,
   resolve: {
-    CheckLicense: checkFullLicense,
-    privileges: checkGetJobsPrivilege,
+    CheckLicense: checkBasicLicense,
+    privileges: checkCreateDataFrameJobsPrivilege,
     indexPattern: loadCurrentIndexPattern,
   },
 });
