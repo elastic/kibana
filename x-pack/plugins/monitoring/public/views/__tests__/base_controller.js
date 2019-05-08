@@ -8,7 +8,7 @@ import { spy, stub } from 'sinon';
 import expect from '@kbn/expect';
 import { MonitoringViewBaseController } from '../';
 import { timefilter } from 'ui/timefilter';
-import { PromiseWithCancel,  Status } from '../../../common/cancel-promise';
+import { PromiseWithCancel,  Status } from '../../../common/cancel_promise';
 
 /*
  * Mostly copied from base_table_controller test, with modifications
