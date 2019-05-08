@@ -140,7 +140,7 @@ export default function ({ getService }) {
                     'delay': '1d',
                     // TODO: Note that we created the job with `interval`, but ES has coerced this to
                     // `fixed_interval` based on the value we provided. Once we update the UI and
-                    // tests to no longer use the deprecaated `interval` property, we can remove
+                    // tests to no longer use the deprecated `interval` property, we can remove
                     // this comment.
                     'fixed_interval': '24h',
                     'time_zone': 'UTC'
