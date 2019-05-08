@@ -76,6 +76,17 @@ export interface CapabilitiesStart {
  */
 export class CapabilitiesService {
   public async start({ apps, basePath, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
+    if (injectedMetadata.getInjectedVars().disableCapabilities) {
+      return {
+        availableApps: [],
+        capabilities: deepFreeze({
+          navLinks: {},
+          management: {},
+          catalogue: {},
+        }),
+      };
+    }
+
     const mergedCapabilities = mergeCapabilities(
       // Custom capabilites for new platform apps
       ...apps.filter(app => app.capabilities).map(app => app.capabilities!),

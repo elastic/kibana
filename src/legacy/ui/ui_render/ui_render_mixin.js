@@ -270,11 +270,12 @@ export function uiRenderMixin(kbnServer, server, config) {
     });
   });
 
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app, injectedVarsOverrides) {
     return renderApp({
       app,
       h: this,
       includeUserProvidedConfig: false,
+      injectedVarsOverrides
     });
   });
 }

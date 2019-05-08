@@ -11,7 +11,9 @@ export function initLogoutView(server) {
     method: 'GET',
     path: '/logout',
     handler(request, h) {
-      return h.renderAppWithDefaultConfig(logout);
+      return h.renderAppWithDefaultConfig(logout, {
+        disableCapabilities: true
+      });
     },
     config: {
       auth: false

@@ -18,7 +18,9 @@ export function initLoggedOutView(server) {
         const basePath = config.get('server.basePath');
         return h.redirect(`${basePath}/`);
       }
-      return h.renderAppWithDefaultConfig(loggedOut);
+      return h.renderAppWithDefaultConfig(loggedOut, {
+        disableCapabilities: true
+      });
     },
     config: {
       auth: false

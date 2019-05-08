@@ -37,7 +37,9 @@ export function initLoginView(server, xpackMainPlugin) {
         const next = parseNext(url, basePath);
         return h.redirect(next);
       }
-      return h.renderAppWithDefaultConfig(login);
+      return h.renderAppWithDefaultConfig(login, {
+        disableCapabilities: true
+      });
     },
     config: {
       auth: false
