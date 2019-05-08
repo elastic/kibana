@@ -9,13 +9,14 @@ import { RemoteClusterList } from '../../../public/sections/remote_cluster_list'
 import { createRemoteClustersStore } from '../../../public/store';
 import { registerRouter } from '../../../public/services/routing';
 
-const testBedOptions = {
+const testBedConfig = {
+  store: createRemoteClustersStore,
   memoryRouter: {
     onRouter: (router) => registerRouter(router)
   }
 };
 
-const initTestBed = registerTestBed(RemoteClusterList, { options: testBedOptions, store: createRemoteClustersStore });
+const initTestBed = registerTestBed(RemoteClusterList, testBedConfig);
 
 export const setup = (props) => {
   const testBed = initTestBed(props);

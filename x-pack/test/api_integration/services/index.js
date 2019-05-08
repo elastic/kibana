@@ -9,3 +9,5 @@ export { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 export { SupertestWithoutAuthProvider } from './supertest_without_auth';
 export { UsageAPIProvider } from './usage_api';
 export { InfraOpsGraphQLClientProvider, InfraOpsGraphQLClientFactoryProvider } from './infraops_graphql_client';
+export { SiemGraphQLProvider } from './siem_graphql_client';
+export { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';

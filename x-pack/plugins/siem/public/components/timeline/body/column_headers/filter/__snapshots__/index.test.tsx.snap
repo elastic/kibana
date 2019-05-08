@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Filter renders correctly against snapshot 1`] = `
+<Component
+  header={
+    Object {
+      "columnHeaderType": "text-filter",
+      "id": "@timestamp",
+      "width": 240,
+    }
+  }
+/>
+`;

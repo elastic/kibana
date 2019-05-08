@@ -9,7 +9,7 @@ The interface that should be returned by a `PluginInitializer`<!-- -->.
 <b>Signature:</b>
 
 ```typescript
-export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = 
+export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> 
 ```
 
 ## Properties
@@ -17,5 +17,6 @@ export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> =
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [setup](./kibana-plugin-public.plugin.setup.md) | <code>(core: PluginSetupContext, plugins: TPluginsSetup) =&gt; TSetup &#124; Promise&lt;TSetup&gt;</code> |  |
+|  [start](./kibana-plugin-public.plugin.start.md) | <code>(core: PluginStartContext, plugins: TPluginsStart) =&gt; TStart &#124; Promise&lt;TStart&gt;</code> |  |
 |  [stop](./kibana-plugin-public.plugin.stop.md) | <code>() =&gt; void</code> |  |
 

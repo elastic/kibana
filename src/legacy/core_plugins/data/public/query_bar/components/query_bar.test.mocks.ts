@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { createKfetch } from 'ui/kfetch/kfetch';
+import { setup } from '../../../../../../test_utils/public/kfetch_test_setup';
+
 const mockChromeFactory = jest.fn(() => {
   return {
     getBasePath: () => `foo`,
@@ -47,6 +50,7 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
 export const mockGetAutocompleteSuggestions = jest.fn(() => Promise.resolve([]));
 const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
 export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
+const mockKfetch = jest.fn(() => createKfetch(setup().http));
 
 jest.mock('ui/chrome', () => mockChromeFactory());
 jest.mock('ui/kfetch', () => ({
@@ -62,6 +66,10 @@ jest.mock('ui/metadata', () => ({
 }));
 jest.mock('ui/autocomplete_providers', () => ({
   getAutocompleteProvider: mockGetAutocompleteProvider,
+}));
+jest.mock('ui/kfetch', () => ({
+  __newPlatformSetup__: jest.fn(),
+  kfetch: mockKfetch,
 }));
 
 import _ from 'lodash';

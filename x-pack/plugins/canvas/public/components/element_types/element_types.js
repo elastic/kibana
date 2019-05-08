@@ -4,82 +4,214 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiFieldSearch,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiModalHeader,
   EuiModalBody,
+  EuiTabbedContent,
+  EuiEmptyPrompt,
+  EuiSearchBar,
+  EuiSpacer,
+  EuiOverlayMask,
 } from '@elastic/eui';
-import lowerCase from 'lodash.lowercase';
-import { map, includes, sortBy } from 'lodash';
+import { map, sortBy } from 'lodash';
+import { ConfirmModal } from '../confirm_modal/confirm_modal';
+import { CustomElementModal } from '../custom_element_modal';
+import { getTagsFilter } from '../../lib/get_tags_filter';
+import { extractSearch } from '../../lib/extract_search';
+import { ElementGrid } from './element_grid';
 
-export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
-  search = lowerCase(search);
-  elements = sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
-  const elementList = map(elements, (element, name) => {
-    const { help, displayName, expression, filter, width, height, image } = element;
-    const whenClicked = () => onClick({ expression, filter, width, height });
+const tagType = 'badge';
+export class ElementTypes extends Component {
+  static propTypes = {
+    addCustomElement: PropTypes.func.isRequired,
+    addElement: PropTypes.func.isRequired,
+    customElements: PropTypes.array.isRequired,
+    elements: PropTypes.object,
+    filterTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+    findCustomElements: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    removeCustomElement: PropTypes.func.isRequired,
+    search: PropTypes.string,
+    setCustomElements: PropTypes.func.isRequired,
+    setSearch: PropTypes.func.isRequired,
+    setFilterTags: PropTypes.func.isRequired,
+    updateCustomElement: PropTypes.func.isRequired,
+  };
 
-    // Add back in icon={image} to this when Design has a full icon set
-    const card = (
-      <EuiFlexItem key={name}>
-        <EuiCard
-          textAlign="left"
-          image={image}
-          title={displayName}
-          description={help}
-          onClick={whenClicked}
-          className="canvasCard"
+  state = {
+    elementToDelete: null,
+    elementToEdit: null,
+  };
+
+  componentDidMount() {
+    // fetch custom elements
+    this.props.findCustomElements();
+  }
+
+  _showEditModal = elementToEdit => this.setState({ elementToEdit });
+
+  _hideEditModal = () => this.setState({ elementToEdit: null });
+
+  _handleEdit = async (name, description, image) => {
+    const { updateCustomElement } = this.props;
+    const { elementToEdit } = this.state;
+    await updateCustomElement(elementToEdit.id, name, description, image);
+    this._hideEditModal();
+  };
+
+  _showDeleteModal = elementToDelete => this.setState({ elementToDelete });
+
+  _hideDeleteModal = () => this.setState({ elementToDelete: null });
+
+  _handleDelete = async () => {
+    const { removeCustomElement } = this.props;
+    const { elementToDelete } = this.state;
+    await removeCustomElement(elementToDelete.id);
+    this._hideDeleteModal();
+  };
+
+  _renderEditModal = () => {
+    const { elementToEdit } = this.state;
+
+    if (!elementToEdit) {
+      return null;
+    }
+
+    return (
+      <EuiOverlayMask>
+        <CustomElementModal
+          title="Edit element"
+          name={elementToEdit.displayName}
+          description={elementToEdit.help}
+          image={elementToEdit.image}
+          onSave={this._handleEdit}
+          onCancel={this._hideEditModal}
         />
-      </EuiFlexItem>
+      </EuiOverlayMask>
+    );
+  };
+
+  _renderDeleteModal = () => {
+    const { elementToDelete } = this.state;
+
+    if (!elementToDelete) {
+      return null;
+    }
+
+    return (
+      <ConfirmModal
+        isOpen
+        title={`Delete element '${elementToDelete.displayName}'?`}
+        message="Are you sure you want to delete this element?"
+        confirmButtonText="Delete"
+        onConfirm={this._handleDelete}
+        onCancel={this._hideDeleteModal}
+      />
+    );
+  };
+
+  _sortElements = elements =>
+    sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
+
+  render() {
+    const {
+      search,
+      setSearch,
+      addElement,
+      addCustomElement,
+      filterTags,
+      setFilterTags,
+    } = this.props;
+    let { elements, customElements } = this.props;
+    elements = this._sortElements(elements);
+
+    let customElementContent = (
+      <EuiEmptyPrompt
+        iconType="vector"
+        title={<h2>Add new elements</h2>}
+        body={<p>Group and save workpad elements to create new elements</p>}
+        titleSize="s"
+      />
     );
 
-    if (!search) {
-      return card;
+    if (customElements.length) {
+      customElements = this._sortElements(customElements);
+      customElementContent = (
+        <ElementGrid
+          elements={customElements}
+          filter={search}
+          handleClick={addCustomElement}
+          showControls
+          onEdit={this._showEditModal}
+          onDelete={this._showDeleteModal}
+        />
+      );
     }
-    if (includes(lowerCase(name), search)) {
-      return card;
-    }
-    if (includes(lowerCase(displayName), search)) {
-      return card;
-    }
-    if (includes(lowerCase(help), search)) {
-      return card;
-    }
-    return null;
-  });
 
-  return (
-    <Fragment>
-      <EuiModalHeader>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              className="canvasElements__filter"
-              placeholder="Filter elements"
-              onChange={e => setSearch(e.target.value)}
-              value={search}
+    const filters = [getTagsFilter(tagType)];
+    const onSearch = ({ queryText }) => {
+      const { searchTerm, filterTags } = extractSearch(queryText);
+      setSearch(searchTerm);
+      setFilterTags(filterTags);
+    };
+
+    const tabs = [
+      {
+        id: 'elements',
+        name: 'Elements',
+        content: (
+          <Fragment>
+            <EuiSpacer />
+            <EuiSearchBar
+              defaultQuery={search}
+              box={{
+                placeholder: 'Find element',
+                incremental: true,
+              }}
+              filters={filters}
+              onChange={onSearch}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiFlexGrid gutterSize="l" columns={4}>
-          {elementList}
-        </EuiFlexGrid>
-      </EuiModalBody>
-    </Fragment>
-  );
-};
+            <EuiSpacer />
+            <ElementGrid
+              elements={elements}
+              filterText={search}
+              filterTags={filterTags}
+              handleClick={addElement}
+            />
+          </Fragment>
+        ),
+      },
+      {
+        id: 'customElements',
+        name: 'My elements',
+        content: (
+          <Fragment>
+            <EuiSpacer />
+            <EuiSearchBar
+              defaultQuery={search}
+              box={{
+                placeholder: 'Find element',
+                incremental: true,
+              }}
+              onChange={onSearch}
+            />
+            <EuiSpacer />
+            {customElementContent}
+          </Fragment>
+        ),
+      },
+    ];
 
-ElementTypes.propTypes = {
-  elements: PropTypes.object,
-  onClick: PropTypes.func,
-  search: PropTypes.string,
-  setSearch: PropTypes.func,
-};
+    return (
+      <Fragment>
+        <EuiModalBody style={{ paddingRight: '1px' }}>
+          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+        </EuiModalBody>
+
+        {this._renderDeleteModal()}
+        {this._renderEditModal()}
+      </Fragment>
+    );
+  }
+}
