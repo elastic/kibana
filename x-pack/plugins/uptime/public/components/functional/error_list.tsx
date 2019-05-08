@@ -8,7 +8,6 @@ import {
   EuiBadge,
   EuiCodeBlock,
   EuiInMemoryTable,
-  EuiLink,
   EuiPanel,
   EuiText,
   EuiTextColor,
@@ -18,10 +17,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ErrorListItem, Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { errorListQuery } from '../../queries';
+import { MonitorPageLink } from './monitor_page_link';
 
 interface ErrorListProps {
   linkParameters?: string;
@@ -72,10 +71,14 @@ export const ErrorListComponent = ({ data, linkParameters, loading }: Props) => 
           name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
             defaultMessage: 'Monitor ID',
           }),
-          render: (id: string, { name }: ErrorListItem) => (
-            <EuiLink>
-              <Link to={`/monitor/${id}${linkParameters}`}>{name || id}</Link>
-            </EuiLink>
+          render: (id: string, { name, location }: ErrorListItem) => (
+            <MonitorPageLink
+              id={id}
+              location={location || undefined}
+              linkParameters={linkParameters}
+            >
+              {name || id}
+            </MonitorPageLink>
           ),
           width: '12.5%',
         },

@@ -12,6 +12,7 @@ export { FilterBarLoading } from './filter_bar_loading';
 export { IntegrationLink } from './integration_link';
 export { MonitorCharts } from './monitor_charts';
 export { MonitorList } from './monitor_list';
+export { MonitorPageLink } from './monitor_page_link';
 export { MonitorPageTitle } from './monitor_page_title';
 export { MonitorStatusBar } from './monitor_status_bar';
 export { PingList } from './ping_list';
