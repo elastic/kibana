@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 // @ts-ignore unconverted component
 import { Datasource } from '../../datasource';
 // @ts-ignore unconverted component
 import { FunctionFormList } from '../../function_form_list';
-// @ts-ignore unconverted component
-import { SidebarHeader } from '../../sidebar_header';
 import { PositionedElement } from '../../../lib/positioned_element';
 
 interface Props {
@@ -48,12 +46,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
     },
   ];
 
-  return (
-    <Fragment>
-      <SidebarHeader title="Selected element" />
-      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />
-    </Fragment>
-  );
+  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
 };
 
 ElementSettings.propTypes = {
