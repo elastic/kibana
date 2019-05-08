@@ -17,7 +17,6 @@ export function snapshotRestore(kibana: any) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/snapshot_restore'],
     },
     init(server: Legacy.Server) {
