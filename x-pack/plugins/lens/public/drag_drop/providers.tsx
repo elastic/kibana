@@ -60,7 +60,7 @@ export interface ProviderProps {
  *
  * @param props
  */
-export function RootDragDropProvider({ children }: { children: React.ReactNodeArray }) {
+export function RootDragDropProvider({ children }: { children: any }) {
   const [state, setState] = useState<{ dragging: any }>({
     dragging: undefined,
   });

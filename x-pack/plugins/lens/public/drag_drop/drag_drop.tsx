@@ -39,7 +39,7 @@ interface Props {
   /**
    * The React children.
    */
-  children?: React.ReactNodeArray;
+  children?: any;
 
   /**
    * Indicates whether or not the currently dragged item
@@ -122,6 +122,7 @@ export function DragDrop(props: Props) {
 
   return (
     <div
+      data-test-subj="drag-drop"
       className={`${className || ''}${classSuffix}`}
       onDragOver={dragOver}
       onDragLeave={dragLeave}

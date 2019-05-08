@@ -26,7 +26,7 @@ describe('DragDrop', () => {
     const preventDefault = jest.fn(() => {});
     const component = shallow(<DragDrop droppable>Hello!</DragDrop>);
 
-    component.find('.drag-drop').simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="drag-drop"]').simulate('dragover', { preventDefault });
 
     expect(preventDefault).toBeCalled();
   });
@@ -35,7 +35,7 @@ describe('DragDrop', () => {
     const preventDefault = jest.fn(() => {});
     const component = shallow(<DragDrop>Hello!</DragDrop>);
 
-    component.find('.drag-drop').simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="drag-drop"]').simulate('dragover', { preventDefault });
 
     expect(preventDefault).not.toBeCalled();
   });
@@ -54,7 +54,7 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    component.find('.drag-drop').simulate('dragstart', { dataTransfer });
+    component.find('[data-test-subj="drag-drop"]').simulate('dragstart', { dataTransfer });
 
     jest.runAllTimers();
 
@@ -77,7 +77,9 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    component.find('.drag-drop').simulate('drop', { preventDefault, stopPropagation });
+    component
+      .find('[data-test-subj="drag-drop"]')
+      .simulate('drop', { preventDefault, stopPropagation });
 
     expect(preventDefault).toBeCalled();
     expect(stopPropagation).toBeCalled();
