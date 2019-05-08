@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { init } from './init';
+import { init, postInit } from './init';
 import { config } from './config';
 import { deprecations } from './deprecations';
 import { getUiExports } from './ui_exports';
@@ -24,4 +24,7 @@ export const monitoring = (kibana) => new kibana.Plugin({
   config,
   deprecations,
   uiExports: getUiExports(),
+  postInit(server) {
+    postInit(server);
+  },
 });
