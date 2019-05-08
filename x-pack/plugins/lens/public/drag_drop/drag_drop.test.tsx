@@ -23,7 +23,7 @@ describe('DragDrop', () => {
   });
 
   test('dragover calls preventDefault if droppable is true', () => {
-    const preventDefault = jest.fn(() => {});
+    const preventDefault = jest.fn();
     const component = shallow(<DragDrop droppable>Hello!</DragDrop>);
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
@@ -32,7 +32,7 @@ describe('DragDrop', () => {
   });
 
   test('dragover does not call preventDefault if droppable is false', () => {
-    const preventDefault = jest.fn(() => {});
+    const preventDefault = jest.fn();
     const component = shallow(<DragDrop>Hello!</DragDrop>);
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
@@ -41,10 +41,10 @@ describe('DragDrop', () => {
   });
 
   test('dragstart sets dragging in the context', async () => {
-    const setDragging = jest.fn(() => {});
+    const setDragging = jest.fn();
     const dataTransfer = {
-      setData: jest.fn(() => {}),
-      getData: jest.fn(() => {}),
+      setData: jest.fn(),
+      getData: jest.fn(),
     };
     const value = {};
 
@@ -63,10 +63,10 @@ describe('DragDrop', () => {
   });
 
   test('drop resets all the things', async () => {
-    const preventDefault = jest.fn(() => {});
-    const stopPropagation = jest.fn(() => {});
-    const setDragging = jest.fn(() => {});
-    const onDrop = jest.fn(() => {});
+    const preventDefault = jest.fn();
+    const stopPropagation = jest.fn();
+    const setDragging = jest.fn();
+    const onDrop = jest.fn();
     const value = {};
 
     const component = mount(

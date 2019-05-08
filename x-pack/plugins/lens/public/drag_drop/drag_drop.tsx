@@ -12,7 +12,7 @@ type DroppableEvent = React.DragEvent<HTMLElement>;
 /**
  * A function that handles a drop event.
  */
-type DropHandler = (item: any) => void;
+type DropHandler = (item: unknown) => void;
 
 /**
  * The argument to the DragDrop component.
@@ -34,12 +34,12 @@ interface Props {
    * If this component is dragged, this will be the value of
    * "dragging" in the root drag/drop context.
    */
-  value?: any;
+  value?: unknown;
 
   /**
    * The React children.
    */
-  children?: any;
+  children: React.ReactNode;
 
   /**
    * Indicates whether or not the currently dragged item

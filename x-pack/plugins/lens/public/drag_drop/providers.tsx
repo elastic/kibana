@@ -13,12 +13,12 @@ export interface DragContextState {
   /**
    * The item being dragged or undefined.
    */
-  dragging: any;
+  dragging: unknown;
 
   /**
    * Set the item being dragged.
    */
-  setDragging: (dragging: any) => void;
+  setDragging: (dragging: unknown) => void;
 }
 
 /**
@@ -39,18 +39,18 @@ export interface ProviderProps {
    * The item being dragged. If unspecified, the provider will
    * behave as if it is the root provider.
    */
-  dragging: any;
+  dragging: unknown;
 
   /**
    * Sets the item being dragged. If unspecified, the provider
    * will behave as if it is the root provider.
    */
-  setDragging: (dragging: any) => void;
+  setDragging: (dragging: unknown) => void;
 
   /**
    * The React children.
    */
-  children?: any;
+  children: React.ReactNode;
 }
 
 /**
@@ -60,11 +60,11 @@ export interface ProviderProps {
  *
  * @param props
  */
-export function RootDragDropProvider({ children }: { children: any }) {
-  const [state, setState] = useState<{ dragging: any }>({
+export function RootDragDropProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<{ dragging: unknown }>({
     dragging: undefined,
   });
-  const setDragging = (dragging: any) => setState({ dragging });
+  const setDragging = (dragging: unknown) => setState({ dragging });
 
   return (
     <ChildDragDropProvider dragging={state.dragging} setDragging={setDragging}>
