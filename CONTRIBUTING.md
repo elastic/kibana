@@ -1,19 +1,18 @@
-**Run from source**
+**Run**
 
 ```
+# Compile and run
 npx ts-node ./src/index.ts --branch 6.1 --upstream sqren/backport-demo --all
 ```
 
-**Run from build**
+or
 
 ```
-node dist/index.js --branch 6.1 --upstream sqren/backport-demo --all
-```
-
-**Compile typecscript**
-
-```
+# Compile
 yarn build
+
+# Run
+node dist/index.js --branch 6.1 --upstream sqren/backport-demo --all
 ```
 
 **Test**
