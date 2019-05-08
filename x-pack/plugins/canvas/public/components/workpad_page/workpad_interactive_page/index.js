@@ -51,14 +51,21 @@ const configuration = {
   tooltipZ: 1100,
 };
 
-const componentLayoutState = ({ aeroStore, setAeroStore, elements, selectedToplevelNodes }) => {
+const componentLayoutState = ({
+  aeroStore,
+  setAeroStore,
+  elements,
+  selectedToplevelNodes,
+  height,
+  width,
+}) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
   const newState = {
     primaryUpdate: null,
     currentScene: {
       shapes,
-      configuration,
+      configuration: { ...configuration, pageHeight: height, pageWidth: width },
       selectedShapes,
       selectionState: aeroStore
         ? aeroStore.getCurrentState().currentScene.selectionState
