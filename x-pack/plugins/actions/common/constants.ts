@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { init } from './init';
+export const APP_ID = 'actions';

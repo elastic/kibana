@@ -6,11 +6,9 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { APP_ID } from '../../common/constants';
-import { WithoutQueryAndParams, SavedObjectReference, Server } from '../types';
+import { WithoutQueryAndParams, SavedObjectReference } from '../types';
 
-interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
-  server: Server;
+interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   query: {
     overwrite: boolean;
   };
@@ -28,10 +26,10 @@ interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
 }
 
-export function createActionRoute(server: Hapi.Server) {
+export function createRoute(server: Hapi.Server) {
   server.route({
     method: 'POST',
-    path: `/api/${APP_ID}/action`,
+    path: `/api/action`,
     options: {
       validate: {
         payload: Joi.object().keys({
@@ -55,11 +53,12 @@ export function createActionRoute(server: Hapi.Server) {
         }),
       },
     },
-    async handler(request: CreateActionRequest) {
+    async handler(request: CreateRequest) {
       const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server
-        .alerting()
-        .actions.create(savedObjectsClient, request.payload.attributes);
+      return await request.server.plugins.actions.create(
+        savedObjectsClient,
+        request.payload.attributes
+      );
     },
   });
 }

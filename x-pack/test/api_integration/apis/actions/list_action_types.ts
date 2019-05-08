@@ -14,7 +14,7 @@ export default function listActionTypesTests({ getService }: KibanaFunctionalTes
   describe('list_action_types', () => {
     it('should return 200 with list of action types containing defaults', async () => {
       await supertest
-        .get('/api/alerting/action_types')
+        .get('/api/action/types')
         .expect(200)
         .then((resp: any) => {
           function createActionTypeMatcher(id: string, name: string) {

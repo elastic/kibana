@@ -5,32 +5,42 @@
  */
 
 import expect from '@kbn/expect';
-
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function deleteActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function getActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('delete_action', () => {
-    beforeEach(() => esArchiver.load('alerting/basic'));
-    afterEach(() => esArchiver.unload('alerting/basic'));
+  describe('get', () => {
+    before(() => esArchiver.load('alerting/basic'));
+    after(() => esArchiver.unload('alerting/basic'));
 
-    it('should return 200 when deleting an action', async () => {
+    it('should return 200 when finding a record', async () => {
       await supertest
-        .delete('/api/alerting/action/1')
-        .set('kbn-xsrf', 'foo')
+        .get('/api/action/1')
         .expect(200)
         .then((resp: any) => {
-          expect(resp.body).to.eql({});
+          expect(resp.body).to.eql({
+            id: '1',
+            type: 'action',
+            references: [],
+            version: resp.body.version,
+            attributes: {
+              actionTypeId: 'test',
+              description: 'My description',
+              actionTypeConfig: {
+                bar: false,
+                foo: true,
+              },
+            },
+          });
         });
     });
 
-    it(`should return 404 when action doesn't exist`, async () => {
+    it('should return 404 when not finding a record', async () => {
       await supertest
-        .delete('/api/alerting/action/2')
-        .set('kbn-xsrf', 'foo')
+        .get('/api/action/2')
         .expect(404)
         .then((resp: any) => {
           expect(resp.body).to.eql({

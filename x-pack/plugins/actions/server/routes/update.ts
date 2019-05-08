@@ -7,11 +7,9 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 
-import { APP_ID } from '../../common/constants';
-import { SavedObjectReference, Server } from '../types';
+import { SavedObjectReference } from '../types';
 
-interface UpdateActionRequest extends Hapi.Request {
-  server: Server;
+interface UpdateRequest extends Hapi.Request {
   payload: {
     attributes: {
       description: string;
@@ -23,10 +21,10 @@ interface UpdateActionRequest extends Hapi.Request {
   };
 }
 
-export function updateActionRoute(server: Hapi.Server) {
+export function updateRoute(server: Hapi.Server) {
   server.route({
     method: 'PUT',
-    path: `/api/${APP_ID}/action/{id}`,
+    path: `/api/action/{id}`,
     options: {
       validate: {
         params: Joi.object()
@@ -57,14 +55,17 @@ export function updateActionRoute(server: Hapi.Server) {
           .required(),
       },
     },
-    async handler(request: UpdateActionRequest) {
+    async handler(request: UpdateRequest) {
       const { id } = request.params;
       const { attributes, version, references } = request.payload;
       const options = { version, references };
       const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server
-        .alerting()
-        .actions.update(savedObjectsClient, id, attributes, options);
+      return await request.server.plugins.actions.update(
+        savedObjectsClient,
+        id,
+        attributes,
+        options
+      );
     },
   });
 }

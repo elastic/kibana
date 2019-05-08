@@ -4,23 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import Hapi from 'hapi';
+import Joi from 'joi';
 
-import { APP_ID } from '../../common/constants';
-import { Server } from '../types';
-
-interface GetActionRequest extends Hapi.Request {
-  server: Server;
+interface DeleteRequest extends Hapi.Request {
   params: {
     id: string;
   };
 }
 
-export function getActionRoute(server: Hapi.Server) {
+export function deleteRoute(server: Hapi.Server) {
   server.route({
-    method: 'GET',
-    path: `/api/${APP_ID}/action/{id}`,
+    method: 'DELETE',
+    path: `/api/action/{id}`,
     options: {
       validate: {
         params: Joi.object()
@@ -30,10 +26,10 @@ export function getActionRoute(server: Hapi.Server) {
           .required(),
       },
     },
-    async handler(request: GetActionRequest) {
+    async handler(request: DeleteRequest) {
       const { id } = request.params;
       const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.alerting().actions.get(savedObjectsClient, id);
+      return await request.server.plugins.actions.delete(savedObjectsClient, id);
     },
   });
 }

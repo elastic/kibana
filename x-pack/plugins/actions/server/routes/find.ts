@@ -7,11 +7,9 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 
-import { APP_ID } from '../../common/constants';
-import { WithoutQueryAndParams, Server } from '../types';
+import { WithoutQueryAndParams } from '../types';
 
-interface FindActionRequest extends WithoutQueryAndParams<Hapi.Request> {
-  server: Server;
+interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
   query: {
     per_page: number;
     page: number;
@@ -27,10 +25,10 @@ interface FindActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
 }
 
-export function findActionRoute(server: any) {
+export function findRoute(server: any) {
   server.route({
     method: 'GET',
-    path: `/api/${APP_ID}/action/_find`,
+    path: `/api/action/_find`,
     options: {
       validate: {
         query: Joi.object()
@@ -64,10 +62,10 @@ export function findActionRoute(server: any) {
           .default(),
       },
     },
-    async handler(request: FindActionRequest) {
+    async handler(request: FindRequest) {
       const query = request.query;
       const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.alerting().actions.find(savedObjectsClient, {
+      return await request.server.plugins.actions.find(savedObjectsClient, {
         perPage: query.per_page,
         page: query.page,
         search: query.search,

@@ -250,7 +250,7 @@ describe('update()', () => {
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionService.update(
       savedObjectsClient,
-      'my-alert',
+      'my-action',
       {
         description: 'my description',
         actionTypeId: 'my-action-type',
@@ -264,7 +264,7 @@ describe('update()', () => {
   "calls": Array [
     Array [
       "action",
-      "my-alert",
+      "my-action",
       Object {
         "actionTypeConfig": Object {},
         "actionTypeConfigSecrets": Object {},
@@ -302,7 +302,7 @@ describe('update()', () => {
     await expect(
       actionService.update(
         savedObjectsClient,
-        'my-alert',
+        'my-action',
         {
           description: 'my description',
           actionTypeId: 'my-action-type',
@@ -321,7 +321,7 @@ describe('update()', () => {
     await expect(
       actionService.update(
         savedObjectsClient,
-        'my-alert',
+        'my-action',
         {
           description: 'my description',
           actionTypeId: 'unregistered-action-type',
@@ -347,7 +347,7 @@ describe('update()', () => {
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionService.update(
       savedObjectsClient,
-      'my-alert',
+      'my-action',
       {
         description: 'my description',
         actionTypeId: 'my-action-type',
@@ -365,7 +365,7 @@ describe('update()', () => {
   "calls": Array [
     Array [
       "action",
-      "my-alert",
+      "my-action",
       Object {
         "actionTypeConfig": Object {
           "a": true,

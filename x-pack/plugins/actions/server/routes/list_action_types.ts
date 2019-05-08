@@ -6,19 +6,12 @@
 
 import Hapi from 'hapi';
 
-import { APP_ID } from '../../common/constants';
-import { Server } from '../types';
-
-interface ListActionTypesRequest extends Hapi.Request {
-  server: Server;
-}
-
 export function listActionTypesRoute(server: any) {
   server.route({
     method: 'GET',
-    path: `/api/${APP_ID}/action_types`,
-    async handler(request: ListActionTypesRequest) {
-      return request.server.alerting().actionTypes.list();
+    path: `/api/action/types`,
+    async handler(request: Hapi.Request) {
+      return request.server.plugins.actions.listTypes();
     },
   });
 }

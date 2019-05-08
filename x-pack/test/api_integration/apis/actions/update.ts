@@ -12,13 +12,13 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('update_action', () => {
+  describe('update', () => {
     beforeEach(() => esArchiver.load('alerting/basic'));
     afterEach(() => esArchiver.unload('alerting/basic'));
 
     it('should return 200 when updating a document', async () => {
       await supertest
-        .put('/api/alerting/action/1')
+        .put('/api/action/1')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
@@ -46,7 +46,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 404 when updating a non existing document', async () => {
       await supertest
-        .put('/api/alerting/action/2')
+        .put('/api/action/2')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {

@@ -11,10 +11,10 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 export default function createActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
 
-  describe('create_action', () => {
+  describe('create', () => {
     it('should return 200 when creating an action', async () => {
       await supertest
-        .post('/api/alerting/action')
+        .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
@@ -43,7 +43,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
 
     it(`should return 400 when action type isn't registered`, async () => {
       await supertest
-        .post('/api/alerting/action')
+        .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {

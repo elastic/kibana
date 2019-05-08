@@ -7,10 +7,10 @@
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['alerting'],
+    require: ['actions'],
     name: 'alerts',
     init(server: any) {
-      server.alerting().actionTypes.register({
+      server.plugins.actions.registerType({
         id: 'test',
         name: 'Test',
         async executor(actionTypeConfig: any, params: any) {},

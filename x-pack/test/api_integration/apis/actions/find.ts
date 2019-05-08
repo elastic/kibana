@@ -12,13 +12,13 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('find_action', () => {
+  describe('find', () => {
     before(() => esArchiver.load('alerting/basic'));
     after(() => esArchiver.unload('alerting/basic'));
 
     it('should return 200 with individual responses', async () => {
       await supertest
-        .get('/api/alerting/action/_find?fields=description')
+        .get('/api/action/_find?fields=description')
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({

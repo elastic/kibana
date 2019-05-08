@@ -8,12 +8,12 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('Alerting', () => {
-    loadTestFile(require.resolve('./create_action'));
-    loadTestFile(require.resolve('./delete_action'));
-    loadTestFile(require.resolve('./find_action'));
-    loadTestFile(require.resolve('./get_action'));
+  describe('Actions', () => {
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./find'));
+    loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));
-    loadTestFile(require.resolve('./update_action'));
+    loadTestFile(require.resolve('./update'));
   });
 }

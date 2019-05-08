@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const APP_ID = 'alerting';
+export { init } from './init';
+export { ActionService } from './action_service';
+export { ActionTypeService } from './action_type_service';
