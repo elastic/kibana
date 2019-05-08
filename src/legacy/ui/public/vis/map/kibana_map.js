@@ -108,7 +108,7 @@ export class KibanaMap extends EventEmitter {
     this._containerNode = containerNode;
     this._leafletBaseLayer = null;
     this._baseLayerSettings = null;
-    this._baseLayerIsDesaturated = true;
+    this._baseLayerIsDesaturated = false; //Deprecated in 7.2.
 
     this._leafletDrawControl = null;
     this._leafletFitControl = null;
