@@ -837,39 +837,9 @@ export interface HostItem {
 
   lastSeen?: Date | null;
 
-  host?: HostFields | null;
+  host?: HostEcsFields | null;
 
   cloud?: CloudFields | null;
-}
-
-export interface HostFields {
-  architecture?: string | null;
-
-  id?: string | null;
-
-  ip?: (string | null)[] | null;
-
-  mac?: (string | null)[] | null;
-
-  name?: string | null;
-
-  os?: OsFields | null;
-
-  type?: string | null;
-}
-
-export interface OsFields {
-  platform?: string | null;
-
-  name?: string | null;
-
-  full?: string | null;
-
-  family?: string | null;
-
-  version?: string | null;
-
-  kernel?: string | null;
 }
 
 export interface CloudFields {
@@ -1195,6 +1165,36 @@ export interface UncommonProcessItem {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
+}
+
+export interface OsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
+}
+
+export interface HostFields {
+  architecture?: string | null;
+
+  id?: string | null;
+
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
+
+  name?: string | null;
+
+  os?: OsFields | null;
+
+  type?: string | null;
 }
 
 // ====================================================
@@ -2089,21 +2089,21 @@ export namespace GetHostsTableQuery {
   };
 
   export type Host = {
-    __typename?: 'HostFields';
+    __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
   };
 
   export type Os = {
-    __typename?: 'OsFields';
+    __typename?: 'OsEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Cursor = {
@@ -2159,33 +2159,33 @@ export namespace GetHostOverviewQuery {
   };
 
   export type Host = {
-    __typename?: 'HostFields';
+    __typename?: 'HostEcsFields';
 
-    architecture?: string | null;
+    architecture?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    mac?: (string | null)[] | null;
+    mac?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type Os = {
-    __typename?: 'OsFields';
+    __typename?: 'OsEcsFields';
 
-    family?: string | null;
+    family?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    platform?: string | null;
+    platform?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Cloud = {

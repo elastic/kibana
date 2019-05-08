@@ -54,7 +54,7 @@ export const CLOUD_PROVIDER = i18n.translate(
 );
 
 export const REGION = i18n.translate('xpack.siem.host.details.overview.regionTitle', {
-  defaultMessage: 'Region & Availability',
+  defaultMessage: 'Region',
 });
 
 export const INSTANCE_ID = i18n.translate('xpack.siem.host.details.overview.instanceIdTitle', {
@@ -62,5 +62,5 @@ export const INSTANCE_ID = i18n.translate('xpack.siem.host.details.overview.inst
 });
 
 export const MACHINE_TYPE = i18n.translate('xpack.siem.host.details.overview.machineTypeTitle', {
-  defaultMessage: 'Machine Resource Type',
+  defaultMessage: 'Machine Type',
 });

@@ -44,7 +44,7 @@ export const hostsSchema = gql`
   type HostItem {
     _id: String
     lastSeen: Date
-    host: HostFields
+    host: HostEcsFields
     cloud: CloudFields
   }
 

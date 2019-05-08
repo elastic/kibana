@@ -59,7 +59,7 @@ export class HostOverviewByNameQuery extends QueryTemplate<
           },
         }}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, refetch }) => {
           const hostOverview = getOr([], 'source.HostOverview', data);
           return children({
             id,

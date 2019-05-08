@@ -90,26 +90,43 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.eql(HOST_NAME);
+          expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
         });
     });
 
-    it('Make sure that we get Host Details data', () => {
-      const expectedHost: GetHostOverviewQuery.Host = {
-        architecture: 'x86_64',
-        id: CURSOR_ID,
-        ip: [],
-        mac: [],
-        name: 'zeek-sensor-san-francisco',
-        os: {
-          family: 'debian',
-          name: HOST_NAME,
-          platform: 'ubuntu',
-          version: '18.04.2 LTS (Bionic Beaver)',
-          __typename: 'OsFields',
+    it('Make sure that we get Host Overview data', () => {
+      const expectedHost: GetHostOverviewQuery.HostOverview = {
+        _id: 'zeek-sensor-san-francisco',
+        host: {
+          architecture: ['x86_64'],
+          id: [CURSOR_ID],
+          ip: [],
+          mac: [],
+          name: ['zeek-sensor-san-francisco'],
+          os: {
+            family: ['debian'],
+            name: [HOST_NAME],
+            platform: ['ubuntu'],
+            version: ['18.04.2 LTS (Bionic Beaver)'],
+            __typename: 'OsEcsFields',
+          },
+          type: null,
+          __typename: 'HostEcsFields',
         },
-        type: null,
-        __typename: 'HostFields',
+        cloud: {
+          instance: {
+            id: ['132972452'],
+            __typename: 'CloudInstance',
+          },
+          machine: {
+            type: [],
+            __typename: 'CloudMachine',
+          },
+          provider: ['digitalocean'],
+          region: ['sfo2'],
+          __typename: 'CloudFields',
+        },
+        __typename: 'HostItem',
       };
 
       return client
@@ -127,7 +144,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const hosts = resp.data.source.HostOverview;
-          expect(hosts.host).to.eql(expectedHost);
+          expect(hosts).to.eql(expectedHost);
         });
     });
 

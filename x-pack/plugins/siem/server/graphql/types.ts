@@ -866,39 +866,9 @@ export interface HostItem {
 
   lastSeen?: Date | null;
 
-  host?: HostFields | null;
+  host?: HostEcsFields | null;
 
   cloud?: CloudFields | null;
-}
-
-export interface HostFields {
-  architecture?: string | null;
-
-  id?: string | null;
-
-  ip?: (string | null)[] | null;
-
-  mac?: (string | null)[] | null;
-
-  name?: string | null;
-
-  os?: OsFields | null;
-
-  type?: string | null;
-}
-
-export interface OsFields {
-  platform?: string | null;
-
-  name?: string | null;
-
-  full?: string | null;
-
-  family?: string | null;
-
-  version?: string | null;
-
-  kernel?: string | null;
 }
 
 export interface CloudFields {
@@ -1224,6 +1194,36 @@ export interface UncommonProcessItem {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
+}
+
+export interface OsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
+}
+
+export interface HostFields {
+  architecture?: string | null;
+
+  id?: string | null;
+
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
+
+  name?: string | null;
+
+  os?: OsFields | null;
+
+  type?: string | null;
 }
 
 // ====================================================
@@ -4468,7 +4468,7 @@ export namespace HostItemResolvers {
 
     lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
 
-    host?: HostResolver<HostFields | null, TypeParent, Context>;
+    host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
 
     cloud?: CloudResolver<CloudFields | null, TypeParent, Context>;
   }
@@ -4484,114 +4484,13 @@ export namespace HostItemResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
-    R = HostFields | null,
+    R = HostEcsFields | null,
     Parent = HostItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CloudResolver<
     R = CloudFields | null,
     Parent = HostItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace HostFieldsResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = HostFields> {
-    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
-
-    id?: IdResolver<string | null, TypeParent, Context>;
-
-    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
-
-    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    os?: OsResolver<OsFields | null, TypeParent, Context>;
-
-    type?: TypeResolver<string | null, TypeParent, Context>;
-  }
-
-  export type ArchitectureResolver<
-    R = string | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type IdResolver<R = string | null, Parent = HostFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type IpResolver<
-    R = (string | null)[] | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type MacResolver<
-    R = (string | null)[] | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type OsResolver<
-    R = OsFields | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TypeResolver<
-    R = string | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace OsFieldsResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = OsFields> {
-    platform?: PlatformResolver<string | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    full?: FullResolver<string | null, TypeParent, Context>;
-
-    family?: FamilyResolver<string | null, TypeParent, Context>;
-
-    version?: VersionResolver<string | null, TypeParent, Context>;
-
-    kernel?: KernelResolver<string | null, TypeParent, Context>;
-  }
-
-  export type PlatformResolver<
-    R = string | null,
-    Parent = OsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type FullResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type FamilyResolver<
-    R = string | null,
-    Parent = OsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type VersionResolver<
-    R = string | null,
-    Parent = OsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type KernelResolver<
-    R = string | null,
-    Parent = OsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -5663,4 +5562,105 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace OsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = OsFields> {
+    platform?: PlatformResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    full?: FullResolver<string | null, TypeParent, Context>;
+
+    family?: FamilyResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+
+    kernel?: KernelResolver<string | null, TypeParent, Context>;
+  }
+
+  export type PlatformResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FullResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FamilyResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KernelResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HostFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = HostFields> {
+    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+
+    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    os?: OsResolver<OsFields | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ArchitectureResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IdResolver<R = string | null, Parent = HostFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IpResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MacResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OsResolver<
+    R = OsFields | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
