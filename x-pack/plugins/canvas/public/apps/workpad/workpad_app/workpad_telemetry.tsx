@@ -6,11 +6,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-// @ts-ignore
+// @ts-ignore: Local Untyped
 import { trackCanvasUiMetric } from '../../../lib/ui_metric';
-// @ts-ignore
+// @ts-ignore: Local Untyped
 import { getElementCounts } from '../../../state/selectors/workpad';
-// @ts-ignore
+// @ts-ignore: Local Untyped
 import { getArgs } from '../../../state/selectors/resolved_args';
 
 const WorkpadLoadedMetric = 'workpad-loaded';
