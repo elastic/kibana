@@ -584,7 +584,7 @@ exports[`LayerTocActions should show when layer is not visible because zoom sett
         >
           <EuiIcon
             size="m"
-            type="minusInCircle"
+            type="expand"
           />
         </span>
         layer 1
