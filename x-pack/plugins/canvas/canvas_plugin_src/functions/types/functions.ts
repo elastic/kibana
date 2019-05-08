@@ -81,8 +81,8 @@ export type AvailableFunctionNames = AvailableFunctions['name'];
 // prettier-ignore
 type Functions = 
   typeof commonFunctions[number] &
-  typeof browserFunctions[number] &
-  typeof serverFunctions[number];
+  typeof serverFunctions[number] &
+  typeof browserFunctions[number];
 
 // A union of strings representing Canvas Function "types". This is used in the `type` field
 // of the Function specification.  We may refactor this to be a known type, rather than a

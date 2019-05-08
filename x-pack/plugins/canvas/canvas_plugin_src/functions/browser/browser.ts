@@ -5,8 +5,11 @@
  */
 
 import { Function } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 export function browser(): Function<'browser', {}, any> {
+  const { help, args: argHelp } = getFunctionHelp().browser;
+
   return {
     name: 'browser',
     help: 'Force the interpreter to return to the browser',

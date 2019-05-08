@@ -73,15 +73,15 @@ export interface CSSStyle {
  * Represents an object containing style information for a Container.
  */
 export interface ContainerStyle {
-  border?: string | null;
-  borderRadius?: string | null;
-  padding?: string | null;
-  backgroundColor?: string | null;
-  backgroundImage?: string | null;
-  backgroundSize?: 'contain' | 'cover' | 'auto';
-  backgroundRepeat?: 'repeat-x' | 'repeat' | 'space' | 'round' | 'no-repeat' | 'space';
-  opacity?: number | null;
-  overflow?: 'visible' | 'hidden' | 'scroll' | 'auto';
+  border: string | null;
+  borderRadius: string | null;
+  padding: string | null;
+  backgroundColor: string | null;
+  backgroundImage: string | null;
+  backgroundSize: 'contain' | 'cover' | 'auto';
+  backgroundRepeat: 'repeat-x' | 'repeat' | 'space' | 'round' | 'no-repeat' | 'space';
+  opacity: number | null;
+  overflow: 'visible' | 'hidden' | 'scroll' | 'auto';
 }
 
 /**
