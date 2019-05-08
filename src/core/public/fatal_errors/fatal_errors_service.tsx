@@ -62,8 +62,7 @@ export class FatalErrorsService {
    *
    * @param rootDomElement
    * @param onFirstErrorCb - Callback function that gets executed after the first error,
-   *   but before the FatalErrorsService renders the error to the DOM. Used by Core to
-   *   to stop all services before showing the error page.
+   *   but before the FatalErrorsService renders the error to the DOM.
    */
   constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
 
