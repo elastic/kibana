@@ -49,6 +49,11 @@ interface ContextMenuActionOptions {
    * Optional icon to display to the left of the action.
    */
   icon?: EuiContextMenuItemIcon;
+
+  /**
+   * Return display name of the action in the menu
+   */
+  getDisplayName: (actionAPI: PanelActionAPI) => string;
 }
 
 interface ContextMenuButtonOptions extends ContextMenuActionOptions {
@@ -68,11 +73,6 @@ interface ContextMenuLinkOptions extends ContextMenuActionOptions {
 
 interface ContextMenuActionsConfig {
   id: string;
-
-  /**
-   * Display name of the action in the menu
-   */
-  displayName: string;
 
   /**
    * Determines which ContextMenuPanel this action is displayed on.
@@ -114,6 +114,11 @@ export class ContextMenuAction {
   public readonly getHref?: (panelActionAPI: PanelActionAPI) => string;
 
   /**
+   * @param {PanelActionAPI} panelActionAPI
+   */
+  public readonly getDisplayName: (panelActionAPI: PanelActionAPI) => string;
+
+  /**
    *
    * @param {string} config.id
    * @param {string} config.displayName
@@ -130,11 +135,11 @@ export class ContextMenuAction {
     options: ContextMenuButtonOptions | ContextMenuLinkOptions = {}
   ) {
     this.id = config.id;
-    this.displayName = config.displayName;
     this.parentPanelId = config.parentPanelId;
 
     this.icon = options.icon;
     this.childContextMenuPanel = options.childContextMenuPanel;
+    this.getDisplayName = options.getDisplayName;
 
     if ('onClick' in options) {
       this.onClick = options.onClick;
