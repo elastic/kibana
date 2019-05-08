@@ -32,7 +32,6 @@ export default async function ({ readConfigFile }) {
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.token.timeout=15s',
         'xpack.security.authc.realms.oidc.oidc1.order=0',
-        `xpack.security.authc.realms.oidc.oidc1.op.name=test-oidc`,
         `xpack.security.authc.realms.oidc.oidc1.rp.client_id=0oa8sqpov3TxMWJOt356`,
         `xpack.security.authc.realms.oidc.oidc1.rp.response_type=code`,
         `xpack.security.authc.realms.oidc.oidc1.rp.redirect_uri=http://localhost:${kibanaPort}/api/security/v1/oidc`,
@@ -52,10 +51,11 @@ export default async function ({ readConfigFile }) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
         '--optimize.enabled=false',
-        '--server.xsrf.whitelist=[\"/api/security/v1/oidc\", \"/api/oidc_provider/token_endpoint\", ' +
-        '\"/api/oidc_provider/userinfo_endpoint\"]',
         '--xpack.security.authProviders=[\"oidc\"]',
         '--xpack.security.auth.oidc.realm=\"oidc1\"',
+        '--server.xsrf.whitelist', JSON.stringify(['/api/security/v1/oidc',
+          '/api/oidc_provider/token_endpoint',
+          '/api/oidc_provider/userinfo_endpoint'])
       ],
     },
   };
