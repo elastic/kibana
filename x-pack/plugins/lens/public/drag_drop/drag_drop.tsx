@@ -68,8 +68,8 @@ export function DragDrop(props: Props) {
   const classSuffix =
     ' lnsDragDrop' +
     (droppable ? ' lnsDragDrop-isDropTarget' : '') +
-    (droppable && state.isActive ? ' lnsDragDrop_isActiveDropTarget' : '') +
-    (isDragging ? ' lnsDragDrop_isDragging' : '');
+    (droppable && state.isActive ? ' lnsDragDrop-isActiveDropTarget' : '') +
+    (isDragging ? ' lnsDragDrop-isDragging' : '');
 
   const dragStart = (e: DroppableEvent) => {
     // Setting stopPropgagation causes Chrome failures, so
