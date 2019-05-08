@@ -18,10 +18,10 @@ export function UsageAPIProvider({ getService }) {
     }
     catch (err) {
       if (err.message.includes('503')) {
-        await new Promise(resolve => {
+        return await new Promise(resolve => {
           setTimeout(async () => {
             resolve(await getStats(test));
-          }, 500);
+          }, 100);
         });
       }
       throw err;
