@@ -157,14 +157,19 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     await Promise.race([
-      // await the "started" log message
-      new Promise(resolve => {
-        this._process.stdout.on('data', data => {
-          if (/started/.test(data)) {
-            resolve();
-          }
-        });
-      }),
+      Promise.all([
+        // wait for native realm to be setup
+        this._nativeRealmSetup,
+
+        // await the "started" log message
+        new Promise(resolve => {
+          this._process.stdout.on('data', data => {
+            if (/started/.test(data)) {
+              resolve();
+            }
+          });
+        }),
+      ]),
 
       // await the outcome of the process in case it exits before starting
       this._outcome.then(() => {
@@ -240,25 +245,31 @@ exports.Cluster = class Cluster {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
+    this._httpPort = new Promise(resolve => {
+      const onData = data => {
+        const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
+
+        if (!match) {
+          return;
+        }
+
+        this._process.stdout.removeListener('data', onData);
+        resolve(match[1]);
+      };
+
+      this._process.stdout.on('data', onData);
+    });
+
     this._process.stdout.on('data', data => {
       const lines = parseEsLog(data.toString());
       lines.forEach(line => {
         this._log.info(line.formattedMessage);
-
-        // once we have the port we can stop checking for it
-        if (this.httpPort) {
-          return;
-        }
-
-        const httpAddressMatch = line.message.match(
-          /HttpServer.+publish_address {[0-9.]+:([0-9]+)/
-        );
-
-        if (httpAddressMatch) {
-          this.httpPort = httpAddressMatch[1];
-          new NativeRealm(options.password, this.httpPort, this._log).setPasswords(options);
-        }
       });
+    });
+
+    this._nativeRealmSetup = this._httpPort.then(async port => {
+      const nativeRealm = new NativeRealm(options.password, port, this._log);
+      await nativeRealm.setPasswords(options);
     });
 
     this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
