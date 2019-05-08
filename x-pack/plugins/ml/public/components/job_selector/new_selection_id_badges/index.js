@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const presentation = () => ({ name: 'presentation', color: '#1EA593' });
+export { NewSelectionIdBadges } from './new_selection_id_badges';
