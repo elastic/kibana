@@ -19,13 +19,14 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
+import { API_BASE_PATH } from '../../../common';
 
 export const registerUserActionRoute = (server: Server) => {
   /*
    * Increment a count on an object representing a specific interaction with the UI.
    */
   server.route({
-    path: '/api/ui_metric/{appName}/{metricTypes}',
+    path: `${API_BASE_PATH}/{appName}/{metricTypes}`,
     method: 'POST',
     handler: async (request: any) => {
       const { appName, metricTypes } = request.params;

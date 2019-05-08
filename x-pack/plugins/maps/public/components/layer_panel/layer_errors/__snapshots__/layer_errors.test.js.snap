@@ -14,7 +14,7 @@ exports[`Should render errors when layer has errors 1`] = `
     </p>
   </EuiCallOut>
   <EuiSpacer
-    margin="m"
+    size="m"
   />
 </Fragment>
 `;

@@ -11,6 +11,7 @@ import header from './header.png';
 export const horizontalProgressBar: ElementFactory = () => ({
   name: 'horizontalProgressBar',
   displayName: 'Horizontal progress bar',
+  tags: ['chart', 'proportion'],
   help: 'Displays progress as a portion of a horizontal bar',
   width: 400,
   height: 30,

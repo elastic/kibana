@@ -45,6 +45,17 @@ export default function ({ getPageObjects, getService }) {
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
+    it('should show dynamic data range in legend', async () => {
+      const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+      const split = layerTOCDetails.trim().split('\n');
+
+      const min = split[0];
+      expect(min).to.equal('3');
+
+      const max = split[2];
+      expect(max).to.equal('12');
+    });
+
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
@@ -59,7 +70,6 @@ export default function ({ getPageObjects, getService }) {
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
       });
     });
-
 
     it('should style fills, points and lines independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
@@ -82,12 +92,30 @@ export default function ({ getPageObjects, getService }) {
 
     });
 
-    describe('inspector', () => {
+    describe('query bar', () => {
+      before(async () => {
+        await PageObjects.maps.setAndSubmitQuery('prop1 < 10 or _index : "geo_shapes*"');
+      });
+
       afterEach(async () => {
         await inspector.close();
       });
 
-      it('should contain terms aggregation elasticsearch request', async () => {
+      it('should apply query to join request', async () => {
+        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        const requestStats = await inspector.getTableData();
+        const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+        expect(totalHits).to.equal('3');
+        const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        expect(hits).to.equal('0'); // aggregation requests do not return any documents
+        const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
+        expect(indexPatternName).to.equal('meta_for_geo_shapes*');
+      });
+
+      it('should not apply query to join request when apply global query is disabled', async () => {
+        await PageObjects.maps.openLayerPanel('geo_shapes*');
+        await PageObjects.maps.disableApplyGlobalQuery();
+
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
         const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
@@ -96,6 +124,13 @@ export default function ({ getPageObjects, getService }) {
         expect(hits).to.equal('0'); // aggregation requests do not return any documents
         const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
         expect(indexPatternName).to.equal('meta_for_geo_shapes*');
+      });
+    });
+
+
+    describe('inspector', () => {
+      afterEach(async () => {
+        await inspector.close();
       });
 
       it('should not contain any elasticsearch request after layer is deleted', async () => {

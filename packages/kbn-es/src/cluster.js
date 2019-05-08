@@ -22,7 +22,13 @@ const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const { log: defaultLog, parseEsLog, extractConfigFiles, decompress } = require('./utils');
+const {
+  log: defaultLog,
+  parseEsLog,
+  extractConfigFiles,
+  decompress,
+  NativeRealm,
+} = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
@@ -145,6 +151,7 @@ exports.Cluster = class Cluster {
    * @param {String} installPath
    * @param {Object} options
    * @property {Array} options.esArgs
+   * @property {String} options.password - super user password used to bootstrap
    * @returns {Promise}
    */
   async start(installPath, options = {}) {
@@ -215,7 +222,7 @@ exports.Cluster = class Cluster {
    * @property {Array} options.esArgs
    * @return {undefined}
    */
-  _exec(installPath, { esArgs = [] }) {
+  _exec(installPath, options = {}) {
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
@@ -223,7 +230,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const args = extractConfigFiles(esArgs, installPath, {
+    const args = extractConfigFiles(options.esArgs || [], installPath, {
       log: this._log,
     }).reduce((acc, cur) => acc.concat(['-E', cur]), []);
 
@@ -236,7 +243,23 @@ exports.Cluster = class Cluster {
 
     this._process.stdout.on('data', data => {
       const lines = parseEsLog(data.toString());
-      lines.forEach(line => this._log.info(line.formattedMessage));
+      lines.forEach(line => {
+        this._log.info(line.formattedMessage);
+
+        // once we have the port we can stop checking for it
+        if (this.httpPort) {
+          return;
+        }
+
+        const httpAddressMatch = line.message.match(
+          /HttpServer.+publish_address {[0-9.]+:([0-9]+)/
+        );
+
+        if (httpAddressMatch) {
+          this.httpPort = httpAddressMatch[1];
+          new NativeRealm(options.password, this.httpPort, this._log).setPasswords(options);
+        }
+      });
     });
 
     this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));

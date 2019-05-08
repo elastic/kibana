@@ -6,191 +6,219 @@
 import { i18n } from '@kbn/i18n';
 import { Feature } from './feature_registry';
 
-const kibanaFeatures: Feature[] = [
-  {
-    id: 'discover',
-    name: i18n.translate('xpack.main.featureRegistry.discoverFeatureName', {
-      defaultMessage: 'Discover',
-    }),
-    icon: 'discoverApp',
-    navLinkId: 'kibana:discover',
-    app: ['kibana'],
-    catalogue: ['discover'],
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['search', 'url'],
-          read: ['config', 'index-pattern'],
+const buildKibanaFeatures = (savedObjectTypes: string[]) => {
+  return [
+    {
+      id: 'discover',
+      name: i18n.translate('xpack.main.featureRegistry.discoverFeatureName', {
+        defaultMessage: 'Discover',
+      }),
+      icon: 'discoverApp',
+      navLinkId: 'kibana:discover',
+      app: ['kibana'],
+      catalogue: ['discover'],
+      privileges: {
+        all: {
+          savedObject: {
+            all: ['search', 'url'],
+            read: ['index-pattern'],
+          },
+          ui: ['show', 'createShortUrl', 'save'],
         },
-        ui: ['show', 'createShortUrl', 'save'],
-      },
-      read: {
-        savedObject: {
-          all: [],
-          read: ['config', 'index-pattern', 'search', 'url'],
+        read: {
+          savedObject: {
+            all: [],
+            read: ['index-pattern', 'search', 'url'],
+          },
+          ui: ['show'],
         },
-        ui: ['show'],
-      },
-    },
-  },
-  {
-    id: 'visualize',
-    name: i18n.translate('xpack.main.featureRegistry.visualizeFeatureName', {
-      defaultMessage: 'Visualize',
-    }),
-    icon: 'visualizeApp',
-    navLinkId: 'kibana:visualize',
-    app: ['kibana'],
-    catalogue: ['visualize'],
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['visualization', 'url'],
-          read: ['config', 'index-pattern', 'search'],
-        },
-        ui: ['show', 'createShortUrl', 'delete', 'save'],
-      },
-      read: {
-        savedObject: {
-          all: [],
-          read: ['config', 'index-pattern', 'search', 'visualization'],
-        },
-        ui: ['show'],
       },
     },
-  },
-  {
-    id: 'dashboard',
-    name: i18n.translate('xpack.main.featureRegistry.dashboardFeatureName', {
-      defaultMessage: 'Dashboard',
-    }),
-    icon: 'dashboardApp',
-    navLinkId: 'kibana:dashboard',
-    app: ['kibana'],
-    catalogue: ['dashboard'],
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['dashboard', 'url'],
-          read: [
-            'config',
-            'index-pattern',
-            'search',
-            'visualization',
-            'timelion-sheet',
-            'canvas-workpad',
-            'map',
-          ],
+    {
+      id: 'visualize',
+      name: i18n.translate('xpack.main.featureRegistry.visualizeFeatureName', {
+        defaultMessage: 'Visualize',
+      }),
+      icon: 'visualizeApp',
+      navLinkId: 'kibana:visualize',
+      app: ['kibana'],
+      catalogue: ['visualize'],
+      privileges: {
+        all: {
+          savedObject: {
+            all: ['visualization', 'url'],
+            read: ['index-pattern', 'search'],
+          },
+          ui: ['show', 'createShortUrl', 'delete', 'save'],
         },
-        ui: ['createNew', 'show', 'showWriteControls'],
-      },
-      read: {
-        savedObject: {
-          all: [],
-          read: [
-            'config',
-            'index-pattern',
-            'search',
-            'visualization',
-            'timelion-sheet',
-            'canvas-workpad',
-            'map',
-            'dashboard',
-          ],
+        read: {
+          savedObject: {
+            all: [],
+            read: ['index-pattern', 'search', 'visualization'],
+          },
+          ui: ['show'],
         },
-        ui: ['show'],
       },
     },
-  },
-  {
-    id: 'dev_tools',
-    name: i18n.translate('xpack.main.featureRegistry.devToolsFeatureName', {
-      defaultMessage: 'Dev Tools',
-    }),
-    icon: 'devToolsApp',
-    navLinkId: 'kibana:dev_tools',
-    app: ['kibana'],
-    catalogue: ['console', 'searchprofiler', 'grokdebugger'],
-    privileges: {
-      all: {
-        api: ['console'],
-        savedObject: {
-          all: [],
-          read: ['config'],
+    {
+      id: 'dashboard',
+      name: i18n.translate('xpack.main.featureRegistry.dashboardFeatureName', {
+        defaultMessage: 'Dashboard',
+      }),
+      icon: 'dashboardApp',
+      navLinkId: 'kibana:dashboard',
+      app: ['kibana'],
+      catalogue: ['dashboard'],
+      privileges: {
+        all: {
+          savedObject: {
+            all: ['dashboard', 'url'],
+            read: [
+              'index-pattern',
+              'search',
+              'visualization',
+              'timelion-sheet',
+              'canvas-workpad',
+              'map',
+            ],
+          },
+          ui: ['createNew', 'show', 'showWriteControls'],
         },
-        ui: ['show'],
-      },
-      read: {
-        api: ['console'],
-        savedObject: {
-          all: [],
-          read: ['config'],
+        read: {
+          savedObject: {
+            all: [],
+            read: [
+              'index-pattern',
+              'search',
+              'visualization',
+              'timelion-sheet',
+              'canvas-workpad',
+              'map',
+              'dashboard',
+            ],
+          },
+          ui: ['show'],
         },
-        ui: ['show'],
-      },
-    },
-    privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
-      defaultMessage:
-        'User should also be granted the appropriate Elasticsearch cluster and index privileges',
-    }),
-  },
-  {
-    id: 'advancedSettings',
-    name: i18n.translate('xpack.main.featureRegistry.advancedSettingsFeatureName', {
-      defaultMessage: 'Advanced Settings',
-    }),
-    icon: 'advancedSettingsApp',
-    app: ['kibana'],
-    catalogue: ['advanced_settings'],
-    management: {
-      kibana: ['settings'],
-    },
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['config'],
-          read: [],
-        },
-        ui: ['save'],
-      },
-      read: {
-        savedObject: {
-          all: [],
-          read: ['config'],
-        },
-        ui: [],
       },
     },
-  },
-  {
-    id: 'indexPatterns',
-    name: i18n.translate('xpack.main.featureRegistry.indexPatternFeatureName', {
-      defaultMessage: 'Index Pattern Management',
-    }),
-    icon: 'indexPatternApp',
-    app: ['kibana'],
-    catalogue: ['index_patterns'],
-    management: {
-      kibana: ['index_patterns'],
-    },
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['index-pattern'],
-          read: ['config'],
+    {
+      id: 'dev_tools',
+      name: i18n.translate('xpack.main.featureRegistry.devToolsFeatureName', {
+        defaultMessage: 'Dev Tools',
+      }),
+      icon: 'devToolsApp',
+      navLinkId: 'kibana:dev_tools',
+      app: ['kibana'],
+      catalogue: ['console', 'searchprofiler', 'grokdebugger'],
+      privileges: {
+        all: {
+          api: ['console'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show', 'save'],
         },
-        ui: ['createNew'],
-      },
-      read: {
-        savedObject: {
-          all: [],
-          read: ['index-pattern', 'config'],
+        read: {
+          api: ['console'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show'],
         },
-        ui: [],
+      },
+      privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
+        defaultMessage:
+          'User should also be granted the appropriate Elasticsearch cluster and index privileges',
+      }),
+    },
+    {
+      id: 'advancedSettings',
+      name: i18n.translate('xpack.main.featureRegistry.advancedSettingsFeatureName', {
+        defaultMessage: 'Advanced Settings',
+      }),
+      icon: 'advancedSettingsApp',
+      app: ['kibana'],
+      catalogue: ['advanced_settings'],
+      management: {
+        kibana: ['settings'],
+      },
+      privileges: {
+        all: {
+          savedObject: {
+            all: ['config'],
+            read: [],
+          },
+          ui: ['save'],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
       },
     },
-  },
-];
+    {
+      id: 'indexPatterns',
+      name: i18n.translate('xpack.main.featureRegistry.indexPatternFeatureName', {
+        defaultMessage: 'Index Pattern Management',
+      }),
+      icon: 'indexPatternApp',
+      app: ['kibana'],
+      catalogue: ['index_patterns'],
+      management: {
+        kibana: ['index_patterns'],
+      },
+      privileges: {
+        all: {
+          savedObject: {
+            all: ['index-pattern'],
+            read: [],
+          },
+          ui: ['save'],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: ['index-pattern'],
+          },
+          ui: [],
+        },
+      },
+    },
+    {
+      id: 'savedObjectsManagement',
+      name: i18n.translate('xpack.main.featureRegistry.savedObjectsManagementFeatureName', {
+        defaultMessage: 'Saved Objects Management',
+      }),
+      icon: 'savedObjectsApp',
+      app: ['kibana'],
+      catalogue: ['saved_objects'],
+      management: {
+        kibana: ['objects'],
+      },
+      privileges: {
+        all: {
+          savedObject: {
+            all: [...savedObjectTypes],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [...savedObjectTypes],
+          },
+          ui: [],
+        },
+      },
+    },
+  ];
+};
 
 const timelionFeatures: Feature[] = [
   {
@@ -204,14 +232,14 @@ const timelionFeatures: Feature[] = [
       all: {
         savedObject: {
           all: ['timelion-sheet'],
-          read: ['config', 'index-pattern'],
+          read: ['index-pattern'],
         },
         ui: ['save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'timelion-sheet'],
+          read: ['index-pattern', 'timelion-sheet'],
         },
         ui: [],
       },
@@ -219,7 +247,11 @@ const timelionFeatures: Feature[] = [
   },
 ];
 
-export function registerOssFeatures(registerFeature: (feature: Feature) => void) {
+export function registerOssFeatures(
+  registerFeature: (feature: Feature) => void,
+  savedObjectTypes: string[]
+) {
+  const kibanaFeatures = buildKibanaFeatures(savedObjectTypes);
   for (const feature of [...kibanaFeatures, ...timelionFeatures]) {
     registerFeature(feature);
   }

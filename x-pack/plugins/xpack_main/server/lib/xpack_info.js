@@ -82,6 +82,10 @@ export class XPackInfo {
       continuePollingOnError: true
     });
 
+    server.events.on('stop', () => {
+      this._poller.stop();
+    });
+
     this._license = new XPackInfoLicense(
       () => this._cache.response && this._cache.response.license
     );

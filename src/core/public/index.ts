@@ -17,17 +17,34 @@
  * under the License.
  */
 
-import { BasePathSetup } from './base_path';
-import { Capabilities, CapabilitiesSetup } from './capabilities';
-import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
+import { BasePathSetup, BasePathStart } from './base_path';
+import {
+  ChromeBadge,
+  ChromeBrand,
+  ChromeBreadcrumb,
+  ChromeHelpExtension,
+  ChromeSetup,
+} from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
-import { I18nSetup } from './i18n';
-import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
-import { FlyoutRef, OverlaySetup } from './overlays';
+import { I18nSetup, I18nStart } from './i18n';
+import {
+  InjectedMetadataParams,
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+  LegacyNavLink,
+} from './injected_metadata';
+import {
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsApi,
+  NotificationsStart,
+} from './notifications';
+import { FlyoutRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
 
@@ -41,6 +58,8 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
   /** {@link I18nSetup} */
   i18n: I18nSetup;
   /** {@link InjectedMetadataSetup} */
@@ -53,39 +72,57 @@ export interface CoreSetup {
   http: HttpSetup;
   /** {@link BasePathSetup} */
   basePath: BasePathSetup;
-  /** {@link CapabilitiesSetup} */
-  capabilities: CapabilitiesSetup;
   /** {@link UiSettingsSetup} */
   uiSettings: UiSettingsSetup;
   /** {@link ChromeSetup} */
   chrome: ChromeSetup;
-  /** {@link OverlaySetup} */
-  overlays: OverlaySetup;
+}
+
+export interface CoreStart {
+  /** {@link ApplicationStart} */
+  application: ApplicationStart;
+  /** {@link BasePathStart} */
+  basePath: BasePathStart;
+  /** {@link I18nStart} */
+  i18n: I18nStart;
+  /** {@link InjectedMetadataStart} */
+  injectedMetadata: InjectedMetadataStart;
+  /** {@link NotificationsStart} */
+  notifications: NotificationsStart;
+  /** {@link OverlayStart} */
+  overlays: OverlayStart;
 }
 
 export {
+  ApplicationSetup,
+  ApplicationStart,
   BasePathSetup,
+  BasePathStart,
   HttpSetup,
   FatalErrorsSetup,
-  CapabilitiesSetup,
   Capabilities,
   ChromeSetup,
+  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
   I18nSetup,
+  I18nStart,
   InjectedMetadataSetup,
+  InjectedMetadataStart,
   InjectedMetadataParams,
+  LegacyNavLink,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
   PluginSetupContext,
   NotificationsSetup,
-  OverlaySetup,
+  NotificationsStart,
+  OverlayStart,
   FlyoutRef,
   Toast,
   ToastInput,
-  ToastsSetup,
+  ToastsApi,
   UiSettingsClient,
   UiSettingsState,
   UiSettingsSetup,

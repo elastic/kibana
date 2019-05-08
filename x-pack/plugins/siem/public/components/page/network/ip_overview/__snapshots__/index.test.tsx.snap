@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IP Overview Component rendering it renders the default IP Overview 1`] = `
+<Component
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <pure(Component)
+    flowTarget="source"
+    ip="10.10.10.10"
+    loading={false}
+    type="details"
+    updateFlowTargetAction={[MockFunction]}
+  />
+</Component>
+`;

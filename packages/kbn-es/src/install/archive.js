@@ -22,8 +22,10 @@ const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
 const del = require('del');
+const url = require('url');
 const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
+const { Artifact } = require('../artifact');
 
 /**
  * Extracts an ES archive and optionally installs plugins
@@ -44,22 +46,27 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     log = defaultLog,
   } = options;
 
+  let dest = archive;
+  if (['http:', 'https:'].includes(url.parse(archive).protocol)) {
+    const artifact = await Artifact.getArchive(archive, log);
+    dest = path.resolve(basePath, 'cache', artifact.getFilename());
+    await artifact.download(dest);
+  }
+
   if (fs.existsSync(installPath)) {
     log.info('install directory already exists, removing');
     await del(installPath, { force: true });
   }
 
-  log.info('extracting %s', chalk.bold(archive));
-  await decompress(archive, installPath);
+  log.info('extracting %s', chalk.bold(dest));
+  await decompress(dest, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
-  if (license === 'trial') {
+  if (license !== 'oss') {
     // starting in 6.3, security is disabled by default. Since we bootstrap
     // the keystore, we can enable security ourselves.
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
-  }
 
-  if (license !== 'oss') {
     await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
     await configureKeystore(installPath, password, log);
   }

@@ -11,6 +11,10 @@ import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import { createMapStore } from '../store/store';
+import { addLayerWithoutDataSync } from '../actions/store_actions';
+import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { capabilities } from 'ui/capabilities';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
 
@@ -28,8 +32,21 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     this._savedObjectLoader = gisMapSavedObjectLoader;
   }
 
-  async _getIndexPatterns(indexPatternIds = []) {
-    const promises = indexPatternIds.map(async (indexPatternId) => {
+  async _getIndexPatterns(layerListJSON) {
+    // Need to extract layerList from store to get queryable index pattern ids
+    const store = createMapStore();
+    try {
+      JSON.parse(layerListJSON).forEach(layerDescriptor => {
+        store.dispatch(addLayerWithoutDataSync(layerDescriptor));
+      });
+    } catch (error) {
+      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory', {
+        defaultMessage: 'Unable to load map, malformed saved object',
+      }));
+    }
+    const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
+
+    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
       try {
         return await indexPatternService.get(indexPatternId);
       } catch (error) {
@@ -44,13 +61,17 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
   async create(panelMetadata, onEmbeddableStateChanged) {
     const savedMap = await this._savedObjectLoader.get(panelMetadata.id);
-    const indexPatterns = await this._getIndexPatterns(savedMap.indexPatternIds);
+
+    const indexPatterns = await this._getIndexPatterns(savedMap.layerListJSON);
+
+    const editable = capabilities.get().maps.save;
 
     return new MapEmbeddable({
       onEmbeddableStateChanged,
       embeddableConfig: panelMetadata.embeddableConfig,
       savedMap,
       editUrl: chrome.addBasePath(createMapPath(panelMetadata.id)),
+      editable,
       indexPatterns,
     });
   }
