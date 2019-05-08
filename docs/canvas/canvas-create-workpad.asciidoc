@@ -51,21 +51,24 @@ editor and edit the expression associated with an element directly.
 
 [float]
 === Working with data sources 
-Each Canvas element 
-From the sidebar editor, Click *Data* > *Change your data source*. 
+Each Canvas element is connected to some demo data by default. Once you place the 
+element on your workpad, you can configure it to display your own data.
+
+From the sidebar editor, click *Data > Change your data source* to connect a new 
+data source to your element.
 
 There are four types of data sources to choose from: 
 
-* Timelion
-* Demo data
-* Elasticsearch SQL
-* Elasticsearch raw documents 
+Timelion::
+* 
+Demo data::
+* Elements are connected to demo data by default
+Elasticsearch SQL::
+* {ref}/sql-overview.html
+{es} raw documents:: 
+* sd
 
-Click *Data > Change your data source* to select the data source that you want
-your element to display. 
-
-
-
+After you change the data source for an element, update the ... in the ... 
 
 
 [float]
@@ -76,6 +79,6 @@ Next, click *+* on the righthand side to add a new page.
 
 [float]
 === Sharing your workpad
-
+You can share your workpad in *Display* mode or download.. 
 
 
