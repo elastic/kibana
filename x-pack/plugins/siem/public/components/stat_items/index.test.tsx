@@ -12,8 +12,6 @@ import { StatItemsComponent, StatItemsProps } from '.';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
-// @ts-ignore
-import { EuiAreaSeries, EuiBarSeries } from '@elastic/eui/lib/experimental';
 
 describe('Stat Items', () => {
   describe.each([

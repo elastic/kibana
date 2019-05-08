@@ -9,8 +9,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiHorizontalRule,
-  // @ts-ignore
-  EuiStat,
   EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
@@ -30,6 +28,20 @@ export const WrappedByAutoSizer = styled.div`
   &:hover {
     z-index: 100;
   }
+`;
+
+const FlexGroup = styled(EuiFlexGroup)`
+  height: '100%';
+`;
+
+const FlexItem = styled(EuiFlexItem)`
+  min-width: 0;
+`;
+
+const StatValue = styled(EuiTitle)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export interface StatItem {
@@ -94,7 +106,7 @@ export const StatItemsComponent = pure<StatItemsProps>(
             {fields.map(field => (
               <FlexItem key={`stat-items-field-${field.key}`}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  {(isAreaChartDataAvailable || isBarChartDataAbailable) && field.icon ? (
+                  {(isAreaChartDataAvailable || isBarChartDataAbailable) && field.icon && (
                     <FlexItem grow={false}>
                       <EuiIcon
                         type={field.icon}
@@ -103,7 +115,7 @@ export const StatItemsComponent = pure<StatItemsProps>(
                         data-test-subj="stat-icon"
                       />
                     </FlexItem>
-                  ) : null}
+                  )}
 
                   <FlexItem>
                     <StatValue>
@@ -118,20 +130,20 @@ export const StatItemsComponent = pure<StatItemsProps>(
             ))}
           </EuiFlexGroup>
 
-          {enableAreaChart || enableBarChart ? <EuiHorizontalRule /> : null}
+          {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
 
           <EuiFlexGroup>
-            {enableBarChart ? (
+            {enableBarChart && (
               <FlexItem>
                 <BarChart barChart={barChart!} />
               </FlexItem>
-            ) : null}
+            )}
 
-            {enableAreaChart ? (
+            {enableAreaChart && (
               <FlexItem>
                 <AreaChart areaChart={areaChart!} />
               </FlexItem>
-            ) : null}
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       </FlexItem>
@@ -140,21 +152,11 @@ export const StatItemsComponent = pure<StatItemsProps>(
 );
 
 export const ChartHolder = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
+  <FlexGroup justifyContent="center" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiText size="s" textAlign="center" color="subdued">
         Chart Data Not Available
       </EuiText>
     </EuiFlexItem>
-  </EuiFlexGroup>
+  </FlexGroup>
 );
-
-const FlexItem = styled(EuiFlexItem)`
-  min-width: 0;
-`;
-
-const StatValue = styled(EuiTitle)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;

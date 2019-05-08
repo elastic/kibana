@@ -11,7 +11,6 @@ import {
 } from '@elastic/eui';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-// @ts-ignore
 import { EuiSeriesChart, EuiBarSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
 import { BarChartData, WrappedByAutoSizer, ChartHolder } from '.';
 import { AutoSizer } from '../auto_sizer';
@@ -39,7 +38,6 @@ export const BarChartBaseComponent = pure<{
     >
       {data.map(series => {
         return (
-          // @ts-ignore
           <EuiBarSeries
             key={`stat-items-areachart-${series.key}`}
             name={series.key}
@@ -75,19 +73,16 @@ export const BarChartWithCustomPrompt = pure<{
   );
 });
 
-export const BarChart = pure<{ barChart: BarChartData[] | [] | null | undefined }>(
-  ({ barChart }) => (
-    <AutoSizer detectAnyWindowResize={false} content>
-      {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer innerRef={measureRef}>
-          <BarChartWithCustomPrompt height={height} width={width} data={barChart} />
-        </WrappedByAutoSizer>
-      )}
-    </AutoSizer>
-  )
-);
+export const BarChart = pure<{ barChart: BarChartData[] | null | undefined }>(({ barChart }) => (
+  <AutoSizer detectAnyWindowResize={false} content>
+    {({ measureRef, content: { height, width } }) => (
+      <WrappedByAutoSizer innerRef={measureRef}>
+        <BarChartWithCustomPrompt height={height} width={width} data={barChart} />
+      </WrappedByAutoSizer>
+    )}
+  </AutoSizer>
+));
 
-// @ts-ignore
 const SeriesChart = styled(EuiSeriesChart)`
   svg
     .rv-xy-plot__axis--horizontal

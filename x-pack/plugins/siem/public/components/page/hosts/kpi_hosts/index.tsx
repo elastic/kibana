@@ -147,12 +147,12 @@ const addValueToAreaChart = (fields: StatItem[], data: KpiHostsData): AreaChartD
 const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartData[] => {
   if (fields.length === 0) return [];
   return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
-    const key = get('key', field);
+    const key: string = get('key', field);
     const x: number | null = getOr(null, key, data);
     const y: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
-    const dataSet: BarChartData[] = [];
-    if (y != null)
-      dataSet.push({
+
+    return acc.concat([
+      {
         ...field,
         value: [
           {
@@ -160,7 +160,7 @@ const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartDat
             y,
           },
         ],
-      });
-    return acc.concat(dataSet);
+      },
+    ]);
   }, []);
 };

@@ -60,14 +60,18 @@ describe.each([
         color: '#490092',
       },
     ],
+  ],
+  [
     [
-      { key: 'uniqueSourceIps', value: [{ x: null, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ x: 1714, y: '' }], color: '#DB1374' },
       {
         key: 'uniqueDestinationIps',
-        value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+        value: [{ x: 2354, y: '' }],
         color: '#490092',
       },
     ],
+  ],
+  [
     [
       { key: 'uniqueSourceIps', value: [{ x: 0, y: 'uniqueSourceIps' }], color: '#DB1374' },
       {
@@ -91,28 +95,68 @@ describe.each([
       expect(wrapper.find('ChartHolder')).toHaveLength(0);
     });
   });
+});
 
-  describe.each([
-    [],
-    null,
+describe.each([
+  [],
+  null,
+  [
     [
-      [
-        { key: 'uniqueSourceIps', value: [{ x: null, y: 'uniqueSourceIps' }], color: '#DB1374' },
-        {
-          key: 'uniqueDestinationIps',
-          value: [{ x: null, y: 'uniqueDestinationIps' }],
-          color: '#490092',
-        },
-      ],
+      { key: 'uniqueSourceIps', color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        color: '#490092',
+      },
     ],
-  ])('renders prompt', (data: BarChartData[] | [] | null | undefined) => {
-    beforeAll(() => {
-      wrapper = mount(<BarChartWithCustomPrompt height={100} width={120} data={data} />);
-    });
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{}], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{}],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ x: null, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ x: null, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ x: null, y: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+  ],
+])('renders prompt', (data: BarChartData[] | [] | null | undefined) => {
+  let wrapper: ReactWrapper;
+  beforeAll(() => {
+    wrapper = mount(<BarChartWithCustomPrompt height={100} width={120} data={data} />);
+  });
 
-    it('render Chart Holder', () => {
-      expect(wrapper.find('[data-test-subj="stat-bar-chart"]')).toHaveLength(0);
-      expect(wrapper.find('ChartHolder')).toHaveLength(1);
-    });
+  it('render Chart Holder', () => {
+    expect(wrapper.find('[data-test-subj="stat-bar-chart"]')).toHaveLength(0);
+    expect(wrapper.find('ChartHolder')).toHaveLength(1);
   });
 });

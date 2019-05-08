@@ -66,31 +66,50 @@ describe('AreaChartBaseComponent', () => {
 
 describe('AreaChartWithCustomPrompt', () => {
   let wrapper: ReactWrapper;
-  const mockAreaChartData: AreaChartData[] = [
-    {
-      key: 'uniqueSourceIpsHistogram',
-      value: [
-        { x: 1556686800000, y: 580213 },
-        { x: 1556730000000, y: 1096175 },
-        { x: 1556773200000, y: 12382 },
+  describe.each([
+    [
+      [
+        {
+          key: 'uniqueSourceIpsHistogram',
+          value: [
+            { x: 1556686800000, y: 580213 },
+            { x: 1556730000000, y: 1096175 },
+            { x: 1556773200000, y: 12382 },
+          ],
+          color: '#DB1374',
+        },
+        {
+          key: 'uniqueDestinationIpsHistogram',
+          value: [
+            { x: 1556686800000, y: 565975 },
+            { x: 1556730000000, y: 1084366 },
+            { x: 1556773200000, y: 12280 },
+          ],
+          color: '#490092',
+        },
       ],
-      color: '#DB1374',
-    },
-    {
-      key: 'uniqueDestinationIpsHistogram',
-      value: [
-        { x: 1556686800000, y: 565975 },
-        { x: 1556730000000, y: 1084366 },
-        { x: 1556773200000, y: 12280 },
+      [
+        [
+          {
+            key: 'uniqueSourceIpsHistogram',
+            value: [],
+            color: '#DB1374',
+          },
+          {
+            key: 'uniqueDestinationIpsHistogram',
+            value: [
+              { x: 1556686800000, y: 565975 },
+              { x: 1556730000000, y: 1084366 },
+              { x: 1556773200000, y: 12280 },
+            ],
+            color: '#490092',
+          },
+        ],
       ],
-      color: '#490092',
-    },
-  ];
-  describe('renders areachart', () => {
+    ],
+  ])('renders areachart', (data: AreaChartData[] | [] | null | undefined) => {
     beforeAll(() => {
-      wrapper = mount(
-        <AreaChartWithCustomPrompt height={100} width={120} data={mockAreaChartData} />
-      );
+      wrapper = mount(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
 
     it('render AreaChartBaseComponent', () => {
@@ -99,7 +118,78 @@ describe('AreaChartWithCustomPrompt', () => {
     });
   });
 
-  describe.each([[], null])('renders prompt', (data: AreaChartData[] | [] | null | undefined) => {
+  describe.each([
+    null,
+    [],
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: null,
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: null,
+        color: '#490092',
+      },
+    ],
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [{ x: 1556686800000 }, { x: 1556730000000 }, { x: 1556773200000 }],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [{ x: 1556686800000 }, { x: 1556730000000 }, { x: 1556773200000 }],
+        color: '#490092',
+      },
+    ],
+    [
+      [
+        {
+          key: 'uniqueSourceIpsHistogram',
+          value: [
+            { x: 1556686800000, y: 580213 },
+            { x: 1556730000000, y: null },
+            { x: 1556773200000, y: 12382 },
+          ],
+          color: '#DB1374',
+        },
+        {
+          key: 'uniqueDestinationIpsHistogram',
+          value: [
+            { x: 1556686800000, y: 565975 },
+            { x: 1556730000000, y: 1084366 },
+            { x: 1556773200000, y: 12280 },
+          ],
+          color: '#490092',
+        },
+      ],
+    ],
+    [
+      [
+        {
+          key: 'uniqueSourceIpsHistogram',
+          value: [
+            { x: 1556686800000, y: 580213 },
+            { x: 1556730000000, y: {} },
+            { x: 1556773200000, y: 12382 },
+          ],
+          color: '#DB1374',
+        },
+        {
+          key: 'uniqueDestinationIpsHistogram',
+          value: [
+            { x: 1556686800000, y: 565975 },
+            { x: 1556730000000, y: 1084366 },
+            { x: 1556773200000, y: 12280 },
+          ],
+          color: '#490092',
+        },
+      ],
+    ],
+  ])('renders prompt', (data: AreaChartData[] | [] | null | undefined) => {
     beforeAll(() => {
       wrapper = mount(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
