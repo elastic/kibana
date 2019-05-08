@@ -117,7 +117,7 @@ export class Config {
         `Unexpected environment "${env}", expected one of "development" or "production"`
       );
     }
-
+    console.log(`DEBUGGING: ${JSON.stringify(newVals)}`);
     const results = Joi.validate(newVals, this.getSchema(), {
       context,
       abortEarly: false
