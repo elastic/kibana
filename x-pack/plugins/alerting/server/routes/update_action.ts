@@ -16,7 +16,7 @@ interface UpdateActionRequest extends Hapi.Request {
     attributes: {
       description: string;
       actionTypeId: string;
-      actionTypeOptions: { [key: string]: any };
+      actionTypeConfig: { [key: string]: any };
     };
     version?: string;
     references: SavedObjectReference[];
@@ -40,7 +40,7 @@ export function updateActionRoute(server: Hapi.Server) {
               .keys({
                 description: Joi.string().required(),
                 actionTypeId: Joi.string().required(),
-                actionTypeOptions: Joi.object(),
+                actionTypeConfig: Joi.object(),
               })
               .required(),
             version: Joi.string(),

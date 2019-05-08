@@ -39,7 +39,7 @@ describe('create()', () => {
     const result = await actionService.create(savedObjectsClient, {
       description: 'my description',
       actionTypeId: 'my-action-type',
-      actionTypeOptions: {},
+      actionTypeConfig: {},
     });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
@@ -49,8 +49,8 @@ describe('create()', () => {
       "action",
       Object {
         "actionTypeId": "my-action-type",
-        "actionTypeOptions": Object {},
-        "actionTypeOptionsSecrets": Object {},
+        "actionTypeConfig": Object {},
+        "actionTypeConfigSecrets": Object {},
         "description": "my description",
       },
     ],
@@ -65,14 +65,14 @@ describe('create()', () => {
 `);
   });
 
-  test('validates actionTypeOptions', async () => {
+  test('validates actionTypeConfig', async () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        actionTypeOptions: Joi.object()
+        actionTypeConfig: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })
@@ -84,7 +84,7 @@ describe('create()', () => {
       actionService.create(savedObjectsClient, {
         description: 'my description',
         actionTypeId: 'my-action-type',
-        actionTypeOptions: {},
+        actionTypeConfig: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
@@ -98,7 +98,7 @@ describe('create()', () => {
       actionService.create(savedObjectsClient, {
         description: 'my description',
         actionTypeId: 'unregistered-action-type',
-        actionTypeOptions: {},
+        actionTypeConfig: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"unregistered-action-type\\" is not registered."`
@@ -119,7 +119,7 @@ describe('create()', () => {
     const result = await actionService.create(savedObjectsClient, {
       description: 'my description',
       actionTypeId: 'my-action-type',
-      actionTypeOptions: {
+      actionTypeConfig: {
         a: true,
         b: true,
         c: true,
@@ -133,11 +133,11 @@ describe('create()', () => {
       "action",
       Object {
         "actionTypeId": "my-action-type",
-        "actionTypeOptions": Object {
+        "actionTypeConfig": Object {
           "a": true,
           "c": true,
         },
-        "actionTypeOptionsSecrets": Object {
+        "actionTypeConfigSecrets": Object {
           "b": true,
         },
         "description": "my description",
@@ -254,7 +254,7 @@ describe('update()', () => {
       {
         description: 'my description',
         actionTypeId: 'my-action-type',
-        actionTypeOptions: {},
+        actionTypeConfig: {},
       },
       {}
     );
@@ -267,8 +267,8 @@ describe('update()', () => {
       "my-alert",
       Object {
         "actionTypeId": "my-action-type",
-        "actionTypeOptions": Object {},
-        "actionTypeOptionsSecrets": Object {},
+        "actionTypeConfig": Object {},
+        "actionTypeConfigSecrets": Object {},
         "description": "my description",
       },
       Object {},
@@ -284,14 +284,14 @@ describe('update()', () => {
 `);
   });
 
-  test('validates actionTypeOptions', async () => {
+  test('validates actionTypeConfig', async () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        actionTypeOptions: Joi.object()
+        actionTypeConfig: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })
@@ -306,7 +306,7 @@ describe('update()', () => {
         {
           description: 'my description',
           actionTypeId: 'my-action-type',
-          actionTypeOptions: {},
+          actionTypeConfig: {},
         },
         {}
       )
@@ -325,7 +325,7 @@ describe('update()', () => {
         {
           description: 'my description',
           actionTypeId: 'unregistered-action-type',
-          actionTypeOptions: {},
+          actionTypeConfig: {},
         },
         {}
       )
@@ -351,7 +351,7 @@ describe('update()', () => {
       {
         description: 'my description',
         actionTypeId: 'my-action-type',
-        actionTypeOptions: {
+        actionTypeConfig: {
           a: true,
           b: true,
           c: true,
@@ -368,11 +368,11 @@ describe('update()', () => {
       "my-alert",
       Object {
         "actionTypeId": "my-action-type",
-        "actionTypeOptions": Object {
+        "actionTypeConfig": Object {
           "a": true,
           "c": true,
         },
-        "actionTypeOptionsSecrets": Object {
+        "actionTypeConfigSecrets": Object {
           "b": true,
         },
         "description": "my description",
@@ -405,7 +405,7 @@ describe('fire()', () => {
       id: 'mock-action',
       attributes: {
         actionTypeId: 'mock',
-        actionTypeOptionsSecrets: {
+        actionTypeConfigSecrets: {
           foo: true,
         },
       },
@@ -448,7 +448,7 @@ describe('fire()', () => {
       id: 'mock-action',
       attributes: {
         actionTypeId: 'non-registered-action-type',
-        actionTypeOptionsSecrets: {
+        actionTypeConfigSecrets: {
           foo: true,
         },
       },
@@ -474,11 +474,11 @@ describe('fire()', () => {
       id: 'mock-action',
       attributes: {
         actionTypeId: 'mock',
-        actionTypeOptions: {
+        actionTypeConfig: {
           a: true,
           c: true,
         },
-        actionTypeOptionsSecrets: {
+        actionTypeConfigSecrets: {
           b: true,
         },
       },

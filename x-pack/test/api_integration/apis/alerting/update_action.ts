@@ -24,7 +24,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             actionTypeId: 'test',
             description: 'My description updated',
-            actionTypeOptions: {},
+            actionTypeConfig: {},
           },
         })
         .expect(200)
@@ -38,7 +38,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             attributes: {
               actionTypeId: 'test',
               description: 'My description updated',
-              actionTypeOptions: {},
+              actionTypeConfig: {},
             },
           });
         });
@@ -52,7 +52,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             actionTypeId: 'test',
             description: 'My description updated',
-            actionTypeOptions: {},
+            actionTypeConfig: {},
           },
         })
         .expect(404)

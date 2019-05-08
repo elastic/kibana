@@ -6,7 +6,7 @@
       "action": {
         "description": "My description",
         "actionTypeId": "test",
-        "actionTypeOptions": {
+        "actionTypeConfig": {
           "foo": true,
           "bar": false
         }

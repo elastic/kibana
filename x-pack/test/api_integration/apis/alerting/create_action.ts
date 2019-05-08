@@ -20,7 +20,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action',
             actionTypeId: 'test',
-            actionTypeOptions: {},
+            actionTypeConfig: {},
           },
         })
         .expect(200)
@@ -31,7 +31,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             attributes: {
               description: 'My action',
               actionTypeId: 'test',
-              actionTypeOptions: {},
+              actionTypeConfig: {},
             },
             references: [],
             updated_at: resp.body.updated_at,
@@ -49,7 +49,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           attributes: {
             description: 'My action',
             actionTypeId: 'unregistered-action-type',
-            actionTypeOptions: {},
+            actionTypeConfig: {},
           },
         })
         .expect(400)

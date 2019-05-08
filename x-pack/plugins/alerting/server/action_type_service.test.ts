@@ -157,7 +157,7 @@ describe('validateParams()', () => {
   });
 });
 
-describe('validateActionTypeOptions()', () => {
+describe('validateActionTypeConfig()', () => {
   test('should pass when validation not defined', () => {
     const actionTypeService = new ActionTypeService();
     actionTypeService.register({
@@ -165,16 +165,16 @@ describe('validateActionTypeOptions()', () => {
       name: 'My action type',
       async executor() {},
     });
-    actionTypeService.validateActionTypeOptions('my-action-type', {});
+    actionTypeService.validateActionTypeConfig('my-action-type', {});
   });
 
-  test('should validate and pass when actionTypeOptions is valid', () => {
+  test('should validate and pass when actionTypeConfig is valid', () => {
     const actionTypeService = new ActionTypeService();
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        actionTypeOptions: Joi.object()
+        actionTypeConfig: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })
@@ -182,16 +182,16 @@ describe('validateActionTypeOptions()', () => {
       },
       async executor() {},
     });
-    actionTypeService.validateActionTypeOptions('my-action-type', { param1: 'value' });
+    actionTypeService.validateActionTypeConfig('my-action-type', { param1: 'value' });
   });
 
-  test('should validate and throw error when actionTypeOptions is invalid', () => {
+  test('should validate and throw error when actionTypeConfig is invalid', () => {
     const actionTypeService = new ActionTypeService();
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        actionTypeOptions: Joi.object()
+        actionTypeConfig: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })
@@ -200,7 +200,7 @@ describe('validateActionTypeOptions()', () => {
       async executor() {},
     });
     expect(() =>
-      actionTypeService.validateActionTypeOptions('my-action-type', {})
+      actionTypeService.validateActionTypeConfig('my-action-type', {})
     ).toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -240,10 +240,12 @@ describe('execute()', () => {
   "calls": Array [
     Array [
       Object {
-        "foo": true,
-      },
-      Object {
-        "bar": false,
+        "actionTypeConfig": Object {
+          "foo": true,
+        },
+        "params": Object {
+          "bar": false,
+        },
       },
     ],
   ],
@@ -279,7 +281,7 @@ describe('execute()', () => {
     );
   });
 
-  test('validates actionTypeOptions', async () => {
+  test('validates actionTypeConfig', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
     const actionTypeService = new ActionTypeService();
     actionTypeService.register({
@@ -287,7 +289,7 @@ describe('execute()', () => {
       name: 'My action type',
       executor,
       validate: {
-        actionTypeOptions: Joi.object()
+        actionTypeConfig: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })

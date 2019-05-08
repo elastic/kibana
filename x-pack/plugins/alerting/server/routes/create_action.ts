@@ -21,7 +21,7 @@ interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
     attributes: {
       description: string;
       actionTypeId: string;
-      actionTypeOptions: { [key: string]: any };
+      actionTypeConfig: { [key: string]: any };
     };
     migrationVersion?: { [key: string]: string };
     references: SavedObjectReference[];
@@ -39,7 +39,7 @@ export function createActionRoute(server: Hapi.Server) {
             .keys({
               description: Joi.string().required(),
               actionTypeId: Joi.string().required(),
-              actionTypeOptions: Joi.object(),
+              actionTypeConfig: Joi.object(),
             })
             .required(),
           migrationVersion: Joi.object().optional(),

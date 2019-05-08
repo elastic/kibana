@@ -29,7 +29,7 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
             attributes: {
               actionTypeId: 'test',
               description: 'My description',
-              actionTypeOptions: {
+              actionTypeConfig: {
                 bar: false,
                 foo: true,
               },

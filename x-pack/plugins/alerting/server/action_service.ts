@@ -11,14 +11,14 @@ import { ActionTypeService } from './action_type_service';
 interface Action {
   description: string;
   actionTypeId: string;
-  actionTypeOptions: { [key: string]: any };
+  actionTypeConfig: { [key: string]: any };
 }
 
 interface EncryptedAction extends Action {
   description: string;
   actionTypeId: string;
-  actionTypeOptions: { [key: string]: any };
-  actionTypeOptionsSecrets: { [key: string]: any };
+  actionTypeConfig: { [key: string]: any };
+  actionTypeConfigSecrets: { [key: string]: any };
 }
 
 interface FireActionOptions {
@@ -61,9 +61,9 @@ export class ActionService {
     if (!this.actionTypeService.has(actionTypeId)) {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
-    this.actionTypeService.validateActionTypeOptions(actionTypeId, data.actionTypeOptions);
-    const actionWithSplitActionTypeOptions = this.applyEncryptedAttributes(data);
-    return await savedObjectsClient.create<any>('action', actionWithSplitActionTypeOptions);
+    this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
+    const actionWithSplitActionTypeConfig = this.applyEncryptedAttributes(data);
+    return await savedObjectsClient.create<any>('action', actionWithSplitActionTypeConfig);
   }
 
   public async get(savedObjectsClient: SavedObjectsClient, id: string) {
@@ -91,12 +91,12 @@ export class ActionService {
     if (!this.actionTypeService.has(actionTypeId)) {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
-    this.actionTypeService.validateActionTypeOptions(actionTypeId, data.actionTypeOptions);
-    const actionWithSplitActionTypeOptions = this.applyEncryptedAttributes(data);
+    this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
+    const actionWithSplitActionTypeConfig = this.applyEncryptedAttributes(data);
     return await savedObjectsClient.update<any>(
       'action',
       id,
-      actionWithSplitActionTypeOptions,
+      actionWithSplitActionTypeConfig,
       options
     );
   }
@@ -106,8 +106,8 @@ export class ActionService {
     return await this.actionTypeService.execute(
       action.attributes.actionTypeId,
       {
-        ...action.attributes.actionTypeOptions,
-        ...action.attributes.actionTypeOptionsSecrets,
+        ...action.attributes.actionTypeConfig,
+        ...action.attributes.actionTypeConfigSecrets,
       },
       params
     );
@@ -117,20 +117,20 @@ export class ActionService {
     const unencryptedAttributes = this.actionTypeService.getUnencryptedAttributes(
       action.actionTypeId
     );
-    const encryptedActionTypeOptions: { [key: string]: any } = {};
-    const unencryptedActionTypeOptions: { [key: string]: any } = {};
-    for (const key of Object.keys(action.actionTypeOptions)) {
+    const encryptedActionTypeConfig: { [key: string]: any } = {};
+    const unencryptedActionTypeConfig: { [key: string]: any } = {};
+    for (const key of Object.keys(action.actionTypeConfig)) {
       if (unencryptedAttributes.includes(key)) {
-        unencryptedActionTypeOptions[key] = action.actionTypeOptions[key];
+        unencryptedActionTypeConfig[key] = action.actionTypeConfig[key];
         continue;
       }
-      encryptedActionTypeOptions[key] = action.actionTypeOptions[key];
+      encryptedActionTypeConfig[key] = action.actionTypeConfig[key];
     }
     return {
       ...action,
       // Important these overwrite attributes in data for encryption purposes
-      actionTypeOptions: unencryptedActionTypeOptions,
-      actionTypeOptionsSecrets: encryptedActionTypeOptions,
+      actionTypeConfig: unencryptedActionTypeConfig,
+      actionTypeConfigSecrets: encryptedActionTypeConfig,
     };
   }
 }

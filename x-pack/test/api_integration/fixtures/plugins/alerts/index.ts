@@ -13,7 +13,7 @@ export default function(kibana: any) {
       server.alerting().actionTypes.register({
         id: 'test',
         name: 'Test',
-        async executor(actionTypeOptions: any, params: any) {},
+        async executor(actionTypeConfig: any, params: any) {},
       });
     },
   });

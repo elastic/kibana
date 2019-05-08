@@ -56,11 +56,11 @@
               "actionTypeId": {
                 "type": "keyword"
               },
-              "actionTypeOptions": {
+              "actionTypeConfig": {
                 "dynamic": "true",
                 "type": "object"
               },
-              "actionTypeOptionsSecrets": {
+              "actionTypeConfigSecrets": {
                 "type": "binary"
               }
             }

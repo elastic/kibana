@@ -6,15 +6,20 @@
 
 import Boom from 'boom';
 
+interface ExecutorOptions {
+  actionTypeConfig: any;
+  params: any;
+}
+
 interface ActionType {
   id: string;
   name: string;
   unencryptedAttributes?: string[];
   validate?: {
     params?: any;
-    actionTypeOptions?: any;
+    actionTypeConfig?: any;
   };
-  executor(actionTypeOptions: any, params: any): Promise<any>;
+  executor({ actionTypeConfig, params }: ExecutorOptions): Promise<any>;
 }
 
 export class ActionTypeService {
@@ -63,21 +68,21 @@ export class ActionTypeService {
     }
   }
 
-  public validateActionTypeOptions(id: string, actionTypeOptions: any) {
+  public validateActionTypeConfig(id: string, actionTypeConfig: any) {
     const actionType = this.get(id);
-    const validator = actionType.validate && actionType.validate.actionTypeOptions;
+    const validator = actionType.validate && actionType.validate.actionTypeConfig;
     if (validator) {
-      const { error } = validator.validate(actionTypeOptions);
+      const { error } = validator.validate(actionTypeConfig);
       if (error) {
         throw error;
       }
     }
   }
 
-  public async execute(id: string, actionTypeOptions: any, params: any) {
+  public async execute(id: string, actionTypeConfig: any, params: any) {
     const actionType = this.get(id);
-    this.validateActionTypeOptions(id, actionTypeOptions);
+    this.validateActionTypeConfig(id, actionTypeConfig);
     this.validateParams(id, params);
-    return await actionType.executor(actionTypeOptions, params);
+    return await actionType.executor({ actionTypeConfig, params });
   }
 }
