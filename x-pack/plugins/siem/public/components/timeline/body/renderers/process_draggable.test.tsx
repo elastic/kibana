@@ -10,8 +10,7 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
-
-import { isNillOrEmptyString, ProcessDraggable } from '.';
+import { ProcessDraggable, isNillOrEmptyString } from './process_draggable';
 
 describe('ProcessDraggable', () => {
   describe('rendering', () => {
