@@ -64,14 +64,6 @@ export const Expression = ({
           setExpression(formState.expression);
         }
       })}
-      {shortcut(refExpressionInput, 'RUN_SELECTION', () => {
-        if (!error && refExpressionInput.current) {
-          const selection = refExpressionInput.current.getSelection();
-          if (selection) {
-            setExpression(selection);
-          }
-        }
-      })}
       <ExpressionInput
         ref={refExpressionInput}
         fontSize={fontSize}

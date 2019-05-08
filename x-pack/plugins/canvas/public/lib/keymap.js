@@ -124,6 +124,5 @@ export const keymap = {
   EXPRESSION: {
     displayName: 'Expression controls',
     RUN: { ...getShortcuts('enter', ['ctrl']), help: 'Run whole expression' },
-    RUN_SELECTION: { ...getShortcuts('enter', ['ctrl', 'shift']), help: 'Run selection' },
   },
 };
