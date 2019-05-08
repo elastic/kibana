@@ -85,7 +85,7 @@ export const HomePage = pure(() => (
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
                       <EuiFlexItem data-test-subj="datePickerContainer">
-                        <SuperDatePicker id="global" />
+                        {/* <SuperDatePicker id="global" /> */}
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
@@ -136,6 +136,6 @@ const GlobalHeader = styled.header`
   border-bottom: ${({ theme }) =>
     theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
   margin: 0 -${paddingTimeline} ${euiLightVars.euiSizeL} -${euiLightVars.euiSizeL};
-  padding: ${euiLightVars.euiSizeL} ${paddingTimeline} ${euiLightVars.euiSizeL}
+  padding: ${euiLightVars.euiSize} ${paddingTimeline} ${euiLightVars.euiSize}
     ${euiLightVars.euiSizeL};
 `;
