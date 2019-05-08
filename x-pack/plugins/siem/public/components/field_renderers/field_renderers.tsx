@@ -23,9 +23,10 @@ import { ExternalLinkIcon } from '../external_link_icon';
 import { FormattedDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
 
-import { IpOverviewId } from '../page/network/ip_overview/index';
 import * as i18n from '../page/network/ip_overview/translations';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
+
+export const IpOverviewId = 'ip-overview';
 
 export const locationRenderer = (fieldNames: string[], data: IpOverviewData): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every(fieldName => getOr(null, fieldName, data)) ? (
