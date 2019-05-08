@@ -13,21 +13,24 @@ import {
 
 const EXAMPLE_VALUE = 'example_value';
 
-const getMockServer = (cloudValue?: string): KibanaHapiServer => ({
-  usage: { collectorSet: { makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg) } },
-  config() {
-    return {
-      get(path: string) {
-        switch (path) {
-          case 'xpack.telemetry.usage':
-            return { example_field: cloudValue };
-          default:
-            throw Error(`server.config().get(${path}) should not be called by this collector.`);
-        }
-      },
-    };
-  },
-}) as KibanaHapiServer & Server;
+const getMockServer = (exampleValue?: string): KibanaHapiServer =>
+  ({
+    usage: {
+      collectorSet: { makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg) },
+    },
+    config() {
+      return {
+        get(path: string) {
+          switch (path) {
+            case 'xpack.telemetry.usage':
+              return exampleValue ? { example_field: exampleValue } : undefined;
+            default:
+              throw Error(`server.config().get(${path}) should not be called by this collector.`);
+          }
+        },
+      };
+    },
+  } as KibanaHapiServer & Server);
 
 describe('static_telemetry usage collector', () => {
   describe('collector', () => {
