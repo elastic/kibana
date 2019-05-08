@@ -1,0 +1,7 @@
+.drag-drop_is-drop-target {
+  background-color: transparentize($euiColorSecondary, .9);
+}
+
+.drag-drop_is-active-drop-target {
+  background-color: transparentize($euiColorSecondary, .75);
+}

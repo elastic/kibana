@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DragDrop changes className if droppable 1`] = `
+<div
+  class=" drag-drop drag-drop_is-drop-target"
+>
+  Hello!
+</div>
+`;
+
+exports[`DragDrop droppable is reflected in the className 1`] = `
+<div
+  class=" drag-drop drag-drop_is-drop-target"
+>
+  Hello!
+</div>
+`;
+
+exports[`DragDrop renders if nothing is being dragged 1`] = `
+<div
+  class=" drag-drop"
+  draggable="true"
+>
+  Hello!
+</div>
+`;
