@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('when the query is edited and applied', async function () {
           const originalQuery = await queryBar.getQueryString();
-          await queryBar.setQuery(`${originalQuery} and extra stuff`);
+          await queryBar.setQuery(`${originalQuery}and extra stuff`);
           await queryBar.submitQuery();
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
