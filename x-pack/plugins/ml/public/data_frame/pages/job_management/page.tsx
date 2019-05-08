@@ -9,7 +9,6 @@ import React, { SFC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButton,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
@@ -20,11 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { CreateJobButton } from './components/create_job_button';
 import { DataFrameJobList } from './components/job_list';
-
-function newJob() {
-  window.location.href = `#/data_frame/new_job`;
-}
 
 export const Page: SFC = () => (
   <EuiPage>
@@ -41,12 +37,7 @@ export const Page: SFC = () => (
           </EuiTitle>
         </EuiPageContentHeaderSection>
         <EuiPageContentHeaderSection>
-          <EuiButton fill onClick={newJob} iconType="plusInCircle" size="s">
-            <FormattedMessage
-              id="xpack.ml.dataframe.jobsList.createDataFrameButton"
-              defaultMessage="Create data frame"
-            />
-          </EuiButton>
+          <CreateJobButton />
         </EuiPageContentHeaderSection>
       </EuiPageContentHeader>
       <EuiPageContentBody>

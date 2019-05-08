@@ -83,3 +83,89 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "map:0b849ed0-70f5-11e9-8625-9580c4904684",
+    "source": {
+      "map": {
+        "title" : "just a map",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":0.8,\"center\":{\"lon\":0,\"lat\":0},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
+        "layerListJSON" : "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"id\":\"c7bdee60-5267-459e-83d6-b53acf1b9e67\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"applyGlobalQuery\":true,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true}",
+        "bounds" : {
+          "type" : "polygon",
+          "coordinates" : [
+            [
+              [
+                -180,
+                85.05113
+              ],
+              [
+                -180,
+                -85.05113
+              ],
+              [
+                180,
+                -85.05113
+              ],
+              [
+                180,
+                85.05113
+              ],
+              [
+                -180,
+                85.05113
+              ]
+            ]
+          ]
+        }
+      },
+      "type": "map",
+      "references" : [ ],
+      "migrationVersion" : {
+        "map" : "7.1.0"
+      },
+      "updated_at" : "2019-05-07T18:22:17.405Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "dashboard:1c1a87f0-70f5-11e9-8625-9580c4904684",
+    "source": {
+      "dashboard": {
+        "title" : "dashboard with map",
+        "hits" : 0,
+        "description" : "",
+        "panelsJSON" : "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"1\"},\"version\":\"8.0.0\",\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":0,\"lon\":0,\"zoom\":0.8},\"isLayerTOCOpen\":true},\"panelRefName\":\"panel_0\"}]",
+        "optionsJSON" : "{\"useMargins\":true,\"hidePanelTitles\":false}",
+        "version" : 1,
+        "timeRestore" : false,
+        "kibanaSavedObjectMeta" : {
+          "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "type": "dashboard",
+      "references" : [
+        {
+          "name" : "panel_0",
+          "type" : "map",
+          "id" : "0b849ed0-70f5-11e9-8625-9580c4904684"
+        }
+      ],
+      "migrationVersion" : {
+        "dashboard" : "7.0.0"
+      },
+      "updated_at" : "2019-05-07T18:22:45.231Z"
+    }
+  }
+}
