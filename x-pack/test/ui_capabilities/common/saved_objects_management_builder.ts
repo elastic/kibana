@@ -8,6 +8,7 @@
 class SavedObjectsTypeUICapabilitiesGroup {
   public all = ['delete', 'edit', 'read'];
   public read = ['read'];
+  public none = [] as string[];
 }
 const savedObjectsTypeUICapabilitiesGroup = new SavedObjectsTypeUICapabilitiesGroup();
 
