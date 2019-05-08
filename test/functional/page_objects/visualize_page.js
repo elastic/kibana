@@ -61,7 +61,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async navigateToNewVisualization() {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToApp('visualize');
+      await PageObjects.common.navigateToApp('visualize', { insertTimestamp: true });
       await this.clickNewVisualization();
       await this.waitForVisualizationSelectPage();
     }
