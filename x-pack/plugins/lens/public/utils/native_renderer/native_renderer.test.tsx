@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { NativeRenderer } from './native_renderer';
 
-describe('agnostic_renderer', () => {
+describe('native_renderer', () => {
   let mountpoint: Element;
 
   beforeEach(() => {
