@@ -104,24 +104,6 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       ).resolves.toEqual(expectedResponse);
     });
 
-    it('should return failed verification from ES', async () => {
-      const mockEsResponse = {
-        [name]: { type: '', settings: {} },
-      };
-      const verificationError = new Error('failed verification');
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce(mockEsResponse)
-        .mockResolvedValueOnce({});
-      const expectedResponse = {
-        repository: { name, ...mockEsResponse[name] },
-        snapshots: { count: null },
-      };
-      await expect(
-        getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
-    });
-
     it('should return snapshot count from ES', async () => {
       const mockEsResponse = {
         [name]: { type: '', settings: {} },

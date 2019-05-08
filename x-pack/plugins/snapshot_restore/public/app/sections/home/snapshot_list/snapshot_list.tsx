@@ -100,7 +100,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotList.emptyPrompt.errorRepositoriesTitle"
-              defaultMessage="Your repositories contain errors"
+              defaultMessage="Some repositories contain errors"
             />
           </h1>
         }
