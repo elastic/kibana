@@ -18,6 +18,14 @@ exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
               id="xpack.ml.dataframe.jobsList.dataFrameTitle"
               values={Object {}}
             />
+            <span>
+               
+            </span>
+            <EuiBetaBadge
+              label="Beta"
+              tooltipContent="Data frames are a beta feature. We'd love to hear your feedback."
+              tooltipPosition="top"
+            />
           </h1>
         </EuiTitle>
       </EuiPageContentHeaderSection>
