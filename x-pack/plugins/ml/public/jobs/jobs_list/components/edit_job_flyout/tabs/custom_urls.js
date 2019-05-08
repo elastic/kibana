@@ -36,7 +36,7 @@ import {
   loadSavedDashboards,
   loadIndexPatterns,
 } from '../edit_utils';
-import { isKibanaUrl } from '../../../../../util/custom_url_utils';
+import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -136,11 +136,7 @@ class CustomUrlsUI extends Component {
       .then((customUrl) => {
         getTestUrl(job, customUrl)
           .then((testUrl) => {
-            if (isKibanaUrl(customUrl) === true) {
-              window.open(testUrl, '_blank');
-            } else {
-              window.open(testUrl, '_blank', 'noopener,noreferrer');
-            }
+            openCustomUrlWindow(testUrl, customUrl);
           })
           .catch((resp) => {
             console.log('Error obtaining URL for test:', resp);

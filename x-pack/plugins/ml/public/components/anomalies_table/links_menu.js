@@ -29,7 +29,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
-import { getUrlForRecord, isKibanaUrl } from '../../util/custom_url_utils';
+import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getIndexPatterns } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
@@ -119,12 +119,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
           // Replace any tokens in the configured url_value with values from the source record,
           // and then open link in a new tab/window.
           const urlPath = replaceStringTokens(customUrl.url_value, record, true);
-          if (isKibanaUrl(customUrl) === true) {
-            window.open(urlPath, '_blank');
-          } else {
-            window.open(urlPath, '_blank', 'noopener,noreferrer');
-          }
-
+          openCustomUrlWindow(urlPath, customUrl);
         }).catch((resp) => {
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
           toastNotifications.addDanger(intl.formatMessage({
@@ -139,11 +134,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
       const urlPath = getUrlForRecord(customUrl, record);
-      if (isKibanaUrl(customUrl) === true) {
-        window.open(urlPath, '_blank');
-      } else {
-        window.open(urlPath, '_blank', 'noopener,noreferrer');
-      }
+      openCustomUrlWindow(urlPath, customUrl);
     }
 
   };

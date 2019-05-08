@@ -26,7 +26,7 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 
-import { isKibanaUrl, isValidLabel } from '../../../util/custom_url_utils';
+import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from '../../../jobs/components/custom_url_editor/utils';
 
 import { parseInterval } from '../../../../common/util/parse_interval';
@@ -107,11 +107,7 @@ export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
     if (index < customUrls.length) {
       getTestUrl(job, customUrls[index])
         .then((testUrl) => {
-          if (isKibanaUrl(customUrls[index]) === true) {
-            window.open(testUrl, '_blank');
-          } else {
-            window.open(testUrl, '_blank', 'noopener,noreferrer');
-          }
+          openCustomUrlWindow(testUrl, customUrls[index]);
         })
         .catch((resp) => {
           console.log('Error obtaining URL for test:', resp);
