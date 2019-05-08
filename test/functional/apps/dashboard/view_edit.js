@@ -209,7 +209,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
         const originalQuery = await queryBar.getQueryString();
-        await queryBar.setQuery(`${originalQuery} extra stuff`);
+        await queryBar.setQuery(`${originalQuery}extra stuff`);
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
