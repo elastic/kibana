@@ -102,7 +102,7 @@ describe('Histogram', () => {
             transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
           },
           style: { cursor: 'pointer' },
-          center: 869010,
+          xCenter: 869010,
           x0: 811076,
           x: 926944,
           y: 49
@@ -130,7 +130,7 @@ describe('Histogram', () => {
           transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
         },
         style: { cursor: 'pointer' },
-        center: 869010,
+        xCenter: 869010,
         x0: 811076,
         x: 926944,
         y: 49
