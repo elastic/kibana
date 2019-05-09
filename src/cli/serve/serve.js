@@ -213,8 +213,7 @@ export default function (program) {
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
-          isOssModeSupported: !IS_KIBANA_DISTRIBUTABLE,
-          isXPackInstalled: XPACK_INSTALLED,
+          stripXpackConfig: XPACK_INSTALLED && opts.oss,
           isReplModeSupported: CAN_REPL,
         },
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
