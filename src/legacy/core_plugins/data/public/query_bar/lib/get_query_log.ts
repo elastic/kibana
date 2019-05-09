@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export { OverlayService, OverlayStart, OverlayRef } from './overlay_service';
+import chrome from 'ui/chrome';
+import { PersistedLog } from 'ui/persisted_log';
+
+const config = chrome.getUiSettingsClient();
+
+export function getQueryLog(appName: string, language: string) {
+  return new PersistedLog(`typeahead:${appName}-${language}`, {
+    maxLength: config.get('history:limit'),
+    filterDuplicates: true,
+  });
+}

@@ -41,7 +41,7 @@ import {
   ToastsApi,
   NotificationsStart,
 } from './notifications';
-import { FlyoutRef, OverlayStart } from './overlays';
+import { OverlayRef, OverlayStart } from './overlays';
 import {
   Plugin,
   PluginInitializer,
@@ -138,8 +138,8 @@ export {
   PluginStartContext,
   NotificationsSetup,
   NotificationsStart,
+  OverlayRef,
   OverlayStart,
-  FlyoutRef,
   Toast,
   ToastInput,
   ToastsApi,

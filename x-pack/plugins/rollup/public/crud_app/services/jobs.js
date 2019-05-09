@@ -86,7 +86,9 @@ export function deserializeJob(job) {
       metrics,
       groups: {
         date_histogram: {
-          interval: dateHistogramInterval,
+          interval,
+          fixed_interval: fixedInterval,
+          calendar_interval: calendarInterval,
           delay: rollupDelay,
           time_zone: dateHistogramTimeZone,
           field: dateHistogramField,
@@ -107,6 +109,10 @@ export function deserializeJob(job) {
   } = job;
 
   const json = job;
+
+  // `interval` is deprecated but still supported. All three of the various interval types are
+  // mutually exclusive.
+  const dateHistogramInterval = interval || fixedInterval || calendarInterval;
 
   const deserializedJob = {
     id,
