@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type JobId = string;
-export type EsIndexName = string;
-export type IndexPatternTitle = string;
+export interface InjectorService {
+  get<T>(name: string, caller?: string): T;
+}
