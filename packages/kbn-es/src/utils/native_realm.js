@@ -64,9 +64,17 @@ exports.NativeRealm = class NativeRealm {
   }
 
   async isSecurityEnabled() {
-    const {
-      body: { features },
-    } = await this._client.xpack.info({ categories: 'features' });
-    return features.security && features.security.enabled && features.security.available;
+    try {
+      const {
+        body: { features },
+      } = await this._client.xpack.info({ categories: 'features' });
+      return features.security && features.security.enabled && features.security.available;
+    } catch (error) {
+      if (error.meta && error.meta.statusCode === 400) {
+        return false;
+      }
+
+      throw error;
+    }
   }
 };

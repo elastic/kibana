@@ -192,6 +192,12 @@ exports.Cluster = class Cluster {
   async run(installPath, options = {}) {
     this._exec(installPath, options);
 
+    // log native realm setup errors so they aren't uncaught
+    this._nativeRealmSetup.catch(error => {
+      this._log.error(error);
+      this.stop();
+    });
+
     // await the final outcome of the process
     await this._outcome;
   }
