@@ -38,7 +38,7 @@ const first = (stream, map) =>
   new Promise(resolve => {
     const onData = data => {
       const result = map(data);
-      if (data !== undefined) {
+      if (result !== undefined) {
         resolve(result);
         stream.removeListener('data', onData);
       }
