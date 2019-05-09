@@ -35,14 +35,6 @@ import {
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from '../source_destination/geo_fields';
 import {
-  NETWORK_BYTES_FIELD_NAME,
-  NETWORK_COMMUNITY_ID_FIELD_NAME,
-  NETWORK_DIRECTION_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
-  NETWORK_PROTOCOL_FIELD_NAME,
-  NETWORK_TRANSPORT_FIELD_NAME,
-} from '../source_destination/network';
-import {
   DESTINATION_BYTES_FIELD_NAME,
   DESTINATION_PACKETS_FIELD_NAME,
   SOURCE_BYTES_FIELD_NAME,
@@ -56,6 +48,14 @@ import {
   EVENT_START_FIELD_NAME,
 } from './netflow_columns/duration_event_start_end';
 import { PROCESS_NAME_FIELD_NAME, USER_NAME_FIELD_NAME } from './netflow_columns/user_process';
+import {
+  NETWORK_BYTES_FIELD_NAME,
+  NETWORK_DIRECTION_FIELD_NAME,
+  NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
+  NETWORK_TRANSPORT_FIELD_NAME,
+} from '../source_destination/field_names';
 
 const getNetflowInstance = () => (
   <Netflow

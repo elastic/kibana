@@ -356,7 +356,7 @@ Test runner arguments:
     `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
   - Run the api integration test case whose description matches the given string:
     `node scripts/functional_tests_server --config test/api_integration/config.js`
-    `node scripts/functional_tests_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
+    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
 
 ### Debugging Unit Tests
 

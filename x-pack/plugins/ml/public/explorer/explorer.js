@@ -144,7 +144,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     static propTypes = {
       appStateHandler: PropTypes.func.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
-      mlJobSelectService: PropTypes.object.isRequired,
       MlTimeBuckets: PropTypes.func.isRequired,
     };
 
