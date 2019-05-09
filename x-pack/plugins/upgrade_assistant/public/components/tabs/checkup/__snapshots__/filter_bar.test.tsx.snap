@@ -7,7 +7,7 @@ exports[`FilterBar renders 1`] = `
   <EuiFilterGroup>
     <EuiFilterButton
       color="text"
-      grow={false}
+      grow={true}
       hasActiveFilters={false}
       iconSide="right"
       key="all"
@@ -19,7 +19,7 @@ exports[`FilterBar renders 1`] = `
     </EuiFilterButton>
     <EuiFilterButton
       color="text"
-      grow={false}
+      grow={true}
       hasActiveFilters={true}
       iconSide="right"
       key="critical"

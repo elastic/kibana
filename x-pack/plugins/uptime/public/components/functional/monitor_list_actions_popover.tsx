@@ -131,7 +131,7 @@ export const MonitorListActionsPopover = ({
               'xpack.uptime.monitorList.infraIntegrationAction.docker.tooltip',
               {
                 defaultMessage:
-                  'Click her to check Infrastructure UI for container ID "{containerId}"',
+                  'Click here to check Infrastructure UI for container ID "{containerId}"',
                 values: {
                   containerId,
                 },

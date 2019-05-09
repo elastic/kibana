@@ -4,6 +4,7 @@
 
 ## CoreStart interface
 
+
 <b>Signature:</b>
 
 ```typescript
@@ -15,4 +16,5 @@ export interface CoreStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [http](./kibana-plugin-server.corestart.http.md) | <code>HttpServiceStart</code> |  |
+|  [plugins](./kibana-plugin-server.corestart.plugins.md) | <code>PluginsServiceStart</code> |  |
 

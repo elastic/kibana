@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { Capabilities as UICapabilities, CapabilitiesStart } from '../../../../core/public';
+import { Capabilities as UICapabilities } from '../../../../core/public';
 
 export { UICapabilities };
+let uiCapabilities: UICapabilities;
 
-let uiCapabilities: UICapabilities = null!;
-
-export function __newPlatformStart__(capabililitiesService: CapabilitiesStart) {
+export function __newPlatformStart__(capabilities: UICapabilities) {
   if (uiCapabilities) {
     throw new Error('ui/capabilities already initialized with new platform apis');
   }
 
-  uiCapabilities = capabililitiesService.getCapabilities();
+  uiCapabilities = capabilities;
 }
 
 export const capabilities = {

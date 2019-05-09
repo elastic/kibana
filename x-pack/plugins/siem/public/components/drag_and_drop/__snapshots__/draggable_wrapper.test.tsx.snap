@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DraggableWrapper rendering it renders against the snapshot 1`] = `
+<ThemeProvider
+  theme={[Function]}
+>
+  <Connect(DragDropContextWrapperComponent)>
+    <Connect(DraggableWrapperComponent)
+      dataProvider={
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "value": "Provider 1",
+          },
+        }
+      }
+      render={[Function]}
+    />
+  </Connect(DragDropContextWrapperComponent)>
+</ThemeProvider>
+`;
