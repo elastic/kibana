@@ -39,9 +39,12 @@ async function fetch(server: HapiServer) {
 export function getUsageCollector(server: HapiServer) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
+    console.log('determineIfTaskManagerIsReady()'); // eslint-disable-line
     if (await isTaskManagerReady(server)) {
+      console.log('determineIfTaskManagerIsReady() is ready'); // eslint-disable-line
       isCollectorReady = true;
     } else {
+      console.log('determineIfTaskManagerIsReady() is NOT ready, waiting 500ms'); // eslint-disable-line
       setTimeout(determineIfTaskManagerIsReady, 500);
     }
   }
