@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function Tag(config) {
-  // The name of the tag
-  this.name = config.name;
-
-  // color of the tag to display in a list
-  this.color = config.color;
-}
+export { JobSelectorBadge } from './job_selector_badge';
