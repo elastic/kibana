@@ -7,9 +7,13 @@ import _ from 'lodash';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { isMetaDataLoaded, getDataSourcesSync } from '../meta';
-import { DEFAULT_EMS_TILE_LAYER } from '../../common/constants';
+import { DEFAULT_EMS_BRIGHT_TILE_LAYER, DEFAULT_EMS_DARK_TILE_LAYER } from '../../common/constants';
 
-export function getInitialLayers(savedMapLayerListJSON) {
+export function getInitialLayers(savedMapLayerListJSON, darkMode) {
+
+  const DEFAULT_EMS_TILE_LAYER = darkMode
+    ? DEFAULT_EMS_DARK_TILE_LAYER
+    : DEFAULT_EMS_BRIGHT_TILE_LAYER;
 
   if (savedMapLayerListJSON) {
     return JSON.parse(savedMapLayerListJSON);

@@ -151,7 +151,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
-    const layerList = getInitialLayers(savedMap.layerListJSON);
+    // determine whether dark mode is enabled
+    const darkMode = config.get('theme:darkMode', false) || false;
+    const layerList = getInitialLayers(savedMap.layerListJSON, darkMode);
     store.dispatch(replaceLayerList(layerList));
 
     store.dispatch(setRefreshConfig($scope.refreshConfig));
