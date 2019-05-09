@@ -196,7 +196,7 @@ module.controller('MlExplorerController', function (
   // Listen for changes to job selection.
   $scope.jobSelectionUpdateInProgress = false;
 
-  mlJobSelectService.subscribe(({ selection }) => {
+  const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
     if (selection !== undefined) {
       $scope.jobSelectionUpdateInProgress = true;
       jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
@@ -286,6 +286,7 @@ module.controller('MlExplorerController', function (
 
   $scope.$on('$destroy', () => {
     explorerSubscriber.unsubscribe();
+    jobSelectServiceSub.unsubscribe();
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.
