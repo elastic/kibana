@@ -20,7 +20,7 @@
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from, merge } from 'rxjs';
-import { catchError, filter, mergeMap, shareReplay } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
 import { PluginWrapper } from '../plugin';
@@ -115,9 +115,8 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
  */
 function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
-    mergeMap(async manifest => {
+    map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-
       return new PluginWrapper(
         path,
         manifest,
