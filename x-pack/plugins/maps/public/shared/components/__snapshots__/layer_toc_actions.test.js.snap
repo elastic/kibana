@@ -2,9 +2,11 @@
 
 exports[`LayerTocActions is rendered 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
@@ -13,11 +15,17 @@ exports[`LayerTocActions is rendered 1`] = `
       size="xs"
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="mapTocEntry__layerNameIcon"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+      layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -55,6 +63,15 @@ exports[`LayerTocActions is rendered 1`] = `
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -74,9 +91,11 @@ exports[`LayerTocActions is rendered 1`] = `
 
 exports[`LayerTocActions should disable fit to data when supportsFitToBounds is false 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
@@ -85,11 +104,17 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
       size="xs"
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="mapTocEntry__layerNameIcon"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+      layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -127,6 +152,15 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -146,9 +180,11 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
 
 exports[`LayerTocActions should display spinner when layer is loading 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
@@ -157,11 +193,17 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
       size="xs"
       type="button"
     >
-      <EuiLoadingSpinner
-        size="m"
-      />
+      <span
+        className="mapTocEntry__layerNameIcon"
+      >
+        <EuiLoadingSpinner
+          size="m"
+        />
+      </span>
+      layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -199,6 +241,15 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -218,9 +269,11 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
 
 exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
@@ -229,11 +282,17 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
       size="xs"
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="mapTocEntry__layerNameIcon"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+      layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -281,9 +340,11 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
 
 exports[`LayerTocActions should provide feedback when layer is not visible because of current zoom level 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
@@ -292,18 +353,24 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
       size="xs"
       type="button"
     >
-      <EuiToolTip
-        content="Map is at zoom level 0.
-          This layer is only visible between zoom levels 2 to 3."
-        delay="regular"
-        position="top"
+      <span
+        className="mapTocEntry__layerNameIcon"
       >
-        <div>
-          icon mock
-        </div>
-      </EuiToolTip>
+        <EuiToolTip
+          content="Map is at zoom level 0.
+          This layer is only visible between zoom levels 2 to 3."
+          delay="regular"
+          position="top"
+        >
+          <div>
+            icon mock
+          </div>
+        </EuiToolTip>
+      </span>
+      layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -341,6 +408,15 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -360,9 +436,11 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
 
 exports[`LayerTocActions should show visible toggle when layer is not visible 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
@@ -371,11 +449,17 @@ exports[`LayerTocActions should show visible toggle when layer is not visible 1`
       size="xs"
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="mapTocEntry__layerNameIcon"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+      layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -413,6 +497,15 @@ exports[`LayerTocActions should show visible toggle when layer is not visible 1`
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -432,9 +525,11 @@ exports[`LayerTocActions should show visible toggle when layer is not visible 1`
 
 exports[`LayerTocActions should show warning when layer has errors 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
@@ -443,15 +538,21 @@ exports[`LayerTocActions should show warning when layer has errors 1`] = `
       size="xs"
       type="button"
     >
-      <EuiIconTip
-        aria-label="Load warning"
-        color="warning"
-        content="simulated layer error"
-        size="m"
-        type="alert"
-      />
+      <span
+        className="mapTocEntry__layerNameIcon"
+      >
+        <EuiIconTip
+          aria-label="Load warning"
+          color="warning"
+          content="simulated layer error"
+          size="m"
+          type="alert"
+        />
+      </span>
+      layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -486,6 +587,15 @@ exports[`LayerTocActions should show warning when layer has errors 1`] = `
                 type="eye"
               />,
               "name": "Hide layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
               "onClick": [Function],
             },
             Object {

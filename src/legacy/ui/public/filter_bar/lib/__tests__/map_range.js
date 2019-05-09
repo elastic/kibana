@@ -19,53 +19,48 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapRangeProvider } from '../map_range';
+import { mapRange } from '../map_range';
+import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
   describe('mapRange()', function () {
-    let mapRange;
-    let $rootScope;
+    let mapRangeFn;
+    let mockIndexPatterns;
 
     beforeEach(ngMock.module(
       'kibana',
-      'kibana/courier',
-      function ($provide) {
-        $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
-      }
+      'kibana/courier'
     ));
 
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      mapRange = Private(FilterBarLibMapRangeProvider);
-      $rootScope = _$rootScope_;
+    beforeEach(ngMock.inject(function (Private) {
+      mockIndexPatterns = Private(IndexPatternMock);
+      mapRangeFn = mapRange(mockIndexPatterns);
     }));
 
     it('should return the key and value for matching filters with gt/lt', function (done) {
       const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
-      mapRange(filter).then(function (result) {
+      mapRangeFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
         expect(result).to.have.property('value', '1,024 to 2,048');
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should return the key and value for matching filters with gte/lte', function (done) {
       const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lte: 2048, gte: 1024 } } };
-      mapRange(filter).then(function (result) {
+      mapRangeFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
         expect(result).to.have.property('value', '1,024 to 2,048');
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should return undefined for none matching', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
-      mapRange(filter).catch(function (result) {
+      mapRangeFn(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });
-      $rootScope.$apply();
     });
 
   });

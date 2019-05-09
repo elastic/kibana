@@ -110,7 +110,8 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     });
 
     await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body })
-      .then(blob => {
+      .then((rawResponse: string) => {
+        const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
         const a = window.document.createElement('a');
         const downloadObject = window.URL.createObjectURL(blob);
         a.href = downloadObject;
@@ -119,7 +120,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
         window.URL.revokeObjectURL(downloadObject);
         this.isDownloading = false;
       })
-      .catch(this.onGenerationFail);
+      .catch(this.onGenerationFail.bind(this));
   };
 
   private onGenerationFail(error: Error) {

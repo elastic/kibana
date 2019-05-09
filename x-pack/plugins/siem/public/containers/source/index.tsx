@@ -5,11 +5,12 @@
  */
 
 import { isUndefined } from 'lodash';
-import { get, memoize, pick, set, difference } from 'lodash/fp';
+import { get, pick, set, difference } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { StaticIndexPattern, StaticIndexPatternField } from 'ui/index_patterns';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
+import memoizeOne from 'memoize-one';
 import { IndexField, IndexType, SourceQuery } from '../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';
@@ -42,27 +43,33 @@ interface WithSourceProps {
   sourceId: string;
 }
 
+const indexTypesVariables = [IndexType.ANY];
+
 export class WithSource extends React.PureComponent<WithSourceProps> {
   private memoizedIndexFields: (
     indexTypes: string[],
+    title: string,
     fields: IndexField[]
-  ) => StaticIndexPatternField[];
+  ) => StaticIndexPattern;
   private memoizedBrowserFields: (indexTypes: string[], fields: IndexField[]) => BrowserFields;
+  private memoizedIndexTypesLowerCase: (indexTypes: string[]) => string[];
 
   constructor(props: WithSourceProps) {
     super(props);
-    this.memoizedIndexFields = memoize(this.getIndexFields);
-    this.memoizedBrowserFields = memoize(this.getBrowserFields);
+    this.memoizedIndexFields = memoizeOne(this.getIndexFields);
+    this.memoizedBrowserFields = memoizeOne(this.getBrowserFields);
+    this.memoizedIndexTypesLowerCase = memoizeOne(this.getIndexTypesLowerCase);
   }
 
   public render() {
-    const { children, sourceId, indexTypes = [IndexType.ANY] } = this.props;
+    const { children, sourceId, indexTypes } = this.props;
+
     return (
       <Query<SourceQuery.Query, SourceQuery.Variables>
         query={sourceQuery}
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
-        variables={{ sourceId, indexTypes: [IndexType.ANY] }}
+        variables={{ sourceId, indexTypes: indexTypesVariables }}
       >
         {({ data }) => {
           const logAlias = get('source.configuration.logAlias', data);
@@ -92,56 +99,62 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
               indexPatternTitle = [...indexPatternTitle, winlogbeatAlias];
             }
           }
-          const indexTypesLowerCase = indexTypes.map(i => i.toLocaleLowerCase());
+          const indexTypesLowerCase = this.memoizedIndexTypesLowerCase(indexTypes);
+
           return children({
             auditbeatIndicesExist: get('source.status.auditbeatIndicesExist', data),
             filebeatIndicesExist: get('source.status.filebeatIndicesExist', data),
             winlogbeatIndicesExist: get('source.status.winlogbeatIndicesExist', data),
-            browserFields: get('source.status.indexFields', data)
-              ? this.memoizedBrowserFields(
-                  indexTypesLowerCase,
-                  get('source.status.indexFields', data)
-                )
-              : {},
-            indexPattern: {
-              fields: get('source.status.indexFields', data)
-                ? this.memoizedIndexFields(
-                    indexTypesLowerCase,
-                    get('source.status.indexFields', data)
-                  )
-                : [],
-              title: indexPatternTitle.join(),
-            },
+            browserFields: this.memoizedBrowserFields(
+              indexTypesLowerCase,
+              get('source.status.indexFields', data)
+            ),
+            indexPattern: this.memoizedIndexFields(
+              indexTypesLowerCase,
+              indexPatternTitle.join(),
+              get('source.status.indexFields', data)
+            ),
           });
         }}
       </Query>
     );
   }
 
+  private getIndexTypesLowerCase = (indexTypes: string[]) =>
+    indexTypes.map(i => i.toLocaleLowerCase());
+
   private getIndexFields = (
     indexTypes: string[],
+    title: string,
     fields: IndexField[]
-  ): StaticIndexPatternField[] =>
-    fields
-      .filter(
-        item =>
-          indexTypes.includes('any') ||
-          difference(item.indexes, indexTypes).length !== item.indexes.length
-      )
-      .map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field));
+  ): StaticIndexPattern =>
+    fields && fields.length > 0
+      ? {
+          fields: fields
+            .filter(
+              item =>
+                indexTypes.includes('any') ||
+                difference(item.indexes, indexTypes).length !== item.indexes.length
+            )
+            .map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field)),
+          title,
+        }
+      : { fields: [], title };
 
   private getBrowserFields = (indexTypes: string[], fields: IndexField[]): BrowserFields =>
-    fields
-      .filter(
-        item =>
-          indexTypes.includes('any') ||
-          difference(item.indexes, indexTypes).length !== item.indexes.length
-      )
-      .reduce(
-        (accumulator: BrowserFields, field: IndexField) =>
-          set([field.category, 'fields', field.name], field, accumulator),
-        {} as BrowserFields
-      );
+    fields && fields.length > 0
+      ? fields
+          .filter(
+            item =>
+              indexTypes.includes('any') ||
+              difference(item.indexes, indexTypes).length !== item.indexes.length
+          )
+          .reduce<BrowserFields>(
+            (accumulator: BrowserFields, field: IndexField) =>
+              set([field.category, 'fields', field.name], field, accumulator),
+            {}
+          )
+      : {};
 }
 
 export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>

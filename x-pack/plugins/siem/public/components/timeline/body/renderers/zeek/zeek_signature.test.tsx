@@ -12,20 +12,19 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
-
 import {
-  constructDroppedValue,
-  defaultStringRenderer,
-  DraggableZeekElement,
-  droppedStringRenderer,
-  extractStateValue,
-  Link,
-  md5StringRenderer,
-  moduleStringRenderer,
-  sha1StringRenderer,
-  TotalVirusLinkSha,
   ZeekSignature,
-} from '.';
+  extractStateValue,
+  constructDroppedValue,
+  TotalVirusLinkSha,
+  Link,
+  DraggableZeekElement,
+  sha1StringRenderer,
+  md5StringRenderer,
+  droppedStringRenderer,
+  moduleStringRenderer,
+  defaultStringRenderer,
+} from './zeek_signature';
 
 describe('ZeekSignature', () => {
   let zeek: Ecs;
