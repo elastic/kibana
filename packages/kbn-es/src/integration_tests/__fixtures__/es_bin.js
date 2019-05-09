@@ -19,10 +19,55 @@
  * under the License.
  */
 
+const { createServer } = require('http');
 const { exitCode, start } = JSON.parse(process.argv[2]);
 
-if (start) {
-  console.log('started');
+process.exitCode = exitCode;
+
+if (!start) {
+  return;
 }
 
-process.exitCode = exitCode;
+console.log('started');
+
+let serverUrl;
+const server = createServer((req, res) => {
+  const url = new URL(req.url, serverUrl);
+  const send = (code, body) => {
+    res.writeHead(code, {
+      'content-type': 'application/json',
+    });
+    res.end(JSON.stringify(body));
+  };
+
+  if (url.pathname === '/_xpack') {
+    return send(400, {
+      error: {
+        reason: 'foo bar',
+      },
+    });
+  }
+
+  return send(404, {
+    error: {
+      reason: 'not found',
+    },
+  });
+});
+
+// setup server auto close after 1 second of silence
+let serverCloseTimer;
+const delayServerClose = () => {
+  if (serverCloseTimer) {
+    clearTimeout(serverCloseTimer);
+  }
+  serverCloseTimer = setTimeout(() => server.close(), 1000);
+};
+server.on('request', delayServerClose);
+server.on('listening', delayServerClose);
+
+server.listen(0, '127.0.0.1', function() {
+  serverUrl = new URL('http://127.0.0.1');
+  serverUrl.port = server.address().port;
+  console.log(`HttpServer publish_address {${serverUrl.hostname}:${serverUrl.port}}`);
+});

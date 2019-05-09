@@ -54,7 +54,7 @@ async function ensureResolve(promise) {
   ]);
 }
 
-function mockEsBin({ exitCode, start }) {
+function mockEsBin({ exitCode, start, includeXpack, securityEnabled, securityAvailable }) {
   execa.mockImplementationOnce((cmd, args, options) =>
     require.requireActual('execa')(
       process.execPath,
@@ -62,6 +62,9 @@ function mockEsBin({ exitCode, start }) {
         require.resolve('./__fixtures__/es_bin.js'),
         JSON.stringify({
           exitCode,
+          includeXpack,
+          securityEnabled,
+          securityAvailable,
           start,
         }),
       ],
