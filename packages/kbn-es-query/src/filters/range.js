@@ -33,10 +33,10 @@ const comparators = {
 };
 
 const dateComparators = {
-  gt: 'boolean gt(Supplier s, def v) {return s.get() > Instant.parse(v).toEpochMilli()}',
-  gte: 'boolean gte(Supplier s, def v) {return s.get() >= Instant.parse(v).toEpochMilli()}',
-  lte: 'boolean lte(Supplier s, def v) {return s.get() <= Instant.parse(v).toEpochMilli()}',
-  lt: 'boolean lt(Supplier s, def v) {return s.get() < Instant.parse(v).toEpochMilli()}',
+  gt: 'boolean gt(Supplier s, def v) {return s.get().toInstant().isAfter(Instant.parse(v))}',
+  gte: 'boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))}',
+  lte: 'boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}',
+  lt: 'boolean lt(Supplier s, def v) {return s.get().toInstant().isBefore(Instant.parse(v))}',
 };
 
 function formatValue(field, params) {
