@@ -173,11 +173,7 @@ describe.skip('onPostAuthRequestInterceptor', () => {
       // we are including the already tested interceptor here in the test chain.
       initSpacesOnRequestInterceptor({
         config: server.config(),
-        legacyServer: server,
         http: null as any,
-        log,
-        xpackMain: server.plugins.xpack_main,
-        spacesService,
       });
       initSpacesOnPostAuthRequestInterceptor({
         config: server.config(),

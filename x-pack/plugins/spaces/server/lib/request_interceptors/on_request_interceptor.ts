@@ -3,12 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaRequest, OnRequestToolkit } from 'src/core/server';
+import { KibanaRequest, OnRequestToolkit, HttpServiceSetup } from 'src/core/server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../spaces_url_parser';
-import { InterceptorDeps } from '.';
 
-export function initSpacesOnRequestInterceptor({ config, legacyServer, http }: InterceptorDeps) {
+export interface OnRequestInterceptorDeps {
+  config: KibanaConfig;
+  http: HttpServiceSetup;
+}
+export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterceptorDeps) {
   const serverBasePath: string = config.get('server.basePath');
 
   http.registerOnRequest(async function spacesOnRequestHandler(

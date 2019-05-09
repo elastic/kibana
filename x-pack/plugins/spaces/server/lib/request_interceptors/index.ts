@@ -4,22 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'src/core/server';
-import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
-import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
-import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
-import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
-import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
-import { SpacesHttpServiceSetup } from '../../new_platform/plugin';
+import { initSpacesOnRequestInterceptor, OnRequestInterceptorDeps } from './on_request_interceptor';
+import {
+  initSpacesOnPostAuthRequestInterceptor,
+  OnPostAuthInterceptorDeps,
+} from './on_post_auth_interceptor';
 
-export interface InterceptorDeps {
-  config: KibanaConfig;
-  legacyServer: Server;
-  http: SpacesHttpServiceSetup;
-  xpackMain: XPackMainPlugin;
-  spacesService: SpacesServiceSetup;
-  log: Logger;
-}
+export type InterceptorDeps = OnRequestInterceptorDeps & OnPostAuthInterceptorDeps;
 
 export function initSpacesRequestInterceptors(deps: InterceptorDeps) {
   initSpacesOnRequestInterceptor(deps);

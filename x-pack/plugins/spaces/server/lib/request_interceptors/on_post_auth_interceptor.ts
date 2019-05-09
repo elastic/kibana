@@ -4,11 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
+import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
+import { HttpServiceSetup, Logger } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { addSpaceIdToPath, getSpaceIdFromPath } from '../spaces_url_parser';
-import { InterceptorDeps } from '.';
+import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
+import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
+
+export interface OnPostAuthInterceptorDeps {
+  config: KibanaConfig;
+  legacyServer: Server;
+  http: HttpServiceSetup;
+  xpackMain: XPackMainPlugin;
+  spacesService: SpacesServiceSetup;
+  log: Logger;
+}
 
 export function initSpacesOnPostAuthRequestInterceptor({
   config,
@@ -16,7 +28,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
   xpackMain,
   spacesService,
   log,
-}: InterceptorDeps) {
+}: OnPostAuthInterceptorDeps) {
   const serverBasePath: string = config.get('server.basePath');
 
   legacyServer.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
