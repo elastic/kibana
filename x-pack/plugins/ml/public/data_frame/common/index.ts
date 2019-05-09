@@ -6,7 +6,7 @@
 
 export * from './aggregations';
 export * from './dropdown';
-export * from './index_pattern_context';
+export * from './kibana_context';
 export * from './pivot_aggs';
 export * from './pivot_group_by';
 export * from './request';

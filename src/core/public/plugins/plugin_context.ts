@@ -29,7 +29,7 @@ import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { OverlayStart } from '../overlays';
 import { ApplicationStart } from '../application';
-import { HttpSetup } from '../http';
+import { HttpSetup, HttpStart } from '../http';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -62,6 +62,7 @@ export interface PluginSetupContext {
 export interface PluginStartContext {
   application: Pick<ApplicationStart, 'capabilities'>;
   basePath: BasePathStart;
+  http: HttpStart;
   i18n: I18nStart;
   notifications: NotificationsStart;
   overlays: OverlayStart;
@@ -128,6 +129,7 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
       capabilities: deps.application.capabilities,
     },
     basePath: deps.basePath,
+    http: deps.http,
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
