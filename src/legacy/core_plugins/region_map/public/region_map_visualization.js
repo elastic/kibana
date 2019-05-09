@@ -91,8 +91,6 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       await super._updateParams();
       const visParams = this._params;
 
-      this._kibanaMap.setDesaturateBaseLayer(visParams.isDesaturated);
-
       if (!visParams.selectedJoinField && visParams.selectedLayer) {
         visParams.selectedJoinField = visParams.selectedLayer.fields[0];
       }
