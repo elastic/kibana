@@ -188,6 +188,7 @@ describe('once LegacyService is set up with connection info', () => {
           someOption: 'foo',
         },
         handledConfigPaths: ['foo.bar'],
+        logger,
       }
     );
 
@@ -214,6 +215,7 @@ describe('once LegacyService is set up with connection info', () => {
           someOption: 'foo',
         },
         handledConfigPaths: ['foo.bar'],
+        logger,
       }
     );
 
@@ -340,6 +342,7 @@ describe('once LegacyService is set up without connection info', () => {
         startDeps: disabledHttpStartDeps,
         serverOptions: { autoListen: false },
         handledConfigPaths: ['foo.bar'],
+        logger,
       }
     );
   });

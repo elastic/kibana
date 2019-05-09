@@ -24,6 +24,7 @@ import {
   HttpServiceSetup,
   HttpServiceStart,
   ConfigService,
+  LoggerFactory,
   PluginsServiceSetup,
   PluginsServiceStart,
 } from '../../core/server';
@@ -88,6 +89,9 @@ type Unpromise<T> = T extends Promise<infer U> ? U : T;
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
+    coreContext: {
+      logger: LoggerFactory;
+    };
     setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;
