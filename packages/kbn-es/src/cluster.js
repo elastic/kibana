@@ -283,19 +283,16 @@ exports.Cluster = class Cluster {
 
     this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
 
-    this._outcome = new Promise((resolve, reject) => {
-      this._process.once('exit', code => {
-        if (this._stopCalled) {
-          resolve();
-          return;
-        }
-        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
-        if (code > 0 && !(code === 143 || code === 130)) {
-          reject(createCliError(`ES exited with code ${code}`));
-        } else {
-          resolve();
-        }
-      });
+    const exitCode = new Promise(resolve => this._process.once('exit', resolve));
+    this._outcome = exitCode.then(code => {
+      if (this._stopCalled) {
+        return;
+      }
+
+      // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
+      if (code > 0 && !(code === 143 || code === 130)) {
+        throw createCliError(`ES exited with code ${code}`);
+      }
     });
   }
 };
