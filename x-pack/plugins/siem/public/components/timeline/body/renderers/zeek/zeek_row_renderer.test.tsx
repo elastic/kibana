@@ -12,8 +12,7 @@ import * as React from 'react';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
-
-import { zeekRowRenderer } from '.';
+import { zeekRowRenderer } from './zeek_row_renderer';
 
 describe('zeek_row_renderer', () => {
   let nonZeek: Ecs;

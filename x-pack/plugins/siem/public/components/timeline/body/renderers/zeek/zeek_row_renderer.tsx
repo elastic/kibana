@@ -7,9 +7,9 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { Row, RowRenderer, RowRendererContainer } from '..';
-
-import { ZeekDetails } from '.';
+import { Row } from '../helpers';
+import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { ZeekDetails } from './zeek_details';
 
 export const zeekRowRenderer: RowRenderer = {
   isInstance: ecs => {
