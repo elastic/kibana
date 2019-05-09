@@ -60,12 +60,10 @@ const addI18nImport = (ast, jscodeshift) => {
   return hasI18nImport ? jscodeshift(ast) : addImport(ast);
 };
 
-module.exports = function ({ source, path }, { jscodeshift }) {
+module.exports = function ({ source }, { jscodeshift }) {
   const [didChange, newSource] = removeI18nFnParams(source, jscodeshift);
   if(didChange) {
   	return addI18nImport(newSource, jscodeshift)
   	  .toSource({ quote: 'single' });
-  } else {
-    return newSource;
   }
 };
