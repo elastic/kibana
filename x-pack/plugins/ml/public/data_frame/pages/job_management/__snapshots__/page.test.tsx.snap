@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
+<EuiPage
+  restrictWidth={false}
+>
+  <EuiPageBody
+    restrictWidth={false}
+  >
+    <EuiPageContentHeader
+      responsive={true}
+    >
+      <EuiPageContentHeaderSection>
+        <EuiTitle>
+          <h1>
+            <FormattedMessage
+              defaultMessage="Data frame jobs"
+              id="xpack.ml.dataframe.jobsList.dataFrameTitle"
+              values={Object {}}
+            />
+            <span>
+               
+            </span>
+            <EuiBetaBadge
+              label="Beta"
+              tooltipContent="Data frames are a beta feature. We'd love to hear your feedback."
+              tooltipPosition="top"
+            />
+          </h1>
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+      <EuiPageContentHeaderSection>
+        <CreateJobButton />
+      </EuiPageContentHeaderSection>
+    </EuiPageContentHeader>
+    <EuiPageContentBody>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="m"
+      >
+        <DataFrameJobList />
+      </EuiPanel>
+    </EuiPageContentBody>
+  </EuiPageBody>
+</EuiPage>
+`;
