@@ -60,10 +60,23 @@ const addI18nImport = (ast, jscodeshift) => {
   return hasI18nImport ? jscodeshift(ast) : addImport(ast);
 };
 
+const fixI18nCalls = (ast, jscodeshift) => {
+  return jscodeshift(ast)
+    .find(jscodeshift.CallExpression)
+    .filter(call => call.value.callee.name === 'i18n')
+    .forEach(call => {
+      console.log('found one!');
+      console.log(call.value.callee.name);
+      call.value.callee.name = 'i18n.translate';
+    })
+    .toSource();
+};
+
 module.exports = function ({ source }, { jscodeshift }) {
-  const [didChange, newSource] = removeI18nFnParams(source, jscodeshift);
+  const [didChange, newSourceParams] = removeI18nFnParams(source, jscodeshift);
   if(didChange) {
-  	return addI18nImport(newSource, jscodeshift)
+    const newSourceCalls = fixI18nCalls(newSourceParams, jscodeshift);
+    return addI18nImport(newSourceCalls, jscodeshift)
   	  .toSource({ quote: 'single' });
   }
 };
