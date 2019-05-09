@@ -442,7 +442,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`infrastructure snapshot page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/snapshot', {
+        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/inventory', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
