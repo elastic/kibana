@@ -3,8 +3,10 @@ import { validateOptions } from '../../src/options/options';
 const validOptions = {
   accessToken: 'myAccessToken',
   all: false,
+  apiHostname: 'api.github.com',
   branchChoices: [],
   branches: ['branchA'],
+  gitHostname: 'github.com',
   labels: [],
   multiple: false,
   multipleBranches: true,

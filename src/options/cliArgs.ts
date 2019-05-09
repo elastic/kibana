@@ -19,12 +19,22 @@ export function getOptionsFromCliArgs(
       description: 'List all commits',
       type: 'boolean'
     })
+    .option('apiHostname', {
+      default: configOptions.apiHostname,
+      description: 'Hostname for the Github API',
+      type: 'string'
+    })
     .option('branches', {
       default: [] as string[],
       description: 'Branch(es) to backport to',
       type: 'array',
       alias: 'branch',
       string: true // ensure `6.0` is not coerced to `6`
+    })
+    .option('gitHostname', {
+      default: configOptions.gitHostname,
+      description: 'Hostname for Github',
+      type: 'string'
     })
     .option('labels', {
       default: configOptions.labels,
@@ -78,8 +88,10 @@ export function getOptionsFromCliArgs(
   return {
     accessToken: cliArgs.accessToken,
     all: cliArgs.all,
+    apiHostname: cliArgs.apiHostname,
     branchChoices: configOptions.branchChoices,
     branches: cliArgs.branches,
+    gitHostname: cliArgs.gitHostname,
     labels: cliArgs.labels,
     multiple: cliArgs.multiple,
     multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,

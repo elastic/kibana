@@ -13,12 +13,14 @@ export async function maybeSetupRepo({
   accessToken,
   owner,
   repoName,
-  username
+  username,
+  gitHostname
 }: {
   accessToken: string;
   owner: string;
   repoName: string;
   username: string;
+  gitHostname: string;
 }) {
   const isAlreadyCloned = await repoExists({ owner, repoName });
 
@@ -36,7 +38,8 @@ export async function maybeSetupRepo({
         accessToken,
         callback: (progress: string) => {
           spinner.text = `${progress}% ${spinnerCloneText}`;
-        }
+        },
+        gitHostname
       });
       spinner.succeed(`100% ${spinnerCloneText}`);
     } catch (e) {
@@ -48,10 +51,16 @@ export async function maybeSetupRepo({
 
   // ensure remote are setup with latest accessToken
   await deleteRemote({ owner, repoName, username });
-  await addRemote({ owner, repoName, username, accessToken });
+  await addRemote({ owner, repoName, username, accessToken, gitHostname });
 
   if (username !== owner) {
     await deleteRemote({ owner, repoName, username: owner });
-    await addRemote({ owner, repoName, username: owner, accessToken });
+    await addRemote({
+      owner,
+      repoName,
+      username: owner,
+      accessToken,
+      gitHostname
+    });
   }
 }

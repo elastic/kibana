@@ -8,7 +8,8 @@ describe('addRemote', () => {
       accessToken: 'myAccessToken',
       owner: 'elastic',
       repoName: 'kibana',
-      username: 'elastic'
+      username: 'elastic',
+      gitHostname: 'github.com'
     });
 
     return expect(spy).toHaveBeenCalledWith(
@@ -23,11 +24,28 @@ describe('addRemote', () => {
       accessToken: 'myAccessToken',
       owner: 'elastic',
       repoName: 'kibana',
-      username: 'sqren'
+      username: 'sqren',
+      gitHostname: 'github.com'
     });
 
     return expect(spy).toHaveBeenCalledWith(
       'git remote add sqren https://myAccessToken@github.com/sqren/kibana.git',
+      { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
+    );
+  });
+
+  it('allows custom github url', async () => {
+    const spy = jest.spyOn(rpc, 'exec').mockResolvedValue({} as any);
+    await addRemote({
+      accessToken: 'myAccessToken',
+      owner: 'elastic',
+      repoName: 'kibana',
+      username: 'sqren',
+      gitHostname: 'github.my-company.com'
+    });
+
+    return expect(spy).toHaveBeenCalledWith(
+      'git remote add sqren https://myAccessToken@github.my-company.com/sqren/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
     );
   });

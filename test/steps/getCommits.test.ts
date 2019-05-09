@@ -22,7 +22,12 @@ describe('getCommitBySha', () => {
         items: []
       });
 
-    const commits = await getCommitBySha('elastic', 'kibana', 'myCommitSha');
+    const commits = await getCommitBySha(
+      'elastic',
+      'kibana',
+      'myCommitSha',
+      'api.github.com'
+    );
     expect(commits).toEqual({
       message: '[Chrome] Bootstrap Angular into document.body (#15158)',
       sha: 'myCommitSha',
@@ -39,7 +44,7 @@ describe('getCommitBySha', () => {
       });
 
     await expect(
-      getCommitBySha('elastic', 'kibana', 'myCommitSha')
+      getCommitBySha('elastic', 'kibana', 'myCommitSha', 'api.github.com')
     ).rejects.toThrowError('No commit found for SHA: myCommitSha');
   });
 
@@ -58,7 +63,9 @@ describe('getCommitBySha', () => {
         items: [{ number: 1338 }]
       });
 
-    expect(await getCommitBySha('elastic', 'kibana', 'myCommitSha')).toEqual({
+    expect(
+      await getCommitBySha('elastic', 'kibana', 'myCommitSha', 'api.github.com')
+    ).toEqual({
       message: '[Chrome] Bootstrap Angular into document.body (#15158)',
       pullNumber: 1338,
       sha: 'myCommitSha'

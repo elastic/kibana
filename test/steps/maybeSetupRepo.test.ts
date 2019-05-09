@@ -14,7 +14,8 @@ describe('maybeSetupRepo', () => {
         owner: 'elastic',
         repoName: 'kibana',
         username: 'sqren',
-        accessToken: 'myAccessToken'
+        accessToken: 'myAccessToken',
+        gitHostname: 'github.com'
       });
     } catch (e) {
       expect(rimraf).toHaveBeenCalledWith(

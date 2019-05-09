@@ -19,6 +19,8 @@ export async function getOptionsFromConfigFiles() {
     all: false,
     labels: [] as string[],
     prTitle: '[{baseBranch}] {commitMessages}',
+    gitHostname: 'github.com',
+    apiHostname: 'api.github.com',
 
     // options from config files
     ...globalConfig,

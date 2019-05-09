@@ -58,7 +58,8 @@ describe('doBackportVersion', () => {
         'sqren',
         ['backport'],
         '[{baseBranch}] {commitMessages}',
-        'myPrSuffix'
+        'myPrSuffix',
+        'api.github.com'
       );
     });
 
@@ -109,7 +110,8 @@ describe('doBackportVersion', () => {
         'sqren',
         ['backport'],
         '[{baseBranch}] {commitMessages}',
-        undefined
+        undefined,
+        'api.github.com'
       );
     });
 
@@ -171,7 +173,8 @@ describe('doBackportVersion', () => {
         'sqren',
         ['backport'],
         'myPrTitle',
-        undefined
+        undefined,
+        'api.github.com'
       );
 
       return { logSpy, execSpy, promise };

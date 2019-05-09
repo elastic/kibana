@@ -25,7 +25,8 @@ export function doBackportVersions(
   username: string,
   labels: string[],
   prTitle: string,
-  prDescription: string | undefined
+  prDescription: string | undefined,
+  apiHostname: string
 ) {
   return sequentially(branches, async branch => {
     try {
@@ -37,7 +38,8 @@ export function doBackportVersions(
         username,
         labels,
         prTitle,
-        prDescription
+        prDescription,
+        apiHostname
       );
       log(`View pull request: ${pullRequest.html_url}`);
     } catch (e) {
@@ -59,7 +61,8 @@ export async function doBackportVersion(
   username: string,
   labels: string[] = [],
   prTitle: string,
-  prDescription: string | undefined
+  prDescription: string | undefined,
+  apiHostname: string
 ) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const refValues = commits.map(commit => getReferenceLong(commit)).join(', ');
@@ -98,9 +101,20 @@ export async function doBackportVersion(
       prTitle,
       prDescription
     );
-    const pullRequest = await createPullRequest(owner, repoName, payload);
+    const pullRequest = await createPullRequest(
+      owner,
+      repoName,
+      payload,
+      apiHostname
+    );
     if (labels.length > 0) {
-      await addLabelsToPullRequest(owner, repoName, pullRequest.number, labels);
+      await addLabelsToPullRequest(
+        owner,
+        repoName,
+        pullRequest.number,
+        labels,
+        apiHostname
+      );
     }
     return pullRequest;
   });
