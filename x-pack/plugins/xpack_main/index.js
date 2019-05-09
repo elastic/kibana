@@ -52,6 +52,8 @@ export const xpackMain = (kibana) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         telemetry: Joi.object({
+          // `config` is used internally and not intended to be set
+          config: Joi.string().default(Joi.ref('$defaultConfigPath')),
           enabled: Joi.boolean().default(true),
           url: Joi.when('$dev', {
             is: true,

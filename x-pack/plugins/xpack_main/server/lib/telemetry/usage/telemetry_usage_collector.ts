@@ -6,17 +6,11 @@
 
 import { accessSync, constants, promises, statSync } from 'fs';
 import { Server } from 'hapi';
-import { find } from 'lodash';
 import { safeLoad } from 'js-yaml';
+import { dirname, join } from 'path';
 
 // look for telemetry.yml in the same places we expect kibana.yml
-import { createConfigPaths } from 'legacy/server/path/create_config_path';
 import { ensureDeepObject } from './ensure_deep_object';
-
-/**
- * Paths expected to contain the file.
- */
-const USAGE_PATHS: string[] = createConfigPaths('telemetry.yml');
 
 /**
  * The maximum file size before we ignore it (note: this limit is arbitrary).
@@ -32,41 +26,33 @@ export interface KibanaHapiServer extends Server {
 }
 
 /**
- * Find the first path from the supplied `paths` that is readable.
+ * Determine if the supplied `path` is readable.
  *
- * @param {Array} paths The possible paths where a config file may exist.
- * @returns The first matching path, or `undefined`.
+ * @param path The possible path where a config file may exist.
+ * @returns `true` if the file should be used.
  */
-export function findFirstReadableFile(paths: string[]): string | undefined {
-  return find(paths, path => {
-    try {
-      accessSync(path, constants.R_OK);
+export function isFileReadable(path: string): boolean {
+  try {
+    accessSync(path, constants.R_OK);
 
-      // ignore files above the limit
-      const stats = statSync(path);
-      return stats.size <= MAX_FILE_SIZE;
-    } catch (e) {
-      // Check the next path
-    }
-  });
+    // ignore files above the limit
+    const stats = statSync(path);
+    return stats.size <= MAX_FILE_SIZE;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
  * Load the `telemetry.yml` file, if it exists, and return its contents as
  * a JSON object.
  *
- * @param _callCluster The unneeded parameter passed to every collector fetch method.
- * @param paths Defaults to `USAGE_PATHS`, but overridable for testing.
+ * @param configPath The config file path.
  * @returns The unmodified JSON object if the file exists and is a valid YAML file.
  */
-export async function readTelemetryFile(
-  _callCluster: any,
-  paths: string[] = USAGE_PATHS
-): Promise<object | undefined> {
+export async function readTelemetryFile(path: string): Promise<object | undefined> {
   try {
-    const path = findFirstReadableFile(paths);
-
-    if (path) {
+    if (isFileReadable(path)) {
       const yaml = await promises.readFile(path);
       const data = safeLoad(yaml.toString());
 
@@ -97,6 +83,15 @@ export async function readTelemetryFile(
 export function createTelemetryUsageCollector(server: KibanaHapiServer) {
   return server.usage.collectorSet.makeUsageCollector({
     type: 'static_telemetry',
-    fetch: readTelemetryFile,
+    fetch: async () => {
+      try {
+        const configPath: string = server.config().get('xpack.xpack_main.telemetry.config');
+        const telemetryPath = join(dirname(configPath), 'telemetry.yml');
+        return await readTelemetryFile(telemetryPath);
+      } catch (err) {
+        // ignored
+        return undefined;
+      }
+    },
   });
 }

@@ -6,12 +6,11 @@
 
 import { writeFileSync, unlinkSync } from 'fs';
 import { Server } from 'hapi';
-import { shuffle } from 'lodash';
 import { resolve } from 'path';
 import { tmpdir } from 'os';
 import {
-  findFirstReadableFile,
   createTelemetryUsageCollector,
+  isFileReadable,
   readTelemetryFile,
   KibanaHapiServer,
   MAX_FILE_SIZE,
@@ -24,6 +23,21 @@ const getMockServer = (): KibanaHapiServer =>
     },
   } as KibanaHapiServer & Server);
 
+const serverWithConfig = (configPath: string): KibanaHapiServer & Server => {
+  return {
+    ...getMockServer(),
+    config: () => ({
+      get: (key: string) => {
+        if (key !== 'xpack.xpack_main.telemetry.config') {
+          throw new Error('Expected `xpack.xpack_main.telemetry.config`');
+        }
+
+        return configPath;
+      },
+    }),
+  } as KibanaHapiServer & Server;
+};
+
 describe('telemetry_usage_collector', () => {
   const tempDir = tmpdir();
   const tempFiles = {
@@ -31,7 +45,7 @@ describe('telemetry_usage_collector', () => {
     empty: resolve(tempDir, 'tests-telemetry_usage_collector-empty.yml'),
     too_big: resolve(tempDir, 'tests-telemetry_usage_collector-too_big.yml'),
     unreadable: resolve(tempDir, 'tests-telemetry_usage_collector-unreadable.yml'),
-    valid: resolve(tempDir, 'tests-telemetry_usage_collector-valid.yml'),
+    valid: resolve(tempDir, 'telemetry.yml'),
   };
   const invalidFiles = [tempFiles.too_big, tempFiles.unreadable];
   const validFiles = [tempFiles.blank, tempFiles.empty, tempFiles.valid];
@@ -71,42 +85,49 @@ describe('telemetry_usage_collector', () => {
     });
   });
 
-  describe('findFirstReadableFile', () => {
+  describe('isFileReadable', () => {
     test('returns `undefined` no file is readable', async () => {
-      expect(findFirstReadableFile([])).toBeUndefined();
-      expect(findFirstReadableFile(invalidFiles)).toBeUndefined();
+      expect(isFileReadable('')).toBe(false);
+      invalidFiles.forEach(path => {
+        expect(isFileReadable(path)).toBe(false);
+      });
     });
 
-    test('returns the first file that has valid data', async () => {
-      expect(findFirstReadableFile(allFiles)).toBe(tempFiles.blank);
-      // allFiles is shuffled so we randomly go through the list
-      expect(validFiles).toContain(findFirstReadableFile(shuffle(allFiles)));
+    test('returns `true` file that has valid data', async () => {
+      expect(allFiles.filter(isFileReadable)).toEqual(validFiles);
     });
   });
 
   describe('readTelemetryFile', () => {
     test('returns `undefined` if no path was found', async () => {
-      expect(await readTelemetryFile(null, [])).toBeUndefined();
-      expect(await readTelemetryFile(null, invalidFiles)).toBeUndefined();
+      expect(await readTelemetryFile('')).toBeUndefined();
+      for (const invalidFile of invalidFiles) {
+        expect(await readTelemetryFile(invalidFile)).toBeUndefined();
+      }
     });
 
     test('returns `undefined` if the file is blank or empty', async () => {
-      expect(await readTelemetryFile(null, [tempFiles.blank])).toBeUndefined();
-      expect(await readTelemetryFile(null, [tempFiles.empty])).toBeUndefined();
+      expect(await readTelemetryFile(tempFiles.blank)).toBeUndefined();
+      expect(await readTelemetryFile(tempFiles.empty)).toBeUndefined();
     });
 
     test('returns the object parsed from the YAML file', async () => {
-      expect(await readTelemetryFile(null, [tempFiles.valid])).toEqual(expectedObject);
+      expect(await readTelemetryFile(tempFiles.valid)).toEqual(expectedObject);
     });
   });
 
   describe('createTelemetryUsageCollector', () => {
-    test('returns calls `collectorSet.makeUsageCollector`', async () => {
+    test('calls `collectorSet.makeUsageCollector`', async () => {
+      // note: it uses the file's path to get the directory, then looks for 'telemetry.yml'
+      // exclusively, which is indirectly tested by passing it the wrong "file" in the same
+      // dir
+      const server: KibanaHapiServer & Server = serverWithConfig(tempFiles.unreadable);
+
       // the `makeUsageCollector` is mocked above to return the argument passed to it
-      const collectorOptions = createTelemetryUsageCollector(getMockServer());
+      const collectorOptions = createTelemetryUsageCollector(server);
 
       expect(collectorOptions.type).toBe('static_telemetry');
-      expect(collectorOptions.fetch).toBe(readTelemetryFile);
+      expect(await collectorOptions.fetch()).toEqual(expectedObject);
     });
   });
 });
