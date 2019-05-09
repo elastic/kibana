@@ -7,17 +7,16 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-
-import { GetHostDetailsQuery, HostItem } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
-import { HostDetailsQuery } from './host_details.gql_query';
+import { HostOverviewQuery } from './host_overview.gql_query';
+import { GetHostOverviewQuery, HostItem } from '../../../graphql/types';
 
-export interface HostDetailsArgs {
+export interface HostOverviewArgs {
   id: string;
-  hostDetails: HostItem;
+  hostOverview: HostItem;
   loading: boolean;
   refetch: inputsModel.Refetch;
   startDate: number;
@@ -25,20 +24,20 @@ export interface HostDetailsArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: HostDetailsArgs) => React.ReactNode;
+  children: (args: HostOverviewArgs) => React.ReactNode;
   hostName: string;
   startDate: number;
   endDate: number;
 }
 
-export class HostDetailsByNameQuery extends QueryTemplate<
+export class HostOverviewByNameQuery extends QueryTemplate<
   OwnProps,
-  GetHostDetailsQuery.Query,
-  GetHostDetailsQuery.Variables
+  GetHostOverviewQuery.Query,
+  GetHostOverviewQuery.Variables
 > {
   public render() {
     const {
-      id = 'hostDetailsQuery',
+      id = 'hostOverviewQuery',
       children,
       hostName,
       sourceId,
@@ -46,8 +45,8 @@ export class HostDetailsByNameQuery extends QueryTemplate<
       endDate,
     } = this.props;
     return (
-      <Query<GetHostDetailsQuery.Query, GetHostDetailsQuery.Variables>
-        query={HostDetailsQuery}
+      <Query<GetHostOverviewQuery.Query, GetHostOverviewQuery.Variables>
+        query={HostOverviewQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={{
@@ -60,13 +59,13 @@ export class HostDetailsByNameQuery extends QueryTemplate<
           },
         }}
       >
-        {({ data, loading, fetchMore, refetch }) => {
-          const hostDetails = getOr([], 'source.HostDetails', data);
+        {({ data, loading, refetch }) => {
+          const hostOverview = getOr([], 'source.HostOverview', data);
           return children({
             id,
             refetch,
             loading,
-            hostDetails,
+            hostOverview,
             startDate,
             endDate,
           });
