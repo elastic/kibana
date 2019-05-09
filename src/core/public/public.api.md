@@ -138,9 +138,7 @@ export interface CoreSetup {
     uiSettings: UiSettingsSetup;
 }
 
-// Warning: (ae-missing-release-tag) "CoreStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface CoreStart {
     // (undocumented)
     application: ApplicationStart;
@@ -148,6 +146,8 @@ export interface CoreStart {
     basePath: BasePathStart;
     // (undocumented)
     chrome: ChromeStart;
+    // (undocumented)
+    http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
     // (undocumented)
@@ -173,16 +173,26 @@ export class CoreSystem {
     }
 
 // @public
+export interface FatalErrorInfo {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    stack: string | undefined;
+}
+
+// @public
 export interface FatalErrorsSetup {
     add: (error: string | Error, source?: string) => never;
-    // Warning: (ae-forgotten-export) The symbol "ErrorInfo" needs to be exported by the entry point index.d.ts
-    get$: () => Rx.Observable<ErrorInfo>;
+    get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
 export type HttpSetup = ReturnType<HttpService['setup']>;
+
+// @public (undocumented)
+export type HttpStart = ReturnType<HttpService['start']>;
 
 // @public
 export interface I18nSetup {
@@ -191,8 +201,6 @@ export interface I18nSetup {
     }) => JSX.Element;
 }
 
-// Warning: (ae-missing-release-tag) "I18nStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type I18nStart = I18nSetup;
 
@@ -331,8 +339,6 @@ export interface OverlayStart {
 export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
     // (undocumented)
     setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
-    // Warning: (ae-forgotten-export) The symbol "PluginStartContext" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
@@ -364,6 +370,24 @@ export interface PluginSetupContext {
     uiSettings: UiSettingsSetup;
 }
 
+// @public
+export interface PluginStartContext {
+    // (undocumented)
+    application: Pick<ApplicationStart, 'capabilities'>;
+    // (undocumented)
+    basePath: BasePathStart;
+    // (undocumented)
+    chrome: ChromeStart;
+    // (undocumented)
+    http: HttpStart;
+    // (undocumented)
+    i18n: I18nStart;
+    // (undocumented)
+    notifications: NotificationsStart;
+    // (undocumented)
+    overlays: OverlayStart;
+}
+
 export { Toast }
 
 // @public (undocumented)
@@ -387,6 +411,7 @@ export class ToastsApi {
 
 // @public (undocumented)
 export class UiSettingsClient {
+    // Warning: (ae-forgotten-export) The symbol "UiSettingsClientParams" needs to be exported by the entry point index.d.ts
     constructor(params: UiSettingsClientParams);
     get$(key: string, defaultOverride?: any): Rx.Observable<any>;
     get(key: string, defaultOverride?: any): any;
@@ -407,10 +432,6 @@ export class UiSettingsClient {
     isDefault(key: string): boolean;
     isOverridden(key: string): boolean;
     overrideLocalDefault(key: string, newDefault: any): void;
-    // Warning: (ae-forgotten-export) The symbol "UiSettingsClientParams" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    readonly params: UiSettingsClientParams;
     remove(key: string): Promise<boolean>;
     set(key: string, val: any): Promise<boolean>;
     stop(): void;
