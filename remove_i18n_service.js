@@ -57,15 +57,15 @@ const addI18nImport = (ast, jscodeshift) => {
     .filter(imp => imp.value.source.value === '@kbn/i18n').length;
 
   console.log('  adding \'i18n\' import');
-  return hasI18nImport ? ast : addImport(ast);
+  return hasI18nImport ? jscodeshift(ast) : addImport(ast);
 };
 
 module.exports = function ({ source, path }, { jscodeshift }) {
-  console.log(path);
   const [didChange, newSource] = removeI18nFnParams(source, jscodeshift);
-
   if(didChange) {
   	return addI18nImport(newSource, jscodeshift)
   	  .toSource({ quote: 'single' });
+  } else {
+    return newSource;
   }
 };
