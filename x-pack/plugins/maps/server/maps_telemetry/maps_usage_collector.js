@@ -52,7 +52,12 @@ async function fetch(server) {
 export function buildCollectorObj(server) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
-    if (await isTaskManagerReady(server)) {
+    let isReady = false;
+    try {
+      isReady = await isTaskManagerReady(server);
+    } catch (err) {} // eslint-disable-line
+
+    if (isReady) {
       isCollectorReady = true;
     } else {
       setTimeout(determineIfTaskManagerIsReady, 500);

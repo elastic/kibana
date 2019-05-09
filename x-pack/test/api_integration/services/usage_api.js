@@ -9,18 +9,15 @@ export function UsageAPIProvider({ getService }) {
   const supertest = getService('supertest');
   const supertestNoAuth = getService('supertestWithoutAuth');
 
-  async function getStats(test) {
+  async function getStats(promise) {
     try {
-      return await test
-        .get('/api/stats?extended=true')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      return await promise;
     }
     catch (err) {
       if (err.message.includes('503')) {
         return await new Promise(resolve => {
           setTimeout(async () => {
-            resolve(await getStats(test));
+            resolve(await getStats(promise));
           }, 100);
         });
       }
@@ -30,15 +27,20 @@ export function UsageAPIProvider({ getService }) {
 
   return {
     async getUsageStatsNoAuth() {
-      const { body } = await supertestNoAuth
+      const { body } = await getStats(supertestNoAuth
         .get('/api/stats?extended=true')
         .set('kbn-xsrf', 'xxx')
-        .expect(401);
+        .expect(401)
+      );
       return body.usage;
     },
 
     async getUsageStats() {
-      const { body } = await getStats(supertest);
+      const { body } = await getStats(supertest
+        .get('/api/stats?extended=true')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200)
+      );
       return body.usage;
     },
   };

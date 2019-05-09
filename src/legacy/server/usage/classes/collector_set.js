@@ -81,7 +81,6 @@ export class CollectorSet {
     let allReady = true;
     await collectorSet.asyncEach(async collector => {
       if (!await collector.isReady()) {
-        console.log('collector_set.areAllCollectorsReady() a collector is not ready', { type: collector.type });
         allReady = false;
       }
     });
