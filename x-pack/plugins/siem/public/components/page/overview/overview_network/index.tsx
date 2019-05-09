@@ -30,10 +30,16 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
     <EuiPanel>
       <HeaderPanel
         border
+        subtitle={
+          <FormattedMessage
+            id="xpack.siem.overview.networkSubtitle"
+            defaultMessage="Showing: Last 24 Hours"
+          />
+        }
         title={
           <FormattedMessage
             id="xpack.siem.overview.networkTitle"
-            defaultMessage="Network Ingest Indices"
+            defaultMessage="Network Beats Events"
           />
         }
       >

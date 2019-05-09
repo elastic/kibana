@@ -30,10 +30,16 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
     <EuiPanel>
       <HeaderPanel
         border
+        subtitle={
+          <FormattedMessage
+            id="xpack.siem.overview.hostsSubtitle"
+            defaultMessage="Showing: Last 24 Hours"
+          />
+        }
         title={
           <FormattedMessage
             id="xpack.siem.overview.hostsTitle"
-            defaultMessage="Hosts Ingest Indices"
+            defaultMessage="Host Beats Events"
           />
         }
       >

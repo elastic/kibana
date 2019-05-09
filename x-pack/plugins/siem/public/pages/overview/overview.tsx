@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
+import moment from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
@@ -23,6 +24,10 @@ import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
+const dateEnd = Date.now();
+const dateRange = moment.duration(24, 'hours').asMilliseconds();
+const dateStart = dateEnd - dateRange;
+
 export const OverviewComponent = pure(() => (
   <WithSource
     sourceId="default"
@@ -35,11 +40,11 @@ export const OverviewComponent = pure(() => (
           <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE} />
 
           <GlobalTime>
-            {({ to, from, setQuery }) => (
+            {({ setQuery }) => (
               <EuiFlexGroup>
                 <Summary />
-                <OverviewHost endDate={to} startDate={from} setQuery={setQuery} />
-                <OverviewNetwork endDate={to} startDate={from} setQuery={setQuery} />
+                <OverviewHost endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
+                <OverviewNetwork endDate={dateEnd} startDate={dateStart} setQuery={setQuery} />
               </EuiFlexGroup>
             )}
           </GlobalTime>
