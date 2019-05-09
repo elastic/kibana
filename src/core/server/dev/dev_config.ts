@@ -25,8 +25,8 @@ const createDevSchema = schema.object({
   }),
 });
 
-export const configDefinition = {
-  configPath: 'dev',
+export const config = {
+  path: 'dev',
   schema: createDevSchema,
 };
 
@@ -42,7 +42,7 @@ export class DevConfig {
   /**
    * @internal
    */
-  constructor(config: DevConfigType) {
-    this.basePathProxyTargetPort = config.basePathProxyTarget;
+  constructor(rawConfig: DevConfigType) {
+    this.basePathProxyTargetPort = rawConfig.basePathProxyTarget;
   }
 }

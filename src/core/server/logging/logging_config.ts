@@ -79,8 +79,8 @@ const loggingSchema = schema.object({
 
 /** @internal */
 export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
-export const configDefinition = {
-  configPath: 'logging',
+export const config = {
+  path: 'logging',
   schema: loggingSchema,
 };
 

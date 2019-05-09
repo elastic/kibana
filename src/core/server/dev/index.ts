@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DevConfig, configDefinition } from './dev_config';
+export { DevConfig, config } from './dev_config';

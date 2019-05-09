@@ -31,7 +31,7 @@ import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
-import { configDefinition } from './plugins_config';
+import { config } from './plugins_config';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
@@ -62,7 +62,7 @@ beforeEach(() => {
     env,
     logger
   );
-  configService.setSchema(configDefinition.configPath, configDefinition.schema);
+  configService.setSchema(config.path, config.schema);
   pluginsService = new PluginsService({ env, logger, configService });
 
   [mockPluginSystem] = MockPluginsSystem.mock.instances as any;

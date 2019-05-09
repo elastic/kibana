@@ -24,12 +24,12 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService, HttpServiceSetup, Router } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
-import { PluginsService, configDefinition as pluginsConfigDefinition } from './plugins';
+import { PluginsService, config as pluginsConfig } from './plugins';
 
-import { configDefinition as elasticsearchConfigDefinition } from './elasticsearch';
-import { configDefinition as httpConfigDefinition } from './http';
-import { configDefinition as loggingConfigDefinition } from './logging';
-import { configDefinition as devConfigDefinition } from './dev';
+import { config as elasticsearchConfig } from './elasticsearch';
+import { config as httpConfig } from './http';
+import { config as loggingConfig } from './logging';
+import { config as devConfig } from './dev';
 
 export class Server {
   public readonly configService: ConfigService;
@@ -113,11 +113,11 @@ export class Server {
 
   private async setupConfigSchemas() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
-      [elasticsearchConfigDefinition.configPath, elasticsearchConfigDefinition.schema],
-      [loggingConfigDefinition.configPath, loggingConfigDefinition.schema],
-      [httpConfigDefinition.configPath, httpConfigDefinition.schema],
-      [pluginsConfigDefinition.configPath, pluginsConfigDefinition.schema],
-      [devConfigDefinition.configPath, devConfigDefinition.schema],
+      [elasticsearchConfig.path, elasticsearchConfig.schema],
+      [loggingConfig.path, loggingConfig.schema],
+      [httpConfig.path, httpConfig.schema],
+      [pluginsConfig.path, pluginsConfig.schema],
+      [devConfig.path, devConfig.schema],
     ];
 
     for (const [path, schema] of schemas) {

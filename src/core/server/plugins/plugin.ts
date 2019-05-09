@@ -248,16 +248,15 @@ export class PluginWrapper<
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pluginDefinition = require(pluginPathServer);
 
-    if (!('configDefinition' in pluginDefinition)) {
-      this.log.debug(`"${pluginPathServer}" does not export "configDefinition".`);
+    if (!('config' in pluginDefinition)) {
+      this.log.debug(`"${pluginPathServer}" does not export "config".`);
       return null;
     }
 
-    const configSchema = pluginDefinition.configDefinition.schema;
-    if (!(configSchema instanceof Type)) {
+    if (!(pluginDefinition.config.schema instanceof Type)) {
       throw new Error('Configuration schema expected to be an instance of Type');
     }
-    return configSchema;
+    return pluginDefinition.config.schema;
   }
 
   private createPluginInstance() {

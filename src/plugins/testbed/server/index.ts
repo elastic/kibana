@@ -77,6 +77,6 @@ class Plugin {
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);
 
-export const configDefinition = {
+export const config = {
   schema: TestBedConfig.schema,
 };

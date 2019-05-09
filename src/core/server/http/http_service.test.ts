@@ -22,7 +22,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpService, Router } from '.';
-import { HttpConfigType, configDefinition } from './http_config';
+import { HttpConfigType, config } from './http_config';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -40,7 +40,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
     env,
     logger
   );
-  configService.setSchema(configDefinition.configPath, configDefinition.schema);
+  configService.setSchema(config.path, config.schema);
   return configService;
 };
 

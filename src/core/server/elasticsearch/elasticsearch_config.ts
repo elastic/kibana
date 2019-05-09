@@ -64,8 +64,8 @@ type SslConfigSchema = TypeOf<typeof configSchema>['ssl'];
 
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 
-export const configDefinition = {
-  configPath: 'elasticsearch',
+export const config = {
+  path: 'elasticsearch',
   schema: configSchema,
 };
 
@@ -163,32 +163,32 @@ export class ElasticsearchConfig {
    */
   public readonly customHeaders: TypeOf<typeof configSchema>['customHeaders'];
 
-  constructor(config: TypeOf<typeof configSchema>) {
-    this.apiVersion = config.apiVersion;
-    this.logQueries = config.logQueries;
-    this.hosts = Array.isArray(config.hosts) ? config.hosts : [config.hosts];
-    this.requestHeadersWhitelist = Array.isArray(config.requestHeadersWhitelist)
-      ? config.requestHeadersWhitelist
-      : [config.requestHeadersWhitelist];
-    this.pingTimeout = config.pingTimeout;
-    this.requestTimeout = config.requestTimeout;
-    this.shardTimeout = config.shardTimeout;
-    this.sniffOnStart = config.sniffOnStart;
-    this.sniffOnConnectionFault = config.sniffOnConnectionFault;
-    this.sniffInterval = config.sniffInterval;
-    this.healthCheckDelay = config.healthCheck.delay;
-    this.username = config.username;
-    this.password = config.password;
-    this.customHeaders = config.customHeaders;
+  constructor(rawConfig: TypeOf<typeof configSchema>) {
+    this.apiVersion = rawConfig.apiVersion;
+    this.logQueries = rawConfig.logQueries;
+    this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
+    this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
+      ? rawConfig.requestHeadersWhitelist
+      : [rawConfig.requestHeadersWhitelist];
+    this.pingTimeout = rawConfig.pingTimeout;
+    this.requestTimeout = rawConfig.requestTimeout;
+    this.shardTimeout = rawConfig.shardTimeout;
+    this.sniffOnStart = rawConfig.sniffOnStart;
+    this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
+    this.sniffInterval = rawConfig.sniffInterval;
+    this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.username = rawConfig.username;
+    this.password = rawConfig.password;
+    this.customHeaders = rawConfig.customHeaders;
 
-    const certificateAuthorities = Array.isArray(config.ssl.certificateAuthorities)
-      ? config.ssl.certificateAuthorities
-      : typeof config.ssl.certificateAuthorities === 'string'
-      ? [config.ssl.certificateAuthorities]
+    const certificateAuthorities = Array.isArray(rawConfig.ssl.certificateAuthorities)
+      ? rawConfig.ssl.certificateAuthorities
+      : typeof rawConfig.ssl.certificateAuthorities === 'string'
+      ? [rawConfig.ssl.certificateAuthorities]
       : undefined;
 
     this.ssl = {
-      ...config.ssl,
+      ...rawConfig.ssl,
       certificateAuthorities,
     };
   }

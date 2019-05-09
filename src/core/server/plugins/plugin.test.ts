@@ -269,7 +269,7 @@ describe('#getConfigSchema()', () => {
     jest.doMock(
       'plugin-with-schema/server',
       () => ({
-        configDefinition: {
+        config: {
           schema: pluginSchema,
         },
       }),
@@ -284,7 +284,7 @@ describe('#getConfigSchema()', () => {
 
     expect(plugin.getConfigSchema()).toBe(pluginSchema);
   });
-  it('returns null if configDefinition not specified', () => {
+  it('returns null if config definition not specified', () => {
     jest.doMock('plugin-with-no-definition/server', () => ({}), { virtual: true });
     const manifest = createPluginManifest();
     const plugin = new PluginWrapper(
@@ -307,7 +307,7 @@ describe('#getConfigSchema()', () => {
     jest.doMock(
       'plugin-invalid-schema/server',
       () => ({
-        configDefinition: {
+        config: {
           schema: () => null,
         },
       }),
