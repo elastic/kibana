@@ -19,8 +19,9 @@
 
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -44,6 +45,13 @@ const setupDeps = {
   http: httpServiceMock.createSetupContract(),
 };
 const logger = loggingServiceMock.create();
+
+['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {
+  jest.doMock(join(path, 'server'), () => ({}), {
+    virtual: true,
+  });
+});
+
 beforeEach(() => {
   mockPackage.raw = {
     branch: 'feature-v1',
@@ -327,4 +335,41 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
 test('`stop` stops plugins system', async () => {
   await pluginsService.stop();
   expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
+});
+
+test('`setup` registers plugin config schema in config service', async () => {
+  const configSchema = schema.string();
+  jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
+  jest.doMock(
+    join('path-with-schema', 'server'),
+    () => ({
+      config: {
+        schema: configSchema,
+      },
+    }),
+    {
+      virtual: true,
+    }
+  );
+  mockDiscover.mockReturnValue({
+    error$: from([]),
+    plugin$: from([
+      new PluginWrapper(
+        'path-with-schema',
+        {
+          id: 'some-id',
+          version: 'some-version',
+          configPath: 'path',
+          kibanaVersion: '7.0.0',
+          requiredPlugins: [],
+          optionalPlugins: [],
+          server: true,
+          ui: true,
+        },
+        { logger } as any
+      ),
+    ]),
+  });
+  await pluginsService.setup(setupDeps);
+  expect(configService.setSchema).toBeCalledWith('path', configSchema);
 });

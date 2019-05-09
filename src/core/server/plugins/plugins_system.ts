@@ -70,12 +70,6 @@ export class PluginsSystem {
         {} as Record<PluginName, unknown>
       );
 
-      const schema = plugin.getConfigSchema();
-
-      if (schema) {
-        await this.coreContext.configService.setSchema(plugin.configPath, schema);
-      }
-
       contracts.set(
         pluginName,
         await plugin.setup(

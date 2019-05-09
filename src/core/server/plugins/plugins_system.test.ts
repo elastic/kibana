@@ -23,7 +23,6 @@ import {
 } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { schema } from '@kbn/config-schema';
 
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -119,7 +118,6 @@ test('`setupPlugins` throws if plugins have circular optional dependency', async
 test('`setupPlugins` ignores missing optional dependency', async () => {
   const plugin = createPlugin('some-id', { optional: ['missing-dep'] });
   jest.spyOn(plugin, 'setup').mockResolvedValue('test');
-  jest.spyOn(plugin, 'getConfigSchema').mockReturnValue(null);
 
   pluginsSystem.addPlugin(plugin);
 
@@ -182,7 +180,6 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   [...plugins.keys()].forEach((plugin, index) => {
     jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
     jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
-    jest.spyOn(plugin, 'getConfigSchema').mockReturnValue(null);
 
     setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
     startContextMap.set(plugin.name, `start-for-${plugin.name}`);
@@ -269,7 +266,6 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
 
   [firstPluginToRun, secondPluginNotToRun, thirdPluginToRun].forEach((plugin, index) => {
     jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
-    jest.spyOn(plugin, 'getConfigSchema').mockReturnValue(null);
 
     pluginsSystem.addPlugin(plugin);
   });
@@ -359,7 +355,6 @@ test('`startPlugins` only starts plugins that were setup', async () => {
   [firstPluginToRun, secondPluginNotToRun, thirdPluginToRun].forEach((plugin, index) => {
     jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
     jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
-    jest.spyOn(plugin, 'getConfigSchema').mockReturnValue(null);
 
     pluginsSystem.addPlugin(plugin);
   });
@@ -377,14 +372,4 @@ Array [
   ],
 ]
 `);
-});
-
-test('`setup` calls configService.setSchema if plugin specifies config schema', async () => {
-  const pluginSchema = schema.string();
-  const plugin = createPlugin('plugin-1');
-  jest.spyOn(plugin, 'setup').mockResolvedValue('test');
-  jest.spyOn(plugin, 'getConfigSchema').mockReturnValue(pluginSchema);
-  pluginsSystem.addPlugin(plugin);
-  await pluginsSystem.setupPlugins(setupDeps);
-  await expect(configService.setSchema).toBeCalledWith('path', pluginSchema);
 });
