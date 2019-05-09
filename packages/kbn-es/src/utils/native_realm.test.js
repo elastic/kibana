@@ -79,11 +79,30 @@ describe('isSecurityEnabled', () => {
     expect(await nativeRealm.isSecurityEnabled()).toBe(false);
   });
 
-  test('logs exception and returns false', async () => {
+  test('returns false if 400 error returned', async () => {
     mockClient.xpack.info.mockImplementation(() => {
-      throw new Error('ResponseError');
+      const error = new Error('ResponseError');
+      error.meta = {
+        statusCode: 400,
+      };
+      throw error;
     });
+
     expect(await nativeRealm.isSecurityEnabled()).toBe(false);
+  });
+
+  test('rejects if unexpected error is thrown', async () => {
+    mockClient.xpack.info.mockImplementation(() => {
+      const error = new Error('ResponseError');
+      error.meta = {
+        statusCode: 500,
+      };
+      throw error;
+    });
+
+    await expect(nativeRealm.isSecurityEnabled()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"ResponseError"`
+    );
   });
 });
 
@@ -204,18 +223,13 @@ describe('setPassword', () => {
     });
   });
 
-  it('logs error', async () => {
+  it('rejects with errors', async () => {
     mockClient.security.changePassword.mockImplementation(() => {
       throw new Error('SomeError');
     });
 
-    await nativeRealm.setPassword('kibana', 'foo');
-    expect(log.error.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "[31munable to set password for [1mkibana[22m: SomeError[39m",
-  ],
-]
-`);
+    await expect(
+      nativeRealm.setPassword('kibana', 'foo')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"SomeError"`);
   });
 });
