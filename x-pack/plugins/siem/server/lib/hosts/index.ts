@@ -8,7 +8,7 @@ import { FirstLastSeenHost, HostItem, HostsData } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 
 import {
-  HostDetailsRequestOptions,
+  HostOverviewRequestOptions,
   HostLastFirstSeenRequestOptions,
   HostsAdapter,
   HostsRequestOptions,
@@ -24,11 +24,11 @@ export class Hosts {
     return await this.adapter.getHosts(req, options);
   }
 
-  public async getHostDetails(
+  public async getHostOverview(
     req: FrameworkRequest,
-    options: HostDetailsRequestOptions
+    options: HostOverviewRequestOptions
   ): Promise<HostItem> {
-    return await this.adapter.getHostDetails(req, options);
+    return await this.adapter.getHostOverview(req, options);
   }
 
   public async getHostFirstLastSeen(

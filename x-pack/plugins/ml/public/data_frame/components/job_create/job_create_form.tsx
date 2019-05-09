@@ -36,7 +36,7 @@ export function getDefaultJobCreateState(): JobDetailsExposedState {
 }
 
 function gotToDataFrameJobManagement() {
-  window.location.href = '#/data_frame';
+  window.location.href = '#/data_frames';
 }
 interface Props {
   createIndexPattern: boolean;

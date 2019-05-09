@@ -16,7 +16,7 @@ import {
 } from '../../../../../privilege/check_privilege';
 
 function newJob() {
-  window.location.href = `#/data_frame/new_job`;
+  window.location.href = `#/data_frames/new_job`;
 }
 
 export const CreateJobButton: SFC = () => {

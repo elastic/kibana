@@ -8,12 +8,12 @@ import expect from '@kbn/expect';
 
 import {
   Direction,
-  GetHostDetailsQuery,
+  GetHostOverviewQuery,
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
 } from '../../../../plugins/siem/public/graphql/types';
-import { HostDetailsQuery } from './../../../../plugins/siem/public/containers/hosts/details/host_details.gql_query';
+import { HostOverviewQuery } from '../../../../plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
 import { HostFirstLastSeenGqlQuery } from './../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
 import { HostsTableQuery } from './../../../../plugins/siem/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
@@ -90,31 +90,48 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.eql(HOST_NAME);
+          expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
         });
     });
 
-    it('Make sure that we get Host Details data', () => {
-      const expectedHost: GetHostDetailsQuery.Host = {
-        architecture: 'x86_64',
-        id: CURSOR_ID,
-        ip: [],
-        mac: [],
-        name: 'zeek-sensor-san-francisco',
-        os: {
-          family: 'debian',
-          name: HOST_NAME,
-          platform: 'ubuntu',
-          version: '18.04.2 LTS (Bionic Beaver)',
-          __typename: 'OsFields',
+    it('Make sure that we get Host Overview data', () => {
+      const expectedHost: GetHostOverviewQuery.HostOverview = {
+        _id: 'zeek-sensor-san-francisco',
+        host: {
+          architecture: ['x86_64'],
+          id: [CURSOR_ID],
+          ip: [],
+          mac: [],
+          name: ['zeek-sensor-san-francisco'],
+          os: {
+            family: ['debian'],
+            name: [HOST_NAME],
+            platform: ['ubuntu'],
+            version: ['18.04.2 LTS (Bionic Beaver)'],
+            __typename: 'OsEcsFields',
+          },
+          type: null,
+          __typename: 'HostEcsFields',
         },
-        type: null,
-        __typename: 'HostFields',
+        cloud: {
+          instance: {
+            id: ['132972452'],
+            __typename: 'CloudInstance',
+          },
+          machine: {
+            type: [],
+            __typename: 'CloudMachine',
+          },
+          provider: ['digitalocean'],
+          region: ['sfo2'],
+          __typename: 'CloudFields',
+        },
+        __typename: 'HostItem',
       };
 
       return client
-        .query<GetHostDetailsQuery.Query>({
-          query: HostDetailsQuery,
+        .query<GetHostOverviewQuery.Query>({
+          query: HostOverviewQuery,
           variables: {
             sourceId: 'default',
             hostName: 'zeek-sensor-san-francisco',
@@ -126,8 +143,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
           },
         })
         .then(resp => {
-          const hosts = resp.data.source.HostDetails;
-          expect(hosts.host).to.eql(expectedHost);
+          const hosts = resp.data.source.HostOverview;
+          expect(hosts).to.eql(expectedHost);
         });
     });
 
