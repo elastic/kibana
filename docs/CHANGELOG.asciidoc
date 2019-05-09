@@ -100,7 +100,7 @@ when migrating your application from one version of Kibana to another.
 === Enhancements
 Security:: 
 * Enables security features (authentication, user/role management, and RBAC) at 
-the basic license level {pull}35889[#35889]
+the Basic license level {pull}35889[#35889]
 Visualize::
 * Sets a default timeout for all "waitFor" methods {pull}34756[#34756]
 
