@@ -96,7 +96,9 @@ export interface ChromeNavLink {
     readonly hidden?: boolean;
     readonly icon?: string;
     readonly id: string;
+    readonly linkToLastSubUrl?: boolean;
     readonly order: number;
+    readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
     readonly url?: string;

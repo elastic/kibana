@@ -90,7 +90,7 @@ function extendRecentlyAccessedHistoryItem(
   recentlyAccessed: RecentlyAccessedHistoryItem
 ) {
   const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
-  const navLink = navLinks.find(nl => href.startsWith(nl.baseUrl));
+  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase || nl.baseUrl));
 
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {

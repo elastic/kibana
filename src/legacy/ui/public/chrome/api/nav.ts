@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { pick } from 'lodash';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 import { onStart } from '../../new_platform';
@@ -29,15 +28,7 @@ export interface ChromeNavLinks {
   trackSubUrlForApp(linkId: string, parsedKibanaUrl: KibanaParsedUrl): void;
 }
 
-interface LegacyNavLinkProperties {
-  subUrlBase: string;
-  readonly linkToLastSubUrl: boolean;
-}
-
-type LegacyNavLink = ChromeNavLink & LegacyNavLinkProperties;
-
 interface NavInternals {
-  nav: LegacyNavLink[];
   appUrlStore: Storage;
   trackPossibleSubUrl(url: string): void;
 }
@@ -45,18 +36,6 @@ interface NavInternals {
 export function initChromeNavApi(chrome: any, internals: NavInternals) {
   let coreNavLinks: ChromeStart['navLinks'];
   onStart(({ core }) => (coreNavLinks = core.chrome.navLinks));
-
-  // These are legacy link properties that are not supported in the new platform.
-  // Index by link id for lookups when tracking sub urls.
-  const legacyNavProps = new Map(
-    internals.nav.map(
-      link =>
-        [link.id, pick(link, ['subUrlBase', 'linkToLastSubUrl'])] as [
-          string,
-          LegacyNavLinkProperties
-        ]
-    )
-  );
 
   /**
    * Clear last url for deleted saved objects to avoid loading pages with "Could not locate..."
@@ -70,8 +49,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     }
 
     coreNavLinks.getAll().forEach(link => {
-      const legacyProps = legacyNavProps.get(link.id)!;
-      if (legacyProps.linkToLastSubUrl && urlContainsDeletedId(link.url!)) {
+      if (link.linkToLastSubUrl && urlContainsDeletedId(link.url!)) {
         setLastUrl(link, link.baseUrl);
       }
     });
@@ -98,23 +76,26 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
   internals.trackPossibleSubUrl = async function(url: string) {
     const kibanaParsedUrl = absoluteToParsedUrl(url, chrome.getBasePath());
 
-    for (let link of coreNavLinks.getAll()) {
-      const subUrlBase = legacyNavProps.get(link.id)!.subUrlBase;
-      const active = url.startsWith(subUrlBase);
-      link = coreNavLinks.update(link.id, { active })!;
+    coreNavLinks
+      .getAll()
+      // Filter only legacy links
+      .filter(link => link.subUrlBase)
+      .forEach(link => {
+        const active = url.startsWith(link.subUrlBase!);
+        link = coreNavLinks.update(link.id, { active })!;
 
-      if (active) {
-        setLastUrl(link, url);
-        continue;
-      }
+        if (active) {
+          setLastUrl(link, url);
+          return;
+        }
 
-      link = refreshLastUrl(link);
+        link = refreshLastUrl(link);
 
-      const newGlobalState = kibanaParsedUrl.getGlobalState();
-      if (newGlobalState) {
-        injectNewGlobalState(link, kibanaParsedUrl.appId, newGlobalState);
-      }
-    }
+        const newGlobalState = kibanaParsedUrl.getGlobalState();
+        if (newGlobalState) {
+          injectNewGlobalState(link, kibanaParsedUrl.appId, newGlobalState);
+        }
+      });
   };
 
   function lastSubUrlKey(link: ChromeNavLink) {
@@ -126,7 +107,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
   }
 
   function setLastUrl(link: ChromeNavLink, url: string) {
-    if (legacyNavProps.get(link.id)!.linkToLastSubUrl === false) {
+    if (link.linkToLastSubUrl === false) {
       return;
     }
 
@@ -164,10 +145,15 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
 
   // simulate a possible change in url to initialize the
   // link.active and link.lastUrl properties
-  onStart(() => {
-    [...legacyNavProps.values()].forEach(
-      link => (link.subUrlBase = relativeToAbsolute(chrome.addBasePath(link.subUrlBase)))
-    );
+  onStart(({ core }) => {
+    core.chrome.navLinks
+      .getAll()
+      .filter(link => link.subUrlBase)
+      .forEach(link => {
+        core.chrome.navLinks.update(link.id, {
+          subUrlBase: relativeToAbsolute(chrome.addBasePath(link.subUrlBase)),
+        });
+      });
     internals.trackPossibleSubUrl(document.location.href);
   });
 }

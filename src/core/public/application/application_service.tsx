@@ -76,6 +76,8 @@ export interface App extends BaseApp {
 /** @internal */
 export interface LegacyApp extends BaseApp {
   appUrl: string;
+  subUrlBase?: string;
+  linkToLastSubUrl?: boolean;
 }
 
 /** @internal */

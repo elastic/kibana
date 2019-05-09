@@ -82,18 +82,10 @@ describe('chrome nav apis', function () {
         title: 'Discover',
         url: `${appUrl}?id=${deletedId}`,
         baseUrl: appUrl,
+        linkToLastSubUrl: true,
       }];
 
-      const {
-        chrome
-      } = init({
-        appUrlStore,
-        nav: [{
-          id: appId,
-          linkToLastSubUrl: true,
-        }],
-      });
-
+      const { chrome } = init({ appUrlStore });
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
       expect(coreNavLinks.update.calledWith(appId, { url: appUrl })).to.be(true);
     });
@@ -106,18 +98,10 @@ describe('chrome nav apis', function () {
         title: 'Discover',
         url: lastUrl,
         baseUrl: appUrl,
+        linkToLastSubUrl: true
       }];
 
-      const {
-        chrome
-      } = init({
-        appUrlStore,
-        nav: [{
-          id: appId,
-          linkToLastSubUrl: true
-        }],
-      });
-
+      const { chrome } = init({ appUrlStore });
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
       expect(coreNavLinks.update.calledWith(appId, { url: appUrl })).to.be(false);
     });
@@ -130,37 +114,21 @@ describe('chrome nav apis', function () {
         {
           id: 'kibana:discover',
           baseUrl: `${baseUrl}/app/kibana#discover`,
+          subUrlBase: '/app/kibana#discover'
         },
         {
           id: 'kibana:visualize',
           baseUrl: `${baseUrl}/app/kibana#visualize`,
+          subUrlBase: '/app/kibana#visualize'
         },
         {
           id: 'kibana:dashboard',
           baseUrl: `${baseUrl}/app/kibana#dashboards`,
+          subUrlBase: '/app/kibana#dashboard'
         },
       ];
 
-      const {
-        internals
-      } = init({
-        appUrlStore,
-        nav: [
-          {
-            id: 'kibana:discover',
-            subUrlBase: '/app/kibana#discover'
-          },
-          {
-            id: 'kibana:visualize',
-            subUrlBase: '/app/kibana#visualize'
-          },
-          {
-            id: 'kibana:dashboard',
-            subUrlBase: '/app/kibana#dashboard'
-          },
-        ],
-      });
-
+      const { internals } = init({ appUrlStore });
       internals.trackPossibleSubUrl(`${baseUrl}/app/kibana#dashboard?_g=globalstate`);
 
       expect(fakedLinks[0].url).to.be(`${baseUrl}/app/kibana#discover?_g=globalstate`);
@@ -181,16 +149,10 @@ describe('chrome nav apis', function () {
         id: 'kibana:visualize',
         baseUrl: `${baseUrl}/app/kibana#visualize`,
         url: `${baseUrl}/app/kibana#visualize`,
+        subUrlBase: '/app/kibana#visualize',
       }];
 
-      const { chrome } = init({
-        appUrlStore,
-        nav: [{
-          id: 'kibana:visualize',
-          subUrlBase: '/app/kibana#visualize',
-        }],
-      });
-
+      const { chrome } = init({ appUrlStore });
       const kibanaParsedUrl = absoluteToParsedUrl(`${baseUrl}/xyz/app/kibana#visualize/1234?_g=globalstate`, '/xyz');
       chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
       expect(

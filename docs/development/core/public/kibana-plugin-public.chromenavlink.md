@@ -22,7 +22,9 @@ export interface ChromeNavLink
 |  [hidden](./kibana-plugin-public.chromenavlink.hidden.md) | <code>boolean</code> | Hides a link from the navigation.<!-- -->NOTE: remove this when ApplicationService is implemented. Instead, plugins should only register an Application if needed. |
 |  [icon](./kibana-plugin-public.chromenavlink.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
 |  [id](./kibana-plugin-public.chromenavlink.id.md) | <code>string</code> | A unique identifier for looking up links. |
+|  [linkToLastSubUrl](./kibana-plugin-public.chromenavlink.linktolastsuburl.md) | <code>boolean</code> | Whether or not the subUrl feature should be enabled.<!-- -->NOTE: only read by legacy platform. |
 |  [order](./kibana-plugin-public.chromenavlink.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
+|  [subUrlBase](./kibana-plugin-public.chromenavlink.suburlbase.md) | <code>string</code> | A url base that legacy apps can set to match deep URLs to an applcation.<!-- -->NOTE: this should be removed once legacy apps are gone. |
 |  [title](./kibana-plugin-public.chromenavlink.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-public.chromenavlink.tooltip.md) | <code>string</code> | A tooltip shown when hovering over an app link. |
 |  [url](./kibana-plugin-public.chromenavlink.url.md) | <code>string</code> | A url that legacy apps can set to deep link into their applications.<!-- -->NOTE: Currently used by the "lastSubUrl" feature legacy/ui/chrome. This should be removed once the ApplicationService is implemented and mounting apps. At that time, each app can handle opening to the previous location when they are mounted. |

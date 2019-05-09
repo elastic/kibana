@@ -72,15 +72,6 @@ export interface ChromeNavLink {
   readonly baseUrl: string;
 
   /**
-   * A url that legacy apps can set to deep link into their applications.
-   *
-   * NOTE: Currently used by the "lastSubUrl" feature legacy/ui/chrome. This should
-   * be removed once the ApplicationService is implemented and mounting apps. At that
-   * time, each app can handle opening to the previous location when they are mounted.
-   */
-  readonly url?: string;
-
-  /**
    * A EUI iconType that will be used for the app's icon. This icon
    * takes precendence over the `icon` property.
    */
@@ -91,10 +82,35 @@ export interface ChromeNavLink {
    * if `euiIconType` is not provided.
    */
   readonly icon?: string;
+
+  /** LEGACY FIELDS */
+
+  /**
+   * A url base that legacy apps can set to match deep URLs to an applcation.
+   *
+   * NOTE: this should be removed once legacy apps are gone.
+   */
+  readonly subUrlBase?: string;
+
+  /**
+   * Whether or not the subUrl feature should be enabled.
+   *
+   * NOTE: only read by legacy platform.
+   */
+  readonly linkToLastSubUrl?: boolean;
+
+  /**
+   * A url that legacy apps can set to deep link into their applications.
+   *
+   * NOTE: Currently used by the "lastSubUrl" feature legacy/ui/chrome. This should
+   * be removed once the ApplicationService is implemented and mounting apps. At that
+   * time, each app can handle opening to the previous location when they are mounted.
+   */
+  readonly url?: string;
 }
 
 export type NavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url'>
+  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>
 >;
 
 export class NavLinkWrapper {
@@ -112,7 +128,7 @@ export class NavLinkWrapper {
 
   public update(newProps: NavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url']);
+    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }
