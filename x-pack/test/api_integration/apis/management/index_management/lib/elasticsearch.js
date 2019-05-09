@@ -20,15 +20,19 @@ export const initElasticsearchHelpers = (es) => {
 
   const deleteIndex = (index) => {
     indicesCreated = indicesCreated.filter(i => i !== index);
-    return es.indices.delete({ index });
+    return es.indices.delete({ index, ignoreUnavailable: true });
   };
 
   const deleteAllIndices = () => (
     Promise.all(indicesCreated.map(deleteIndex)).then(() => indicesCreated = [])
   );
 
-  const catIndex = (index) => (
-    es.cat.indices({ index, format: 'json' })
+  const catIndex = (index, h) => (
+    es.cat.indices({ index, format: 'json', h })
+  );
+
+  const indexStats = (index, metric) => (
+    es.indices.stats({ index, metric })
   );
 
   const cleanUp = () => (
@@ -40,6 +44,7 @@ export const initElasticsearchHelpers = (es) => {
     deleteIndex,
     deleteAllIndices,
     catIndex,
+    indexStats,
     cleanUp,
   });
 };
