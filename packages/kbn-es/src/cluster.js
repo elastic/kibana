@@ -172,7 +172,14 @@ exports.Cluster = class Cluster {
 
     await Promise.race([
       // wait for native realm to be setup and es to be started
-      Promise.all([this._nativeRealmSetup, this._started]),
+      Promise.all([
+        first(this._process.stdout, data => {
+          if (/started/.test(data)) {
+            return true;
+          }
+        }),
+        this._nativeRealmSetup,
+      ]),
 
       // await the outcome of the process in case it exits before starting
       this._outcome.then(() => {
@@ -252,12 +259,6 @@ exports.Cluster = class Cluster {
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
       stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    this._started = first(this._process.stdout, data => {
-      if (/started/.test(data)) {
-        return true;
-      }
     });
 
     this._httpPort = first(this._process.stdout, data => {
