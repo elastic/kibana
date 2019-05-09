@@ -77,8 +77,8 @@ the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 
 ===== Set the vector style
 
-The final step is to set the vector fill color to shade
-the countries by web log traffic.
+All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
+Lets use <<maps-vector-style-data-driven, data driven styling>> to shade the world countries based on which country is sending the most requests.
 
 . Click image:maps/images/gs_link_icon.png[] to the right of *Fill color*.
 . Select the grey color ramp.
