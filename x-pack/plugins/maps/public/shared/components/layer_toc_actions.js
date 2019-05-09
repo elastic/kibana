@@ -66,7 +66,6 @@ export class LayerTocActions extends Component {
           color="text"
           onClick={this._togglePopover}
           data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
-          // textProps="mapTocEntry__layerNameText"
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
           {this.props.displayName}
@@ -78,58 +77,49 @@ export class LayerTocActions extends Component {
   _getIconAndTooltipContent() {
     const { zoom, layer } = this.props;
 
+    let icon;
+    let tooltipContent;
     if (layer.hasErrors()) {
-      return {
-        icon: (
-          <EuiIcon
-            aria-label={i18n.translate('xpack.maps.layerTocActions.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
-            size="m"
-            type="alert"
-            color="warning"
-          />
-        ),
-        tooltipContent: layer.getErrors()
-      };
-    }
-
-    if (layer.isLayerLoading()) {
-      return {
-        icon: (<EuiLoadingSpinner size="m"/>),
-      };
-    }
-
-    if (!layer.isVisible()) {
-      return {
-        icon: (
-          <EuiIcon
-            size="m"
-            type="eyeClosed"
-          />
-        ),
-        tooltipContent: i18n.translate('xpack.maps.layerTocActions.layerHiddenTooltip', {
-          defaultMessage: `Layer is hidden.`
-        })
-      };
-    }
-
-    if (!layer.showAtZoomLevel(zoom)) {
+      icon = (
+        <EuiIcon
+          aria-label={i18n.translate('xpack.maps.layerTocActions.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
+          size="m"
+          type="alert"
+          color="warning"
+        />
+      );
+      tooltipContent = layer.getErrors();
+    } else if (layer.isLayerLoading()) {
+      icon = (<EuiLoadingSpinner size="m"/>);
+    } else if (!layer.isVisible()) {
+      icon = (
+        <EuiIcon
+          size="m"
+          type="eyeClosed"
+        />
+      );
+      tooltipContent = i18n.translate('xpack.maps.layerTocActions.layerHiddenTooltip', {
+        defaultMessage: `Layer is hidden.`
+      });
+    } else if (!layer.showAtZoomLevel(zoom)) {
       const { minZoom, maxZoom } = layer.getZoomConfig();
-      return {
-        icon: (
-          <EuiIcon
-            size="m"
-            type="expand"
-          />
-        ),
-        tooltipContent: i18n.translate('xpack.maps.layerTocActions.zoomFeedbackTooltip', {
-          defaultMessage: `Layer is visible between zoom levels {minZoom} to {maxZoom}.`,
-          values: { minZoom, maxZoom }
-        })
-      };
+      icon = (
+        <EuiIcon
+          size="m"
+          type="expand"
+        />
+      );
+      tooltipContent = i18n.translate('xpack.maps.layerTocActions.zoomFeedbackTooltip', {
+        defaultMessage: `Layer is visible between zoom levels {minZoom} to {maxZoom}.`,
+        values: { minZoom, maxZoom }
+      });
+    } else {
+      icon = layer.getIcon();
     }
 
     return {
-      icon: layer.getIcon()
+      icon,
+      tooltipContent
     };
   }
 
