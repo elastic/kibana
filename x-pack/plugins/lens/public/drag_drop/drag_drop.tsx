@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useContext } from 'react';
+import classNames from 'classnames';
 import { DragContext } from './providers';
 
 type DroppableEvent = React.DragEvent<HTMLElement>;
@@ -65,11 +66,11 @@ export function DragDrop(props: Props) {
   const { className, onDrop, value, children, droppable, draggable } = props;
   const isDragging = draggable && value === dragging;
 
-  const classSuffix =
-    ' lnsDragDrop' +
-    (droppable ? ' lnsDragDrop-isDropTarget' : '') +
-    (droppable && state.isActive ? ' lnsDragDrop-isActiveDropTarget' : '') +
-    (isDragging ? ' lnsDragDrop-isDragging' : '');
+  const classes = classNames('lnsDragDrop', className, {
+    'lnsDragDrop-isDropTarget': droppable,
+    'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
+    'lnsDragDrop-isDragging': isDragging,
+  });
 
   const dragStart = (e: DroppableEvent) => {
     // Setting stopPropgagation causes Chrome failures, so
@@ -123,7 +124,7 @@ export function DragDrop(props: Props) {
   return (
     <div
       data-test-subj="lnsDragDrop"
-      className={`${className || ''}${classSuffix}`}
+      className={classes}
       onDragOver={dragOver}
       onDragLeave={dragLeave}
       onDrop={drop}
