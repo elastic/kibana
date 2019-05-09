@@ -55,24 +55,27 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
 
     getValidTimeInterval(userIntervalString) {
       const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
+      const inRollupJobUnit = this.convertIntervalToUnit(userIntervalString, parsedRollupJobInterval.unit);
 
       const getValidCalendarInterval = () => {
-        const inSeconds = this.convertIntervalToUnit(userIntervalString, 's');
+        let unit = parsedRollupJobInterval.unit;
+
+        if (inRollupJobUnit.value > parsedRollupJobInterval.value) {
+          const inSeconds = this.convertIntervalToUnit(userIntervalString, 's');
+
+          unit = this.getSuitableUnit(inSeconds.value);
+        }
 
         return {
           value: 1,
-          unit: this.getSuitableUnit(inSeconds.value),
+          unit,
         };
       };
 
-      const getValidFixedInterval = () => {
-        const inRollupJobUnit = this.convertIntervalToUnit(userIntervalString, parsedRollupJobInterval.unit);
-
-        return {
-          value: leastCommonInterval(inRollupJobUnit.value, parsedRollupJobInterval.value),
-          unit: parsedRollupJobInterval.unit,
-        };
-      };
+      const getValidFixedInterval = () => ({
+        value: leastCommonInterval(inRollupJobUnit.value, parsedRollupJobInterval.value),
+        unit: parsedRollupJobInterval.unit,
+      });
 
       const { value, unit } = (
         isCalendarInterval(parsedRollupJobInterval) ? getValidCalendarInterval : getValidFixedInterval
