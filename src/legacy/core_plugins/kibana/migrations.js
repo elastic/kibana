@@ -152,11 +152,17 @@ function transformFilterStringToQueryObject(doc) {
     try {
       visState = JSON.parse(visStateJSON);
     } catch (e) {
-      // let it do, the data is invalid and we'll leave it as is
+      // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
-      // should I only be migrating filters for metric (and markdown later) types?
-      if (get(visState, 'type') !== 'metric') {
+      // we need to migrate all filters where they are applied:
+      // filters appear in:
+      // type: metric -> visState.params.series[item]
+      // type: markdown -> visState.params.series[item]
+      const isMetricTSVBVis = get(visState, 'params.type') === 'metric';
+      const isMarkdownTSVBVis = get(visState, 'params.type') === 'markdown';
+      if (!isMetricTSVBVis && !isMarkdownTSVBVis) {
+        // skip
         return doc;
       }
       const series = get(visState, 'params.series') || [];
