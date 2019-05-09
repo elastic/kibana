@@ -6,11 +6,11 @@
 
 import gql from 'graphql-tag';
 
-export const HostDetailsQuery = gql`
-  query GetHostDetailsQuery($sourceId: ID!, $hostName: String!, $timerange: TimerangeInput!) {
+export const HostOverviewQuery = gql`
+  query GetHostOverviewQuery($sourceId: ID!, $hostName: String!, $timerange: TimerangeInput!) {
     source(id: $sourceId) {
       id
-      HostDetails(hostName: $hostName, timerange: $timerange) {
+      HostOverview(hostName: $hostName, timerange: $timerange) {
         _id
         host {
           architecture
@@ -25,6 +25,16 @@ export const HostDetailsQuery = gql`
             version
           }
           type
+        }
+        cloud {
+          instance {
+            id
+          }
+          machine {
+            type
+          }
+          provider
+          region
         }
       }
     }
