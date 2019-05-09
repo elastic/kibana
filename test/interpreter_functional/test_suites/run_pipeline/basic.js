@@ -51,8 +51,7 @@ export default function ({ getService, updateBaselines }) {
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'  | 
-        metricVis 
-          visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"},"params":{}}],"bucket":{"accessor":0}}}'
+        metricVis metric={vis_dimension 1 format="number"} bucket={vis_dimension 0}'
       `;
 
       // we can execute an expression and validate the result manually:
