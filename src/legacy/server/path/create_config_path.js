@@ -29,12 +29,13 @@ import { fromRoot } from '../../utils/from_root';
  * const paths: string[] = createConfigPaths('kibana.yml');
  *
  * @param file The file to expect in a Kibana config directory.
+ * @returns Array of strings containing places to check for the config `file`.
  */
-export function createConfigPaths(file: string): string[] {
+export function createConfigPaths(file) {
   return [
     process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, file),
     process.env.CONFIG_PATH, // deprecated
     fromRoot(`config/${file}`),
     `/etc/kibana/${file}`,
-  ].filter(Boolean) as string[];
+  ].filter(Boolean);
 }
