@@ -14,14 +14,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SourceEditor = ({ isImport, clearSource, sourceType, ...props }) => {
-  const editorProperties = getEditorProperties({ isImport, ...props });
+export const SourceEditor = ({
+  isImport, clearSource, sourceType, indexingTriggered, ...props
+}) => {
+  const editorProperties = getEditorProperties({ isImport, indexingTriggered, ...props });
+  let editor;
   if(isImport) {
-    return (
-      <EuiPanel>
-        {GeojsonFileSource.renderEditor(editorProperties)}
-      </EuiPanel>
-    );
+    editor = GeojsonFileSource.renderEditor(editorProperties);
   } else {
     const Source = ALL_SOURCES.find(Source => {
       return Source.type === sourceType;
@@ -29,30 +28,39 @@ export const SourceEditor = ({ isImport, clearSource, sourceType, ...props }) =>
     if (!Source) {
       throw new Error(`Unexpected source type: ${sourceType}`);
     }
-    return (
-      <Fragment>
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          onClick={clearSource}
-          iconType="arrowLeft"
-        >
-          <FormattedMessage
-            id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
-            defaultMessage="Change data source"
-          />
-        </EuiButtonEmpty>
-        <EuiSpacer size="s" />
-        <EuiPanel>
-          {Source.renderEditor(editorProperties)}
-        </EuiPanel>
-      </Fragment>
-    );
+    editor = Source.renderEditor(editorProperties);
   }
+  return (
+    <Fragment>
+      {
+        indexingTriggered
+          ? null
+          : (
+            <Fragment>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                onClick={clearSource}
+                iconType="arrowLeft"
+              >
+                <FormattedMessage
+                  id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
+                  defaultMessage="Change data source"
+                />
+              </EuiButtonEmpty>
+              <EuiSpacer size="s" />
+            </Fragment>
+          )
+      }
+      <EuiPanel>
+        {editor}
+      </EuiPanel>
+    </Fragment>
+  );
 };
 
 function getEditorProperties({
-  removeTransientLayer, inspectorAdapters, isImport, previewLayer,
+  inspectorAdapters, isImport, onRemove, previewLayer,
   addImportLayer, indexingTriggered, onIndexReady, onIndexSuccess
 }) {
   return {
@@ -60,9 +68,9 @@ function getEditorProperties({
     inspectorAdapters,
     ...(isImport
       ? {
+        onRemove,
         boolIndexData: indexingTriggered,
         addAndViewSource: source => addImportLayer(source),
-        onRemove: removeTransientLayer,
         onIndexReadyStatusChange: onIndexReady,
         onIndexSuccess,
       }

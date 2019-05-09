@@ -9,8 +9,6 @@
 import { connect } from 'react-redux';
 import { SourceEditor } from './view';
 import {
-  setSelectedLayer,
-  removeTransientLayer,
   clearTransientLayerStateAndCloseFlyout,
 } from '../../../actions/store_actions';
 import { getInspectorAdapters } from '../../../store/non_serializable_instances';
@@ -24,10 +22,6 @@ function mapStateToProps(state = {}) {
 function mapDispatchToProps(dispatch) {
   return {
     closeFlyout: () => dispatch(clearTransientLayerStateAndCloseFlyout()),
-    removeTransientLayer: () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(removeTransientLayer());
-    },
   };
 }
 

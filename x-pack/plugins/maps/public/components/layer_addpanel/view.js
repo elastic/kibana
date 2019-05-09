@@ -55,10 +55,10 @@ export class AddLayerPanel extends Component {
     }, () => this.props.addImportedLayer(this.state.layer));
   };
 
-  _clearSource = () => {
+  _clearLayerData = ({ keepSourceType = false }) => {
     this.setState({
       layer: null,
-      sourceType: null
+      ...(!keepSourceType ? { sourceType: null } : {}),
     });
     this.props.removeTransientLayer();
   }
@@ -87,7 +87,7 @@ export class AddLayerPanel extends Component {
       return (
         <SourceEditor
           isImport={this.state.importView}
-          clearSource={this._clearSource}
+          clearSource={this._clearLayerData}
           sourceType={this.state.sourceType}
           previewLayer={source => this._viewLayer(source, this.state.importView)}
           addImportLayer={source => this._addImportedLayer(source)}
@@ -96,6 +96,7 @@ export class AddLayerPanel extends Component {
             importIndexingReady => this.setState({ importIndexingReady })
           }
           onIndexSuccess={() => this.setState({ indexingComplete: true })}
+          onRemove={() => this._clearLayerData({ keepSourceType: true })}
         />
       );
     }
