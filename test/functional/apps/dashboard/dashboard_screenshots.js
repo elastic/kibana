@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard snapshots', function describeIndexTests() {
+  describe('dashboard screenshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setWindowSize(1000, 700);
@@ -38,8 +38,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
-    // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
-    it.skip('compare TSVB snapshot', async () => {
+    it('compare TSVB screenshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
@@ -61,7 +60,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       expect(percentDifference).to.be.lessThan(0.05);
     });
 
-    it('compare area chart snapshot', async () => {
+    it('compare area chart screenshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
