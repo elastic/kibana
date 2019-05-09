@@ -13,7 +13,7 @@ import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_l
 import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
 
-import { FirstLastSeenHost } from '.';
+import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
 
 describe('FirstLastSeen Component', async () => {
   // this is just a little hack to silence a warning that we'll get until react
@@ -45,7 +45,7 @@ describe('FirstLastSeen Component', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="first-seen" />
+          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
     );
@@ -58,7 +58,7 @@ describe('FirstLastSeen Component', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="first-seen" />
+          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
     );
@@ -74,7 +74,7 @@ describe('FirstLastSeen Component', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="last-seen" />
+          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
         </MockedProvider>
       </TestProviders>
     );
@@ -90,7 +90,7 @@ describe('FirstLastSeen Component', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="last-seen" />
+          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
         </MockedProvider>
       </TestProviders>
     );
@@ -108,7 +108,7 @@ describe('FirstLastSeen Component', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="first-seen" />
+          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
     );
@@ -126,7 +126,7 @@ describe('FirstLastSeen Component', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="first-seen" />
+          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.FIRST_SEEN} />
         </MockedProvider>
       </TestProviders>
     );
@@ -140,7 +140,7 @@ describe('FirstLastSeen Component', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="last-seen" />
+          <FirstLastSeenHost hostname="kibana-siem" type={FirstLastSeenHostType.LAST_SEEN} />
         </MockedProvider>
       </TestProviders>
     );
