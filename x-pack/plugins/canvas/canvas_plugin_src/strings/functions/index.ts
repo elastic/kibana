@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './apply_strings';
-export * from './element_strings';
-export * from './functions';
+export * from './function_help';

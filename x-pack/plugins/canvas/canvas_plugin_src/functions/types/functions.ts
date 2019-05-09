@@ -57,19 +57,19 @@ export interface NullContextFunction<Name extends string, Arguments, Return>
 // This is useful for collecting all of the Functions and the concepts they share as
 // one useable type.
 // prettier-ignore
-type FunctionFactories<FnFactory> = 
+export type FunctionFactory<FnFactory> = 
   FnFactory extends ContextFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
     Function<Name, Arguments, Return> :
   FnFactory extends NullContextFunctionFactory<infer Name, infer Arguments, infer Return> ?
     Function<Name, Arguments, Return> :
-  FnFactory extends FunctionFactory<infer Name, infer Arguments, infer Return> ?
+  FnFactory extends BasicFunctionFactory<infer Name, infer Arguments, infer Return> ?
     Function<Name, Arguments, Return> :
   never;
 
 /**
  * A type containing all available Functions.
  */
-export type AvailableFunctions = FunctionFactories<Functions>;
+export type AvailableFunctions = FunctionFactory<Functions>;
 
 /**
  * A type containing all of the Function names available to Canvas, formally exported.
@@ -105,7 +105,7 @@ interface FunctionHandlers {
 
 // A `FunctionFactory` defines the function that produces a named FunctionSpec.
 // prettier-ignore
-type FunctionFactory<Name extends string, Arguments, Return> = 
+type BasicFunctionFactory<Name extends string, Arguments, Return> = 
   () => Function<Name, Arguments, Return>;
 
 // A `ContextFunctionFactory` defines the function that produces a named FunctionSpec

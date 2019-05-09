@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { markdown as markdownFn } from '../../functions/browser/markdown';
+import { FunctionHelp } from '.';
+import { FunctionFactory } from '../../functions/types';
+
+export const help: FunctionHelp<FunctionFactory<typeof markdownFn>> = {
+  help: i18n.translate('xpack.canvas.functions.markdownHelpText', {
+    defaultMessage:
+      'An element for rendering markdown text. Great for single numbers, metrics or paragraphs of text.',
+  }),
+  args: {
+    expression: i18n.translate('xpack.canvas.functions.markdown.args.expressionHelpText', {
+      defaultMessage:
+        'A markdown expression. You can pass this multiple times to achieve concatenation',
+    }),
+    font: i18n.translate('xpack.canvas.functions.markdown.args.fontHelpText', {
+      defaultMessage: 'Font settings. Technically, you can add other styles in here as well',
+    }),
+  },
+};

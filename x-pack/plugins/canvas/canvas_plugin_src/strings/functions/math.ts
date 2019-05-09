@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { math as mathFn } from '../../functions/common/math';
+import { FunctionHelp } from '.';
+import { FunctionFactory } from '../../functions/types';
+
+export const help: FunctionHelp<FunctionFactory<typeof mathFn>> = {
+  help: i18n.translate('xpack.canvas.functions.mathHelpText', {
+    defaultMessage:
+      'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. If you pass in a number it is available as "value" (without the quotes)',
+  }),
+  args: {
+    expression: i18n.translate('xpack.canvas.functions.math.args.expressionHelpText', {
+      defaultMessage:
+        'An evaluated TinyMath expression. (See [TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html))',
+    }),
+  },
+};

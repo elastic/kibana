@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { timefilter } from '../../functions/common/timefilter';
+import { FunctionHelp } from '.';
+import { FunctionFactory } from '../../functions/types';
+
+export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
+  help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {
+    defaultMessage: 'Create a timefilter for querying a source',
+  }),
+  args: {
+    column: i18n.translate('xpack.canvas.functions.timefilter.args.columnHelpText', {
+      defaultMessage: 'The column or field to attach the filter to',
+    }),
+    from: i18n.translate('xpack.canvas.functions.timefilter.args.fromHelpText', {
+      defaultMessage: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
+    }),
+    to: i18n.translate('xpack.canvas.functions.timefilter.args.toHelpText', {
+      defaultMessage: 'End of the range, in ISO8601 or Elasticsearch datemath format',
+    }),
+  },
+};
