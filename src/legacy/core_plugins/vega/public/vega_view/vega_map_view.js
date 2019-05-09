@@ -22,6 +22,9 @@ import * as vega from 'vega-lib';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
 import { i18n }  from '@kbn/i18n';
+import chrome from 'ui/chrome';
+
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 export class VegaMapView extends VegaBaseView {
 
@@ -38,7 +41,7 @@ export class VegaMapView extends VegaBaseView {
       const mapStyle = mapConfig.mapStyle === 'default' ? 'road_map' : mapConfig.mapStyle;
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       baseMapOpts = {
-        url: await this._serviceSettings.getUrlTemplateForTMSLayer(baseMapOpts),
+        url: await this._serviceSettings.getUrlTemplateForTMSLayer(baseMapOpts, true, IS_DARK_THEME),
         ...baseMapOpts
       };
       if (!baseMapOpts) {
