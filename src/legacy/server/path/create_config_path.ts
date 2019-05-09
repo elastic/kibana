@@ -33,7 +33,7 @@ import { fromRoot } from '../../utils/from_root';
 export function createConfigPaths(file: string): string[] {
   return [
     process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, file),
-    process.env.CONFIG_PATH, //deprecated
+    process.env.CONFIG_PATH, // deprecated
     fromRoot(`config/${file}`),
     `/etc/kibana/${file}`,
   ].filter(Boolean) as string[];
