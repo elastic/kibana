@@ -78,7 +78,7 @@ describe('telemetry_usage_collector', () => {
     });
 
     test('returns the first file that has valid data', async () => {
-      expect(findFirstReadableFile(allFiles)).toBe(tempFiles.empty);
+      expect(findFirstReadableFile(allFiles)).toBe(tempFiles.blank);
       // allFiles is shuffled so we randomly go through the list
       expect(validFiles).toContain(findFirstReadableFile(shuffle(allFiles)));
     });

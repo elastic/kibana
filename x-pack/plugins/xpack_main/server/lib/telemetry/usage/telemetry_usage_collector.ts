@@ -10,7 +10,8 @@ import { find } from 'lodash';
 import { safeLoad } from 'js-yaml';
 
 // look for telemetry.yml in the same places we expect kibana.yml
-import { createConfigPaths } from '../../../../../../../src/legacy/server/path/create_config_path';
+import { createConfigPaths } from 'src/legacy/server/path/create_config_path';
+import { ensureDeepObject } from 'src/core/server/config/ensure_deep_object';
 
 /**
  * Paths expected to contain the file.
@@ -71,7 +72,8 @@ export async function readTelemetryFile(
 
       // don't bother returning empty objects
       if (Object.keys(data).length) {
-        return data;
+        // ensure { "a.b": "value" } becomes { "a": { "b": "value" } }
+        return ensureDeepObject(data);
       }
     }
   } catch (e) {
