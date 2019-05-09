@@ -847,6 +847,7 @@ Object {
     const migrate = doc => migrations.visualization['7.2.0'](doc);
     let doc;
     let doc2;
+    let doc3;
     beforeEach(() => {
       doc = {
         attributes: {
@@ -952,6 +953,84 @@ Object {
           })
         },
       };
+      doc3 = {
+        id: '3',
+        type: 'visualization',
+        attributes: {
+          description: '',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}'
+          },
+          title: 'Filter Bytes Test: tsvb markdown',
+          uiStateJSON: '{}',
+          version: 1,
+          visState: JSON.stringify({
+            title: 'Filter Bytes Test: tsvb markdown',
+            type: 'metrics',
+            params: {
+              id: '61ca57f0-469d-11e7-af02-69e470af7417',
+              type: 'markdown',
+              series: [
+                {
+                  id: '61ca57f1-469d-11e7-af02-69e470af7417',
+                  color: '#68BC00',
+                  split_mode: 'filters',
+                  metrics: [
+                    {
+                      id: '482d6560-4194-11e8-a461-7d278185cba4',
+                      type: 'avg',
+                      field: 'bytes'
+                    }
+                  ],
+                  seperate_axis: 0,
+                  axis_position: 'right',
+                  formatter: 'number',
+                  chart_type: 'line',
+                  line_width: 1,
+                  point_size: 1,
+                  fill: 0.5,
+                  stacked: 'none',
+                  terms_field: 'clientip',
+                  filter: 'Filter Bytes Test:>1000',
+                  override_index_pattern: 0,
+                  series_index_pattern: 'logstash-*',
+                  series_time_field: 'utc_time',
+                  series_interval: '1m',
+                  value_template: '',
+                  split_filters: [
+                    {
+                      filter: 'bytes:>1000',
+                      label: '',
+                      color: '#68BC00',
+                      id: '39a107e0-4194-11e8-a461-7d278185cba4'
+                    }
+                  ],
+                  label: '',
+                  var_name: ''
+                }
+              ],
+              time_field: '@timestamp',
+              index_pattern: 'logstash-*',
+              interval: 'auto',
+              axis_position: 'left',
+              axis_formatter: 'number',
+              show_legend: 1,
+              show_grid: 1,
+              background_color_rules: [
+                {
+                  id: '06893260-4194-11e8-a461-7d278185cba4'
+                }
+              ],
+              bar_color_rules: [
+                {
+                  id: '36a0e740-4194-11e8-a461-7d278185cba4'
+                }
+              ],
+              markdown: '{{bytes_1000.last.formatted}}'
+            }
+          })
+        }
+      };
     });
     it('should change series item filters from a string into an object for metric visualizations', () => {
       const migratedDoc = migrate(doc);
@@ -959,12 +1038,21 @@ Object {
       expect(series[0].filter).toHaveProperty('query');
       expect(series[0].filter).toHaveProperty('language');
     });
-    it('should not change a series item filter string in the object', () => {
-      const migratedDoc = migrate(doc);
+    it('should change series item filters from a string into an object for markdown visualizations', () => {
+      const migratedDoc = migrate(doc3);
       const series = JSON.parse(migratedDoc.attributes.visState).params.series;
-      expect(series[0].filter.query).toBe(JSON.parse(doc.attributes.visState).params.series[0].filter);
+      expect(series[0].filter).toHaveProperty('query');
+      expect(series[0].filter).toHaveProperty('language');
     });
-    it('should not change a non metric type visualization', () => {
+    it('should not change a series item filter string in the object after migration', () => {
+      const migratedDoc = migrate(doc);
+      const migratedDoc3 = migrate(doc3);
+      const metricSeries = JSON.parse(migratedDoc.attributes.visState).params.series;
+      const markdownSeries = JSON.parse(migratedDoc3.attributes.visState).params.series;
+      expect(metricSeries[0].filter.query).toBe(JSON.parse(doc.attributes.visState).params.series[0].filter);
+      expect(markdownSeries[0].filter.query).toBe(JSON.parse(doc3.attributes.visState).params.series[0].filter);
+    });
+    it('should not change a non metric and non markdown type visualization', () => {
       const migratedDoc = migrate(doc2);
       const series = JSON.parse(migratedDoc.attributes.visState).params.series;
       expect(series[0].filter).toBe(JSON.parse(doc2.attributes.visState).params.series[0].filter);
