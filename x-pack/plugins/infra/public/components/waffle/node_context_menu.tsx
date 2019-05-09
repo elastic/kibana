@@ -83,16 +83,18 @@ export const NodeContextMenu = injectUICapabilities(
             }
           : undefined;
 
-      const uptimeUrl = {
-        name: intl.formatMessage(
-          {
-            id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
-            defaultMessage: 'View {nodeType} in Uptime',
-          },
-          { nodeType }
-        ),
-        href: createUptimeLink(options, nodeType, node),
-      };
+      const uptimeUrl = node.ip
+        ? {
+            name: intl.formatMessage(
+              {
+                id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
+                defaultMessage: 'View {nodeType} in Uptime',
+              },
+              { nodeType }
+            ),
+            href: createUptimeLink(options, nodeType, node),
+          }
+        : undefined;
 
       const panels: EuiContextMenuPanelDescriptor[] = [
         {
