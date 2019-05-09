@@ -144,8 +144,7 @@ const migrateDateHistogramAggregation = doc => {
   attributes.visState.
 */
 function transformFilterStringToQueryObject(doc) {
-  // Migrate filters
-  // If any filters exist and they are a string, we assume it to be lucene and transform the filter into an object accordingly
+  // Migrate filter
   const newDoc = cloneDeep(doc);
   const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
