@@ -48,7 +48,7 @@ export class Root {
   public async setup() {
     try {
       this.log.debug('setting up root');
-      await this.setupLogging(this.server.configService);
+      await this.setupLogging();
       return await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
@@ -79,9 +79,7 @@ export class Root {
       this.log.fatal(reason);
     }
 
-    if (this.server !== undefined) {
-      await this.server.stop();
-    }
+    await this.server.stop();
 
     if (this.loggingConfigSubscription !== undefined) {
       this.loggingConfigSubscription.unsubscribe();
@@ -94,7 +92,8 @@ export class Root {
     }
   }
 
-  private async setupLogging(configService: ConfigService) {
+  private async setupLogging() {
+    const { configService } = this.server;
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
