@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerCreateRoute } from './register_create_route';
+import Chance from 'chance';
 
-export function registerLifecycleRoutes(server) {
-  registerCreateRoute(server);
-}
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+export const getRandomString = () => `${chance.string({ pool: CHARS_POOL })}-${Date.now()}`;
