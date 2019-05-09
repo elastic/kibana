@@ -58,7 +58,10 @@ export function findFirstReadableFile(paths: string[]): string | undefined {
  * @param paths Defaults to `USAGE_PATHS`, but overridable for testing.
  * @returns The unmodified JSON object if the file exists and is a valid YAML file.
  */
-export async function readTelemetryFile(_callCluster: any, paths: string[] = USAGE_PATHS): Promise<object | undefined> {
+export async function readTelemetryFile(
+  _callCluster: any,
+  paths: string[] = USAGE_PATHS
+): Promise<object | undefined> {
   try {
     const path = findFirstReadableFile(paths);
 

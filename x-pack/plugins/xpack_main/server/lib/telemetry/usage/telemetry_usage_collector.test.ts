@@ -25,8 +25,7 @@ const getMockServer = (): KibanaHapiServer =>
   } as KibanaHapiServer & Server);
 
 describe('telemetry_usage_collector', () => {
-
-  let tempDir = tmpdir();
+  const tempDir = tmpdir();
   const tempFiles = {
     blank: resolve(tempDir, 'tests-telemetry_usage_collector-blank.yml'),
     empty: resolve(tempDir, 'tests-telemetry_usage_collector-empty.yml'),
@@ -34,15 +33,8 @@ describe('telemetry_usage_collector', () => {
     unreadable: resolve(tempDir, 'tests-telemetry_usage_collector-unreadable.yml'),
     valid: resolve(tempDir, 'tests-telemetry_usage_collector-valid.yml'),
   };
-  const invalidFiles = [
-    tempFiles.too_big,
-    tempFiles.unreadable,
-  ];
-  const validFiles = [
-    tempFiles.blank,
-    tempFiles.empty,
-    tempFiles.valid,
-  ];
+  const invalidFiles = [tempFiles.too_big, tempFiles.unreadable];
+  const validFiles = [tempFiles.blank, tempFiles.empty, tempFiles.valid];
   const allFiles = Object.values(tempFiles);
   const expectedObject = {
     expected: 'value',
@@ -74,13 +66,12 @@ describe('telemetry_usage_collector', () => {
       try {
         unlinkSync(path);
       } catch (err) {
-        console.error(`Unable to delete temp file [${path}]`, err);
+        // ignored
       }
-    })
+    });
   });
 
   describe('findFirstReadableFile', () => {
-
     test('returns `undefined` no file is readable', async () => {
       expect(findFirstReadableFile([])).toBeUndefined();
       expect(findFirstReadableFile(invalidFiles)).toBeUndefined();
@@ -91,29 +82,25 @@ describe('telemetry_usage_collector', () => {
       // allFiles is shuffled so we randomly go through the list
       expect(validFiles).toContain(findFirstReadableFile(shuffle(allFiles)));
     });
-
   });
 
   describe('readTelemetryFile', () => {
-
     test('returns `undefined` if no path was found', async () => {
       expect(await readTelemetryFile(null, [])).toBeUndefined();
       expect(await readTelemetryFile(null, invalidFiles)).toBeUndefined();
     });
 
     test('returns `undefined` if the file is blank or empty', async () => {
-      expect(await readTelemetryFile(null, [ tempFiles.blank ])).toBeUndefined();
-      expect(await readTelemetryFile(null, [ tempFiles.empty ])).toBeUndefined();
+      expect(await readTelemetryFile(null, [tempFiles.blank])).toBeUndefined();
+      expect(await readTelemetryFile(null, [tempFiles.empty])).toBeUndefined();
     });
 
     test('returns the object parsed from the YAML file', async () => {
-      expect(await readTelemetryFile(null, [ tempFiles.valid ])).toEqual(expectedObject);
+      expect(await readTelemetryFile(null, [tempFiles.valid])).toEqual(expectedObject);
     });
-
   });
 
   describe('createTelemetryUsageCollector', () => {
-
     test('returns calls `collectorSet.makeUsageCollector`', async () => {
       // the `makeUsageCollector` is mocked above to return the argument passed to it
       const collectorOptions = createTelemetryUsageCollector(getMockServer());
@@ -121,7 +108,5 @@ describe('telemetry_usage_collector', () => {
       expect(collectorOptions.type).toBe('static_telemetry');
       expect(collectorOptions.fetch).toBe(readTelemetryFile);
     });
-
   });
-
 });
