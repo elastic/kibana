@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { accessSync, constants, promises, statSync } from 'fs';
+import { accessSync, constants, readFileSync, statSync } from 'fs';
 import { Server } from 'hapi';
 import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';
@@ -53,7 +53,7 @@ export function isFileReadable(path: string): boolean {
 export async function readTelemetryFile(path: string): Promise<object | undefined> {
   try {
     if (isFileReadable(path)) {
-      const yaml = await promises.readFile(path);
+      const yaml = readFileSync(path);
       const data = safeLoad(yaml.toString());
 
       // don't bother returning empty objects
