@@ -16,7 +16,7 @@ export interface ChromeNavLink
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [active](./kibana-plugin-public.chromenavlink.active.md) | <code>boolean</code> | Indicates whether or not this app is currently on the screen.<!-- -->NOTE: remove this when ApplicationService is implemented and managing apps. |
-|  [appUrl](./kibana-plugin-public.chromenavlink.appurl.md) | <code>string</code> | The base URL used to open the root of an application. |
+|  [baseUrl](./kibana-plugin-public.chromenavlink.baseurl.md) | <code>string</code> | The base route used to open the root of an application. |
 |  [disabled](./kibana-plugin-public.chromenavlink.disabled.md) | <code>boolean</code> | Disables a link from being clickable.<!-- -->NOTE: this is only used by the ML and Graph plugins currently. They use this field to disable the nav link when the license is expired. |
 |  [euiIconType](./kibana-plugin-public.chromenavlink.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
 |  [hidden](./kibana-plugin-public.chromenavlink.hidden.md) | <code>boolean</code> | Hides a link from the navigation.<!-- -->NOTE: remove this when ApplicationService is implemented. Instead, plugins should only register an Application if needed. |

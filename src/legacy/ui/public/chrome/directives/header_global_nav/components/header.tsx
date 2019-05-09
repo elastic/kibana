@@ -56,6 +56,7 @@ import chrome from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -63,12 +64,7 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { NavControlSide } from '../';
-import {
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeNavLink,
-  BasePathStart,
-} from '../../../../../../../core/public';
+import { ChromeBadge, ChromeBreadcrumb, ChromeNavLink } from '../../../../../../../core/public';
 
 interface Props {
   appTitle?: string;
@@ -93,7 +89,7 @@ function extendRecentlyAccessedHistoryItem(
   navLinks: ChromeNavLink[],
   recentlyAccessed: RecentlyAccessedHistoryItem
 ) {
-  const href = chrome.addBasePath(recentlyAccessed.link);
+  const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
   const navLink = navLinks.find(nl => href.startsWith(nl.baseUrl));
 
   let titleAndAriaLabel = recentlyAccessed.label;

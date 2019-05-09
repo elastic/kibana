@@ -90,7 +90,7 @@ export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 // @public (undocumented)
 export interface ChromeNavLink {
     readonly active?: boolean;
-    readonly appUrl: string;
+    readonly baseUrl: string;
     readonly disabled?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
