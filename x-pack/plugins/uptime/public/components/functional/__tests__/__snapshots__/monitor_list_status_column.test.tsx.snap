@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorListStatusColumn provides expected tooltip and display times 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem>
+    <EuiHealth
+      color="success"
+      style={
+        Object {
+          "display": "block",
+        }
+      }
+    >
+      Up
+    </EuiHealth>
+    <EuiToolTip
+      content={
+        <EuiText
+          color="ghost"
+          size="xs"
+        >
+          Thu May 09 2019 10:15:11 GMT-0400
+        </EuiText>
+      }
+      delay="regular"
+      position="top"
+    >
+      <EuiText
+        color="subdued"
+        size="xs"
+      >
+        a few seconds ago
+      </EuiText>
+    </EuiToolTip>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
