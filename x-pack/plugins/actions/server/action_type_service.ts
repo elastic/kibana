@@ -22,6 +22,12 @@ interface ActionType {
   executor({ actionTypeConfig, params }: ExecutorOptions): Promise<any>;
 }
 
+interface ExecuteOptions {
+  id: string;
+  actionTypeConfig: any;
+  params: any;
+}
+
 export class ActionTypeService {
   private actionTypes: Record<string, ActionType> = {};
 
@@ -101,7 +107,7 @@ export class ActionTypeService {
   /**
    * Executes an action type based on given parameters
    */
-  public async execute(id: string, actionTypeConfig: any, params: any) {
+  public async execute({ id, actionTypeConfig, params }: ExecuteOptions) {
     const actionType = this.get(id);
     this.validateActionTypeConfig(id, actionTypeConfig);
     this.validateParams(id, params);

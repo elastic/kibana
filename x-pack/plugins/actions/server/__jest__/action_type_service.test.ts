@@ -234,7 +234,11 @@ describe('execute()', () => {
       name: 'My action type',
       executor,
     });
-    await actionTypeService.execute('my-action-type', { foo: true }, { bar: false });
+    await actionTypeService.execute({
+      id: 'my-action-type',
+      actionTypeConfig: { foo: true },
+      params: { bar: false },
+    });
     expect(executor).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
@@ -275,7 +279,11 @@ describe('execute()', () => {
       },
     });
     await expect(
-      actionTypeService.execute('my-action-type', {}, {})
+      actionTypeService.execute({
+        id: 'my-action-type',
+        actionTypeConfig: {},
+        params: {},
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -297,7 +305,11 @@ describe('execute()', () => {
       },
     });
     await expect(
-      actionTypeService.execute('my-action-type', {}, {})
+      actionTypeService.execute({
+        id: 'my-action-type',
+        actionTypeConfig: {},
+        params: {},
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -306,7 +318,11 @@ describe('execute()', () => {
   test('throws error if action type not registered', async () => {
     const actionTypeService = new ActionTypeService();
     await expect(
-      actionTypeService.execute('my-action-type', { foo: true }, { bar: false })
+      actionTypeService.execute({
+        id: 'my-action-type',
+        actionTypeConfig: { foo: true },
+        params: { bar: false },
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"my-action-type\\" is not registered."`
     );

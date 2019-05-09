@@ -126,11 +126,11 @@ export class ActionService {
       ...action.attributes.actionTypeConfig,
       ...action.attributes.actionTypeConfigSecrets,
     };
-    return await this.actionTypes.execute(
-      action.attributes.actionTypeId,
-      mergedActionTypeConfig,
-      params
-    );
+    return await this.actionTypes.execute({
+      id: action.attributes.actionTypeId,
+      actionTypeConfig: mergedActionTypeConfig,
+      params,
+    });
   }
 
   /**
