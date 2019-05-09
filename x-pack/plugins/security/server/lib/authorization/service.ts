@@ -19,12 +19,17 @@ import {
 } from './check_privileges_dynamically';
 import { AuthorizationMode, authorizationModeFactory } from './mode';
 import { privilegesFactory, PrivilegesService } from './privileges';
+import {
+  GetPrivilegesWithRequest,
+  getPrivilegesWithRequestFactory,
+} from './get_privileges_with_request';
 
 export interface AuthorizationService {
   actions: Actions;
   application: string;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
+  getPrivilegesWithRequest: GetPrivilegesWithRequest;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
 }
@@ -49,6 +54,7 @@ export function createAuthorizationService(
     checkPrivilegesWithRequest,
     spaces
   );
+  const getPrivilegesWithRequest = getPrivilegesWithRequestFactory(application, shieldClient);
   const mode = authorizationModeFactory(securityXPackFeature);
   const privileges = privilegesFactory(actions, xpackMainPlugin);
 
@@ -57,6 +63,7 @@ export function createAuthorizationService(
     application,
     checkPrivilegesWithRequest,
     checkPrivilegesDynamicallyWithRequest,
+    getPrivilegesWithRequest,
     mode,
     privileges,
   };

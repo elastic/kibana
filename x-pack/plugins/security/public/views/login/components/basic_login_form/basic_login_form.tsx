@@ -8,6 +8,7 @@ import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import { LoginState } from '../../../../../common/login_state';
+import { UnauthorizedLoginForm } from '../unauthorized_login_form';
 
 interface Props {
   http: any;
@@ -19,7 +20,7 @@ interface Props {
 }
 
 interface State {
-  hasError: boolean;
+  errorStatusCode: number | null;
   isLoading: boolean;
   username: string;
   password: string;
@@ -28,7 +29,7 @@ interface State {
 
 class BasicLoginFormUI extends Component<Props, State> {
   public state = {
-    hasError: false,
+    errorStatusCode: null,
     isLoading: false,
     username: '',
     password: '',
@@ -36,6 +37,9 @@ class BasicLoginFormUI extends Component<Props, State> {
   };
 
   public render() {
+    if (this.state.errorStatusCode === 403) {
+      return <UnauthorizedLoginForm window={this.props.window} />;
+    }
     return (
       <Fragment>
         {this.renderMessage()}
@@ -192,7 +196,7 @@ class BasicLoginFormUI extends Component<Props, State> {
         }
 
         this.setState({
-          hasError: true,
+          errorStatusCode: statusCode,
           message,
           isLoading: false,
         });

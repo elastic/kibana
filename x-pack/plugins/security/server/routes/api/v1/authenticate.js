@@ -7,9 +7,12 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
+import { isAuthorizedKibanaUser } from '../../../lib/is_authorized_kibana_user';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
 
 export function initAuthenticateApi(server) {
+
+  const { authorization } = server.plugins.security;
 
   server.route({
     method: 'POST',
@@ -35,6 +38,11 @@ export function initAuthenticateApi(server) {
 
         if (!authenticationResult.succeeded()) {
           throw Boom.unauthorized(authenticationResult.error);
+        }
+
+        const isAllowed = await isAuthorizedKibanaUser(authorization, request);
+        if (!isAllowed) {
+          throw Boom.forbidden('unauthorized for Kibana');
         }
 
         return h.response();

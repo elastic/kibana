@@ -442,5 +442,12 @@
         fmt: '/_security/user/_has_privileges'
       }
     });
+
+    shield.userPrivileges = ca({
+      method: 'GET',
+      url: {
+        fmt: '/_security/user/_privileges'
+      }
+    });
   };
 }));
