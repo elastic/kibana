@@ -8,6 +8,7 @@
  * Controller for Advanced Index Detail
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -51,12 +52,12 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
   },
   controllerAs: 'monitoringElasticsearchAdvancedIndexApp',
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const indexName = $route.current.params.index;
 
       super({
-        title: i18n('xpack.monitoring.elasticsearch.indices.advanced.routeTitle', {
+        title: i18n.translate('xpack.monitoring.elasticsearch.indices.advanced.routeTitle', {
           defaultMessage: 'Elasticsearch - Indices - {indexName} - Advanced',
           values: {
             indexName,

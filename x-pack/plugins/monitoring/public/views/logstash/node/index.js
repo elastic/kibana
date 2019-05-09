@@ -8,6 +8,7 @@
  * Logstash Node
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -52,7 +53,7 @@ uiRoutes.when('/logstash/node/:uuid', {
     pageData: getPageData
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       super({
         defaultData: {},
         getPageData,
@@ -66,7 +67,7 @@ uiRoutes.when('/logstash/node/:uuid', {
           return;
         }
 
-        this.setTitle(i18n('xpack.monitoring.logstash.node.routeTitle', {
+        this.setTitle(i18n.translate('xpack.monitoring.logstash.node.routeTitle', {
           defaultMessage: 'Logstash - {nodeName}',
           values: {
             nodeName: data.nodeSummary.name

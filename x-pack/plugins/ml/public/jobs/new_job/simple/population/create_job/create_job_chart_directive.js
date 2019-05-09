@@ -11,6 +11,7 @@
  */
 
 import $ from 'jquery';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
@@ -24,7 +25,7 @@ import { mlChartTooltipService } from '../../../../../components/chart_tooltip/c
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlPopulationJobChart', function (i18n) {
+module.directive('mlPopulationJobChart', function () {
 
   function link(scope, element) {
 
@@ -233,7 +234,7 @@ module.directive('mlPopulationJobChart', function (i18n) {
       const formattedDate = formatHumanReadableDateTime(data.date);
       contents += `${formattedDate}<br/><hr/>`;
       contents += `${mlEscape(scope.overFieldName)}: ${mlEscape(data.label)}<br/>`;
-      contents += i18n('xpack.ml.newJob.simple.population.chartTooltipValueLabel', {
+      contents += i18n.translate('xpack.ml.newJob.simple.population.chartTooltipValueLabel', {
         defaultMessage: 'Value: {dataValue}',
         values: {
           dataValue: scope.chartData.fieldFormat !== undefined

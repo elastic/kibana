@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import ReactDOM from 'react-dom';
 
 import { BucketSpanEstimator } from './bucket_span_estimator_view';
@@ -16,7 +17,7 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlBucketSpanEstimator', function (i18n) {
+module.directive('mlBucketSpanEstimator', function () {
   return {
     restrict: 'AE',
     replace: false,
@@ -39,9 +40,10 @@ module.directive('mlBucketSpanEstimator', function (i18n) {
       const errorHandler = (error) => {
         console.log('Bucket span could not be estimated', error);
         $scope.ui.bucketSpanEstimator.status = STATUS.FAILED;
-        $scope.ui.bucketSpanEstimator.message = i18n('xpack.ml.newJob.simple.bucketSpanEstimator.bucketSpanCouldNotBeEstimatedMessage', {
-          defaultMessage: 'Bucket span could not be estimated'
-        });
+        $scope.ui.bucketSpanEstimator.message = i18n.translate(
+          'xpack.ml.newJob.simple.bucketSpanEstimator.bucketSpanCouldNotBeEstimatedMessage', {
+            defaultMessage: 'Bucket span could not be estimated'
+          });
         $scope.$applyAsync();
       };
 
@@ -122,10 +124,10 @@ module.directive('mlBucketSpanEstimator', function (i18n) {
         );
         const estimatorRunning = ($scope.ui.bucketSpanEstimator.status === STATUS.RUNNING);
         const buttonText = (estimatorRunning)
-          ? i18n('xpack.ml.newJob.simple.bucketSpanEstimator.estimatingBucketSpanButtonLabel', {
+          ? i18n.translate('xpack.ml.newJob.simple.bucketSpanEstimator.estimatingBucketSpanButtonLabel', {
             defaultMessage: 'Estimating bucket span'
           })
-          : i18n('xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonLabel', {
+          : i18n.translate('xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonLabel', {
             defaultMessage: 'Estimate bucket span'
           });
 

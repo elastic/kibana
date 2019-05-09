@@ -5,6 +5,7 @@
  */
 
 import { find } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -25,14 +26,14 @@ uiRoutes.when('/beats/beats', {
   },
   controllerAs: 'beats',
   controller: class BeatsListing extends MonitoringViewBaseEuiTableController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       // breadcrumbs + page title
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
       super({
-        title: i18n('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' }),
+        title: i18n.translate('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' }),
         storageKey: 'beats.beats',
         getPageData,
         reactNodeId: 'monitoringBeatsInstancesApp',

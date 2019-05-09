@@ -5,6 +5,7 @@
  */
 
 import { size } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import template from './watch_edit_title_panel.html';
@@ -19,7 +20,7 @@ const app = uiModules.get('xpack/watcher');
 
 const VALID_NORMALIZED_TYPES = ['date'];
 
-app.directive('watchEditTitlePanel', function ($injector, i18n) {
+app.directive('watchEditTitlePanel', function ($injector) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -90,7 +91,7 @@ app.directive('watchEditTitlePanel', function ($injector, i18n) {
       get title() {
         if (this.watch.isNew) {
           const typeName = this.watch.typeName.toLowerCase();
-          return i18n('xpack.watcher.sections.watchEdit.titlePanel.createNewTypeOfWatchTitle', {
+          return i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.createNewTypeOfWatchTitle', {
             defaultMessage: 'Create a new {typeName}',
             values: { typeName },
           });

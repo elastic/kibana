@@ -7,16 +7,17 @@
 
 
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 if (chrome.getInjected('monitoringUiEnabled')) {
-  FeatureCatalogueRegistryProvider.register((i18n) => {
+  FeatureCatalogueRegistryProvider.register(() => {
     return {
       id: 'monitoring',
-      title: i18n('xpack.monitoring.monitoringTitle', {
+      title: i18n.translate('xpack.monitoring.monitoringTitle', {
         defaultMessage: 'Monitoring'
       }),
-      description: i18n('xpack.monitoring.monitoringDescription', {
+      description: i18n.translate('xpack.monitoring.monitoringDescription', {
         defaultMessage: 'Track the real-time health and performance of your Elastic Stack.'
       }),
       icon: 'monitoringApp',

@@ -5,6 +5,7 @@
  */
 
 import { I18nContext } from 'ui/i18n';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { constant } from 'lodash';
@@ -30,7 +31,7 @@ chromeNavControlsRegistry.register(constant({
 }));
 
 const module = uiModules.get('security', ['kibana']);
-module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private, i18n) => {
+module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private) => {
   const xpackInfo = Private(XPackInfoProvider);
   const showSecurityLinks = xpackInfo.get('features.security.showLinks');
   if (Private(PathProvider).isUnauthenticated() || !showSecurityLinks) return;
@@ -47,7 +48,7 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
     return tooltip;
   };
 
-  $scope.logoutLabel = i18n('xpack.security.navControl.logoutLabel', {
+  $scope.logoutLabel = i18n.translate('xpack.security.navControl.logoutLabel', {
     defaultMessage: 'Logout'
   });
 });

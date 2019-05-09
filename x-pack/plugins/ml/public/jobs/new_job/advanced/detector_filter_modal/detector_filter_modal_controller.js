@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
@@ -14,10 +15,10 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params, i18n) {
+module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params) {
   const msgs = mlMessageBarService;
   msgs.clear();
-  $scope.title = i18n('xpack.ml.newJob.advanced.detectorFilterModal.addNewFilterTitle', {
+  $scope.title = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.addNewFilterTitle', {
     defaultMessage: 'Add new filter'
   });
   $scope.detector = params.detector;
@@ -27,10 +28,10 @@ module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, par
   const add = params.add;
   const validate = params.validate;
 
-  $scope.updateButtonLabel = i18n('xpack.ml.newJob.advanced.detectorFilterModal.updateButtonLabel', {
+  $scope.updateButtonLabel = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.updateButtonLabel', {
     defaultMessage: 'Update'
   });
-  $scope.addButtonLabel = i18n('xpack.ml.newJob.advanced.detectorFilterModal.addButtonLabel', {
+  $scope.addButtonLabel = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.addButtonLabel', {
     defaultMessage: 'Add'
   });
 
@@ -99,7 +100,7 @@ module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, par
     // editing an existing filter
     $scope.editMode = true;
     $scope.filter = params.filter;
-    $scope.title = i18n('xpack.ml.newJob.advanced.detectorFilterModal.editFilterTitle', {
+    $scope.title = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.editFilterTitle', {
       defaultMessage: 'Edit filter'
     });
     index = params.index;

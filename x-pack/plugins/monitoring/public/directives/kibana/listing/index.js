@@ -138,7 +138,7 @@ const instanceRowFactory = (scope, kbnUrl) => {
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
+uiModule.directive('monitoringKibanaListing', kbnUrl => {
   return {
     restrict: 'E',
     scope: {
@@ -151,7 +151,7 @@ uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
     },
     link(scope, $el) {
       scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
-      const filterInstancesPlaceholder = i18n('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
+      const filterInstancesPlaceholder = i18n.translate('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
         defaultMessage: 'Filter Instances…'
       });
 

@@ -9,13 +9,14 @@
 // Service with functions used for broadcasting job picker changes
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 
 let jobSelectService = undefined;
 
-export function JobSelectServiceProvider($rootScope, globalState, i18n) {
+export function JobSelectServiceProvider($rootScope, globalState) {
 
   function checkGlobalState() {
     if (globalState.ml === undefined) {
@@ -42,7 +43,7 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
 
       // if there are no valid ids, warn and then select the first job
       if (validIds.length === 0) {
-        toastNotifications.addWarning(i18n('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
+        toastNotifications.addWarning(i18n.translate('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
           defaultMessage: 'No jobs selected, auto selecting first job',
         }));
 
@@ -90,7 +91,7 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
 
   function warnAboutInvalidJobIds(invalidIds) {
     if (invalidIds.length > 0) {
-      toastNotifications.addWarning(i18n('xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage', {
+      toastNotifications.addWarning(i18n.translate('xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage', {
         defaultMessage: `Requested
 {invalidIdsLength, plural, one {job {invalidIds} does not exist} other {jobs {invalidIds} do not exist}}`,
         values: {
@@ -131,7 +132,7 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
     });
     // All jobs have been selected
     if ((_.uniq(selectedGroupJobs).length + groupLessJobs) === jobCount) {
-      txt = i18n('xpack.ml.jobSelect.allJobsDescription', {
+      txt = i18n.translate('xpack.ml.jobSelect.allJobsDescription', {
         defaultMessage: 'All jobs',
       });
     } else {
@@ -156,7 +157,7 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
         txt = wholeGroups[0];
         if (wholeGroups.length > 1 || groupLessJobs > 0) {
           const total = (wholeGroups.length - 1) + groupLessJobs;
-          txt = i18n('xpack.ml.jobSelect.wholeGroupDescription', {
+          txt = i18n.translate('xpack.ml.jobSelect.wholeGroupDescription', {
             defaultMessage: `{wholeGroup} (with {count, plural, zero {# job} one {# job} other {# jobs}}) and
             {total, plural, zero {# other} one {# other} other {# others}}`,
             values: {
@@ -170,7 +171,7 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
         // otherwise just list the job ids
         txt = splitJobId(jobs[0]).job;
         if (jobs.length > 1) {
-          txt = i18n('xpack.ml.jobSelect.jobDescription', {
+          txt = i18n.translate('xpack.ml.jobSelect.jobDescription', {
             defaultMessage: '{jobId} and {jobsAmount, plural, zero {# other} one {# other} other {# others}}',
             values: {
               jobId: splitJobId(jobs[0]).job,

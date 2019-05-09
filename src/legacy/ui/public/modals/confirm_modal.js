@@ -18,6 +18,7 @@
  */
 
 import angular from 'angular';
+import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { uiModules } from '../modules';
 import template from './confirm_modal.html';
@@ -44,7 +45,7 @@ export const ConfirmationButtonTypes = {
  * @property {String=} title - If given, shows a title on the confirm modal.
  */
 
-module.factory('confirmModal', function ($rootScope, $compile, i18n) {
+module.factory('confirmModal', function ($rootScope, $compile) {
   let modalPopover;
   const confirmQueue = [];
 
@@ -55,7 +56,7 @@ module.factory('confirmModal', function ($rootScope, $compile, i18n) {
   return function confirmModal(message, customOptions) {
     const defaultOptions = {
       onCancel: noop,
-      cancelButtonText: i18n('common.ui.modals.cancelButtonLabel', {
+      cancelButtonText: i18n.translate('common.ui.modals.cancelButtonLabel', {
         defaultMessage: 'Cancel'
       }),
       defaultFocusedButton: ConfirmationButtonTypes.CONFIRM

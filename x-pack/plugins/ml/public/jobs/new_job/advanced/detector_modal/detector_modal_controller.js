@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import { detectorToString } from 'plugins/ml/util/string_utils';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
@@ -14,10 +15,10 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlDetectorModal', function ($scope, $modalInstance, params, i18n) {
+module.controller('MlDetectorModal', function ($scope, $modalInstance, params) {
   const msgs = mlMessageBarService;
   msgs.clear();
-  $scope.title = i18n('xpack.ml.newJob.advanced.detectorModal.addNewDetectorTitle', {
+  $scope.title = i18n.translate('xpack.ml.newJob.advanced.detectorModal.addNewDetectorTitle', {
     defaultMessage: 'Add new detector'
   });
   $scope.detector = { 'function': '' };
@@ -25,10 +26,10 @@ module.controller('MlDetectorModal', function ($scope, $modalInstance, params, i
   $scope.editMode = false;
   let index = -1;
 
-  $scope.updateButtonLabel = i18n('xpack.ml.newJob.advanced.detectorModal.updateButtonLabel', {
+  $scope.updateButtonLabel = i18n.translate('xpack.ml.newJob.advanced.detectorModal.updateButtonLabel', {
     defaultMessage: 'Update'
   });
-  $scope.addButtonLabel = i18n('xpack.ml.newJob.advanced.detectorModal.addButtonLabel', {
+  $scope.addButtonLabel = i18n.translate('xpack.ml.newJob.advanced.detectorModal.addButtonLabel', {
     defaultMessage: 'Add'
   });
 
@@ -90,7 +91,7 @@ module.controller('MlDetectorModal', function ($scope, $modalInstance, params, i
   if (params.detector) {
     $scope.detector = params.detector;
     index = params.index;
-    $scope.title = i18n('xpack.ml.newJob.advanced.detectorModal.editDetectorTitle', {
+    $scope.title = i18n.translate('xpack.ml.newJob.advanced.detectorModal.editDetectorTitle', {
       defaultMessage: 'Edit detector'
     });
     $scope.editMode = true;
@@ -102,14 +103,14 @@ module.controller('MlDetectorModal', function ($scope, $modalInstance, params, i
 
   $scope.functionChange = function () {
     const func = _.findWhere($scope.functions, { id: $scope.detector.function });
-    $scope.helpLink.label = i18n('xpack.ml.newJob.advanced.detectorModal.helpForAnalyticalFunctionsLabel', {
+    $scope.helpLink.label = i18n.translate('xpack.ml.newJob.advanced.detectorModal.helpForAnalyticalFunctionsLabel', {
       defaultMessage: 'Help for analytical functions'
     });
     $scope.helpLink.uri = 'ml-functions.html';
 
     if (func) {
       $scope.helpLink.uri = func.uri;
-      $scope.helpLink.label = i18n('xpack.ml.newJob.advanced.detectorModal.helpForAnalyticalFunctionLabel', {
+      $scope.helpLink.label = i18n.translate('xpack.ml.newJob.advanced.detectorModal.helpForAnalyticalFunctionLabel', {
         defaultMessage: 'Help for {funcId}',
         values: { funcId: func.id }
       });

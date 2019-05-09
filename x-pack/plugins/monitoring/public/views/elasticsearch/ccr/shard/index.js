@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { getPageData } from './get_page_data';
@@ -25,9 +26,9 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
-    constructor($injector, $scope, pageData, i18n) {
+    constructor($injector, $scope, pageData) {
       super({
-        title: i18n('xpack.monitoring.elasticsearch.ccr.shard.routeTitle', {
+        title: i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.routeTitle', {
           defaultMessage: 'Elasticsearch - Ccr - Shard'
         }),
         reactNodeId: 'elasticsearchCcrShardReact',
@@ -36,7 +37,7 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
         $injector
       });
 
-      $scope.instance = i18n('xpack.monitoring.elasticsearch.ccr.shard.instanceTitle', {
+      $scope.instance = i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.instanceTitle', {
         defaultMessage: 'Index: {followerIndex} Shard: {shardId}',
         values: {
           followerIndex: get(pageData, 'stat.follower_index'),

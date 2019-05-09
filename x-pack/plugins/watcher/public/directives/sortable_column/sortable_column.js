@@ -6,11 +6,12 @@
 
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './sortable_column.html';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('sortableColumn', function (i18n) {
+app.directive('sortableColumn', function () {
   return {
     restrict: 'E',
     transclude: true,
@@ -35,12 +36,12 @@ app.directive('sortableColumn', function (i18n) {
       getAriaLabel() {
         const isAscending = this.isSortedAscending();
         if(isAscending) {
-          return i18n('xpack.watcher.sortableColumn.sortAscendingAriaLabel', {
+          return i18n.translate('xpack.watcher.sortableColumn.sortAscendingAriaLabel', {
             defaultMessage: 'Sort {field} ascending',
             values: { field: this.field },
           });
         }
-        return i18n('xpack.watcher.sortableColumn.sortDescendingAriaLabel', {
+        return i18n.translate('xpack.watcher.sortableColumn.sortDescendingAriaLabel', {
           defaultMessage: 'Sort {field} descending',
           values: { field: this.field },
         });

@@ -5,17 +5,18 @@
  */
 
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory
 } from 'ui/registry/feature_catalogue';
 
 if (chrome.getInjected('apmUiEnabled')) {
-  FeatureCatalogueRegistryProvider.register(i18n => {
+  FeatureCatalogueRegistryProvider.register(() => {
     return {
       id: 'apm',
       title: 'APM',
-      description: i18n('xpack.apm.apmDescription', {
+      description: i18n.translate('xpack.apm.apmDescription', {
         defaultMessage:
           'Automatically collect in-depth performance metrics and ' +
           'errors from inside your applications.'

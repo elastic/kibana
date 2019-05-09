@@ -18,13 +18,14 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { shortenDottedString } from '../../../../common/utils/shorten_dotted_string';
 import headerHtml from './table_header.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('app/discover');
 
 
-module.directive('kbnTableHeader', function (i18n) {
+module.directive('kbnTableHeader', function () {
   return {
     restrict: 'A',
     scope: {
@@ -55,7 +56,7 @@ module.directive('kbnTableHeader', function (i18n) {
       $scope.tooltip = function (column) {
         if (!$scope.isSortableColumn(column)) return '';
         const name = $scope.isShortDots ? shortenDottedString(column) : column;
-        return i18n('kbn.docTable.tableHeader.sortByColumnTooltip', {
+        return i18n.translate('kbn.docTable.tableHeader.sortByColumnTooltip', {
           defaultMessage: 'Sort by {columnName}',
           values: { columnName: name },
         });
@@ -132,12 +133,12 @@ module.directive('kbnTableHeader', function (i18n) {
 
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         if(name === currentColumnName && currentDirection === 'asc') {
-          return i18n('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
+          return i18n.translate('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
             defaultMessage: 'Sort {columnName} descending',
             values: { columnName: name },
           });
         }
-        return i18n('kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
+        return i18n.translate('kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
           defaultMessage: 'Sort {columnName} ascending',
           values: { columnName: name },
         });

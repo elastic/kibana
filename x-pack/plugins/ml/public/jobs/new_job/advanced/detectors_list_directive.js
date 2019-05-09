@@ -9,6 +9,7 @@
 // directive for displaying detectors form list.
 
 import angular from 'angular';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import 'plugins/ml/jobs/new_job/advanced/detector_modal';
 import 'plugins/ml/jobs/new_job/advanced/detector_filter_modal';
@@ -21,7 +22,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobDetectorsList', function ($modal, i18n) {
+module.directive('mlJobDetectorsList', function ($modal) {
   return {
     restrict: 'AE',
     replace: true,
@@ -97,7 +98,7 @@ module.directive('mlJobDetectorsList', function ($modal, i18n) {
               then: function (callback) {
                 callback({
                   success: false,
-                  message: i18n('xpack.ml.newJob.advanced.detectorsList.invalidExcludeFrequentParameterErrorMessage', {
+                  message: i18n.translate('xpack.ml.newJob.advanced.detectorsList.invalidExcludeFrequentParameterErrorMessage', {
                     defaultMessage: '{excludeFrequentParam} value must be: {allValue}, {noneValue}, {byValue} or {overValue}',
                     values: {
                       excludeFrequentParam: 'exclude_frequent',
@@ -124,7 +125,7 @@ module.directive('mlJobDetectorsList', function ($modal, i18n) {
             return {
               success: false,
               message: (
-                resp.message || i18n('xpack.ml.newJob.advanced.detectorsList.validationFailedErrorMessage', {
+                resp.message || i18n.translate('xpack.ml.newJob.advanced.detectorsList.validationFailedErrorMessage', {
                   defaultMessage: 'Validation failed'
                 })
               )

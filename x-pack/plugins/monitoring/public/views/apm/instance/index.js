@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { find, get } from 'lodash';
 import uiRoutes from'ui/routes';
@@ -31,7 +32,7 @@ uiRoutes.when('/apm/instances/:uuid', {
   },
 
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const title = $injector.get('title');
       const globalState = $injector.get('globalState');
@@ -40,7 +41,7 @@ uiRoutes.when('/apm/instances/:uuid', {
       });
 
       super({
-        title: i18n('xpack.monitoring.apm.instance.routeTitle', {
+        title: i18n.translate('xpack.monitoring.apm.instance.routeTitle', {
           defaultMessage: '{apm} - Instance',
           values: {
             apm: 'APM'
