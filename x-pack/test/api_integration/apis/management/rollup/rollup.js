@@ -24,7 +24,7 @@ export default function ({ getService }) {
     cleanUp,
   } = registerHelpers({ supertest, es });
 
-  describe('Rollup jobs', () => {
+  describe('jobs', () => {
     after(() => cleanUp());
 
     describe('indices', () => {
