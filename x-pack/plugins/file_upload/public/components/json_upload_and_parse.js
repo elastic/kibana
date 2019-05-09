@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import {
   EuiForm,
 } from '@elastic/eui';
@@ -45,6 +44,11 @@ export function JsonUploadAndParse({
   const [hasIndexErrors, setHasIndexErrors] = useState(false);
   const [indexReady, setIndexReady] = useState(false);
 
+  // Progress-tracking state
+  const [currentIndexingStage, setCurrentIndexingStage] = useState('');
+  const [indexDataResp, setIndexDataResp] = useState('');
+  const [indexPatternResp, setIndexPatternResp] = useState('');
+
   const resetFileAndIndexSettings = () => {
     setIndexTypes([]);
     setSelectedIndexType('');
@@ -83,10 +87,12 @@ export function JsonUploadAndParse({
       parsedFile, transformDetails, indexName, selectedIndexType, appName
     ).then(resp => {
       setIndexedFile(parsedFile);
+      setIndexDataResp(resp);
       onIndexAddSuccess && onIndexAddSuccess(resp);
-    }).catch(() => {
+    }).catch(err => {
       setIndexedFile(null);
-      onIndexAddError && onIndexAddError();
+      setIndexDataResp(err);
+      onIndexAddError && onIndexAddError(err);
     });
 
   }, [
@@ -113,9 +119,11 @@ export function JsonUploadAndParse({
     setIndexPatternRequestInFlight(true);
     createIndexPattern(indexName)
       .then(resp => {
+        setIndexPatternResp(resp);
         onIndexPatternCreateSuccess && onIndexPatternCreateSuccess(resp);
         setIndexPatternRequestInFlight(false);
       }).catch(err => {
+        setIndexPatternResp(err);
         onIndexPatternCreateError && onIndexPatternCreateError(err);
         setIndexPatternRequestInFlight(false);
       });
@@ -149,32 +157,60 @@ export function JsonUploadAndParse({
     }
   }, [parsedFile, transformDetails]);
 
-  return (
+  // Determine current stage of progress
+  useEffect(() => {
+    if (!boolIndexData) {
+      return;
+    }
+
+    if (indexRequestInFlight) {
+      setCurrentIndexingStage(`Writing to index: ${indexName}`);
+    } else if (indexPatternRequestInFlight) {
+      setCurrentIndexingStage(`Creating index pattern`);
+    } else if (!!indexedFile) {
+      setCurrentIndexingStage(`Indexing complete`);
+    } else {
+      // No else
+    }
+  }, [
+    indexedFile, indexName, indexRequestInFlight, indexPatternRequestInFlight,
     boolIndexData
-      ? <JsonImportProgress />
-      : (
-        <EuiForm>
-          <JsonIndexFilePicker
-            {...{
-              onFileUpload,
-              onFileRemove,
-              fileRef,
-              setFileRef,
-              setParsedFile,
-              transformDetails,
-              resetFileAndIndexSettings,
-            }}
-          />
-          <IndexSettings
-            disabled={!fileRef}
-            indexName={indexName}
-            setIndexName={setIndexName}
-            indexTypes={indexTypes}
-            setSelectedIndexType={setSelectedIndexType}
-            setHasIndexErrors={setHasIndexErrors}
-          />
-        </EuiForm>
-      )
+  ]);
+
+  return (
+    <EuiForm>
+      { boolIndexData
+        ? <JsonImportProgress
+          importStage={currentIndexingStage}
+          indexDataResp={indexDataResp}
+          indexPatternResp={indexPatternResp}
+          complete={currentIndexingStage === 'Indexing complete'}
+        />
+        : (
+          <Fragment>
+            <JsonIndexFilePicker
+              {...{
+                onFileUpload,
+                onFileRemove,
+                fileRef,
+                setFileRef,
+                setParsedFile,
+                transformDetails,
+                resetFileAndIndexSettings,
+              }}
+            />
+            <IndexSettings
+              disabled={!fileRef}
+              indexName={indexName}
+              setIndexName={setIndexName}
+              indexTypes={indexTypes}
+              setSelectedIndexType={setSelectedIndexType}
+              setHasIndexErrors={setHasIndexErrors}
+            />
+          </Fragment>
+        )
+      }
+    </EuiForm>
   );
 }
 

@@ -5,38 +5,62 @@
  */
 
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
-  EuiFlyoutHeader,
-  EuiFlexGroup,
-  EuiTitle,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiFormRow,
+  EuiText,
+  EuiProgress,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function JsonImportProgress() {
+export function JsonImportProgress({
+  importStage = '',
+  indexDataResp,
+  indexPatternResp,
+  complete = false,
+}) {
+
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-    >
-      <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
-        <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="xpack.maps.addLayerPanel.panelTitle"
-              defaultMessage={'File indexing status'}
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-
-      <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
-        <div className="mapLayerPanel__bodyOverflow">
-          {'Import status'}
-        </div>
-      </div>
-      {'Repurposed footer with correct action buttons'}
-
-    </EuiFlexGroup>
+    <Fragment>
+      { !complete ? <EuiProgress size="xs" color="accent" position="absolute" /> : null }
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.file_upload.indexNameLabel"
+            defaultMessage="Indexing status"
+          />
+        }
+      >
+        <EuiText>
+          {importStage}
+        </EuiText>
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      { complete
+        ? (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.file_upload.indexNameLabel"
+                defaultMessage="Index response"
+              />
+            }
+          >
+            <EuiCodeBlock
+              paddingSize="s"
+              overflowHeight={400}
+            >
+              {indexDataResp && JSON.stringify(indexDataResp)}
+              {indexPatternResp && JSON.stringify(indexPatternResp)}
+            </EuiCodeBlock>
+          </EuiFormRow>
+        )
+        : null
+      }
+      <EuiSpacer size="s" />
+    </Fragment>
   );
 }
