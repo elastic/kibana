@@ -283,7 +283,9 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.$watch('model.query', (newQuery) => {
         const query = migrateLegacyQuery(newQuery);
-        $scope.updateQueryAndFetch({ query });
+        if (!_.isEqual(query, newQuery)) {
+          $scope.updateQueryAndFetch({ query });
+        }
       });
 
       $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {

@@ -565,11 +565,6 @@ function discoverController(
           });
         });
 
-        // update data source when hitting forward/back and the query changes
-        $scope.$listen($state, 'fetch_with_changes', function (diff) {
-          if (diff.indexOf('query') >= 0) $scope.fetch();
-        });
-
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
@@ -594,7 +589,9 @@ function discoverController(
 
         $scope.$watch('state.query', (newQuery) => {
           const query = migrateLegacyQuery(newQuery);
-          $scope.updateQueryAndFetch({ query });
+          if (!_.isEqual(query, newQuery)) {
+            $scope.updateQueryAndFetch({ query });
+          }
         });
 
         $scope.$watchMulti([

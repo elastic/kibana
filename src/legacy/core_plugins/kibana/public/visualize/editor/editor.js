@@ -367,7 +367,9 @@ function VisEditor(
 
     $scope.$watch('state.query', (newQuery) => {
       const query = migrateLegacyQuery(newQuery);
-      $scope.updateQueryAndFetch({ query });
+      if (!_.isEqual(query, newQuery)) {
+        $scope.updateQueryAndFetch({ query });
+      }
     });
 
     $state.replace();
