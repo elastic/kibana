@@ -956,15 +956,13 @@ Object {
     it('should change series item filters from a string into an object for metric visualizations', () => {
       const migratedDoc = migrate(doc);
       const series = JSON.parse(migratedDoc.attributes.visState).params.series;
-      expect(series[0]).toHaveProperty('filter.query');
-      expect(series[0]).toHaveProperty('filter.language');
-      expect(1).toEqual(1);
+      expect(series[0].filter).toHaveProperty('query');
+      expect(series[0].filter).toHaveProperty('language');
     });
     it('should not change a series item filter string in the object', () => {
       const migratedDoc = migrate(doc);
       const series = JSON.parse(migratedDoc.attributes.visState).params.series;
       expect(series[0].filter.query).toBe(JSON.parse(doc.attributes.visState).params.series[0].filter);
-      expect(1).toEqual(1);
     });
     it('should not change a non metric type visualization', () => {
       const migratedDoc = migrate(doc2);
