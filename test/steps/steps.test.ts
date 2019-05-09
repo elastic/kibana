@@ -177,6 +177,7 @@ describe('run through steps', () => {
       multiple: false,
       multipleBranches: false,
       multipleCommits: false,
+      prTitle: 'myPrTitle',
       prDescription: 'myPrDescription',
       sha: undefined,
       upstream,
@@ -201,7 +202,7 @@ describe('run through steps', () => {
       base: '6.2',
       body: `Backports the following commits to 6.2:\n - myCommitMessage (#myPullRequestNumber)\n\nmyPrDescription`,
       head: 'sqren:backport/6.2/pr-myPullRequestNumber',
-      title: '[6.2] myCommitMessage'
+      title: 'myPrTitle'
     });
   });
 

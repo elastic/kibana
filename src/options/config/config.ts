@@ -18,6 +18,7 @@ export async function getOptionsFromConfigFiles() {
     multipleBranches: true,
     all: false,
     labels: [] as string[],
+    prTitle: '[{baseBranch}] {commitMessages}',
 
     // options from config files
     ...globalConfig,

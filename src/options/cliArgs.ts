@@ -46,6 +46,11 @@ export function getOptionsFromCliArgs(
       description: 'Backport to multiple branches',
       type: 'boolean'
     })
+    .option('prTitle', {
+      default: configOptions.prTitle,
+      description: 'Title of pull request',
+      type: 'string'
+    })
     .option('prDescription', {
       default: configOptions.prDescription,
       description: 'Description to be added to pull request',
@@ -79,6 +84,7 @@ export function getOptionsFromCliArgs(
     multiple: cliArgs.multiple,
     multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,
     multipleCommits: cliArgs.multipleCommits || cliArgs.multiple,
+    prTitle: cliArgs.prTitle,
     prDescription: cliArgs.prDescription,
     sha: cliArgs.sha,
     upstream: cliArgs.upstream,

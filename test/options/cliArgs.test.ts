@@ -12,6 +12,7 @@ describe('getOptionsFromCliArgs', () => {
       multiple: false,
       multipleBranches: true,
       multipleCommits: false,
+      prTitle: 'myPrTitle',
       upstream: 'elastic/kibana',
       username: 'sqren'
     };
@@ -43,6 +44,7 @@ describe('getOptionsFromCliArgs', () => {
       multiple: false,
       multipleBranches: true,
       multipleCommits: false,
+      prTitle: 'myPrTitle',
       sha: undefined,
       upstream: 'sqren/backport-demo',
       username: 'sqren'

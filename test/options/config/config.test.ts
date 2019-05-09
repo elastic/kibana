@@ -40,6 +40,7 @@ describe('getOptionsFromConfigFiles', () => {
       multiple: false,
       multipleBranches: true,
       multipleCommits: false,
+      prTitle: '[{baseBranch}] {commitMessages}',
       upstream: 'elastic/kibana',
       username: 'sqren'
     });

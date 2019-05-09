@@ -57,6 +57,7 @@ describe('doBackportVersion', () => {
         '6.x',
         'sqren',
         ['backport'],
+        '[{baseBranch}] {commitMessages}',
         'myPrSuffix'
       );
     });
@@ -107,6 +108,7 @@ describe('doBackportVersion', () => {
         '6.x',
         'sqren',
         ['backport'],
+        '[{baseBranch}] {commitMessages}',
         undefined
       );
     });
@@ -168,6 +170,7 @@ describe('doBackportVersion', () => {
         '6.x',
         'sqren',
         ['backport'],
+        'myPrTitle',
         undefined
       );
 

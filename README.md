@@ -89,6 +89,7 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 | --labels        | Pull request labels                       | string                   |
 | --multiple      | Backport multiple commits and/or branches | boolean                  |
 | --prDescription | Description to be added to pull request   | string                   |
+| --prTitle       | Title for the pull request                | string                   |
 | --sha           | Commit sha to backport                    | string                   |
 | --upstream      | Name of repository                        | string                   |
 | --username      | Github username                           | string                   |

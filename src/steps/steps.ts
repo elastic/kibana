@@ -26,6 +26,7 @@ export async function initSteps(options: BackportOptions) {
     branches,
     options.username,
     options.labels,
+    options.prTitle,
     options.prDescription
   );
 }
