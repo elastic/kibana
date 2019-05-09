@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body';
 import {
   Direction,
   DomainsFields,
@@ -19,6 +18,7 @@ import {
 import { State } from '../store';
 
 import { defaultHeaders } from './header';
+import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body/helpers';
 
 export const mockGlobalState: State = {
   app: {

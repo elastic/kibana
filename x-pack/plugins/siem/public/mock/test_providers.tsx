@@ -20,8 +20,8 @@ import { ThemeProvider } from 'styled-components';
 import { KibanaConfigContext } from '../components/formatted_date';
 import { AppTestingFrameworkAdapter } from '../lib/adapters/framework/testing_framework_adapter';
 import { createStore, State } from '../store';
-
-import { mockFrameworks, mockGlobalState } from '.';
+import { mockGlobalState } from './global_state';
+import { mockFrameworks } from './kibana_config';
 
 const state: State = mockGlobalState;
 

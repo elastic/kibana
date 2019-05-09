@@ -17,14 +17,12 @@
  * under the License.
  */
 
-export function FilterBarLibMapMissingProvider(Promise) {
-  return function (filter) {
-    if (filter.missing) {
-      const type = 'missing';
-      const key = filter.missing.field;
-      const value = type;
-      return Promise.resolve({ type, key, value });
-    }
-    return Promise.reject(filter);
-  };
+export async function mapMissing(filter) {
+  if (filter.missing) {
+    const type = 'missing';
+    const key = filter.missing.field;
+    const value = type;
+    return { type, key, value };
+  }
+  throw filter;
 }

@@ -17,12 +17,14 @@ interface Props {
   transactionTypes: string[];
   urlParams: IUrlParams;
   isRumAgent?: boolean;
+  agentName: string;
 }
 
 export function ServiceDetailTabs({
   transactionTypes,
   urlParams,
-  isRumAgent
+  isRumAgent,
+  agentName
 }: Props) {
   const location = useLocation();
   const { serviceName } = urlParams;
@@ -56,7 +58,7 @@ export function ServiceDetailTabs({
       defaultMessage: 'Metrics'
     }),
     path: `/${serviceName}/metrics`,
-    render: () => <ServiceMetrics urlParams={urlParams} location={location} />
+    render: () => <ServiceMetrics urlParams={urlParams} agentName={agentName} />
   };
   const tabs = isRumAgent
     ? [transactionsTab, errorsTab]
