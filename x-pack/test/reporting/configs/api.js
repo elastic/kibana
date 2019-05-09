@@ -24,6 +24,7 @@ export async function getReportingApiConfig({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack Reporting API Tests',
     },
+    testFiles: [require.resolve('../api/generate')],
     esTestCluster: apiConfig.get('esTestCluster'),
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
@@ -36,3 +37,5 @@ export async function getReportingApiConfig({ readConfigFile }) {
     },
   };
 }
+
+export default getReportingApiConfig;
