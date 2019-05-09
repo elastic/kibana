@@ -158,7 +158,7 @@ function transformFilterStringToQueryObject(doc) {
       // we need to migrate all filters where they are applied:
       // filters appear in:
       // type: metric -> visState.params.series[item]
-      // type: markdown -> visState.params.series[item]
+      // type: markdown -> visState.params.series[item], this also has one here: visState.params.series[each].split_filters.filter
       const isMetricTSVBVis = get(visState, 'params.type') === 'metric';
       const isMarkdownTSVBVis = get(visState, 'params.type') === 'markdown';
       if (!isMetricTSVBVis && !isMarkdownTSVBVis) {
@@ -167,12 +167,13 @@ function transformFilterStringToQueryObject(doc) {
       }
       // migrate the series filters
       const series = get(visState, 'params.series') || [];
+      // TODO: the forEach body can be extracted into another function
       series.forEach((item) => {
         if (!item.filter) {
           // we don't need to transform anything if there isn't a filter at all
           return;
         }
-        // series item filter
+        // top level filter:
         if (typeof item.filter === 'string') {
           const itemfilterObject = {
             query: item.filter,
@@ -180,7 +181,6 @@ function transformFilterStringToQueryObject(doc) {
           };
           item.filter = itemfilterObject;
         }
-        // series item split filters filter
         if (item.split_filters) {
           const splitFilters = get(item, 'split_filters') || [];
           splitFilters.forEach((filter) => {
