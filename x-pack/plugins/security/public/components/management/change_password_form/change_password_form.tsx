@@ -26,6 +26,7 @@ interface Props {
   user: User;
   isUserChangingOwnPassword: boolean;
   onChangePassword?: () => void;
+  apiClient: UserAPIClient;
 }
 
 interface State {
@@ -277,7 +278,7 @@ export class ChangePasswordForm extends Component<Props, State> {
 
   private performPasswordChange = async () => {
     try {
-      await UserAPIClient.changePassword(
+      await this.props.apiClient.changePassword(
         this.props.user.username,
         this.state.newPassword,
         this.state.currentPassword

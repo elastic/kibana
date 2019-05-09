@@ -9,7 +9,7 @@ import React from 'react';
 
 import {
   getPivotQuery,
-  IndexPatternContext,
+  KibanaContext,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
@@ -26,7 +26,7 @@ jest.mock('react', () => {
 
 describe('Data Frame: <PivotPreview />', () => {
   test('Minimal initialization', () => {
-    const indexPattern = {
+    const currentIndexPattern = {
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -51,9 +51,11 @@ describe('Data Frame: <PivotPreview />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <IndexPatternContext.Provider value={indexPattern}>
+        <KibanaContext.Provider
+          value={{ currentIndexPattern, indexPatterns: {}, kibanaConfig: {} }}
+        >
           <PivotPreview {...props} />
-        </IndexPatternContext.Provider>
+        </KibanaContext.Provider>
       </div>
     );
 

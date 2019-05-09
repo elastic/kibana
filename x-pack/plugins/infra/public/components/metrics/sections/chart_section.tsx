@@ -30,6 +30,7 @@ import {
 import { createFormatter } from '../../../utils/formatters';
 
 const MARGIN_LEFT = 60;
+
 const chartComponentsByType = {
   [InfraMetricLayoutVisualizationType.line]: EuiLineSeries,
   [InfraMetricLayoutVisualizationType.area]: EuiAreaSeries,
@@ -167,7 +168,7 @@ export const ChartSection = injectI18n(
       const itemsFormatter = createItemsFormatter(formatterFunction, seriesLabels, seriesColors);
       return (
         <EuiPageContentBody>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3 id={section.id}>{section.label}</h3>
           </EuiTitle>
           <div style={{ height: 200 }}>
