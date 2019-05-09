@@ -122,6 +122,7 @@ export const NodeContextMenu = injectUICapabilities(
           isOpen={isPopoverOpen}
           button={children}
           panelPaddingSize="none"
+          anchorPosition="rightCenter"
         >
           <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="nodeContextMenu" />
         </EuiPopover>
