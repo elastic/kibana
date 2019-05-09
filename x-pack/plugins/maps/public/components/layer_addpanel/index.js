@@ -14,7 +14,8 @@ import {
   setTransientLayer,
   addLayer,
   setSelectedLayer,
-  removeTransientLayer
+  removeTransientLayer,
+  fitToLayerExtent,
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
@@ -33,15 +34,21 @@ function mapDispatchToProps(dispatch) {
     closeFlyout: () => {
       dispatch(clearTransientLayerStateAndCloseFlyout());
     },
-    previewLayer: async (layer) => {
+    viewLayer: async layer => {
       //this removal always needs to happen prior to adding the new layer
       //many source editors allow users to modify the settings in the add-source wizard
       //this triggers a new request for preview. Any existing transient layers need to be cleared before the new one can be added.
       await dispatch(setSelectedLayer(null));
       await dispatch(removeTransientLayer());
-      dispatch(addLayer(layer.toLayerDescriptor()));
+      await dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
       dispatch(setTransientLayer(layer.getId()));
+    },
+    addImportedLayer: async layer => {
+      await dispatch(setSelectedLayer(null));
+      dispatch(addLayer(layer.toLayerDescriptor()));
+      dispatch(setSelectedLayer(layer.getId()));
+      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     removeTransientLayer: () => {
       dispatch(setSelectedLayer(null));
@@ -51,6 +58,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(setTransientLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
+    fitToLayerExtent: layerId => dispatch(fitToLayerExtent(layerId))
   };
 }
 

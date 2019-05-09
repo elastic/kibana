@@ -20,30 +20,50 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { GeojsonFileSource } from '../../shared/layers/sources/client_file_source';
 import _ from 'lodash';
 
 export class AddLayerPanel extends Component {
 
   state = {
     sourceType: null,
-    layer: null
+    isLoading: false,
+    hasLayerSelected: false,
+    layer: null,
+    indexingTriggered: false,
+    importIndexingReady: false,
+    importView: false,
   }
 
-  _previewLayer = (source) => {
+  _viewLayer = (source, fitToExtent = false) => {
     if (!source) {
       this.setState({ layer: null });
       this.props.removeTransientLayer();
       return;
     }
 
-
     const layerOptions = this.state.layer
       ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
       : {};
+    const layer = source.createDefaultLayer(layerOptions, this.props.mapColors);
+    this.setState({ layer }, async () => {
+      await this.props.viewLayer(this.state.layer);
+      fitToExtent && this.props.fitToLayerExtent(layer.getId());
+    });
+  };
+
+  _addImportedLayer = async source => {
+    await this.props.removeTransientLayer();
+    if (!source) {
+      this.setState({ layer: null }, () => {
+        this.props.closeFlyout();
+      });
+      console.error(`Failed to add source`);
+      return;
+    }
     this.setState({
-      layer: source.createDefaultLayer(layerOptions, this.props.mapColors)
-    },
-    () => this.props.previewLayer(this.state.layer));
+      layer: source.createDefaultLayer({}, this.props.mapColors)
+    }, () => this.props.addImportedLayer(this.state.layer));
   };
 
   _clearSource = () => {
@@ -54,25 +74,36 @@ export class AddLayerPanel extends Component {
     this.props.removeTransientLayer();
   }
 
-  _onSourceTypeChange = (sourceType) => {
-    this.setState({ sourceType });
+  _onSourceTypeChange = (sourceType, isImportView) => {
+    this.setState({ sourceType, importView: isImportView });
   }
 
   _renderNextBtn() {
-    if (!this.state.sourceType) {
+    if (!this.state.importView && !this.state.sourceType) {
       return null;
     }
 
-    const {  hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
+    const { hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
     return (
       <EuiButton
-        disabled={!hasLayerSelected}
+        disabled={
+          !hasLayerSelected || this.state.importView &&
+          !this.state.importIndexingReady
+        }
         isLoading={hasLayerSelected && isLoading}
         iconSide="right"
         iconType={'sortRight'}
         onClick={() => {
+          const layerSource = this.state.layer.getSource();
+          const boolIndexLayer = layerSource.shouldBeIndexed();
           this.setState({ layer: null });
-          selectLayerAndAdd();
+          if (boolIndexLayer) {
+            this.setState({
+              indexingTriggered: true
+            });
+          } else {
+            selectLayerAndAdd();
+          }
         }}
         fill
       >
@@ -96,7 +127,10 @@ export class AddLayerPanel extends Component {
             className="mapLayerAddpanel__card"
             title={Source.title}
             icon={icon}
-            onClick={() => this._onSourceTypeChange(Source.type)}
+            onClick={() => {
+              const isImportView = Source.indexReadyFile;
+              this._onSourceTypeChange(Source.type, isImportView);
+            }}
             description={Source.description}
             layout="horizontal"
             data-test-subj={_.camelCase(Source.title)}
@@ -122,17 +156,32 @@ export class AddLayerPanel extends Component {
     );
   }
 
-  _renderSourceEditor() {
-    const editorProperties = {
-      onPreviewSource: this._previewLayer,
+  _getEditorProperties = (importView = false) => {
+    let editorProperties = {
+      onPreviewSource: this._viewLayer,
       inspectorAdapters: this.props.inspectorAdapters,
     };
+    if (importView) {
+      editorProperties = {
+        ...editorProperties,
+        onPreviewSource: source => this._viewLayer(source, true),
+        boolIndexData: this.state.indexingTriggered,
+        addAndViewSource: source => this._addImportedLayer(source),
+        onRemove: this.props.removeTransientLayer,
+        onIndexReadyStatusChange: indexReady => this.setState(
+          { importIndexingReady: indexReady }
+        ),
+      };
+    }
+    return editorProperties;
+  }
 
-    const Source = ALL_SOURCES.find((Source) => {
+  _renderSourceEditor() {
+    const Source = ALL_SOURCES.find(Source => {
       return Source.type === this.state.sourceType;
     });
     if (!Source) {
-      throw new Error(`Unexepected source type: ${this.state.sourceType}`);
+      throw new Error(`Unexpected source type: ${this.state.sourceType}`);
     }
 
     return (
@@ -150,9 +199,21 @@ export class AddLayerPanel extends Component {
         </EuiButtonEmpty>
         <EuiSpacer size="s" />
         <EuiPanel>
-          {Source.renderEditor(editorProperties)}
+          {Source.renderEditor(this._getEditorProperties())}
         </EuiPanel>
       </Fragment>
+    );
+  }
+
+  _renderFileImportEditor() {
+    return (
+      <EuiPanel>
+        {
+          GeojsonFileSource.renderEditor(
+            this._getEditorProperties(true)
+          )
+        }
+      </EuiPanel>
     );
   }
 
@@ -183,7 +244,11 @@ export class AddLayerPanel extends Component {
 
         <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
           <div className="mapLayerPanel__bodyOverflow">
-            {this._renderAddLayerForm()}
+            {
+              this.state.importView
+                ? this._renderFileImportEditor()
+                : this._renderAddLayerForm()
+            }
           </div>
         </div>
 

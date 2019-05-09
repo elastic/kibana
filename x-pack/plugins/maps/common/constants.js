@@ -15,6 +15,8 @@ export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 
+export const GEOJSON_FILE = 'GEOJSON_FILE';
+
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 
 export const ZOOM_PRECISION = 2;
