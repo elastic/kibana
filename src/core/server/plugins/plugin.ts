@@ -85,7 +85,7 @@ export interface PluginManifest {
 /**
  * Small container object used to expose information about discovered plugins that may
  * or may not have been started.
- * @internal
+ * @public
  */
 export interface DiscoveredPlugin {
   /**

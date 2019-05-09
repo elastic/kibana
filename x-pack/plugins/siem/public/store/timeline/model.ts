@@ -5,11 +5,12 @@
  */
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
-import { Sort } from '../../components/timeline/body/sort';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
+import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
+import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { Direction } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
+import { Sort } from '../../components/timeline/body/sort';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -84,7 +85,7 @@ export const timelineDefaults: Readonly<
     | 'width'
   >
 > = {
-  columns: [],
+  columns: defaultHeaders,
   dataProviders: [],
   description: '',
   eventIdToNoteIds: {},

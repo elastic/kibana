@@ -174,6 +174,9 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     new ServerLoggerFactory(server),
     repoConfigController
   );
+  server.events.on('stop', async () => {
+    await lspService.shutdown();
+  });
   // Initialize indexing factories.
   const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, esClient, log);
 
