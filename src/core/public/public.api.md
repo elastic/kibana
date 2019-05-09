@@ -157,13 +157,6 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<ErrorInfo>;
 }
 
-// @public
-export class FlyoutRef {
-    constructor();
-    close(): Promise<void>;
-    readonly onClose: Promise<void>;
-}
-
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
@@ -288,6 +281,14 @@ export interface NotificationsSetup {
 // @public (undocumented)
 export type NotificationsStart = NotificationsSetup;
 
+// Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface OverlayRef {
+    close(): Promise<void>;
+    onClose: Promise<void>;
+}
+
 // @public (undocumented)
 export interface OverlayStart {
     // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
@@ -296,7 +297,12 @@ export interface OverlayStart {
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
-    }) => FlyoutRef;
+    }) => OverlayRef;
+    // (undocumented)
+    openModal: (modalChildren: React.ReactNode, modalProps?: {
+        closeButtonAriaLabel?: string;
+        'data-test-subj'?: string;
+    }) => OverlayRef;
 }
 
 // @public
