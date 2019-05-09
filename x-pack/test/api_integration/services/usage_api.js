@@ -10,17 +10,22 @@ export function UsageAPIProvider({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');
 
   async function getStats(promise) {
+    console.log('getStats()');
     try {
-      return await promise;
+      const result = await promise;
+      console.log('getStats() successful!');
+      return result;
     }
     catch (err) {
       if (err.message.includes('503')) {
+        console.log('getStats()', err.message);
         return await new Promise(resolve => {
           setTimeout(async () => {
             resolve(await getStats(promise));
           }, 100);
         });
       }
+      console.log('getStats() actual err', err.message);
       throw err;
     }
   }

@@ -73,6 +73,7 @@ export function registerStatsApi(kbnServer, server, config) {
           const callCluster = (...args) => callWithRequest(req, ...args);
           const collectorsReady = await collectorSet.areAllCollectorsReady();
 
+          console.log('register_stats.handle', { collectorsReady });
           if (shouldGetUsage && !collectorsReady) {
             return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
           }
