@@ -9,7 +9,7 @@ Reads the subset of the config at the specified `path` and validates it against 
 <b>Signature:</b>
 
 ```typescript
-atPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
+atPath<TSchema extends Type<unknown>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
 ```
 
 ## Parameters

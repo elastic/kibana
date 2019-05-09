@@ -21,6 +21,5 @@ export declare class ConfigService
 |  [getUsedPaths()](./kibana-plugin-server.configservice.getusedpaths.md) |  |  |
 |  [isEnabledAtPath(path)](./kibana-plugin-server.configservice.isenabledatpath.md) |  |  |
 |  [optionalAtPath(path, ConfigClass)](./kibana-plugin-server.configservice.optionalatpath.md) |  | Same as <code>atPath</code>, but returns <code>undefined</code> if there is no config at the specified path.[ConfigService.atPath()](./kibana-plugin-server.configservice.atpath.md) |
-|  [setSchemaFor(path, schema)](./kibana-plugin-server.configservice.setschemafor.md) |  | Set config schema for a path and performs its validation |
-|  [validateAll()](./kibana-plugin-server.configservice.validateall.md) |  | Performs validation for all known validation schemas |
+|  [setSchema(path, schema)](./kibana-plugin-server.configservice.setschema.md) |  | Set config schema for a path and performs its validation |
 
