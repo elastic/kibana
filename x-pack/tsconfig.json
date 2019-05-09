@@ -14,6 +14,9 @@
   "compilerOptions": {
     "outDir": ".",
     "paths": {
+      "legacy/server/*": [
+        "src/legacy/server/*"
+      ],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],

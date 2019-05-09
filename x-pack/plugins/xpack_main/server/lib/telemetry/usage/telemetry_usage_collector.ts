@@ -10,7 +10,7 @@ import { find } from 'lodash';
 import { safeLoad } from 'js-yaml';
 
 // look for telemetry.yml in the same places we expect kibana.yml
-import { createConfigPaths } from '../../../../../../../src/legacy/server/path/create_config_path';
+import { createConfigPaths } from 'legacy/server/path/create_config_path';
 import { ensureDeepObject } from './ensure_deep_object';
 
 /**
