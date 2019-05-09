@@ -10,14 +10,31 @@ export default function ({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
 
+  async function getStats(promise) {
+    try {
+      return await promise;
+    }
+    catch (err) {
+      if (err.message.includes('503')) {
+        return await new Promise(resolve => {
+          setTimeout(async () => {
+            resolve(await getStats(promise));
+          }, 100);
+        });
+      }
+      throw err;
+    }
+  }
+
   describe('/api/stats', () => {
     describe('operational stats and usage stats', () => {
 
       describe('no auth', () => {
         it('should return 200 and stats for no extended', async () => {
-          const { body } = await supertestNoAuth
+          const { body } = await getStats(supertestNoAuth
             .get('/api/stats')
-            .expect(200);
+            .expect(200)
+          );
           expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
           expect(body.process.uptime_ms).to.be.greaterThan(0);
           expect(body.os.uptime_ms).to.be.greaterThan(0);
@@ -33,18 +50,20 @@ export default function ({ getService }) {
 
       describe('with auth', () => {
         it('should return 200 and stats for no extended', async () => {
-          const { body } = await supertest
+          const { body } = await getStats(supertest
             .get('/api/stats')
-            .expect(200);
+            .expect(200)
+          );
           expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
           expect(body.process.uptime_ms).to.be.greaterThan(0);
           expect(body.os.uptime_ms).to.be.greaterThan(0);
         });
 
         it('should return 200 for extended', async () => {
-          const { body } = await supertest
+          const { body } = await getStats(supertest
             .get('/api/stats?extended')
-            .expect(200);
+            .expect(200)
+          );
           expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
           expect(body.process.uptime_ms).to.be.greaterThan(0);
           expect(body.os.uptime_ms).to.be.greaterThan(0);
@@ -53,9 +72,10 @@ export default function ({ getService }) {
         });
 
         it('should return 200 for extended and legacy', async () => {
-          const { body } = await supertest
+          const { body } = await getStats(supertest
             .get('/api/stats?extended&legacy')
-            .expect(200);
+            .expect(200)
+          );
           expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
           expect(body.process.uptime_ms).to.be.greaterThan(0);
           expect(body.os.uptime_ms).to.be.greaterThan(0);
