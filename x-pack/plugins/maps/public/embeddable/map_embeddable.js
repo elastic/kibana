@@ -49,7 +49,7 @@ export class MapEmbeddable extends Embeddable {
     super({
       title: savedMap.title,
       editUrl,
-      editLabel: i18n.translate('kbn.embeddable.map.editLabel', {
+      editLabel: i18n.translate('xpack.maps.embeddable.editLabel', {
         defaultMessage: 'Edit map',
       }),
       editable,
