@@ -188,29 +188,20 @@ const WatchHistoryUi = () => {
     setIsTogglingActivation(false);
 
     if (error) {
-      return toastNotifications.addDanger(
-        i18n.translate(
-          'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.descriptionText',
-          {
-            defaultMessage: "Couldn't {action} watch",
-            values: {
-              action: isActivated
-                ? i18n.translate(
-                    'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.deactivateText',
-                    {
-                      defaultMessage: 'deactivate',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.activateText',
-                    {
-                      defaultMessage: 'activate',
-                    }
-                  ),
-            },
-          }
-        )
-      );
+      const message = isActivated
+        ? i18n.translate(
+            'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.deactivateDescriptionText',
+            {
+              defaultMessage: "Couldn't deactivate watch",
+            }
+          )
+        : i18n.translate(
+            'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.activateDescriptionText',
+            {
+              defaultMessage: "Couldn't activate watch",
+            }
+          );
+      return toastNotifications.addDanger(message);
     }
 
     setIsActivated(!isActivated);

@@ -47,18 +47,24 @@ const WatchDetailUi = () => {
 
   const [selectedErrorAction, setSelectedErrorAction] = useState<string | null>(null);
 
-  const actionErrors = watchDetail.watchErrors.actionErrors;
+  const {
+    isSystemWatch,
+    id: watchId,
+    watchErrors: { actionErrors },
+    watchStatus: { actionStatuses: currentActionStatuses },
+  } = watchDetail;
+
   const hasActionErrors = actionErrors && Object.keys(actionErrors).length > 0;
 
   useEffect(
     () => {
-      const currentActionStatuses = watchDetail.watchStatus.actionStatuses;
       const actionStatusesWithErrors =
         currentActionStatuses &&
         currentActionStatuses.map((currentActionStatus: ActionStatus) => {
+          const errors = actionErrors && actionErrors[currentActionStatus.id];
           return {
             ...currentActionStatus,
-            errors: actionErrors ? actionErrors[currentActionStatus.id] : [],
+            errors: errors || [],
           };
         });
       setActionStatuses(actionStatusesWithErrors);
@@ -92,9 +98,10 @@ const WatchDetailUi = () => {
       defaultMessage: 'Errors',
     }),
     render: (errors: ActionError[], action: ActionStatus) => {
+      const { id: actionId } = action;
       if (errors && errors.length > 0) {
         return (
-          <EuiButtonEmpty onClick={() => setSelectedErrorAction(action.id)}>
+          <EuiButtonEmpty onClick={() => setSelectedErrorAction(actionId)}>
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.errorsCellText', {
               defaultMessage: '{total, number} {total, plural, one {error} other {errors}}',
               values: {
@@ -128,12 +135,13 @@ const WatchDetailUi = () => {
                 onClick={async () => {
                   setIsActionStatusLoading(true);
                   try {
-                    const watchStatus = await ackWatchAction(watchDetail.id, action.id);
+                    const watchStatus = await ackWatchAction(watchId, action.id);
                     const newActionStatusesWithErrors = watchStatus.actionStatuses.map(
                       (newActionStatus: ActionStatus) => {
+                        const errors = actionErrors && actionErrors[newActionStatus.id];
                         return {
                           ...newActionStatus,
-                          errors: actionErrors ? actionErrors[newActionStatus.id] : [],
+                          errors: errors || [],
                         };
                       }
                     );
@@ -214,12 +222,12 @@ const WatchDetailUi = () => {
               <FormattedMessage
                 id="xpack.watcher.sections.watchDetail.header"
                 defaultMessage="Current status for '{watchId}'"
-                values={{ watchId: watchDetail.id }}
+                values={{ watchId }}
               />
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        {watchDetail.isSystemWatch && (
+        {isSystemWatch && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={

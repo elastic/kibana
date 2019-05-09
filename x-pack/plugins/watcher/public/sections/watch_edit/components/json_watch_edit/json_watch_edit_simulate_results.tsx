@@ -39,20 +39,22 @@ export const JsonWatchEditSimulateResults = ({
 }) => {
   const { watch } = useContext(WatchContext);
 
+  const { actionModes } = executeDetails;
+
   const getTableData = () => {
     const actions = watch.watch && watch.watch.actions;
     if (executeResults && actions) {
       const actionStatuses =
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
-      const actionModes = executeDetails.actionModes;
       return Object.keys(actions).map(actionKey => {
         const actionStatus = actionStatuses.find(status => status.id === actionKey);
+        const { state: actionState, lastExecutionReason: actionReason } = actionStatus;
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),
           actionMode: actionModes[actionKey],
-          actionState: actionStatus && actionStatus.state,
-          actionReason: actionStatus && actionStatus.lastExecutionReason,
+          actionState,
+          actionReason,
         };
       });
     }
@@ -130,7 +132,6 @@ export const JsonWatchEditSimulateResults = ({
         onClose={() => {
           onCloseFlyout();
         }}
-        size="s"
         aria-labelledby="simulateResultsFlyOutTitle"
       >
         <EuiFlyoutHeader hasBorder>{flyoutTitle}</EuiFlyoutHeader>
@@ -153,18 +154,22 @@ export const JsonWatchEditSimulateResults = ({
     return null;
   }
 
+  const {
+    watchStatus: { state },
+    details,
+  } = executeResults;
+
   return (
     <EuiFlyout
       onClose={() => {
         onCloseFlyout();
       }}
-      size="s"
       aria-labelledby="simulateResultsFlyOutTitle"
     >
       <EuiFlyoutHeader hasBorder>
         {flyoutTitle}
         <EuiSpacer size="xs" />
-        <WatchStatus status={executeResults.watchStatus.state} />
+        <WatchStatus status={state} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {actionsTableData && actionsTableData.length > 0 && (
@@ -195,9 +200,7 @@ export const JsonWatchEditSimulateResults = ({
           </h5>
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiCodeBlock language="json">
-          {JSON.stringify(executeResults.details, null, 2)}
-        </EuiCodeBlock>
+        <EuiCodeBlock language="json">{JSON.stringify(details, null, 2)}</EuiCodeBlock>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

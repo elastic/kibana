@@ -42,13 +42,6 @@ export const WatchStatus = ({
   );
 
   const errorCode = getPageErrorCode(watchDetailError);
-  if (errorCode) {
-    return (
-      <EuiPageContent>
-        <PageError errorCode={errorCode} id={id} />
-      </EuiPageContent>
-    );
-  }
 
   if (isWatchDetailLoading) {
     return (
@@ -61,13 +54,25 @@ export const WatchStatus = ({
     );
   }
 
-  return (
-    <WatchDetailsContext.Provider value={{ watchDetailError, watchDetail, isWatchDetailLoading }}>
+  if (errorCode) {
+    return (
       <EuiPageContent>
-        <WatchDetail />
-        <EuiSpacer size="m" />
-        <WatchHistory />
+        <PageError errorCode={errorCode} id={id} />
       </EuiPageContent>
-    </WatchDetailsContext.Provider>
-  );
+    );
+  }
+
+  if (watchDetail) {
+    return (
+      <WatchDetailsContext.Provider value={{ watchDetailError, watchDetail, isWatchDetailLoading }}>
+        <EuiPageContent>
+          <WatchDetail />
+          <EuiSpacer size="m" />
+          <WatchHistory />
+        </EuiPageContent>
+      </WatchDetailsContext.Provider>
+    );
+  }
+
+  return null;
 };

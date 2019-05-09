@@ -55,7 +55,7 @@ export const useRequest = ({
   processData,
 }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>(initialData);
 
   // Tied to every render and bound to each request.
@@ -72,6 +72,7 @@ export const useRequest = ({
 
     setError(null);
     setData(initialData);
+    setIsLoading(true);
 
     const { data: responseData, error: responseError } = await sendRequest({
       path,

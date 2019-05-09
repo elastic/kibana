@@ -38,6 +38,37 @@ import { WatchContext } from '../../watch_context';
 import { timeUnits } from '../../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 
+const actionModeOptions = Object.keys(ACTION_MODES).map(mode => ({
+  text: ACTION_MODES[mode],
+  value: ACTION_MODES[mode],
+}));
+
+const scheduledTimeUnitOptions = [
+  {
+    value: TIME_UNITS.SECOND,
+    text: timeUnits[TIME_UNITS.SECOND].labelPlural,
+  },
+  {
+    value: TIME_UNITS.MINUTE,
+    text: timeUnits[TIME_UNITS.MINUTE].labelPlural,
+  },
+  {
+    value: TIME_UNITS.HOUR,
+    text: timeUnits[TIME_UNITS.HOUR].labelPlural,
+  },
+];
+
+const triggeredTimeUnitOptions = [
+  {
+    value: TIME_UNITS.MILLISECOND,
+    text: timeUnits[TIME_UNITS.MILLISECOND].labelPlural,
+  },
+  {
+    value: TIME_UNITS.SECOND,
+    text: timeUnits[TIME_UNITS.SECOND].labelPlural,
+  },
+];
+
 export const JsonWatchEditSimulate = ({
   executeWatchErrors,
   hasExecuteWatchErrors,
@@ -65,6 +96,16 @@ export const JsonWatchEditSimulate = ({
   const { errors: watchErrors } = watch.validate();
   const hasWatchJsonError = watchErrors.json.length >= 1;
 
+  const {
+    actionModes,
+    scheduledTimeValue,
+    scheduledTimeUnit,
+    triggeredTimeValue,
+    triggeredTimeUnit,
+    alternativeInput,
+    ignoreCondition,
+  } = executeDetails;
+
   const columns = [
     {
       field: 'actionId',
@@ -88,16 +129,13 @@ export const JsonWatchEditSimulate = ({
       }),
       render: ({}, row: { actionId: string }) => (
         <EuiSelect
-          options={Object.keys(ACTION_MODES).map(mode => ({
-            text: ACTION_MODES[mode],
-            value: ACTION_MODES[mode],
-          }))}
-          value={executeDetails.actionModes[row.actionId]}
+          options={actionModeOptions}
+          value={actionModes[row.actionId]}
           onChange={e => {
             setExecuteDetails(
               new ExecuteDetails({
                 ...executeDetails,
-                actionModes: { ...executeDetails.actionModes, [row.actionId]: e.target.value },
+                actionModes: { ...actionModes, [row.actionId]: e.target.value },
               })
             );
           }}
@@ -161,7 +199,7 @@ export const JsonWatchEditSimulate = ({
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiFieldNumber
-                  value={executeDetails.scheduledTimeValue}
+                  value={scheduledTimeValue}
                   min={0}
                   onChange={e => {
                     const value = e.target.value;
@@ -176,21 +214,8 @@ export const JsonWatchEditSimulate = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
-                  value={executeDetails.scheduledTimeUnit}
-                  options={[
-                    {
-                      value: TIME_UNITS.SECOND,
-                      text: timeUnits[TIME_UNITS.SECOND].labelPlural,
-                    },
-                    {
-                      value: TIME_UNITS.MINUTE,
-                      text: timeUnits[TIME_UNITS.MINUTE].labelPlural,
-                    },
-                    {
-                      value: TIME_UNITS.HOUR,
-                      text: timeUnits[TIME_UNITS.HOUR].labelPlural,
-                    },
-                  ]}
+                  value={scheduledTimeUnit}
+                  options={scheduledTimeUnitOptions}
                   onChange={e => {
                     setExecuteDetails(
                       new ExecuteDetails({
@@ -214,7 +239,7 @@ export const JsonWatchEditSimulate = ({
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiFieldNumber
-                  value={executeDetails.triggeredTimeValue}
+                  value={triggeredTimeValue}
                   min={0}
                   onChange={e => {
                     const value = e.target.value;
@@ -229,17 +254,8 @@ export const JsonWatchEditSimulate = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
-                  value={executeDetails.triggeredTimeUnit}
-                  options={[
-                    {
-                      value: TIME_UNITS.MILLISECOND,
-                      text: timeUnits[TIME_UNITS.MILLISECOND].labelPlural,
-                    },
-                    {
-                      value: TIME_UNITS.SECOND,
-                      text: timeUnits[TIME_UNITS.SECOND].labelPlural,
-                    },
-                  ]}
+                  value={triggeredTimeUnit}
+                  options={triggeredTimeUnitOptions}
                   onChange={e => {
                     setExecuteDetails(
                       new ExecuteDetails({
@@ -297,7 +313,7 @@ export const JsonWatchEditSimulate = ({
                   defaultMessage: 'Code editor',
                 }
               )}
-              value={executeDetails.alternativeInput}
+              value={alternativeInput}
               onChange={(json: string) => {
                 setExecuteDetails(
                   new ExecuteDetails({
@@ -334,7 +350,7 @@ export const JsonWatchEditSimulate = ({
                 defaultMessage: 'Ignore condition',
               }
             )}
-            checked={executeDetails.ignoreCondition}
+            checked={ignoreCondition}
             onChange={e => {
               setExecuteDetails(
                 new ExecuteDetails({ ...executeDetails, ignoreCondition: e.target.checked })
