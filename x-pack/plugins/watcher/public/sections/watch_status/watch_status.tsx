@@ -66,7 +66,7 @@ export const WatchStatus = ({
       <EuiPageContent>
         <WatchDetail />
         <EuiSpacer size="m" />
-        <WatchHistory watchId={id} />
+        <WatchHistory />
       </EuiPageContent>
     </WatchDetailsContext.Provider>
   );

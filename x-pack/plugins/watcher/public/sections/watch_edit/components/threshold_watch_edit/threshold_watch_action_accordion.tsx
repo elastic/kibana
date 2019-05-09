@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -40,6 +40,7 @@ import {
 } from './action_fields';
 import { executeWatch } from '../../../../lib/api';
 import { watchActionsConfigurationMap } from '../../../../lib/documentation_links';
+import { SectionError } from '../../../../components';
 
 const actionFieldsComponentMap = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,
@@ -72,6 +73,9 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
 }) => {
   const { watch, setWatchProperty } = useContext(WatchContext);
   const { actions } = watch;
+
+  const [isExecuting, setIsExecuting] = useState<boolean>(false);
+  const [executeResultsError, setExecuteResultsError] = useState<any>(null);
 
   if (actions && actions.length >= 1) {
     return actions.map((action: any) => {
@@ -119,6 +123,20 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
           }
           paddingSize="l"
         >
+          {executeResultsError && (
+            <Fragment>
+              <SectionError
+                title={
+                  <FormattedMessage
+                    id="xpack.watcher.sections.watchEdit.threshold.accordion.simulateResultsErrorTitle"
+                    defaultMessage="Error testing action"
+                  />
+                }
+                error={executeResultsError}
+              />
+              <EuiSpacer size="s" />
+            </Fragment>
+          )}
           <EuiForm>
             <FieldsComponent
               action={action}
@@ -180,10 +198,12 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
             <EuiButton
               type="submit"
               isDisabled={hasErrors}
+              isLoading={isExecuting}
               onClick={async () => {
                 const selectedWatchAction = watch.actions.filter(
                   (watchAction: any) => watchAction.id === action.id
                 );
+
                 const executeDetails = new ExecuteDetails({
                   ignoreCondition: true,
                   recordExecution: false,
@@ -191,28 +211,34 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                     [action.id]: ACTION_MODES.FORCE_EXECUTE,
                   },
                 });
+
                 const newExecuteWatch = new ThresholdWatch({
                   ...watch,
                   actions: selectedWatchAction,
                 });
-                try {
-                  const executedWatch = await executeWatch(executeDetails, newExecuteWatch);
-                  const executeResults = WatchHistoryItem.fromUpstreamJson(
-                    executedWatch.watchHistoryItem
-                  );
-                  const actionStatuses = executeResults.watchStatus.actionStatuses;
-                  const actionStatus = actionStatuses.find(
-                    (actionItem: ActionType) => actionItem.id === action.id
-                  );
 
-                  if (actionStatus.lastExecutionSuccessful === false) {
-                    const message = actionStatus.lastExecutionReason || action.simulateFailMessage;
-                    return toastNotifications.addDanger(message);
-                  }
-                  toastNotifications.addSuccess(action.simulateMessage);
-                } catch (e) {
-                  toastNotifications.addDanger(e.data.message);
+                setIsExecuting(true);
+                setExecuteResultsError(null);
+
+                const { data, error } = await executeWatch(executeDetails, newExecuteWatch);
+
+                setIsExecuting(false);
+
+                if (error) {
+                  return setExecuteResultsError(error);
                 }
+
+                const formattedResults = WatchHistoryItem.fromUpstreamJson(data.watchHistoryItem);
+                const actionStatuses = formattedResults.watchStatus.actionStatuses;
+                const actionStatus = actionStatuses.find(
+                  (actionItem: ActionType) => actionItem.id === action.id
+                );
+
+                if (actionStatus.lastExecutionSuccessful === false) {
+                  const message = actionStatus.lastExecutionReason || action.simulateFailMessage;
+                  return toastNotifications.addDanger(message);
+                }
+                return toastNotifications.addSuccess(action.simulateMessage);
               }}
             >
               {action.simulatePrompt}
