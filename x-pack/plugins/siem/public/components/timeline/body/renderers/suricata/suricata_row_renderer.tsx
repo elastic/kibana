@@ -7,9 +7,9 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { Row, RowRenderer, RowRendererContainer } from '..';
-
-import { SuricataDetails } from '.';
+import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { Row } from '../helpers';
+import { SuricataDetails } from './suricata_details';
 
 export const suricataRowRenderer: RowRenderer = {
   isInstance: ecs => {

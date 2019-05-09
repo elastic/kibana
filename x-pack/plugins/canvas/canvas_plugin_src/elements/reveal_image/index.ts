@@ -10,6 +10,7 @@ import header from './header.png';
 export const revealImage: ElementFactory = () => ({
   name: 'revealImage',
   displayName: 'Image reveal',
+  tags: ['graphic', 'proportion'],
   help: 'Reveals a percentage of an image',
   image: header,
   expression: `filters

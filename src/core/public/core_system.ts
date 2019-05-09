@@ -118,9 +118,12 @@ export class CoreSystem {
       const i18n = this.i18n.setup();
       const injectedMetadata = this.injectedMetadata.setup();
       this.fatalErrorsSetup = this.fatalErrors.setup({ injectedMetadata, i18n });
-
-      const http = this.http.setup({ fatalErrors: this.fatalErrorsSetup });
       const basePath = this.basePath.setup({ injectedMetadata });
+      const http = this.http.setup({
+        basePath,
+        injectedMetadata,
+        fatalErrors: this.fatalErrorsSetup,
+      });
       const uiSettings = this.uiSettings.setup({
         http,
         injectedMetadata,
@@ -165,6 +168,7 @@ export class CoreSystem {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
       const basePath = await this.basePath.start({ injectedMetadata });
+      const http = await this.http.start();
       const i18n = await this.i18n.start();
       const application = await this.application.start({ basePath, injectedMetadata });
 
@@ -187,6 +191,7 @@ export class CoreSystem {
       const core: CoreStart = {
         application,
         basePath,
+        http,
         i18n,
         injectedMetadata,
         notifications,
