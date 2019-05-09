@@ -21,6 +21,7 @@ import { readdir, stat } from 'fs';
 import { resolve, join } from 'path';
 import { bindNodeCallback, from, merge } from 'rxjs';
 import { catchError, filter, mergeMap, shareReplay } from 'rxjs/operators';
+import { Type } from '@kbn/config-schema';
 
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
@@ -122,7 +123,7 @@ function readSchemaMaybe(
   }
 
   const configSchema = pluginDefinition.configDefinition.schema;
-  if (configSchema && typeof configSchema.validate === 'function') {
+  if (configSchema instanceof Type) {
     return configSchema;
   }
 

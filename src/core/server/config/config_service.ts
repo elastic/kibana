@@ -34,7 +34,7 @@ export class ConfigService {
    * then list all unhandled config paths when the startup process is completed.
    */
   private readonly handledPaths: ConfigPath[] = [];
-  private schemas = new Map<string, Type<any>>();
+  private readonly schemas = new Map<string, Type<any>>();
 
   constructor(
     private readonly config$: Observable<Config>,

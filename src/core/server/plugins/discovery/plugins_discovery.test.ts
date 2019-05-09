@@ -18,6 +18,7 @@
  */
 
 import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugins_discovery.test.mocks';
+import { schema } from '@kbn/config-schema';
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
@@ -37,9 +38,7 @@ const TEST_PLUGIN_SEARCH_PATHS = {
 const TEST_EXTRA_PLUGIN_PATH = resolve(process.cwd(), 'my-extra-plugin');
 const pluginDefinition = {
   configDefinition: {
-    schema: {
-      validate: () => null,
-    },
+    schema: schema.any(),
   },
 };
 

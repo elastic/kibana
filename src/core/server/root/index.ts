@@ -20,7 +20,7 @@
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
-import { Config, ConfigService, Env } from '../config';
+import { Config, Env } from '../config';
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
 import { Server } from '../server';
 
