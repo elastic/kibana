@@ -9,5 +9,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./mapping'));
     loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./stats'));
   });
 }

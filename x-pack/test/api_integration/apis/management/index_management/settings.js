@@ -90,7 +90,11 @@ export default function ({ getService }) {
 
       // Make sure none of the settings have been removed from ES API
       expectedSettings.forEach((setting) => {
-        expect(body.defaults.index.hasOwnProperty(setting)).to.be(true);
+        try {
+          expect(body.defaults.index.hasOwnProperty(setting)).to.be(true);
+        } catch {
+          throw new Error(`Expected setting "${setting}" not found.`);
+        }
       });
     });
 
