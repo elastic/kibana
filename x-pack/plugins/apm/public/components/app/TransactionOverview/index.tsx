@@ -120,7 +120,7 @@ export function TransactionOverview({
         urlParams={urlParams}
       />
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiPanel>
         <EuiTitle size="xs">

@@ -33,7 +33,7 @@ import {
   PluginsServiceSetupDeps,
 } from './plugins_service';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
+import { applicationServiceMock } from '../application/application_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { PluginStartContext, PluginSetupContext } from './plugin_context';
@@ -42,6 +42,8 @@ import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.moc
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { UiSettingsClient } from '../ui_settings';
+import { httpServiceMock } from '../http/http_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -59,6 +61,7 @@ let mockStartContext: DeeplyMocked<PluginStartContext>;
 
 beforeEach(() => {
   mockSetupDeps = {
+    application: applicationServiceMock.createSetupContract(),
     injectedMetadata: (function() {
       const metadata = injectedMetadataServiceMock.createSetupContract();
       metadata.getPlugins.mockReturnValue([
@@ -78,19 +81,27 @@ beforeEach(() => {
     })(),
     chrome: chromeServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
     i18n: i18nServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
-  } as any;
-  mockSetupContext = omit(mockSetupDeps, 'injectedMetadata');
+    uiSettings: uiSettingsServiceMock.createSetupContract() as jest.Mocked<UiSettingsClient>,
+  };
+  mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
   mockStartDeps = {
-    capabilities: capabilitiesServiceMock.createStartContract(),
+    application: applicationServiceMock.createStartContract(),
+    basePath: basePathServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
   };
-  mockStartContext = omit(mockStartDeps, 'injectedMetadata');
+  mockStartContext = {
+    ...omit(mockStartDeps, 'injectedMetadata'),
+    application: {
+      capabilities: mockStartDeps.application.capabilities,
+    },
+  };
 
   // Reset these for each test.
   mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>(([

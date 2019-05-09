@@ -150,7 +150,6 @@ jest.mock('ui/chrome/services/global_nav_state', () => {
 });
 
 import { basePathServiceMock } from '../base_path/base_path_service.mock';
-import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -160,7 +159,9 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
+import { applicationServiceMock } from '../application/application_service.mock';
 
+const applicationSetup = applicationServiceMock.createSetupContract();
 const basePathSetup = basePathServiceMock.createSetupContract();
 const chromeSetup = chromeServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
@@ -178,6 +179,7 @@ const defaultParams = {
 
 const defaultSetupDeps = {
   core: {
+    application: applicationSetup,
     i18n: i18nSetup,
     fatalErrors: fatalErrorsSetup,
     injectedMetadata: injectedMetadataSetup,
@@ -189,16 +191,20 @@ const defaultSetupDeps = {
   },
 };
 
-const capabilitiesStart = capabilitiesServiceMock.createStartContract();
+const applicationStart = applicationServiceMock.createStartContract();
+const basePathStart = basePathServiceMock.createStartContract();
 const i18nStart = i18nServiceMock.createStartContract();
+const httpStart = httpServiceMock.createStartContract();
 const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
 const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
 
 const defaultStartDeps = {
   core: {
-    capabilities: capabilitiesStart,
+    application: applicationStart,
+    basePath: basePathStart,
     i18n: i18nStart,
+    http: httpStart,
     injectedMetadata: injectedMetadataStart,
     notifications: notificationsStart,
     overlays: overlayStart,
@@ -208,7 +214,6 @@ const defaultStartDeps = {
 
 afterEach(() => {
   jest.clearAllMocks();
-  injectedMetadataSetup.getLegacyMetadata.mockReset();
   jest.resetModules();
   mockLoadOrder.length = 0;
 });
@@ -216,8 +221,8 @@ afterEach(() => {
 describe('#setup()', () => {
   describe('default', () => {
     it('passes legacy metadata from injectedVars to ui/metadata', () => {
-      const legacyMetadata = { isLegacyMetadata: true };
-      injectedMetadataSetup.getLegacyMetadata.mockReturnValue(legacyMetadata as any);
+      const legacyMetadata = { nav: [], isLegacyMetadata: true };
+      injectedMetadataSetup.getLegacyMetadata.mockReturnValueOnce(legacyMetadata as any);
 
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
@@ -404,7 +409,7 @@ describe('#start()', () => {
     legacyPlatform.start(defaultStartDeps);
 
     expect(mockUICapabilitiesInit).toHaveBeenCalledTimes(1);
-    expect(mockUICapabilitiesInit).toHaveBeenCalledWith(capabilitiesStart);
+    expect(mockUICapabilitiesInit).toHaveBeenCalledWith(applicationStart.capabilities);
   });
 
   describe('useLegacyTestHarness = false', () => {

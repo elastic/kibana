@@ -37,6 +37,14 @@ export default function (kibana) {
       }).default();
     },
 
+    uiCapabilities() {
+      return {
+        timelion: {
+          save: true,
+        }
+      };
+    },
+
     uiExports: {
       app: {
         title: 'Timelion',
@@ -54,11 +62,6 @@ export default function (kibana) {
       injectDefaultVars(server) {
         return {
           timelionUiEnabled: server.config().get('timelion.ui.enabled'),
-          uiCapabilities: {
-            timelion: {
-              save: true,
-            }
-          }
         };
       },
       visTypes: [

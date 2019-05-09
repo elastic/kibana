@@ -10,8 +10,14 @@ import {
   EuiButtonEmpty,
   EuiConfirmModal,
   EuiOverlayMask,
+  EuiToolTip,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
+
+import {
+  checkPermission,
+  createPermissionFailureMessage,
+} from '../../../../../privilege/check_privilege';
 
 import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
 import { deleteJobFactory, startJobFactory, stopJobFactory } from './job_service';
@@ -23,6 +29,8 @@ interface DeleteActionProps {
 }
 
 export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => {
+  const canDeleteDataFrameJob: boolean = checkPermission('canDeleteDataFrameJob');
+
   const [isModalVisible, setModalVisible] = useState(false);
 
   const closeModal = () => setModalVisible(false);
@@ -35,18 +43,40 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item
   const buttonDeleteText = i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
     defaultMessage: 'Delete',
   });
+
+  let deleteButton = (
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      disabled={disabled || !canDeleteDataFrameJob}
+      iconType="trash"
+      onClick={openModal}
+      aria-label={buttonDeleteText}
+    >
+      {buttonDeleteText}
+    </EuiButtonEmpty>
+  );
+
+  if (disabled || !canDeleteDataFrameJob) {
+    deleteButton = (
+      <EuiToolTip
+        position="top"
+        content={
+          disabled
+            ? i18n.translate('xpack.ml.dataframe.jobsList.deleteActionDisabledToolTipContent', {
+                defaultMessage: 'Stop the data frame job in order to delete it.',
+              })
+            : createPermissionFailureMessage('canStartStopDataFrameJob')
+        }
+      >
+        {deleteButton}
+      </EuiToolTip>
+    );
+  }
+
   return (
     <Fragment>
-      <EuiButtonEmpty
-        size="xs"
-        color="text"
-        disabled={disabled}
-        iconType="trash"
-        onClick={openModal}
-        aria-label={buttonDeleteText}
-      >
-        {buttonDeleteText}
-      </EuiButtonEmpty>
+      {deleteButton}
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -84,6 +114,8 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item
 };
 
 export const getActions = (getJobs: () => void) => {
+  const canStartStopDataFrameJob: boolean = checkPermission('canStartStopDataFrameJob');
+
   const deleteJob = deleteJobFactory(getJobs);
   const startJob = startJobFactory(getJobs);
   const stopJob = stopJobFactory(getJobs);
@@ -96,10 +128,12 @@ export const getActions = (getJobs: () => void) => {
           const buttonStartText = i18n.translate('xpack.ml.dataframe.jobsList.startActionName', {
             defaultMessage: 'Start',
           });
-          return (
+
+          const startButton = (
             <EuiButtonEmpty
               size="xs"
               color="text"
+              disabled={!canStartStopDataFrameJob}
               iconType="play"
               onClick={() => startJob(item)}
               aria-label={buttonStartText}
@@ -107,15 +141,30 @@ export const getActions = (getJobs: () => void) => {
               {buttonStartText}
             </EuiButtonEmpty>
           );
+
+          if (!canStartStopDataFrameJob) {
+            return (
+              <EuiToolTip
+                position="top"
+                content={createPermissionFailureMessage('canStartStopDataFrameJob')}
+              >
+                {startButton}
+              </EuiToolTip>
+            );
+          }
+
+          return startButton;
         }
 
         const buttonStopText = i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
           defaultMessage: 'Stop',
         });
-        return (
+
+        const stopButton = (
           <EuiButtonEmpty
             size="xs"
             color="text"
+            disabled={!canStartStopDataFrameJob}
             iconType="stop"
             onClick={() => stopJob(item)}
             aria-label={buttonStopText}
@@ -123,6 +172,18 @@ export const getActions = (getJobs: () => void) => {
             {buttonStopText}
           </EuiButtonEmpty>
         );
+        if (!canStartStopDataFrameJob) {
+          return (
+            <EuiToolTip
+              position="top"
+              content={createPermissionFailureMessage('canStartStopDataFrameJob')}
+            >
+              {stopButton}
+            </EuiToolTip>
+          );
+        }
+
+        return stopButton;
       },
     },
     {
