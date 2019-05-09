@@ -25,12 +25,19 @@ import {
   HttpServiceStart,
   ConfigService,
   PluginsServiceSetup,
+  PluginsServiceStart,
 } from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
+import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
+import {
+  SavedObjectsClient,
+  SavedObjectsService,
+  SavedObjectsSchema,
+  SavedObjectsManagement,
+} from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -55,8 +62,14 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
+    usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
+    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
+    addScopedTutorialContextFactory: (
+      scopedTutorialContextFactory: (...args: any[]) => any
+    ) => void;
+    savedObjectsManagement(): SavedObjectsManagement;
   }
 
   interface Request {
@@ -86,6 +99,7 @@ export default class KbnServer {
       core: {
         http: HttpServiceStart;
       };
+      plugins: PluginsServiceStart;
     };
     stop: null;
     params: {
@@ -95,6 +109,7 @@ export default class KbnServer {
   };
   public server: Server;
   public inject: Server['inject'];
+  public pluginSpecs: any[];
 
   constructor(settings: any, core: any);
 
@@ -102,6 +117,7 @@ export default class KbnServer {
   public mixin(...fns: KbnMixinFunc[]): Promise<void>;
   public listen(): Promise<Server>;
   public close(): Promise<void>;
+  public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
 }
 

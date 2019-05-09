@@ -8,37 +8,40 @@ import React, { Fragment, SFC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { JobId, TargetIndex } from './common';
+import { JobDetailsExposedState } from './job_details_form';
 
-interface Props {
-  jobId: JobId;
-  targetIndex: TargetIndex;
-  touched: boolean;
-}
+export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
+  ({ createIndexPattern, jobId, targetIndex, touched }) => {
+    if (touched === false) {
+      return null;
+    }
 
-export const JobDetailsSummary: SFC<Props> = React.memo(({ jobId, targetIndex, touched }) => {
-  if (touched === false) {
-    return null;
+    const targetIndexHelpText = createIndexPattern
+      ? i18n.translate('xpack.ml.dataframe.jobDetailsSummary.createIndexPatternMessage', {
+          defaultMessage: 'A Kibana index pattern will be created for this job.',
+        })
+      : '';
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.jobIdLabel', {
+            defaultMessage: 'Job id',
+          })}
+        >
+          <EuiFieldText defaultValue={jobId} disabled={true} />
+        </EuiFormRow>
+        <EuiFormRow
+          helpText={targetIndexHelpText}
+          label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.targetIndexLabel', {
+            defaultMessage: 'Target index',
+          })}
+        >
+          <EuiFieldText defaultValue={targetIndex} disabled={true} />
+        </EuiFormRow>
+      </Fragment>
+    );
   }
-
-  return (
-    <Fragment>
-      <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.jobIdLabel', {
-          defaultMessage: 'Job id',
-        })}
-      >
-        <span>{jobId}</span>
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.targetIndexLabel', {
-          defaultMessage: 'Target index',
-        })}
-      >
-        <span>{targetIndex}</span>
-      </EuiFormRow>
-    </Fragment>
-  );
-});
+);

@@ -6,12 +6,12 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Request } from 'hapi';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { LoginAttempt } from '../login_attempt';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Utility class that knows how to decorate request with proper Basic authentication headers.
@@ -20,11 +20,15 @@ export class BasicCredentials {
   /**
    * Takes provided `username` and `password`, transforms them into proper `Basic ***` authorization
    * header and decorates passed request with it.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param username User name.
    * @param password User password.
    */
-  public static decorateRequest<T extends Request>(request: T, username: string, password: string) {
+  public static decorateRequest<T extends Legacy.Request>(
+    request: T,
+    username: string,
+    password: string
+  ) {
     const typeOfRequest = typeof request;
     if (!request || typeOfRequest !== 'object') {
       throw new Error('Request should be a valid object.');
@@ -44,18 +48,9 @@ export class BasicCredentials {
   }
 }
 
-type RequestWithLoginAttempt = Request & {
+type RequestWithLoginAttempt = Legacy.Request & {
   loginAttempt: () => LoginAttempt;
 };
-
-/**
- * Represents available provider options.
- */
-interface ProviderOptions {
-  basePath: string;
-  client: Cluster;
-  log: (tags: string[], message: string) => void;
-}
 
 /**
  * The state supported by the provider.
@@ -72,16 +67,10 @@ interface ProviderState {
 /**
  * Provider that supports request authentication via Basic HTTP Authentication.
  */
-export class BasicAuthenticationProvider {
-  /**
-   * Instantiates BasicAuthenticationProvider.
-   * @param options Provider options object.
-   */
-  constructor(private readonly options: ProviderOptions) {}
-
+export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs request authentication using Basic HTTP Authentication.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
@@ -117,9 +106,9 @@ export class BasicAuthenticationProvider {
 
   /**
    * Redirects user to the login page preserving query string parameters.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  public async deauthenticate(request: Request) {
+  public async deauthenticate(request: Legacy.Request) {
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     return DeauthenticationResult.redirectTo(
@@ -130,7 +119,7 @@ export class BasicAuthenticationProvider {
   /**
    * Validates whether request contains a login payload and authenticates the
    * user if necessary.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
   private async authenticateViaLoginAttempt(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via login attempt.');
@@ -162,9 +151,9 @@ export class BasicAuthenticationProvider {
   /**
    * Validates whether request contains `Basic ***` Authorization header and just passes it
    * forward to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Request) {
+  private async authenticateViaHeader(request: Legacy.Request) {
     this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
@@ -197,10 +186,10 @@ export class BasicAuthenticationProvider {
   /**
    * Tries to extract authorization header from the state and adds it to the request before
    * it's forwarded to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Request, { authorization }: ProviderState) {
+  private async authenticateViaState(request: Legacy.Request, { authorization }: ProviderState) {
     this.debug('Trying to authenticate via state.');
 
     if (!authorization) {

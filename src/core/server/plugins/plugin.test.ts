@@ -179,6 +179,44 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
   expect(mockPluginInstance.setup).toHaveBeenCalledWith(setupContext, setupDependencies);
 });
 
+test('`start` fails if setup is not called first', async () => {
+  const manifest = createPluginManifest();
+  const plugin = new PluginWrapper(
+    'some-plugin-path',
+    manifest,
+    createPluginInitializerContext(coreContext, manifest)
+  );
+
+  await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
+  );
+});
+
+test('`start` calls plugin.start with context and dependencies', async () => {
+  const manifest = createPluginManifest();
+  const plugin = new PluginWrapper(
+    'plugin-with-initializer-path',
+    manifest,
+    createPluginInitializerContext(coreContext, manifest)
+  );
+  const context = { any: 'thing' } as any;
+  const deps = { otherDep: 'value' };
+
+  const pluginStartContract = { contract: 'start-contract' };
+  const mockPluginInstance = {
+    setup: jest.fn(),
+    start: jest.fn().mockResolvedValue(pluginStartContract),
+  };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {} as any);
+
+  const startContract = await plugin.start(context, deps);
+
+  expect(startContract).toBe(pluginStartContract);
+  expect(mockPluginInstance.start).toHaveBeenCalledWith(context, deps);
+});
+
 test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
   const plugin = new PluginWrapper(

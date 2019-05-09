@@ -87,7 +87,7 @@ export class InfraSources {
         .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
         .create(
           infraSourceConfigurationSavedObjectType,
-          pickSavedSourceConfiguration(newSourceConfiguration),
+          pickSavedSourceConfiguration(newSourceConfiguration) as any,
           { id: sourceId }
         )
     );
@@ -110,15 +110,15 @@ export class InfraSources {
   public async updateSourceConfiguration(
     request: InfraFrameworkRequest,
     sourceId: string,
-    updaters: Array<(configuration: InfraSourceConfiguration) => InfraSourceConfiguration>
+    sourceProperties: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
     const { configuration, version } = await this.getSourceConfiguration(request, sourceId);
 
-    const updatedConfigurationAttributes = updaters.reduce(
-      (accumulatedConfiguration, updater) => updater(accumulatedConfiguration),
-      configuration
+    const updatedSourceConfigurationAttributes = mergeSourceConfiguration(
+      configuration,
+      sourceProperties
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
@@ -127,7 +127,7 @@ export class InfraSources {
         .update(
           infraSourceConfigurationSavedObjectType,
           sourceId,
-          pickSavedSourceConfiguration(updatedConfigurationAttributes),
+          pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
           {
             version,
           }

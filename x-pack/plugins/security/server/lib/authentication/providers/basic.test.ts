@@ -7,6 +7,7 @@
 import sinon from 'sinon';
 import { requestFixture } from '../../__tests__/__fixtures__/request';
 import { LoginAttempt } from '../login_attempt';
+import { mockAuthenticationProviderOptions } from './base.mock';
 import { BasicAuthenticationProvider, BasicCredentials } from './basic';
 
 function generateAuthorizationHeader(username: string, password: string) {
@@ -22,14 +23,9 @@ describe('BasicAuthenticationProvider', () => {
     let provider: BasicAuthenticationProvider;
     let callWithRequest: sinon.SinonStub;
     beforeEach(() => {
-      callWithRequest = sinon.stub();
-      provider = new BasicAuthenticationProvider({
-        client: { callWithRequest } as any,
-        log() {
-          // no-op
-        },
-        basePath: '/base-path',
-      });
+      const providerOptions = mockAuthenticationProviderOptions();
+      callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
+      provider = new BasicAuthenticationProvider(providerOptions);
     });
 
     it('does not redirect AJAX requests that can not be authenticated to the login page.', async () => {
@@ -176,13 +172,7 @@ describe('BasicAuthenticationProvider', () => {
   describe('`deauthenticate` method', () => {
     let provider: BasicAuthenticationProvider;
     beforeEach(() => {
-      provider = new BasicAuthenticationProvider({
-        client: { callWithRequest: sinon.stub() } as any,
-        log() {
-          // no-op
-        },
-        basePath: '/base-path',
-      });
+      provider = new BasicAuthenticationProvider(mockAuthenticationProviderOptions());
     });
 
     it('always redirects to the login page.', async () => {

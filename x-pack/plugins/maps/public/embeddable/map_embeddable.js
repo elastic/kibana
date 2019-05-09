@@ -20,14 +20,17 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
-  setRefreshConfig
+  setRefreshConfig,
+  disableScrollZoom,
 } from '../actions/store_actions';
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
   getIsLayerTOCOpen,
+  getOpenTOCDetails,
   setReadOnly,
   setFilterable,
-  setIsLayerTOCOpen
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
 } from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
@@ -39,9 +42,10 @@ export class MapEmbeddable extends Embeddable {
     embeddableConfig,
     savedMap,
     editUrl,
+    editable,
     indexPatterns = []
   }) {
-    super({ title: savedMap.title, editUrl, indexPatterns });
+    super({ title: savedMap.title, editUrl, editable, indexPatterns });
 
     this._onEmbeddableStateChanged = onEmbeddableStateChanged;
     this._embeddableConfig = _.cloneDeep(embeddableConfig);
@@ -89,12 +93,20 @@ export class MapEmbeddable extends Embeddable {
   render(domNode, containerState) {
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(setFilterable(true));
+    this._store.dispatch(disableScrollZoom());
 
     if (_.has(this._embeddableConfig, 'isLayerTOCOpen')) {
       this._store.dispatch(setIsLayerTOCOpen(this._embeddableConfig.isLayerTOCOpen));
     } else if (this._savedMap.uiStateJSON) {
       const uiState = JSON.parse(this._savedMap.uiStateJSON);
       this._store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
+    }
+
+    if (_.has(this._embeddableConfig, 'openTOCDetails')) {
+      this._store.dispatch(setOpenTOCDetails(this._embeddableConfig.openTOCDetails));
+    } else if (this._savedMap.uiStateJSON) {
+      const uiState = JSON.parse(this._savedMap.uiStateJSON);
+      this._store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
     if (this._embeddableConfig.mapCenter) {
@@ -166,10 +178,15 @@ export class MapEmbeddable extends Embeddable {
     }
 
     const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
-    if (!this._embeddableConfig.isLayerTOCOpen
-      || this._embeddableConfig.isLayerTOCOpen !== isLayerTOCOpen) {
+    if (this._embeddableConfig.isLayerTOCOpen !== isLayerTOCOpen) {
       embeddableConfigChanged = true;
       this._embeddableConfig.isLayerTOCOpen = isLayerTOCOpen;
+    }
+
+    const openTOCDetails = getOpenTOCDetails(this._store.getState());
+    if (!_.isEqual(this._embeddableConfig.openTOCDetails, openTOCDetails)) {
+      embeddableConfigChanged = true;
+      this._embeddableConfig.openTOCDetails = openTOCDetails;
     }
 
     if (embeddableConfigChanged) {

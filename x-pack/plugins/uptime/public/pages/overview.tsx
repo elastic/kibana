@@ -80,7 +80,10 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
         <Snapshot colors={colors} variables={sharedProps} />
         <EuiSpacer size="s" />
         <MonitorList
+          basePath={basePath}
           dangerColor={colors.danger}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
           linkParameters={linkParameters}
           variables={sharedProps}
         />
