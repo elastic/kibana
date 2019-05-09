@@ -164,7 +164,7 @@ export function JsonUploadAndParse({
     }
 
     if (indexRequestInFlight) {
-      setCurrentIndexingStage(`Writing to index: ${indexName}`);
+      setCurrentIndexingStage(`Writing to index`);
     } else if (indexPatternRequestInFlight) {
       setCurrentIndexingStage(`Creating index pattern`);
     } else if (!!indexedFile) {
@@ -185,6 +185,7 @@ export function JsonUploadAndParse({
           indexDataResp={indexDataResp}
           indexPatternResp={indexPatternResp}
           complete={currentIndexingStage === 'Indexing complete'}
+          indexName={indexName}
         />
         : (
           <Fragment>
