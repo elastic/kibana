@@ -261,7 +261,8 @@ exports.Cluster = class Cluster {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    this._httpPort = first(this._process.stdout, data => {
+    // parse log output to find http port
+    const httpPort = first(this._process.stdout, data => {
       const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
       if (match) {
@@ -269,6 +270,13 @@ exports.Cluster = class Cluster {
       }
     });
 
+    // once the http port is available setup the native realm
+    this._nativeRealmSetup = httpPort.then(async port => {
+      const nativeRealm = new NativeRealm(options.password, port, this._log);
+      await nativeRealm.setPasswords(options);
+    });
+
+    // parse and forward es stdout to the log
     this._process.stdout.on('data', data => {
       const lines = parseEsLog(data.toString());
       lines.forEach(line => {
@@ -276,13 +284,10 @@ exports.Cluster = class Cluster {
       });
     });
 
-    this._nativeRealmSetup = this._httpPort.then(async port => {
-      const nativeRealm = new NativeRealm(options.password, port, this._log);
-      await nativeRealm.setPasswords(options);
-    });
-
+    // forward es stderr to the log
     this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
 
+    // observe the exit code of the process and reflect in _outcome promies
     const exitCode = new Promise(resolve => this._process.once('exit', resolve));
     this._outcome = exitCode.then(code => {
       if (this._stopCalled) {
