@@ -115,6 +115,11 @@ The layer is only visible when users zoom in the map past zoom level 9.
 . Set *Layer transparency* to 1.
 . Set *Fill color* to *#2200ff*.
 . Click *Save & close*.
++
+Your map now looks like this between zoom levels 9 and 24:
++
+[role="screenshot"]
+image::maps/images/gs_add_es_document_layer.png[]
 
 ==== Add a vector layer from the grid aggregation source
 
@@ -155,7 +160,7 @@ image::maps/images/grid_metrics_both.png[]
   .. In the field select, select *sum of bytes*.
 . Click *Save & close* button.
 +
-Your map now looks like this between between zoom levels 0 and 9:
+Your map now looks like this between zoom levels 0 and 9:
 +
 [role="screenshot"]
 image::maps/images/gs_add_es_layer.png[]
