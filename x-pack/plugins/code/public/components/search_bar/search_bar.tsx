@@ -11,7 +11,7 @@ import url from 'url';
 import { SearchScope } from '../../../model';
 import { SearchScopeText } from '../../common/types';
 import { history } from '../../utils/url';
-import { Shortcut } from '../shortcuts';
+import { ShortcutsProvider, Shortcut } from '../shortcuts';
 
 import {
   AutocompleteSuggestion,
@@ -68,6 +68,7 @@ export class SearchBar extends React.PureComponent<Props> {
 
     return (
       <div className="codeSearchbar__container">
+        <ShortcutsProvider />
         <Shortcut
           keyCode="p"
           help={SearchScopeText[SearchScope.REPOSITORY]}

@@ -20,6 +20,7 @@ import { timefilter } from 'ui/timefilter';
 import { MonitoringViewBaseEuiTableController } from '../../../';
 import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
+import { DetailStatus } from '../../../../components/logstash/detail_status';
 
 const getPageData = ($injector) => {
   const $route = $injector.get('$route');
@@ -100,6 +101,7 @@ uiRoutes
                 className="monitoringLogstashPipelinesTable"
                 onBrush={this.onBrush}
                 stats={data.nodeSummary}
+                statusComponent={DetailStatus}
                 data={data.pipelines}
                 sorting={this.sorting}
                 pagination={this.pagination}
