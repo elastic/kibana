@@ -17,6 +17,7 @@ import { ESSearchSource } from './es_search_source';
 
 
 export const ALL_SOURCES = [
+  GeojsonFileSource,
   ESSearchSource,
   ESGeoGridSource,
   EMSFileSource,
@@ -25,5 +26,4 @@ export const ALL_SOURCES = [
   KibanaTilemapSource,
   XYZTMSSource,
   WMSSource,
-  GeojsonFileSource,
 ];
