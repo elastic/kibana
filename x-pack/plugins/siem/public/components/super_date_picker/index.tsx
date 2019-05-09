@@ -15,7 +15,6 @@ import {
 import { get, getOr, take } from 'lodash/fp';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel, State } from '../../store';
@@ -38,13 +37,6 @@ type MyEuiSuperDatePickerProps = Pick<
   isLoading?: boolean;
 };
 const MyEuiSuperDatePicker: React.SFC<MyEuiSuperDatePickerProps> = EuiSuperDatePicker;
-
-// Temporary fix for EuiSuperDatePicker whitespace bug - Michael Marcialis
-const FixStyleMyEuiSuperDatePicker = styled.div`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-  }
-`;
 
 interface SuperDatePickerStateRedux {
   duration: number;
@@ -115,20 +107,18 @@ export const SuperDatePickerComponent = class extends Component<
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
     return (
-      <FixStyleMyEuiSuperDatePicker>
-        <MyEuiSuperDatePicker
-          end={endDate}
-          isLoading={isLoading}
-          isPaused={policy === 'manual'}
-          onTimeChange={this.onTimeChange}
-          onRefreshChange={this.onRefreshChange}
-          onRefresh={this.onRefresh}
-          recentlyUsedRanges={this.state.recentlyUsedRanges}
-          refreshInterval={duration}
-          showUpdateButton={this.state.showUpdateButton}
-          start={startDate}
-        />
-      </FixStyleMyEuiSuperDatePicker>
+      <MyEuiSuperDatePicker
+        end={endDate}
+        isLoading={isLoading}
+        isPaused={policy === 'manual'}
+        onTimeChange={this.onTimeChange}
+        onRefreshChange={this.onRefreshChange}
+        onRefresh={this.onRefresh}
+        recentlyUsedRanges={this.state.recentlyUsedRanges}
+        refreshInterval={duration}
+        showUpdateButton={this.state.showUpdateButton}
+        start={startDate}
+      />
     );
   }
   private onRefresh = ({ start, end, refreshInterval }: OnRefreshProps): void => {

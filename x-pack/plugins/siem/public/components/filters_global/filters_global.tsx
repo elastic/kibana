@@ -5,8 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
 import { pure } from 'recompose';
@@ -18,25 +16,33 @@ const offsetChrome = 49;
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
-  background: ${({ theme }) =>
-    theme.darkMode ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiColorEmptyShade};
-  border-bottom: ${({ theme }) =>
-    theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
-  box-sizing: content-box;
-  margin: 0 -${gutterTimeline} 0 -${euiLightVars.euiSizeL};
-  padding: ${euiLightVars.euiSize} ${gutterTimeline} ${euiLightVars.euiSize}
-    ${euiLightVars.euiSizeL};
+  ${props => `
+    background: ${props.theme.eui.euiColorEmptyShade};
+    border-bottom: ${props.theme.eui.euiBorderThin};
+    box-sizing: content-box;
+    margin: 0 -${gutterTimeline} 0 -${props.theme.eui.euiSizeL};
+    padding: ${props.theme.eui.euiSize} ${gutterTimeline} ${props.theme.eui.euiSize} ${
+    props.theme.eui.euiSizeL
+  };
 
-  ${props =>
-    props.isSticky &&
-    `
+    ${props.isSticky &&
+      `
       top: ${offsetChrome}px !important;
-      z-index: ${euiLightVars.euiZNavigation};
+      z-index: ${props.theme.eui.euiZNavigation};
     `}
+  `}
+`;
+
+// Temporary fix for EuiSuperDatePicker whitespace bug and auto width - Michael Marcialis
+const FlexItemWithDatePickerFix = styled(EuiFlexItem)`
+  .euiSuperDatePicker__flexWrapper {
+    max-width: none;
+    width: auto;
+  }
 `;
 
 export interface FiltersGlobalProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
@@ -44,11 +50,11 @@ export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
     {({ style, isSticky }) => (
       <Aside isSticky={isSticky} style={style}>
         <EuiFlexGroup>
-          {children && <EuiFlexItem>{children}</EuiFlexItem>}
+          <EuiFlexItem grow={8}>{children}</EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
+          <FlexItemWithDatePickerFix grow={4}>
             <SuperDatePicker id="global" />
-          </EuiFlexItem>
+          </FlexItemWithDatePickerFix>
         </EuiFlexGroup>
       </Aside>
     )}

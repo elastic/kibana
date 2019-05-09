@@ -29,7 +29,7 @@ class Timelines extends React.PureComponent<DispatchProps> {
   public render() {
     return (
       <>
-        <HeaderPage title={i18n.TIMELINES} />
+        <HeaderPage title={i18n.PAGE_TITLE} />
 
         <TimelinesContainer>
           <StatefulOpenTimeline
@@ -37,7 +37,7 @@ class Timelines extends React.PureComponent<DispatchProps> {
             openTimeline={this.openTimeline}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             searchResults={[]}
-            title={i18n.ALL_TIMELINES}
+            title={i18n.ALL_TIMELINES_PANEL_TITLE}
           />
         </TimelinesContainer>
       </>

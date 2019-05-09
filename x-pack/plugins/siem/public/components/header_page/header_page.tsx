@@ -5,11 +5,17 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+
+const Header = styled.header`
+  ${({ theme }) => `
+    border-bottom: ${theme.eui.euiBorderThin};
+    padding-bottom: ${theme.eui.euiSizeL};
+    margin: ${theme.eui.euiSizeL} 0;
+  `}
+`;
 
 export interface HeaderPageProps {
   children?: React.ReactNode;
@@ -34,10 +40,3 @@ export const HeaderPage = pure<HeaderPageProps>(({ children, subtitle, title }) 
     </EuiFlexGroup>
   </Header>
 ));
-
-const Header = styled.header`
-  border-bottom: ${({ theme }) =>
-    theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
-  padding-bottom: ${euiLightVars.euiSizeL};
-  margin: ${euiLightVars.euiSizeL} 0;
-`;

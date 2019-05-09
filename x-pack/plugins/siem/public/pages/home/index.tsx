@@ -5,8 +5,6 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
@@ -34,17 +32,18 @@ const WrappedByAutoSizer = styled.div`
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const Page = styled(EuiPage)`
-  padding: 0 ${gutterTimeline} ${euiLightVars.euiSizeL} ${euiLightVars.euiSizeL};
+  ${({ theme }) => `
+    padding: 0 ${gutterTimeline} ${theme.eui.euiSizeL} ${theme.eui.euiSizeL};
+  `}
 `;
 
 const NavGlobal = styled.nav`
-  background: ${({ theme }) =>
-    theme.darkMode ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiColorEmptyShade};
-  border-bottom: ${({ theme }) =>
-    theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin};
-  margin: 0 -${gutterTimeline} 0 -${euiLightVars.euiSizeL};
-  padding: ${euiLightVars.euiSize} ${gutterTimeline} ${euiLightVars.euiSize}
-    ${euiLightVars.euiSizeL};
+  ${({ theme }) => `
+    background: ${theme.eui.euiColorEmptyShade};
+    border-bottom: ${theme.eui.euiBorderThin};
+    margin: 0 -${gutterTimeline} 0 -${theme.eui.euiSizeL};
+    padding: ${theme.eui.euiSize} ${gutterTimeline} ${theme.eui.euiSize} ${theme.eui.euiSizeL};
+  `}
 `;
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)

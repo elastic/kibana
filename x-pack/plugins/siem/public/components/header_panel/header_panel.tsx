@@ -5,11 +5,21 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+
+const Header = styled.header<{ border?: boolean }>`
+  ${props => `
+    margin-bottom: ${props.theme.eui.euiSizeL};
+
+    ${props.border &&
+      `
+      border-bottom: ${props.theme.eui.euiBorderThin};
+      padding-bottom: ${props.theme.eui.euiSizeL};
+    `}
+  `}
+`;
 
 export interface HeaderPanelProps {
   border?: boolean;
@@ -41,16 +51,3 @@ export const HeaderPanel = pure<HeaderPanelProps>(
     </Header>
   )
 );
-
-const Header = styled.header<{ border?: boolean }>`
-  margin-bottom: ${euiLightVars.euiSizeL};
-
-  ${props =>
-    props.border &&
-    `
-      border-bottom: ${
-        props.theme.darkMode ? euiDarkVars.euiBorderThin : euiLightVars.euiBorderThin
-      };
-      padding-bottom: ${euiLightVars.euiSizeL};
-    `}
-`;
