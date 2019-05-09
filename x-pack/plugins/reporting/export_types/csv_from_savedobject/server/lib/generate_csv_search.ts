@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
+
 // @ts-ignore no module definition
 import { buildEsQuery } from '@kbn/es-query';
-import { Request } from 'hapi';
-import { KbnServer, Logger, JobParams } from '../../../../types';
 // @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
+
+import { CancellationToken } from '../../../../common/cancellation_token';
+
+import { KbnServer, Logger, JobParams } from '../../../../types';
 import {
   IndexPatternSavedObject,
   SavedSearchObjectAttributes,
@@ -144,7 +148,7 @@ export async function generateCsvSearch(
     formatsMap: new Map(), // there is no field formatting in this API; this is required for generateCsv
     metaFields: [],
     conflictedTypesFields: [],
-    cancellationToken: [], // TODO
+    cancellationToken: new CancellationToken(),
     settings: {
       ...uiSettings,
       maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),

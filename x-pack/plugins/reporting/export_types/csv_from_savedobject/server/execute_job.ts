@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
 import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
 import { CONTENT_TYPE_CSV } from '../../../common/constants';
-import { createGenerateCsv } from './lib/generate_csv';
+import { CsvResultFromSearch, createGenerateCsv } from './lib';
 
 interface FakeRequest {
   headers: any;
@@ -70,15 +70,24 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
     let maxSizeReached = false;
     let size = 0;
     try {
+      const generateResults: CsvResultFromSearch = await generateCsv(
+        requestObject,
+        server,
+        visType as string,
+        panel,
+        jobParams
+      );
+
       ({
         result: { content, maxSizeReached, size },
-      } = await generateCsv(requestObject, server, visType as string, panel, jobParams));
+      } = generateResults);
     } catch (err) {
-      if (err.stack) {
-        logger.error(err.stack);
-      }
       logger.error(`Generate CSV Error! ${err}`);
       throw err;
+    }
+
+    if (maxSizeReached) {
+      logger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
     }
 
     return {

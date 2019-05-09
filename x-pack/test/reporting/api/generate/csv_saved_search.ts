@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import supertest from 'supertest';
 import {
+  CSV_RESULT_HUGE,
   CSV_RESULT_SCRIPTED,
   CSV_RESULT_SCRIPTED_REQUERY,
   CSV_RESULT_SCRIPTED_RESORTED,
@@ -159,6 +160,33 @@ export default function({ getService }: { getService: any }) {
 
         await esArchiver.unload('reporting/logs');
         await esArchiver.unload('logstash_functional');
+      });
+
+      it('Stops at Max Size Reached', async () => {
+        // load test data that contains a saved search and documents
+        await esArchiver.load('reporting/scripted');
+
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
+          {
+            timerange: {
+              timezone: 'UTC',
+              min: '1960-01-01T10:00:00Z',
+              max: '1999-01-01T10:00:00Z',
+            },
+            state: {},
+          }
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(CSV_RESULT_HUGE);
+
+        await esArchiver.unload('reporting/scripted');
       });
     });
 

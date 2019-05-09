@@ -193,6 +193,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
+        '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
         '--timelion.ui.enabled=true',

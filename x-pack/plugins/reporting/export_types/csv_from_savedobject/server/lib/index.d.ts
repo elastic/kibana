@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CancellationToken } from '../../../../common/cancellation_token';
 import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../';
 
 export interface SavedSearchGeneratorResult {
@@ -35,7 +36,7 @@ export interface GenerateCsvParams {
   formatsMap: FormatsMap;
   metaFields: string[]; // FIXME not sure what this is for
   conflictedTypesFields: string[]; // FIXME not sure what this is for
-  cancellationToken: any; // FIXME not sure how to do anything with this
+  cancellationToken: CancellationToken;
   settings: {
     separator: string;
     quoteValues: boolean;
