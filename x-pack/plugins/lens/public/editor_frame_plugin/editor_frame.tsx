@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Datasource, Visualization } from '../types';
-import { NativeRenderer } from '../utils/native_renderer/native_renderer';
+import { NativeRenderer } from '../native_renderer';
 
 interface EditorFrameProps {
   datasources: { [key: string]: Datasource };

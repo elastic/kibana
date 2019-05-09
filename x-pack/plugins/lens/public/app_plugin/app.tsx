@@ -8,7 +8,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 
 import { EditorFrameSetup } from '../types';
-import { NativeRenderer } from '../utils/native_renderer/native_renderer';
+import { NativeRenderer } from '../native_renderer';
 
 export function App({ editorFrame }: { editorFrame: EditorFrameSetup }) {
   return (
