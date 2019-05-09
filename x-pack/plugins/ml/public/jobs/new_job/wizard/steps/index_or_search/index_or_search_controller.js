@@ -68,7 +68,7 @@ uiRoutes
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,
       indexPatterns: loadIndexPatterns,
-      nextStepPath: () => '#data_frame/new_job/step/pivot',
+      nextStepPath: () => '#data_frames/new_job/step/pivot',
     }
   });
 
