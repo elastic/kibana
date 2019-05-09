@@ -61,16 +61,19 @@ const cases = [
               _index
               timestamp
               event {
-                type
-                severity
-                module
+                action
                 category
+                dataset
                 id
+                module
+                severity
               }
               host {
                 name
                 ip
+                id
               }
+              message
               source {
                 ip
                 port
@@ -78,10 +81,6 @@ const cases = [
               destination {
                 ip
                 port
-              }
-              geo {
-                region_name
-                country_iso_code
               }
               suricata {
                 eve {
@@ -92,6 +91,12 @@ const cases = [
                     signature_id
                   }
                 }
+              }
+              user {
+                name
+              }
+              zeek {
+                session_id
               }
             }
           }
