@@ -31,11 +31,11 @@ import { fromRoot } from '../../utils/from_root';
  * @param file The file to expect in a Kibana config directory.
  * @returns Array of strings containing places to check for the config `file`.
  */
-export function createConfigPaths(file) {
+export function createConfigPaths(file: string): string[] {
   return [
     process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, file),
     process.env.CONFIG_PATH, // deprecated
     fromRoot(`config/${file}`),
     `/etc/kibana/${file}`,
-  ].filter(Boolean);
+  ].filter(Boolean) as string[];
 }
