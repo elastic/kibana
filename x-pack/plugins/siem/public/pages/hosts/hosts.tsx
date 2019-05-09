@@ -46,8 +46,10 @@ interface HostsComponentReduxProps {
 
 type HostsComponentProps = HostsComponentReduxProps;
 
+const indexTypes = [IndexType.AUDITBEAT];
+
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={[IndexType.AUDITBEAT]}>
+  <WithSource sourceId="default" indexTypes={indexTypes}>
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>

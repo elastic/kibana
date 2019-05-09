@@ -28,8 +28,9 @@ import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
 import { ACTIONS_COLUMN_WIDTH } from './helpers';
-import { ColumnRenderer, RowRenderer } from './renderers';
 import { Sort } from './sort';
+import { ColumnRenderer } from './renderers/column_renderer';
+import { RowRenderer } from './renderers/row_renderer';
 
 interface Props {
   addNoteToEvent: AddNoteToEvent;
@@ -77,8 +78,6 @@ const VerticalScrollContainer = styled.div<{
   overflow-y: auto;
   min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
-
-export const DEFAULT_TIMELINE_WIDTH = 1100; // px
 
 /** Renders the timeline body */
 export const Body = pure<Props>(
