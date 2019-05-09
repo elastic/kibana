@@ -66,14 +66,14 @@ export class OverlayService {
 /** @public */
 export interface OverlayStart {
   openFlyout: (
-    flyoutChildren: React.ReactNode,
+    contents: (close: OverlayRef['close']) => React.ReactNode,
     flyoutProps?: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
     }
   ) => OverlayRef;
   openModal: (
-    modalChildren: React.ReactNode,
+    contents: (close: OverlayRef['close']) => React.ReactNode,
     modalProps?: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;

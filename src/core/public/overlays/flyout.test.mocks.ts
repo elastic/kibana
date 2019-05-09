@@ -17,6 +17,11 @@
  * under the License.
  */
 
+import ReactDOM from 'react-dom';
+
+// export const mockReactDomRender = jest.spyOn(ReactDOM, 'render');
+// export const mockReactDomUnmount = jest.spyOn(ReactDOM, 'unmountComponentAtNode');
+
 export const mockReactDomRender = jest.fn();
 export const mockReactDomUnmount = jest.fn();
 jest.doMock('react-dom', () => ({

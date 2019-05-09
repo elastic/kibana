@@ -62,15 +62,15 @@ export class ModalService {
   constructor(private readonly targetDomElement: Element) {}
 
   /**
-   * Opens a flyout panel with the given component inside. You can use
-   * `close()` on the returned FlyoutRef to close the flyout.
+   * Opens a modal with the given component inside. You can use
+   * `close()` on the returned ModalRef to close the modal.
    *
-   * @param flyoutChildren - Mounts the children inside a flyout panel
-   * @return {FlyoutRef} A reference to the opened flyout panel.
+   * @param contents - Function that returns a React tree to be mounted inside the modal.
+   * @return {ModalRef} A reference to the opened modal.
    */
   public openModal = (
     i18n: I18nSetup,
-    modalChildren: React.ReactNode,
+    contents: (close: ModalRef['close']) => React.ReactNode,
     modalProps: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
@@ -97,7 +97,7 @@ export class ModalService {
       <EuiOverlayMask>
         <i18n.Context>
           <EuiModal {...modalProps} onClose={() => modal.close()}>
-            {modalChildren}
+            {contents(modal.close.bind(modal))}
           </EuiModal>
         </i18n.Context>
       </EuiOverlayMask>,

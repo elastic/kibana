@@ -45,16 +45,18 @@ class SamplePanelAction extends ContextMenuAction {
       return;
     }
     getNewPlatform().start.core.overlays.openFlyout(
-      <React.Fragment>
-        <EuiFlyoutHeader>
-          <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-            <h2>{embeddable.metadata.title}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
-        </EuiFlyoutBody>
-      </React.Fragment>,
+      () => (
+        <React.Fragment>
+          <EuiFlyoutHeader>
+            <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
+              <h2>{embeddable.metadata.title}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
+          </EuiFlyoutBody>
+        </React.Fragment>
+      ),
       {
         'data-test-subj': 'samplePanelActionFlyout',
       }

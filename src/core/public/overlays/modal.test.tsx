@@ -35,18 +35,27 @@ describe('ModalService', () => {
       const target = document.createElement('div');
       const modalService = new ModalService(target);
       expect(mockReactDomRender).not.toHaveBeenCalled();
-      modalService.openModal(i18nMock, <span>Modal content</span>);
+      modalService.openModal(i18nMock, () => <span>Modal content</span>);
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+    });
+    it('can close the modal from rendered tree', async () => {
+      const target = document.createElement('div');
+      const modalService = new ModalService(target);
+      const fakeContents = jest.fn();
+      const modal = modalService.openModal(i18nMock, fakeContents);
+      const passedClose = fakeContents.mock.calls[0][0];
+      passedClose();
+      await expect(modal.onClose).resolves;
     });
     describe('with a currently active modal', () => {
       let target: HTMLElement, modalService: ModalService, ref1: ModalRef;
       beforeEach(() => {
         target = document.createElement('div');
         modalService = new ModalService(target);
-        ref1 = modalService.openModal(i18nMock, <span>Modal content 1</span>);
+        ref1 = modalService.openModal(i18nMock, () => <span>Modal content 1</span>);
       });
       it('replaces the current modal with a new one', () => {
-        modalService.openModal(i18nMock, <span>Flyout content 2</span>);
+        modalService.openModal(i18nMock, () => <span>Flyout content 2</span>);
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
@@ -55,7 +64,7 @@ describe('ModalService', () => {
       it('resolves onClose on the previous ref', async () => {
         const onCloseComplete = jest.fn();
         ref1.onClose.then(onCloseComplete);
-        modalService.openModal(i18nMock, <span>Flyout content 2</span>);
+        modalService.openModal(i18nMock, () => <span>Flyout content 2</span>);
         await ref1.onClose;
         expect(onCloseComplete).toBeCalledTimes(1);
       });
@@ -65,7 +74,7 @@ describe('ModalService', () => {
     it('resolves the onClose Promise', async () => {
       const target = document.createElement('div');
       const modalService = new ModalService(target);
-      const ref = modalService.openModal(i18nMock, <span>Flyout content</span>);
+      const ref = modalService.openModal(i18nMock, () => <span>Flyout content</span>);
 
       const onCloseComplete = jest.fn();
       ref.onClose.then(onCloseComplete);
@@ -76,7 +85,7 @@ describe('ModalService', () => {
     it('can be called multiple times on the same ModalRef', async () => {
       const target = document.createElement('div');
       const modalService = new ModalService(target);
-      const ref = modalService.openModal(i18nMock, <span>Flyout content</span>);
+      const ref = modalService.openModal(i18nMock, () => <span>Flyout content</span>);
       expect(mockReactDomUnmount).not.toHaveBeenCalled();
       await ref.close();
       expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
@@ -86,8 +95,8 @@ describe('ModalService', () => {
     it("on a stale ModalRef doesn't affect the active flyout", async () => {
       const target = document.createElement('div');
       const modalService = new ModalService(target);
-      const ref1 = modalService.openModal(i18nMock, <span>Modal content 1</span>);
-      const ref2 = modalService.openModal(i18nMock, <span>Modal content 2</span>);
+      const ref1 = modalService.openModal(i18nMock, () => <span>Modal content 1</span>);
+      const ref2 = modalService.openModal(i18nMock, () => <span>Modal content 2</span>);
       const onCloseComplete = jest.fn();
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();

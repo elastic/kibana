@@ -74,7 +74,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
   }
 
   return getNewPlatform().start.core.overlays.openFlyout(
-    <InspectorPanel views={views} adapters={adapters} title={options.title} />,
+    () => <InspectorPanel views={views} adapters={adapters} title={options.title} />,
     {
       'data-test-subj': 'inspectorPanel',
       closeButtonAriaLabel: closeButtonLabel,

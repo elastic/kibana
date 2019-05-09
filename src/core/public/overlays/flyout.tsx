@@ -76,12 +76,12 @@ export class FlyoutService {
    * Opens a flyout panel with the given component inside. You can use
    * `close()` on the returned FlyoutRef to close the flyout.
    *
-   * @param flyoutChildren - Mounts the children inside a flyout panel
+   * @param contents - Function that returns a React tree to be mounted inside the flyout.
    * @return {FlyoutRef} A reference to the opened flyout panel.
    */
   public openFlyout = (
     i18n: I18nSetup,
-    flyoutChildren: React.ReactNode,
+    contents: (close: OverlayRef['close']) => React.ReactNode,
     flyoutProps: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
@@ -107,7 +107,7 @@ export class FlyoutService {
     render(
       <i18n.Context>
         <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
-          {flyoutChildren}
+          {contents(flyout.close.bind(flyout))}
         </EuiFlyout>
       </i18n.Context>,
       this.targetDomElement
