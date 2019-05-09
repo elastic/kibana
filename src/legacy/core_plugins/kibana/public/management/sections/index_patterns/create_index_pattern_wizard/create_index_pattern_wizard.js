@@ -132,7 +132,7 @@ export class CreateIndexPatternWizard extends Component {
 
     const createdId = await emptyPattern.create();
     if (!createdId) {
-      const confirmMessage = i18n.translate('common.ui.indexPattern.titleExistsLabel', { values: { title: this.title },
+      const confirmMessage = i18n.translate('kbn.management.indexPattern.titleExistsLabel', { values: { title: this.title },
         defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
       try {
         await services.confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
