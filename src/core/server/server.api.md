@@ -56,7 +56,7 @@ export class ClusterClient {
     close(): void;
     }
 
-// @public (undocumented)
+// @internal (undocumented)
 export class ConfigService {
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
@@ -80,25 +80,19 @@ export interface CoreSetup {
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
-    // Warning: (ae-incompatible-release-tags) The symbol "plugins" is marked as @public, but its signature references "PluginsServiceSetup" which is marked as @internal
-    // 
     // (undocumented)
     plugins: PluginsServiceSetup;
 }
 
-// Warning: (ae-missing-release-tag) "CoreStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface CoreStart {
     // (undocumented)
     http: HttpServiceStart;
-    // Warning: (ae-incompatible-release-tags) The symbol "plugins" is marked as @public, but its signature references "PluginsServiceStart" which is marked as @internal
-    // 
     // (undocumented)
     plugins: PluginsServiceStart;
 }
 
-// @internal
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -295,7 +289,7 @@ export interface PluginSetupContext {
     };
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export interface PluginsServiceSetup {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
@@ -306,7 +300,7 @@ export interface PluginsServiceSetup {
     };
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export interface PluginsServiceStart {
     // (undocumented)
     contracts: Map<PluginName, unknown>;

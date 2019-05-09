@@ -32,14 +32,25 @@ storiesOf('components/ElementTypes/ElementGrid', module)
       onEdit={action('onEdit')}
     />
   ))
-  .add('with filter', () => (
-    <ElementGrid elements={testElements} handleClick={action('addCustomElement')} filter="table" />
+  .add('with text filter', () => (
+    <ElementGrid
+      elements={testElements}
+      handleClick={action('addCustomElement')}
+      filterText="table"
+    />
+  ))
+  .add('with tags filter', () => (
+    <ElementGrid
+      elements={testElements}
+      handleClick={action('addCustomElement')}
+      filterTags={['graphic']}
+    />
   ))
   .add('with controls and filter', () => (
     <ElementGrid
       elements={testCustomElements}
       handleClick={action('addCustomElement')}
-      filter="Lorem"
+      filterText="Lorem"
       showControls
       onDelete={action('onDelete')}
       onEdit={action('onEdit')}

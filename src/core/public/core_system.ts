@@ -168,6 +168,7 @@ export class CoreSystem {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
       const basePath = await this.basePath.start({ injectedMetadata });
+      const http = await this.http.start();
       const i18n = await this.i18n.start();
       const application = await this.application.start({ basePath, injectedMetadata });
 
@@ -190,6 +191,7 @@ export class CoreSystem {
       const core: CoreStart = {
         application,
         basePath,
+        http,
         i18n,
         injectedMetadata,
         notifications,
