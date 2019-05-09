@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerLifecycleRoutes } from './register_lifecycle_routes';
+
+export const wait = (time = 1000) => (
+  new Promise((resolve) => (
+    setTimeout(resolve, time)
+  ))
+);
+
+// Return an array of policy names
+export const getPolicyNames = (policies) => policies.map(({ name }) => name);
