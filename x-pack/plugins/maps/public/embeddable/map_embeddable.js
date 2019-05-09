@@ -34,6 +34,7 @@ import {
 } from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
+import { i18n } from '@kbn/i18n';
 
 export class MapEmbeddable extends Embeddable {
 
@@ -42,9 +43,17 @@ export class MapEmbeddable extends Embeddable {
     embeddableConfig,
     savedMap,
     editUrl,
+    editable,
     indexPatterns = []
   }) {
-    super({ title: savedMap.title, editUrl, indexPatterns });
+    super({
+      title: savedMap.title,
+      editUrl,
+      editLabel: i18n.translate('xpack.maps.embeddable.editLabel', {
+        defaultMessage: 'Edit map',
+      }),
+      editable,
+      indexPatterns });
 
     this._onEmbeddableStateChanged = onEmbeddableStateChanged;
     this._embeddableConfig = _.cloneDeep(embeddableConfig);
