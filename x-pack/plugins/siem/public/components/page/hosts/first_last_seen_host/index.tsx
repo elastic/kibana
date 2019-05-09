@@ -15,7 +15,10 @@ import { getEmptyTagValue } from '../../../empty_value';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 
-export type FirstLastSeenHostType = 'first-seen' | 'last-seen';
+export enum FirstLastSeenHostType {
+  FIRST_SEEN = 'first-seen',
+  LAST_SEEN = 'last-seen',
+}
 
 export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHostType }>(
   ({ hostname, type }) => {
@@ -40,7 +43,7 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
               </EuiToolTip>
             );
           }
-          const valueSeen = type === 'first-seen' ? firstSeen : lastSeen;
+          const valueSeen = type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen;
           return (
             <>
               {loading && <EuiLoadingSpinner size="m" />}

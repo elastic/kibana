@@ -5,8 +5,7 @@
  */
 
 import { Ecs } from '../../../../graphql/types';
-
-import { RowRenderer } from '.';
+import { RowRenderer } from './row_renderer';
 
 const unhandledRowRenderer = (): never => {
   throw new Error('Unhandled Row Renderer');

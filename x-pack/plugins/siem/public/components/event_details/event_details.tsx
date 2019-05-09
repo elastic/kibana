@@ -34,7 +34,7 @@ export const EventDetails = pure<Props>(({ data, id, view, onViewSelected }) => 
     {
       id: 'table-view',
       name: i18n.TABLE,
-      content: <EventFieldsBrowser data={data} id={id} />,
+      content: <EventFieldsBrowser data={data} eventId={id} />,
     },
     {
       id: 'json-view',

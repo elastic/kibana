@@ -26,6 +26,10 @@ export interface CustomElement {
    */
   image?: string;
   /**
+   * tags associated with the element
+   */
+  tags?: string[];
+  /**
    * the element object stringified
    */
   content: string;
