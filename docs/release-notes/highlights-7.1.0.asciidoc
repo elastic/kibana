@@ -6,7 +6,14 @@
 
 coming[7.1.0]
 
-See also <<breaking-changes>> and <<release-notes>>.
+Each release of {kib} brings new features and product improvements. 
+Here are the highlights of the feature and user experience changes in 6.7.0.
+
+Refer to the <<release-notes-7.1.0, {kib} 7.1.0 Release Notes>> for a list of
+bug fixes and other changes.
+
+[float]
+=== {kib} 
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
