@@ -8,5 +8,6 @@ export default function ({ loadTestFile }) {
   describe('index management', () => {
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./mapping'));
+    loadTestFile(require.resolve('./settings'));
   });
 }

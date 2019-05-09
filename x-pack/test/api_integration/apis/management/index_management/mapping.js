@@ -33,7 +33,7 @@ export default function ({ getService }) {
       };
       const index = await createIndex(undefined, { mappings });
 
-      const { body } = await getIndexMapping(index);
+      const { body } = await getIndexMapping(index).expect(200);
 
       expect(body.mapping).to.eql(mappings);
     });
