@@ -292,7 +292,7 @@ export const migrations = {
     },
     '7.0.1': removeDateHistogramTimeZones,
     '7.1.0': doc => executeMigrations710(doc),
-    '7.1.1': migrateGaugeVerticalSplitToAlignment
+    '7.2.0': migrateGaugeVerticalSplitToAlignment
   },
   dashboard: {
     '7.0.0': (doc) => {

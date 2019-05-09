@@ -843,8 +843,6 @@ Object {
       expect(aggs[3]).not.toHaveProperty('params.customInterval');
     });
   });
-  describe('7.1.0', () => {
-    const migrate = doc => migrations.visualization['7.1.0'](doc);
   describe('7.2.0', () => {
     const migrate = doc => migrations.visualization['7.2.0'](doc);
 
