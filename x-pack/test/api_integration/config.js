@@ -64,6 +64,12 @@ export default async function ({ readConfigFile }) {
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
       ],
     },
-    esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
+        'node.attr.name=apiIntegrationTestNode'
+      ],
+    },
   };
 }
