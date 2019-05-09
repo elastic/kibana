@@ -40,7 +40,12 @@ export function getUsageCollector(server: HapiServer) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     console.log('determineIfTaskManagerIsReady()'); // eslint-disable-line
-    if (await isTaskManagerReady(server)) {
+    let isReady = false;
+    try {
+      isReady = await isTaskManagerReady(server);
+    } catch (err) {} // eslint-disable-line
+
+    if (isReady) {
       console.log('determineIfTaskManagerIsReady() is ready'); // eslint-disable-line
       isCollectorReady = true;
     } else {
