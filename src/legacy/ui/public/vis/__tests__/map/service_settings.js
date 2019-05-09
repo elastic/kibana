@@ -189,25 +189,7 @@ describe('service_settings (FKA tilemaptest)', function () {
             'maxZoom': 10,
             'attribution': '<p><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a href="https://openmaptiles.org">OpenMapTiles</a> | <a href="https://www.maptiler.com">MapTiler</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>',
             'subdomains': []
-          },
-          {
-            'id': 'road_map_desaturated',
-            'name': 'Road Map',
-            'url': 'https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
-            'minZoom': 0,
-            'maxZoom': 10,
-            'attribution': '<p><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a href="https://openmaptiles.org">OpenMapTiles</a> | <a href="https://www.maptiler.com">MapTiler</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>',
-            'subdomains': []
-          },
-          {
-            'id': 'dark_map',
-            'name': 'Dark Map',
-            'url': 'https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
-            'minZoom': 0,
-            'maxZoom': 10,
-            'attribution': '<p><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a href="https://openmaptiles.org">OpenMapTiles</a> | <a href="https://www.maptiler.com">MapTiler</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>',
-            'subdomains': []
-          },
+          }
         ];
 
 
@@ -223,6 +205,22 @@ describe('service_settings (FKA tilemaptest)', function () {
 
       });
 
+      it('should load appropriate EMS road_map url for desaturated and dark theme', async () => {
+
+        tilemapServices = await serviceSettings.getTMSServices();
+        const roadMapService = tilemapServices.find(service => service.id === 'road_map');
+
+        const desaturationFalse = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, false, false);
+        const desaturationTrue = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, true, false);
+        const darkThemeDesaturationFalse = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, false, true);
+        const darkThemeDesaturationTrue = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, true, true);
+
+        expect(desaturationFalse).to.equal('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(desaturationTrue).to.equal('https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(darkThemeDesaturationFalse).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(darkThemeDesaturationTrue).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+
+      });
 
       it('should exclude EMS', async () => {
 
