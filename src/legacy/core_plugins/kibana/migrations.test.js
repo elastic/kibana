@@ -843,6 +843,140 @@ Object {
       expect(aggs[3]).not.toHaveProperty('params.customInterval');
     });
   });
+  describe('7.2.0', () => {
+    const migrate = doc => migrations.visualization['7.2.0'](doc);
+    let doc;
+    let doc2;
+    beforeEach(() => {
+      doc = {
+        attributes: {
+          visState: JSON.stringify({
+            title: 'Filter Bytes Test: tsvb metric with custom interval and bytes filter',
+            type: 'metrics',
+            params: {
+              id: '61ca57f0-469d-11e7-af02-69e470af7417',
+              type: 'metric',
+              series: [
+                {
+                  id: '1',
+                  color: '#68BC00',
+                  split_mode: 'everything',
+                  metrics: [
+                    {
+                      value: '',
+                      id: '61ca57f2-469d-11e7-af02-69e470af7417',
+                      type: 'sum',
+                      field: 'bytes'
+                    }
+                  ],
+                  filter: 'Filter Bytes Test:>1000',
+                },
+                {
+                  id: '2',
+                  color: '#68BC00',
+                  split_mode: 'everything',
+                  metrics: [
+                    {
+                      value: '',
+                      id: '61ca57f2-469d-11e7-af02-69e470af7417',
+                      type: 'sum',
+                      field: 'bytes'
+                    }
+                  ],
+                  filter: {
+                    query: 'Filter Bytes Test:>1000',
+                    language: 'lucene'
+                  },
+                },
+                {
+                  id: '3',
+                  color: '#68BC00',
+                  split_mode: 'everything',
+                  metrics: [
+                    {
+                      value: '',
+                      id: '61ca57f2-469d-11e7-af02-69e470af7417',
+                      type: 'sum',
+                      field: 'bytes'
+                    }
+                  ]
+                }
+              ],
+              time_field: '@timestamp',
+              index_pattern: 'logstash-*',
+              interval: 'auto',
+              axis_position: 'left',
+              axis_formatter: 'number',
+              show_legend: 1,
+              show_grid: 1,
+              background_color_rules: [{ 'id': '1' }]
+            },
+            aggs: []
+          })
+        },
+      };
+      doc2 = {
+        attributes: {
+          visState: JSON.stringify({
+            title: 'Arbitrary table',
+            type: 'table',
+            params: {
+              id: '61ca57f0-469d-11e7-af02-69e470af7417',
+              type: 'metric',
+              series: [
+                {
+                  id: '1',
+                  color: '#68BC00',
+                  split_mode: 'everything',
+                  metrics: [
+                    {
+                      value: '',
+                      id: '61ca57f2-469d-11e7-af02-69e470af7417',
+                      type: 'sum',
+                      field: 'bytes'
+                    }
+                  ],
+                  filter: '',
+                }
+              ],
+              time_field: '@timestamp',
+              index_pattern: 'logstash-*',
+              interval: 'auto',
+              axis_position: 'left',
+              axis_formatter: 'number',
+              show_legend: 1,
+              show_grid: 1,
+              background_color_rules: [{ 'id': '1' }]
+            },
+            aggs: []
+          })
+        },
+      };
+    });
+    it('should change series item filters from a string into an object for metric visualizations', () => {
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      expect(series[0]).toHaveProperty('filter.query');
+      expect(series[0]).toHaveProperty('filter.language');
+      expect(1).toEqual(1);
+    });
+    it('should not change a series item filter string in the object', () => {
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      expect(series[0].filter.query).toBe(JSON.parse(doc.attributes.visState).params.series[0].filter);
+      expect(1).toEqual(1);
+    });
+    it('should not change a non metric type visualization', () => {
+      const migratedDoc = migrate(doc2);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      expect(series[0].filter).toBe(JSON.parse(doc2.attributes.visState).params.series[0].filter);
+    });
+    it('should not fail on a metric visualization without a filter in a series item', () => {
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      expect(series[2]).not.toHaveProperty('filter.query');
+    });
+  });
 });
 
 describe('dashboard', () => {

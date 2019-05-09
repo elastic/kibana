@@ -134,6 +134,53 @@ const migrateDateHistogramAggregation = doc => {
   return doc;
 };
 
+// Migrate filters (string -> { query: string, language: lucene })
+/*
+  Enabling KQL in TSVB causes problems with savedObject visualizations when these are saved with filters.
+  In a visualisation type of saved object, if the visState param is of type metric, the filter is saved as a string that is not interpretted correctly as a lucene query in the visualization itself.
+  We need to transform the filter string into an object containing the original string as a query and specify the query language as lucene.
+  For Metrics visualizations (param.type === "metric"), filters can be applied to each series object in the series array within the SavedObject.visState.params object.
+  Path to the series array is thus:
+  attributes.visState.
+*/
+function transformFilterStringToQueryObject(doc) {
+  // Migrate filter
+  const newDoc = cloneDeep(doc);
+  const visStateJSON = get(doc, 'attributes.visState');
+  if (visStateJSON) {
+    let visState;
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // let it do, the data is invalid and we'll leave it as is
+    }
+    if (visState) {
+      // should I only be migrating filters for metric (and markdown later) types?
+      if (get(visState, 'type') !== 'metric') {
+        return doc;
+      }
+      const series = get(visState, 'params.series') || [];
+      series.forEach((item) => {
+        if (!item.filter) {
+          // we don't need to transform anything if there isn't a filter at all
+          return;
+        }
+        if (typeof item.filter === 'string') {
+          // if the filter exists and it is a string, assume it to be lucene and transform the filter into an object accordingly
+          const itemfilterObject = {
+            query: item.filter,
+            language: 'lucene',
+          };
+          // replace the filter string with the filterObject
+          item.filter = itemfilterObject;
+        }
+      });
+      newDoc.attributes.visState = JSON.stringify(visState);
+    }
+  }
+  return newDoc;
+}
+
 const executeMigrations710 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
 
 function removeDateHistogramTimeZones(doc) {
@@ -264,7 +311,8 @@ export const migrations = {
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
-    '7.1.0': doc => executeMigrations710(doc)
+    '7.1.0': doc => executeMigrations710(doc),
+    '7.2.0': transformFilterStringToQueryObject
   },
   dashboard: {
     '7.0.0': (doc) => {
