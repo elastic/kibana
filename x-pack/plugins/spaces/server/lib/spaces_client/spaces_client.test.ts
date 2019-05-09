@@ -5,9 +5,9 @@
  */
 
 import { SpacesClient } from './spaces_client';
-import { AuthorizationService } from '../../../security/server/lib/authorization/service';
-import { actionsFactory } from '../../../security/server/lib/authorization/actions';
-import { SpacesConfig } from '../new_platform/config';
+import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
+import { actionsFactory } from '../../../../security/server/lib/authorization/actions';
+import { SpacesConfig } from '../../new_platform/config';
 import { TypeOf } from '@kbn/config-schema';
 
 const createMockAuditLogger = () => {

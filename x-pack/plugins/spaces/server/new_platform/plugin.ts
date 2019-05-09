@@ -114,6 +114,7 @@ export class Plugin {
       this.initializerContext.legacyConfig.get('server.basePath')
     );
     const spacesService = await service.setup({
+      http: core.http,
       elasticsearch: core.elasticsearch,
       savedObjects: core.savedObjects,
       getSecurity: plugins.getSecurity,
@@ -136,7 +137,7 @@ export class Plugin {
       try {
         const activeSpace = await getActiveSpace(
           spacesClient,
-          request.getBasePath(),
+          core.http.getBasePathFor(request),
           this.initializerContext.legacyConfig.get('server.basePath')
         );
 

@@ -3,46 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as Rx from 'rxjs';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { Space } from '../../../common/model/space';
-import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { SpacesService } from '../../new_platform/spaces_service';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { SecurityPlugin } from '../../../../security';
-import { SpacesAuditLogger } from '../audit_logger';
-import { ElasticsearchServiceSetup } from 'src/core/server';
-import { SpacesConfig } from '../../new_platform/config';
 
-const config: any = {
-  'server.basePath': '/',
-};
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
+import { spacesServiceMock } from '../../new_platform/spaces_service/spaces_service.mock';
 
 const types = ['foo', 'bar', 'space'];
 
-const server = {
-  config: () => ({
-    get: (key: string) => {
-      return config[key];
-    },
-  }),
-};
-
-const log = {
-  log: jest.fn(),
-  trace: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  fatal: jest.fn(),
-};
-
-const service = new SpacesService(log, server.config().get('server.basePath'));
-
-const createMockRequest = (space: Partial<Space>) => ({
-  getBasePath: () => (space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : ''),
-});
+const createMockRequest = () => ({});
 
 const createMockClient = () => {
   const errors = Symbol() as any;
@@ -59,21 +27,8 @@ const createMockClient = () => {
   };
 };
 
-const createSpacesService = async () => {
-  return service.setup({
-    elasticsearch: ({
-      adminClient$: Rx.of({
-        callAsInternalUser: jest.fn(),
-        asScoped: jest.fn(req => ({
-          callWithRequest: jest.fn(),
-        })),
-      }),
-    } as unknown) as ElasticsearchServiceSetup,
-    savedObjects: {} as SavedObjectsService,
-    getSecurity: () => ({} as SecurityPlugin),
-    spacesAuditLogger: {} as SpacesAuditLogger,
-    config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
-  });
+const createSpacesService = async (spaceId: string) => {
+  return spacesServiceMock.createSetupContract(spaceId);
 };
 
 [
@@ -83,9 +38,9 @@ const createSpacesService = async () => {
   describe(`${currentSpace.id} space`, () => {
     describe('#get', () => {
       test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -100,9 +55,9 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if type is space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -115,11 +70,11 @@ const createSpacesService = async () => {
       });
 
       test(`supplements options with undefined namespace`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.get.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -143,9 +98,9 @@ const createSpacesService = async () => {
 
     describe('#bulkGet', () => {
       test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -160,9 +115,9 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if objects type is space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -177,11 +132,11 @@ const createSpacesService = async () => {
       });
 
       test(`supplements options with undefined namespace`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.bulkGet.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -205,9 +160,9 @@ const createSpacesService = async () => {
 
     describe('#find', () => {
       test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -220,11 +175,11 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if options.type is space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.find.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -237,11 +192,11 @@ const createSpacesService = async () => {
       });
 
       test(`passes options.type to baseClient if valid singular type specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.find.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -261,11 +216,11 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if options.type is array containing space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.find.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -280,11 +235,11 @@ const createSpacesService = async () => {
       });
 
       test(`if options.type isn't provided specifies options.type based on the types excluding the space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.find.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -299,11 +254,11 @@ const createSpacesService = async () => {
       });
 
       test(`supplements options with undefined namespace`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.find.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -325,9 +280,9 @@ const createSpacesService = async () => {
 
     describe('#create', () => {
       test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -342,9 +297,9 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if type is space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -357,11 +312,11 @@ const createSpacesService = async () => {
       });
 
       test(`supplements options with undefined namespace`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.create.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -386,9 +341,9 @@ const createSpacesService = async () => {
 
     describe('#bulkCreate', () => {
       test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -403,9 +358,9 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if objects type is space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -423,11 +378,11 @@ const createSpacesService = async () => {
       });
 
       test(`supplements options with undefined namespace`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.bulkCreate.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -451,9 +406,9 @@ const createSpacesService = async () => {
 
     describe('#update', () => {
       test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -469,9 +424,9 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if type is space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -484,11 +439,11 @@ const createSpacesService = async () => {
       });
 
       test(`supplements options with undefined namespace`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.update.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -514,9 +469,9 @@ const createSpacesService = async () => {
 
     describe('#delete', () => {
       test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -532,9 +487,9 @@ const createSpacesService = async () => {
       });
 
       test(`throws error if type is space`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,
@@ -547,11 +502,11 @@ const createSpacesService = async () => {
       });
 
       test(`supplements options with undefined namespace`, async () => {
-        const request = createMockRequest({ id: currentSpace.id });
+        const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = Symbol();
         baseClient.delete.mockReturnValue(expectedReturnValue);
-        const spacesService = await createSpacesService();
+        const spacesService = await createSpacesService(currentSpace.id);
 
         const client = new SpacesSavedObjectsClient({
           request,

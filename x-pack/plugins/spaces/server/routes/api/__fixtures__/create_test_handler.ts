@@ -7,8 +7,11 @@
 import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
-import { ElasticsearchServiceSetup } from 'src/core/server';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import {
+  httpServiceMock,
+  elasticsearchServiceMock,
+} from '../../../../../../../src/core/server/mocks';
 import { SecurityPlugin } from '../../../../../security';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
@@ -95,9 +98,6 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
 
     server.decorate('server', 'config', jest.fn<any, any>(() => mockConfig));
 
-    server.decorate('request', 'getBasePath', jest.fn());
-    server.decorate('request', 'setBasePath', jest.fn());
-
     const mockSavedObjectsRepository = {
       get: jest.fn((type, id) => {
         const result = spaces.filter(s => s.id === id);
@@ -160,14 +160,8 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
 
     const service = new SpacesService(log, server.config().get('server.basePath'));
     const spacesService = await service.setup({
-      elasticsearch: ({
-        adminClient$: Rx.of({
-          callAsInternalUser: jest.fn(),
-          asScoped: jest.fn(req => ({
-            callWithRequest: jest.fn(),
-          })),
-        }),
-      } as unknown) as ElasticsearchServiceSetup,
+      http: httpServiceMock.createSetupContract(),
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
       savedObjects: server.savedObjects,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,

@@ -16,7 +16,7 @@ import { SpacesService } from '../../new_platform/spaces_service';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
-import { ElasticsearchServiceSetup } from 'src/core/server';
+import { elasticsearchServiceMock, httpServiceMock } from '../../../../../../src/core/server/mocks';
 import { SpacesConfig } from '../../new_platform/config';
 
 // TODO: re-implement on NP
@@ -123,12 +123,6 @@ describe.skip('onPostAuthRequestInterceptor', () => {
         },
       };
 
-      let basePath: string | undefined;
-      server.decorate('request', 'getBasePath', () => basePath);
-      server.decorate('request', 'setBasePath', (newPath: string) => {
-        basePath = newPath;
-      });
-
       const log = {
         log: jest.fn(),
         trace: jest.fn(),
@@ -139,16 +133,19 @@ describe.skip('onPostAuthRequestInterceptor', () => {
         fatal: jest.fn(),
       };
 
+      let basePath: string | undefined;
+
+      const httpMock = httpServiceMock.createSetupContract();
+
+      httpMock.getBasePathFor = jest.fn().mockReturnValue(basePath);
+      httpMock.setBasePathFor = jest.fn().mockImplementation((newPath: string) => {
+        basePath = newPath;
+      });
+
       const service = new SpacesService(log, server.config());
       spacesService = await service.setup({
-        elasticsearch: ({
-          adminClient$: Rx.of({
-            callAsInternalUser: jest.fn(),
-            asScoped: jest.fn(req => ({
-              callWithRequest: jest.fn(),
-            })),
-          }),
-        } as unknown) as ElasticsearchServiceSetup,
+        http: httpMock,
+        elasticsearch: elasticsearchServiceMock.createSetupContract(),
         savedObjects: server.savedObjects,
         getSecurity: () => ({} as SecurityPlugin),
         spacesAuditLogger: {} as SpacesAuditLogger,
@@ -173,12 +170,12 @@ describe.skip('onPostAuthRequestInterceptor', () => {
       // we are including the already tested interceptor here in the test chain.
       initSpacesOnRequestInterceptor({
         config: server.config(),
-        http: null as any,
+        http: httpMock,
       });
       initSpacesOnPostAuthRequestInterceptor({
         config: server.config(),
         legacyServer: server,
-        http: null as any,
+        http: httpMock,
         log,
         xpackMain: server.plugins.xpack_main,
         spacesService,
@@ -189,21 +186,21 @@ describe.skip('onPostAuthRequestInterceptor', () => {
           method: 'GET',
           path: '/',
           handler: (req: any) => {
-            return { path: req.path, url: req.url, basePath: req.getBasePath() };
+            return { path: req.path, url: req.url, basePath: httpMock.getBasePathFor(req) };
           },
         },
         {
           method: 'GET',
           path: '/app/{appId}',
           handler: (req: any) => {
-            return { path: req.path, url: req.url, basePath: req.getBasePath() };
+            return { path: req.path, url: req.url, basePath: httpMock.getBasePathFor(req) };
           },
         },
         {
           method: 'GET',
           path: '/api/foo',
           handler: (req: any) => {
-            return { path: req.path, url: req.url, basePath: req.getBasePath() };
+            return { path: req.path, url: req.url, basePath: httpMock.getBasePathFor(req) };
           },
         },
       ]);

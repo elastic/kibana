@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, Headers } from 'src/core/server';
+import { Legacy } from 'kibana';
+import { Logger } from 'src/core/server';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
@@ -29,12 +30,7 @@ export interface PublicRouteDeps extends Omit<RouteDeps, 'xpackMain'> {
   routePreCheckLicenseFn: any;
 }
 
-export interface PublicRouteRequestFacade {
-  headers?: Headers;
-  params: Record<string, any>;
-  payload: Record<string, any>;
-  getBasePath: () => string;
-}
+export type PublicRouteRequestFacade = Legacy.Request;
 
 export function initPublicSpacesApi({ xpackMain, ...rest }: RouteDeps) {
   const routePreCheckLicenseFn = routePreCheckLicense({ xpackMain });

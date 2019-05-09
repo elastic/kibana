@@ -6,18 +6,21 @@
 
 import { first } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
+import { Legacy } from 'kibana';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { Logger, ElasticsearchServiceSetup, Headers } from 'src/core/server';
+import {
+  Logger,
+  ElasticsearchServiceSetup,
+  HttpServiceSetup,
+  KibanaRequest,
+} from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 import { SpacesConfig } from '../config';
 
-interface RequestFacade {
-  headers?: Headers;
-  getBasePath: () => string;
-}
+type RequestFacade = KibanaRequest | Legacy.Request;
 
 export interface SpacesServiceSetup {
   scopedClient(request: RequestFacade): SpacesClient;
@@ -33,6 +36,7 @@ interface CacheEntry {
 }
 
 interface SpacesServiceDeps {
+  http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
   getSecurity: () => SecurityPlugin | undefined;
@@ -50,6 +54,7 @@ export class SpacesService {
   }
 
   public async setup({
+    http,
     elasticsearch,
     savedObjects,
     getSecurity,
@@ -68,7 +73,7 @@ export class SpacesService {
     return {
       getSpaceId: (request: RequestFacade) => {
         if (!this.contextCache.has(request)) {
-          this.populateCache(request);
+          this.populateCache(http, request);
         }
 
         const { spaceId } = this.contextCache.get(request) as CacheEntry;
@@ -76,7 +81,7 @@ export class SpacesService {
       },
       isInDefaultSpace: (request: RequestFacade) => {
         if (!this.contextCache.has(request)) {
-          this.populateCache(request);
+          this.populateCache(http, request);
         }
 
         return this.contextCache.get(request)!.isInDefaultSpace;
@@ -116,8 +121,8 @@ export class SpacesService {
     }
   }
 
-  private populateCache(request: RequestFacade) {
-    const spaceId = getSpaceIdFromPath(request.getBasePath(), this.serverBasePath);
+  private populateCache(http: HttpServiceSetup, request: RequestFacade) {
+    const spaceId = getSpaceIdFromPath(http.getBasePathFor(request), this.serverBasePath);
 
     this.contextCache.set(request, {
       spaceId,

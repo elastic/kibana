@@ -11,8 +11,9 @@ import { SpacesService } from '../new_platform/spaces_service';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../security';
 import { SpacesAuditLogger } from './audit_logger';
-import { ElasticsearchServiceSetup } from 'src/core/server';
 import { SpacesConfig } from '../new_platform/config';
+import { elasticsearchServiceMock, httpServiceMock } from '../../../../../src/core/server/mocks';
+import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
 
 const server = {
   config: () => {
@@ -41,43 +42,15 @@ const service = new SpacesService(log, server.config().get('server.basePath'));
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
-    const spacesService = await service.setup({
-      elasticsearch: ({
-        adminClient$: Rx.of({
-          callAsInternalUser: jest.fn(),
-          asScoped: jest.fn(req => ({
-            callWithRequest: jest.fn(),
-          })),
-        }),
-      } as unknown) as ElasticsearchServiceSetup,
-      savedObjects: {} as SavedObjectsService,
-      getSecurity: () => ({} as SecurityPlugin),
-      spacesAuditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
-    });
+    const spacesService = spacesServiceMock.createSetupContract();
     expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
   });
 
   it('should create context with the current space id for space my-space-id', async () => {
-    const spacesService = await service.setup({
-      elasticsearch: ({
-        adminClient$: Rx.of({
-          callAsInternalUser: jest.fn(),
-          asScoped: jest.fn(req => ({
-            callWithRequest: jest.fn(),
-          })),
-        }),
-      } as unknown) as ElasticsearchServiceSetup,
-      savedObjects: {} as SavedObjectsService,
-      getSecurity: () => ({} as SecurityPlugin),
-      spacesAuditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
-    });
+    const spacesService = spacesServiceMock.createSetupContract('my-space-id');
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
-    const request = {
-      getBasePath: () => '/foo/s/my-space-id',
-    };
+    const request = {};
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',
@@ -87,14 +60,8 @@ describe('createSpacesTutorialContextFactory', () => {
 
   it('should create context with the current space id for the default space', async () => {
     const spacesService = await service.setup({
-      elasticsearch: ({
-        adminClient$: Rx.of({
-          callAsInternalUser: jest.fn(),
-          asScoped: jest.fn(req => ({
-            callWithRequest: jest.fn(),
-          })),
-        }),
-      } as unknown) as ElasticsearchServiceSetup,
+      http: httpServiceMock.createSetupContract(),
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
@@ -102,9 +69,7 @@ describe('createSpacesTutorialContextFactory', () => {
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
-    const request = {
-      getBasePath: () => '/foo',
-    };
+    const request = {};
 
     expect(contextFactory(request)).toEqual({
       spaceId: DEFAULT_SPACE_ID,

@@ -28,6 +28,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
   xpackMain,
   spacesService,
   log,
+  http,
 }: OnPostAuthInterceptorDeps) {
   const serverBasePath: string = config.get('server.basePath');
 
@@ -74,7 +75,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
       let spaceId: string = '';
       let space: Space;
       try {
-        spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
+        spaceId = getSpaceIdFromPath(http.getBasePathFor(request), serverBasePath);
 
         log.debug(`Verifying access to space "${spaceId}"`);
 

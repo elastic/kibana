@@ -6,11 +6,11 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { Headers } from 'src/core/server';
-import { AuthorizationService } from '../../../security/server/lib/authorization/service';
-import { isReservedSpace } from '../../common/is_reserved_space';
-import { Space } from '../../common/model/space';
-import { SpacesAuditLogger } from './audit_logger';
-import { SpacesConfig } from '../new_platform/config';
+import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
+import { isReservedSpace } from '../../../common/is_reserved_space';
+import { Space } from '../../../common/model/space';
+import { SpacesAuditLogger } from '../audit_logger';
+import { SpacesConfig } from '../../new_platform/config';
 
 interface SpacesClientRequestFacade {
   headers?: Headers;
