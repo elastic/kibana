@@ -28,15 +28,13 @@ This section summarizes the changes in each release.
 coming[7.1.0]
 
 See <<breaking-changes, breaking changes>> for the changes to be aware of 
-when migrating your application from one version of Kibana to another.
+when migrating your application from one version of {kib} to another.
 
 [float]
 [[enhancements-7.1.0]]
 === Enhancements
 Security:: 
-* Enables security features (authentication, user/role management, and RBAC) at 
-the basic license level {pull}35890[#35890] 
-
+* Updates {kib} to support changes to licensing of security features {pull}35890[#35890]
 
 [float]
 [[bug-7.1.0]]
