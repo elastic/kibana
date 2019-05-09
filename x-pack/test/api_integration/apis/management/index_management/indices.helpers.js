@@ -7,68 +7,31 @@
 import { API_BASE_PATH } from './constants';
 
 export const registerHelpers = ({ supertest }) => {
-  const closeIndex = (index) => {
+  const executeActionOnIndices = (index, urlParam, args) => {
     const indices = Array.isArray(index) ? index : [index];
 
-    return supertest.post(`${API_BASE_PATH}/indices/close`)
+    return supertest.post(`${API_BASE_PATH}/indices/${urlParam}`)
       .set('kbn-xsrf', 'xxx')
-      .send({ indices });
+      .send({ indices, ...args });
   };
 
-  const openIndex = (index) => {
-    const indices = Array.isArray(index) ? index : [index];
+  const closeIndex = (index) => executeActionOnIndices(index, 'close');
 
-    return supertest.post(`${API_BASE_PATH}/indices/open`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices });
-  };
+  const openIndex = (index) => executeActionOnIndices(index, 'open');
 
-  const deleteIndex = (indices) => {
-    return supertest.post(`${API_BASE_PATH}/indices/delete`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices });
-  };
+  const deleteIndex = (index) => executeActionOnIndices(index, 'delete');
 
-  const flushIndex = (index) => {
-    const indices = Array.isArray(index) ? index : [index];
+  const flushIndex = (index) => executeActionOnIndices(index, 'flush');
 
-    return supertest.post(`${API_BASE_PATH}/indices/flush`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices });
-  };
+  const refreshIndex = (index) => executeActionOnIndices(index, 'refresh');
 
-  const refreshIndex = (index) => {
-    const indices = Array.isArray(index) ? index : [index];
+  const forceMerge = (index, args) => executeActionOnIndices(index, 'forcemerge', args);
 
-    return supertest.post(`${API_BASE_PATH}/indices/refresh`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices });
-  };
+  const freeze = (index) => executeActionOnIndices(index, 'freeze');
 
-  // eslint-disable-next-line camelcase
-  const forceMerge = ({ index, max_num_segments }) => {
-    const indices = Array.isArray(index) ? index : [index];
+  const unfreeze = (index) => executeActionOnIndices(index, 'unfreeze');
 
-    return supertest.post(`${API_BASE_PATH}/indices/forcemerge`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices, max_num_segments });
-  };
-
-  const freeze = (index) => {
-    const indices = Array.isArray(index) ? index : [index];
-
-    return supertest.post(`${API_BASE_PATH}/indices/freeze`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices });
-  };
-
-  const unfreeze = (index) => {
-    const indices = Array.isArray(index) ? index : [index];
-
-    return supertest.post(`${API_BASE_PATH}/indices/unfreeze`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices });
-  };
+  const clearCache = (index) => executeActionOnIndices(index, 'clear_cache');
 
   const list = () => supertest.get(`${API_BASE_PATH}/indices`);
 
@@ -76,12 +39,6 @@ export const registerHelpers = ({ supertest }) => {
     supertest.post(`${API_BASE_PATH}/indices/reload`)
       .set('kbn-xsrf', 'xxx')
       .send({ indexNames })
-  );
-
-  const clearCache = (indices) => (
-    supertest.post(`${API_BASE_PATH}/indices/clear_cache`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indices })
   );
 
   return {

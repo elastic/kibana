@@ -132,12 +132,12 @@ export default function ({ getService }) {
     describe('forcemerge', () => {
       it('should force merge an index', async () => {
         const index = await createIndex();
-        await forceMerge({ index }).expect(200);
+        await forceMerge(index).expect(200);
       });
 
       it('should allow to define the number of segments', async () => {
         const index = await createIndex();
-        await forceMerge({ index, max_num_segments: 1 }).expect(200);
+        await forceMerge(index, { max_num_segments: 1 }).expect(200);
       });
     });
 
