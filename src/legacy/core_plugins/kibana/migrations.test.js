@@ -862,12 +862,6 @@ Object {
       expect(series[0].filter).toHaveProperty('query');
       expect(series[0].filter).toHaveProperty('language');
     });
-    it('should change series item filters from a string into an object for markdown visualizations', () => {
-      const migratedDoc = migrate(doc3);
-      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
-      expect(series[0].filter).toHaveProperty('query');
-      expect(series[0].filter).toHaveProperty('language');
-    });
     it('should not change a series item filter string in the object after migration', () => {
       const migratedDoc = migrate(doc);
       const migratedDoc3 = migrate(doc3);
@@ -875,6 +869,19 @@ Object {
       const markdownSeries = JSON.parse(migratedDoc3.attributes.visState).params.series;
       expect(metricSeries[0].filter.query).toBe(JSON.parse(doc.attributes.visState).params.series[0].filter);
       expect(markdownSeries[0].filter.query).toBe(JSON.parse(doc3.attributes.visState).params.series[0].filter);
+    });
+    it('should change series item filters from a string into an object for markdown visualizations', () => {
+      const migratedDoc = migrate(doc3);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      expect(series[0].filter).toHaveProperty('query');
+      expect(series[0].filter).toHaveProperty('language');
+    });
+    it('should change a split filter filter if it is present', () => {
+      const migratedDoc = migrate(doc3);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      const splitFilters = series[0].split_filters;
+      expect(splitFilters[0].filter).toHaveProperty('query');
+      expect(splitFilters[0].filter).toHaveProperty('language');
     });
     it('should not change a non metric and non markdown type visualization', () => {
       const migratedDoc = migrate(doc2);
