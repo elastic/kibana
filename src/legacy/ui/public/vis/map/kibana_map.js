@@ -24,6 +24,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
+import { ORIGIN } from '../../../../core_plugins/tile_map/common/origin';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -648,12 +649,19 @@ export class KibanaMap extends EventEmitter {
     this._layers.forEach(layer => layer.updateExtent());
   }
 
+  // TODO Check if base layer is EMS and choose the appropriate style
+  // If base layer is self-hosted, apply client-side styling.
   _updateDesaturation() {
     const tiles = $('img.leaflet-tile-loaded');
-    if (this._baseLayerIsDesaturated) {
-      tiles.removeClass('filters-off');
-    } else if (!this._baseLayerIsDesaturated) {
+    // Don't apply client-side styling to EMS basemaps
+    if (_.get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {
       tiles.addClass('filters-off');
+    } else {
+      if (this._baseLayerIsDesaturated) {
+        tiles.removeClass('filters-off');
+      } else if (!this._baseLayerIsDesaturated) {
+        tiles.addClass('filters-off');
+      }
     }
   }
 

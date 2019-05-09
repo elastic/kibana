@@ -31,6 +31,11 @@ const markdownIt = new MarkdownIt({
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
+// Service ids in tiles manifest
+const EMS_BASELAYERID_DARK = 'dark_map';
+const EMS_BASELAYERID_DESATURATED = 'road_map_desaturated';
+const EMS_BASELAYERID_DEFAULT = 'road_map';
+
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
@@ -118,18 +123,21 @@ uiModules.get('kibana')
 
         if  (mapConfig.includeElasticMapsService) {
           const servicesFromManifest = await this._emsClient.getTMSServices();
-          const strippedServiceFromManifest = await Promise.all(servicesFromManifest.map(async (service) => {
+          const strippedServiceFromManifest = await Promise.all(servicesFromManifest
+            .filter(service => service.getId() === 'road_map')
+            .map(async (service) => {
             //shim for compatibility
-            const shim = {
-              origin: service.getOrigin(),
-              id: service.getId(),
-              name: await service.getDisplayName(),
-              minZoom: await service.getMinZoom(),
-              maxZoom: await service.getMaxZoom(),
-              attribution: service.getHTMLAttribution()
-            };
-            return shim;
-          }));
+              const shim = {
+                origin: service.getOrigin(),
+                id: service.getId(),
+                name: 'Road Map', //hard code human readable name
+                minZoom: await service.getMinZoom(),
+                maxZoom: await service.getMaxZoom(),
+                attribution: service.getHTMLAttribution()
+              };
+              return shim;
+            })
+          );
           allServices = allServices.concat(strippedServiceFromManifest);
         }
 
@@ -155,19 +163,27 @@ uiModules.get('kibana')
         return  (layer) ? layer.getEMSHotLink() : null;
       }
 
-
-      async _getUrlTemplateForEMSTMSLayer(tmsServiceConfig) {
+      async _getUrlTemplateForEMSTMSLayer(isDesaturated, isDarkMode) {
         const tmsServices = await this._emsClient.getTMSServices();
+        let serviceId;
+        if (isDesaturated) {
+          serviceId = EMS_BASELAYERID_DESATURATED;
+        } else {
+          serviceId = EMS_BASELAYERID_DEFAULT;
+        }
+        if (isDarkMode) {
+          serviceId = EMS_BASELAYERID_DARK;
+        }
         const tmsService = tmsServices.find(service => {
-          return service.getId() === tmsServiceConfig.id;
+          return service.getId() === serviceId;
         });
         return await tmsService.getUrlTemplate();
       }
 
-      async getUrlTemplateForTMSLayer(tmsServiceConfig) {
+      async getUrlTemplateForTMSLayer(tmsServiceConfig, isDesaturated, isDarkMode) {
 
         if (tmsServiceConfig.origin === ORIGIN.EMS) {
-          return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
+          return this._getUrlTemplateForEMSTMSLayer(isDesaturated, isDarkMode);
         } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
           return tilemapsConfig.deprecated.config.url;
         } else {
