@@ -47,9 +47,12 @@ exports.NativeRealm = class NativeRealm {
       return;
     }
 
-    for (const user of await this.getReservedUsers()) {
-      await this.setPassword(user, options[`password.${user}`]);
-    }
+    const reservedUsers = await this.getReservedUsers();
+    await Promise.all(
+      reservedUsers.map(async user => {
+        await this.setPassword(user, options[`password.${user}`]);
+      })
+    );
   }
 
   async getReservedUsers() {
