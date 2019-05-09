@@ -100,22 +100,24 @@ export function CustomSelectionTable({
   }
 
   function handleTableChange({ isSelected, itemId }) {
-    const allIds = Object.getOwnPropertyNames(itemIdToSelectedMap);
-    let currentSelected = allIds;
+    const selectedMapIds = Object.getOwnPropertyNames(itemIdToSelectedMap);
+    const currentItemIds = currentItems.map((item) => item.id);
+
+    let currentSelected = selectedMapIds.filter((id) =>
+      itemIdToSelectedMap[id] === true && id !== itemId);
 
     if (itemId !== 'all') {
-      currentSelected = allIds.filter((id) =>
-        itemIdToSelectedMap[id] === true && id !== itemId);
-
       if (isSelected === true) {
         currentSelected.push(itemId);
       }
     } else {
       if (isSelected === false) {
-        currentSelected = [];
+        // don't include any current items in the selection update since we're deselecting 'all'
+        currentSelected = currentSelected.filter((id) => currentItemIds.includes(id) === false);
       } else {
         // grab all id's
-        currentSelected = currentItems.map((item) => item.id);
+        currentSelected = [...currentSelected, ...currentItemIds];
+        currentSelected = [...new Set(currentSelected)];
       }
     }
 

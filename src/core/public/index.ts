@@ -27,8 +27,8 @@ import {
   ChromeSetup,
   ChromeStart,
 } from './chrome';
-import { FatalErrorsSetup } from './fatal_errors';
-import { HttpSetup } from './http';
+import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
+import { HttpSetup, HttpStart } from './http';
 import { I18nSetup, I18nStart } from './i18n';
 import {
   InjectedMetadataParams,
@@ -43,15 +43,21 @@ import {
   ToastsApi,
   NotificationsStart,
 } from './notifications';
-import { FlyoutRef, OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
+import { OverlayRef, OverlayStart } from './overlays';
+import {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginSetupContext,
+  PluginStartContext,
+} from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
 
 /**
- * Core services exposed to the start lifecycle
+ * Core services exposed to the setup lifecycle
  *
  * @public
  *
@@ -80,6 +86,15 @@ export interface CoreSetup {
   chrome: ChromeSetup;
 }
 
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ *
+ * @internalRemarks We document the properties with \@link tags to improve
+ * navigation in the generated docs until there's a fix for
+ * https://github.com/Microsoft/web-build-tools/issues/1237
+ */
 export interface CoreStart {
   /** {@link ApplicationStart} */
   application: ApplicationStart;
@@ -87,6 +102,8 @@ export interface CoreStart {
   basePath: BasePathStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
+  /** {@link HttpStart} */
+  http: HttpStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link InjectedMetadataStart} */
@@ -103,7 +120,9 @@ export {
   BasePathSetup,
   BasePathStart,
   HttpSetup,
+  HttpStart,
   FatalErrorsSetup,
+  FatalErrorInfo,
   Capabilities,
   ChromeSetup,
   ChromeStart,
@@ -122,10 +141,11 @@ export {
   PluginInitializer,
   PluginInitializerContext,
   PluginSetupContext,
+  PluginStartContext,
   NotificationsSetup,
   NotificationsStart,
+  OverlayRef,
   OverlayStart,
-  FlyoutRef,
   Toast,
   ToastInput,
   ToastsApi,
