@@ -60,26 +60,6 @@
 
       <!-- Alerts -->
       <div
-        ng-if="indexPattern.isUnsupportedTimePattern()"
-        class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
-      >
-        <div class="kuiInfoPanelHeader">
-          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
-          <span class="kuiInfoPanelHeader__title"
-                i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternHeader"
-                i18n-default-message="Support for repeating index patterns removed">
-          </span>
-        </div>
-
-        <div class="kuiInfoPanelBody">
-          <div class="kuiInfoPanelBody__message">
-            <span i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternLabel"
-                  i18n-default-message="Support for time-interval based index patterns has been removed! In the next major version of Kibana this index patterns will stop working. Migrate saved objects that use this index pattern to a wildcard pattern and delete this one."></span>
-          </div>
-        </div>
-      </div>
-
-      <div
         ng-if="conflictFields.length"
         class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
       >

@@ -21,33 +21,29 @@ import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectIndexHTML from './_objects.html';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
-import { canViewInApp, getInAppUrl } from './lib/in_app_url';
 import { I18nContext } from 'ui/i18n';
+import { get } from 'lodash';
+import { getNewPlatform } from 'ui/new_platform';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, $injector, i18n) {
+function updateObjectsTable($scope, $injector) {
   const Private = $injector.get('Private');
   const indexPatterns = $injector.get('indexPatterns');
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
-  const uiCapabilites = chrome.getInjected('uiCapabilities');
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
-  const allServices = savedObjectManagementRegistry.all();
-  const typeToServiceName = type => allServices.reduce((serviceName, service) => {
-    return service.title.includes(type) ? service.service : serviceName;
-  }, null);
+  const uiCapabilites = getNewPlatform().start.core.application.capabilities;
 
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_OBJECTS_TABLE_DOM_ELEMENT_ID);
@@ -66,27 +62,15 @@ function updateObjectsTable($scope, $injector, i18n) {
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
           uiCapabilities={uiCapabilites}
-          getEditUrl={(id, type) => {
-            if (type === 'index-pattern' || type === 'indexPatterns') {
-              return kbnUrl.eval(`#/management/kibana/index_patterns/${id}`);
+          goInspectObject={object => {
+            if (object.meta.editUrl) {
+              kbnUrl.change(object.meta.editUrl);
+              $scope.$apply();
             }
-            const serviceName = typeToServiceName(type);
-            if (!serviceName) {
-              toastNotifications.addWarning(i18n('kbn.management.objects.unknownSavedObjectTypeNotificationMessage', {
-                defaultMessage: 'Unknown saved object type: {type}',
-                values: { type }
-              }));
-              return null;
-            }
-
-            return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
           }}
-          canGoInApp={(type) => {
-            return canViewInApp(uiCapabilites, type);
-          }}
-          goInApp={(id, type) => {
-            kbnUrl.change(getInAppUrl(id, type));
-            $scope.$apply();
+          canGoInApp={object => {
+            const { inAppUrl } = object.meta;
+            return inAppUrl && get(uiCapabilites, inAppUrl.uiCapabilitiesPath);
           }}
         />
       </I18nContext>,
@@ -103,7 +87,8 @@ function destroyObjectsTable() {
 uiRoutes
   .when('/management/kibana/objects', {
     template: objectIndexHTML,
-    k7Breadcrumbs: getIndexBreadcrumbs
+    k7Breadcrumbs: getIndexBreadcrumbs,
+    requireUICapability: 'management.kibana.objects',
   })
   .when('/management/kibana/objects/:service', {
     redirectTo: '/management/kibana/objects'
@@ -114,8 +99,8 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       controllerAs: 'managementObjectsController',
-      controller: function ($scope, $injector, i18n) {
-        updateObjectsTable($scope, $injector, i18n);
+      controller: function ($scope, $injector) {
+        updateObjectsTable($scope, $injector);
         $scope.$on('$destroy', destroyObjectsTable);
       }
     };

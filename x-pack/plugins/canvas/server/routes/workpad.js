@@ -13,37 +13,14 @@ import {
   API_ROUTE_WORKPAD_STRUCTURES,
 } from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id';
+import { formatResponse as formatRes } from '../lib/format_response';
 
 export function workpad(server) {
-  //const config = server.config();
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
   const routePrefixAssets = API_ROUTE_WORKPAD_ASSETS;
   const routePrefixStructures = API_ROUTE_WORKPAD_STRUCTURES;
-
-  function formatResponse(resp) {
-    if (resp.isBoom) {
-      return resp;
-    } // can't wrap it if it's already a boom error
-
-    if (resp instanceof esErrors['400']) {
-      return boom.badRequest(resp);
-    }
-
-    if (resp instanceof esErrors['401']) {
-      return boom.unauthorized();
-    }
-
-    if (resp instanceof esErrors['403']) {
-      return boom.forbidden("Sorry, you don't have access to that");
-    }
-
-    if (resp instanceof esErrors['404']) {
-      return boom.boomify(resp, { statusCode: 404 });
-    }
-
-    return resp;
-  }
+  const formatResponse = formatRes(esErrors);
 
   function createWorkpad(req) {
     const savedObjectsClient = req.getSavedObjectsClient();

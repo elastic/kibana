@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List Actions <DeleteAction /> Minimal initialization 1`] = `
+<Fragment>
+  <EuiToolTip
+    content="Your license has expired. Please contact your administrator."
+    delay="regular"
+    position="top"
+  >
+    <EuiButtonEmpty
+      aria-label="Delete"
+      color="text"
+      disabled={true}
+      iconSide="left"
+      iconType="trash"
+      onClick={[Function]}
+      size="xs"
+      type="button"
+    >
+      Delete
+    </EuiButtonEmpty>
+  </EuiToolTip>
+</Fragment>
+`;

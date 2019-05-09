@@ -22,11 +22,11 @@ import { Coordinate } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
-import { LicenseContext } from '../../../app/Main/LicenseCheck';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';
+import { LicenseContext } from '../../../../context/LicenseContext';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -139,7 +139,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     return (
       <SyncChartGroup
         render={hoverXHandlers => (
-          <EuiFlexGrid columns={2}>
+          <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
               <EuiPanel>
                 <React.Fragment>

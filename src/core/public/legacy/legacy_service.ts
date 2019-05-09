@@ -52,8 +52,9 @@ export class LegacyPlatformService {
 
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public async setup({ core }: SetupDeps) {
+  public setup({ core }: SetupDeps) {
     const {
+      application,
       i18n,
       injectedMetadata,
       fatalErrors,
@@ -69,6 +70,7 @@ export class LegacyPlatformService {
     require('ui/metadata').__newPlatformSetup__(injectedMetadata.getLegacyMetadata());
     require('ui/i18n').__newPlatformSetup__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformSetup__(fatalErrors);
+    require('ui/kfetch').__newPlatformSetup__(http);
     require('ui/notify/toasts').__newPlatformSetup__(notifications.toasts);
     require('ui/chrome/api/loading_count').__newPlatformSetup__(http);
     require('ui/chrome/api/base_path').__newPlatformSetup__(basePath);
@@ -77,8 +79,20 @@ export class LegacyPlatformService {
     require('ui/chrome/api/controls').__newPlatformSetup__(chrome);
     require('ui/chrome/api/help_extension').__newPlatformSetup__(chrome);
     require('ui/chrome/api/theme').__newPlatformSetup__(chrome);
+    require('ui/chrome/api/badge').__newPlatformSetup__(chrome);
     require('ui/chrome/api/breadcrumbs').__newPlatformSetup__(chrome);
     require('ui/chrome/services/global_nav_state').__newPlatformSetup__(chrome);
+
+    injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
+      application.registerLegacyApp({
+        id: navLink.id,
+        order: navLink.order,
+        title: navLink.title,
+        euiIconType: navLink.euiIconType,
+        icon: navLink.icon,
+        appUrl: navLink.url,
+      })
+    );
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
@@ -96,7 +110,7 @@ export class LegacyPlatformService {
     this.targetDomElement = targetDomElement;
 
     require('ui/new_platform').__newPlatformStart__(core);
-    require('ui/capabilities').__newPlatformStart__(core.capabilities);
+    require('ui/capabilities').__newPlatformStart__(core.application.capabilities);
 
     this.bootstrapModule.bootstrap(this.targetDomElement);
   }

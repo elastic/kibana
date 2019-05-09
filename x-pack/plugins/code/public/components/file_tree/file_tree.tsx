@@ -121,8 +121,8 @@ export class CodeFileTree extends React.Component<Props> {
                 }`}
               />
               <span className="codeFileTree__directory">
-                <EuiText size="s" grow={false} className="eui-displayInlineBlock">
-                  {`${node.name}/`}
+                <EuiText size="xs" grow={false} className="eui-displayInlineBlock">
+                  {node.name}
                 </EuiText>
               </span>
             </div>
@@ -143,7 +143,7 @@ export class CodeFileTree extends React.Component<Props> {
             >
               <EuiIcon type="submodule" />
               <span className="codeFileTree__directory">
-                <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
+                <EuiText size="xs" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
               </span>
@@ -165,7 +165,7 @@ export class CodeFileTree extends React.Component<Props> {
             >
               <EuiIcon type="symlink" />
               <span className="codeFileTree__directory">
-                <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
+                <EuiText size="xs" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
               </span>
@@ -187,7 +187,7 @@ export class CodeFileTree extends React.Component<Props> {
             >
               <EuiIcon type="document" />
               <span className="codeFileTree__directory">
-                <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
+                <EuiText size="xs" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
               </span>
@@ -253,7 +253,7 @@ export class CodeFileTree extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   node: state.file.tree,
   openedPaths: state.file.openedPaths,
-  treeLoading: state.file.loading,
+  treeLoading: state.file.rootFileTreeLoading,
 });
 
 const mapDispatchToProps = {

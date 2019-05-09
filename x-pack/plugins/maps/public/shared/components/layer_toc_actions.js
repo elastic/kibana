@@ -13,16 +13,9 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiToolTip,
-  EuiIconTip
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-function cleanDisplayName(displayName) {
-  if (!displayName) {
-    return displayName;
-  }
-  return displayName.split(' ').join('');
-}
 
 export class LayerTocActions extends Component {
 
@@ -63,13 +56,16 @@ export class LayerTocActions extends Component {
     const icon = this._renderIcon();
     return (
       <EuiButtonEmpty
+        className="mapTocEntry__layerName eui-textLeft"
         size="xs"
         flush="left"
         color="text"
         onClick={this._onClick}
-        data-test-subj={`layerTocActionsPanelToggleButton${cleanDisplayName(this.props.displayName)}`}
+        data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
+        // textProps="mapTocEntry__layerNameText"
       >
-        {icon}
+        <span className="mapTocEntry__layerNameIcon">{icon}</span>
+        {this.props.displayName}
       </EuiButtonEmpty>);
   }
 
@@ -161,6 +157,22 @@ export class LayerTocActions extends Component {
 
     if (!this.props.isReadOnly) {
       actionItems.push({
+        name: i18n.translate('xpack.maps.layerTocActions.editLayerTitle', {
+          defaultMessage: 'Edit layer',
+        }),
+        icon: (
+          <EuiIcon
+            type="pencil"
+            size="m"
+          />
+        ),
+        'data-test-subj': 'editLayerButton',
+        onClick: () => {
+          this._closePopover();
+          this.props.editLayer();
+        }
+      });
+      actionItems.push({
         name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
           defaultMessage: 'Clone layer',
         }),
@@ -193,17 +205,19 @@ export class LayerTocActions extends Component {
     return (
       <EuiPopover
         id="contextMenu"
+        className="mapLayTocActions"
         button={this._renderButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
         withTitle
         anchorPosition="leftUp"
+        anchorClassName="mapLayTocActions__popoverAnchor"
       >
         <EuiContextMenu
           initialPanelId={0}
           panels={this._getPanels()}
-          data-test-subj={`layerTocActionsPanel${cleanDisplayName(this.props.displayName)}`}
+          data-test-subj={`layerTocActionsPanel${this.props.escapedDisplayName}`}
         />
       </EuiPopover>);
   }

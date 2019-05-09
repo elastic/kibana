@@ -17,8 +17,8 @@
  * under the License.
  */
 import { ElasticsearchServiceSetup } from './elasticsearch';
-import { HttpServiceSetup } from './http';
-import { PluginsServiceSetup } from './plugins';
+import { HttpServiceSetup, HttpServiceStart } from './http';
+import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export { bootstrap } from './bootstrap';
 export { ConfigService } from './config';
@@ -47,6 +47,7 @@ export {
   PluginInitializerContext,
   PluginName,
   PluginSetupContext,
+  PluginStartContext,
 } from './plugins';
 
 /** @public */
@@ -56,4 +57,18 @@ export interface CoreSetup {
   plugins: PluginsServiceSetup;
 }
 
-export { HttpServiceSetup, ElasticsearchServiceSetup, PluginsServiceSetup };
+/**
+ * @public
+ */
+export interface CoreStart {
+  http: HttpServiceStart;
+  plugins: PluginsServiceStart;
+}
+
+export {
+  HttpServiceSetup,
+  HttpServiceStart,
+  ElasticsearchServiceSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+};

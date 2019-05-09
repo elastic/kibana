@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
+<Component
+  actionsColumnWidth={150}
+  columnHeaders={
+    Array [
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "@timestamp",
+        "width": 240,
+      },
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "event.severity",
+        "width": 180,
+      },
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "event.category",
+        "width": 180,
+      },
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "event.action",
+        "width": 180,
+      },
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "host.name",
+        "width": 180,
+      },
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "source.ip",
+        "width": 180,
+      },
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "destination.ip",
+        "width": 180,
+      },
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "user.name",
+        "width": 180,
+      },
+    ]
+  }
+  isLoading={false}
+  minWidth={1000}
+  onColumnRemoved={[MockFunction]}
+  onColumnResized={[MockFunction]}
+  onColumnSorted={[MockFunction]}
+  sort={
+    Object {
+      "columnId": "fooColumn",
+      "sortDirection": "desc",
+    }
+  }
+  timelineId="test"
+/>
+`;

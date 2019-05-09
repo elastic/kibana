@@ -8,6 +8,7 @@ import Boom from 'boom';
 import sinon from 'sinon';
 
 import { requestFixture } from '../../__tests__/__fixtures__/request';
+import { mockAuthenticationProviderOptions } from './base.mock';
 
 import { SAMLAuthenticationProvider } from './saml';
 
@@ -16,19 +17,11 @@ describe('SAMLAuthenticationProvider', () => {
   let callWithRequest: sinon.SinonStub;
   let callWithInternalUser: sinon.SinonStub;
   beforeEach(() => {
-    callWithRequest = sinon.stub();
-    callWithInternalUser = sinon.stub();
+    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+    callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
+    callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
 
-    provider = new SAMLAuthenticationProvider({
-      client: { callWithRequest, callWithInternalUser } as any,
-      log() {
-        // no-op
-      },
-      protocol: 'test-protocol',
-      hostname: 'test-hostname',
-      port: 1234,
-      basePath: '/test-base-path',
-    });
+    provider = new SAMLAuthenticationProvider(providerOptions);
   });
 
   describe('`authenticate` method', () => {

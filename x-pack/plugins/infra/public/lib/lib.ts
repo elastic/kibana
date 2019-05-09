@@ -11,11 +11,10 @@ import { AxiosRequestConfig } from 'axios';
 import React from 'react';
 import { Observable } from 'rxjs';
 import {
-  InfraMetricInput,
-  InfraNodeMetric,
-  InfraNodePath,
-  InfraPathInput,
-  InfraPathType,
+  InfraSnapshotMetricInput,
+  InfraSnapshotNodeMetric,
+  InfraSnapshotNodePath,
+  InfraSnapshotGroupbyInput,
   InfraTimerangeInput,
   SourceQuery,
 } from '../graphql/types';
@@ -103,8 +102,8 @@ export interface InfraWaffleMapNode {
   pathId: string;
   id: string;
   name: string;
-  path: InfraNodePath[];
-  metric: InfraNodeMetric;
+  path: InfraSnapshotNodePath[];
+  metric: InfraSnapshotNodeMetric;
 }
 
 export type InfraWaffleMapGroup = InfraWaffleMapGroupOfNodes | InfraWaffleMapGroupOfGroups;
@@ -166,9 +165,8 @@ export interface InfraWaffleMapOptions {
   fields?: SourceQuery.Query['source']['configuration']['fields'] | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
-  metric: InfraMetricInput;
-  path: InfraPathInput[];
-  groupBy: InfraPathInput[];
+  metric: InfraSnapshotMetricInput;
+  groupBy: InfraSnapshotGroupbyInput[];
   legend: InfraWaffleMapLegend;
 }
 
@@ -205,6 +203,5 @@ export enum InfraWaffleMapDataFormat {
 
 export interface InfraGroupByOptions {
   text: string;
-  type: InfraPathType;
   field: string;
 }

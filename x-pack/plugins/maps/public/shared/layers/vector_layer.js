@@ -11,6 +11,7 @@ import { LeftInnerJoin } from './joins/left_inner_join';
 import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
+import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -77,21 +78,20 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  getSupportedStyles() {
-    return [VectorStyle];
-  }
-
   getIcon() {
-    const isPointsOnly = this._isPointsOnly();
-    return this._style.getIcon(isPointsOnly);
+    return this._style.getIcon();
   }
 
   getLayerTypeIconName() {
     return 'vector';
   }
 
-  getTOCDetails() {
-    return this._style.getTOCDetails();
+  hasLegendDetails() {
+    return this._style.getDynamicPropertiesArray().length > 0;
+  }
+
+  getLegendDetails() {
+    return this._style.getLegendDetails();
   }
 
   _getBoundsBasedOnData() {
@@ -207,10 +207,18 @@ export class VectorLayer extends AbstractLayer {
     let updateDueToQuery = false;
     let updateDueToFilters = false;
     let updateDueToLayerQuery = false;
+    let updateDueToApplyGlobalQuery = false;
     if (isQueryAware) {
-      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
-      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
       updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+      if (searchFilters.applyGlobalQuery) {
+        updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+        updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      } else {
+        // Global filters and query are not applied to layer search request so no re-fetch required.
+        // Exception is "Refresh" query.
+        updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+      }
     }
 
     let updateDueToPrecisionChange = false;
@@ -227,6 +235,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToQuery
       && !updateDueToFilters
       && !updateDueToLayerQuery
+      && !updateDueToApplyGlobalQuery
       && !updateDueToPrecisionChange;
   }
 
@@ -236,22 +245,27 @@ export class VectorLayer extends AbstractLayer {
     const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
+    const searchFilters = {
+      ...dataFilters,
+      applyGlobalQuery: this.getApplyGlobalQuery(),
+    };
+    const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
+    if (canSkip) {
+      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+      const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
+      return {
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: propertiesMap
+      };
+    }
+
     try {
-      const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
-      if (canSkip) {
-        const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-        const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
-        return {
-          dataHasChanged: false,
-          join: join,
-          propertiesMap: propertiesMap
-        };
-      }
-      startLoading(sourceDataId, requestToken, dataFilters);
+      startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this.getSourceName();
       const {
         propertiesMap
-      } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
+      } = await joinSource.getPropertiesMap(searchFilters, leftSourceName, join.getLeftFieldName());
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
         dataHasChanged: true,
@@ -273,6 +287,7 @@ export class VectorLayer extends AbstractLayer {
     const joinSyncs = this.getValidJoins().map(async join => {
       return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
     });
+
     return await Promise.all(joinSyncs);
   }
 
@@ -289,7 +304,8 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      layerQuery: this.getQuery()
+      layerQuery: this.getQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
     };
   }
 
@@ -333,70 +349,37 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
-    if (!sourceResult.refreshed && !joinState.dataHasChanged) {
-      //no data changes in both the source data or the join data
-      return false;
-    }
-    if (!sourceResult.featureCollection || !joinState.propertiesMap) {
-      //no data available in source or join (ie. request is pending or data errored)
-      return false;
-    }
-
-    //all other cases, perform the join
-    //- source data changed but join data has not
-    //- join data changed but source data has not
-    //- both source and join data changed
-    const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
-      sourceResult.featureCollection,
-      joinState.propertiesMap);
-
-    updateSourceData(updatedFeatureCollection);
-
-    return true;
-  }
-
-  async _performJoins(sourceResult, joinStates, updateSourceData) {
-    const hasJoined = joinStates.map(joinState => {
-      return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
-    });
-    return hasJoined.some(shouldRefresh => shouldRefresh === true);
-  }
-
-  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters, updateSourceData }) {
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
+
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-    const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    const shouldRefresh = await this._performJoins(sourceResult, joinResults, updateSourceData);
-    if (shouldRefresh) {
-      onRefreshStyle();
+
+    if (sourceResult.featureCollection && sourceResult.featureCollection.features.length) {
+      const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+      const activeJoinStates = joinStates.filter(joinState => {
+        // Perform join when
+        // - source data changed but join data has not
+        // - join data changed but source data has not
+        // - both source and join data changed
+        return sourceResult.refreshed || joinState.dataHasChanged;
+      });
+
+      if (activeJoinStates.length) {
+        activeJoinStates.forEach(joinState => {
+          joinState.join.joinPropertiesToFeatureCollection(
+            sourceResult.featureCollection,
+            joinState.propertiesMap);
+        });
+        updateSourceData(sourceResult.featureCollection);
+      }
     }
   }
 
   _getSourceFeatureCollection() {
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? sourceDataRequest.getData() : null;
-  }
-
-  _isPointsOnly() {
-    const featureCollection = this._getSourceFeatureCollection();
-    if (!featureCollection) {
-      return false;
-    }
-    let isPointsOnly = true;
-    if (featureCollection) {
-      for (let i = 0; i < featureCollection.features.length; i++) {
-        if (featureCollection.features[i].geometry.type !== 'Point') {
-          isPointsOnly = false;
-          break;
-        }
-      }
-    } else {
-      isPointsOnly = false;
-    }
-    return isPointsOnly;
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
@@ -496,13 +479,6 @@ export class VectorLayer extends AbstractLayer {
     this._syncStylePropertiesWithMb(mbMap);
   }
 
-  renderStyleEditor(Style, options) {
-    return Style.renderEditor({
-      layer: this,
-      ...options
-    });
-  }
-
   _getMbPointLayerId() {
     return this.getId() +  '_circle';
   }
@@ -553,8 +529,8 @@ export class VectorLayer extends AbstractLayer {
     return this.isVisible() && this._source.canFormatFeatureProperties();
   }
 
-  getFeatureByFeatureById(id) {
-    const featureCollection = this._getSourceFeatureCollection(id);
+  getFeatureById(id) {
+    const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
       return;
     }
