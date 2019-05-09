@@ -15,28 +15,25 @@ import { decode, encode, RisonValue } from 'rison-node';
 import { QueryString } from 'ui/utils/query_string';
 import { ActionCreator } from 'typescript-fsa';
 import { inputsActions, inputsSelectors, State } from '../../store';
-import { UrlInputsModel, InputsModelId, TimeRangeKinds, TimeRange } from '../../store/inputs/model';
+import { InputsModelId, TimeRange, TimeRangeKinds, UrlInputsModel } from '../../store/inputs/model';
 
 interface UrlState {
-  global: any;
-  timeline: any;
+  timerange: UrlInputsModel;
+  [key: string]: any;
 }
 
-interface UrlStateContainerProps {
-  urlState: UrlState | undefined;
-  urlStateKey: string;
+interface UrlStateProps {
+  urlState: UrlState;
   mapToUrlState?: (value: any) => UrlState | undefined;
   onChange?: (urlState: UrlState, previousUrlState: UrlState | undefined) => void;
   onInitialize?: (urlState: UrlState | undefined) => void;
 }
 
-interface UrlStateReduxProps {
-  limit: number;
-}
-
 interface UrlStateDispatchProps {
   setAbsoluteTimerange: ActionCreator<{
     id: InputsModelId;
+    fromStr: undefined;
+    toStr: undefined;
     from: number;
     to: number;
   }>;
@@ -49,14 +46,16 @@ interface UrlStateDispatchProps {
   }>;
 }
 
-interface UrlStateContainerLifecycleProps extends UrlStateContainerProps {
+type UrlStateContainerProps = UrlStateProps & UrlStateDispatchProps;
+
+interface UrlStateContainerLifecycles {
   location: Location;
   history: History;
 }
 
-type UrlStateProps = UrlStateContainerLifecycleProps & UrlStateReduxProps & UrlStateDispatchProps;
+type UrlStateContainerLifecycleProps = UrlStateContainerLifecycles & UrlStateContainerProps;
 
-class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
+class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecycleProps> {
   public render() {
     return null;
   }
@@ -66,9 +65,12 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
     urlState: prevUrlState,
   }: UrlStateContainerLifecycleProps) {
     const { history, location, urlState } = this.props;
-
-    if (urlState !== prevUrlState) {
-      this.replaceStateInLocation(urlState);
+    if (JSON.stringify(urlState) !== JSON.stringify(prevUrlState)) {
+      Object.keys(urlState).map((urlKey: string) => {
+        if (JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])) {
+          this.replaceStateInLocation(urlState[urlKey], urlKey);
+        }
+      });
     }
 
     if (history.action === 'POP' && location !== prevLocation) {
@@ -82,18 +84,20 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering this is really a method despite what eslint thinks
-  private replaceStateInLocation = throttle(1000, (urlState: UrlState | undefined) => {
-    const { history, location, urlStateKey } = this.props;
+  private replaceStateInLocation = throttle(
+    1000,
+    (urlState: UrlState | undefined, urlStateKey: string) => {
+      const { history, location } = this.props;
+      const newLocation = replaceQueryStringInLocation(
+        location,
+        replaceStateKeyInQueryString(urlStateKey, urlState)(getQueryStringFromLocation(location))
+      );
 
-    const newLocation = replaceQueryStringInLocation(
-      location,
-      replaceStateKeyInQueryString(urlStateKey, urlState)(getQueryStringFromLocation(location))
-    );
-
-    if (newLocation !== location) {
-      history.replace(newLocation);
+      if (newLocation !== location) {
+        history.replace(newLocation);
+      }
     }
-  });
+  );
 
   private urlStateMappedToActions = {
     timerange: {
@@ -111,12 +115,26 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
       if (newUrlStateString) {
         switch (key) {
           case 'timerange':
-            const urlStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString)
+            const urlStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
             const globalType: TimeRangeKinds = get('global.kind', urlStateData);
             const globalRange: TimeRange = urlStateData.global;
             const globalId: InputsModelId = 'global';
             if (globalType !== null) {
-              return this.urlStateMappedToActions.timerange[globalType]({...globalRange, id: globalId});
+              // @ts-ignore
+              this.urlStateMappedToActions.timerange[globalType]({
+                ...globalRange,
+                id: globalId,
+              });
+            }
+            const timelineRange: TimeRange = urlStateData.timeline;
+            const timelineType: TimeRangeKinds = get('timeline.kind', urlStateData);
+            const timelineId: InputsModelId = 'timeline';
+            if (timelineType !== null) {
+              // @ts-ignore
+              this.urlStateMappedToActions.timerange[timelineType]({
+                ...timelineRange,
+                id: timelineId,
+              });
             }
         }
         return;
@@ -125,7 +143,7 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
   };
 
   private handleLocationChange = (prevLocation: Location, newLocation: Location) => {
-    const { onChange, mapToUrlState, urlStateKey } = this.props;
+    const { onChange, mapToUrlState } = this.props;
 
     if (!onChange || !mapToUrlState) {
       return;
@@ -133,11 +151,11 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateProps> {
 
     const previousUrlStateString = getParamFromQueryString(
       getQueryStringFromLocation(prevLocation),
-      urlStateKey
+      'urlStateKey'
     );
     const newUrlStateString = getParamFromQueryString(
       getQueryStringFromLocation(newLocation),
-      urlStateKey
+      'urlStateKey'
     );
 
     if (previousUrlStateString !== newUrlStateString) {
@@ -161,10 +179,19 @@ export const UrlStateComponents = pure<UrlStateContainerProps>(props => (
 
 const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
-  const mapStateToProps = (state: State) => ({
-    ...getInputsSelector(state),
-    urlStateKey: 'qwrty',
-  });
+  const mapStateToProps = (state: State) => {
+    const inputState = getInputsSelector(state);
+    return {
+      urlState: {
+        timerange: inputState
+          ? {
+              global: get('global.timerange', inputState),
+              timeline: get('timeline.timerange', inputState),
+            }
+          : {},
+      },
+    };
+  };
 
   return mapStateToProps;
 };
@@ -174,6 +201,7 @@ export const UrlStateContainer = connect(
     setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
     setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
   }
+  // @ts-ignore
 )(UrlStateComponents);
 
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -200,11 +228,9 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  debugger;
   const previousQueryValues = QueryString.decode(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  debugger;
   return QueryString.encode({
     ...previousQueryValues,
     [stateKey]: encodedUrlState,
