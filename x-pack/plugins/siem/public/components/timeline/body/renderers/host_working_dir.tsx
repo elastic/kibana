@@ -9,8 +9,8 @@ import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../draggables';
 
-import { TokensFlexItem } from '.';
 import * as i18n from './translations';
+import { TokensFlexItem } from './helpers';
 
 interface Props {
   contextId: string;

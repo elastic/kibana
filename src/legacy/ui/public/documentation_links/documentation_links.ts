@@ -37,6 +37,9 @@ export const documentationLinks = {
     startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
     exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
   },
+  auditbeat: {
+    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
+  },
   metricbeat: {
     base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
   },
@@ -48,6 +51,9 @@ export const documentationLinks = {
   },
   functionbeat: {
     base: `${ELASTIC_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
+  },
+  winlogbeat: {
+    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/winlogbeat/${DOC_LINK_VERSION}`,
   },
   aggs: {
     date_histogram: `${ELASTIC_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,

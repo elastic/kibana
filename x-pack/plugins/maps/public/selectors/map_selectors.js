@@ -67,6 +67,8 @@ export const getTooltipState = ({ map }) => {
 
 export const getMapReady = ({ map }) => map && map.ready;
 
+export const getMapInitError = ({ map }) => map.mapInitError;
+
 export const getGoto = ({ map }) => map && map.goto;
 
 export const getSelectedLayerId = ({ map }) => {
@@ -149,7 +151,6 @@ export const getDataFilters = createSelector(
     };
   }
 );
-
 
 export const getLayerList = createSelector(
   getLayerListRaw,

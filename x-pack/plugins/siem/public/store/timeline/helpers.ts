@@ -12,8 +12,8 @@ import { Sort } from '../../components/timeline/body/sort';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { TimelineById, TimelineState } from '.';
 import { KqlMode, timelineDefaults, TimelineModel } from './model';
+import { TimelineById, TimelineState } from './reducer';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
