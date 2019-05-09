@@ -21,7 +21,6 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
-import { schema } from '@kbn/config-schema';
 
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -129,7 +128,6 @@ test('`setup` throws if discovered plugins with conflicting names', async () => 
           server: true,
           ui: true,
         },
-        null,
         { logger } as any
       ),
       new PluginWrapper(
@@ -144,7 +142,6 @@ test('`setup` throws if discovered plugins with conflicting names', async () => 
           server: true,
           ui: false,
         },
-        null,
         { logger } as any
       ),
     ]),
@@ -156,33 +153,6 @@ test('`setup` throws if discovered plugins with conflicting names', async () => 
 
   expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
   expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
-});
-
-test('`setup` throws if plugin config validation fails', async () => {
-  mockDiscover.mockReturnValue({
-    error$: from([]),
-    plugin$: from([
-      new PluginWrapper(
-        'path-1',
-        {
-          id: 'explicitly-disabled-plugin',
-          version: 'some-version',
-          configPath: 'non-existing-path',
-          kibanaVersion: '7.0.0',
-          requiredPlugins: [],
-          optionalPlugins: [],
-          server: true,
-          ui: true,
-        },
-        schema.string(),
-        { logger } as any
-      ),
-    ]),
-  });
-
-  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: [non-existing-path]: expected value of type [string] but got [undefined]]`
-  );
 });
 
 test('`setup` properly detects plugins that should be disabled.', async () => {
@@ -208,7 +178,6 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
-        null,
         { logger } as any
       ),
       new PluginWrapper(
@@ -223,7 +192,6 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
-        null,
         { logger } as any
       ),
       new PluginWrapper(
@@ -238,7 +206,6 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
-        null,
         { logger } as any
       ),
       new PluginWrapper(
@@ -253,7 +220,6 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
           server: true,
           ui: true,
         },
-        null,
         { logger } as any
       ),
     ]),
@@ -299,7 +265,6 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
       server: true,
       ui: true,
     },
-    null,
     { logger } as any
   );
 
@@ -315,7 +280,6 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
       server: true,
       ui: false,
     },
-    null,
     { logger } as any
   );
 

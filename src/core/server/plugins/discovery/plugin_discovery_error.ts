@@ -24,7 +24,6 @@ export enum PluginDiscoveryErrorType {
   InvalidPluginPath = 'invalid-plugin-path',
   InvalidManifest = 'invalid-manifest',
   MissingManifest = 'missing-manifest',
-  InvalidConfigSchema = 'invalid-config-schema',
 }
 
 /** @internal */
@@ -47,10 +46,6 @@ export class PluginDiscoveryError extends Error {
 
   public static missingManifest(path: string, cause: Error) {
     return new PluginDiscoveryError(PluginDiscoveryErrorType.MissingManifest, path, cause);
-  }
-
-  public static invalidConfigSchema(path: string, cause: Error) {
-    return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidConfigSchema, path, cause);
   }
 
   /**

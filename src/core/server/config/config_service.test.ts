@@ -26,7 +26,7 @@ import { mockPackage } from './config_service.test.mocks';
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 
-import { ConfigService, Env, ObjectToConfigAdapter, ConfigPath } from '.';
+import { ConfigService, Env, ObjectToConfigAdapter } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from './__mocks__/env';
 

@@ -18,7 +18,6 @@
  */
 
 import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugins_discovery.test.mocks';
-import { schema } from '@kbn/config-schema';
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
@@ -36,30 +35,6 @@ const TEST_PLUGIN_SEARCH_PATHS = {
   nonExistentKibanaExtra: resolve(process.cwd(), '..', 'kibana-extra'),
 };
 const TEST_EXTRA_PLUGIN_PATH = resolve(process.cwd(), 'my-extra-plugin');
-const pluginDefinition = {
-  configDefinition: {
-    schema: schema.any(),
-  },
-};
-
-[
-  resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '1', 'server'),
-  resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '3', 'server'),
-  resolve(TEST_EXTRA_PLUGIN_PATH, 'server'),
-].forEach(path => jest.doMock(path, () => pluginDefinition, { virtual: true }));
-
-const pluginDefinitionBad = {
-  configDefinition: {
-    schema: {
-      validate: undefined,
-    },
-  },
-};
-jest.doMock(
-  resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '6-no-schema', 'server'),
-  () => pluginDefinitionBad,
-  { virtual: true }
-);
 
 const logger = loggingServiceMock.create();
 beforeEach(() => {
@@ -71,7 +46,7 @@ beforeEach(() => {
         '3',
         '4-incomplete-manifest',
         '5-invalid-manifest',
-        '6-no-schema',
+        '6',
         '7-non-dir',
         '8-incompatible-manifest',
         '9-inaccessible-dir',
@@ -155,11 +130,12 @@ test('properly iterates through plugin search locations', async () => {
   const { plugin$, error$ } = discover(pluginsConfig, { configService, env, logger });
 
   const plugins = await plugin$.pipe(toArray()).toPromise();
-  expect(plugins).toHaveLength(3);
+  expect(plugins).toHaveLength(4);
 
   for (const path of [
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '1'),
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '3'),
+    resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '6'),
     TEST_EXTRA_PLUGIN_PATH,
   ]) {
     const discoveredPlugin = plugins.find(plugin => plugin.path === path)!;
@@ -167,7 +143,6 @@ test('properly iterates through plugin search locations', async () => {
     expect(discoveredPlugin.configPath).toEqual(['core', 'config']);
     expect(discoveredPlugin.requiredPlugins).toEqual(['a', 'b']);
     expect(discoveredPlugin.optionalPlugins).toEqual(['c', 'd']);
-    expect(discoveredPlugin.schema).toEqual(pluginDefinition.configDefinition.schema);
   }
 
   await expect(
@@ -202,11 +177,6 @@ test('properly iterates through plugin search locations', async () => {
       TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins,
       '8-incompatible-manifest',
       'kibana.json'
-    )})`,
-    `Error: The config definition for plugin did not contain \"schema\" field, which is required for config validation (invalid-config-schema, ${resolve(
-      TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins,
-      '6-no-schema',
-      'server'
     )})`,
   ]);
 

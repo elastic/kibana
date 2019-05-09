@@ -18,14 +18,12 @@
  */
 
 import { readdir, stat } from 'fs';
-import { resolve, join } from 'path';
+import { resolve } from 'path';
 import { bindNodeCallback, from, merge } from 'rxjs';
 import { catchError, filter, mergeMap, shareReplay } from 'rxjs/operators';
-import { Type } from '@kbn/config-schema';
-
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
-import { PluginWrapper, PluginManifest, PluginConfigSchema } from '../plugin';
+import { PluginWrapper } from '../plugin';
 import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
@@ -107,34 +105,6 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
   );
 }
 
-function readSchemaMaybe(
-  pluginPath: string,
-  manifest: PluginManifest,
-  log: Logger
-): PluginConfigSchema {
-  if (!manifest.server) return null;
-  const pluginPathServer = join(pluginPath, 'server');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const pluginDefinition = require(pluginPathServer);
-
-  if (!('configDefinition' in pluginDefinition)) {
-    log.debug(`"${pluginPathServer}" does not export "configDefinition".`);
-    return null;
-  }
-
-  const configSchema = pluginDefinition.configDefinition.schema;
-  if (configSchema instanceof Type) {
-    return configSchema;
-  }
-
-  throw PluginDiscoveryError.invalidConfigSchema(
-    pluginPathServer,
-    new Error(
-      'The config definition for plugin did not contain "schema" field, which is required for config validation'
-    )
-  );
-}
-
 /**
  * Tries to load and parse the plugin manifest file located at the provided plugin
  * directory path and produces an error result if it fails to do so or plugin manifest
@@ -151,7 +121,6 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
       return new PluginWrapper(
         path,
         manifest,
-        readSchemaMaybe(path, manifest, log),
         createPluginInitializerContext(coreContext, manifest)
       );
     }),

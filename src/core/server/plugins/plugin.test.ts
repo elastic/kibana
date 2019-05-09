@@ -19,6 +19,8 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
+import { schema } from '@kbn/config-schema';
+
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
@@ -82,7 +84,6 @@ test('`constructor` correctly initializes plugin instance', () => {
   const plugin = new PluginWrapper(
     'some-plugin-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -98,7 +99,6 @@ test('`setup` fails if `plugin` initializer is not exported', async () => {
   const plugin = new PluginWrapper(
     'plugin-without-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -114,7 +114,6 @@ test('`setup` fails if plugin initializer is not a function', async () => {
   const plugin = new PluginWrapper(
     'plugin-with-wrong-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -130,7 +129,6 @@ test('`setup` fails if initializer does not return object', async () => {
   const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -148,7 +146,6 @@ test('`setup` fails if object returned from initializer does not define `setup` 
   const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -165,12 +162,7 @@ test('`setup` fails if object returned from initializer does not define `setup` 
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
   const manifest = createPluginManifest();
   const initializerContext = createPluginInitializerContext(coreContext, manifest);
-  const plugin = new PluginWrapper(
-    'plugin-with-initializer-path',
-    manifest,
-    null,
-    initializerContext
-  );
+  const plugin = new PluginWrapper('plugin-with-initializer-path', manifest, initializerContext);
 
   const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'yes' }) };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
@@ -191,7 +183,6 @@ test('`start` fails if setup is not called first', async () => {
   const plugin = new PluginWrapper(
     'some-plugin-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -205,7 +196,6 @@ test('`start` calls plugin.start with context and dependencies', async () => {
   const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
   const context = { any: 'thing' } as any;
@@ -231,7 +221,6 @@ test('`stop` fails if plugin is not set up', async () => {
   const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -249,7 +238,6 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
   const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -264,7 +252,6 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
   const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
-    null,
     createPluginInitializerContext(coreContext, manifest)
   );
 
@@ -274,4 +261,66 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 
   await expect(plugin.stop()).resolves.toBeUndefined();
   expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);
+});
+
+describe('#getConfigSchema()', () => {
+  it('reads config schema from plugin', () => {
+    const pluginSchema = schema.any();
+    jest.doMock(
+      'plugin-with-schema/server',
+      () => ({
+        configDefinition: {
+          schema: pluginSchema,
+        },
+      }),
+      { virtual: true }
+    );
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper(
+      'plugin-with-schema',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+
+    expect(plugin.getConfigSchema()).toBe(pluginSchema);
+  });
+  it('returns null if configDefinition not specified', () => {
+    jest.doMock('plugin-with-no-definition/server', () => ({}), { virtual: true });
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper(
+      'plugin-with-no-definition',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+    expect(plugin.getConfigSchema()).toBe(null);
+  });
+  it('returns null for plugins without a server part', () => {
+    const manifest = createPluginManifest({ server: false });
+    const plugin = new PluginWrapper(
+      'plugin-with-no-definition',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+    expect(plugin.getConfigSchema()).toBe(null);
+  });
+  it('throws if plugin contains invalid schema', () => {
+    jest.doMock(
+      'plugin-invalid-schema/server',
+      () => ({
+        configDefinition: {
+          schema: () => null,
+        },
+      }),
+      { virtual: true }
+    );
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper(
+      'plugin-invalid-schema',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+    expect(() => plugin.getConfigSchema()).toThrowErrorMatchingInlineSnapshot(
+      `"Configuration schema expected to be an instance of Type"`
+    );
+  });
 });

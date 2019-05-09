@@ -131,9 +131,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .pipe(
         mergeMap(async plugin => {
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
-          if (plugin.schema) {
-            await this.coreContext.configService.setSchema(plugin.configPath, plugin.schema);
-          }
 
           if (pluginEnableStatuses.has(plugin.name)) {
             throw new Error(`Plugin with id "${plugin.name}" is already registered!`);

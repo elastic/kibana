@@ -184,7 +184,6 @@ export class PluginWrapper<
   constructor(
     public readonly path: string,
     public readonly manifest: PluginManifest,
-    public readonly schema: PluginConfigSchema,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.log = initializerContext.logger.get();
@@ -241,6 +240,24 @@ export class PluginWrapper<
     }
 
     this.instance = undefined;
+  }
+
+  public getConfigSchema(): PluginConfigSchema {
+    if (!this.manifest.server) return null;
+    const pluginPathServer = join(this.path, 'server');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pluginDefinition = require(pluginPathServer);
+
+    if (!('configDefinition' in pluginDefinition)) {
+      this.log.debug(`"${pluginPathServer}" does not export "configDefinition".`);
+      return null;
+    }
+
+    const configSchema = pluginDefinition.configDefinition.schema;
+    if (!(configSchema instanceof Type)) {
+      throw new Error('Configuration schema expected to be an instance of Type');
+    }
+    return configSchema;
   }
 
   private createPluginInstance() {
