@@ -431,7 +431,7 @@ function VisEditor(
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
       $scope.globalFilters = queryFilter.getGlobalFilters();
-      $scope.vis.forceReload();
+      // We don't need to manually trigger a reload here since the changes above will trigger a reload anyway
     };
 
     $scope.$on('$destroy', function () {
