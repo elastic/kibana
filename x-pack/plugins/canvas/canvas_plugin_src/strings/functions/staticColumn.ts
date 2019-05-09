@@ -19,7 +19,8 @@ export const help: FunctionHelp<FunctionFactory<typeof staticColumn>> = {
     }),
     value: i18n.translate('xpack.canvas.functions.staticColumn.args.valueHelpText', {
       defaultMessage:
-        'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
+        'The value to insert in each column. Tip: use a sub-expression to rollup ' +
+        'other columns into a static value',
     }),
   },
 };

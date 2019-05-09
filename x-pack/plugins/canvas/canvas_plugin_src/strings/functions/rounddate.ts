@@ -11,12 +11,23 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof rounddateFn>> = {
   help: i18n.translate('xpack.canvas.functions.rounddateHelpText', {
-    defaultMessage: 'Round ms since epoch using a moment formatting string. Returns ms since epoch',
+    defaultMessage:
+      'Round {ms} since epoch using a {moment} formatting string. Returns {ms} since epoch',
+    values: {
+      ms: 'ms',
+      moment: 'MomentJS',
+    },
   }),
   args: {
     format: i18n.translate('xpack.canvas.functions.rounddate.args.formatHelpText', {
       defaultMessage:
-        'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/). For example "YYYY-MM" would round to the month',
+        '{moment} format with which to bucket (See {url}). For example "{example}" would round to the month',
+      values: {
+        ms: 'ms',
+        moment: 'MomentJS',
+        url: 'https://momentjs.com/docs/#/displaying/',
+        example: 'YYYY-MM',
+      },
     }),
   },
 };

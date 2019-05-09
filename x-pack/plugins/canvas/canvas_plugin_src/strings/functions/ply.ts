@@ -12,7 +12,10 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof plyFn>> = {
   help: i18n.translate('xpack.canvas.functions.plyHelpText', {
     defaultMessage:
-      'Subdivide a datatable and pass the resulting tables into an expression, then merge the output',
+      'Subdivide a {datatable} and pass the resulting tables into an expression, then merge the output',
+    values: {
+      datatable: 'datatable',
+    },
   }),
   args: {
     by: i18n.translate('xpack.canvas.functions.ply.args.byHelpText', {
@@ -20,11 +23,15 @@ export const help: FunctionHelp<FunctionFactory<typeof plyFn>> = {
     }),
     expression: i18n.translate('xpack.canvas.functions.ply.args.expressionHelpText', {
       defaultMessage:
-        'An expression to pass each resulting data table into. Tips: \n' +
-        ' Expressions must return a datatable. Use `as` to turn literals into datatables.\n' +
+        'An expression to pass each resulting {datatable} into. Tips: \n' +
+        ' Expressions must return a {datatable}. Use `as` to turn literals into {datatable}.\n' +
         ' Multiple expressions must return the same number of rows.' +
-        ' If you need to return a differing row count, pipe into another instance of ply.\n' +
+        ' If you need to return a differing row count, pipe into another instance of {ply}.\n' +
         ' If multiple expressions return the same columns, the last one wins.',
+      values: {
+        datatable: 'datatable',
+        ply: 'ply',
+      },
     }),
   },
 };

@@ -129,7 +129,7 @@ export function pie(): ContextFunction<'pie', PointSeries, Arguments, Render<Pie
         types: ['string', 'boolean'],
         help: argHelp.legend,
         default: false,
-        options: ['nw', 'sw', 'ne', 'se', false],
+        options: Object.values(Legend).concat(false),
       },
       tilt: {
         types: ['number'],

@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { revealImage as revealImageFn } from '../../functions/common/revealImage';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory, Position } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImageFn>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
-    defaultMessage: 'Configure a image reveal element',
+    defaultMessage: 'Configure an image reveal element',
   }),
   args: {
     image: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {
@@ -21,7 +21,10 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImageFn>> = {
       defaultMessage: 'An optional background image to reveal over',
     }),
     origin: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {
-      defaultMessage: 'Where to start from. Eg, top, left, bottom or right',
+      defaultMessage: 'Where to start from, eg {position}',
+      values: {
+        position: Object.values(Position).join(', '),
+      },
     }),
   },
 };

@@ -17,10 +17,17 @@ export const help: FunctionHelp<FunctionFactory<typeof renderFn>> = {
   args: {
     as: i18n.translate('xpack.canvas.functions.render.args.asHelpText', {
       defaultMessage:
-        'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+        'The element type to use in rendering. You probably want a specialized function instead, such as `{plot}` or `{grid}`',
+      values: {
+        plot: 'plot',
+        grid: 'grid',
+      },
     }),
     css: i18n.translate('xpack.canvas.functions.render.args.cssHelpText', {
-      defaultMessage: 'Any block of custom CSS to be scoped to this element.',
+      defaultMessage: 'Any block of custom {css} to be scoped to this element.',
+      values: {
+        css: 'CSS',
+      },
     }),
     containerStyle: i18n.translate('xpack.canvas.functions.render.args.containerStyleHelpText', {
       defaultMessage: 'Style for the container, including background, border, and opacity',

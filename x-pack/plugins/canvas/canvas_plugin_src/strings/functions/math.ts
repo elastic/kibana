@@ -12,12 +12,23 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof mathFn>> = {
   help: i18n.translate('xpack.canvas.functions.mathHelpText', {
     defaultMessage:
-      'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. If you pass in a number it is available as "value" (without the quotes)',
+      'Interpret a math expression, with a number or {datatable} as context. {Datatable} ' +
+      'columns are available by their column name. If you pass in a number it is available ' +
+      'as "{value}" (without the quotes)',
+    values: {
+      datatable: 'datatable',
+      Datatable: 'Datatable',
+      value: 'value',
+    },
   }),
   args: {
     expression: i18n.translate('xpack.canvas.functions.math.args.expressionHelpText', {
-      defaultMessage:
-        'An evaluated TinyMath expression. (See [TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html))',
+      defaultMessage: 'An evaluated {tinymath} expression. (See {url})',
+      values: {
+        tinymath: 'TinyMath',
+        url:
+          '[TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html)',
+      },
     }),
   },
 };

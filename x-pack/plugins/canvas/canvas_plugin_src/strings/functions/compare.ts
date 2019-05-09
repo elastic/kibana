@@ -5,21 +5,32 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { compare, OP } from '../../functions/common/compare';
+import { compare, Operation } from '../../functions/common/compare';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
   help: i18n.translate('xpack.canvas.functions.compareHelpText', {
     defaultMessage:
-      'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. This only works with primitive types, such as number, string, and boolean.',
+      'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. ' +
+      'This only works with primitive types, such as {examples}.',
+    values: {
+      if: '{if}',
+      examples: ['number', 'string', 'boolean'].join(', '),
+    },
   }),
   args: {
     op: i18n.translate('xpack.canvas.functions.compare.args.opHelpText', {
       defaultMessage:
-        'The operator to use in the comparison: eq (equal), ne (not equal), lt (less than), gt (greater than), lte (less than equal), gte (greater than eq)',
+        'The operator to use in the comparison: {eq} (equal), {ne} (not equal), {lt} (less than), {gt} (greater ' +
+        'than), {lte} (less than equal), {gte} (greater than eq)',
       values: {
-        equal: OP.EQ,
+        eq: Operation.EQ,
+        ne: Operation.NE,
+        lt: Operation.LT,
+        gt: Operation.GT,
+        lte: Operation.LTE,
+        gte: Operation.GTE,
       },
     }),
     to: i18n.translate('xpack.canvas.functions.compare.args.toHelpText', {

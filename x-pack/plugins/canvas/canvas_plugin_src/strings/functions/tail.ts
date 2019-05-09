@@ -11,11 +11,18 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof tail>> = {
   help: i18n.translate('xpack.canvas.functions.tailHelpText', {
-    defaultMessage: 'Get the last N rows from the end of a datatable. Also see `head`',
+    defaultMessage: 'Get the last N rows from the end of a {datatable}. Also see `{head}`',
+    values: {
+      datatable: 'datatable',
+      head: 'head',
+    },
   }),
   args: {
     count: i18n.translate('xpack.canvas.functions.tail.args.countHelpText', {
-      defaultMessage: 'Return this many rows from the end of the datatable',
+      defaultMessage: 'Return this many rows from the end of the {datatable}',
+      values: {
+        datatable: 'datatable',
+      },
     }),
   },
 };

@@ -12,7 +12,8 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof locationFn>> = {
   help: i18n.translate('xpack.canvas.functions.locationHelpText', {
     defaultMessage:
-      "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
+      "Use the browser's location functionality to get your current location. " +
+      'Usually quite slow, but fairly accurate',
   }),
   args: {},
 };

@@ -15,7 +15,10 @@ export const help: FunctionHelp<FunctionFactory<typeof shape>> = {
   }),
   args: {
     border: i18n.translate('xpack.canvas.functions.shape.args.borderHelpText', {
-      defaultMessage: 'Valid CSS color string',
+      defaultMessage: 'Valid {css} color string',
+      values: {
+        css: 'CSS',
+      },
     }),
     borderWidth: i18n.translate('xpack.canvas.functions.shape.args.borderWidthHelpText', {
       defaultMessage: 'Thickness of the border',
@@ -24,7 +27,10 @@ export const help: FunctionHelp<FunctionFactory<typeof shape>> = {
       defaultMessage: 'Pick a shape',
     }),
     fill: i18n.translate('xpack.canvas.functions.shape.args.fillHelpText', {
-      defaultMessage: 'Valid CSS color string',
+      defaultMessage: 'Valid {css} color string',
+      values: {
+        css: 'CSS',
+      },
     }),
     maintainAspect: i18n.translate('xpack.canvas.functions.shape.args.maintainAspectHelpText', {
       defaultMessage: 'Select true to maintain aspect ratio',

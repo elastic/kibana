@@ -11,7 +11,10 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
   help: i18n.translate('xpack.canvas.functions.caseHelpText', {
-    defaultMessage: 'Build a case (including a condition/result) to pass to the switch function',
+    defaultMessage: 'Build a case (including a condition/result) to pass to the {switch} function',
+    values: {
+      switch: 'switch',
+    },
   }),
   args: {
     if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
@@ -20,7 +23,10 @@ export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
     }),
     when: i18n.translate('xpack.canvas.functions.case.args.whenHelpText', {
       defaultMessage:
-        'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
+        'This value is compared to the context to see if the condition is met. It is overridden by the "{if}" argument if both are provided.',
+      values: {
+        if: 'if',
+      },
     }),
     then: i18n.translate('xpack.canvas.functions.case.args.thenHelpText', {
       defaultMessage: 'The value to return if the condition is met',

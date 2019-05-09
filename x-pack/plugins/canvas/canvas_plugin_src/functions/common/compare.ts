@@ -6,7 +6,7 @@
 import { ContextFunction } from '../types';
 import { getFunctionHelp } from '../../strings';
 
-export enum OP {
+export enum Operation {
   EQ = 'eq',
   NE = 'ne',
   LT = 'lt',
@@ -16,7 +16,7 @@ export enum OP {
 }
 
 interface Arguments {
-  op: OP;
+  op: Operation;
   to: Context;
 }
 
@@ -39,7 +39,7 @@ export function compare(): ContextFunction<'compare', Context, Arguments, boolea
         types: ['string'],
         default: 'eq',
         help: argHelp.op,
-        options: Object.values(OP),
+        options: Object.values(Operation),
       },
       to: {
         aliases: ['this', 'b'],
@@ -52,36 +52,38 @@ export function compare(): ContextFunction<'compare', Context, Arguments, boolea
       const typesMatch = typeof a === typeof b;
 
       switch (op) {
-        case OP.EQ:
+        case Operation.EQ:
           return a === b;
-        case OP.NE:
+        case Operation.NE:
           return a !== b;
-        case OP.LT:
+        case Operation.LT:
           if (typesMatch) {
             // @ts-ignore #35433 This is a wonky comparison for nulls
             return a < b;
           }
           return false;
-        case OP.LTE:
+        case Operation.LTE:
           if (typesMatch) {
             // @ts-ignore #35433 This is a wonky comparison for nulls
             return a <= b;
           }
           return false;
-        case OP.GT:
+        case Operation.GT:
           if (typesMatch) {
             // @ts-ignore #35433 This is a wonky comparison for nulls
             return a > b;
           }
           return false;
-        case OP.GTE:
+        case Operation.GTE:
           if (typesMatch) {
             // @ts-ignore #35433 This is a wonky comparison for nulls
             return a >= b;
           }
           return false;
         default:
-          throw new Error(`Invalid compare operator: '${op}'. Use ${Object.values(OP).join(', ')}`);
+          throw new Error(
+            `Invalid compare operator: '${op}'. Use ${Object.values(Operation).join(', ')}`
+          );
       }
     },
   };

@@ -74,7 +74,7 @@ export function plot(): ContextFunction<'plot', PointSeries, Arguments, Render<a
         types: ['string', 'boolean'],
         help: argHelp.legend,
         default: 'ne',
-        options: ['nw', 'sw', 'ne', 'se', false],
+        options: Object.values(Legend).concat(false),
       },
       yaxis: {
         types: ['boolean', 'axisConfig'],

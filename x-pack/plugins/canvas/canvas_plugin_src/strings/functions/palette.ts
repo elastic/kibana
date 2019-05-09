@@ -15,7 +15,13 @@ export const help: FunctionHelp<FunctionFactory<typeof paletteFn>> = {
   }),
   args: {
     color: i18n.translate('xpack.canvas.functions.palette.args.colorHelpText', {
-      defaultMessage: 'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
+      defaultMessage:
+        'Palette colors, {rgba}, {hex}, or {HTML} color string. Pass this multiple times.',
+      values: {
+        rgba: 'rgba',
+        hex: 'hex',
+        html: 'HTML',
+      },
     }),
     gradient: i18n.translate('xpack.canvas.functions.palette.args.gradientHelpText', {
       defaultMessage: 'Prefer to make a gradient where supported and useful?',

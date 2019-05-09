@@ -11,11 +11,17 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof csv>> = {
   help: i18n.translate('xpack.canvas.functions.csvHelpText', {
-    defaultMessage: 'Create datatable from csv input',
+    defaultMessage: 'Create datatable from {csv} input',
+    values: {
+      csv: 'CSV',
+    },
   }),
   args: {
     data: i18n.translate('xpack.canvas.functions.csv.args.dataHelpText', {
-      defaultMessage: 'CSV data to use',
+      defaultMessage: '{csv} data to use',
+      values: {
+        csv: 'CSV',
+      },
     }),
     delimiter: i18n.translate('xpack.canvas.functions.csv.args.delimeterHelpText', {
       defaultMessage: 'Data separation character',

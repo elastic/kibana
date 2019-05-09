@@ -18,7 +18,11 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumnFn>> = {
       defaultMessage: 'The name of the resulting column',
     }),
     expression: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
-      defaultMessage: 'A canvas expression which will be passed each row as a single row datatable',
+      defaultMessage:
+        'A canvas expression which will be passed each row as a single row {datatable}',
+      values: {
+        datatable: 'datatable',
+      },
     }),
   },
 };

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { axisConfig } from '../../functions/common/axisConfig';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory, Position } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   help: i18n.translate('xpack.canvas.functions.axisConfigHelpText', {
@@ -16,14 +16,25 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   args: {
     max: i18n.translate('xpack.canvas.functions.axisConfig.args.maxHelpText', {
       defaultMessage:
-        'Maximum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
+        'Maximum value displayed in the axis. Must be a number or a date in {ms} or {iso} string',
+      values: {
+        ms: 'ms',
+        iso: 'ISO8601',
+      },
     }),
     min: i18n.translate('xpack.canvas.functions.axisConfig.args.maxHelpText', {
       defaultMessage:
-        'Minimum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
+        'Minimum value displayed in the axis. Must be a number or a date in {ms} or {iso} string',
+      values: {
+        ms: 'ms',
+        iso: 'ISO8601',
+      },
     }),
     position: i18n.translate('xpack.canvas.functions.axisConfig.args.positionHelpText', {
       defaultMessage: 'Position of the axis labels - top, bottom, left, and right',
+      values: {
+        examples: Object.values(Position).join(', '),
+      },
     }),
     show: i18n.translate('xpack.canvas.functions.axisConfig.args.showHelpText', {
       defaultMessage: 'Show the axis labels?',

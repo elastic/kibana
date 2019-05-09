@@ -16,15 +16,25 @@ export const help: FunctionHelp<FunctionFactory<typeof replaceFn>> = {
   args: {
     pattern: i18n.translate('xpack.canvas.functions.replace.args.patternHelpText', {
       defaultMessage:
-        'The text or pattern of a JavaScript regular expression, eg "[aeiou]". You can use capture groups here.',
+        'The text or pattern of a {js} regular expression, eg "{example}". You can use capture groups here.',
+      values: {
+        js: 'JavaScript',
+        example: '[aeiou]',
+      },
     }),
     flags: i18n.translate('xpack.canvas.functions.replace.args.flagsHelpText', {
-      defaultMessage:
-        'Specify flags. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp for reference.',
+      defaultMessage: 'Specify flags. See {url} for reference.',
+      values: {
+        url:
+          'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
+      },
     }),
     replacement: i18n.translate('xpack.canvas.functions.replace.args.replacementHelpText', {
       defaultMessage:
-        'The replacement for the matching parts of string. Capture groups can be accessed by their index, eg $1',
+        'The replacement for the matching parts of string. Capture groups can be accessed by their index, eg {example}',
+      values: {
+        example: '$1',
+      },
     }),
   },
 };

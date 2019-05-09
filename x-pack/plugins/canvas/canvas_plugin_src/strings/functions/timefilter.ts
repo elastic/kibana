@@ -11,17 +11,30 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
   help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {
-    defaultMessage: 'Create a timefilter for querying a source',
+    defaultMessage: 'Create a {timefilter} for querying a source',
+    values: {
+      timefilter: 'timefilter',
+    },
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.timefilter.args.columnHelpText', {
       defaultMessage: 'The column or field to attach the filter to',
     }),
     from: i18n.translate('xpack.canvas.functions.timefilter.args.fromHelpText', {
-      defaultMessage: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
+      defaultMessage: 'Beginning of the range, in {iso} or {es} {dm} format',
+      values: {
+        iso: 'ISO8601',
+        es: 'Elasticsearch',
+        dm: 'datemath',
+      },
     }),
     to: i18n.translate('xpack.canvas.functions.timefilter.args.toHelpText', {
-      defaultMessage: 'End of the range, in ISO8601 or Elasticsearch datemath format',
+      defaultMessage: 'End of the range, in {iso} or {es} {dm} format',
+      values: {
+        iso: 'ISO8601',
+        es: 'Elasticsearch',
+        dm: 'datemath',
+      },
     }),
   },
 };

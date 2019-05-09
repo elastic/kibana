@@ -17,11 +17,19 @@ export const help: FunctionHelp<FunctionFactory<typeof date>> = {
   args: {
     value: i18n.translate('xpack.canvas.functions.date.args.valueHelpText', {
       defaultMessage:
-        'An optional date string to parse into milliseconds since epoch. Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format',
+        'An optional date string to parse into milliseconds since epoch. Can be either a valid ' +
+        'Javascript Date input or a string to parse using the format argument. Must be an {iso} ' +
+        'string or you must provide the format',
+      values: {
+        iso: 'ISO8601',
+      },
     }),
     format: i18n.translate('xpack.canvas.functions.date.args.formatHelpText', {
-      defaultMessage:
-        'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
+      defaultMessage: 'The {moment} format for parsing the optional date string (See {url})',
+      values: {
+        moment: 'momentJS',
+        url: 'https://momentjs.com/docs/#/displaying/',
+      },
     }),
   },
 };

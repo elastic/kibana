@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { image as imageFn } from '../../functions/common/image';
+import { image as imageFn, ImageMode } from '../../functions/common/image';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
@@ -19,7 +19,15 @@ export const help: FunctionHelp<FunctionFactory<typeof imageFn>> = {
     }),
     mode: i18n.translate('xpack.canvas.functions.image.args.modeHelpText', {
       defaultMessage:
-        '"contain" will show the entire image, scaled to fit. "cover" will fill the container with the image, cropping from the sides or bottom as needed.  "stretch" will resize the height and width of the image to 100% of the container',
+        '`{contain}` will show the entire image, scaled to fit. ' +
+        '`{cover}` will fill the container with the image, cropping from the sides or ' +
+        'bottom as needed. ' +
+        '`{stretch}` will resize the height and width of the image to 100% of the container',
+      values: {
+        contain: ImageMode.CONTAIN,
+        cover: ImageMode.COVER,
+        stretch: ImageMode.STRETCH,
+      },
     }),
   },
 };

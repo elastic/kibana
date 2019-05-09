@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { font } from '../../functions/common/font';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory, FontWeight } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof font>> = {
   help: i18n.translate('xpack.canvas.functions.fontHelpText', {
@@ -21,23 +21,34 @@ export const help: FunctionHelp<FunctionFactory<typeof font>> = {
       defaultMessage: 'Text color',
     }),
     family: i18n.translate('xpack.canvas.functions.font.args.familyHelpText', {
-      defaultMessage: 'An acceptable CSS web font string',
+      defaultMessage: 'An acceptable {css} web font string',
+      values: {
+        css: 'CSS',
+      },
     }),
     italic: i18n.translate('xpack.canvas.functions.font.args.italicHelpText', {
       defaultMessage: 'Italicize, true or false',
     }),
     lHeight: i18n.translate('xpack.canvas.functions.font.args.lHeightHelpText', {
-      defaultMessage: 'Line height (px)',
+      defaultMessage: 'Line height ({px})',
+      values: {
+        px: 'px',
+      },
     }),
     size: i18n.translate('xpack.canvas.functions.font.args.sizeHelpText', {
-      defaultMessage: 'Font size (px)',
+      defaultMessage: 'Font size ({px})',
+      values: {
+        px: 'px',
+      },
     }),
     underline: i18n.translate('xpack.canvas.functions.font.args.underlineHelpText', {
       defaultMessage: 'Underline the text, true or false',
     }),
     weight: i18n.translate('xpack.canvas.functions.font.args.weightHelpText', {
-      defaultMessage:
-        'Set the font weight, e.g. normal, bold, bolder, lighter, 100, 200, 300, 400, 500, 600, 700, 800, 900',
+      defaultMessage: 'Set the font weight, e.g. {examples',
+      values: {
+        examples: Object.values(FontWeight).join(', '),
+      },
     }),
   },
 };

@@ -11,10 +11,17 @@ import { elasticOutline } from '../../lib/elastic_outline';
 import { ContextFunction, Render } from '../types';
 import { getFunctionHelp } from '../../strings';
 
+export enum Origin {
+  TOP = 'top',
+  LEFT = 'left',
+  BOTTOM = 'bottom',
+  RIGHT = 'right',
+}
+
 interface Arguments {
   image: string | null;
   emptyImage: string | null;
-  origin: 'top' | 'left' | 'bottom' | 'right';
+  origin: Origin;
 }
 
 export function revealImage(): ContextFunction<
@@ -48,7 +55,7 @@ export function revealImage(): ContextFunction<
         types: ['string'],
         help: argHelp.origin,
         default: 'bottom',
-        options: ['top', 'left', 'bottom', 'right'],
+        options: Object.values(Origin),
       },
     },
     fn: (percent, args) => {

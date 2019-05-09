@@ -15,7 +15,6 @@ import {
   NullContextFunction,
   Style,
   TextAlignment,
-  FONT_WEIGHTS,
   TEXT_ALIGNMENTS,
 } from '../types';
 
@@ -82,12 +81,12 @@ export function font(): NullContextFunction<'font', Arguments, Style> {
       weight: {
         default: 'normal',
         help: argHelp.weight,
-        options: FONT_WEIGHTS,
+        options: Object.values(FontWeight),
         types: ['string'],
       },
     },
     fn: (_context, args) => {
-      if (!FONT_WEIGHTS.includes(args.weight)) {
+      if (!Object.values(FontWeight).includes(args.weight)) {
         throw new Error(`Invalid font weight: '${args.weight}'`);
       }
       if (!TEXT_ALIGNMENTS.includes(args.align)) {

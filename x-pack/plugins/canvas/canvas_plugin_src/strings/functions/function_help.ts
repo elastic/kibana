@@ -100,6 +100,9 @@ type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<AvailableFunctions>>
  * Help text for Canvas Functions should be properly localized. This function will
  * return a dictionary of help strings, organized by Canvas Function specification
  * and then by available arguments.
+ *
+ * This a function, rather than an object, to future-proof string initialization,
+ * if ever necessary.
  */
 export const getFunctionHelp = (): FunctionHelpDict => ({
   all,

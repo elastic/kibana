@@ -5,19 +5,12 @@
  */
 
 import moment from 'moment';
-import { ContextFunction, Datatable } from '../types';
+import { ContextFunction, Datatable, Position } from '../types';
 import { getFunctionHelp } from '../../strings';
-
-export enum POSITION {
-  TOP = 'top',
-  BOTTOM = 'bottom',
-  LEFT = 'left',
-  RIGHT = 'right',
-}
 
 interface Arguments {
   show: boolean;
-  position: POSITION;
+  position: Position;
   min: number | string | null;
   max: number | string | null;
   tickSize: number | null;
@@ -47,7 +40,7 @@ export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments
       position: {
         types: ['string'],
         help: argHelp.position,
-        options: Object.values(POSITION),
+        options: Object.values(Position),
         default: 'left',
       },
       min: {
@@ -66,7 +59,7 @@ export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments
     fn: (_context, args) => {
       const { position, min, max, ...rest } = args;
 
-      if (!Object.values(POSITION).includes(position)) {
+      if (!Object.values(Position).includes(position)) {
         throw new Error(`Invalid position: '${args.position}'`);
       }
 

@@ -11,11 +11,19 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof headFn>> = {
   help: i18n.translate('xpack.canvas.functions.vHelpText', {
-    defaultMessage: 'Get the first N rows from the datatable. Also see `tail`',
+    defaultMessage: 'Get the first {n} rows from the {datatable}. Also see `{tail}`',
+    values: {
+      n: 'N',
+      datatable: 'datatable',
+      tail: 'tail',
+    },
   }),
   args: {
     count: i18n.translate('xpack.canvas.functions.head.args.countHelpText', {
-      defaultMessage: 'Return this many rows from the beginning of the datatable',
+      defaultMessage: 'Return this many rows from the beginning of the {datatable}',
+      values: {
+        datatable: 'datatable',
+      },
     }),
   },
 };

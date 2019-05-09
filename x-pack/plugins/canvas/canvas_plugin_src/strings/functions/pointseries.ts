@@ -12,13 +12,21 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof pointseriesFn>> = {
   help: i18n.translate('xpack.canvas.functions.pointseriesHelpText', {
     defaultMessage:
-      'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html). ' +
-      'If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
-      'keys. Measures are then deduplicated by those keys using the specified TinyMath function',
+      'Turn a {datatable} into a point series model. Currently we differentiate measure ' +
+      'from dimensions by looking for a {url}. If you enter a {tinymath} expression in your ' +
+      'argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions ' +
+      'are combined to create unique keys. Measures are then deduplicated by those keys using ' +
+      'the specified {tinymath} function',
+    values: {
+      datatable: 'datatable',
+      url:
+        '[TinyMath function](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html)',
+      tinymath: 'TinyMath',
+    },
   }),
   args: {
     x: i18n.translate('xpack.canvas.functions.pointseries.args.xHelpText', {
-      defaultMessage: 'The values along the X-axis',
+      defaultMessage: 'The values along the x-axis',
     }),
     y: i18n.translate('xpack.canvas.functions.pointseries.args.yHelpText', {
       defaultMessage: 'The values along the y-axis',

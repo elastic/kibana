@@ -12,12 +12,14 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
   help: i18n.translate('xpack.canvas.functions.seriesStyleHelpText', {
     defaultMessage:
-      'Creates an object used for describing the properties of a series on a chart. You would usually use this inside of a charting function',
+      'Creates an object used for describing the properties of a series on a chart. ' +
+      'You would usually use this inside of a charting function',
   }),
   args: {
     label: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelHelpText', {
       defaultMessage:
-        'The label of the line this style applies to, not the name you would like to give the line',
+        'The label of the line this style applies to, not the name you would like to ' +
+        'give the line',
     }),
     color: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorHelpText', {
       defaultMessage: 'Color to assign the line',
@@ -36,7 +38,8 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
     }),
     stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
       defaultMessage:
-        'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
+        'Should we stack the series? This is the stack "id". Series with the same ' +
+        'stack id will be stacked together',
     }),
     horizontalBars: i18n.translate(
       'xpack.canvas.functions.seriesStyle.args.horizontalBarsHelpText',

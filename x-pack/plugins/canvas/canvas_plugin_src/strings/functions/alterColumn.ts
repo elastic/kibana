@@ -11,8 +11,10 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
   help: i18n.translate('xpack.canvas.functions.alterColumnHelpText', {
-    defaultMessage:
-      'Converts between core types, eg string, number, null, boolean, date and rename columns',
+    defaultMessage: 'Converts between core types (eg {examples}) and rename columns',
+    values: {
+      examples: ['string', 'number', 'null', 'boolean', 'date'].join(','),
+    },
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.alterColumn.args.columnHelpText', {

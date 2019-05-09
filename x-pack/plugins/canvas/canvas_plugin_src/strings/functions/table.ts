@@ -11,7 +11,10 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof table>> = {
   help: i18n.translate('xpack.canvas.functions.tableHelpText', {
-    defaultMessage: 'Configure a Data Table element',
+    defaultMessage: 'Configure a {datatable} element',
+    values: {
+      datatable: 'datatable',
+    },
   }),
   args: {
     font: i18n.translate('xpack.canvas.functions.table.args.fontHelpText', {

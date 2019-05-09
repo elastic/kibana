@@ -10,39 +10,21 @@ export { FontLabel as FontFamily, FontValue } from '../../../common/lib/fonts';
 /**
  * Type containing font weights.
  */
-export type FontWeight =
-  | 'normal'
-  | 'bold'
-  | 'bolder'
-  | 'lighter'
-  | '100'
-  | '200'
-  | '300'
-  | '400'
-  | '500'
-  | '600'
-  | '700'
-  | '800'
-  | '900';
-
-/**
- * Collection of available font weights
- */
-export const FONT_WEIGHTS: FontWeight[] = [
-  'normal',
-  'bold',
-  'bolder',
-  'lighter',
-  '100',
-  '200',
-  '300',
-  '400',
-  '500',
-  '600',
-  '700',
-  '800',
-  '900',
-];
+export enum FontWeight {
+  NORMAL = 'normal',
+  BOLD = 'bold',
+  BOLDER = 'bolder',
+  LIGHTER = 'lighter',
+  ONE = '100',
+  TWO = '200',
+  THREE = '300',
+  FOUR = '400',
+  FIVE = '500',
+  SIX = '600',
+  SEVEN = '700',
+  EIGHT = '800',
+  NINE = '900',
+}
 
 /**
  * Type containing valid text alignments.

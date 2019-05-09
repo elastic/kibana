@@ -12,12 +12,14 @@ import { FunctionFactory } from '../../functions/types';
 export const help: FunctionHelp<FunctionFactory<typeof doFn>> = {
   help: i18n.translate('xpack.canvas.functions.doHelpText', {
     defaultMessage:
-      'Runs multiple sub-expressions. Returns the passed in context. Nice for running actions producing functions.',
+      'Runs multiple sub-expressions. Returns the passed in context. Nice for running ' +
+      'actions producing functions.',
   }),
   args: {
     fn: i18n.translate('xpack.canvas.functions.do.args.fnHelpText', {
       defaultMessage:
-        'One or more sub-expressions. The value of these is not available in the root pipeline as this function simply returns the passed in context',
+        'One or more sub-expressions. The value of these is not available in the root ' +
+        'pipeline as this function simply returns the passed in context',
     }),
   },
 };

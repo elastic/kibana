@@ -27,7 +27,11 @@ export const help: FunctionHelp<FunctionFactory<typeof progressFn>> = {
         'Font settings for the label. Technically you can stick other styles in here too!',
     }),
     label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
-      defaultMessage: `Set true/false to show/hide label or provide a string to display as the label`,
+      defaultMessage: `Set {true}/{false} to show/hide label or provide a string to display as the label`,
+      values: {
+        true: 'true',
+        false: 'false',
+      },
     }),
     max: i18n.translate('xpack.canvas.functions.progress.args.maxHelpText', {
       defaultMessage: 'Maximum value of the progress element',
