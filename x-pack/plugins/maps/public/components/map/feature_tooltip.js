@@ -53,14 +53,11 @@ export class FeatureTooltip extends React.Component {
 
     let properties;
     try {
-      const tooltipLayer = this.props.layerList.find(layer => {
-        return layer.getId() === this.props.tooltipState.layerId;
-      });
-      const targetFeature = tooltipLayer.getFeatureById(this.props.tooltipState.featureId);
-      properties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+      properties = await this.props.loadFeatureProperties({ layerId: nextLayerId, featureId: nextFeatureId });
     } catch(error) {
       if (this._isMounted) {
         this.setState({
+          properties: [],
           loadPropertiesErrorMsg: error.message
         });
       }

@@ -21,6 +21,7 @@ import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/store_actions';
 import { filterBarQueryFilter } from '../../../kibana_services';
 import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
+import { i18n } from '@kbn/i18n';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
@@ -364,8 +365,8 @@ export class MBMapContainer extends React.Component {
     const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
     ReactDOM.render((
       <FeatureTooltip
-        layerList={this.props.layerList}
         tooltipState={this.props.tooltipState}
+        loadFeatureProperties={this._loadFeatureProperties}
         closeTooltip={this._onTooltipClose}
         showFilterButtons={this.props.isFilterable && isLocked}
         showCloseButton={isLocked}
@@ -375,6 +376,30 @@ export class MBMapContainer extends React.Component {
     this._mbPopup.setLngLat(this.props.tooltipState.location)
       .setDOMContent(this._tooltipContainer)
       .addTo(this._mbMap);
+  }
+
+  _loadFeatureProperties = async ({ layerId, featureId }) => {
+    const tooltipLayer = this.props.layerList.find(layer => {
+      return layer.getId() === layerId;
+    });
+    if (!tooltipLayer) {
+      throw new Error(
+        i18n.translate('xpack.maps.mb.unableToFindLayerMsg', {
+          defaultMessage: 'Unable to find layer {layerId}',
+          values: { layerId }
+        })
+      );
+    }
+    const targetFeature = tooltipLayer.getFeatureById(this.props.tooltipState.featureId);
+    if (!targetFeature) {
+      throw new Error(
+        i18n.translate('xpack.maps.mb.unableToFindFeatureMsg', {
+          defaultMessage: 'Unable to find feature {featureId}',
+          values: { featureId }
+        })
+      );
+    }
+    return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
   }
 
   _syncTooltipState() {

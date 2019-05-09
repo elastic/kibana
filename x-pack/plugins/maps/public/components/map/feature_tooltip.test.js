@@ -33,7 +33,11 @@ class MockTooltipProperty {
 }
 
 const defaultProps = {
-  loadProperties: () => { return []; },
+  loadFeatureProperties: () => { return []; },
+  tooltipState: {
+    layerId: 'layer1',
+    featureId: 'feature1',
+  },
   closeTooltip: () => {},
   showFilterButtons: false,
   showCloseButton: false
@@ -85,7 +89,7 @@ describe('FeatureTooltip', async () => {
       <FeatureTooltip
         {...defaultProps}
         showFilterButtons={true}
-        loadProperties={() => { return mockTooltipProperties; }}
+        loadFeatureProperties={() => { return mockTooltipProperties; }}
       />
     );
 
@@ -104,7 +108,7 @@ describe('FeatureTooltip', async () => {
         {...defaultProps}
         showFilterButtons={true}
         showCloseButton={true}
-        loadProperties={() => { return mockTooltipProperties; }}
+        loadFeatureProperties={() => { return mockTooltipProperties; }}
       />
     );
 
@@ -123,7 +127,7 @@ describe('FeatureTooltip', async () => {
         {...defaultProps}
         showFilterButtons={true}
         showCloseButton={true}
-        loadProperties={() => { throw new Error('Simulated load properties error'); }}
+        loadFeatureProperties={() => { throw new Error('Simulated load properties error'); }}
       />
     );
 
