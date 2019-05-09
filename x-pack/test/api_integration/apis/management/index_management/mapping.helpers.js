@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('index management', () => {
-    loadTestFile(require.resolve('./indices'));
-    loadTestFile(require.resolve('./mapping'));
-  });
-}
+import { API_BASE_PATH } from './constants';
+
+export const registerHelpers = ({ supertest }) => {
+  const getIndexMapping = (indexName) => supertest.get(`${API_BASE_PATH}/mapping/${indexName}`);
+
+  return {
+    getIndexMapping,
+  };
+};

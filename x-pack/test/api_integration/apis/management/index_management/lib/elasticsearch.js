@@ -13,9 +13,9 @@ import { getRandomString } from './random';
 export const initElasticsearchHelpers = (es) => {
   let indicesCreated = [];
 
-  const createIndex = (index = getRandomString()) => {
+  const createIndex = (index = getRandomString(), body) => {
     indicesCreated.push(index);
-    return es.indices.create({ index }).then(() => index);
+    return es.indices.create({ index, body }).then(() => index);
   };
 
   const deleteIndex = (index) => {
