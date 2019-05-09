@@ -132,7 +132,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         mergeMap(async plugin => {
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
           if (plugin.schema) {
-            await this.coreContext.configService.setSchemaFor(plugin.configPath, plugin.schema);
+            await this.coreContext.configService.setSchema(plugin.configPath, plugin.schema);
           }
 
           if (pluginEnableStatuses.has(plugin.name)) {

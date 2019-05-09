@@ -61,9 +61,9 @@ beforeEach(() => {
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
     env,
-    logger,
-    [[configDefinition.configPath, configDefinition.schema]]
+    logger
   );
+  configService.setSchema(configDefinition.configPath, configDefinition.schema);
   pluginsService = new PluginsService({ env, logger, configService });
 
   [mockPluginSystem] = MockPluginsSystem.mock.instances as any;

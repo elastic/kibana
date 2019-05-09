@@ -34,39 +34,30 @@ export class ConfigService {
    * then list all unhandled config paths when the startup process is completed.
    */
   private readonly handledPaths: ConfigPath[] = [];
-  private readonly schemas = new Map<string, Type<any>>();
+  private readonly schemas = new Map<string, Type<unknown>>();
 
   constructor(
     private readonly config$: Observable<Config>,
     private readonly env: Env,
-    logger: LoggerFactory,
-    coreServiceSchemas: Array<[ConfigPath, Type<any>]> = []
+    logger: LoggerFactory
   ) {
     this.log = logger.get('config');
-    for (const [path, schema] of coreServiceSchemas) {
-      this.setSchema(path, schema);
-    }
   }
 
   /**
    * Set config schema for a path and performs its validation
    */
-  public async setSchemaFor(path: ConfigPath, schema: Type<any>) {
-    this.setSchema(path, schema);
+  public async setSchema(path: ConfigPath, schema: Type<unknown>) {
+    const namespace = pathToString(path);
+    if (this.schemas.has(namespace)) {
+      throw new Error(`Validation schema for ${path} was already registered.`);
+    }
+
+    this.schemas.set(namespace, schema);
+
     await this.validateConfig(path)
       .pipe(first())
       .toPromise();
-  }
-
-  /**
-   * Performs validation for all known validation schemas
-   */
-  public async validateAll() {
-    for (const namespace of this.schemas.keys()) {
-      await this.validateConfig(namespace)
-        .pipe(first())
-        .toPromise();
-    }
   }
 
   /**
@@ -85,7 +76,7 @@ export class ConfigService {
    * @param ConfigClass - A class (not an instance of a class) that contains a
    * static `schema` that we validate the config at the given `path` against.
    */
-  public atPath<TSchema extends Type<any>, TConfig>(
+  public atPath<TSchema extends Type<unknown>, TConfig>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
@@ -165,8 +156,8 @@ export class ConfigService {
     );
   }
 
-  private createConfig<TSchema extends Type<any>, TConfig>(
-    validatedConfig: Record<string, any>,
+  private createConfig<TSchema extends Type<unknown>, TConfig>(
+    validatedConfig: unknown,
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     return new ConfigClass(validatedConfig, this.env);
@@ -188,15 +179,6 @@ export class ConfigService {
   private markAsHandled(path: ConfigPath) {
     this.log.debug(`Marking config path as handled: ${path}`);
     this.handledPaths.push(path);
-  }
-
-  /**
-   * Defines a validation schema for an appropriate path in config object.
-   * @internal
-   */
-  private setSchema(path: ConfigPath, schema: Type<any>) {
-    const namespace = pathToString(path);
-    this.schemas.set(namespace, schema);
   }
 }
 

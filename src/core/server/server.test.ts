@@ -103,11 +103,11 @@ test('stops services on "stop"', async () => {
 });
 
 test(`doesn't setup core services if config validation fails`, async () => {
-  configService.validateAll.mockImplementation(() => {
+  configService.setSchema.mockImplementation(() => {
     throw new Error('invalid config');
   });
   const server = new Server(config$, env, logger);
-  await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
+  await expect(server.preSetup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
   expect(httpService.setup).not.toHaveBeenCalled();
   expect(elasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();

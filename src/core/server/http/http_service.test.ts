@@ -38,10 +38,9 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
       })
     ),
     env,
-    logger,
-    [[configDefinition.configPath, configDefinition.schema]]
+    logger
   );
-
+  configService.setSchema(configDefinition.configPath, configDefinition.schema);
   return configService;
 };
 

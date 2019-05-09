@@ -31,14 +31,6 @@ import { configDefinition as httpConfigDefinition } from './http';
 import { configDefinition as loggingConfigDefinition } from './logging';
 import { configDefinition as devConfigDefinition } from './dev';
 
-const schemas: Array<[ConfigPath, Type<any>]> = [
-  [elasticsearchConfigDefinition.configPath, elasticsearchConfigDefinition.schema],
-  [loggingConfigDefinition.configPath, loggingConfigDefinition.schema],
-  [httpConfigDefinition.configPath, httpConfigDefinition.schema],
-  [pluginsConfigDefinition.configPath, pluginsConfigDefinition.schema],
-  [devConfigDefinition.configPath, devConfigDefinition.schema],
-];
-
 export class Server {
   public readonly configService: ConfigService;
   private readonly elasticsearch: ElasticsearchService;
@@ -53,7 +45,7 @@ export class Server {
     private readonly logger: LoggerFactory
   ) {
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(config$, env, logger, schemas);
+    this.configService = new ConfigService(config$, env, logger);
 
     const core = { configService: this.configService, env, logger };
     this.http = new HttpService(core);
@@ -62,8 +54,11 @@ export class Server {
     this.elasticsearch = new ElasticsearchService(core);
   }
 
+  public async preSetup() {
+    await this.setupConfigSchemas();
+  }
+
   public async setup() {
-    await this.configService.validateAll();
     this.log.debug('setting up server');
 
     const httpSetup = await this.http.setup();
@@ -114,5 +109,19 @@ export class Server {
     const router = new Router('/core');
     router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
     httpSetup.registerRouter(router);
+  }
+
+  private async setupConfigSchemas() {
+    const schemas: Array<[ConfigPath, Type<unknown>]> = [
+      [elasticsearchConfigDefinition.configPath, elasticsearchConfigDefinition.schema],
+      [loggingConfigDefinition.configPath, loggingConfigDefinition.schema],
+      [httpConfigDefinition.configPath, httpConfigDefinition.schema],
+      [pluginsConfigDefinition.configPath, pluginsConfigDefinition.schema],
+      [devConfigDefinition.configPath, devConfigDefinition.schema],
+    ];
+
+    for (const [path, schema] of schemas) {
+      await this.configService.setSchema(path, schema);
+    }
   }
 }

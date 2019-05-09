@@ -144,9 +144,9 @@ test('properly iterates through plugin search locations', async () => {
       new ObjectToConfigAdapter({ plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } })
     ),
     env,
-    logger,
-    [[configDefinition.configPath, configDefinition.schema]]
+    logger
   );
+  configService.setSchema(configDefinition.configPath, configDefinition.schema);
 
   const pluginsConfig = await configService
     .atPath('plugins', PluginsConfig)
