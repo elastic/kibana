@@ -17,30 +17,24 @@
  * under the License.
  */
 
-import { accessSync, R_OK } from 'fs';
-import { find } from 'lodash';
-import { fromRoot } from '../../utils';
-import { createConfigPaths } from './create_config_path';
+import { join } from 'path';
+import { fromRoot } from '../../utils/from_root';
 
-const CONFIG_PATHS = createConfigPaths('kibana.yml');
-
-const DATA_PATHS = [
-  process.env.DATA_PATH, //deprecated
-  fromRoot('data'),
-  '/var/lib/kibana'
-].filter(Boolean);
-
-function findFile(paths) {
-  const availablePath = find(paths, configPath => {
-    try {
-      accessSync(configPath, R_OK);
-      return true;
-    } catch (e) {
-      //Check the next path
-    }
-  });
-  return availablePath || paths[0];
+/**
+ * Create the paths where you might find a `config` directory containing
+ * the specified `file`.
+ *
+ * @example
+ *
+ * const paths: string[] = createConfigPaths('kibana.yml');
+ *
+ * @param file The file to expect in a Kibana config directory.
+ */
+export function createConfigPaths(file: string): string[] {
+  return [
+    process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, file),
+    process.env.CONFIG_PATH, //deprecated
+    fromRoot(`config/${file}`),
+    `/etc/kibana/${file}`,
+  ].filter(Boolean) as string[];
 }
-
-export const getConfig = () => findFile(CONFIG_PATHS);
-export const getData = () => findFile(DATA_PATHS);
