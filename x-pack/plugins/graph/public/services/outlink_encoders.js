@@ -6,7 +6,9 @@
 
 import rison from 'rison-node';
 
-export const getOutlinkEncoders = i18n => [{
+import { i18n } from '@kbn/i18n';
+
+export const getOutlinkEncoders = () => [{
   id: 'esq-rison-loose',
   title: i18n('xpack.graph.outlinkEncoders.esqRisonLooseTitle', {
     defaultMessage: 'elasticsearch OR query (rison encoded)',

@@ -7,6 +7,7 @@
 
 
 import template from './general_job_details.html';
+import { i18n } from '@kbn/i18n';
 import { changeJobIDCase } from './change_job_id_case';
 
 import { uiModules } from 'ui/modules';
@@ -17,7 +18,7 @@ module.directive('mlGeneralJobDetails', function () {
     restrict: 'E',
     replace: true,
     template,
-    controller: function ($scope, i18n) {
+    controller: function ($scope) {
       // force job ids to be lowercase
       $scope.changeJobIDCase = changeJobIDCase;
       $scope.hideAdvancedButtonAriaLabel = i18n('xpack.ml.newJob.simple.generalJobDetails.hideAdvancedButtonAriaLabel', {

@@ -7,6 +7,7 @@
 
 // K5 imports
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
 import { notify } from 'ui/notify';
@@ -33,7 +34,7 @@ import { defaultQuery } from './templates/default_query';
 uiRoutes.when('/dev_tools/searchprofiler', {
   template: template,
   requireUICapability: 'dev_tools.show',
-  controller: ($scope, i18n) => {
+  controller: $scope => {
     $scope.registerLicenseLinkLabel = i18n('xpack.searchProfiler.registerLicenseLinkLabel',
       { defaultMessage: 'register a license' });
     $scope.trialLicense = i18n('xpack.searchProfiler.trialLicenseTitle',

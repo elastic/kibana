@@ -8,7 +8,9 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+import { i18n } from '@kbn/i18n';
+
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'ml',
     title: i18n('xpack.ml.machineLearningTitle', {

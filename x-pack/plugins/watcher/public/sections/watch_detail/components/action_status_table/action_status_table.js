@@ -5,11 +5,12 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './action_status_table.html';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('actionStatusTable', function ($injector, i18n) {
+app.directive('actionStatusTable', function () {
   return {
     restrict: 'E',
     replace: true,

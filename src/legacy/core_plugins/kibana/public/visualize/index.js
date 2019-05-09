@@ -18,6 +18,7 @@
  */
 
 import './editor/editor';
+import { i18n } from '@kbn/i18n';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
 import 'ui/filter_bar';
@@ -33,7 +34,7 @@ uiRoutes
   .defaults(/visualize/, {
     requireDefaultIndex: true,
     requireUICapability: 'visualize.show',
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.visualize.save) {
         return undefined;
       }
@@ -68,7 +69,7 @@ uiRoutes
     },
   });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'visualize',
     title: 'Visualize',

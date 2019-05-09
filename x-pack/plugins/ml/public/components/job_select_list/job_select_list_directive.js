@@ -12,6 +12,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 import moment from 'moment';
 import d3 from 'd3';
@@ -31,7 +32,7 @@ module.directive('mlJobSelectList', function (Private) {
     replace: true,
     transclude: true,
     template,
-    controller: function ($scope, i18n) {
+    controller: function ($scope) {
       const mlJobSelectService = Private(JobSelectServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];

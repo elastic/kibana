@@ -99,7 +99,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
     pageData: getPageData
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const config = $injector.get('config');
       const dateFormat = config.get('dateFormat');
 

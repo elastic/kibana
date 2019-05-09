@@ -5,11 +5,12 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { DocTitleProvider } from 'ui/doc_title';
 
 const uiModule = uiModules.get('monitoring/title', []);
-uiModule.service('title', (Private, i18n) => {
+uiModule.service('title', Private => {
   const docTitle = Private(DocTitleProvider);
   return function changeTitle(cluster, suffix) {
     let clusterName = _.get(cluster, 'cluster_name');

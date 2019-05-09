@@ -7,10 +7,11 @@
 
 
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 if (chrome.getInjected('monitoringUiEnabled')) {
-  FeatureCatalogueRegistryProvider.register((i18n) => {
+  FeatureCatalogueRegistryProvider.register(() => {
     return {
       id: 'monitoring',
       title: i18n('xpack.monitoring.monitoringTitle', {

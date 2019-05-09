@@ -6,11 +6,12 @@
 
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './sortable_column.html';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('sortableColumn', function (i18n) {
+app.directive('sortableColumn', function () {
   return {
     restrict: 'E',
     transclude: true,

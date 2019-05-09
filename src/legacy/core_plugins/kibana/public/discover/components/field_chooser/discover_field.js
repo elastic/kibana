@@ -18,6 +18,7 @@
  */
 
 import $ from 'jquery';
+import { i18n } from '@kbn/i18n';
 import html from './discover_field.html';
 import _ from 'lodash';
 import 'ui/directives/css_truncate';
@@ -28,7 +29,7 @@ import { capabilities } from 'ui/capabilities';
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
-app.directive('discoverField', function ($compile, i18n) {
+app.directive('discoverField', function ($compile) {
   return {
     restrict: 'E',
     template: html,

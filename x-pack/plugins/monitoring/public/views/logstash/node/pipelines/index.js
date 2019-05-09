@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -45,7 +46,7 @@ const getPageData = ($injector) => {
     });
 };
 
-function makeUpgradeMessage(logstashVersion, i18n) {
+function makeUpgradeMessage(logstashVersion) {
   if (isPipelineMonitoringSupportedInVersion(logstashVersion)) {
     return null;
   }
@@ -70,7 +71,7 @@ uiRoutes
       pageData: getPageData
     },
     controller: class extends MonitoringViewBaseEuiTableController {
-      constructor($injector, $scope, i18n) {
+      constructor($injector, $scope) {
         const kbnUrl = $injector.get('kbnUrl');
         const config = $injector.get('config');
 

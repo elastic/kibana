@@ -8,6 +8,7 @@
  * Controller for single index detail
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
@@ -53,7 +54,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
   },
   controllerAs: 'monitoringElasticsearchIndexApp',
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const kbnUrl = $injector.get('kbnUrl');
       const indexName = $route.current.params.index;

@@ -18,6 +18,7 @@
  */
 
 import truncText from 'trunc-text';
+import { i18n } from '@kbn/i18n';
 import truncHTML from 'trunc-html';
 import { uiModules } from '../../modules';
 import truncatedTemplate from '../partials/truncated.html';
@@ -25,7 +26,7 @@ import 'angular-sanitize';
 
 const module = uiModules.get('kibana', ['ngSanitize']);
 
-module.directive('kbnTruncated', function (i18n) {
+module.directive('kbnTruncated', function () {
   return {
     restrict: 'E',
     scope: {

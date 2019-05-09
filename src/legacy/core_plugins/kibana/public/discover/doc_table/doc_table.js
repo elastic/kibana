@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
 import './infinite_scroll';
@@ -32,7 +33,7 @@ import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('app/discover')
-  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier, i18n) {
+  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier) {
     return {
       restrict: 'E',
       template: html,

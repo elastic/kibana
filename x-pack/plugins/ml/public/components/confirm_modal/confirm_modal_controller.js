@@ -7,9 +7,10 @@
 
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlConfirmModal', function ($scope, $modalInstance, params, i18n) {
+module.controller('MlConfirmModal', function ($scope, $modalInstance, params) {
 
   $scope.okFunc = params.ok;
   $scope.cancelFunc = params.cancel;

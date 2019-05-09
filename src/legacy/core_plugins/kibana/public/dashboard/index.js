@@ -18,6 +18,7 @@
  */
 
 import './dashboard_app';
+import { i18n } from '@kbn/i18n';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
@@ -48,7 +49,7 @@ app.directive('dashboardListing', function (reactDirective) {
   return reactDirective(wrapInI18nContext(DashboardListing));
 });
 
-function createNewDashboardCtrl($scope, i18n) {
+function createNewDashboardCtrl($scope) {
   $scope.visitVisualizeAppLinkText = i18n('kbn.dashboard.visitVisualizeAppLinkText', {
     defaultMessage: 'visit the Visualize app',
   });
@@ -58,7 +59,7 @@ uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true,
     requireUICapability: 'dashboard.show',
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.dashboard.showWriteControls) {
         return undefined;
       }
@@ -76,7 +77,7 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller($injector, $location, $scope, Private, config, i18n) {
+    controller($injector, $location, $scope, Private, config) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const kbnUrl = $injector.get('kbnUrl');
       const dashboardConfig = $injector.get('dashboardConfig');
@@ -148,7 +149,7 @@ uiRoutes
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
     resolve: {
-      dash: function (savedDashboards, $route, redirectWhenMissing, kbnUrl, AppState, i18n) {
+      dash: function (savedDashboards, $route, redirectWhenMissing, kbnUrl, AppState) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)
@@ -183,7 +184,7 @@ uiRoutes
     }
   });
 
-FeatureCatalogueRegistryProvider.register((i18n) => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'dashboard',
     title: i18n('kbn.dashboard.featureCatalogue.dashboardTitle', {

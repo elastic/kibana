@@ -6,7 +6,9 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(($injector, i18n) => {
+import { i18n } from '@kbn/i18n';
+
+FeatureCatalogueRegistryProvider.register($injector => {
 
   const licenseService = $injector.get('logstashLicenseService');
   if (!licenseService.enableLinks) {

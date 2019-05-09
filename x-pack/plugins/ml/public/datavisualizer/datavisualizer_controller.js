@@ -12,6 +12,7 @@
   */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 
 import 'plugins/ml/components/form_filter_input';
@@ -51,14 +52,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlDataVisualizerViewFields', function (
-    $scope,
-    $timeout,
-    $window,
-    Private,
-    AppState,
-    config,
-    i18n) {
+  .controller('MlDataVisualizerViewFields', function ($scope, $timeout, $window, Private, AppState, config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();

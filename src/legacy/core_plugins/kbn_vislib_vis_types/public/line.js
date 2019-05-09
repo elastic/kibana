@@ -18,10 +18,11 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import pointSeriesTemplate from './editors/point_series.html';
 
-export default function PointSeriesVisType(Private, i18n) {
+export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({

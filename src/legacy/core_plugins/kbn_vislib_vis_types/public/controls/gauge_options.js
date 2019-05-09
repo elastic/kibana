@@ -18,11 +18,12 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import gaugeOptionsTemplate from './gauge_options.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('gaugeOptions', function (i18n) {
+module.directive('gaugeOptions', function () {
   return {
     restrict: 'E',
     template: gaugeOptionsTemplate,

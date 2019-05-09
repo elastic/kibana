@@ -8,6 +8,8 @@
 
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import template from './job_group_select.html';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -16,7 +18,7 @@ import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobGroupSelect', function (i18n) {
+module.directive('mlJobGroupSelect', function () {
   return {
     restrict: 'E',
     template,

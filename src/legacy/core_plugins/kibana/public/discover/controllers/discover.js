@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
 import moment from 'moment';
@@ -95,7 +96,7 @@ uiRoutes
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
       ),
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.discover.save) {
         return undefined;
       }
@@ -191,8 +192,7 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
-  i18n,
-  uiCapabilities,
+  uiCapabilities
 ) {
   const visualizeLoader = Private(VisualizeLoaderProvider);
   let visualizeHandler;
@@ -349,7 +349,7 @@ function discoverController(
 
     return [
       newSearch,
-      ...uiCapabilities.discover.save ? [saveSearch] : [],
+      ...(uiCapabilities.discover.save ? [saveSearch] : []),
       openSearch,
       shareSearch,
       inspectSearch,

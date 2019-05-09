@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -23,7 +24,7 @@ uiRoutes.when('/elasticsearch/indices', {
   },
   controllerAs: 'elasticsearchIndices',
   controller: class ElasticsearchIndicesController extends MonitoringViewBaseEuiTableController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const features = $injector.get('features');

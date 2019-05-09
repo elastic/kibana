@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import 'ui/angular_ui_select';
 import dateMath from '@elastic/datemath';
@@ -45,12 +46,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateRecognizerJobs', function (
-    $scope,
-    $window,
-    $route,
-    Private,
-    i18n) {
+  .controller('MlCreateRecognizerJobs', function ($scope, $window, $route, Private) {
 
     const mlCreateRecognizerJobsService = Private(CreateRecognizerJobsServiceProvider);
     timefilter.disableTimeRangeSelector();

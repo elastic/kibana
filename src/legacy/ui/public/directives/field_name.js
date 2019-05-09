@@ -18,6 +18,7 @@
  */
 
 import $ from 'jquery';
+import { i18n } from '@kbn/i18n';
 import { template } from 'lodash';
 import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import booleanFieldNameIcon from './field_name_icons/boolean_field_name_icon.html';
@@ -45,7 +46,7 @@ const compiledSourceFieldNameIcon = template(sourceFieldNameIcon);
 const compiledStringFieldNameIcon = template(stringFieldNameIcon);
 const compiledUnknownFieldNameIcon = template(unknownFieldNameIcon);
 
-module.directive('fieldName', function ($compile, $rootScope, config, i18n) {
+module.directive('fieldName', function ($compile, $rootScope, config) {
   return {
     restrict: 'AE',
     scope: {

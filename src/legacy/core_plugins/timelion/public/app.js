@@ -19,6 +19,8 @@
 
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import { capabilities } from 'ui/capabilities';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
@@ -72,7 +74,7 @@ require('ui/routes')
         ? getSavedSheetBreadcrumbs
         : getCreateBreadcrumbs
     ),
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.timelion.save) {
         return undefined;
       }
@@ -120,8 +122,7 @@ app.controller('timelion', function (
   courier,
   kbnUrl,
   Notifier,
-  Private,
-  i18n,
+  Private
 ) {
 
   // Keeping this at app scope allows us to keep the current page when the user

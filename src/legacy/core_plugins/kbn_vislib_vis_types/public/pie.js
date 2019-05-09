@@ -18,10 +18,11 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import pieTemplate from './editors/pie.html';
 
-export default function HistogramVisType(Private, i18n) {
+export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({

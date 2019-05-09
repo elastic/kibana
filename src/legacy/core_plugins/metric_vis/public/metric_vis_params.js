@@ -18,12 +18,13 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import 'ui/directives/inequality';
 import metricVisParamsTemplate from './metric_vis_params.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('metricVisParams', function (i18n) {
+module.directive('metricVisParams', function () {
   return {
     restrict: 'E',
     template: metricVisParamsTemplate,

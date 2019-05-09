@@ -18,6 +18,7 @@
  */
 
 import { MetricsRequestHandlerProvider } from './request_handler';
+import { i18n } from '@kbn/i18n';
 import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
@@ -28,7 +29,7 @@ import { PANEL_TYPES } from '../../common/panel_types';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 VisTypesRegistryProvider.register(MetricsVisProvider);
 
-export default function MetricsVisProvider(Private, i18n) {
+export default function MetricsVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const ReactEditorController = Private(ReactEditorControllerProvider).handler;
   const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;

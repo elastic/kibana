@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import 'ace';
 import 'ui/angular_ui_select';
@@ -73,14 +74,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlNewJob',
-  function (
-    $scope,
-    $route,
-    $location,
-    $modal,
-    Private,
-    mlConfirmModalService,
-    i18n) {
+  function ($scope, $route, $location, $modal, Private, mlConfirmModalService) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page

@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types';
@@ -63,14 +64,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateSingleMetricJob', function (
-    $scope,
-    $route,
-    $filter,
-    $timeout,
-    Private,
-    AppState,
-    i18n) {
+  .controller('MlCreateSingleMetricJob', function ($scope, $route, $filter, $timeout, Private, AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();

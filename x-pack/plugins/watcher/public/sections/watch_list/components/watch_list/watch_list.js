@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { toastNotifications } from 'ui/notify';
 import template from './watch_list.html';
@@ -21,7 +22,7 @@ import 'plugins/watcher/services/license';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchList', function ($injector, i18n) {
+app.directive('watchList', function ($injector) {
   const pagerFactory = $injector.get('pagerFactory');
   const watchesService = $injector.get('xpackWatcherWatchesService');
   const licenseService = $injector.get('xpackWatcherLicenseService');

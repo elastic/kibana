@@ -5,9 +5,10 @@
  */
 
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
+import { i18n } from '@kbn/i18n';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
-DevToolsRegistryProvider.register((Private, i18n) => {
+DevToolsRegistryProvider.register(Private => {
   const xpackInfo = Private(XPackInfoProvider);
   return {
     order: 6,

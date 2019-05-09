@@ -34,7 +34,7 @@ export function serializeFetchParams(
     return Promise.resolve(fetchParams.index)
       .then(function (indexPattern) {
         const body = {
-          ...fetchParams.body || {},
+          ...(fetchParams.body || {}),
         };
         if (esShardTimeout > 0) {
           body.timeout = `${esShardTimeout}ms`;

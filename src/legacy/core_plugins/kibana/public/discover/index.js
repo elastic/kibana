@@ -18,6 +18,7 @@
  */
 
 import './saved_searches/saved_searches';
+import { i18n } from '@kbn/i18n';
 import './directives';
 import 'ui/collapsible_sidebar';
 import './components/field_chooser/field_chooser';
@@ -25,7 +26,7 @@ import './controllers/discover';
 import './doc_table/components/table_row';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'discover',
     title: i18n('kbn.discover.discoverTitle', {

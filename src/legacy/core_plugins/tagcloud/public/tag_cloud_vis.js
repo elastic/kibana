@@ -18,13 +18,14 @@
  */
 
 import './tag_cloud_vis_params';
+import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 
-VisTypesRegistryProvider.register(function (Private, i18n) {
+VisTypesRegistryProvider.register(function (Private) {
 
   const VisFactory = Private(VisFactoryProvider);
 

@@ -63,7 +63,7 @@ uiRoutes
     template: indexTemplate,
     k7Breadcrumbs: getBreadcrumbs,
     requireUICapability: 'management.kibana.settings',
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.advancedSettings.save) {
         return undefined;
       }
@@ -106,7 +106,7 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings'
 });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'advanced_settings',
     title: i18n('kbn.management.settings.advancedSettingsLabel', {

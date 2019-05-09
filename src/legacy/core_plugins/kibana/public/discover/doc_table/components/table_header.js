@@ -18,13 +18,14 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { shortenDottedString } from '../../../../common/utils/shorten_dotted_string';
 import headerHtml from './table_header.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('app/discover');
 
 
-module.directive('kbnTableHeader', function (i18n) {
+module.directive('kbnTableHeader', function () {
   return {
     restrict: 'A',
     scope: {

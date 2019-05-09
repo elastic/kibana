@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { toastNotifications } from 'ui/notify';
 import template from './json_watch_edit.html';
@@ -21,7 +22,7 @@ import { ACTION_TYPES } from '../../../../../common/constants';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('jsonWatchEdit', function ($injector, i18n) {
+app.directive('jsonWatchEdit', function ($injector) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
   const kbnUrl = $injector.get('kbnUrl');

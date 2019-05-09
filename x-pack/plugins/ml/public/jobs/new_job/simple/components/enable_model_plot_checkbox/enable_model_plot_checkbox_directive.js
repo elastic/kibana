@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import ReactDOM from 'react-dom';
 
 import { EnableModelPlotCheckbox } from './enable_model_plot_checkbox_view.js';
@@ -16,7 +17,7 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlEnableModelPlotCheckbox', function (i18n) {
+module.directive('mlEnableModelPlotCheckbox', function () {
   return {
     restrict: 'AE',
     replace: false,

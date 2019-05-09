@@ -12,6 +12,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 
 import { numTicks } from '../../util/chart_utils';
@@ -21,7 +22,7 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlMetricDistributionChart', function (i18n) {
+module.directive('mlMetricDistributionChart', function () {
 
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;

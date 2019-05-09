@@ -18,9 +18,11 @@
  */
 import panelRegistryProvider from '../../lib/panel_registry';
 
+import { i18n } from '@kbn/i18n';
+
 require('ui/modules')
   .get('apps/timelion', [])
-  .directive('chart', function (Private, i18n) {
+  .directive('chart', function (Private) {
     return {
       restrict: 'A',
       scope: {

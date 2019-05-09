@@ -8,11 +8,13 @@
 
 import template from './form_filter_input.html';
 
+import { i18n } from '@kbn/i18n';
+
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlFormFilterInput', function (i18n) {
+module.directive('mlFormFilterInput', function () {
   return {
     scope: {
       placeholder: '@?',

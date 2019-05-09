@@ -19,11 +19,13 @@
 
 require('./sense_help_example');
 
+import { i18n } from '@kbn/i18n';
+
 const storage = require('../storage');
 
 require('ui/modules')
   .get('app/sense')
-  .directive('senseWelcome', function (i18n) {
+  .directive('senseWelcome', function () {
     return {
       restrict: 'E',
       template: require('./welcome.html'),

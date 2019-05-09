@@ -18,6 +18,7 @@
  */
 
 import 'ui/directives/css_truncate';
+import { i18n } from '@kbn/i18n';
 import 'ui/directives/field_name';
 import './discover_field';
 import 'ui/angular_ui_select';
@@ -30,7 +31,7 @@ import { uiModules } from 'ui/modules';
 import fieldChooserTemplate from './field_chooser.html';
 const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, globalState, config, $route, i18n) {
+app.directive('discFieldChooser', function ($location, globalState, config, $route) {
   return {
     restrict: 'E',
     scope: {

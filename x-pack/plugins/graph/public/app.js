@@ -5,6 +5,7 @@
  */
 
 import d3 from 'd3';
+import { i18n } from '@kbn/i18n';
 import 'ace';
 import rison from 'rison-node';
 import React from 'react';
@@ -107,7 +108,7 @@ uiRoutes
     template: appTemplate,
     k7Breadcrumbs: getWorkspaceBreadcrumbs,
     resolve: {
-      savedWorkspace: function (savedGraphWorkspaces, courier, $route, i18n) {
+      savedWorkspace: function (savedGraphWorkspaces, courier, $route) {
         return savedGraphWorkspaces.get($route.current.params.id)
           .catch(
             function () {
@@ -146,7 +147,17 @@ uiRoutes
 
 
 //========  Controller for basic UI ==================
-app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl, i18n, config) {
+app.controller('graphuiPlugin', function (
+  $scope,
+  $route,
+  $http,
+  kbnUrl,
+  Private,
+  Promise,
+  confirmModal,
+  kbnBaseUrl,
+  config
+) {
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)
       .then(() => data);

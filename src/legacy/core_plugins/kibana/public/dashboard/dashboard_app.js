@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
@@ -92,8 +93,7 @@ app.directive('dashboardApp', function ($injector) {
       $routeParams,
       getAppState,
       dashboardConfig,
-      localStorage,
-      i18n,
+      localStorage
     ) {
       const filterManager = Private(FilterManagerProvider);
       const queryFilter = Private(FilterBarQueryFilterProvider);

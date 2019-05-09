@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import ReactDOM from 'react-dom';
 
 import { BucketSpanEstimator } from './bucket_span_estimator_view';
@@ -16,7 +17,7 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlBucketSpanEstimator', function (i18n) {
+module.directive('mlBucketSpanEstimator', function () {
   return {
     restrict: 'AE',
     replace: false,

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import 'angular-elastic/elastic';
 import rison from 'rison-node';
@@ -44,7 +45,7 @@ uiRoutes
   });
 
 uiModules.get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
+  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {

@@ -18,9 +18,10 @@
  */
 
 import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
+import { i18n } from '@kbn/i18n';
 import storage from '../storage';
 
-export function SenseTopNavController(Private, i18n) {
+export function SenseTopNavController(Private) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
 
   const controller = new KbnTopNavController([

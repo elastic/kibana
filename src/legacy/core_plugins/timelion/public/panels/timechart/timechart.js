@@ -18,9 +18,10 @@
  */
 
 import Panel from '../panel';
+import { i18n } from '@kbn/i18n';
 import panelRegistry from '../../lib/panel_registry';
 
-panelRegistry.register(function timeChartProvider(Private, i18n) {
+panelRegistry.register(function timeChartProvider(Private) {
   // Schema is broken out so that it may be extended for use in other plugins
   // Its also easier to test.
   return new Panel('timechart', Private(require('./schema'))(), i18n);

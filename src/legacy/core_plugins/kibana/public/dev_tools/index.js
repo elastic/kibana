@@ -18,6 +18,7 @@
  */
 
 import uiRoutes from 'ui/routes';
+import { i18n } from '@kbn/i18n';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import 'ui/directives/kbn_href';
@@ -34,7 +35,7 @@ uiRoutes
   });
 
 uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
-  badge: (i18n, uiCapabilities) => {
+  badge: uiCapabilities => {
     if (uiCapabilities.dev_tools.save) {
       return undefined;
     }
@@ -49,7 +50,7 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
       iconType: 'glasses'
     };
   },
-  k7Breadcrumbs: (i18n) => [
+  k7Breadcrumbs: () => [
     {
       text: i18n('kbn.devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools'
@@ -59,7 +60,7 @@ uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
   ]
 });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'console',
     title: i18n('kbn.devTools.consoleTitle', {

@@ -5,6 +5,7 @@
  */
 
 import { debounce, isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import template from './threshold_watch_edit.html';
@@ -28,7 +29,7 @@ import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchEdit', function ($injector, i18n) {
+app.directive('thresholdWatchEdit', function ($injector) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const fieldsService = $injector.get('xpackWatcherFieldsService');
   const timezoneService = $injector.get('xpackWatcherTimezoneService');

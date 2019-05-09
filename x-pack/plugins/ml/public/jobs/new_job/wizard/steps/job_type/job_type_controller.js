@@ -12,6 +12,7 @@
  */
 
 import uiRoutes from 'ui/routes';
+import { i18n } from '@kbn/i18n';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getCreateJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
@@ -40,10 +41,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlNewJobStepJobType',
-  function (
-    $scope,
-    Private,
-    i18n) {
+  function ($scope, Private) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page

@@ -86,7 +86,7 @@ uiRoutes
   .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
     resolve: indexPatternsResolutions,
     requireUICapability: 'management.kibana.index_patterns',
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.indexPatterns.save) {
         return undefined;
       }

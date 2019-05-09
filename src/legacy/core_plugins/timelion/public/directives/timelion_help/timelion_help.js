@@ -18,6 +18,7 @@
  */
 
 import template from './timelion_help.html';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import moment from 'moment';
@@ -25,7 +26,7 @@ import '../../components/timelionhelp_tabs_directive';
 
 const app = uiModules.get('apps/timelion', []);
 
-app.directive('timelionHelp', function ($http, i18n) {
+app.directive('timelionHelp', function ($http) {
   return {
     restrict: 'E',
     template,

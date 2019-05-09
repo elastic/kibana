@@ -138,7 +138,7 @@ const instanceRowFactory = (scope, kbnUrl) => {
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
+uiModule.directive('monitoringKibanaListing', kbnUrl => {
   return {
     restrict: 'E',
     scope: {

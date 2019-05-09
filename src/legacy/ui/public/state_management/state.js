@@ -26,6 +26,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from '../utils/diff_object';
@@ -41,7 +42,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, i18n) {
+export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   createLegacyClass(State).inherits(Events);

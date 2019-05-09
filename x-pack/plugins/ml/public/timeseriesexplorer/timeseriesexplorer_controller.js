@@ -13,6 +13,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
 import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
@@ -80,14 +81,7 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlTimeSeriesExplorerController', function (
-  $injector,
-  $scope,
-  $timeout,
-  Private,
-  AppState,
-  config,
-  i18n) {
+module.controller('MlTimeSeriesExplorerController', function ($injector, $scope, $timeout, Private, AppState, config) {
 
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectSeverityService');

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import html from './vislib_vis_legend.html';
 import { VislibLibDataProvider } from '../../vislib/lib/data';
 import { uiModules } from '../../modules';
@@ -28,7 +29,7 @@ import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities'
 export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
 
 uiModules.get('kibana')
-  .directive('vislibLegend', function (Private, $timeout, i18n) {
+  .directive('vislibLegend', function (Private, $timeout) {
     const Data = Private(VislibLibDataProvider);
     const visFilters = Private(VisFiltersProvider);
 

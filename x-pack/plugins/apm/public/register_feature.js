@@ -5,13 +5,14 @@
  */
 
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory
 } from 'ui/registry/feature_catalogue';
 
 if (chrome.getInjected('apmUiEnabled')) {
-  FeatureCatalogueRegistryProvider.register(i18n => {
+  FeatureCatalogueRegistryProvider.register(() => {
     return {
       id: 'apm',
       title: 'APM',

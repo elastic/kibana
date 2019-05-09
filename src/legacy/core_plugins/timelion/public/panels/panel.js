@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export default function Panel(name, config, i18n) {
+import { i18n } from '@kbn/i18n';
+
+export default function Panel(name, config) {
 
   this.name = name;
 

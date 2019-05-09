@@ -9,13 +9,14 @@
 // Service with functions used for broadcasting job picker changes
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 
 let jobSelectService = undefined;
 
-export function JobSelectServiceProvider($rootScope, globalState, i18n) {
+export function JobSelectServiceProvider($rootScope, globalState) {
 
   function checkGlobalState() {
     if (globalState.ml === undefined) {

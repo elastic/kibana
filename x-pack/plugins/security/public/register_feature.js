@@ -8,7 +8,9 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+import { i18n } from '@kbn/i18n';
+
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'security',
     title: i18n('xpack.security.registerFeature.securitySettingsTitle', {

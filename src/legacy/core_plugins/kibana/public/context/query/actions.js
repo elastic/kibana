@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { MarkdownSimple } from 'ui/markdown';
 import { toastNotifications } from 'ui/notify';
@@ -27,7 +28,7 @@ import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 
-export function QueryActionsProvider(courier, Private, Promise, i18n) {
+export function QueryActionsProvider(courier, Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
   const {

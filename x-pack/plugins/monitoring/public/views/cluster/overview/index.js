@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
@@ -24,7 +25,7 @@ uiRoutes.when('/overview', {
     }
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const kbnUrl = $injector.get('kbnUrl');
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');

@@ -19,7 +19,9 @@
 
 import $ from 'jquery';
 
-export function TileMapTooltipFormatterProvider($compile, $rootScope, i18n) {
+import { i18n } from '@kbn/i18n';
+
+export function TileMapTooltipFormatterProvider($compile, $rootScope) {
 
   const $tooltipScope = $rootScope.$new();
   const $el = $('<div>').html(require('./_tooltip.html'));

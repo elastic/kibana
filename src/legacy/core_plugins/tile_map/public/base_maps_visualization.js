@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
@@ -35,7 +36,7 @@ const emsServiceSettings = new Promise((resolve) => {
   });
 });
 
-export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
+export function BaseMapsVisualizationProvider(serviceSettings) {
 
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.

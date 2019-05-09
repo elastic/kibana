@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
@@ -14,7 +15,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params, i18n) {
+module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params) {
   const msgs = mlMessageBarService;
   msgs.clear();
   $scope.title = i18n('xpack.ml.newJob.advanced.detectorFilterModal.addNewFilterTitle', {
