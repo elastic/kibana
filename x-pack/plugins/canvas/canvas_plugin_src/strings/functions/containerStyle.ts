@@ -70,8 +70,8 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
       defaultMessage:
         'A number between 0 and 1 representing the degree of transparency of the element',
     }),
-    overflow: i18n.translate('xpack.canvas.functions.containerStyle.args.HelpText', {
-      defaultMessage: '',
+    overflow: i18n.translate('xpack.canvas.functions.containerStyle.args.overflowHelpText', {
+      defaultMessage: 'Sets overflow of the container',
     }),
   },
 };

@@ -16,7 +16,7 @@ export const help: FunctionHelp<FunctionFactory<typeof paletteFn>> = {
   args: {
     color: i18n.translate('xpack.canvas.functions.palette.args.colorHelpText', {
       defaultMessage:
-        'Palette colors, {rgba}, {hex}, or {HTML} color string. Pass this multiple times.',
+        'Palette colors, {rgba}, {hex}, or {html} color string. Pass this multiple times.',
       values: {
         rgba: 'rgba',
         hex: 'hex',

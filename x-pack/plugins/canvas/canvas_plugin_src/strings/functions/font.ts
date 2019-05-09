@@ -45,7 +45,7 @@ export const help: FunctionHelp<FunctionFactory<typeof font>> = {
       defaultMessage: 'Underline the text, true or false',
     }),
     weight: i18n.translate('xpack.canvas.functions.font.args.weightHelpText', {
-      defaultMessage: 'Set the font weight, e.g. {examples',
+      defaultMessage: 'Set the font weight, e.g. {examples}',
       values: {
         examples: Object.values(FontWeight).join(', '),
       },
