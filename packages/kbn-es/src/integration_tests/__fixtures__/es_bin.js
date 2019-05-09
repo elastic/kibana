@@ -28,15 +28,11 @@ if (!start) {
   return;
 }
 
-console.log('started');
-
 let serverUrl;
 const server = createServer((req, res) => {
   const url = new URL(req.url, serverUrl);
   const send = (code, body) => {
-    res.writeHead(code, {
-      'content-type': 'application/json',
-    });
+    res.writeHead(code, { 'content-type': 'application/json' });
     res.end(JSON.stringify(body));
   };
 
@@ -58,9 +54,7 @@ const server = createServer((req, res) => {
 // setup server auto close after 1 second of silence
 let serverCloseTimer;
 const delayServerClose = () => {
-  if (serverCloseTimer) {
-    clearTimeout(serverCloseTimer);
-  }
+  clearTimeout(serverCloseTimer);
   serverCloseTimer = setTimeout(() => server.close(), 1000);
 };
 server.on('request', delayServerClose);
@@ -70,4 +64,5 @@ server.listen(0, '127.0.0.1', function() {
   serverUrl = new URL('http://127.0.0.1');
   serverUrl.port = server.address().port;
   console.log(`HttpServer publish_address {${serverUrl.hostname}:${serverUrl.port}}`);
+  console.log('started');
 });
