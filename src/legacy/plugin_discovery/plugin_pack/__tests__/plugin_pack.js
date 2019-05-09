@@ -115,7 +115,7 @@ describe('plugin discovery/plugin pack', () => {
         new PluginPack({ provider: () => true }),
         new PluginPack({ provider: () => new Date() }),
         new PluginPack({ provider: () => /foo.*bar/ }),
-        new PluginPack({ provider: () => (function () {}) }),
+        new PluginPack({ provider: () => function () {} }),
         new PluginPack({ provider: () => new OtherPluginSpecClass({}) }),
       ];
 

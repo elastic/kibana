@@ -37,7 +37,7 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
     pkg,
   });
 
-  return new (class Config {
+  return new class Config {
     /**
      * Get Kibana's parsed package.json file
      * @return {Object}
@@ -183,5 +183,5 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
     resolveFromTarget(...subPaths) {
       return resolve(repoRoot, 'target', ...subPaths);
     }
-  })();
+  }();
 }
