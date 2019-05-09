@@ -28,10 +28,21 @@ const mockAppService = {
   ],
 } as any;
 
+const mockBasePath = {
+  addToPath: (url: string) => `wow${url}`,
+} as any;
+
 describe('NavLinksService', () => {
+  let service: NavLinksService;
+  let start: ReturnType<NavLinksService['start']>;
+
+  beforeEach(() => {
+    service = new NavLinksService();
+    start = service.start({ application: mockAppService, basePath: mockBasePath });
+  });
+
   describe('#getNavLinks$()', () => {
     it('sorts navlinks by `order` property', async () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(
         await start
           .getNavLinks$()
@@ -44,8 +55,6 @@ describe('NavLinksService', () => {
     });
 
     it('emits multiple values', async () => {
-      const service = new NavLinksService();
-      const start = service.start({ application: mockAppService });
       const navLinkIds$ = start.getNavLinks$().pipe(map(links => links.map(l => l.id)));
       const emittedLinks: string[][] = [];
       navLinkIds$.subscribe(r => emittedLinks.push(r));
@@ -56,8 +65,6 @@ describe('NavLinksService', () => {
     });
 
     it('completes when service is stopped', async () => {
-      const service = new NavLinksService();
-      const start = service.start({ application: mockAppService });
       const last$ = start
         .getNavLinks$()
         .pipe(takeLast(1))
@@ -69,38 +76,32 @@ describe('NavLinksService', () => {
 
   describe('#get()', () => {
     it('returns link if exists', () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(start.get('app1')!.title).toEqual('App 1');
     });
 
     it('returns undefined if it does not exist', () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(start.get('phony')).toBeUndefined();
     });
   });
 
   describe('#getAll()', () => {
     it('returns a sorted array of navlinks', () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(start.getAll().map(l => l.id)).toEqual(['app2', 'app1', 'legacyApp']);
     });
   });
 
   describe('#has()', () => {
     it('returns true if exists', () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(start.has('app1')).toBe(true);
     });
 
     it('returns false if it does not exist', () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(start.has('phony')).toBe(false);
     });
   });
 
   describe('#showOnly()', () => {
     it('does nothing if link does not exist', async () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       start.showOnly('fake');
       expect(
         await start
@@ -114,7 +115,6 @@ describe('NavLinksService', () => {
     });
 
     it('removes all other links', async () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       start.showOnly('app1');
       expect(
         await start
@@ -130,10 +130,9 @@ describe('NavLinksService', () => {
 
   describe('#update()', () => {
     it('updates the navlinks and returns the updated link', async () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(start.update('app1', { hidden: true })).toMatchInlineSnapshot(`
 Object {
-  "appUrl": "/app1",
+  "baseUrl": "http://localhost/wow/app1",
   "hidden": true,
   "icon": "app1",
   "id": "app1",
@@ -153,14 +152,12 @@ Object {
     });
 
     it('returns undefined if link does not exist', () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       expect(start.update('fake', { hidden: true })).toBeUndefined();
     });
   });
 
   describe('#enableForcedAppSwitcherNavigation()', () => {
     it('flips #getForceAppSwitcherNavigation$()', async () => {
-      const start = new NavLinksService().start({ application: mockAppService });
       await expect(
         start
           .getForceAppSwitcherNavigation$()

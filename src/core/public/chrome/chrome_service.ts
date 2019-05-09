@@ -27,6 +27,7 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { NotificationsSetup } from '../notifications';
 import { NavLinksService } from './nav_links/nav_links_service';
 import { ApplicationStart } from '../application';
+import { BasePathStart } from '../base_path';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -69,6 +70,7 @@ interface SetupDeps {
 
 interface StartDeps {
   application: ApplicationStart;
+  basePath: BasePathStart;
 }
 
 /** @internal */
@@ -228,9 +230,9 @@ export class ChromeService {
     };
   }
 
-  public start({ application }: StartDeps) {
+  public start({ application, basePath }: StartDeps) {
     return {
-      navLinks: this.navLinks.start({ application }),
+      navLinks: this.navLinks.start({ application, basePath }),
     };
   }
 

@@ -45,7 +45,6 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private, uiCapabili
     breadcrumbs$: chrome.breadcrumbs.get$(),
     helpExtension$: chrome.helpExtension.get$(),
     navLinks$: newPlatformStart.chrome.navLinks.getNavLinks$(),
-    addBasePath: newPlatformStart.basePath.addToPath,
     recentlyAccessed$: recentlyAccessed.get$(),
     forceAppSwitcherNavigation$: newPlatformStart.chrome.navLinks.getForceAppSwitcherNavigation$(),
     navControls,

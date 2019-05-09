@@ -33,7 +33,7 @@ export function registerSubUrlHooks(angularModule, internals) {
     function updateSubUrls() {
       const urlWithHashes = window.location.href;
       const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-      onStart(() => internals.trackPossibleSubUrl(urlWithStates));
+      internals.trackPossibleSubUrl(urlWithStates);
     }
 
     function onRouteChange($event) {
@@ -61,7 +61,7 @@ export function registerSubUrlHooks(angularModule, internals) {
 
     $rootScope.$on('$routeChangeSuccess', onRouteChange);
     $rootScope.$on('$routeUpdate', onRouteChange);
-    updateSubUrls(); // initialize sub urls
+    onStart(updateSubUrls); // initialize sub urls
   });
 }
 

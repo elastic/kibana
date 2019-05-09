@@ -22,15 +22,17 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, NavLinkUpdateableFields } from './nav_link';
 import { ApplicationStart } from '../../application';
+import { BasePathStart } from '../../base_path';
 
 interface StartDeps {
   application: ApplicationStart;
+  basePath: BasePathStart;
 }
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
-  public start({ application }: StartDeps) {
+  public start({ application, basePath }: StartDeps) {
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
       new Map(
         application.availableApps.map(
@@ -40,7 +42,7 @@ export class NavLinksService {
               new NavLinkWrapper({
                 ...app,
                 // Either rootRoute or appUrl must be defined.
-                appUrl: (app.rootRoute || app.appUrl)!,
+                baseUrl: relativeToAbsolute(basePath.addToPath((app.rootRoute || app.appUrl)!)),
               }),
             ] as [string, NavLinkWrapper]
         )
@@ -151,4 +153,11 @@ export class NavLinksService {
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
   return sortBy([...navLinks.values()].map(link => link.properties), 'order');
+}
+
+function relativeToAbsolute(url: string) {
+  // convert all link urls to absolute urls
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
 }

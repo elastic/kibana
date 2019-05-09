@@ -67,9 +67,9 @@ export interface ChromeNavLink {
   readonly tooltip?: string;
 
   /**
-   * The base URL used to open the root of an application.
+   * The base route used to open the root of an application.
    */
-  readonly appUrl: string;
+  readonly baseUrl: string;
 
   /**
    * A url that legacy apps can set to deep link into their applications.

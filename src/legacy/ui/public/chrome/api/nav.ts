@@ -22,6 +22,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 import { onStart } from '../../new_platform';
 import { ChromeStart, ChromeNavLink } from '../../../../../core/public';
+import { relativeToAbsolute } from '../../url/relative_to_absolute';
 
 export interface ChromeNavLinks {
   untrackNavLinksForDeletedSavedObjects(deletedIds: string[]): void;
@@ -29,7 +30,7 @@ export interface ChromeNavLinks {
 }
 
 interface LegacyNavLinkProperties {
-  readonly subUrlBase: string;
+  subUrlBase: string;
   readonly linkToLastSubUrl: boolean;
 }
 
@@ -71,7 +72,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     coreNavLinks.getAll().forEach(link => {
       const legacyProps = legacyNavProps.get(link.id)!;
       if (legacyProps.linkToLastSubUrl && urlContainsDeletedId(link.url!)) {
-        setLastUrl(link, link.appUrl);
+        setLastUrl(link, link.baseUrl);
       }
     });
   };
@@ -99,7 +100,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
 
     for (let link of coreNavLinks.getAll()) {
       const subUrlBase = legacyNavProps.get(link.id)!.subUrlBase;
-      const active = kibanaParsedUrl.getAppRootPath().startsWith(subUrlBase);
+      const active = url.startsWith(subUrlBase);
       link = coreNavLinks.update(link.id, { active })!;
 
       if (active) {
@@ -117,7 +118,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
   };
 
   function lastSubUrlKey(link: ChromeNavLink) {
-    return `lastSubUrl:${link.appUrl}`;
+    return `lastSubUrl:${link.baseUrl}`;
   }
 
   function getLastUrl(link: ChromeNavLink) {
@@ -125,6 +126,10 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
   }
 
   function setLastUrl(link: ChromeNavLink, url: string) {
+    if (legacyNavProps.get(link.id)!.linkToLastSubUrl === false) {
+      return;
+    }
+
     internals.appUrlStore.setItem(lastSubUrlKey(link), url);
     refreshLastUrl(link);
   }
@@ -133,7 +138,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     const lastSubUrl = getLastUrl(link);
 
     return coreNavLinks.update(link.id, {
-      url: lastSubUrl || link.url || link.appUrl,
+      url: lastSubUrl || link.url || link.baseUrl,
     })!;
   }
 
@@ -142,7 +147,10 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     fromAppId: string,
     newGlobalState: string | string[]
   ) {
-    const kibanaParsedUrl = absoluteToParsedUrl(link.url!, chrome.getBasePath());
+    const kibanaParsedUrl = absoluteToParsedUrl(
+      getLastUrl(link) || link.url || link.baseUrl,
+      chrome.getBasePath()
+    );
 
     // don't copy global state if links are for different apps
     if (fromAppId !== kibanaParsedUrl.appId) return;
@@ -156,5 +164,10 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
 
   // simulate a possible change in url to initialize the
   // link.active and link.lastUrl properties
-  onStart(() => internals.trackPossibleSubUrl(document.location.href));
+  onStart(() => {
+    [...legacyNavProps.values()].forEach(
+      link => (link.subUrlBase = relativeToAbsolute(chrome.addBasePath(link.subUrlBase)))
+    );
+    internals.trackPossibleSubUrl(document.location.href);
+  });
 }

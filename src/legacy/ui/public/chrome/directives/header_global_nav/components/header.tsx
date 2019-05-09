@@ -77,7 +77,6 @@ interface Props {
   homeHref: string;
   isVisible: boolean;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
-  addBasePath: BasePathStart['addToPath'];
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
   helpExtension$: Rx.Observable<HelpExtension>;
@@ -95,7 +94,7 @@ function extendRecentlyAccessedHistoryItem(
   recentlyAccessed: RecentlyAccessedHistoryItem
 ) {
   const href = chrome.addBasePath(recentlyAccessed.link);
-  const navLink = navLinks.find(nl => href.startsWith(nl.appUrl));
+  const navLink = navLinks.find(nl => href.startsWith(nl.baseUrl));
 
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {
@@ -120,7 +119,7 @@ function extendRecentlyAccessedHistoryItem(
 function extendNavLink(navLink: ChromeNavLink) {
   return {
     ...navLink,
-    href: navLink.url && !navLink.active ? navLink.url : navLink.appUrl,
+    href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
   };
 }
 
@@ -221,7 +220,6 @@ class HeaderUI extends Component<Props, State> {
   public render() {
     const {
       appTitle,
-      addBasePath,
       badge$,
       breadcrumbs$,
       isVisible,
@@ -243,7 +241,7 @@ class HeaderUI extends Component<Props, State> {
       .map(navLink => ({
         key: navLink.id,
         label: navLink.title,
-        href: addBasePath(navLink.href),
+        href: navLink.href,
         isDisabled: navLink.disabled,
         isActive: navLink.active,
         iconType: navLink.euiIconType,
