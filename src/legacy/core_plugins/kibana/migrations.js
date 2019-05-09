@@ -189,7 +189,6 @@ function transformFilterStringToQueryObject(doc) {
       });
       // migrate the series filters
       const series = get(visState, 'params.series') || [];
-      // TODO: the forEach body can be extracted into another function
       series.forEach((item) => {
         if (!item.filter) {
           // we don't need to transform anything if there isn't a filter at all
@@ -221,6 +220,8 @@ function transformFilterStringToQueryObject(doc) {
           });
         }
       });
+      // migrate aggs filters
+      // migrate panel filters (where are these?)
       newDoc.attributes.visState = JSON.stringify(visState);
     }
   }
