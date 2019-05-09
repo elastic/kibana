@@ -1,6 +1,6 @@
 
 {
-  "groups": ["kibana-sample-data"],
+  "groups": ["kibana_sample_data"],
   "description": "Kibana sample flights data: detect anomalies in mean flight delay",
   "analysis_config" : {
     "bucket_span": "1h",

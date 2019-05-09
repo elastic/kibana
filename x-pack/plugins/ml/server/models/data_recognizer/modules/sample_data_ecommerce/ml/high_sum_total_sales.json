@@ -1,5 +1,5 @@
 {
-  "groups": ["kibana-sample-data"],
+  "groups": ["kibana_sample_data"],
   "description": "Kibana sample eCommerce data : detect anomalies in total sales",
   "analysis_config" : {
     "bucket_span": "1h",
