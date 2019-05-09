@@ -52,6 +52,12 @@ export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
 export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
+export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
+
+export const DRAW_TYPE = {
+  BOUNDS: 'BOUNDS',
+  POLYGON: 'POLYGON'
+};
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
@@ -95,6 +101,11 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
       type: ROLLBACK_TO_TRACKED_LAYER_STATE,
       layerId: layerId
     });
+
+    // Ensure updateStyleMeta is triggered
+    // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
+    dispatch(updateStyleMeta(layerId));
+
     dispatch(syncDataForLayer(layerId));
   };
 }
@@ -629,13 +640,12 @@ export function updateLayerStyle(layerId, styleDescriptor) {
       },
     });
 
+    // Ensure updateStyleMeta is triggered
+    // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
+    dispatch(updateStyleMeta(layerId));
+
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
     dispatch(syncDataForLayer(layerId));
-
-    // syncDataForLayer may short circuit if no re-fetch is required:
-    // 1) if no re-fetch: setDynamicRanges required to update dynamic range from last request state
-    // 2) if re-fetch: setDynamicRanges called here and then called again after re-fetch finishes
-    dispatch(updateStyleMeta(layerId));
   };
 }
 
@@ -679,5 +689,17 @@ export function setJoinsForLayer(layer, joins) {
 
     await dispatch(clearMissingStyleProperties(layer.getId()));
     dispatch(syncDataForLayer(layer.getId()));
+  };
+}
+
+export function updateDrawState(drawState) {
+  return async (dispatch) => {
+    if (drawState !== null) {
+      await dispatch(setTooltipState(null));//tooltips just get in the way
+    }
+    dispatch({
+      type: UPDATE_DRAW_STATE,
+      drawState: drawState
+    });
   };
 }

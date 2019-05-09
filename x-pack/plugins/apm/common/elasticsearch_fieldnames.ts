@@ -43,3 +43,12 @@ export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
+
+export const METRIC_JAVA_HEAP_MEMORY_MAX = 'jvm.memory.heap.max';
+export const METRIC_JAVA_HEAP_MEMORY_COMMITTED = 'jvm.memory.heap.committed';
+export const METRIC_JAVA_HEAP_MEMORY_USED = 'jvm.memory.heap.used';
+export const METRIC_JAVA_NON_HEAP_MEMORY_MAX = 'jvm.memory.non_heap.max';
+export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED =
+  'jvm.memory.non_heap.committed';
+export const METRIC_JAVA_NON_HEAP_MEMORY_USED = 'jvm.memory.non_heap.used';
+export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';

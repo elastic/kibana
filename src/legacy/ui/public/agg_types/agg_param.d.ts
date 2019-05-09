@@ -22,10 +22,17 @@ import { AggConfig } from '../vis';
 interface AggParam {
   type: string;
   name: string;
+  options?: AggParamOption[];
   required?: boolean;
   displayName?: string;
   onChange?(agg: AggConfig): void;
   shouldShow?(agg: AggConfig): boolean;
 }
 
-export { AggParam };
+interface AggParamOption {
+  val: string;
+  display: string;
+  enabled?(agg: AggConfig): void;
+}
+
+export { AggParam, AggParamOption };

@@ -4,10 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { convertChangeToUpdater } from '../../../common/source_configuration';
-import { InfraSourceResolvers, MutationResolvers, QueryResolvers } from '../../graphql/types';
+import { UserInputError } from 'apollo-server-errors';
+import { failure } from 'io-ts/lib/PathReporter';
+
+import {
+  InfraSourceLogColumn,
+  InfraSourceResolvers,
+  MutationResolvers,
+  QueryResolvers,
+  UpdateSourceLogColumnInput,
+} from '../../graphql/types';
 import { InfraSourceStatus } from '../../lib/source_status';
-import { InfraSources } from '../../lib/sources';
+import {
+  InfraSources,
+  SavedSourceConfigurationFieldColumnRuntimeType,
+  SavedSourceConfigurationMessageColumnRuntimeType,
+  SavedSourceConfigurationTimestampColumnRuntimeType,
+  SavedSourceConfigurationColumnRuntimeType,
+} from '../../lib/sources';
 import {
   ChildResolverOf,
   InfraResolverOf,
@@ -59,6 +73,15 @@ export const createSourcesResolvers = (
   InfraSource: {
     status: InfraSourceStatusResolver;
   };
+  InfraSourceLogColumn: {
+    __resolveType(
+      logColumn: InfraSourceLogColumn
+    ):
+      | 'InfraSourceTimestampLogColumn'
+      | 'InfraSourceMessageLogColumn'
+      | 'InfraSourceFieldLogColumn'
+      | null;
+  };
   Mutation: {
     createSource: MutationCreateSourceResolver;
     deleteSource: MutationDeleteSourceResolver;
@@ -82,14 +105,34 @@ export const createSourcesResolvers = (
       return source;
     },
   },
+  InfraSourceLogColumn: {
+    __resolveType(logColumn) {
+      if (SavedSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
+        return 'InfraSourceTimestampLogColumn';
+      }
+
+      if (SavedSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
+        return 'InfraSourceMessageLogColumn';
+      }
+
+      if (SavedSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
+        return 'InfraSourceFieldLogColumn';
+      }
+
+      return null;
+    },
+  },
   Mutation: {
     async createSource(root, args, { req }) {
       const sourceConfiguration = await libs.sources.createSourceConfiguration(
         req,
         args.id,
         compactObject({
-          ...args.source,
-          fields: args.source.fields ? compactObject(args.source.fields) : undefined,
+          ...args.sourceProperties,
+          fields: args.sourceProperties.fields
+            ? compactObject(args.sourceProperties.fields)
+            : undefined,
+          logColumns: decodeLogColumns(args.sourceProperties.logColumns),
         })
       );
 
@@ -105,12 +148,16 @@ export const createSourcesResolvers = (
       };
     },
     async updateSource(root, args, { req }) {
-      const updaters = args.changes.map(convertChangeToUpdater);
-
       const updatedSourceConfiguration = await libs.sources.updateSourceConfiguration(
         req,
         args.id,
-        updaters
+        compactObject({
+          ...args.sourceProperties,
+          fields: args.sourceProperties.fields
+            ? compactObject(args.sourceProperties.fields)
+            : undefined,
+          logColumns: decodeLogColumns(args.sourceProperties.logColumns),
+        })
       );
 
       return {
@@ -133,3 +180,12 @@ const compactObject = <T>(obj: T): CompactObject<T> =>
           },
     {} as CompactObject<T>
   );
+
+const decodeLogColumns = (logColumns?: UpdateSourceLogColumnInput[] | null) =>
+  logColumns
+    ? logColumns.map(logColumn =>
+        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
+          throw new UserInputError(failure(errors).join('\n'));
+        })
+      )
+    : undefined;

@@ -23,18 +23,13 @@ import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
 import { I18nSetup } from '../i18n';
-import { InjectedMetadataService } from '../injected_metadata';
+import { InjectedMetadataSetup } from '../';
 import { FatalErrorsScreen } from './fatal_errors_screen';
-import { ErrorInfo, getErrorInfo } from './get_error_info';
-
-export interface FatalErrorsParams {
-  rootDomElement: HTMLElement;
-  injectedMetadata: InjectedMetadataService;
-  stopCoreSystem: () => void;
-}
+import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 interface Deps {
   i18n: I18nSetup;
+  injectedMetadata: InjectedMetadataSetup;
 }
 
 /**
@@ -56,47 +51,51 @@ export interface FatalErrorsSetup {
   /**
    * An Observable that will emit whenever a fatal error is added with `add()`
    */
-  get$: () => Rx.Observable<ErrorInfo>;
+  get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
 /** @interal */
 export class FatalErrorsService {
-  private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
-  private i18n?: I18nSetup;
+  private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
 
-  constructor(private params: FatalErrorsParams) {
+  /**
+   *
+   * @param rootDomElement
+   * @param onFirstErrorCb - Callback function that gets executed after the first error,
+   *   but before the FatalErrorsService renders the error to the DOM.
+   */
+  constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
+
+  public setup({ i18n, injectedMetadata }: Deps) {
     this.errorInfo$
       .pipe(
         first(),
-        tap(() => this.onFirstError())
+        tap(() => {
+          this.onFirstErrorCb();
+          this.renderError(injectedMetadata, i18n);
+        })
       )
       .subscribe({
         error: error => {
           // eslint-disable-next-line no-console
-          console.error('Uncaught error in fatal error screen internals', error);
+          console.error('Uncaught error in fatal error service internals', error);
         },
       });
-  }
-
-  public add: FatalErrorsSetup['add'] = (error, source?) => {
-    const errorInfo = getErrorInfo(error, source);
-
-    this.errorInfo$.next(errorInfo);
-
-    if (error instanceof Error) {
-      // make stack traces clickable by putting whole error in the console
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
-
-    throw error;
-  };
-
-  public setup({ i18n }: Deps) {
-    this.i18n = i18n;
 
     const fatalErrorsSetup: FatalErrorsSetup = {
-      add: this.add,
+      add: (error, source?) => {
+        const errorInfo = getErrorInfo(error, source);
+
+        this.errorInfo$.next(errorInfo);
+
+        if (error instanceof Error) {
+          // make stack traces clickable by putting whole error in the console
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
+
+        throw error;
+      },
       get$: () => {
         return this.errorInfo$.asObservable();
       },
@@ -105,30 +104,22 @@ export class FatalErrorsService {
     return fatalErrorsSetup;
   }
 
-  private onFirstError() {
-    // stop the core systems so that things like the legacy platform are stopped
-    // and angular/react components are unmounted;
-    this.params.stopCoreSystem();
-
+  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nSetup) {
     // delete all content in the rootDomElement
-    this.params.rootDomElement.textContent = '';
+    this.rootDomElement.textContent = '';
 
     // create and mount a container for the <FatalErrorScreen>
     const container = document.createElement('div');
-    this.params.rootDomElement.appendChild(container);
-
-    // If error occurred before I18nService has been set up we don't have any
-    // i18n context to provide.
-    const I18nContext = this.i18n ? this.i18n.Context : React.Fragment;
+    this.rootDomElement.appendChild(container);
 
     render(
-      <I18nContext>
+      <i18n.Context>
         <FatalErrorsScreen
-          buildNumber={this.params.injectedMetadata.getKibanaBuildNumber()}
-          kibanaVersion={this.params.injectedMetadata.getKibanaVersion()}
+          buildNumber={injectedMetadata.getKibanaBuildNumber()}
+          kibanaVersion={injectedMetadata.getKibanaVersion()}
           errorInfo$={this.errorInfo$}
         />
-      </I18nContext>,
+      </i18n.Context>,
       container
     );
   }
