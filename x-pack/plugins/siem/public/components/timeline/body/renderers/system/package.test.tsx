@@ -10,8 +10,7 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
-
-import { Package } from '.';
+import { Package } from './package';
 
 describe('Package', () => {
   describe('rendering', () => {
