@@ -144,7 +144,8 @@ const migrateDateHistogramAggregation = doc => {
   attributes.visState.
 */
 function transformFilterStringToQueryObject(doc) {
-  // Migrate filter
+  // Migrate filters
+  // If any filters exist and they are a string, we assume it to be lucene and transform the filter into an object accordingly
   const newDoc = cloneDeep(doc);
   const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
@@ -155,10 +156,8 @@ function transformFilterStringToQueryObject(doc) {
       // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
-      // we need to migrate all filters where they are applied:
-      // filters appear in:
-      // type: metric -> visState.params.series[item]
-      // type: markdown -> visState.params.series[item], this also has one here: visState.params.series[each].split_filters.filter
+      // we need to migrate all filters where they are applied and for now, we migrate only the types that are tested in the functional tests
+      // TODO apply to all types
       const isMetricTSVBVis = get(visState, 'params.type') === 'metric';
       const isMarkdownTSVBVis = get(visState, 'params.type') === 'markdown';
       if (!isMetricTSVBVis && !isMarkdownTSVBVis) {
@@ -167,22 +166,20 @@ function transformFilterStringToQueryObject(doc) {
       }
       // migrate the series filters
       const series = get(visState, 'params.series') || [];
-      // TODO: the forEach body can be extracted into another function
       series.forEach((item) => {
         if (!item.filter) {
           // we don't need to transform anything if there isn't a filter at all
           return;
         }
-        // top level filter:
+        // series item filter
         if (typeof item.filter === 'string') {
-          // if the filter exists and it is a string, assume it to be lucene and transform the filter into an object accordingly
           const itemfilterObject = {
             query: item.filter,
             language: 'lucene',
           };
-          // replace the filter string with the filterObject
           item.filter = itemfilterObject;
         }
+        // series item split filters filter
         if (item.split_filters) {
           const splitFilters = get(item, 'split_filters') || [];
           splitFilters.forEach((filter) => {
@@ -191,17 +188,17 @@ function transformFilterStringToQueryObject(doc) {
               return;
             }
             if (typeof filter.filter === 'string') {
-              // if the filter exists and it is a string, assume it to be lucene and transform the filter into an object accordingly
               const filterfilterObject = {
                 query: filter.filter,
                 language: 'lucene',
               };
-              // replace the filter string with the filterObject
               filter.filter = filterfilterObject;
             }
           });
         }
       });
+      // migrate aggs filters
+      // migrate panel filters (where are these?)
       newDoc.attributes.visState = JSON.stringify(visState);
     }
   }
