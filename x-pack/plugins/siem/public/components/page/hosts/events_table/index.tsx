@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -13,14 +13,12 @@ import { ActionCreator } from 'typescript-fsa';
 import { hostsActions } from '../../../../store/actions';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyStringTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
-import { IPDetailsLink } from '../../../links';
+import { getOrEmptyTag } from '../../../empty_value';
+import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
+import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 
 interface OwnProps {
   data: Ecs[];
@@ -114,6 +112,9 @@ const getEventsColumns = (): [
   Columns<EcsEdges>,
   Columns<EcsEdges>,
   Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
   Columns<EcsEdges>
 ] => [
   {
@@ -121,54 +122,93 @@ const getEventsColumns = (): [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const hostName: string | null | undefined = get('host.name[0]', node);
-      if (hostName != null) {
-        const id = escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: hostName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'host.name',
-                value: hostName,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                hostName
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'host.name', node),
+        attrName: 'host.name',
+        idPrefix: `events-table-${node._id}`,
+        render: item => <HostDetailsLink hostName={item} />,
+      }),
+  },
+  {
+    name: i18n.EVENT_MODULE_DATASET,
+    sortable: true,
+    truncateText: true,
+    hideForMobile: true,
+    render: ({ node }) => (
+      <>
+        {getRowItemDraggables({
+          rowItems: getOr(null, 'event.module', node),
+          attrName: 'event.module',
+          idPrefix: `events-table-${node._id}`,
+        })}
+        /
+        {getRowItemDraggables({
+          rowItems: getOr(null, 'event.dataset', node),
+          attrName: 'event.dataset',
+          idPrefix: `events-table-${node._id}`,
+        })}
+      </>
+    ),
+  },
+  {
+    name: i18n.EVENT_CATEGORY,
+    sortable: true,
+    truncateText: true,
+    hideForMobile: true,
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'event.category', node),
+        attrName: 'event.category',
+        idPrefix: `events-table-${node._id}`,
+      }),
   },
   {
     name: i18n.EVENT_ACTION,
     sortable: true,
     truncateText: true,
     hideForMobile: true,
-    render: ({ node }) => getOrEmptyTag('event.action', node),
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'event.action', node),
+        attrName: 'event.action',
+        idPrefix: `events-table-${node._id}`,
+      }),
+  },
+  {
+    name: i18n.USER,
+    sortable: true,
+    truncateText: true,
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'user.name', node),
+        attrName: 'user.name',
+        idPrefix: `events-table-${node._id}`,
+      }),
+  },
+  {
+    name: i18n.MESSAGE,
+    sortable: false,
+    truncateText: true,
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'message', node),
+        attrName: 'message',
+        idPrefix: `events-table-${node._id}`,
+      }),
   },
   {
     name: i18n.SOURCE,
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('source.ip[0]', node)}:{getOrEmptyTag('source.port', node)}
+        {getRowItemDraggable({
+          rowItem: getOr(null, 'source.ip[0]', node),
+          attrName: 'source.ip',
+          idPrefix: `events-table-${node._id}`,
+          render: item => <IPDetailsLink ip={item} />,
+        })}
+        :{getOrEmptyTag('source.port', node)}
       </>
     ),
   },
@@ -178,31 +218,14 @@ const getEventsColumns = (): [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('destination.ip[0]', node)}:{getOrEmptyTag('destination.port', node)}
-      </>
-    ),
-  },
-  {
-    name: i18n.LOCATION,
-    sortable: true,
-    truncateText: true,
-    render: ({ node }) => (
-      <>
-        {getOrEmptyTag('geo.region_name', node)} : {getOrEmptyTag('geo.country_iso_code', node)}
+        {getRowItemDraggable({
+          rowItem: getOr(null, 'destination.ip[0]', node),
+          attrName: 'destination.ip',
+          idPrefix: `events-table-${node._id}`,
+          render: item => <IPDetailsLink ip={item} />,
+        })}
+        :{getOrEmptyTag('destination.port', node)}
       </>
     ),
   },
 ];
-
-export const formatIpSafely = (path: string, data: Ecs): JSX.Element => {
-  if (has(path, data)) {
-    const txt = get(path, data);
-    if (txt === '') {
-      return getEmptyStringTag();
-    } else {
-      const ip = txt && txt.slice ? txt.slice(0, 45) : txt;
-      return <IPDetailsLink ip={ip} />;
-    }
-  }
-  return getEmptyTagValue();
-};
