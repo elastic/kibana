@@ -284,6 +284,7 @@ Another tool we use for enforcing consistent coding style is EditorConfig, which
 All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
 
 In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be an `I18nContext`:
+
 ```jsx
 import { I18nContext } from 'ui/i18n';
 
