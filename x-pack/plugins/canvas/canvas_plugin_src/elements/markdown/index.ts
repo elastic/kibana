@@ -10,6 +10,7 @@ import { ElementFactory } from '../types';
 export const markdown: ElementFactory = () => ({
   name: 'markdown',
   displayName: 'Markdown',
+  tags: ['text'],
   help: 'Markup from Markdown',
   image: header,
   expression: `filters

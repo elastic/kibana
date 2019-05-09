@@ -11,9 +11,9 @@ import styled from 'styled-components';
 
 import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
-import { timelineActions } from '../../store';
 
 import * as i18n from './translations';
+import { timelineActions } from '../../store/actions';
 
 const TimelinesContainer = styled.div`
   width: 100%:

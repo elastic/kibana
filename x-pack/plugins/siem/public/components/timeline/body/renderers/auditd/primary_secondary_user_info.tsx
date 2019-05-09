@@ -8,10 +8,10 @@ import { EuiFlexGroup } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { TokensFlexItem } from '..';
 import { DraggableBadge } from '../../../../draggables';
 
 import * as i18n from './translations';
+import { TokensFlexItem } from '../helpers';
 
 export const nilOrUnSet = (value?: string | null) =>
   value == null || value.toLowerCase() === 'unset';

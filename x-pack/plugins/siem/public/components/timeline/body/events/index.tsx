@@ -15,9 +15,10 @@ import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
 import { ColumnHeader } from '../column_headers/column_header';
-import { ColumnRenderer, RowRenderer } from '../renderers';
 
 import { StatefulEvent } from './stateful_event';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { RowRenderer } from '../renderers/row_renderer';
 
 const EventsContainer = styled.div<{
   minWidth: number;

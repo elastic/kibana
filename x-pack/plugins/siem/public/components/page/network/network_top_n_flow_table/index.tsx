@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { networkActions } from '../../../../store/actions';
 import {
   FlowDirection,
   FlowTarget,
@@ -18,7 +19,7 @@ import {
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
 } from '../../../../graphql/types';
-import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';

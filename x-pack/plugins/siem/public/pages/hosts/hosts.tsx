@@ -16,13 +16,19 @@ import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
+import {
+  EventsTable,
+  HostsTable,
+  KpiHostsComponent,
+  UncommonProcessTable,
+} from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
+import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType, LastEventIndexKey } from '../../graphql/types';
@@ -37,15 +43,17 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
-
+const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 interface HostsComponentReduxProps {
   filterQuery: string;
 }
 
 type HostsComponentProps = HostsComponentReduxProps;
 
+const indexTypes = [IndexType.AUDITBEAT];
+
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={[IndexType.AUDITBEAT]}>
+  <WithSource sourceId="default" indexTypes={indexTypes}>
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <StickyContainer>
@@ -61,6 +69,25 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
           <GlobalTime>
             {({ to, from, setQuery }) => (
               <>
+                <KpiHostsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                >
+                  {({ kpiHosts, loading, id, refetch }) => (
+                    <KpiHostsComponentManage
+                      id={id}
+                      setQuery={setQuery}
+                      refetch={refetch}
+                      data={kpiHosts}
+                      loading={loading}
+                    />
+                  )}
+                </KpiHostsQuery>
+
+                <EuiSpacer />
+
                 <HostsQuery
                   endDate={to}
                   filterQuery={filterQuery}

@@ -49,6 +49,8 @@ interface IPDetailsComponentReduxProps {
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
+const indexTypes = [IndexType.FILEBEAT, IndexType.PACKETBEAT];
+
 const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
@@ -57,7 +59,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     filterQuery,
     flowTarget,
   }) => (
-    <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
+    <WithSource sourceId="default" indexTypes={indexTypes}>
       {({ filebeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
           <StickyContainer>

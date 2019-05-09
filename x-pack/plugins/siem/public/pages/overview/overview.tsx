@@ -28,11 +28,10 @@ const dateEnd = Date.now();
 const dateRange = moment.duration(24, 'hours').asMilliseconds();
 const dateStart = dateEnd - dateRange;
 
+const indexTypes = [IndexType.FILEBEAT, IndexType.AUDITBEAT, IndexType.PACKETBEAT];
+
 export const OverviewComponent = pure(() => (
-  <WithSource
-    sourceId="default"
-    indexTypes={[IndexType.FILEBEAT, IndexType.AUDITBEAT, IndexType.PACKETBEAT]}
-  >
+  <WithSource sourceId="default" indexTypes={indexTypes}>
     {({ auditbeatIndicesExist, filebeatIndicesExist }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) &&
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (

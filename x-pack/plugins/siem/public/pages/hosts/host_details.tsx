@@ -21,12 +21,12 @@ import { LastEventTime } from '../../components/last_event_time';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
-import { HostSummary } from '../../components/page/hosts/host_summary';
+import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
-import { HostDetailsByNameQuery } from '../../containers/hosts/details';
+import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType, LastEventIndexKey } from '../../graphql/types';
@@ -39,7 +39,7 @@ import * as i18n from './translations';
 const basePath = chrome.getBasePath();
 const type = hostsModel.HostsType.details;
 
-const HostSummaryManage = manageQuery(HostSummary);
+const HostOverviewManage = manageQuery(HostOverview);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const EventsTableManage = manageQuery(EventsTable);
@@ -50,6 +50,8 @@ interface HostDetailsComponentReduxProps {
 
 type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
 
+const indexTypes = [IndexType.AUDITBEAT];
+
 const HostDetailsComponent = pure<HostDetailsComponentProps>(
   ({
     match: {
@@ -57,7 +59,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
     },
     filterQueryExpression,
   }) => (
-    <WithSource sourceId="default" indexTypes={[IndexType.AUDITBEAT]}>
+    <WithSource sourceId="default" indexTypes={indexTypes}>
       {({ auditbeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
           <StickyContainer>
@@ -75,22 +77,22 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
             <GlobalTime>
               {({ to, from, setQuery }) => (
                 <>
-                  <HostDetailsByNameQuery
+                  <HostOverviewByNameQuery
                     sourceId="default"
                     hostName={hostName}
                     startDate={from}
                     endDate={to}
                   >
-                    {({ hostDetails, loading, id, refetch }) => (
-                      <HostSummaryManage
+                    {({ hostOverview, loading, id, refetch }) => (
+                      <HostOverviewManage
                         id={id}
                         refetch={refetch}
                         setQuery={setQuery}
-                        data={hostDetails}
+                        data={hostOverview}
                         loading={loading}
                       />
                     )}
-                  </HostDetailsByNameQuery>
+                  </HostOverviewByNameQuery>
 
                   <EuiHorizontalRule />
 

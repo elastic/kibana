@@ -18,7 +18,8 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { inputsActions, inputsModel, State } from '../../store';
+import { inputsModel, State } from '../../store';
+import { inputsActions } from '../../store/actions';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
