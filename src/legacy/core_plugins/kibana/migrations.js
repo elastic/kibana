@@ -155,19 +155,12 @@ function transformFilterStringToQueryObject(doc) {
       // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
-      // we need to migrate all filters where they are applied and for now, we migrate only the types that are tested in the functional tests
-      // TODO apply to all types (figure out if some do not have a filter somewhere)
+      // we need to migrate all filters where they are applied:
+      // filters appear in:
+      // type: metric -> visState.params.series[item]
+      // type: markdown -> visState.params.series[item]
       const isMetricTSVBVis = get(visState, 'params.type') === 'metric';
       const isMarkdownTSVBVis = get(visState, 'params.type') === 'markdown';
-      /* const isTimeSeriesTSVBVis = get(visState, 'params.type') === 'top_n';  we have filters in:
-        visState.params.series.filter
-        visState.params.series.split_filters[each].filter
-        visState.params.filter
-        visState.params.annotations.query_string
-      */
-      // const isGaugeTSVBVis = get(visState, 'params.type') === 'gauge';
-      // const isTableTSVBVis = get(visState, 'params.type') === 'table';
-      // const isTimeSeriresTSVBVis = get(visState, 'params.type') === 'timeseries';
       if (!isMetricTSVBVis && !isMarkdownTSVBVis) {
         // skip
         return doc;
