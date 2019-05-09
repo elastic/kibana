@@ -11,12 +11,6 @@
 export declare class UiSettingsClient 
 ```
 
-## Properties
-
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [params](./kibana-plugin-public.uisettingsclient.params.md) |  | <code>UiSettingsClientParams</code> |  |
-
 ## Methods
 
 |  Method | Modifiers | Description |

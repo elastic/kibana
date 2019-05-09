@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { HttpService, HttpSetup } from './http_service';
+export { HttpService, HttpSetup, HttpStart } from './http_service';
+export { HttpFetchError } from './http_fetch_error';

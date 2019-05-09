@@ -90,6 +90,7 @@ beforeEach(() => {
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
     basePath: basePathServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiIcon, EuiPage } from '@elastic/eui';
-import styled from 'styled-components';
-import { injectGlobal } from 'styled-components';
+import { EuiBadge, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
+import styled, { injectGlobal } from 'styled-components';
+import { getOr } from 'lodash/fp';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions
@@ -98,4 +98,19 @@ export const CountBadge = styled(EuiBadge)`
 
 export const MoreRowItems = styled(EuiIcon)`
   margin-left: 5px;
+`;
+
+export const OverviewWrapper = styled(EuiFlexGroup)`
+  position: relative;
+`;
+
+export const LoadingOverlay = styled.div`
+  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
+  margin: -4px 5px;
+  height: 100%;
+  opacity: 0.7;
+  width: calc(100% - 10px);
+  position: absolute;
+  z-index: 3;
+  border-radius: 5px;
 `;
