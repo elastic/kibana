@@ -14,14 +14,8 @@ import { TimelineNonEcsData } from '../../../../graphql/types';
 import { defaultHeaders, mockFrameworks, mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
-import {
-  deleteItemIdx,
-  findItem,
-  getValues,
-  parseQueryValue,
-  parseValue,
-  plainColumnRenderer,
-} from '.';
+import { plainColumnRenderer } from './plain_column_renderer';
+import { getValues, deleteItemIdx, findItem } from './helpers';
 
 const mockFramework = mockFrameworks.default_UTC;
 
@@ -151,50 +145,6 @@ describe('plain_column_renderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
-    });
-  });
-
-  describe('parseQueryValue', () => {
-    test('parseQueryValue should return an empty string if value null', () => {
-      expect(parseQueryValue(null)).toEqual('');
-    });
-
-    test('parseQueryValue should return an empty string if value undefined', () => {
-      expect(parseQueryValue(undefined)).toEqual('');
-    });
-
-    test('parseQueryValue should return a string if value is an object', () => {
-      expect(parseQueryValue({ hello: 'world' })).toEqual('{"hello":"world"}');
-    });
-
-    test('parseQueryValue should return a number if value is a number', () => {
-      expect(parseQueryValue(33)).toEqual(33);
-    });
-
-    test('parseQueryValue should return a string if value is a string', () => {
-      expect(parseQueryValue('I am a string')).toEqual('I am a string');
-    });
-  });
-
-  describe('parseValue', () => {
-    test('parseValue should return null if value null', () => {
-      expect(parseValue(null)).toEqual(null);
-    });
-
-    test('parseValue should return undefined if value undefined', () => {
-      expect(parseValue(undefined)).toEqual(undefined);
-    });
-
-    test('parseValue should return a string if value is an object', () => {
-      expect(parseValue({ hello: 'world' })).toEqual('{"hello":"world"}');
-    });
-
-    test('parseValue should return a number if value is a number', () => {
-      expect(parseValue(33)).toEqual(33);
-    });
-
-    test('parseValue should return a string if value is a string', () => {
-      expect(parseValue('I am a string')).toEqual('I am a string');
     });
   });
 });

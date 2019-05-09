@@ -151,6 +151,7 @@ exports.Cluster = class Cluster {
    * @param {String} installPath
    * @param {Object} options
    * @property {Array} options.esArgs
+   * @property {String} options.password - super user password used to bootstrap
    * @returns {Promise}
    */
   async start(installPath, options = {}) {
