@@ -5,27 +5,19 @@
  */
 
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useKibanaUiSetting } from '../utils/use_kibana_ui_setting';
 
-interface FormattedTimeProps {
-  time: number; // Unix time (milliseconds)
-  fallbackFormat?: string;
-}
-
 const getFormattedTime = (
-  time: FormattedTimeProps['time'],
+  time: number,
   userFormat: string | undefined,
   fallbackFormat: string = 'Y-MM-DD HH:mm:ss.SSS'
 ) => {
   return userFormat ? moment(time).format(userFormat) : moment(time).format(fallbackFormat);
 };
 
-export const FormattedTime: React.FunctionComponent<FormattedTimeProps> = ({
-  time,
-  fallbackFormat,
-}) => {
+export const useFormattedTime = (time: number, fallbackFormat?: string) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const formattedTime = useMemo(() => getFormattedTime(time, dateFormat, fallbackFormat), [
     getFormattedTime,
@@ -34,5 +26,5 @@ export const FormattedTime: React.FunctionComponent<FormattedTimeProps> = ({
     fallbackFormat,
   ]);
 
-  return <span>{formattedTime}</span>;
+  return formattedTime;
 };

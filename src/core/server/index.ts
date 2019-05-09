@@ -18,7 +18,7 @@
  */
 import { ElasticsearchServiceSetup } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
-import { PluginsServiceSetup } from './plugins';
+import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export { bootstrap } from './bootstrap';
 export { ConfigService } from './config';
@@ -47,6 +47,7 @@ export {
   PluginInitializerContext,
   PluginName,
   PluginSetupContext,
+  PluginStartContext,
 } from './plugins';
 
 /** @public */
@@ -56,8 +57,18 @@ export interface CoreSetup {
   plugins: PluginsServiceSetup;
 }
 
+/**
+ * @public
+ */
 export interface CoreStart {
   http: HttpServiceStart;
+  plugins: PluginsServiceStart;
 }
 
-export { HttpServiceSetup, HttpServiceStart, ElasticsearchServiceSetup, PluginsServiceSetup };
+export {
+  HttpServiceSetup,
+  HttpServiceStart,
+  ElasticsearchServiceSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+};

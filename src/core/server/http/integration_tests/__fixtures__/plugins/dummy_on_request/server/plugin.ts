@@ -70,4 +70,5 @@ export class DummyOnRequestPlugin {
       return t.next();
     });
   }
+  public start() {}
 }

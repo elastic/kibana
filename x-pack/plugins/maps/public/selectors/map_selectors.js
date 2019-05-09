@@ -67,6 +67,8 @@ export const getTooltipState = ({ map }) => {
 
 export const getMapReady = ({ map }) => map && map.ready;
 
+export const getMapInitError = ({ map }) => map.mapInitError;
+
 export const getGoto = ({ map }) => map && map.goto;
 
 export const getSelectedLayerId = ({ map }) => {
@@ -113,6 +115,8 @@ export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
 
+export const getDrawState = ({ map }) => map.mapState.drawState;
+
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
     return map.mapState.refreshConfig;
@@ -147,7 +151,6 @@ export const getDataFilters = createSelector(
     };
   }
 );
-
 
 export const getLayerList = createSelector(
   getLayerListRaw,
@@ -200,6 +203,6 @@ export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some(layerDescriptor => {
     const currentState = copyPersistentState(layerDescriptor);
     const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-    return (trackedState) ? !_.isEqual(currentState, copyPersistentState(trackedState)) : false;
+    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
   });
 });

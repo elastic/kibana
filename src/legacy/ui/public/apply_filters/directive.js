@@ -21,17 +21,16 @@ import 'ngreact';
 import { uiModules } from '../modules';
 import template from './directive.html';
 import { ApplyFiltersPopover } from './apply_filters_popover';
-import { FilterBarLibMapAndFlattenFiltersProvider } from '../filter_bar/lib/map_and_flatten_filters';
+import { mapAndFlattenFilters } from '../filter_bar/lib/map_and_flatten_filters';
+import { wrapInI18nContext } from 'ui/i18n';
 
 const app = uiModules.get('app/kibana', ['react']);
 
 app.directive('applyFiltersPopoverComponent', (reactDirective) => {
-  return reactDirective(ApplyFiltersPopover);
+  return reactDirective(wrapInI18nContext(ApplyFiltersPopover));
 });
 
-app.directive('applyFiltersPopover', (reactDirective, Private) => {
-  const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
-
+app.directive('applyFiltersPopover', (indexPatterns) => {
   return {
     template,
     restrict: 'E',
@@ -47,7 +46,7 @@ app.directive('applyFiltersPopover', (reactDirective, Private) => {
       // popover, because it has to reset its state whenever the new filters change. Setting a `key`
       // property on the component accomplishes this due to how React handles the `key` property.
       $scope.$watch('filters', filters => {
-        mapAndFlattenFilters(filters).then(mappedFilters => {
+        mapAndFlattenFilters(indexPatterns, filters).then(mappedFilters => {
           $scope.state = {
             filters: mappedFilters,
             key: Date.now(),
