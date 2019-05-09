@@ -194,6 +194,7 @@ const defaultSetupDeps = {
 const applicationStart = applicationServiceMock.createStartContract();
 const basePathStart = basePathServiceMock.createStartContract();
 const i18nStart = i18nServiceMock.createStartContract();
+const httpStart = httpServiceMock.createStartContract();
 const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
 const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
@@ -203,6 +204,7 @@ const defaultStartDeps = {
     application: applicationStart,
     basePath: basePathStart,
     i18n: i18nStart,
+    http: httpStart,
     injectedMetadata: injectedMetadataStart,
     notifications: notificationsStart,
     overlays: overlayStart,
