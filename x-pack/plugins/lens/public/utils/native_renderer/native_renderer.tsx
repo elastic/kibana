@@ -8,19 +8,22 @@ import React, { useEffect, useRef } from 'react';
 
 export interface NativeRendererProps<T> {
   render: (domElement: Element, props: T) => void;
-  actualProps: T;
+  nativeProps: T;
   tag?: string;
   children?: never;
 }
 
 function isShallowDifferent<T>(a: T, b: T): boolean {
+  if (a === b) {
+    return false;
+  }
+
+  if (Object.keys(a).length !== Object.keys(b).length) {
+    return true;
+  }
+
   for (const key in a) {
     if (!(key in b) || a[key] !== b[key]) {
-      return true;
-    }
-  }
-  for (const key in b) {
-    if (!(key in a) || a[key] !== b[key]) {
       return true;
     }
   }
@@ -28,23 +31,23 @@ function isShallowDifferent<T>(a: T, b: T): boolean {
   return false;
 }
 
-export function NativeRenderer<T>({ render, actualProps, tag }: NativeRendererProps<T>) {
+export function NativeRenderer<T>({ render, nativeProps, tag }: NativeRendererProps<T>) {
   const elementRef = useRef<Element | null>(null);
   const propsRef = useRef<T | null>(null);
 
   function renderAndUpdate(element: Element) {
     elementRef.current = element;
-    propsRef.current = actualProps;
-    render(element, actualProps);
+    propsRef.current = nativeProps;
+    render(element, nativeProps);
   }
 
   useEffect(
     () => {
-      if (elementRef.current && isShallowDifferent(propsRef.current, actualProps)) {
+      if (elementRef.current && isShallowDifferent(propsRef.current, nativeProps)) {
         renderAndUpdate(elementRef.current);
       }
     },
-    [actualProps]
+    [nativeProps]
   );
 
   return React.createElement(tag || 'div', {

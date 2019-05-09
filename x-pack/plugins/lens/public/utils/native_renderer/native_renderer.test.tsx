@@ -23,7 +23,7 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
     const containerElement = mountpoint.firstElementChild;
     expect(renderSpy).toHaveBeenCalledWith(containerElement, testProps);
   });
@@ -32,8 +32,8 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
     expect(renderSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -41,8 +41,8 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
-    render(<NativeRenderer render={renderSpy} actualProps={{ ...testProps }} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={{ ...testProps }} />, mountpoint);
     expect(renderSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -54,14 +54,14 @@ describe('native_renderer', () => {
     render(
       <NativeRenderer
         render={renderSpy}
-        actualProps={{ state: testState, setState: testCallback }}
+        nativeProps={{ state: testState, setState: testCallback }}
       />,
       mountpoint
     );
     render(
       <NativeRenderer
         render={renderSpy}
-        actualProps={{ state: testState, setState: testCallback }}
+        nativeProps={{ state: testState, setState: testCallback }}
       />,
       mountpoint
     );
@@ -72,9 +72,9 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
-    render(<NativeRenderer render={renderSpy} actualProps={{ a: 'def' }} />, mountpoint);
-    render(<NativeRenderer render={renderSpy} actualProps={{ a: 'def' }} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={{ a: 'def' }} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={{ a: 'def' }} />, mountpoint);
     expect(renderSpy).toHaveBeenCalledTimes(2);
     const containerElement = mountpoint.firstElementChild;
     expect(renderSpy).lastCalledWith(containerElement, { a: 'def' });
@@ -84,8 +84,8 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
-    render(<NativeRenderer render={renderSpy} actualProps={{ a: 'abc', b: 'def' }} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={{ a: 'abc', b: 'def' }} />, mountpoint);
     expect(renderSpy).toHaveBeenCalledTimes(2);
     const containerElement = mountpoint.firstElementChild;
     expect(renderSpy).lastCalledWith(containerElement, { a: 'abc', b: 'def' });
@@ -95,8 +95,8 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc', b: 'def' };
 
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
-    render(<NativeRenderer render={renderSpy} actualProps={{ a: 'abc' }} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={{ a: 'abc' }} />, mountpoint);
     expect(renderSpy).toHaveBeenCalledTimes(2);
     const containerElement = mountpoint.firstElementChild;
     expect(renderSpy).lastCalledWith(containerElement, { a: 'abc' });
@@ -106,7 +106,7 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
-    render(<NativeRenderer render={renderSpy} actualProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
     const containerElement: Element = mountpoint.firstElementChild!;
     expect(containerElement.nodeName).toBe('DIV');
   });
@@ -115,7 +115,7 @@ describe('native_renderer', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
-    render(<NativeRenderer render={renderSpy} tag="span" actualProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} tag="span" nativeProps={testProps} />, mountpoint);
     const containerElement: Element = mountpoint.firstElementChild!;
     expect(containerElement.nodeName).toBe('SPAN');
   });

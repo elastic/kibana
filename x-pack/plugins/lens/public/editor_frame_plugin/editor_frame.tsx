@@ -24,7 +24,7 @@ export function EditorFrame(props: EditorFrameProps) {
         <NativeRenderer
           key={key}
           render={props.datasources[key].renderDataPanel}
-          actualProps={{
+          nativeProps={{
             state: {},
             setState: () => {},
           }}

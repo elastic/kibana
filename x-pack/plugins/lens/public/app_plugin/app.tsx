@@ -16,7 +16,7 @@ export function App({ editorFrame }: { editorFrame: EditorFrameSetup }) {
       <div>
         <h1>Lens</h1>
 
-        <NativeRenderer render={editorFrame.render} actualProps={undefined} />
+        <NativeRenderer render={editorFrame.render} nativeProps={undefined} />
       </div>
     </I18nProvider>
   );
