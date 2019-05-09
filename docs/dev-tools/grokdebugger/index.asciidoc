@@ -7,11 +7,15 @@ before you use them in your data processing pipelines. Grok is a pattern
 matching syntax that you can use to parse arbitrary text and
 structure it. Grok is good for parsing syslog, apache, and other
 webserver logs, mysql logs, and in general, any log format that is
-written for human consumption.
+written for human consumption. 
 
 Grok patterns are supported in the ingest node
 {ref}/grok-processor.html[grok processor] and the Logstash
-{logstash-ref}/plugins-filters-grok.html[grok filter]. The Elastic Stack ships
+{logstash-ref}/plugins-filters-grok.html[grok filter]. See 
+{logstash-ref}/plugins-filters-grok.html#_grok_basics[grok basics]
+for more information on the syntax for a grok pattern. 
+
+The Elastic Stack ships
 with more than 120 reusable grok patterns. See
 https://github.com/elastic/elasticsearch/tree/master/libs/grok/src/main/resources/patterns[Ingest node grok patterns] and https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns[Logstash grok patterns]
 for the complete list of patterns.
