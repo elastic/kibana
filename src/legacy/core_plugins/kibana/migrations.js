@@ -158,19 +158,22 @@ function transformFilterStringToQueryObject(doc) {
       // we need to migrate all filters where they are applied:
       // filters appear in:
       // type: metric -> visState.params.series[item]
-      // type: markdown -> visState.params.series[item]
+      // type: markdown -> visState.params.series[item], this also has one here: visState.params.series[each].split_filters.filter
       const isMetricTSVBVis = get(visState, 'params.type') === 'metric';
       const isMarkdownTSVBVis = get(visState, 'params.type') === 'markdown';
       if (!isMetricTSVBVis && !isMarkdownTSVBVis) {
         // skip
         return doc;
       }
+      // migrate the series filters
       const series = get(visState, 'params.series') || [];
+      // TODO: the forEach body can be extracted into another function
       series.forEach((item) => {
         if (!item.filter) {
           // we don't need to transform anything if there isn't a filter at all
           return;
         }
+        // top level filter:
         if (typeof item.filter === 'string') {
           // if the filter exists and it is a string, assume it to be lucene and transform the filter into an object accordingly
           const itemfilterObject = {
@@ -179,6 +182,24 @@ function transformFilterStringToQueryObject(doc) {
           };
           // replace the filter string with the filterObject
           item.filter = itemfilterObject;
+        }
+        if (item.split_filters) {
+          const splitFilters = get(item, 'split_filters') || [];
+          splitFilters.forEach((filter) => {
+            if (!filter.filter) {
+              // we don't need to transform anything if there isn't a filter at all
+              return;
+            }
+            if (typeof filter.filter === 'string') {
+              // if the filter exists and it is a string, assume it to be lucene and transform the filter into an object accordingly
+              const filterfilterObject = {
+                query: filter.filter,
+                language: 'lucene',
+              };
+              // replace the filter string with the filterObject
+              filter.filter = filterfilterObject;
+            }
+          });
         }
       });
       newDoc.attributes.visState = JSON.stringify(visState);
