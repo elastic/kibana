@@ -96,10 +96,10 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 
 To avoid overwhelming the user with too much data at once, you'll add two layers for {es} data.
 
-. The first layer will show aggregated data that represents many documents.
-The layer will appear when the user zooms out the map to show larger amounts of the globe.
-. The second layer will display individual documents.
+* The first layer will display individual documents.
 The layer will appear when the user zooms in the map to show smaller regions.
+* The second layer will show aggregated data that represents many documents.
+The layer will appear when the user zooms out the map to show larger amounts of the globe.
 
 ==== Add a vector layer from the document source
 
@@ -155,7 +155,7 @@ image::maps/images/grid_metrics_both.png[]
   .. In the field select, select *sum of bytes*.
 . Click *Save & close* button.
 +
-Your map now looks like this:
+Your map now looks like this between between zoom levels 0 and 9:
 +
 [role="screenshot"]
 image::maps/images/gs_add_es_layer.png[]
@@ -173,7 +173,7 @@ You have completed the steps for re-creating the sample data map.
 
 *Next steps:*
 
-* Continue with this tutorial and use your map in a Kibana Dashboard.
+* Continue with this tutorial and <<maps-embedding, use your map in a Kibana dashboard>>.
 * Create a map using your own data. You might find these resources helpful:
 ** <<heatmap-layer, Heat map layer>>
 ** <<tile-layer, Tile layer>>
