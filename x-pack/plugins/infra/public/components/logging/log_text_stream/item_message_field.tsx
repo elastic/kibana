@@ -5,13 +5,12 @@
  */
 
 import { darken, transparentize } from 'polished';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 // import euiStyled, { css } from '../../../../../../common/eui_styled_components';
 import { css } from '../../../../../../common/eui_styled_components';
-import { TextScale } from '../../../../common/log_text_scale';
 import { tintOrShade } from '../../../utils/styles';
-import { LogTextStreamItemField } from './item_field';
+import { LogTextStreamItemField, LogTextStreamItemFieldContent } from './item_field';
 import {
   isConstantSegment,
   isFieldSegment,
@@ -23,28 +22,27 @@ interface LogTextStreamItemMessageFieldProps {
   segments: LogEntryMessageSegment[];
   isHovered: boolean;
   isWrapped: boolean;
-  scale: TextScale;
   isHighlighted: boolean;
 }
 
-export const LogTextStreamItemMessageField: React.FunctionComponent<
-  LogTextStreamItemMessageFieldProps
-> = ({ dataTestSubj, isHighlighted, isHovered, isWrapped, scale, segments }) => {
-  const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
+export const LogTextStreamItemMessageField = memo<LogTextStreamItemMessageFieldProps>(
+  ({ dataTestSubj, isHighlighted, isHovered, isWrapped, segments }) => {
+    const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
 
-  return (
-    <LogTextStreamItemMessageFieldWrapper
-      data-test-subj={dataTestSubj}
-      hasHighlights={false}
-      isHighlighted={isHighlighted}
-      isHovered={isHovered}
-      isWrapped={isWrapped}
-      scale={scale}
-    >
-      {message}
-    </LogTextStreamItemMessageFieldWrapper>
-  );
-};
+    return (
+      <LogTextStreamItemField data-test-subj={dataTestSubj} growWeight={5}>
+        <MessageFieldContent
+          hasHighlights={false}
+          isHighlighted={isHighlighted}
+          isHovered={isHovered}
+          isWrapped={isWrapped}
+        >
+          {message}
+        </MessageFieldContent>
+      </LogTextStreamItemField>
+    );
+  }
+);
 
 // const renderHighlightFragments = (text: string, highlights: string[]): React.ReactNode[] => {
 //   const renderedHighlights = highlights.reduce(
@@ -98,13 +96,12 @@ const unwrappedFieldStyle = css`
   white-space: pre;
 `;
 
-const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs<{
+const MessageFieldContent = LogTextStreamItemFieldContent.extend.attrs<{
   hasHighlights: boolean;
   isHovered: boolean;
   isHighlighted: boolean;
   isWrapped?: boolean;
 }>({})`
-  flex: 5 0 0%
   text-overflow: ellipsis;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
   padding-left: 0;

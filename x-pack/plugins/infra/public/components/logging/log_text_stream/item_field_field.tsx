@@ -8,31 +8,26 @@ import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
 import { css } from '../../../../../../common/eui_styled_components';
-import { TextScale } from '../../../../common/log_text_scale';
-import { LogTextStreamItemField } from './item_field';
+import { LogTextStreamItemField, LogTextStreamItemFieldContent } from './item_field';
 
 interface LogTextStreamItemFieldFieldProps {
   dataTestSubj?: string;
   encodedValue: string;
   isHighlighted: boolean;
   isHovered: boolean;
-  scale: TextScale;
 }
 
 export const LogTextStreamItemFieldField: React.FunctionComponent<
   LogTextStreamItemFieldFieldProps
-> = ({ dataTestSubj, encodedValue, isHighlighted, isHovered, scale }) => {
+> = ({ dataTestSubj, encodedValue, isHighlighted, isHovered }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
 
   return (
-    <LogTextStreamItemFieldFieldWrapper
-      data-test-subj={dataTestSubj}
-      isHighlighted={isHighlighted}
-      isHovered={isHovered}
-      scale={scale}
-    >
-      {value}
-    </LogTextStreamItemFieldFieldWrapper>
+    <LogTextStreamItemField data-test-subj={dataTestSubj} growWeight={1}>
+      <FieldFieldContent isHighlighted={isHighlighted} isHovered={isHovered}>
+        {value}
+      </FieldFieldContent>
+    </LogTextStreamItemField>
   );
 };
 
@@ -43,11 +38,10 @@ const hoveredFieldStyle = css`
       : darken(0.05, props.theme.eui.euiColorHighlight)};
 `;
 
-const LogTextStreamItemFieldFieldWrapper = LogTextStreamItemField.extend.attrs<{
+const FieldFieldContent = LogTextStreamItemFieldContent.extend.attrs<{
   isHighlighted: boolean;
   isHovered: boolean;
 }>({})`
-  flex: 1 0 0%;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

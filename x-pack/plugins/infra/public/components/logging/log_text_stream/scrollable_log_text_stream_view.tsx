@@ -5,22 +5,28 @@
  */
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
+import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
+import { useFormattedTime } from '../../formatted_time';
 import { InfraLoadingPanel } from '../../loading';
 import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
-import { LogTextStreamItemView } from './item_view';
+import { LogColumnHeaders } from './column_headers';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
+import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
+import { getColumnWidths, LogEntryColumnWidth } from './log_entry_column';
+import { useMeasuredCharacterDimensions } from './text_styles';
 
 interface ScrollableLogTextStreamViewProps {
+  columnConfigurations: LogColumnConfiguration[];
   items: StreamItem[];
   scale: TextScale;
   wrap: boolean;
@@ -44,6 +50,7 @@ interface ScrollableLogTextStreamViewProps {
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
+  showColumnConfiguration: () => void;
   intl: InjectedIntl;
   highlightedItem: string | null;
 }
@@ -91,17 +98,19 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
 
   public render() {
     const {
-      items,
-      scale,
-      wrap,
-      isReloading,
-      isLoadingMore,
-      hasMoreBeforeStart,
+      columnConfigurations,
       hasMoreAfterEnd,
-      isStreaming,
-      lastLoadedTime,
-      intl,
+      hasMoreBeforeStart,
       highlightedItem,
+      intl,
+      isLoadingMore,
+      isReloading,
+      isStreaming,
+      items,
+      lastLoadedTime,
+      scale,
+      showColumnConfiguration,
+      wrap,
     } = this.props;
     const { targetId } = this.state;
     const hasItems = items.length > 0;
@@ -137,60 +146,76 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
             testString="logsNoDataPrompt"
           />
         ) : (
-          <AutoSizer content>
-            {({ measureRef, content: { width = 0, height = 0 } }) => (
-              <ScrollPanelSizeProbe innerRef={measureRef}>
-                <VerticalScrollPanel
-                  height={height}
-                  width={width}
-                  onVisibleChildrenChange={this.handleVisibleChildrenChange}
-                  target={targetId}
-                  hideScrollbar={true}
-                  data-test-subj={'logStream'}
-                >
-                  {registerChild => (
-                    <>
-                      <LogTextStreamLoadingItemView
-                        alignment="bottom"
-                        isLoading={isLoadingMore}
-                        hasMore={hasMoreBeforeStart}
-                        isStreaming={false}
-                        lastStreamingUpdate={null}
-                      />
-                      {items.map(item => (
-                        <MeasurableItemView
-                          register={registerChild}
-                          registrationKey={getStreamItemId(item)}
-                          key={getStreamItemId(item)}
-                        >
-                          {itemMeasureRef => (
-                            <LogTextStreamItemView
-                              openFlyoutWithItem={this.handleOpenFlyout}
-                              ref={itemMeasureRef}
-                              item={item}
-                              scale={scale}
-                              wrap={wrap}
-                              isHighlighted={
-                                highlightedItem ? item.logEntry.gid === highlightedItem : false
-                              }
+          <WithColumnWidths columnConfigurations={columnConfigurations} scale={scale}>
+            {({ columnWidths, CharacterDimensionsProbe }) => (
+              <>
+                <CharacterDimensionsProbe />
+                <LogColumnHeaders
+                  columnConfigurations={columnConfigurations}
+                  columnWidths={columnWidths}
+                  showColumnConfiguration={showColumnConfiguration}
+                />
+                <AutoSizer content>
+                  {({ measureRef, content: { width = 0, height = 0 } }) => (
+                    <ScrollPanelSizeProbe innerRef={measureRef}>
+                      <VerticalScrollPanel
+                        height={height}
+                        width={width}
+                        onVisibleChildrenChange={this.handleVisibleChildrenChange}
+                        target={targetId}
+                        hideScrollbar={true}
+                        data-test-subj={'logStream'}
+                      >
+                        {registerChild => (
+                          <>
+                            <LogTextStreamLoadingItemView
+                              alignment="bottom"
+                              isLoading={isLoadingMore}
+                              hasMore={hasMoreBeforeStart}
+                              isStreaming={false}
+                              lastStreamingUpdate={null}
                             />
-                          )}
-                        </MeasurableItemView>
-                      ))}
-                      <LogTextStreamLoadingItemView
-                        alignment="top"
-                        isLoading={isStreaming || isLoadingMore}
-                        hasMore={hasMoreAfterEnd}
-                        isStreaming={isStreaming}
-                        lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
-                        onLoadMore={this.handleLoadNewerItems}
-                      />
-                    </>
+                            {items.map(item => (
+                              <MeasurableItemView
+                                register={registerChild}
+                                registrationKey={getStreamItemId(item)}
+                                key={getStreamItemId(item)}
+                              >
+                                {itemMeasureRef => (
+                                  <LogEntryRow
+                                    columnConfigurations={columnConfigurations}
+                                    columnWidths={columnWidths}
+                                    openFlyoutWithItem={this.handleOpenFlyout}
+                                    boundingBoxRef={itemMeasureRef}
+                                    logEntry={item.logEntry}
+                                    scale={scale}
+                                    wrap={wrap}
+                                    isHighlighted={
+                                      highlightedItem
+                                        ? item.logEntry.gid === highlightedItem
+                                        : false
+                                    }
+                                  />
+                                )}
+                              </MeasurableItemView>
+                            ))}
+                            <LogTextStreamLoadingItemView
+                              alignment="top"
+                              isLoading={isStreaming || isLoadingMore}
+                              hasMore={hasMoreAfterEnd}
+                              isStreaming={isStreaming}
+                              lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
+                              onLoadMore={this.handleLoadNewerItems}
+                            />
+                          </>
+                        )}
+                      </VerticalScrollPanel>
+                    </ScrollPanelSizeProbe>
                   )}
-                </VerticalScrollPanel>
-              </ScrollPanelSizeProbe>
+                </AutoSizer>
+              </>
             )}
-          </AutoSizer>
+          </WithColumnWidths>
         )}
       </ScrollableLogTextStreamViewWrapper>
     );
@@ -245,6 +270,39 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
 }
 
 export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamViewClass);
+
+/**
+ * This function-as-child component calculates the column widths based on the
+ * given configuration. It depends on the `CharacterDimensionsProbe` it returns
+ * being rendered so it can measure the monospace character size.
+ *
+ * If the above component wasn't a class component, this would have been
+ * written as a hook.
+ */
+const WithColumnWidths: React.FunctionComponent<{
+  children: (
+    params: { columnWidths: LogEntryColumnWidth[]; CharacterDimensionsProbe: React.ComponentType }
+  ) => React.ReactElement<any> | null;
+  columnConfigurations: LogColumnConfiguration[];
+  scale: TextScale;
+}> = ({ children, columnConfigurations, scale }) => {
+  const { CharacterDimensionsProbe, dimensions } = useMeasuredCharacterDimensions(scale);
+  const referenceTime = useMemo(() => Date.now(), []);
+  const formattedCurrentDate = useFormattedTime(referenceTime);
+  const columnWidths = useMemo(
+    () => getColumnWidths(columnConfigurations, dimensions.width, formattedCurrentDate.length),
+    [columnConfigurations, dimensions.width, formattedCurrentDate]
+  );
+  const childParams = useMemo(
+    () => ({
+      columnWidths,
+      CharacterDimensionsProbe,
+    }),
+    [columnWidths, CharacterDimensionsProbe]
+  );
+
+  return children(childParams);
+};
 
 const ScrollableLogTextStreamViewWrapper = euiStyled.div`
   overflow: hidden;

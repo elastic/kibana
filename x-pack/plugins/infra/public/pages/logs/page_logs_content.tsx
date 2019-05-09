@@ -28,9 +28,10 @@ import { ReduxSourceIdBridge, WithStreamItems } from '../../containers/logs/with
 import { Source } from '../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
+import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { derivedIndexPattern, sourceId, version } = useContext(Source.Context);
+  const { derivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -41,6 +42,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     flyoutItem,
     isLoading,
   } = useContext(LogFlyoutState.Context);
+  const { showLogsConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
 
   return (
     <>
@@ -86,6 +88,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 loadNewerEntries,
               }) => (
                 <ScrollableLogTextStreamView
+                  columnConfigurations={(source && source.configuration.logColumns) || []}
                   hasMoreAfterEnd={hasMoreAfterEnd}
                   hasMoreBeforeStart={hasMoreBeforeStart}
                   isLoadingMore={isLoadingMore}
@@ -97,6 +100,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   loadNewerItems={loadNewerEntries}
                   reportVisibleInterval={reportVisiblePositions}
                   scale={textScale}
+                  showColumnConfiguration={showLogsConfiguration}
                   target={targetPosition}
                   wrap={textWrap}
                   setFlyoutItem={setFlyoutId}

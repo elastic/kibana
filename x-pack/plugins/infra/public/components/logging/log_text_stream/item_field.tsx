@@ -5,18 +5,22 @@
  */
 
 import euiStyled from '../../../../../../common/eui_styled_components';
-import { switchProp } from '../../../utils/styles';
 
 export const LogTextStreamItemField = euiStyled.div.attrs<{
-  scale?: 'small' | 'medium' | 'large';
+  baseWidth?: string;
+  growWeight?: number;
+  shrinkWeight?: number;
 }>({})`
-  font-size: ${props =>
-    switchProp('scale', {
-      large: props.theme.eui.euiFontSizeM,
-      medium: props.theme.eui.euiFontSizeS,
-      small: props.theme.eui.euiFontSizeXS,
-      [switchProp.default]: props.theme.eui.euiFontSize,
-    })};
-  line-height: ${props => props.theme.eui.euiLineHeight};
+  align-items: stretch;
+  display: flex;
+  flex-basis: ${props => props.baseWidth || '0%'};
+  flex-direction: row;
+  flex-grow: ${props => props.growWeight || 0};
+  flex-shrink: ${props => props.shrinkWeight || 0};
+  overflow: hidden;
+`;
+
+export const LogTextStreamItemFieldContent = euiStyled.div`
+  flex: 1 0 0%;
   padding: 2px ${props => props.theme.eui.paddingSizes.m};
 `;

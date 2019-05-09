@@ -42,7 +42,7 @@ interface MeasurableChild {
 }
 
 const SCROLL_THROTTLE_INTERVAL = 250;
-const ASSUMED_SCROLLBAR_WIDTH = 20;
+export const ASSUMED_SCROLLBAR_WIDTH = 20;
 
 export class VerticalScrollPanel<Child> extends React.PureComponent<
   VerticalScrollPanelProps<Child>

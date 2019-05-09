@@ -65,6 +65,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
         }
         onMouseEnter={setItemIsHovered}
         onMouseLeave={setItemIsNotHovered}
+        scale={scale}
       >
         {logEntry.columns.map((column, columnIndex) => {
           if (isTimestampColumn(column)) {
@@ -75,7 +76,6 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                 isHighlighted={isHighlighted}
                 isHovered={isHovered}
                 key={`${columnIndex}`}
-                scale={scale}
                 time={column.timestamp}
               />
             );
@@ -104,7 +104,6 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                   isHighlighted={isHighlighted}
                   isHovered={isHovered}
                   isWrapped={wrap}
-                  scale={scale}
                   segments={column.message}
                 />
               </Fragment>
@@ -117,7 +116,6 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                 isHighlighted={isHighlighted}
                 isHovered={isHovered}
                 key={`${columnIndex}`}
-                scale={scale}
               />
             );
           }
@@ -149,15 +147,28 @@ const LogTextStreamIconDiv = euiStyled<IconProps, 'div'>('div')`
   font-size: 0.9em;
 `;
 
-const LogTextStreamLogEntryItemDiv = euiStyled.div`
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
-  font-size: ${props => props.theme.eui.euiFontSize};
-  line-height: ${props => props.theme.eui.euiLineHeight};
+const LogTextStreamLogEntryItemDiv = euiStyled.div.attrs<{
+  scale: TextScale;
+}>({})`
+  align-items: stretch;
   color: ${props => props.theme.eui.euiTextColor};
-  overflow: hidden;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+  font-family: ${props => props.theme.eui.euiCodeFontFamily};
+  font-size: ${props => {
+    switch (props.scale) {
+      case 'large':
+        return props.theme.eui.euiFontSizeM;
+      case 'medium':
+        return props.theme.eui.euiFontSizeS;
+      case 'small':
+        return props.theme.eui.euiFontSizeXS;
+      default:
+        return props.theme.eui.euiFontSize;
+    }
+  }}
   justify-content: flex-start;
-  align-items: stretch;
+  line-height: ${props => props.theme.eui.euiLineHeight};
+  overflow: hidden;
 `;

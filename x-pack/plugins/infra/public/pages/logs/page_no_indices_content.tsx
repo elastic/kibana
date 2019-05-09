@@ -22,7 +22,7 @@ interface LogsPageNoIndicesContentProps {
 export const LogsPageNoIndicesContent = injectUICapabilities(
   injectI18n((props: LogsPageNoIndicesContentProps) => {
     const { intl, uiCapabilities } = props;
-    const { show } = useContext(SourceConfigurationFlyoutState.Context);
+    const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
 
     return (
       <WithKibanaChrome>
@@ -57,7 +57,7 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
                     <EuiButton
                       data-test-subj="configureSourceButton"
                       color="primary"
-                      onClick={show}
+                      onClick={showIndicesConfiguration}
                     >
                       {intl.formatMessage({
                         id: 'xpack.infra.configureSourceActionLabel',
