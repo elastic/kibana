@@ -7,24 +7,11 @@
 import mappings from './mappings.json';
 import { init } from './server';
 
-import { APP_ID } from './common/constants';
-
-import { ActionService, ActionTypeService } from './server';
-
-export interface ActionsPlugin {
-  create: ActionService['create'];
-  get: ActionService['get'];
-  find: ActionService['find'];
-  delete: ActionService['delete'];
-  update: ActionService['update'];
-  fire: ActionService['fire'];
-  registerType: ActionTypeService['register'];
-  listTypes: ActionTypeService['list'];
-}
+export { ActionsPlugin } from './server';
 
 export function actions(kibana: any) {
   return new kibana.Plugin({
-    id: APP_ID,
+    id: 'actions',
     configPrefix: 'xpack.actions',
     require: ['kibana', 'elasticsearch', 'encrypted_saved_objects'],
     config(Joi: any) {

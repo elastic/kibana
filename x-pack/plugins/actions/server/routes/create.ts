@@ -57,7 +57,11 @@ export function createRoute(server: Hapi.Server) {
       const savedObjectsClient = request.getSavedObjectsClient();
       return await request.server.plugins.actions.create(
         savedObjectsClient,
-        request.payload.attributes
+        request.payload.attributes,
+        {
+          migrationVersion: request.payload.migrationVersion,
+          references: request.payload.references,
+        }
       );
     },
   });

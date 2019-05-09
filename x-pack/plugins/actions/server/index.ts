@@ -5,5 +5,4 @@
  */
 
 export { init } from './init';
-export { ActionService } from './action_service';
-export { ActionTypeService } from './action_type_service';
+export { ActionsPlugin } from './types';

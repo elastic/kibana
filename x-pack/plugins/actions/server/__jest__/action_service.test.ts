@@ -36,11 +36,18 @@ describe('create()', () => {
     });
     const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.create(savedObjectsClient, {
-      description: 'my description',
-      actionTypeId: 'my-action-type',
-      actionTypeConfig: {},
-    });
+    const result = await actionService.create(
+      savedObjectsClient,
+      {
+        description: 'my description',
+        actionTypeId: 'my-action-type',
+        actionTypeConfig: {},
+      },
+      {
+        migrationVersion: {},
+        references: [],
+      }
+    );
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -52,6 +59,10 @@ describe('create()', () => {
         "actionTypeConfigSecrets": Object {},
         "actionTypeId": "my-action-type",
         "description": "my description",
+      },
+      Object {
+        "migrationVersion": Object {},
+        "references": Array [],
       },
     ],
   ],
@@ -142,6 +153,7 @@ describe('create()', () => {
         "actionTypeId": "my-action-type",
         "description": "my description",
       },
+      undefined,
     ],
   ],
   "results": Array [

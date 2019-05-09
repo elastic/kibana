@@ -39,6 +39,11 @@ interface FindOptions {
   fields?: string[];
 }
 
+interface CreateOptions {
+  migrationVersion?: Record<string, string>;
+  references?: SavedObjectReference[];
+}
+
 export class ActionService {
   public actionTypes: ActionTypeService;
   private encryptedSavedObjects: any;
@@ -51,14 +56,18 @@ export class ActionService {
   /**
    * Create an action
    */
-  public async create(savedObjectsClient: SavedObjectsClient, data: Action) {
+  public async create(
+    savedObjectsClient: SavedObjectsClient,
+    data: Action,
+    options?: CreateOptions
+  ) {
     const { actionTypeId } = data;
     if (!this.actionTypes.has(actionTypeId)) {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
     this.actionTypes.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
     const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
-    return await savedObjectsClient.create<any>('action', actionWithSplitActionTypeConfig);
+    return await savedObjectsClient.create<any>('action', actionWithSplitActionTypeConfig, options);
   }
 
   /**
