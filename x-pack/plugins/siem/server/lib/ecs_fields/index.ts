@@ -22,6 +22,16 @@ export const auditdMap: Readonly<Record<string, string>> = {
   'auditd.summary.sequence': 'auditd.summary.sequence',
 };
 
+export const cloudFieldsMap: Readonly<Record<string, string>> = {
+  'cloud.account.id': 'cloud.account.id',
+  'cloud.availability_zone': 'cloud.availability_zone',
+  'cloud.instance.id': 'cloud.instance.id',
+  'cloud.instance.name': 'cloud.instance.name',
+  'cloud.machine.type': 'cloud.machine.type',
+  'cloud.provider': 'cloud.provider',
+  'cloud.region': 'cloud.region',
+};
+
 export const fileMap: Readonly<Record<string, string>> = {
   'file.path': 'file.path',
   'file.target_path': 'file.target_path',
@@ -54,7 +64,6 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
   'host.ip': 'host.ip',
   'host.mac': 'host.mac',
   'host.name': 'host.name',
-  'host.type': 'cloud.machine.type',
   ...extendMap('host', osFieldsMap),
 };
 

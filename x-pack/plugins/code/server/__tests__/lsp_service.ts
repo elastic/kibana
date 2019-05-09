@@ -21,14 +21,33 @@ import { createTestServerOption } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const filename = 'hello.ts';
+const packagejson = `
+{
+  "name": "master",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+      "typescript": "~3.3.3333"
+  },
+  "scripts": {
+    "test": "echo \\"Error: no test specified\\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
+`;
 describe('lsp_service tests', () => {
   async function prepareProject(repoPath: string) {
     mkdirp.sync(repoPath);
     const repo = await Git.Repository.init(repoPath, 0);
     const helloContent = "console.log('hello world');";
     fs.writeFileSync(path.join(repo.workdir(), filename), helloContent, 'utf8');
+    fs.writeFileSync(path.join(repo.workdir(), 'package.json'), packagejson, 'utf8');
     const index = await repo.refreshIndex();
     await index.addByPath(filename);
+    await index.addByPath('package.json');
     index.write();
     const treeId = await index.writeTree();
     const committer = Git.Signature.create('tester', 'test@test.com', Date.now() / 1000, 60);
@@ -72,7 +91,16 @@ describe('lsp_service tests', () => {
 
   // @ts-ignore
   before(async () => {
-    await prepareProject(path.join(serverOptions.repoPath, repoUri));
+    const tmpRepo = path.join(serverOptions.repoPath, 'tmp');
+    await prepareProject(tmpRepo);
+    await Git.Clone.clone(`file://${tmpRepo}`, path.join(serverOptions.repoPath, repoUri), {
+      bare: 1,
+      fetchOpts: {
+        callbacks: {
+          certificateCheck: () => 0,
+        },
+      },
+    });
   });
 
   function comparePath(pathA: string, pathB: string) {
@@ -179,7 +207,7 @@ describe('lsp_service tests', () => {
       const realWorkspacePath = fs.realpathSync(workspacePath);
 
       // @ts-ignore
-      const handler = languageServer.languageServerHandlers[realWorkspacePath];
+      const handler = await languageServer.languageServerHandlers[realWorkspacePath];
       const exitSpy = sinon.spy(handler, 'exit');
       const unloadSpy = sinon.spy(handler, 'unloadWorkspace');
 
