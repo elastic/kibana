@@ -18,7 +18,9 @@
  */
 
 import { get } from 'lodash';
-import { CurveType } from '@elastic/charts';
+// import { CurveType } from '@elastic/charts';
+
+const DEFAULT_COLOR = '#000';
 
 export const getAreaSeriesStyles = ({ points, lines, color }) => ({
   areaSeriesStyle: {
@@ -40,22 +42,20 @@ export const getAreaSeriesStyles = ({ points, lines, color }) => ({
       strokeWidth: get(points, 'lineWidth', 0),
     },
   },
-  curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
 });
 
-export const getBarSeriesStyles = ({ show, lineWidth, fill }, color) => ({
+export const getBarStyles = ({ show = true, lineWidth = 1, fill = 1 }, color) => ({
   barSeriesStyle: {
     border: {
-      stroke: color,
+      stroke: color || DEFAULT_COLOR,
       strokeWidth: lineWidth,
       visible: show,
     },
-    opacity: fill
+    opacity: fill,
   },
-  curve: CurveType.LINEAR,
 });
 
-export const calculateCustomSeriesColors = (color, specId) => {
+export const getSeriesColors = (color, specId) => {
   const map = new Map();
 
   map.set(

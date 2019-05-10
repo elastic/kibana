@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should match a snapshot 1`] = `
+Object {
+  "barSeriesStyle": Object {
+    "border": Object {
+      "stroke": "rgb(224, 0, 221)",
+      "strokeWidth": 2,
+      "visible": true,
+    },
+    "opacity": 0.5,
+  },
+}
+`;
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should set default values if bars and colors are empty 1`] = `
+Object {
+  "barSeriesStyle": Object {
+    "border": Object {
+      "stroke": "#000",
+      "strokeWidth": 1,
+      "visible": true,
+    },
+    "opacity": 1,
+  },
+}
+`;

@@ -104,14 +104,13 @@ export const TimeSeries = ({
               <BarSeriesDecorator
                 key={`${id}-${label}`}
                 seriesId={id}
-                groupId={groupId}
+                seriesGroupId={groupId}
                 name={label}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
                 color={color}
                 stack={stack}
-                points={points}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
               />

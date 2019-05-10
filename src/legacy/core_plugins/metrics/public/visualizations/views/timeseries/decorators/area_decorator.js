@@ -20,7 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getSpecId, getGroupId, ScaleType, AreaSeries } from '@elastic/charts';
-import { calculateCustomSeriesColors, getAreaSeriesStyles } from '../utils/series_styles';
+import { getSeriesColors, getAreaSeriesStyles } from '../utils/series_styles';
 
 export function AreaSeriesDecorator({
   seriesId,
@@ -51,7 +51,7 @@ export function AreaSeriesDecorator({
     xScaleType,
     yScaleType,
     yScaleToDataExtent: false,
-    customSeriesColors: calculateCustomSeriesColors(color, id),
+    customSeriesColors: getSeriesColors(color, id),
   };
 
   return (

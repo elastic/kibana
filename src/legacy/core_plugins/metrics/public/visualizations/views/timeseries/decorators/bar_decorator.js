@@ -20,11 +20,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
-import { calculateCustomSeriesColors, getBarSeriesStyles } from '../utils/series_styles';
+import { getSeriesColors, getBarStyles } from '../utils/series_styles';
 
 export function BarSeriesDecorator({
   seriesId,
-  groupId,
+  seriesGroupId,
   name,
   data,
   hideInLegend,
@@ -35,22 +35,23 @@ export function BarSeriesDecorator({
   yScaleType,
 }) {
   const id = getSpecId(seriesId);
-  const seriesStyle = getBarSeriesStyles(bars, color);
+  const groupId = getGroupId(seriesGroupId);
+  const customSeriesColors = getSeriesColors(color, id);
+  const barSeriesStyle = getBarStyles(bars, color);
+
   const seriesSettings = {
     id,
-    groupId: getGroupId(groupId),
     name,
+    groupId,
     data,
+    customSeriesColors,
     hideInLegend,
-    ...seriesStyle,
-    xAccessor: 0,
-    yAccessors: [1],
-    // todo: props.stack ???
-    stackAccessors: stack ? [0] : null,
+    xAccessor: 0, // todo: Magic number
+    yAccessors: [1], // todo: Magic number
+    stackAccessors: stack ? [0] : null, // todo: props.stack ???
     xScaleType,
     yScaleType,
-    yScaleToDataExtent: false,
-    customSeriesColors: calculateCustomSeriesColors(color, id),
+    ...barSeriesStyle,
   };
 
   return (
@@ -60,7 +61,7 @@ export function BarSeriesDecorator({
 
 BarSeriesDecorator.propTypes = {
   seriesId: PropTypes.string.isRequired,
-  groupId: PropTypes.string.isRequired,
+  seriesGroupId: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
   hideInLegend: PropTypes.bool.isRequired,
@@ -68,7 +69,7 @@ BarSeriesDecorator.propTypes = {
     fill: PropTypes.number,
     lineWidth: PropTypes.number,
     show: PropTypes.boolean,
-  }),
+  }).isRequired,
   color: PropTypes.string.isRequired,
   stack: PropTypes.bool.isRequired,
   xScaleType: PropTypes.string,
