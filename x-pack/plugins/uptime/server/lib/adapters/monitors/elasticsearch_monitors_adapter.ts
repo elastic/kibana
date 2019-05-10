@@ -24,7 +24,6 @@ import {
 } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
