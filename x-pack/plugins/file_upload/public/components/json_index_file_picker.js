@@ -11,6 +11,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiCallOut,
+  EuiProgress,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseFile } from '../util/file_parser';
@@ -27,11 +28,16 @@ export function JsonIndexFilePicker({
 }) {
 
   const [fileUploadError, setFileUploadError] = useState('');
+  const [fileParsingProgress, setFileParsingProgress] = useState('');
 
   return (
     <Fragment>
+      { fileParsingProgress
+        ? <EuiProgress size="xs" color="accent" position="absolute" />
+        : null
+      }
       {
-        fileRef
+        fileRef && !fileUploadError
           ? null
           : (
             <EuiCallOut
@@ -59,6 +65,7 @@ export function JsonIndexFilePicker({
         )}
         isInvalid={fileUploadError !== ''}
         error={[fileUploadError]}
+        helpText={fileParsingProgress}
       >
         <EuiFilePicker
           initialPromptText={(
@@ -82,13 +89,14 @@ export function JsonIndexFilePicker({
                 );
                 return;
               }
-              setFileRef(file);
               // Parse file
+              setFileParsingProgress('Parsing file...');
               const parsedFileResult = await parseFile(
                 file, onFileUpload, transformDetails
               ).catch(e => {
                 setFileUploadError(`Unable to parse file: ${e}`);
               });
+              setFileParsingProgress('');
               if (!parsedFileResult) {
                 if (fileRef) {
                   onFileRemove && onFileRemove(fileRef);
@@ -96,7 +104,7 @@ export function JsonIndexFilePicker({
                 }
                 return;
               }
-              // Save parsed result
+              setFileRef(file);
               setParsedFile(parsedFileResult);
 
             } else { // TODO: Support multiple file upload?
