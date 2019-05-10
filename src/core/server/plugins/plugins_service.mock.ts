@@ -17,9 +17,18 @@
  * under the License.
  */
 
-export { config, HttpConfig, HttpConfigType } from './http_config';
-export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
-export { Router, KibanaRequest } from './router';
-export { BasePathProxyServer } from './base_path_proxy_server';
-export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
-export { OnRequestHandler, OnRequestToolkit } from './lifecycle/on_request';
+import { PluginsService } from './plugins_service';
+
+type ServiceContract = PublicMethodsOf<PluginsService>;
+const createServiceMock = () => {
+  const mocked: jest.Mocked<ServiceContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  return mocked;
+};
+
+export const pluginServiceMock = {
+  create: createServiceMock,
+};
