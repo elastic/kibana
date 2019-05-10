@@ -8,8 +8,7 @@ import { cloneDeep } from 'lodash/fp';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { mockTimelineData } from '../../../../mock';
-
-import { deleteItemIdx, findItem, getValues } from '.';
+import { deleteItemIdx, findItem, getValues } from './helpers';
 
 describe('helpers', () => {
   describe('#deleteItemIdx', () => {

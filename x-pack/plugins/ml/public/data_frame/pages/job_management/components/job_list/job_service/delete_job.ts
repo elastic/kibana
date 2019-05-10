@@ -10,10 +10,12 @@ import { ml } from '../../../../../../services/ml_api_service';
 
 import { DataFrameJobListRow } from '../common';
 
-export const deleteJobFactory = (getJobs: () => void) => async (d: DataFrameJobListRow) => {
+import { GetJobs } from './get_jobs';
+
+export const deleteJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListRow) => {
   try {
     await ml.dataFrame.deleteDataFrameTransformsJob(d.config.id);
-    getJobs();
+    getJobs(true);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.jobsList.deleteJobSuccessMessage', {
         defaultMessage: 'Data frame job {jobId} deleted successfully.',

@@ -20,10 +20,16 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           "node": Object {
             "_id": "cPsuhGcB0WOhS6qyTKC0",
             "host": Object {
-              "name": "elrond.elstc.co",
+              "name": Array [
+                "elrond.elstc.co",
+              ],
               "os": Object {
-                "name": "Ubuntu",
-                "version": "18.04.1 LTS (Bionic Beaver)",
+                "name": Array [
+                  "Ubuntu",
+                ],
+                "version": Array [
+                  "18.04.1 LTS (Bionic Beaver)",
+                ],
               },
             },
           },
@@ -34,11 +40,35 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           },
           "node": Object {
             "_id": "KwQDiWcB0WOhS6qyXmrW",
+            "cloud": Object {
+              "instance": Object {
+                "id": Array [
+                  "423232333829362673777",
+                ],
+              },
+              "machine": Object {
+                "type": Array [
+                  "custom-4-16384",
+                ],
+              },
+              "provider": Array [
+                "gce",
+              ],
+              "region": Array [
+                "us-east-1",
+              ],
+            },
             "host": Object {
-              "name": "siem-kibana",
+              "name": Array [
+                "siem-kibana",
+              ],
               "os": Object {
-                "name": "Debian GNU/Linux",
-                "version": "9 (stretch)",
+                "name": Array [
+                  "Debian GNU/Linux",
+                ],
+                "version": Array [
+                  "9 (stretch)",
+                ],
               },
             },
           },

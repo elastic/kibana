@@ -10,6 +10,7 @@ import header from './header.png';
 export const plot: ElementFactory = () => ({
   name: 'plot',
   displayName: 'Coordinate plot',
+  tags: ['chart'],
   help: 'Mixed line, bar or dot charts',
   image: header,
   expression: `filters

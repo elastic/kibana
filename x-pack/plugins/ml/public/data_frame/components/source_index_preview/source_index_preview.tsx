@@ -29,6 +29,7 @@ import {
 
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
+  compressed: boolean;
   itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
   isExpandable: boolean;
 }
@@ -37,7 +38,7 @@ const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<Expandabl
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { IndexPatternContext, SimpleQuery } from '../../common';
+import { isKibanaContext, KibanaContext, SimpleQuery } from '../../common';
 
 import {
   EsDoc,
@@ -93,11 +94,13 @@ interface Props {
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
@@ -340,9 +343,13 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       )}
       {clearTable === false && (
         <ExpandableTable
+          compressed
           items={tableItems}
           columns={columns}
-          pagination={true}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
           hasActions={false}
           isSelectable={false}
           itemId="_id"

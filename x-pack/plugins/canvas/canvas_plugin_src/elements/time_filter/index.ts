@@ -10,6 +10,7 @@ import header from './header.png';
 export const timeFilter: ElementFactory = () => ({
   name: 'time_filter',
   displayName: 'Time filter',
+  tags: ['filter'],
   help: 'Set a time window',
   image: header,
   height: 50,
