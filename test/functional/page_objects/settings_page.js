@@ -281,7 +281,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickIndexPatternLogstash() {
-      await find.clickByPartialLinkText('logstash-*');
+      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
+      await indexLink.click();
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
@@ -637,7 +638,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         const title = await titleCell.getVisibleText();
 
 
-        const viewInAppButtons = await row.findAllByCssSelector('[aria-label="In app"]');
+        const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
         const canViewInApp = Boolean(viewInAppButtons.length);
         summary.push({
           title,

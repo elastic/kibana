@@ -7,14 +7,14 @@
 import React, { useContext } from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { CreateSourceInput, SourceQuery, UpdateSourceInput } from '../../graphql/types';
+import { SourceQuery, UpdateSourceInput } from '../../graphql/types';
 import { RendererFunction } from '../../utils/typed_react';
 import { Source } from '../source';
 
 interface WithSourceProps {
   children: RendererFunction<{
     configuration?: SourceQuery.Query['source']['configuration'];
-    create: (sourceConfiguration: CreateSourceInput) => Promise<any> | undefined;
+    create: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
     derivedIndexPattern: StaticIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
@@ -25,7 +25,7 @@ interface WithSourceProps {
     metricAlias?: string;
     metricIndicesExist?: boolean;
     sourceId: string;
-    update: (changes: UpdateSourceInput[]) => Promise<any> | undefined;
+    update: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
     version?: string;
   }>;
 }
