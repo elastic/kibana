@@ -19,6 +19,7 @@
 
 import { Server } from '../server/kbn_server';
 import { Capabilities } from '../../core/public';
+import { SavedObjectsSchemaDefinition } from '../server/saved_objects/schema';
 
 /**
  * Usage
@@ -32,7 +33,7 @@ import { Capabilities } from '../../core/public';
  * };
  * ```
  */
-export type LegacyPlugin = (kibana: LegacyPluginApi) => ArrayOrItem<LegacyPluginSpec>;
+export type LegacyPluginInitializer = (kibana: LegacyPluginApi) => ArrayOrItem<LegacyPluginSpec>;
 
 export type ArrayOrItem<T> = T | T[];
 
@@ -45,7 +46,25 @@ export interface LegacyPluginOptions {
   require: string[];
   version: string;
   kibanaVersion: 'kibana';
-  uiExports: any;
+  uiExports: Partial<{
+    app: Partial<{
+      title: string;
+      description: string;
+      main: string;
+      icon: string;
+      euiIconType: string;
+      order: number;
+    }>;
+    apps: any;
+    hacks: string[];
+    devTools: string[];
+    styleSheetPaths: string;
+    injectDefaultVars: (server: Server) => Record<string, any>;
+    noParse: string[];
+    home: string[];
+    mappings: any;
+    savedObjectSchemas: SavedObjectsSchemaDefinition;
+  }>;
   uiCapabilities?: Capabilities;
   publicDir: any;
   configPrefix: any;
@@ -55,11 +74,6 @@ export interface LegacyPluginOptions {
   init: InitPluginFunction;
   postInit: any;
   isEnabled: boolean;
-}
-
-export interface UiExports {
-  injectDefaultVars: (server: Server) => { [key: string]: any };
-  styleSheetPaths?: string;
 }
 
 export type InitPluginFunction = (server: Server) => void;

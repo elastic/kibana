@@ -8,11 +8,11 @@ import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
-import { LegacyPlugin } from 'src/legacy/types';
+import { LegacyPluginInitializer } from 'src/legacy/types';
 import mappings from './mappings.json';
 import { plugin } from './server/new-platform/index';
 
-export const apm: LegacyPlugin = kibana => {
+export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
