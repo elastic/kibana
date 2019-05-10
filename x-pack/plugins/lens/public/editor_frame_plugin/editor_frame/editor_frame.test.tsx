@@ -8,6 +8,7 @@ import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { EditorFrame } from './editor_frame';
 import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
+import { act } from 'react-dom/test-utils';
 
 const nextTick = () => new Promise(resolve => setTimeout(resolve));
 
@@ -47,54 +48,60 @@ describe('editor_frame', () => {
 
   describe('initialization', () => {
     it('should initialize initial datasource and visualization if present', () => {
-      mount(
-        <EditorFrame
-          visualizations={{
-            testVis: mockVisualization,
-          }}
-          datasources={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
-        />
-      );
+      act(() => {
+        mount(
+          <EditorFrame
+            visualizations={{
+              testVis: mockVisualization,
+            }}
+            datasources={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasource="testDatasource"
+            initialVisualization="testVis"
+          />
+        );
+      });
 
       expect(mockVisualization.initialize).toHaveBeenCalled();
       expect(mockDatasource.initialize).toHaveBeenCalled();
     });
 
     it('should not initialize datasource and visualization if no initial one is specificed', () => {
-      mount(
-        <EditorFrame
-          visualizations={{
-            testVis: mockVisualization,
-          }}
-          datasources={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasource={null}
-          initialVisualization={null}
-        />
-      );
+      act(() => {
+        mount(
+          <EditorFrame
+            visualizations={{
+              testVis: mockVisualization,
+            }}
+            datasources={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasource={null}
+            initialVisualization={null}
+          />
+        );
+      });
 
       expect(mockVisualization.initialize).not.toHaveBeenCalled();
       expect(mockDatasource.initialize).not.toHaveBeenCalled();
     });
 
     it('should not render something before datasource is initialized', () => {
-      mount(
-        <EditorFrame
-          visualizations={{
-            testVis: mockVisualization,
-          }}
-          datasources={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
-        />
-      );
+      act(() => {
+        mount(
+          <EditorFrame
+            visualizations={{
+              testVis: mockVisualization,
+            }}
+            datasources={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasource="testDatasource"
+            initialVisualization="testVis"
+          />
+        );
+      });
 
       expect(mockVisualization.renderConfigPanel).not.toHaveBeenCalled();
       expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
@@ -104,24 +111,26 @@ describe('editor_frame', () => {
       const initialState = {};
       let databaseInitialized: ({}) => void;
 
-      mount(
-        <EditorFrame
-          visualizations={{
-            testVis: mockVisualization,
-          }}
-          datasources={{
-            testDatasource: {
-              ...mockDatasource,
-              initialize: () =>
-                new Promise(resolve => {
-                  databaseInitialized = resolve;
-                }),
-            },
-          }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
-        />
-      );
+      act(() => {
+        mount(
+          <EditorFrame
+            visualizations={{
+              testVis: mockVisualization,
+            }}
+            datasources={{
+              testDatasource: {
+                ...mockDatasource,
+                initialize: () =>
+                  new Promise(resolve => {
+                    databaseInitialized = resolve;
+                  }),
+              },
+            }}
+            initialDatasource="testDatasource"
+            initialVisualization="testVis"
+          />
+        );
+      });
 
       await nextTick();
       databaseInitialized!(initialState);
@@ -181,7 +190,9 @@ describe('editor_frame', () => {
       const updatedState = {};
       const setVisualizationState = (mockVisualization.renderConfigPanel as jest.Mock).mock
         .calls[0][1].setState;
-      setVisualizationState(updatedState);
+      act(() => {
+        setVisualizationState(updatedState);
+      });
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(2);
       expect(mockVisualization.renderConfigPanel).toHaveBeenLastCalledWith(
@@ -214,7 +225,9 @@ describe('editor_frame', () => {
       const updatedState = {};
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
         .setState;
-      setDatasourceState(updatedState);
+      act(() => {
+        setDatasourceState(updatedState);
+      });
 
       expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(2);
       expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
@@ -248,7 +261,9 @@ describe('editor_frame', () => {
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
         .setState;
-      setDatasourceState({});
+      act(() => {
+        setDatasourceState({});
+      });
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(2);
       expect(mockVisualization.renderConfigPanel).toHaveBeenLastCalledWith(
@@ -330,7 +345,9 @@ describe('editor_frame', () => {
 
       const updatedState = {};
       const setDatasourceState = (mockDatasource.getPublicAPI as jest.Mock).mock.calls[0][1];
-      setDatasourceState(updatedState);
+      act(() => {
+        setDatasourceState(updatedState);
+      });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledTimes(2);
       expect(mockDatasource.getPublicAPI).toHaveBeenLastCalledWith(
@@ -372,9 +389,11 @@ describe('editor_frame', () => {
     });
 
     it('should initialize other datasource on switch', async () => {
-      instance
-        .find('select[data-test-subj="datasource-switch"]')
-        .simulate('change', { target: { value: 'testDatasource2' } });
+      act(() => {
+        instance
+          .find('select[data-test-subj="datasource-switch"]')
+          .simulate('change', { target: { value: 'testDatasource2' } });
+      });
       expect(mockDatasource2.initialize).toHaveBeenCalled();
     });
 
@@ -395,9 +414,11 @@ describe('editor_frame', () => {
     });
 
     it('should initialize other visualization on switch', async () => {
-      instance
-        .find('select[data-test-subj="visualization-switch"]')
-        .simulate('change', { target: { value: 'testVis2' } });
+      act(() => {
+        instance
+          .find('select[data-test-subj="visualization-switch"]')
+          .simulate('change', { target: { value: 'testVis2' } });
+      });
       expect(mockVisualization2.initialize).toHaveBeenCalled();
     });
 
@@ -405,9 +426,11 @@ describe('editor_frame', () => {
       const initialState = {};
       mockVisualization2.initialize = () => initialState;
 
-      instance
-        .find('select[data-test-subj="visualization-switch"]')
-        .simulate('change', { target: { value: 'testVis2' } });
+      act(() => {
+        instance
+          .find('select[data-test-subj="visualization-switch"]')
+          .simulate('change', { target: { value: 'testVis2' } });
+      });
 
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
