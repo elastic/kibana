@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getLoggingContainerHref, getLoggingKubernetesHref } from '../get_logging_href';
+import {
+  getLoggingContainerHref,
+  getLoggingKubernetesHref,
+  getLoggingIpHref,
+} from '../get_logging_href';
 import { LatestMonitor } from '../../../../../common/graphql/types';
 
 describe('getLoggingHref', () => {
@@ -23,6 +27,9 @@ describe('getLoggingHref', () => {
           pod: {
             uid: 'test-pod-id',
           },
+        },
+        monitor: {
+          ip: '151.101.202.217',
         },
         timestamp: 'foo',
         url: {
@@ -44,6 +51,12 @@ describe('getLoggingHref', () => {
     expect(result).toMatchSnapshot();
   });
 
+  it(`creates an ip href with base path when present`, () => {
+    const result = getLoggingKubernetesHref(monitor, 'bar');
+    expect(result).not.toBeUndefined();
+    expect(result).toMatchSnapshot();
+  });
+
   it('creates a pod href with base path when present', () => {
     const result = getLoggingKubernetesHref(monitor, 'bar');
     expect(result).not.toBeUndefined();
@@ -52,6 +65,12 @@ describe('getLoggingHref', () => {
 
   it(`creates a pod href without a base path when it's an empty string`, () => {
     const result = getLoggingKubernetesHref(monitor, '');
+    expect(result).not.toBeUndefined();
+    expect(result).toMatchSnapshot();
+  });
+
+  it(`creates an ip href without a base path when it's an empty string`, () => {
+    const result = getLoggingIpHref(monitor, '');
     expect(result).not.toBeUndefined();
     expect(result).toMatchSnapshot();
   });
@@ -66,5 +85,11 @@ describe('getLoggingHref', () => {
     expect.assertions(1);
     delete monitor.ping;
     expect(getLoggingKubernetesHref(monitor, '')).toBeUndefined();
+  });
+
+  it('returns undefined ip href if ip is not present', () => {
+    expect.assertions(1);
+    delete monitor.ping;
+    expect(getLoggingIpHref(monitor, '')).toBeUndefined();
   });
 });
