@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
@@ -46,7 +46,7 @@ export function TransactionDetails() {
         location={location}
       />
 
-      <EuiSpacer />
+      <EuiHorizontalRule size="full" margin="l" />
 
       <EuiPanel>
         <TransactionDistribution
@@ -56,7 +56,7 @@ export function TransactionDetails() {
         />
       </EuiPanel>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       {!transaction ? (
         <EmptyMessage
