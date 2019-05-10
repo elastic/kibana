@@ -10,6 +10,7 @@ exports[`Data Frame: <DefinePivotForm /> Minimal initialization 1`] = `
           "title": "the-index-pattern-title",
         },
         "indexPatterns": Object {},
+        "kbnBaseUrl": "url",
         "kibanaConfig": Object {},
       }
     }

@@ -24,7 +24,7 @@ type CreateSearchItems = () => { indexPattern: StaticIndexPattern };
 import { KibanaContext } from '../../common';
 import { Page } from './page';
 
-module.directive('mlNewDataFrame', ($injector: InjectorService) => {
+module.directive('mlNewDataFrame', ($injector: InjectorService, kbnBaseUrl: string) => {
   return {
     scope: {},
     restrict: 'E',
@@ -39,6 +39,7 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
       const kibanaContext = {
         currentIndexPattern: indexPattern,
         indexPatterns,
+        kbnBaseUrl,
         kibanaConfig,
       };
 

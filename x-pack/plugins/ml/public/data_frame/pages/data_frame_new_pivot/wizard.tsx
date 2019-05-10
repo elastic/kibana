@@ -167,11 +167,8 @@ export const Wizard: SFC = React.memo(() => {
       children: (
         <Fragment>
           {jobCreate}
-          {currentStep === WIZARD_STEPS.JOB_CREATE && (
-            <WizardNav
-              previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
-              previousActive={!jobCreateState.created}
-            />
+          {currentStep === WIZARD_STEPS.JOB_CREATE && !jobCreateState.created && (
+            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
           )}
         </Fragment>
       ),

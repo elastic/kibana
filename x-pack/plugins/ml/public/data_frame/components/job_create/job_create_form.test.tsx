@@ -23,7 +23,7 @@ describe('Data Frame: <JobCreateForm />', () => {
       createIndexPattern: false,
       jobId: 'the-job-id',
       jobConfig: {},
-      overrides: { created: false, started: false },
+      overrides: { created: false, started: false, indexPatternId: undefined },
       onChange() {},
     };
 
@@ -37,7 +37,7 @@ describe('Data Frame: <JobCreateForm />', () => {
     const wrapper = shallow(
       <div>
         <KibanaContext.Provider
-          value={{ currentIndexPattern, indexPatterns: {}, kibanaConfig: {} }}
+          value={{ currentIndexPattern, indexPatterns: {}, kbnBaseUrl: 'url', kibanaConfig: {} }}
         >
           <JobCreateForm {...props} />
         </KibanaContext.Provider>

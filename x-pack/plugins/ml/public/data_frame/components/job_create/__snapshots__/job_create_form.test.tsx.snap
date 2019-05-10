@@ -10,6 +10,7 @@ exports[`Data Frame: <JobCreateForm /> Minimal initialization 1`] = `
           "title": "the-index-pattern-title",
         },
         "indexPatterns": Object {},
+        "kbnBaseUrl": "url",
         "kibanaConfig": Object {},
       }
     }
@@ -22,6 +23,7 @@ exports[`Data Frame: <JobCreateForm /> Minimal initialization 1`] = `
       overrides={
         Object {
           "created": false,
+          "indexPatternId": undefined,
           "started": false,
         }
       }

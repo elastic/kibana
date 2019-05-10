@@ -17,33 +17,38 @@ import {
   // Module '"@elastic/eui"' has no exported member 'EuiDescribedFormGroup'.
   // @ts-ignore
   EuiDescribedFormGroup,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiHorizontalRule,
   EuiIcon,
+  EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
+import { moveToDataFrameJobsList, moveToDiscover } from '../../common';
+
 import { KibanaContext, isKibanaContext } from '../../common';
 
 export interface JobDetailsExposedState {
   created: boolean;
   started: boolean;
+  indexPatternId: string | undefined;
 }
 
 export function getDefaultJobCreateState(): JobDetailsExposedState {
   return {
     created: false,
     started: false,
+    indexPatternId: undefined,
   };
 }
 
-function gotToDataFrameJobManagement() {
-  window.location.href = '#/data_frames';
-}
 interface Props {
   createIndexPattern: boolean;
   jobId: string;
@@ -58,6 +63,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
 
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
+    const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
 
     const kibanaContext = useContext(KibanaContext);
 
@@ -67,9 +73,9 @@ export const JobCreateForm: SFC<Props> = React.memo(
 
     useEffect(
       () => {
-        onChange({ created, started });
+        onChange({ created, started, indexPatternId });
       },
-      [created, started]
+      [created, started, indexPatternId]
     );
 
     async function createDataFrame() {
@@ -155,6 +161,8 @@ export const JobCreateForm: SFC<Props> = React.memo(
             values: { indexPatternName },
           })
         );
+
+        setIndexPatternId(id);
         return true;
       } catch (e) {
         toastNotifications.addDanger(
@@ -171,6 +179,8 @@ export const JobCreateForm: SFC<Props> = React.memo(
     function getJobConfigDevConsoleStatement() {
       return `PUT _data_frame/transforms/${jobId}\n${JSON.stringify(jobConfig, null, 2)}\n\n`;
     }
+
+    const ITEM_STYLE = { width: '300px' };
 
     return (
       <EuiForm>
@@ -262,13 +272,14 @@ export const JobCreateForm: SFC<Props> = React.memo(
         {created && started && (
           <Fragment>
             <EuiSpacer size="m" />
+            <EuiHorizontalRule />
 
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem grow={false}>
+            <EuiFlexGrid gutterSize="l">
+              <EuiFlexItem style={ITEM_STYLE}>
                 <EuiCard
                   icon={<EuiIcon size="xxl" type="list" />}
-                  title={i18n.translate('xpack.ml.dataframe.jobCreateForm.jobManagementCardTitle', {
-                    defaultMessage: 'Job management',
+                  title={i18n.translate('xpack.ml.dataframe.jobCreateForm.jobsListCardTitle', {
+                    defaultMessage: 'Data frame jobs',
                   })}
                   description={i18n.translate(
                     'xpack.ml.dataframe.jobCreateForm.jobManagementCardDescription',
@@ -276,10 +287,44 @@ export const JobCreateForm: SFC<Props> = React.memo(
                       defaultMessage: 'Return to the data frame job management page.',
                     }
                   )}
-                  onClick={gotToDataFrameJobManagement}
+                  onClick={moveToDataFrameJobsList}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
+              {createIndexPattern === true && indexPatternId === undefined && (
+                <EuiFlexItem style={ITEM_STYLE}>
+                  <EuiPanel style={{ position: 'relative' }}>
+                    <EuiProgress size="xs" color="accent" position="absolute" />
+                    <EuiText color="subdued" size="s">
+                      <p>
+                        {i18n.translate(
+                          'xpack.ml.dataframe.jobCreateForm.creatingIndexPatternMessage',
+                          {
+                            defaultMessage: 'Creating Kibana index pattern ...',
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                  </EuiPanel>
+                </EuiFlexItem>
+              )}
+              {indexPatternId !== undefined && (
+                <EuiFlexItem style={ITEM_STYLE}>
+                  <EuiCard
+                    icon={<EuiIcon size="xxl" type="discoverApp" />}
+                    title={i18n.translate('xpack.ml.dataframe.jobCreateForm.discoverCardTitle', {
+                      defaultMessage: 'Discover',
+                    })}
+                    description={i18n.translate(
+                      'xpack.ml.dataframe.jobCreateForm.discoverCardDescription',
+                      {
+                        defaultMessage: 'Use Discover to explore the data frame pivot.',
+                      }
+                    )}
+                    onClick={() => moveToDiscover(indexPatternId, kibanaContext.kbnBaseUrl)}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGrid>
           </Fragment>
         )}
       </EuiForm>

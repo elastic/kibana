@@ -52,7 +52,7 @@ describe('Data Frame: <PivotPreview />', () => {
     const wrapper = shallow(
       <div>
         <KibanaContext.Provider
-          value={{ currentIndexPattern, indexPatterns: {}, kibanaConfig: {} }}
+          value={{ currentIndexPattern, indexPatterns: {}, kbnBaseUrl: 'url', kibanaConfig: {} }}
         >
           <PivotPreview {...props} />
         </KibanaContext.Provider>
