@@ -31,7 +31,7 @@ export const WrappedByAutoSizer = styled.div`
 `;
 
 const FlexGroup = styled(EuiFlexGroup)`
-  height: '100%';
+  height: 100%;
 `;
 
 const FlexItem = styled(EuiFlexItem)`
@@ -81,8 +81,8 @@ export interface StatItems {
 
 export interface StatItemsProps extends StatItems {
   key: string;
-  areaChart?: AreaChartData[];
-  barChart?: BarChartData[];
+  areaChart?: AreaChartData[] | [];
+  barChart?: BarChartData[] | [];
 }
 
 export const StatItemsComponent = pure<StatItemsProps>(
