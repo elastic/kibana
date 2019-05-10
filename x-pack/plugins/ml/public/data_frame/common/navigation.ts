@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
-export const MINIMUM_REFRESH_INTERVAL_MS = 5000;
-export const DELETING_JOBS_REFRESH_INTERVAL_MS = 2000;
+export function moveToDataFrameWizard() {
+  window.location.href = `#/data_frames/new_job`;
+}
