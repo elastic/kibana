@@ -81,8 +81,8 @@ export interface StatItems {
 
 export interface StatItemsProps extends StatItems {
   key: string;
-  areaChart?: AreaChartData[] | [];
-  barChart?: BarChartData[] | [];
+  areaChart?: AreaChartData[];
+  barChart?: BarChartData[];
 }
 
 export const StatItemsComponent = pure<StatItemsProps>(

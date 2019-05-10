@@ -20,15 +20,15 @@ export const kpiHostsSchema = gql`
 
   type KpiHostsData {
     hosts: Float
-    hostsHistogram: [KpiHostHistogramData]
+    hostsHistogram: [KpiHostHistogramData!]
     authSuccess: Float
-    authSuccessHistogram: [KpiHostHistogramData]
+    authSuccessHistogram: [KpiHostHistogramData!]
     authFailure: Float
-    authFailureHistogram: [KpiHostHistogramData]
+    authFailureHistogram: [KpiHostHistogramData!]
     uniqueSourceIps: Float
-    uniqueSourceIpsHistogram: [KpiHostHistogramData]
+    uniqueSourceIpsHistogram: [KpiHostHistogramData!]
     uniqueDestinationIps: Float
-    uniqueDestinationIpsHistogram: [KpiHostHistogramData]
+    uniqueDestinationIpsHistogram: [KpiHostHistogramData!]
   }
 
   extend type Source {
