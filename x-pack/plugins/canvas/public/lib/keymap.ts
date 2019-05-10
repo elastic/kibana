@@ -93,14 +93,22 @@ export const keymap: KeyMap = {
   },
   EDITOR: {
     displayName: 'Editor controls',
+    // added for documentation purposes, not handled by `react-shortcuts`
     MULTISELECT: getShortcuts('click', { modifiers: 'shift', help: 'Select multiple elements' }),
+    // added for documentation purposes, not handled by `react-shortcuts`
+    RESIZE_FROM_CENTER: getShortcuts('drag', {
+      modifiers: 'alt',
+      help: 'Resize from the center',
+    }),
+    // added for documentation purposes, not handled by `react-shortcuts`
     IGNORE_SNAP: getShortcuts('drag', {
       modifiers: ['ctrl'],
       help: 'Resize and rotate without snapping',
     }),
-    RESIZE_FROM_CENTER: getShortcuts('drag', {
-      modifiers: 'alt',
-      help: 'Resize from the center',
+    // added for documentation purposes, not handled by `react-shortcuts`
+    SELECT_BEHIND: getShortcuts('click', {
+      modifiers: 'ctrl',
+      help: 'Select element behind top element',
     }),
     UNDO: getShortcuts('z', { modifiers: ['ctrl'], help: 'Undo last action' }),
     REDO: getShortcuts('z', { modifiers: ['ctrl', 'shift'], help: 'Redo last action' }),
@@ -112,7 +120,7 @@ export const keymap: KeyMap = {
   },
   PRESENTATION: {
     displayName: 'Presentation controls',
-    FULLSCREEN: getShortcuts(['p', 'f'], { modifiers: ['alt'], help: 'Enter presentation mode' }),
+    FULLSCREEN: getShortcuts(['f', 'p'], { modifiers: 'alt', help: 'Enter presentation mode' }),
     FULLSCREEN_EXIT: getShortcuts(['esc'], { help: 'Exit presentation mode' }),
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS

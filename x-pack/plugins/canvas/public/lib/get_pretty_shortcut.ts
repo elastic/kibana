@@ -9,7 +9,8 @@ export const getPrettyShortcut = (shortcut: string): string => {
     return '';
   }
 
-  let result = shortcut.toUpperCase().replace(/command/i, '⌘');
+  let result = shortcut.toUpperCase();
+  result = result.replace(/command/i, '⌘');
   result = result.replace(/option/i, '⌥');
   result = result.replace(/left/i, '←');
   result = result.replace(/right/i, '→');

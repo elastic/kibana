@@ -42,7 +42,7 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
         title: shortcutKeyMap.help,
         description: osShortcuts.reduce((acc: JSX.Element[], shortcut, i): JSX.Element[] => {
           if (i !== 0) {
-            acc.push(<Fragment> or </Fragment>);
+            acc.push(<span key={getId('span')}> or </span>);
           }
           acc.push(
             <span key={getId('span')}>
