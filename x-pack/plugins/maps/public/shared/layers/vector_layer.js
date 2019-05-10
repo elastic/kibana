@@ -345,7 +345,9 @@ export class VectorLayer extends AbstractLayer {
   _assignIdsToFeatures(featureCollection) {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
-      feature.properties[FEATURE_ID_PROPERTY_NAME] = (typeof feature.id === 'string' || typeof feature.id === 'number')  ? feature.id : i;
+      const id = (typeof feature.id === 'string' || typeof feature.id === 'number')  ? feature.id : i;
+      feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
+      feature.id = id;
     }
   }
 
@@ -396,10 +398,8 @@ export class VectorLayer extends AbstractLayer {
       mbGeoJSONSource.setData(featureCollection);
     }
 
-    const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
-    if (shouldRefresh) {
-      mbGeoJSONSource.setData(featureCollection);
-    }
+    this._style.addScaledPropertiesBasedOnStyleAndSetFeatureStateMb(featureCollection, mbMap, this.getId());
+
   }
 
   _setMbPointsProperties(mbMap) {

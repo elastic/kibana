@@ -249,7 +249,7 @@ export class VectorStyle extends AbstractStyle {
     return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  addScaledPropertiesBasedOnStyle(featureCollection) {
+  addScaledPropertiesBasedOnStyleAndSetFeatureStateMb(featureCollection, mbMap, sourceId) {
     if (!featureCollection || featureCollection.length === 0) {
       return false;
     }
@@ -284,8 +284,19 @@ export class VectorStyle extends AbstractStyle {
           scaledValue = (feature.properties[name] - range.min) / range.delta;
         }
         feature.properties[computedName] = scaledValue;
+        const featureIdentifier = {
+          source: sourceId,
+          id: feature.id
+        };
+        const featureState = {
+          [computedName]: scaledValue
+        };
+        mbMap.setFeatureState(featureIdentifier, featureState);
       });
     });
+
+    window._sourceId = sourceId;
+    window._mbMap = mbMap;
 
     return true;
   }
@@ -297,10 +308,17 @@ export class VectorStyle extends AbstractStyle {
         return accu;
       }, []);
     const targetName = VectorStyle.getComputedFieldName(fieldName);
+    // return [
+    //   'interpolate',
+    //   ['linear'],
+    //   ['coalesce', ['get', targetName], -1],
+    //   -1, 'rgba(0,0,0,0)',
+    //   ...colorRange
+    // ];
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['get', targetName], -1],
+      ['coalesce', ['feature-state', targetName], -1],
       -1, 'rgba(0,0,0,0)',
       ...colorRange
     ];
