@@ -30,6 +30,7 @@ import {
   InfraSnapshotNodeGroupByBucket,
   InfraSnapshotNodeMetricsBucket,
 } from './response_helpers';
+import { IP_FIELDS } from '../constants';
 
 export interface InfraSnapshotRequestOptions {
   nodeType: InfraNodeType;
@@ -95,6 +96,17 @@ const requestGroupedNodes = async (
           composite: {
             size: SNAPSHOT_COMPOSITE_REQUEST_SIZE,
             sources: getGroupedNodesSources(options),
+          },
+          aggs: {
+            ip: {
+              top_hits: {
+                sort: [{ [options.sourceConfiguration.fields.timestamp]: { order: 'desc' } }],
+                _source: {
+                  includes: [IP_FIELDS[options.nodeType]],
+                },
+                size: 1,
+              },
+            },
           },
         },
       },
