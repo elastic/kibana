@@ -109,7 +109,7 @@ describe('editor_frame state management', () => {
         {
           type: 'SWITCH_VISUALIZATION',
           newVisulizationId: 'testVis2',
-          initialState: newVisState
+          initialState: newVisState,
         }
       );
 
@@ -130,7 +130,7 @@ describe('editor_frame state management', () => {
         },
         {
           type: 'SWITCH_DATASOURCE',
-          newDatasourceId: 'testDatasource2'
+          newDatasourceId: 'testDatasource2',
         }
       );
 

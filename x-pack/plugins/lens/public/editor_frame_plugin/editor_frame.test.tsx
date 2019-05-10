@@ -194,7 +194,7 @@ describe('editor_frame', () => {
       // don't re-render datasource when visulization changes
       expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(1);
     });
-    
+
     it('should re-render data panel after state update', async () => {
       mount(
         <EditorFrame
@@ -212,8 +212,8 @@ describe('editor_frame', () => {
       await nextTick();
 
       const updatedState = {};
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock
-        .calls[0][1].setState;
+      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+        .setState;
       setDatasourceState(updatedState);
 
       expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(2);
@@ -224,7 +224,7 @@ describe('editor_frame', () => {
         })
       );
     });
-    
+
     it('should re-render config panel with updated datasource api after datasource state update', async () => {
       mount(
         <EditorFrame
@@ -242,10 +242,12 @@ describe('editor_frame', () => {
       await nextTick();
 
       const updatedPublicAPI = {};
-      mockDatasource.getPublicAPI = jest.fn(() => updatedPublicAPI as unknown as DatasourcePublicAPI);
+      mockDatasource.getPublicAPI = jest.fn(
+        () => (updatedPublicAPI as unknown) as DatasourcePublicAPI
+      );
 
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock
-        .calls[0][1].setState;
+      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+        .setState;
       setDatasourceState({});
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(2);

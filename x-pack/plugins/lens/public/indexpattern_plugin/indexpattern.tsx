@@ -61,7 +61,10 @@ type PersistedKeys = 'currentIndexPattern' | 'columns' | 'columnOrder';
 export type PersistableIndexPatternPrivateState = Pick<IndexPatternPrivateState, PersistedKeys>;
 
 // Not stateful. State is persisted to the frame
-export const indexPatternDatasource: Datasource<IndexPatternPrivateState, PersistableIndexPatternPrivateState> = {
+export const indexPatternDatasource: Datasource<
+  IndexPatternPrivateState,
+  PersistableIndexPatternPrivateState
+> = {
   async initialize(state?: PersistableIndexPatternPrivateState) {
     // TODO: Make fetch request to load indexPatterns from saved objects
     if (state) {

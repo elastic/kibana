@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface EditorFrameOptions {
-}
+// eslint-disable-next-line
+export interface EditorFrameOptions {}
 
 export interface EditorFrameInstance {
   mount: (element: Element) => void;

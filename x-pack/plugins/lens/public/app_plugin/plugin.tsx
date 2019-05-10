@@ -12,7 +12,6 @@ import { App } from './app';
 import { EditorFrameInstance } from '../types';
 
 export class AppPlugin {
-
   private instance: EditorFrameInstance | null = null;
 
   constructor() {}
