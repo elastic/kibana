@@ -8,12 +8,13 @@ import { EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
+
 import {
   DataFramePreviewRequest,
   DropDownLabel,
   DropDownOption,
   FieldName,
-  FIELD_TYPE,
   PivotAggsConfigDict,
   pivotAggsFieldSupport,
   PivotGroupByConfigDict,
@@ -21,9 +22,9 @@ import {
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
 
-interface Field {
+export interface Field {
   name: FieldName;
-  type: FIELD_TYPE;
+  type: KBN_FIELD_TYPES;
 }
 
 function getDefaultGroupByConfig(
@@ -67,7 +68,7 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
   const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
-    .map((field): Field => ({ name: field.name, type: field.type as FIELD_TYPE }));
+    .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
   fields.forEach(field => {
     // Group by

@@ -5,9 +5,10 @@
  */
 
 import { Dictionary } from '../../../common/types/common';
+import { KBN_FIELD_TYPES } from '../../../common/constants/field_types';
 
 import { AggName } from './aggregations';
-import { FieldName, FIELD_TYPE } from './fields';
+import { FieldName } from './fields';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -31,18 +32,18 @@ export type PivotSupportedGroupByAggsWithInterval =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
 
 export const pivotGroupByFieldSupport = {
-  [FIELD_TYPE.ATTACHMENT]: [],
-  [FIELD_TYPE.BOOLEAN]: [],
-  [FIELD_TYPE.DATE]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM],
-  [FIELD_TYPE.GEO_POINT]: [],
-  [FIELD_TYPE.GEO_SHAPE]: [],
-  [FIELD_TYPE.IP]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
-  [FIELD_TYPE.MURMUR3]: [],
-  [FIELD_TYPE.NUMBER]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM],
-  [FIELD_TYPE.STRING]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
-  [FIELD_TYPE._SOURCE]: [],
-  [FIELD_TYPE.UNKNOWN]: [],
-  [FIELD_TYPE.CONFLICT]: [],
+  [KBN_FIELD_TYPES.ATTACHMENT]: [],
+  [KBN_FIELD_TYPES.BOOLEAN]: [],
+  [KBN_FIELD_TYPES.DATE]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM],
+  [KBN_FIELD_TYPES.GEO_POINT]: [],
+  [KBN_FIELD_TYPES.GEO_SHAPE]: [],
+  [KBN_FIELD_TYPES.IP]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
+  [KBN_FIELD_TYPES.MURMUR3]: [],
+  [KBN_FIELD_TYPES.NUMBER]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM],
+  [KBN_FIELD_TYPES.STRING]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
+  [KBN_FIELD_TYPES._SOURCE]: [],
+  [KBN_FIELD_TYPES.UNKNOWN]: [],
+  [KBN_FIELD_TYPES.CONFLICT]: [],
 };
 
 interface GroupByConfigBase {
