@@ -13,11 +13,24 @@ export const getLoggingContainerHref = (
   basePath: string
 ): string | undefined => {
   const containerId = get<string | undefined>(monitor, 'ping.container.id', undefined);
-  if (typeof containerId === 'undefined') {
+  if (containerId === undefined) {
     return containerId;
   }
   return addBasePath(
     basePath,
-    `/app/infra#/logs?logFilter=(expression:'container.id%20:%20${containerId}',kind:kuery)`
+    `/app/infra#/logs?logFilter=${encodeURI(
+      `(expression:'container.id : ${containerId}',kind:kuery)`
+    )}`
+  );
+};
+
+export const getLoggingKubernetesHref = (monitor: LatestMonitor, basePath: string) => {
+  const podUID = get<string | undefined>(monitor, 'ping.kubernetes.pod.uid', undefined);
+  if (podUID === undefined) {
+    return podUID;
+  }
+  return addBasePath(
+    basePath,
+    `/app/infra#/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${podUID}',kind:kuery)`)}`
   );
 };

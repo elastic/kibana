@@ -9,5 +9,7 @@ export {
   getApmHref,
   getInfraContainerHref,
   getInfraKubernetesHref,
+  getLoggingContainerHref,
+  getLoggingKubernetesHref,
 } from './observability_integration';
 export { UptimeUrlParams, getSupportedUrlParams } from './url_params';
