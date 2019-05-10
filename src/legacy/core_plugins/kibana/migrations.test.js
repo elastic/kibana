@@ -18,7 +18,6 @@
  */
 
 import { migrations } from './migrations';
-import { fixtures } from './fixtures.js';
 
 describe('index-pattern', () => {
   describe('6.5.0', () => {
@@ -846,52 +845,75 @@ Object {
   });
   describe('7.2.0', () => {
     const migrate = doc => migrations.visualization['7.2.0'](doc);
-    let doc;
-    let doc2;
-    let doc3;
-    // change this to use a function that generates a document based on items we pass to it.
-    // that way, we don't need to bloat the test file with json objects.
-    beforeEach(() => {
-      doc = fixtures.doc;
-      doc2 = fixtures.doc2;
-      doc3 = fixtures.doc3;
+    const generateDoc = ({ params }) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({ params }),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
     });
-    it('should change series item filters from a string into an object for metric visualizations', () => {
-      const migratedDoc = migrate(doc);
-      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+    it('should change series item filters from a string into an object', () => {
+      const params = { type: 'metric', series: [{ filter: 'Filter Bytes Test:>1000' }] };
+      const testDoc1 = generateDoc({ params });
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
       expect(series[0].filter).toHaveProperty('query');
       expect(series[0].filter).toHaveProperty('language');
     });
     it('should not change a series item filter string in the object after migration', () => {
-      const migratedDoc = migrate(doc);
-      const migratedDoc3 = migrate(doc3);
-      const metricSeries = JSON.parse(migratedDoc.attributes.visState).params.series;
-      const markdownSeries = JSON.parse(migratedDoc3.attributes.visState).params.series;
-      expect(metricSeries[0].filter.query).toBe(JSON.parse(doc.attributes.visState).params.series[0].filter);
-      expect(markdownSeries[0].filter.query).toBe(JSON.parse(doc3.attributes.visState).params.series[0].filter);
+      const markdownParams = {
+        type: 'markdown',
+        series: [
+          {
+            filter: 'Filter Bytes Test:>1000',
+            split_filters: [{ filter: 'bytes:>1000' }],
+          }
+        ]
+      };
+      const markdownDoc = generateDoc({ params: markdownParams });
+      const migratedMarkdownDoc = migrate(markdownDoc);
+      const markdownSeries = JSON.parse(migratedMarkdownDoc.attributes.visState).params.series;
+      expect(markdownSeries[0].filter.query).toBe(JSON.parse(markdownDoc.attributes.visState).params.series[0].filter);
+      expect(markdownSeries[0].split_filters[0].filter.query)
+        .toBe(JSON.parse(markdownDoc.attributes.visState).params.series[0].split_filters[0].filter);
     });
-    it('should change series item filters from a string into an object for markdown visualizations', () => {
-      const migratedDoc = migrate(doc3);
-      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
-      expect(series[0].filter).toHaveProperty('query');
-      expect(series[0].filter).toHaveProperty('language');
-    });
-    it('should change a split filter filter if it is present', () => {
-      const migratedDoc = migrate(doc3);
-      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
-      const splitFilters = series[0].split_filters;
-      expect(splitFilters[0].filter).toHaveProperty('query');
-      expect(splitFilters[0].filter).toHaveProperty('language');
-    });
-    it('should not change a non metric and non markdown type visualization', () => {
-      const migratedDoc = migrate(doc2);
-      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
-      expect(series[0].filter).toBe(JSON.parse(doc2.attributes.visState).params.series[0].filter);
+    it('should change series item filters from a string into an object for all filters', () => {
+      const params = {
+        type: 'timeseries',
+        filter: 'bytes:>1000',
+        series: [
+          {
+            filter: 'Filter Bytes Test:>1000',
+            split_filters: [{ filter: 'bytes:>1000' }],
+          }
+        ],
+        annotations: [{ query_string: 'bytes:>1000' }],
+      };
+      const timeSeriesDoc = generateDoc({ params: params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      expect(Object.keys(timeSeriesParams.series[0].filter)).toEqual(expect.arrayContaining(['query', 'language']));
+      expect(Object.keys(timeSeriesParams.series[0].split_filters[0].filter)).toEqual(expect.arrayContaining(['query', 'language']));
+      expect(Object.keys(timeSeriesParams.annotations[0].query_string)).toEqual(expect.arrayContaining(['query', 'language']));
     });
     it('should not fail on a metric visualization without a filter in a series item', () => {
+      const params = { type: 'metric', series: [{}, {}, {}] };
+      const testDoc1 = generateDoc({ params });
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      expect(series[2]).not.toHaveProperty('filter.query');
+    });
+    it('should not migrate a visualization of unknown type', () => {
+      const params = { type: 'unknown', series: [{ filter: 'foo:bar' }] };
+      const doc = generateDoc({ params });
       const migratedDoc = migrate(doc);
       const series = JSON.parse(migratedDoc.attributes.visState).params.series;
-      expect(series[2]).not.toHaveProperty('filter.query');
+      expect(series[0].filter).toEqual(params.series[0].filter);
     });
   });
 });

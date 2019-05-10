@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, last, max, sum } from 'lodash';
+import { isNumber, last, max, sum, get } from 'lodash';
 import moment from 'moment';
 
 import {
   InfraSnapshotMetricType,
   InfraSnapshotNodePath,
   InfraSnapshotNodeMetric,
+  InfraNodeType,
 } from '../../graphql/types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './snapshot';
+import { IP_FIELDS } from '../constants';
 
 export interface InfraSnapshotNodeMetricsBucket {
   key: { id: string };
@@ -38,13 +40,45 @@ export interface InfraSnapshotBucketWithValues {
 
 export type InfraSnapshotMetricsBucket = InfraSnapshotBucketWithKey & InfraSnapshotBucketWithValues;
 
+interface InfraSnapshotIpHit {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number | null;
+  _source: {
+    host: {
+      ip: string[] | string;
+    };
+  };
+  sort: number[];
+}
+
 export interface InfraSnapshotNodeGroupByBucket {
   key: {
     id: string;
     name: string;
     [groupByField: string]: string;
   };
+  ip: {
+    hits: {
+      total: { value: number };
+      hits: InfraSnapshotIpHit[];
+    };
+  };
 }
+
+export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);
+
+export const getIPFromBucket = (
+  nodeType: InfraNodeType,
+  bucket: InfraSnapshotNodeGroupByBucket
+): string | null => {
+  const ip = get(bucket, `ip.hits.hits[0]._source.${IP_FIELDS[nodeType]}`, null);
+  if (Array.isArray(ip)) {
+    return ip.find(isIPv4) || null;
+  }
+  return ip;
+};
 
 export const getNodePath = (
   groupBucket: InfraSnapshotNodeGroupByBucket,
@@ -52,9 +86,10 @@ export const getNodePath = (
 ): InfraSnapshotNodePath[] => {
   const node = groupBucket.key;
   const path = options.groupBy.map(gb => {
-    return { value: node[`${gb.field}`], label: node[`${gb.field}`] };
+    return { value: node[`${gb.field}`], label: node[`${gb.field}`] } as InfraSnapshotNodePath;
   });
-  path.push({ value: node.id, label: node.name });
+  const ip = getIPFromBucket(options.nodeType, groupBucket);
+  path.push({ value: node.id, label: node.name, ip });
   return path;
 };
 

@@ -87,10 +87,30 @@ export interface ChromeBreadcrumb {
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
+// @public (undocumented)
+export interface ChromeNavLink {
+    readonly active?: boolean;
+    readonly baseUrl: string;
+    readonly disabled?: boolean;
+    readonly euiIconType?: string;
+    readonly hidden?: boolean;
+    readonly icon?: string;
+    readonly id: string;
+    readonly linkToLastSubUrl?: boolean;
+    readonly order: number;
+    readonly subUrlBase?: string;
+    readonly title: string;
+    readonly tooltip?: string;
+    readonly url?: string;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
+
+// @public (undocumented)
+export type ChromeStart = ReturnType<ChromeService['start']>;
 
 // @internal (undocumented)
 export interface CoreContext {
@@ -124,6 +144,8 @@ export interface CoreStart {
     application: ApplicationStart;
     // (undocumented)
     basePath: BasePathStart;
+    // (undocumented)
+    chrome: ChromeStart;
     // (undocumented)
     http: HttpStart;
     // (undocumented)
@@ -162,13 +184,6 @@ export interface FatalErrorInfo {
 export interface FatalErrorsSetup {
     add: (error: string | Error, source?: string) => never;
     get$: () => Rx.Observable<FatalErrorInfo>;
-}
-
-// @public
-export class FlyoutRef {
-    constructor();
-    close(): Promise<void>;
-    readonly onClose: Promise<void>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
@@ -296,6 +311,14 @@ export interface NotificationsSetup {
 // @public (undocumented)
 export type NotificationsStart = NotificationsSetup;
 
+// Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface OverlayRef {
+    close(): Promise<void>;
+    onClose: Promise<void>;
+}
+
 // @public (undocumented)
 export interface OverlayStart {
     // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
@@ -304,7 +327,12 @@ export interface OverlayStart {
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
-    }) => FlyoutRef;
+    }) => OverlayRef;
+    // (undocumented)
+    openModal: (modalChildren: React.ReactNode, modalProps?: {
+        closeButtonAriaLabel?: string;
+        'data-test-subj'?: string;
+    }) => OverlayRef;
 }
 
 // @public
@@ -348,6 +376,8 @@ export interface PluginStartContext {
     application: Pick<ApplicationStart, 'capabilities'>;
     // (undocumented)
     basePath: BasePathStart;
+    // (undocumented)
+    chrome: ChromeStart;
     // (undocumented)
     http: HttpStart;
     // (undocumented)

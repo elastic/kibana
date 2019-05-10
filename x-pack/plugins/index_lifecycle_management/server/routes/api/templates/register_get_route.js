@@ -28,7 +28,7 @@ export function registerGetRoute(server) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/index_lifecycle_management/template/{templateName}',
+    path: '/api/index_lifecycle_management/templates/{templateName}',
     method: 'GET',
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
