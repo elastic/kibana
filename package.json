@@ -340,7 +340,7 @@
     "archiver": "^3.0.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.1.0",
-    "backport": "4.4.1",
+    "backport": "4.5.5",
     "chai": "3.5.0",
     "chance": "1.0.10",
     "cheerio": "0.22.0",
