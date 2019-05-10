@@ -52,9 +52,9 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
+  fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
   currentRepository?: Repository;
-  fileTreeLoading: boolean;
 }
 const LANG_MD = 'markdown';
 
@@ -272,7 +272,7 @@ class CodeContent extends React.PureComponent<Props> {
       return this.renderProgress();
     }
 
-    const { file, match, tree, fileTreeLoading } = this.props;
+    const { file, match, tree, fileTreeLoadingPaths } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
@@ -280,7 +280,7 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <div className="codeContainer__directoryView">
-            <Directory node={node} loading={fileTreeLoading} />
+            <Directory node={node} loading={fileTreeLoadingPaths.includes(path)} />
             <CommitHistory
               repoUri={repoUri}
               header={
@@ -388,7 +388,7 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
   file: state.file.file,
   tree: state.file.tree,
-  fileTreeLoading: state.file.fileTreeLoading,
+  fileTreeLoadingPaths: state.file.fileTreeLoadingPaths,
   currentTree: currentTreeSelector(state),
   branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
