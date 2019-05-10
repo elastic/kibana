@@ -17,11 +17,7 @@
  * under the License.
  */
 
-export { QueryBarService } from './query_bar_service';
+import { Storage } from './storage';
 
-export { QueryBar } from './components';
-
-export interface Query {
-  query: string;
-  language: string;
-}
+export const localStorage = new Storage(window.localStorage);
+export const sessionStorage = new Storage(window.sessionStorage);

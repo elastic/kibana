@@ -27,17 +27,21 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AggConfig } from 'ui/vis';
+import { QueryBarInput } from '../../../../core_plugins/data/public/query_bar/components/query_bar_input';
+import { Query } from '../../../../core_plugins/data/public/query_bar';
 
 interface FilterRowProps {
   id: string;
   arrayIndex: number;
   customLabel: string;
-  value: string;
+  value: Query;
   autoFocus: boolean;
   disableRemove: boolean;
   dataTestSubj: string;
-  onChangeValue(id: string, query: string, label: string): void;
+  onChangeValue(id: string, query: Query, label: string): void;
   onRemoveFilter(id: string): void;
+  agg: AggConfig;
 }
 
 function FilterRow({
@@ -48,6 +52,7 @@ function FilterRow({
   autoFocus,
   disableRemove,
   dataTestSubj,
+  agg,
   onChangeValue,
   onRemoveFilter,
 }: FilterRowProps) {
@@ -94,15 +99,14 @@ function FilterRow({
         fullWidth={true}
         className="visEditorSidebar__aggParamFormRow"
       >
-        <EuiFieldText
-          value={value}
-          placeholder={i18n.translate('common.ui.aggTypes.filters.filterPlaceholder', {
-            defaultMessage: 'Lucene or Query DSL',
-          })}
+        <QueryBarInput
+          query={value}
+          indexPatterns={[agg.getIndexPattern()]}
+          appName="filtersAgg"
+          screenTitle="foo"
+          onChange={query => onChangeValue(id, query, customLabel)}
+          disableAutoFocus={!autoFocus}
           data-test-subj={dataTestSubj}
-          onChange={ev => onChangeValue(id, ev.target.value, customLabel)}
-          fullWidth={true}
-          autoFocus={autoFocus}
         />
       </EuiFormRow>
       {showCustomLabel ? (

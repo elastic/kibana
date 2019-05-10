@@ -34,6 +34,7 @@ import { PersistedLog } from 'ui/persisted_log';
 import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
+import { localStorage } from 'ui/storage/storage_service';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
@@ -52,7 +53,7 @@ interface Props {
   disableAutoFocus?: boolean;
   screenTitle: string;
   prepend?: any;
-  store: Storage;
+  store?: Storage;
   persistedLog?: PersistedLog;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
@@ -339,7 +340,11 @@ export class QueryBarInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.props.store.set('kibana.userQueryLanguage', language);
+    if (this.props.store) {
+      this.props.store.set('kibana.userQueryLanguage', language);
+    } else {
+      localStorage.set('kibana.userQueryLanguage', language);
+    }
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
