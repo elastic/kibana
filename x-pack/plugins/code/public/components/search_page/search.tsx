@@ -209,9 +209,10 @@ class SearchPage extends React.PureComponent<Props, State> {
           />
           <div className="codeContainer__search--main">
             <SearchBar
-              repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
+              searchOptions={this.props.searchOptions}
               query={this.props.query}
               onSearchScopeChanged={this.props.onSearchScopeChanged}
+              enableSubmitWhenOptionsChanged={true}
               ref={(element: any) => (this.searchBar = element)}
             />
             {mainComp}

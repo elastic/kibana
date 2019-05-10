@@ -126,9 +126,10 @@ class AdminPage extends React.PureComponent<Props, State> {
         <div className="codeContainer__rootInner">
           <div className="codeContainer__adminWrapper">
             <SearchBar
-              repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
+              searchOptions={this.props.searchOptions}
               query={this.props.query}
               onSearchScopeChanged={this.props.onSearchScopeChanged}
+              enableSubmitWhenOptionsChanged={false}
               ref={element => (this.searchBar = element)}
             />
             <div className="codeContainer__adminMain">

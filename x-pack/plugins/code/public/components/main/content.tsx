@@ -54,6 +54,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoScope: string[];
   searchOptions: SearchOptions;
   fileTreeLoading: boolean;
+  query: string;
 }
 const LANG_MD = 'markdown';
 
@@ -228,6 +229,7 @@ class CodeContent extends React.PureComponent<Props> {
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          query={this.props.query}
         />
         {this.renderContent()}
       </div>
@@ -393,6 +395,7 @@ const mapStateToProps = (state: RootState) => ({
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
+  query: state.search.query,
 });
 
 const mapDispatchToProps = {

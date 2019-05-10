@@ -12,7 +12,7 @@ import { MainRouteParams } from '../../common/types';
 import { encodeRevisionString } from '../../utils/url';
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
-import { SearchBar } from './search_bar';
+import { SearchBar } from '../search_bar';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -20,6 +20,7 @@ interface Props {
   buttons: React.ReactNode;
   searchOptions: SearchOptions;
   branches: ReferenceInfo[];
+  query: string;
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
@@ -42,7 +43,9 @@ export class TopBar extends React.Component<Props, { value: string }> {
     return (
       <div className="code-top-bar__container">
         <SearchBar
+          query={this.props.query}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
+          enableSubmitWhenOptionsChanged={false}
           searchOptions={this.props.searchOptions}
         />
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">

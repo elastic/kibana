@@ -174,13 +174,11 @@ export const search = handleActions<SearchState, any>(
         draft.scopeSearchResults = action.payload;
         draft.isScopeSearchLoading = false;
       }),
-    // rename this to into a repository
     [String(turnOnDefaultRepoScope)]: (state: SearchState, action: Action<any>) =>
       produce<SearchState>(state, draft => {
         draft.searchOptions.defaultRepoScope = action.payload;
         draft.searchOptions.defaultRepoScopeOn = true;
       }),
-    // issue another repository to turn it off.
   },
   initialState
 );
