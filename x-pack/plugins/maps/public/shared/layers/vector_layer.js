@@ -342,10 +342,19 @@ export class VectorLayer extends AbstractLayer {
   }
 
 
+  static idOffsetCounter = 0;
   _assignIdsToFeatures(featureCollection) {
+    VectorLayer.idOffsetCounter++;
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
-      const id = (typeof feature.id === 'string' || typeof feature.id === 'number')  ? feature.id : i;
+      let id;
+      if(typeof feature.id === 'number') {
+        id = feature.id;
+      } else {
+        VectorLayer.idOffsetCounter++;
+        //just POC to illustrate mapbox issue
+        id = ((VectorLayer.idOffsetCounter % 4) * 2048) +  i;
+      }
       feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
       feature.id = id;
     }
@@ -385,10 +394,16 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
+
+    window._mbMap = mbMap;
+
     const mbGeoJSONSource = mbMap.getSource(this.getId());
 
     const featureCollection = this._getSourceFeatureCollection();
     const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
+
+    window._fc = featureCollection;
+    window._fcom = featureCollectionOnMap;
 
     if (!featureCollection) {
       if (featureCollectionOnMap) {
@@ -397,7 +412,6 @@ export class VectorLayer extends AbstractLayer {
       mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
       return;
     }
-
 
     if (featureCollection !== featureCollectionOnMap) {
       mbGeoJSONSource.setData(featureCollection);

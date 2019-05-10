@@ -183,7 +183,7 @@ export class ESSearchSource extends AbstractESSource {
       tooltipProps.push(new ESTooltipProperty(propertyName, properties[propertyName], indexPattern));
     });
     return tooltipProps;
-  }
+  }f20
 
   isFilterByMapBounds() {
     return _.get(this._descriptor, 'filterByMapBounds', false);
