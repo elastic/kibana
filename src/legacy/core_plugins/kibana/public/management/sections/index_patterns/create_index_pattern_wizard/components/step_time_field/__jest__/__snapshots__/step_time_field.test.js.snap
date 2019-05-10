@@ -319,15 +319,6 @@ exports[`StepTimeField should render any error message 1`] = `
     }
   >
     <p>
-      <strong>
-        <FormattedMessage
-          defaultMessage="Reason"
-          id="kbn.management.createIndexPattern.stepTime.reason"
-          values={Object {}}
-        />
-        :
-      </strong>
-       
       foobar
     </p>
   </EuiCallOut>

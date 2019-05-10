@@ -145,18 +145,7 @@ export class StepTimeFieldComponent extends Component {
           defaultMessage="Custom index pattern ID already exists."
         />
       )
-      : (
-        <>
-          <strong>
-            <FormattedMessage
-              id="kbn.management.createIndexPattern.stepTime.reason"
-              defaultMessage="Reason"
-            />:
-          </strong>
-          {' '}
-          {message}
-        </>
-      );
+      : message;
   }
 
   render() {
