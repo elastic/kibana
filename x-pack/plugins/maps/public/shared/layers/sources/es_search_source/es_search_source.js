@@ -197,7 +197,7 @@ export class ESSearchSource extends AbstractESSource {
       });
   }
 
-  getTooltipContent(sourceDataRequest) {
+  getSourceTooltipContent(sourceDataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 

@@ -101,7 +101,7 @@ export class VectorLayer extends AbstractLayer {
 
     return {
       icon: this._style.getIcon(),
-      tooltipContent: this._source.getTooltipContent(sourceDataRequest)
+      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
     };
   }
 
