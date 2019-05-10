@@ -9,15 +9,11 @@ import React, { Component } from 'react';
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import { connect } from 'react-redux';
-import {
-  saveSearchOptions,
-  SearchOptions as ISearchOptions,
-  searchReposForScope,
-} from '../../../actions';
+import { saveSearchOptions, searchReposForScope } from '../../../actions';
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { SearchScope, Repository } from '../../../../model';
+import { SearchOptions as ISearchOptions, SearchScope, Repository } from '../../../../model';
 import { SearchScopePlaceholderText } from '../../../common/types';
 import { RootState } from '../../../reducers';
 import {
@@ -194,11 +190,15 @@ export class CodeQueryBar extends Component<Props, State> {
 
     const res = await Promise.all(
       this.props.suggestionProviders.map((provider: SuggestionsProvider) => {
-        return provider.getSuggestions(
-          query,
-          this.props.searchScope,
-          this.props.searchOptions.repoScope.map(repo => repo.uri)
-        );
+        // Merge the default repository scope if necessary.
+        const repoScopes = this.props.searchOptions.repoScope.map(repo => repo.uri);
+        if (
+          this.props.searchOptions.defaultRepoScopeOn &&
+          this.props.searchOptions.defaultRepoScope
+        ) {
+          repoScopes.push(this.props.searchOptions.defaultRepoScope.uri);
+        }
+        return provider.getSuggestions(query, this.props.searchScope, repoScopes);
       })
     );
 

@@ -11,8 +11,8 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import url from 'url';
 
-import { DocumentSearchResult, SearchScope } from '../../../model';
-import { changeSearchScope, SearchOptions } from '../../actions';
+import { DocumentSearchResult, SearchOptions, SearchScope } from '../../../model';
+import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { ProjectItem } from '../admin_page/project_item';
