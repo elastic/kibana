@@ -11,12 +11,12 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { timelineActions } from '../../../store';
 import { OnResize, Resizeable } from '../../resize_handle';
 import { TimelineResizeHandle } from '../../resize_handle/styled_handles';
 import { FlyoutHeader } from '../header';
 
 import * as i18n from './translations';
+import { timelineActions } from '../../../store/actions';
 
 const minWidthPixels = 550; // do not allow the flyout to shrink below this width (pixels)
 const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view

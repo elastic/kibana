@@ -147,7 +147,7 @@ export interface Visualization<T = unknown, P = unknown> {
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => P;
 
-  renderConfigPanel: (props: VisualizationProps<T>) => void;
+  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
   toExpression: (state: T, datasource: DatasourcePublicAPI) => string;
 

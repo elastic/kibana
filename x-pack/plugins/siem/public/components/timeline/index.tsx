@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
-import {
-  inputsModel,
-  inputsSelectors,
-  State,
-  timelineActions,
-  timelineModel,
-  timelineSelectors,
-} from '../../store';
+import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 
 import { ColumnHeader } from './body/column_headers/column_header';
-import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
+import { defaultHeaders } from './body/column_headers/default_headers';
+import { Sort } from './body/sort';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -31,6 +26,10 @@ import {
   OnToggleDataProviderExcluded,
 } from './events';
 import { Timeline } from './timeline';
+import { timelineActions } from '../../store/actions';
+import { KqlMode, TimelineModel } from '../../store/timeline/model';
+
+const indexTypes = [IndexType.ANY];
 
 export interface OwnProps {
   id: string;
@@ -46,7 +45,7 @@ interface StateReduxProps {
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
-  kqlMode: timelineModel.KqlMode;
+  kqlMode: KqlMode;
   kqlQueryExpression: string;
   pageCount?: number;
   sort?: Sort;
@@ -55,7 +54,11 @@ interface StateReduxProps {
 }
 
 interface DispatchProps {
-  createTimeline?: ActionCreator<{ id: string }>;
+  createTimeline?: ActionCreator<{
+    id: string;
+    columns: ColumnHeader[];
+    show?: boolean;
+  }>;
   addProvider?: ActionCreator<{
     id: string;
     provider: DataProvider;
@@ -106,11 +109,48 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-class StatefulTimelineComponent extends React.PureComponent<Props> {
+class StatefulTimelineComponent extends React.Component<Props> {
+  public shouldComponentUpdate = ({
+    id,
+    flyoutHeaderHeight,
+    flyoutHeight,
+    activePage,
+    columns,
+    dataProviders,
+    end,
+    isLive,
+    itemsPerPage,
+    itemsPerPageOptions,
+    kqlMode,
+    kqlQueryExpression,
+    pageCount,
+    sort,
+    start,
+    show,
+  }: Props) =>
+    id !== this.props.id ||
+    flyoutHeaderHeight !== this.props.flyoutHeaderHeight ||
+    flyoutHeight !== this.props.flyoutHeight ||
+    activePage !== this.props.activePage ||
+    !isEqual(columns, this.props.columns) ||
+    !isEqual(dataProviders, this.props.dataProviders) ||
+    end !== this.props.end ||
+    isLive !== this.props.isLive ||
+    itemsPerPage !== this.props.itemsPerPage ||
+    !isEqual(itemsPerPageOptions, this.props.itemsPerPageOptions) ||
+    kqlMode !== this.props.kqlMode ||
+    kqlQueryExpression !== this.props.kqlQueryExpression ||
+    pageCount !== this.props.pageCount ||
+    !isEqual(sort, this.props.sort) ||
+    start !== this.props.start ||
+    show !== this.props.show;
+
   public componentDidMount() {
     const { createTimeline, id } = this.props;
 
-    createTimeline!({ id });
+    if (createTimeline != null) {
+      createTimeline({ id, columns: defaultHeaders, show: false });
+    }
   }
 
   public render() {
@@ -132,7 +172,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     } = this.props;
 
     return (
-      <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
+      <WithSource sourceId="default" indexTypes={indexTypes}>
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
@@ -207,7 +247,7 @@ const makeMapStateToProps = () => {
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: timelineModel.TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id);
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,
