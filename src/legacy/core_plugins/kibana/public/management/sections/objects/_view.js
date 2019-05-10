@@ -45,7 +45,7 @@ uiRoutes
   });
 
 uiModules.get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
+  .directive('kbnManagementObjectsView', function (confirmModal) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {

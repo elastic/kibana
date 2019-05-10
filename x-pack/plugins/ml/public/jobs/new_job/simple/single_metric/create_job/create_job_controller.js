@@ -64,7 +64,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateSingleMetricJob', function ($scope, $route, $filter, $timeout, Private, AppState) {
+  .controller('MlCreateSingleMetricJob', function ($scope, $route, $timeout, Private, AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
