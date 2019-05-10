@@ -20,6 +20,7 @@
  */
 
 const { createServer } = require('http');
+const { format: formatUrl } = require('url');
 const { exitCode, start } = JSON.parse(process.argv[2]);
 
 process.exitCode = exitCode;
@@ -61,8 +62,18 @@ server.on('request', delayServerClose);
 server.on('listening', delayServerClose);
 
 server.listen(0, '127.0.0.1', function() {
-  serverUrl = new URL('http://127.0.0.1');
-  serverUrl.port = server.address().port;
-  console.log(`HttpServer publish_address {${serverUrl.hostname}:${serverUrl.port}}`);
+  const { port, address: hostname } = server.address();
+  serverUrl = new URL(
+    formatUrl({
+      protocol: 'http:',
+      port,
+      hostname,
+    })
+  );
+
+  console.log(
+    `[o.e.h.AbstractHttpServerTransport] [computer] publish_address {127.0.0.1:${port}}, bound_addresses {[::1]:${port}}, {127.0.0.1:${port}}`
+  );
+
   console.log('started');
 });
