@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 export const ES_FIELD_TYPES = {
   ATTACHMENT: 'attachment',
   BOOLEAN: 'boolean',
@@ -55,4 +53,3 @@ export const ML_JOB_FIELD_TYPES = {
   TEXT: 'text',
   UNKNOWN: 'unknown',
 };
-
