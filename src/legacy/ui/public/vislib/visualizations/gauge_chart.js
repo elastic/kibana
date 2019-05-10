@@ -48,7 +48,7 @@ export function GaugeChartProvider(Private) {
     calcGaugeDim(alignment, containerDom, nrOfItems) {
       const containerWidth = containerDom.clientWidth;
       const containerHeight = containerDom.clientHeight;
-      const containerMargin = 20;
+      const containerMargin = 25;
 
       //there are a few pixel of margin between multiple gauges
       //subtracting this margin prevents displaying scrollbars
