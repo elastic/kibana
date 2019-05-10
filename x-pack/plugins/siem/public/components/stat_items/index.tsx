@@ -67,7 +67,7 @@ export interface ChartData {
 
 export interface BarChartData {
   key: string;
-  value: ChartData[] | [] | null;
+  value: [ChartData] | [] | null;
   color?: string | undefined;
 }
 
@@ -120,7 +120,7 @@ export const StatItemsComponent = pure<StatItemsProps>(
                   <FlexItem>
                     <StatValue>
                       <p data-test-subj="stat-title">
-                        {field.value ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
+                        {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
                         {field.description}
                       </p>
                     </StatValue>

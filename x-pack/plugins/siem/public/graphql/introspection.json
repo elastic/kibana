@@ -6280,7 +6280,7 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "KpiHostHistogramData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6300,7 +6300,7 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "KpiHostHistogramData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6320,7 +6320,7 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "KpiHostHistogramData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6340,7 +6340,7 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "KpiHostHistogramData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6360,7 +6360,7 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "KpiHostHistogramData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6373,7 +6373,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "HistogramData",
+        "name": "KpiHostHistogramData",
         "description": "",
         "fields": [
           {

@@ -1037,26 +1037,26 @@ export interface KpiNetworkData {
 export interface KpiHostsData {
   hosts?: number | null;
 
-  hostsHistogram?: (HistogramData | null)[] | null;
+  hostsHistogram?: (KpiHostHistogramData | null)[] | null;
 
   authSuccess?: number | null;
 
-  authSuccessHistogram?: (HistogramData | null)[] | null;
+  authSuccessHistogram?: (KpiHostHistogramData | null)[] | null;
 
   authFailure?: number | null;
 
-  authFailureHistogram?: (HistogramData | null)[] | null;
+  authFailureHistogram?: (KpiHostHistogramData | null)[] | null;
 
   uniqueSourceIps?: number | null;
 
-  uniqueSourceIpsHistogram?: (HistogramData | null)[] | null;
+  uniqueSourceIpsHistogram?: (KpiHostHistogramData | null)[] | null;
 
   uniqueDestinationIps?: number | null;
 
-  uniqueDestinationIpsHistogram?: (HistogramData | null)[] | null;
+  uniqueDestinationIpsHistogram?: (KpiHostHistogramData | null)[] | null;
 }
 
-export interface HistogramData {
+export interface KpiHostHistogramData {
   key?: number | null;
 
   key_as_string?: string | null;
@@ -3889,7 +3889,7 @@ export namespace GetUsersQuery {
 
 export namespace ChartFields {
   export type Fragment = {
-    __typename?: 'HistogramData';
+    __typename?: 'KpiHostHistogramData';
 
     x?: string | null;
 
