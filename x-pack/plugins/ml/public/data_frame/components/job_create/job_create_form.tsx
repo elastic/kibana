@@ -10,20 +10,24 @@ import { toastNotifications } from 'ui/notify';
 
 import {
   EuiButton,
-  EuiButtonIcon,
   // Module '"@elastic/eui"' has no exported member 'EuiCard'.
   // @ts-ignore
   EuiCard,
   EuiCopy,
+  // Module '"@elastic/eui"' has no exported member 'EuiDescribedFormGroup'.
+  // @ts-ignore
+  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiIcon,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { getDataFrameRequest, KibanaContext, isKibanaContext } from '../../common';
+import { KibanaContext, isKibanaContext } from '../../common';
 
 export interface JobDetailsExposedState {
   created: boolean;
@@ -165,49 +169,102 @@ export const JobCreateForm: SFC<Props> = React.memo(
     };
 
     function getJobConfigDevConsoleStatement() {
-      return `PUT _data_frame/transforms/${jobId}
-${JSON.stringify(jobConfig, null, 2)}
-`;
+      return `PUT _data_frame/transforms/${jobId}\n${JSON.stringify(jobConfig, null, 2)}\n\n`;
     }
 
-    const euiCopyText = i18n.translate('xpack.ml.dataframe.jobCreateForm.copyClipboardTooltip', {
-      defaultMessage:
-        'Copy Dev Console statement of the data frame job configuration to the clipboard.',
-    });
-
     return (
-      <Fragment>
-        <EuiCopy beforeMessage={euiCopyText} textToCopy={getJobConfigDevConsoleStatement()}>
-          {(copy: () => void) => (
-            <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
-          )}
-        </EuiCopy>
-        <EuiButton isDisabled={created} onClick={createDataFrame}>
-          {i18n.translate('xpack.ml.dataframe.jobCreateForm.createDataFrameButton', {
-            defaultMessage: 'Create data frame',
-          })}
-        </EuiButton>
-        &nbsp;
+      <EuiForm>
         {!created && (
-          <EuiButton fill isDisabled={created && started} onClick={createAndStartDataFrame}>
-            {i18n.translate('xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameButton', {
-              defaultMessage: 'Create and start data frame',
-            })}
-          </EuiButton>
+          <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
+            <EuiFlexItem grow={false} style={{ width: '200px' }}>
+              <EuiButton fill isDisabled={created && started} onClick={createAndStartDataFrame}>
+                {i18n.translate('xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameButton', {
+                  defaultMessage: 'Create & start',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {i18n.translate(
+                  'xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameDescription',
+                  {
+                    defaultMessage:
+                      'Create and starts the data frame job. After the job is started, you will be offered options to continue exploring the data frame job.',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
         {created && (
-          <EuiButton isDisabled={created && started} onClick={startDataFrame}>
-            {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameButton', {
-              defaultMessage: 'Start data frame',
-            })}
-          </EuiButton>
+          <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
+            <EuiFlexItem grow={false} style={{ width: '200px' }}>
+              <EuiButton isDisabled={created && started} onClick={startDataFrame}>
+                {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameButton', {
+                  defaultMessage: 'Start',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameDescription', {
+                  defaultMessage:
+                    'Starts the data frame job. After the job is started, you will be offered options to continue exploring the data frame job.',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
+        <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
+          <EuiFlexItem grow={false} style={{ width: '200px' }}>
+            <EuiButton isDisabled={created} onClick={createDataFrame}>
+              {i18n.translate('xpack.ml.dataframe.jobCreateForm.createDataFrameButton', {
+                defaultMessage: 'Create',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s">
+              {i18n.translate('xpack.ml.dataframe.jobCreateForm.createDataFrameDescription', {
+                defaultMessage:
+                  'Create the data frame job without starting it. You will be able to start the job later by returning to the data frame jobs list.',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
+          <EuiFlexItem grow={false} style={{ width: '200px' }}>
+            <EuiCopy textToCopy={getJobConfigDevConsoleStatement()}>
+              {(copy: () => void) => (
+                <EuiButton onClick={copy} style={{ width: '100%' }}>
+                  {i18n.translate(
+                    'xpack.ml.dataframe.jobCreateForm.copyJobConfigToClipBoardButton',
+                    {
+                      defaultMessage: 'Copy to clipboard',
+                    }
+                  )}
+                </EuiButton>
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s">
+              {i18n.translate(
+                'xpack.ml.dataframe.jobCreateForm.copyJobConfigToClipBoardDescription',
+                {
+                  defaultMessage:
+                    'Copies a Kibana Dev Console statement to create the job to the clipboard.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         {created && started && (
           <Fragment>
             <EuiSpacer size="m" />
 
             <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiCard
                   icon={<EuiIcon size="xxl" type="list" />}
                   title={i18n.translate('xpack.ml.dataframe.jobCreateForm.jobManagementCardTitle', {
@@ -225,7 +282,7 @@ ${JSON.stringify(jobConfig, null, 2)}
             </EuiFlexGroup>
           </Fragment>
         )}
-      </Fragment>
+      </EuiForm>
     );
   }
 );
