@@ -74,7 +74,7 @@ const EventsTableComponent = pure<EventsTableProps>(
     type,
   }) => (
     <LoadMoreTable
-      columns={getEventsColumns()}
+      columns={getEventsColumns(type)}
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
@@ -107,7 +107,9 @@ export const EventsTable = connect(
   }
 )(EventsTableComponent);
 
-const getEventsColumns = (): [
+const getEventsColumns = (
+  pageType: hostsModel.HostsType
+): [
   Columns<EcsEdges>,
   Columns<EcsEdges>,
   Columns<EcsEdges>,
@@ -126,7 +128,7 @@ const getEventsColumns = (): [
       getRowItemDraggables({
         rowItems: getOr(null, 'host.name', node),
         attrName: 'host.name',
-        idPrefix: `events-table-${node._id}`,
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
         render: item => <HostDetailsLink hostName={item} />,
       }),
   },
@@ -140,13 +142,13 @@ const getEventsColumns = (): [
         {getRowItemDraggables({
           rowItems: getOr(null, 'event.module', node),
           attrName: 'event.module',
-          idPrefix: `events-table-${node._id}`,
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
         })}
         /
         {getRowItemDraggables({
           rowItems: getOr(null, 'event.dataset', node),
           attrName: 'event.dataset',
-          idPrefix: `events-table-${node._id}`,
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
         })}
       </>
     ),
@@ -160,7 +162,7 @@ const getEventsColumns = (): [
       getRowItemDraggables({
         rowItems: getOr(null, 'event.category', node),
         attrName: 'event.category',
-        idPrefix: `events-table-${node._id}`,
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
       }),
   },
   {
@@ -172,7 +174,7 @@ const getEventsColumns = (): [
       getRowItemDraggables({
         rowItems: getOr(null, 'event.action', node),
         attrName: 'event.action',
-        idPrefix: `events-table-${node._id}`,
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
       }),
   },
   {
@@ -183,7 +185,7 @@ const getEventsColumns = (): [
       getRowItemDraggables({
         rowItems: getOr(null, 'user.name', node),
         attrName: 'user.name',
-        idPrefix: `events-table-${node._id}`,
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
       }),
   },
   {
@@ -194,7 +196,7 @@ const getEventsColumns = (): [
       getRowItemDraggables({
         rowItems: getOr(null, 'message', node),
         attrName: 'message',
-        idPrefix: `events-table-${node._id}`,
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
       }),
   },
   {
@@ -205,7 +207,7 @@ const getEventsColumns = (): [
         {getRowItemDraggable({
           rowItem: getOr(null, 'source.ip[0]', node),
           attrName: 'source.ip',
-          idPrefix: `events-table-${node._id}`,
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
           render: item => <IPDetailsLink ip={item} />,
         })}
         :{getOrEmptyTag('source.port', node)}
@@ -221,7 +223,7 @@ const getEventsColumns = (): [
         {getRowItemDraggable({
           rowItem: getOr(null, 'destination.ip[0]', node),
           attrName: 'destination.ip',
-          idPrefix: `events-table-${node._id}`,
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
           render: item => <IPDetailsLink ip={item} />,
         })}
         :{getOrEmptyTag('destination.port', node)}
