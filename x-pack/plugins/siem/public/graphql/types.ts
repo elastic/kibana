@@ -1935,13 +1935,15 @@ export namespace GetEventsQuery {
 
     host?: Host | null;
 
+    message?: ToStringArray | null;
+
     source?: _Source | null;
 
     destination?: Destination | null;
 
-    geo?: Geo | null;
-
     suricata?: Suricata | null;
+
+    user?: User | null;
 
     zeek?: Zeek | null;
   };
@@ -1951,13 +1953,15 @@ export namespace GetEventsQuery {
 
     action?: ToStringArray | null;
 
-    severity?: ToNumberArray | null;
+    category?: ToStringArray | null;
+
+    dataset?: ToStringArray | null;
+
+    id?: ToStringArray | null;
 
     module?: ToStringArray | null;
 
-    category?: ToStringArray | null;
-
-    id?: ToStringArray | null;
+    severity?: ToNumberArray | null;
   };
 
   export type Host = {
@@ -1986,14 +1990,6 @@ export namespace GetEventsQuery {
     port?: ToNumberArray | null;
   };
 
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    region_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-  };
-
   export type Suricata = {
     __typename?: 'SuricataEcsFields';
 
@@ -2016,6 +2012,12 @@ export namespace GetEventsQuery {
     signature?: ToStringArray | null;
 
     signature_id?: ToNumberArray | null;
+  };
+
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    name?: ToStringArray | null;
   };
 
   export type Zeek = {
