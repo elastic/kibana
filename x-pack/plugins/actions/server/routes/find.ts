@@ -25,7 +25,7 @@ interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
 }
 
-export function findRoute(server: any) {
+export function findRoute(server: Hapi.Server) {
   server.route({
     method: 'GET',
     path: `/api/action/_find`,

@@ -22,6 +22,8 @@ const savedObjectsClient = {
 beforeEach(() => jest.resetAllMocks());
 
 const mockEncryptedSavedObjects = {
+  isEncryptionError: jest.fn(),
+  registerType: jest.fn(),
   getDecryptedAsInternalUser: jest.fn(),
 };
 

@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 
-export function listActionTypesRoute(server: any) {
+export function listActionTypesRoute(server: Hapi.Server) {
   server.route({
     method: 'GET',
     path: `/api/action/types`,

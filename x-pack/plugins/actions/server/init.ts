@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { Legacy } from 'kibana';
 import { ActionService } from './action_service';
 import { ActionTypeService } from './action_type_service';
 import {
@@ -16,7 +16,7 @@ import {
   listActionTypesRoute,
 } from './routes';
 
-export function init(server: Hapi.Server) {
+export function init(server: Legacy.Server) {
   const actionsEnabled = server.config().get('xpack.actions.enabled');
 
   if (!actionsEnabled) {
@@ -33,7 +33,7 @@ export function init(server: Hapi.Server) {
   const actionTypeService = new ActionTypeService();
   const actionService = new ActionService(
     actionTypeService,
-    server.plugins.encrypted_saved_objects
+    server.plugins.encrypted_saved_objects!
   );
 
   // Routes

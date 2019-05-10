@@ -7,8 +7,8 @@
 import Boom from 'boom';
 
 interface ExecutorOptions {
-  actionTypeConfig: any;
-  params: any;
+  actionTypeConfig: Record<string, any>;
+  params: Record<string, any>;
 }
 
 interface ActionType {
@@ -16,16 +16,16 @@ interface ActionType {
   name: string;
   unencryptedAttributes?: string[];
   validate?: {
-    params?: any;
-    actionTypeConfig?: any;
+    params?: Record<string, any>;
+    actionTypeConfig?: Record<string, any>;
   };
   executor({ actionTypeConfig, params }: ExecutorOptions): Promise<any>;
 }
 
 interface ExecuteOptions {
   id: string;
-  actionTypeConfig: any;
-  params: any;
+  actionTypeConfig: Record<string, any>;
+  params: Record<string, any>;
 }
 
 export class ActionTypeService {
@@ -79,7 +79,7 @@ export class ActionTypeService {
   /**
    * Throws an error if params are invalid for given action type
    */
-  public validateParams(id: string, params: any) {
+  public validateParams(id: string, params: Record<string, any>) {
     const actionType = this.get(id);
     const validator = actionType.validate && actionType.validate.params;
     if (validator) {
@@ -93,7 +93,7 @@ export class ActionTypeService {
   /**
    * Throws an error if actionTypeConfig is invalid for given action type
    */
-  public validateActionTypeConfig(id: string, actionTypeConfig: any) {
+  public validateActionTypeConfig(id: string, actionTypeConfig: Record<string, any>) {
     const actionType = this.get(id);
     const validator = actionType.validate && actionType.validate.actionTypeConfig;
     if (validator) {

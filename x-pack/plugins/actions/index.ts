@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Root } from 'joi';
 import mappings from './mappings.json';
 import { init } from './server';
 
@@ -14,7 +15,7 @@ export function actions(kibana: any) {
     id: 'actions',
     configPrefix: 'xpack.actions',
     require: ['kibana', 'elasticsearch', 'encrypted_saved_objects'],
-    config(Joi: any) {
+    config(Joi: Root) {
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),
