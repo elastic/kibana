@@ -7,41 +7,11 @@
 import { encryptedSavedObjects } from './index';
 import { getConfigSchema } from '../../test_utils';
 
-describe('default config', () => {
-  it('is correct when running from source', async () => {
-    const schema = await getConfigSchema(encryptedSavedObjects);
-    await expect(
-      schema.validate(
-        {},
-        {
-          context: {
-            dist: false,
-          },
-        }
-      )
-    ).resolves.toMatchInlineSnapshot(`
-Object {
-  "enabled": true,
-  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-}
-`);
-  });
+const describeWithContext = describe.each([[{ dist: false }], [{ dist: true }]]);
 
-  it('is correct when not running from source', async () => {
+describeWithContext('config schema with context %j', context => {
+  it('produces correct config', async () => {
     const schema = await getConfigSchema(encryptedSavedObjects);
-    await expect(
-      schema.validate(
-        {},
-        {
-          context: {
-            dist: true,
-          },
-        }
-      )
-    ).resolves.toMatchInlineSnapshot(`
-Object {
-  "enabled": true,
-}
-`);
+    await expect(schema.validate({}, { context })).resolves.toMatchSnapshot();
   });
 });

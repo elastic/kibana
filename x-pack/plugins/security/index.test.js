@@ -7,73 +7,16 @@
 import { security } from './index';
 import { getConfigSchema } from '../../test_utils';
 
-describe('default config', () => {
-  it('is correct when running from source', async () => {
-    const schema = await getConfigSchema(security);
-    await expect(
-      schema.validate(
-        {},
-        {
-          context: {
-            dev: false,
-            dist: false,
-          },
-        }
-      )
-    ).resolves.toMatchInlineSnapshot(`
-Object {
-  "audit": Object {
-    "enabled": false,
-  },
-  "authProviders": Array [
-    "basic",
-  ],
-  "authorization": Object {
-    "legacyFallback": Object {
-      "enabled": true,
-    },
-  },
-  "cookieName": "sid",
-  "enabled": true,
-  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "public": Object {},
-  "secureCookies": false,
-  "sessionTimeout": null,
-}
-`);
-  });
+const describeWithContext = describe.each([
+  [{ dist: false }],
+  [{ dist: true }]
+]);
 
-  it('is correct when NOT running from source', async () => {
+describeWithContext('config schema with context %j', (context) => {
+  it('produces correct config', async () => {
     const schema = await getConfigSchema(security);
     await expect(
-      schema.validate(
-        {},
-        {
-          context: {
-            dev: false,
-            dist: true,
-          },
-        }
-      )
-    ).resolves.toMatchInlineSnapshot(`
-Object {
-  "audit": Object {
-    "enabled": false,
-  },
-  "authProviders": Array [
-    "basic",
-  ],
-  "authorization": Object {
-    "legacyFallback": Object {
-      "enabled": true,
-    },
-  },
-  "cookieName": "sid",
-  "enabled": true,
-  "public": Object {},
-  "secureCookies": false,
-  "sessionTimeout": null,
-}
-`);
+      schema.validate({}, { context })
+    ).resolves.toMatchSnapshot();
   });
 });
