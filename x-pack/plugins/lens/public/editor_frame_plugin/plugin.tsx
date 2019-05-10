@@ -13,8 +13,14 @@ import { EditorFrame } from './editor_frame';
 class EditorFramePlugin {
   constructor() {}
 
-  private datasources: { [key: string]: Datasource } = {};
-  private visualizations: { [key: string]: Visualization } = {};
+  private datasources: {
+    [key: string]: Datasource;
+  } = {};
+  private visualizations: {
+    [key: string]: Visualization;
+  } = {};
+
+  private initialDatasource?: string;
 
   private element: Element | null = null;
 
@@ -23,7 +29,11 @@ class EditorFramePlugin {
       render: domElement => {
         this.element = domElement;
         render(
-          <EditorFrame datasources={this.datasources} visualizations={this.visualizations} />,
+          <EditorFrame
+            datasources={this.datasources}
+            visualizations={this.visualizations}
+            initialDatasource={this.initialDatasource}
+          />,
           domElement
         );
       },
@@ -33,7 +43,11 @@ class EditorFramePlugin {
         // on it's own because we are loosing type information here.
         // So it's basically explicitly saying "I'm dropping the information about type T here
         // because this information isn't useful to me." but without using any which can leak
-        this.datasources[name] = datasource as Datasource<unknown, unknown>;
+        this.datasources[name] = datasource as Datasource<unknown>;
+
+        if (!this.initialDatasource) {
+          this.initialDatasource = name;
+        }
       },
       registerVisualization: (name, visualization) => {
         this.visualizations[name] = visualization as Visualization<unknown, unknown>;
