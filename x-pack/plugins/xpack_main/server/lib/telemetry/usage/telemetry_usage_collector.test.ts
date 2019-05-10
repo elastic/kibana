@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { writeFileSync, unlinkSync } from 'fs';
+import { unlinkSync, writeFileSync } from 'fs';
 import { Server } from 'hapi';
-import { resolve } from 'path';
 import { tmpdir } from 'os';
+import { resolve } from 'path';
 import {
   createTelemetryUsageCollector,
   isFileReadable,
-  readTelemetryFile,
   KibanaHapiServer,
   MAX_FILE_SIZE,
+  readTelemetryFile,
 } from './telemetry_usage_collector';
 
 const getMockServer = (): KibanaHapiServer =>
-  ({
+  (({
     usage: {
       collectorSet: { makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg) },
     },
-  } as KibanaHapiServer & Server);
+  } as unknown) as KibanaHapiServer & Server);
 
 const serverWithConfig = (configPath: string): KibanaHapiServer & Server => {
   return {
