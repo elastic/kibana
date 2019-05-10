@@ -29,16 +29,31 @@ exports.NativeRealm = class NativeRealm {
     this._log = log;
   }
 
-  async setPassword(username, password = this._elasticPassword) {
-    this._log.info(`setting ${chalk.bold(username)} password to ${chalk.bold(password)}`);
+  async setPassword(username, password = this._elasticPassword, { attempt = 1 } = {}) {
+    this._log.info(
+      (attempt > 1 ? `attempt ${attempt}: ` : '') +
+        `setting ${chalk.bold(username)} password to ${chalk.bold(password)}`
+    );
 
-    await this._client.security.changePassword({
-      username,
-      refresh: 'wait_for',
-      body: {
-        password,
-      },
-    });
+    try {
+      await this._client.security.changePassword({
+        username,
+        refresh: 'wait_for',
+        body: {
+          password,
+        },
+      });
+    } catch (error) {
+      if (attempt < 3 && error.meta && error.meta.statusCode === 401) {
+        this._log.warning('[elastic] user not available yet, waiting 1.5 seconds and trying again');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        return await this.setPassword(username, password, {
+          attempt: attempt + 1,
+        });
+      }
+
+      throw error;
+    }
   }
 
   async setPasswords(options) {
