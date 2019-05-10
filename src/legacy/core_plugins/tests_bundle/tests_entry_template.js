@@ -94,7 +94,8 @@ const coreSystem = new CoreSystem({
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
-      }
+      },
+      nav: []
     },
     csp: {
       warnLegacyBrowsers: false,

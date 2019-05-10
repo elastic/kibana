@@ -23,7 +23,9 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeNavLink,
   ChromeSetup,
+  ChromeStart,
 } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
@@ -84,6 +86,8 @@ export interface CoreStart {
   application: ApplicationStart;
   /** {@link BasePathStart} */
   basePath: BasePathStart;
+  /** {@link ChromeStart} */
+  chrome: ChromeStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link InjectedMetadataStart} */
@@ -103,10 +107,12 @@ export {
   FatalErrorsSetup,
   Capabilities,
   ChromeSetup,
+  ChromeStart,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
+  ChromeNavLink,
   I18nSetup,
   I18nStart,
   InjectedMetadataSetup,

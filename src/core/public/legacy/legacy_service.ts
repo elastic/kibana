@@ -90,6 +90,8 @@ export class LegacyPlatformService {
         euiIconType: navLink.euiIconType,
         icon: navLink.icon,
         appUrl: navLink.url,
+        subUrlBase: navLink.subUrlBase,
+        linkToLastSubUrl: navLink.linkToLastSubUrl,
       })
     );
 

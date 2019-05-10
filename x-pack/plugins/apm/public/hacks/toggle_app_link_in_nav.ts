@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { onStart } from 'ui/new_platform';
 
-const apmUiEnabled = chrome.getInjected('apmUiEnabled');
-if (apmUiEnabled === false && chrome.navLinkExists('apm')) {
-  chrome.getNavLinkById('apm').hidden = true;
-}
+onStart(({ core }) => {
+  const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled');
+  if (apmUiEnabled === false) {
+    core.chrome.navLinks.update('apm', { hidden: true });
+  }
+});
