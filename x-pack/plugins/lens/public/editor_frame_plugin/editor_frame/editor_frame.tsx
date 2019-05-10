@@ -5,12 +5,11 @@
  */
 
 import React, { useEffect, useReducer, useMemo } from 'react';
-import { EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Datasource, Visualization, DatasourceDataPanelProps } from '../../types';
-import { NativeRenderer } from '../../native_renderer';
+import { Datasource, Visualization } from '../../types';
 import { reducer, getInitialState } from '../state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
+import { FrameLayout } from './frame_layout';
 
 export interface EditorFrameProps {
   datasources: { [key: string]: Datasource };
@@ -62,8 +61,8 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <FrameLayout
+      dataPanel={
         <DataPanelWrapper
           activeDatasource={state.activeDatasource}
           datasourceIsLoading={state.datasourceIsLoading}
@@ -71,9 +70,10 @@ export function EditorFrame(props: EditorFrameProps) {
           datasources={props.datasources}
           dispatch={dispatch}
         />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {state.activeDatasource && !state.datasourceIsLoading && (
+      }
+      configPanel={
+        state.activeDatasource &&
+        !state.datasourceIsLoading && (
           <ConfigPanelWrapper
             visualizations={props.visualizations}
             activeVisualization={state.activeVisualization}
@@ -81,8 +81,8 @@ export function EditorFrame(props: EditorFrameProps) {
             dispatch={dispatch}
             visualizationState={state.visualizationState}
           />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        )
+      }
+    />
   );
 }
