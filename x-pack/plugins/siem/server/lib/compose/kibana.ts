@@ -12,6 +12,9 @@ import { KibanaConfigurationAdapter } from '../configuration/kibana_configuratio
 import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
+import { KpiHosts } from '../kpi_hosts';
+import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter';
+
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { ElasticsearchIpOverviewAdapter, IpDetails } from '../ip_details';
 import { KpiNetwork } from '../kpi_network';
@@ -36,6 +39,7 @@ export function compose(server: Server): AppBackendLibs {
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
     ipDetails: new IpDetails(new ElasticsearchIpOverviewAdapter(framework)),
+    kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
     overview: new Overview(new ElasticsearchOverviewAdapter(framework)),

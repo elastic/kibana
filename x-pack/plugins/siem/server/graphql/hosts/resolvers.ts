@@ -18,8 +18,8 @@ type QueryHostsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-type QueryHostDetailsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.HostDetailsResolver>,
+type QueryHostOverviewResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.HostOverviewResolver>,
   QuerySourceResolver
 >;
 
@@ -37,7 +37,7 @@ export const createHostsResolvers = (
 ): {
   Source: {
     Hosts: QueryHostsResolver;
-    HostDetails: QueryHostDetailsResolver;
+    HostOverview: QueryHostOverviewResolver;
     HostFirstLastSeen: QueryHostFirstLastSeenResolver;
   };
 } => ({
@@ -49,7 +49,7 @@ export const createHostsResolvers = (
       };
       return libs.hosts.getHosts(req, options);
     },
-    async HostDetails(source, args, { req }, info) {
+    async HostOverview(source, args, { req }, info) {
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
       const options = {
         sourceConfiguration: source.configuration,
@@ -57,7 +57,7 @@ export const createHostsResolvers = (
         hostName: args.hostName,
         timerange: args.timerange,
       };
-      return libs.hosts.getHostDetails(req, options);
+      return libs.hosts.getHostOverview(req, options);
     },
     async HostFirstLastSeen(source, args, { req }) {
       const options = { sourceConfiguration: source.configuration, hostName: args.hostName };

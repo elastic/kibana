@@ -18,7 +18,7 @@ import { Hit, Hits, SearchHit } from '../types';
 
 export interface HostsAdapter {
   getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;
-  getHostDetails(req: FrameworkRequest, options: HostDetailsRequestOptions): Promise<HostItem>;
+  getHostOverview(req: FrameworkRequest, options: HostOverviewRequestOptions): Promise<HostItem>;
   getHostFirstLastSeen(
     req: FrameworkRequest,
     options: HostLastFirstSeenRequestOptions
@@ -48,7 +48,7 @@ export interface HostLastFirstSeenRequestOptions {
   sourceConfiguration: SourceConfiguration;
 }
 
-export interface HostDetailsRequestOptions extends HostLastFirstSeenRequestOptions {
+export interface HostOverviewRequestOptions extends HostLastFirstSeenRequestOptions {
   fields: string[];
   timerange: TimerangeInput;
 }
@@ -69,8 +69,11 @@ export interface HostBuckets {
 }
 
 export interface HostAggEsItem {
-  key?: string;
+  cloud_instance_id?: HostBuckets;
   cloud_machine_type?: HostBuckets;
+  cloud_provider?: HostBuckets;
+  cloud_region?: HostBuckets;
+  key?: string;
   firstSeen?: HostValue;
   lastSeen?: HostValue;
   host_architecture?: HostBuckets;

@@ -14,10 +14,10 @@ import { ActionCreator } from 'typescript-fsa';
 import { FlowDirection, FlowTarget } from '../../../../graphql/types';
 import { State } from '../../../../store';
 import { networkActions, networkSelectors } from '../../../../store/network';
-import { IpOverviewId } from '../ip_overview';
 import * as i18nIp from '../ip_overview/translations';
 
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
+import { IpOverviewId } from '../../../field_renderers/field_renderers';
 
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;

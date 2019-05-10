@@ -10,6 +10,7 @@ import header from './header.png';
 export const shape: ElementFactory = () => ({
   name: 'shape',
   displayName: 'Shape',
+  tags: ['graphic'],
   help: 'A customizable shape',
   width: 200,
   height: 200,

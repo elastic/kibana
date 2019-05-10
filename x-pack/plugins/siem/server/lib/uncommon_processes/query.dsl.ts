@@ -17,15 +17,13 @@ export const buildQuery = ({
   sourceConfiguration: {
     fields: { timestamp },
     auditbeatAlias,
+    winlogbeatAlias,
   },
 }: RequestOptions) => {
   const processUserFields = reduceFields(fields, { ...processFieldsMap, ...userFieldsMap });
   const hostFields = reduceFields(fields, hostFieldsMap);
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { term: { 'event.kind': 'state' } },
-    { term: { 'event.module': 'system' } },
-    { term: { 'event.dataset': 'process' } },
     {
       range: {
         [timestamp]: {
@@ -46,7 +44,7 @@ export const buildQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: auditbeatAlias,
+    index: [auditbeatAlias, winlogbeatAlias],
     ignoreUnavailable: true,
     body: {
       aggregations: {
@@ -98,6 +96,83 @@ export const buildQuery = ({
       },
       query: {
         bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'agent.type': 'auditbeat',
+                    },
+                  },
+                  {
+                    term: {
+                      'event.module': 'auditd',
+                    },
+                  },
+                  {
+                    term: {
+                      'event.action': 'executed',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'agent.type': 'auditbeat',
+                    },
+                  },
+                  {
+                    term: {
+                      'event.module': 'system',
+                    },
+                  },
+                  {
+                    term: {
+                      'event.dataset': 'process',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'agent.type': 'winlogbeat',
+                    },
+                  },
+                  {
+                    term: {
+                      'event.code': '4688',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'winlog.event_id': 1,
+                    },
+                  },
+                  {
+                    term: {
+                      'winlog.channel': 'Microsoft-Windows-Sysmon/Operational',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
           filter,
         },
       },
