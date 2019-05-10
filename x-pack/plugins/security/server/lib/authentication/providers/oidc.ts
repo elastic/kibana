@@ -34,13 +34,13 @@ interface ProviderState {
   nextURL?: string;
 
   /**
-   * Access token issued as the result of successful OpenID Connect handshake and that should be provided with
-   * every request to Elasticsearch on behalf of the authenticated user. This token will eventually expire.
+   * Elasticsearch access token issued as the result of successful OpenID Connect handshake and that should be provided
+   * with every request to Elasticsearch on behalf of the authenticated user. This token will eventually expire.
    */
   accessToken?: string;
 
   /**
-   * Once access token expires the refresh token is used to get a new pair of access/refresh tokens
+   * Once the elasticsearch access token expires the refresh token is used to get a new pair of access/refresh tokens
    * without any user involvement. If not used this token will eventually expire as well.
    */
   refreshToken?: string;
@@ -49,15 +49,21 @@ interface ProviderState {
 /**
  * Defines the shape of an incoming OpenID Connect Request
  */
-type OidcIncomingRequest = Legacy.Request & {
+type OIDCIncomingRequest = Legacy.Request & {
   payload: { iss?: string };
-  query: { iss?: string; code?: string; state?: string };
+  query: {
+    iss?: string;
+    code?: string;
+    state?: string;
+    error?: string;
+    error_description?: string;
+  };
 };
 
 /**
  * Defines the parameters that can be passed to ES when calling the /oidc/prepare endpoint
  */
-interface OidcPrepareParams {
+interface OIDCPrepareParams {
   nonce?: string;
   state?: string;
   iss?: string;
@@ -68,14 +74,28 @@ interface OidcPrepareParams {
 /**
  * Defines the realm specific properties
  */
-type OpenIdConnectProviderOptions = AuthenticationProviderOptions & {
-  realm: string;
-};
+interface OIDCProviderOptions extends AuthenticationProviderOptions {
+  realm?: string;
+}
 
-function isOidcIncomingRequest(request: Legacy.Request): request is OidcIncomingRequest {
+/**
+ * Checks if the Request object represents an HTTP request regarding authentication with OpenID
+ * Connect. This can be
+ * - An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication
+ * - An HTTP POST request with a parameter named `iss` as part of a 3rd party initiated authentication
+ * - An HTTP GET request with a query parameter named `code` as the response to a successful authentication from
+ *   an OpenID Connect Provider
+ * - An HTTP GET request with a query parameter named `error` as the response to a failed authentication from
+ *   an OpenID Connect Provider
+ * @param request Request instance.
+ */
+function isOIDCIncomingRequest(request: Legacy.Request): request is OIDCIncomingRequest {
   return (
-    (request.payload != null && !!(request.payload as any).iss) ||
-    (request.query != null && (!!(request.query as any).iss || !!(request.query as any).code))
+    (request.payload != null && !!(request.payload as Record<string, unknown>).iss) ||
+    (request.query != null &&
+      (!!(request.query as any).iss ||
+        !!(request.query as any).code ||
+        !!(request.query as any).error))
   );
 }
 
@@ -100,19 +120,18 @@ function isAccessTokenExpiredError(err?: any) {
 /**
  * Provider that supports authentication using an OpenID Connect realm in Elasticsearch.
  */
-export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvider {
-  _options: OpenIdConnectProviderOptions;
-
-  constructor(options: AuthenticationProviderOptions) {
+export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
+  constructor(protected readonly options: OIDCProviderOptions) {
     super(options);
-    this._options = options as OpenIdConnectProviderOptions;
+    if (!this.options.realm) {
+      throw new Error('Realm name must be specified');
+    }
   }
 
   /**
    * Performs OpenID Connect request authentication.
-   * @param request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
-
    */
   public async authenticate(request: Legacy.Request, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
@@ -131,12 +150,11 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
         authenticationResult = await this.authenticateViaRefreshToken(request, state);
       }
     }
-    if (isOidcIncomingRequest(request)) {
-      if (authenticationResult.notHandled()) {
-        // This might be the OpenID Connect Provider redirecting the user to `redirect_uri` after authentication or
-        // a third party initiating an authentication
-        authenticationResult = await this.authenticateViaResponseUrl(request, state);
-      }
+
+    if (isOIDCIncomingRequest(request) && authenticationResult.notHandled()) {
+      // This might be the OpenID Connect Provider redirecting the user to `redirect_uri` after authentication or
+      // a third party initiating an authentication
+      authenticationResult = await this.authenticateViaResponseUrl(request, state);
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to
@@ -145,7 +163,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
     // another tab)
     const params = this.addStateNonceFromSession({ realm: this.getRealmName() }, state);
     return authenticationResult.notHandled()
-      ? await this.initiateOpenIdConnectAuthentication(request, params)
+      ? await this.initiateOIDCAuthentication(request, params)
       : authenticationResult;
   }
 
@@ -153,22 +171,22 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
    * Attempts to handle a request that might be a third party initiated OpenID connect authentication attempt or the
    * OpenID Connect Provider redirecting back the UA after an authentication success/failure. In the former case which
    * is signified by the existence of an iss parameter (either in the query of a GET request or the body of a POST
-   * request) it attempts to start the authentication flow by calling initiateOpenIdConnectAuthentication.
+   * request) it attempts to start the authentication flow by calling initiateOIDCAuthentication.
    *
-   * In the latter case, it attempts to exchange the authentication response to an Elasticsearch access token, passing
+   * In the latter case, it attempts to exchange the authentication response to an elasticsearch access token, passing
    * along to Elasticsearch the state and nonce parameters from the user's session.
    *
-   * When login succeeds the Elasticsearch access token and refresh token are stored in the state and user is redirected
+   * When login succeeds the elasticsearch access token and refresh token are stored in the state and user is redirected
    * to the URL that was requested before authentication flow started or to default Kibana location in case of a third
    * party initiated login
    * @param request Request instance.
    * @param [sessionState] Optional state object associated with the provider.
    */
   private async authenticateViaResponseUrl(
-    request: OidcIncomingRequest,
+    request: OIDCIncomingRequest,
     sessionState?: ProviderState | null
   ) {
-    this.debug('Trying to authenticate via OpenId Connect response query.');
+    this.debug('Trying to authenticate via OpenID Connect response query.');
     // First check to see if this is a Third Party initiated authentication (which can happen via POST or GET)
     let iss = null;
     if (request.query) {
@@ -182,7 +200,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
       // We might already have a state and nonce generated by Elasticsearch (from an unfinished authentication in
       // another tab)
       const params = this.addStateNonceFromSession({ iss }, sessionState);
-      return this.initiateOpenIdConnectAuthentication(request, params);
+      return this.initiateOIDCAuthentication(request, params);
     }
 
     if (!request.query || !request.query.code) {
@@ -216,7 +234,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this._options.client.callWithInternalUser('shield.oidcAuthenticate', {
+      } = await this.options.client.callWithInternalUser('shield.oidcAuthenticate', {
         body: {
           state: stateOidcState,
           nonce: stateNonce,
@@ -227,12 +245,12 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
 
       this.debug('Request has been authenticated via OpenID Connect.');
 
-      return AuthenticationResult.redirectTo(stateRedirectURL || `${this._options.basePath}/`, {
+      return AuthenticationResult.redirectTo(stateRedirectURL || `${this.options.basePath}/`, {
         accessToken,
         refreshToken,
       });
     } catch (err) {
-      this.debug(`Failed to authenticate request via OpenIdConnect: ${err.message}`);
+      this.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -243,10 +261,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
    * @param request Request instance.
    * @param params
    */
-  private async initiateOpenIdConnectAuthentication(
-    request: Legacy.Request,
-    params: OidcPrepareParams
-  ) {
+  private async initiateOIDCAuthentication(request: Legacy.Request, params: OIDCPrepareParams) {
     this.debug('Trying to initiate OpenID Connect authentication.');
 
     // If client can't handle redirect response, we shouldn't initiate OpenID Connect authentication.
@@ -258,7 +273,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
-      const { state, nonce, redirect } = await this._options.client.callWithInternalUser(
+      const { state, nonce, redirect } = await this.options.client.callWithInternalUser(
         'shield.oidcPrepare',
         {
           body: params,
@@ -311,7 +326,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
     }
 
     try {
-      const user = await this._options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via header.');
 
@@ -327,7 +342,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
   }
 
   /**
-   * Tries to extract an Elasticsearch access token from state and adds it to the request before it's
+   * Tries to extract an elasticsearch access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
@@ -343,7 +358,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
     request.headers.authorization = `Bearer ${accessToken}`;
 
     try {
-      const user = await this._options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via state.');
 
@@ -363,9 +378,9 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
   }
 
   /**
-   * This method is only called when authentication via access token stored in the state failed because of expired
-   * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
-   * authenticate user with it.
+   * This method is only called when authentication via an elasticsearch access token stored in the state failed because
+   * of expired token. So we should use the elasticsearch refresh token, that is also stored in the state, to extend
+   * expired elasticsearch access token and authenticate user with it.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
@@ -385,7 +400,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
       const {
         access_token: newAccessToken,
         refresh_token: newRefreshToken,
-      } = await this._options.client.callWithInternalUser('shield.getAccessToken', {
+      } = await this.options.client.callWithInternalUser('shield.getAccessToken', {
         body: { grant_type: 'refresh_token', refresh_token: refreshToken },
       });
 
@@ -393,7 +408,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
 
       request.headers.authorization = `Bearer ${newAccessToken}`;
 
-      const user = await this._options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
 
@@ -416,13 +431,13 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
       //
       // 2. Refresh token is one-time use token and if it has been used already, it is treated in the same way as
       // expired token. Even though it's an edge case, there are several perfectly valid scenarios when it can
-      // happen. E.g. when several simultaneous AJAX request has been sent to Kibana, but Elasticsearch access token has
+      // happen. E.g. when several simultaneous AJAX request has been sent to Kibana, but elasticsearch access token has
       // expired already, so the first request that reaches Kibana uses refresh token to get a new elasticsearch access
       // token, but the second concurrent request has no idea about that and tries to refresh access token as well. All
-      // ends well when first request refreshes access token and updates session cookie with fresh access/refresh token
-      // pair. But if user navigates to another page _before_ AJAX request (the one that triggered token refresh)
-      // responds with updated cookie, then user will have only that old cookie with expired access token and refresh
-      // token that has been used already.
+      // ends well when first request refreshes the elasticsearch access token and updates session cookie with fresh
+      // access/refresh token pair. But if user navigates to another page _before_ AJAX request (the one that triggered
+      // token refresh)responds with updated cookie, then user will have only that old cookie with expired elasticsearch
+      // access token and refresh token that has been used already.
       //
       // When user has neither valid access nor refresh token, the only way to resolve this issue is to re-initiate the
       // OpenID Connect authentication by requesting a new authentication request to send to the OpenID Connect Provider
@@ -433,13 +448,13 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
       if (getErrorStatusCode(err) === 400) {
         if (canRedirectRequest(request)) {
           this.debug(
-            'Both access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
+            'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
           );
-          return this.initiateOpenIdConnectAuthentication(request, { realm: this.getRealmName() });
+          return this.initiateOIDCAuthentication(request, { realm: this.getRealmName() });
         }
 
         return AuthenticationResult.failed(
-          Boom.badRequest('Both access and refresh tokens are expired.')
+          Boom.badRequest('Both elasticsearch access and refresh tokens are expired.')
         );
       }
 
@@ -448,7 +463,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
   }
 
   /**
-   * Invalidates an Elasticsearch access token and refresh token that was originally created as an successful response
+   * Invalidates an elasticsearch access token and refresh token that was originally created as an successful response
    * to an OpenID Connect based authentication. This does not handle OP initiated Single Logout
    * @param request Request instance.
    * @param  state State value previously stored by the provider.
@@ -457,7 +472,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
     if (!state || !state.accessToken) {
-      this.debug('There is no Elasticsearch access token to invalidate.');
+      this.debug('There is no elasticsearch access token to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
@@ -470,7 +485,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
       };
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
-      const { redirect } = await this._options.client.callWithInternalUser(
+      const { redirect } = await this.options.client.callWithInternalUser(
         'shield.oidcLogout',
         logoutBody
       );
@@ -485,7 +500,7 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo(`${this._options.basePath}/logged_out`);
+      return DeauthenticationResult.redirectTo(`${this.options.basePath}/logged_out`);
     } catch (err) {
       this.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
@@ -497,17 +512,17 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
    * @returns {string}
    */
   private getRealmName() {
-    return `${this._options.realm}`;
+    return `${this.options.realm}`;
   }
 
   /**
    * Possibly adds the state and nonce parameter that was saved in the user's session state to the
    * {@code params}. There is no use case where we would have only a state parameter or only a nonce
    * parameter in the session state so we only enrich the params object if we have both
-   * @param params OidcPrepareParams containing existing parameters
+   * @param params OIDCPrepareParams containing existing parameters
    * @param sessionState State value previously stored by the provider.
    */
-  private addStateNonceFromSession(params: OidcPrepareParams, sessionState?: ProviderState | null) {
+  private addStateNonceFromSession(params: OIDCPrepareParams, sessionState?: ProviderState | null) {
     const { nonce: stateNonce, state: stateOidcState } = sessionState || {
       nonce: '',
       state: '',
@@ -524,6 +539,6 @@ export class OpenIdConnectAuthenticationProvider extends BaseAuthenticationProvi
    * @param message Message to log.
    */
   private debug(message: string) {
-    this._options.log(['debug', 'security', 'oidc'], message);
+    this.options.log(['debug', 'security', 'oidc'], message);
   }
 }

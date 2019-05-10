@@ -10,10 +10,10 @@ import Boom from 'boom';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { requestFixture } from '../../__tests__/__fixtures__/request';
 
-import { OpenIdConnectAuthenticationProvider } from './oidc';
+import { OIDCAuthenticationProvider } from './oidc';
 
-describe('OpenIdConnectAuthenticationProvider', () => {
-  let provider: OpenIdConnectAuthenticationProvider;
+describe('OIDCAuthenticationProvider', () => {
+  let provider: OIDCAuthenticationProvider;
   let callWithRequest: sinon.SinonStub;
   let callWithInternalUser: sinon.SinonStub;
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('OpenIdConnectAuthenticationProvider', () => {
     callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
     callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
 
-    provider = new OpenIdConnectAuthenticationProvider(providerOptions);
+    provider = new OIDCAuthenticationProvider(providerOptions);
   });
 
   describe('`authenticate` method', () => {
@@ -445,7 +445,7 @@ describe('OpenIdConnectAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toEqual(
-        Boom.badRequest('Both access and refresh tokens are expired.')
+        Boom.badRequest('Both elasticsearch access and refresh tokens are expired.')
       );
     });
 

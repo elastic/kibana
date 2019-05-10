@@ -8,7 +8,7 @@ import { resolve } from 'path';
 export default async function ({ readConfigFile }) {
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
-  const plugin = resolve(__dirname, '../plugin_api_integration/plugins/oidc_provider');
+  const plugin = resolve(__dirname, './fixtures/oidc_provider');
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = resolve(__dirname, './fixtures/jwks.json');
 
@@ -52,7 +52,7 @@ export default async function ({ readConfigFile }) {
         `--plugin-path=${plugin}`,
         '--optimize.enabled=false',
         '--xpack.security.authProviders=[\"oidc\"]',
-        '--xpack.security.auth.oidc.realm=\"oidc1\"',
+        '--xpack.security.authc.oidc.realm=\"oidc1\"',
         '--server.xsrf.whitelist', JSON.stringify(['/api/security/v1/oidc',
           '/api/oidc_provider/token_endpoint',
           '/api/oidc_provider/userinfo_endpoint'])

@@ -23,7 +23,9 @@ export interface AuthenticationProviderOptions {
 /**
  * Base class that all authentication providers should extend.
  */
-export abstract class BaseAuthenticationProvider {
+export abstract class BaseAuthenticationProvider<
+  Options extends AuthenticationProviderOptions = AuthenticationProviderOptions
+> {
   /**
    * Instantiates AuthenticationProvider.
    * @param options Provider options object.

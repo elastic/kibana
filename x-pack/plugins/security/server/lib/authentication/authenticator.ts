@@ -14,7 +14,7 @@ import {
   BasicAuthenticationProvider,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
-  OpenIdConnectAuthenticationProvider,
+  OIDCAuthenticationProvider,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -35,7 +35,7 @@ const providerMap = new Map<
   ['basic', BasicAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
-  ['oidc', OpenIdConnectAuthenticationProvider],
+  ['oidc', OIDCAuthenticationProvider],
 ]);
 
 function assertRequest(request: Legacy.Request) {
@@ -67,15 +67,15 @@ function getProviderOptions(server: Legacy.Server) {
 /**
  * Prepares options object that is specific only to an authentication provider. This will be merged
  * with the general options
- * @param server  Server instance.
+ * @param server Server instance.
+ * @param providerType the type of the provider to get the options for.
  */
-function getProviderSpecificOptions(server: Legacy.Server, providerName: string) {
+function getProviderSpecificOptions(server: Legacy.Server, providerType: string) {
   const config = server.config();
-  if (config.has(`xpack.security.auth.${providerName}`)) {
-    return config.get(`xpack.security.auth.${providerName}`);
-  } else {
-    return {};
+  if (config.has(`xpack.security.authc.${providerType}`)) {
+    return config.get(`xpack.security.authc.${providerType}`);
   }
+  return {};
 }
 
 /**

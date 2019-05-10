@@ -350,7 +350,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'Both access and refresh tokens are expired.',
+          message: 'Both elasticsearch access and refresh tokens are expired.',
           statusCode: 400
         });
       });
