@@ -265,17 +265,22 @@ export class VectorStyle extends AbstractStyle {
         };
       })
       .filter(({ range }) => {
-        return range;
+        return !!range;
       });
 
     if (scaledFields.length === 0) {
       return;
     }
 
+    const tmpFeatureIdentifier = {
+      source: null,
+      id: null
+    };
+    const tmpFeatureState = {};
+
     //scale to [0,1] domain
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
-      const featureState = {};
       for (let j = 0; j < scaledFields.length; j++) {
         const { name, range, computedName } = scaledFields[j];
         const unscaledValue = parseFloat(feature.properties[name]);
@@ -287,14 +292,11 @@ export class VectorStyle extends AbstractStyle {
         } else {
           scaledValue = (feature.properties[name] - range.min) / range.delta;
         }
-        feature.properties[computedName] = scaledValue;
-        featureState[computedName] = scaledValue;
+        tmpFeatureState[computedName] = scaledValue;
       }
-      const featureIdentifier = {
-        source: sourceId,
-        id: feature.id
-      };
-      mbMap.setFeatureState(featureIdentifier, featureState);
+      tmpFeatureIdentifier.source = sourceId;
+      tmpFeatureIdentifier.id = feature.id;
+      mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
   }
 
