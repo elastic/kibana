@@ -40,8 +40,8 @@ export class VegaMapView extends VegaBaseView {
       const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       baseMapOpts = {
-        url: await this._serviceSettings.getUrlTemplateForTMSLayer(baseMapOpts, true, isDarkMode),
-        ...baseMapOpts
+        ...baseMapOpts,
+        ...await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode),
       };
       if (!baseMapOpts) {
         this.onWarn(i18n.translate('vega.mapView.mapStyleNotFoundWarningMessage', {

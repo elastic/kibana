@@ -3,7 +3,7 @@
   "name": "Dark Matter",
   "attribution": "<a href=\"https://www.maptiler.com/copyright/\" target=\"_blank\">&copy; MapTiler</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>",
   "minzoom": 0,
-  "maxzoom": 10,
+  "maxzoom": 22,
   "bounds": [-180, -85.0511, 180, 85.0511],
   "format": "png",
   "type": "baselayer",

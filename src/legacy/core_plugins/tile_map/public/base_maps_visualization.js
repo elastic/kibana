@@ -200,14 +200,13 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       }
       const isDesaturated = this._getMapsParams().isDesaturated;
       const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
-      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
+      const meta = await (await emsServiceSettings).getAttributesForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
-      delete options.url;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { url, showZoomMessage, ...options }
+        options: { ...options, showZoomMessage, ...meta, }
       });
     }
 

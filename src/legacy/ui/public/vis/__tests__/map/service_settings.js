@@ -106,12 +106,12 @@ describe('service_settings (FKA tilemaptest)', function () {
       const tmsService = tmsServices[0];
       expect(typeof tmsService.url === 'undefined').to.equal(true);
 
-      const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tmsService);
-      expect(mapUrl).to.contain('{x}');
-      expect(mapUrl).to.contain('{y}');
-      expect(mapUrl).to.contain('{z}');
+      const attrs = await serviceSettings.getAttributesForTMSLayer(tmsService);
+      expect(attrs.url).to.contain('{x}');
+      expect(attrs.url).to.contain('{y}');
+      expect(attrs.url).to.contain('{z}');
 
-      const urlObject = url.parse(mapUrl, true);
+      const urlObject = url.parse(attrs.url, true);
       expect(urlObject.hostname).to.be('raster-style.foobar');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
@@ -131,8 +131,8 @@ describe('service_settings (FKA tilemaptest)', function () {
       let tilemapServices;
 
       async function assertQuery(expected) {
-        const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
-        const urlObject = url.parse(mapUrl, true);
+        const attrs = await serviceSettings.getAttributesForTMSLayer(tilemapServices[0]);
+        const urlObject = url.parse(attrs.url, true);
         Object.keys(expected).forEach(key => {
           expect(urlObject.query).to.have.property(key, expected[key]);
         });
@@ -202,28 +202,32 @@ describe('service_settings (FKA tilemaptest)', function () {
           const expectedService = expected[index];
           expect(actualService.id).to.equal(expectedService.id);
           expect(actualService.attribution).to.equal(expectedService.attribution);
-          const url = await serviceSettings.getUrlTemplateForTMSLayer(actualService);
-          expect(url).to.equal(expectedService.url);
+          const attrs = await serviceSettings.getAttributesForTMSLayer(actualService);
+          expect(attrs.url).to.equal(expectedService.url);
         });
 
         return Promise.all(assertions);
 
       });
 
-      it('should load appropriate EMS road_map url for desaturated and dark theme', async () => {
+      it('should load appropriate EMS attributes for desaturated and dark theme', async () => {
 
         tilemapServices = await serviceSettings.getTMSServices();
         const roadMapService = tilemapServices.find(service => service.id === 'road_map');
 
-        const desaturationFalse = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, false, false);
-        const desaturationTrue = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, true, false);
-        const darkThemeDesaturationFalse = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, false, true);
-        const darkThemeDesaturationTrue = await serviceSettings.getUrlTemplateForTMSLayer(roadMapService, true, true);
+        const desaturationFalse = await serviceSettings.getAttributesForTMSLayer(roadMapService, false, false);
+        const desaturationTrue = await serviceSettings.getAttributesForTMSLayer(roadMapService, true, false);
+        const darkThemeDesaturationFalse = await serviceSettings.getAttributesForTMSLayer(roadMapService, false, true);
+        const darkThemeDesaturationTrue = await serviceSettings.getAttributesForTMSLayer(roadMapService, true, true);
 
-        expect(desaturationFalse).to.equal('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
-        expect(desaturationTrue).to.equal('https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
-        expect(darkThemeDesaturationFalse).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
-        expect(darkThemeDesaturationTrue).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(desaturationFalse.url).to.equal('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(desaturationFalse.maxzoom).to.equal(10);
+        expect(desaturationTrue.url).to.equal('https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(desaturationTrue.maxzoom).to.equal(18);
+        expect(darkThemeDesaturationFalse.url).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(darkThemeDesaturationFalse.maxzoom).to.equal(22);
+        expect(darkThemeDesaturationTrue.url).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
+        expect(darkThemeDesaturationTrue.maxzoom).to.equal(22);
 
       });
 
@@ -249,8 +253,8 @@ describe('service_settings (FKA tilemaptest)', function () {
         expect(tilemapServices.length).to.eql(1);
         expect(tilemapServices[0].attribution).to.eql(expected[0].attribution);
         expect(tilemapServices[0].id).to.eql(expected[0].id);
-        const url = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
-        expect(url).to.equal(expected[0].url);
+        const attrs = await serviceSettings.getAttributesForTMSLayer(tilemapServices[0]);
+        expect(attrs.url).to.equal(expected[0].url);
 
       });
 

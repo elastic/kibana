@@ -157,7 +157,7 @@ uiModules.get('kibana')
         return  (layer) ? layer.getEMSHotLink() : null;
       }
 
-      async _getUrlTemplateForEMSTMSLayer(isDesaturated, isDarkMode) {
+      async _getAttributesForEMSTMSLayer(isDesaturated, isDarkMode) {
         const tmsServices = await this._emsClient.getTMSServices();
         const emsTileLayerId = mapConfig.emsTileLayerId;
         let serviceId;
@@ -173,25 +173,41 @@ uiModules.get('kibana')
         const tmsService = tmsServices.find(service => {
           return service.getId() === serviceId;
         });
-        return await tmsService.getUrlTemplate();
+        return {
+          url: await tmsService.getUrlTemplate(),
+          minzoom: await tmsService.getMinZoom(),
+          maxzoom: await tmsService.getMaxZoom(),
+          attribution: await tmsService.getHTMLAttribution(),
+        };
       }
 
-      async getUrlTemplateForTMSLayer(tmsServiceConfig, isDesaturated, isDarkMode) {
-
+      async getAttributesForTMSLayer(tmsServiceConfig, isDesaturated, isDarkMode) {
         if (tmsServiceConfig.origin === ORIGIN.EMS) {
-          return this._getUrlTemplateForEMSTMSLayer(isDesaturated, isDarkMode);
+          return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
         } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
-          return tilemapsConfig.deprecated.config.url;
+          const config = tilemapsConfig.deprecated.config;
+          return _.pick(config, [
+            'url',
+            'minzoom',
+            'maxzoom',
+            'attribution',
+          ]);
         } else {
           //this is an older config. need to resolve this dynamically.
           if (tmsServiceConfig.id === TMS_IN_YML_ID) {
-            return tilemapsConfig.deprecated.config.url;
+            const config = tilemapsConfig.deprecated.config;
+            return _.pick(config, [
+              'url',
+              'minzoom',
+              'maxzoom',
+              'attribution',
+            ]);
           } else {
             //assume ems
-            return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
+            return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
           }
-        }
 
+        }
       }
 
       async _getFileUrlFromEMS(fileLayerConfig) {
