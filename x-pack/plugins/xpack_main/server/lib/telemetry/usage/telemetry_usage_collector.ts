@@ -15,7 +15,7 @@ import { ensureDeepObject } from './ensure_deep_object';
 /**
  * The maximum file size before we ignore it (note: this limit is arbitrary).
  */
-export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 KB
+export const MAX_FILE_SIZE = 10 * 1024; // 10 KB
 
 export interface KibanaHapiServer extends Server {
   usage: {
