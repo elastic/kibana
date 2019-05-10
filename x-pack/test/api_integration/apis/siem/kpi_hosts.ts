@@ -30,7 +30,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 1,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
@@ -39,7 +39,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 0,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
@@ -48,7 +48,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 1,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
@@ -57,7 +57,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 1,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
         ],
         authSuccess: 0,
@@ -73,7 +73,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 52,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
@@ -82,7 +82,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 0,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
@@ -91,7 +91,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 31,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
@@ -100,7 +100,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 88,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
         ],
         uniqueDestinationIps: 154,
@@ -112,7 +112,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 61,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
@@ -121,7 +121,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 0,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
@@ -130,7 +130,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 45,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
@@ -139,7 +139,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 114,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
         ],
       };
@@ -181,7 +181,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 1,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
@@ -190,7 +190,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 0,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
@@ -199,7 +199,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 1,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
@@ -208,7 +208,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 1,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
         ],
         authSuccess: 0,
@@ -224,7 +224,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 52,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
@@ -233,7 +233,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 0,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
@@ -242,7 +242,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 31,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
@@ -251,7 +251,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 88,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
         ],
         uniqueDestinationIps: 154,
@@ -263,7 +263,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 61,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
@@ -272,7 +272,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 0,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
@@ -281,7 +281,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 45,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
@@ -290,7 +290,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               doc_count: null,
               value: 114,
             },
-            __typename: 'HistogramData',
+            __typename: 'KpiHostHistogramData',
           },
         ],
       };
@@ -310,111 +310,6 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           .then(resp => {
             const kpiHosts = resp.data.source.KpiHosts;
             expect(kpiHosts!).to.eql(expectedResult);
-            // expect(kpiHosts!.hostsHistogram).to.eql([
-            //   {
-            //     x: '2019-02-09T16:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 1,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-09T19:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 0,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-09T22:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 1,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-10T01:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 1,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            // ]);
-            // expect(kpiHosts!.authSuccess).to.be(0);
-            // expect(kpiHosts!.authSuccessHistogram).to.eql([]);
-            // expect(kpiHosts!.authFailure).to.equal(0);
-            // expect(kpiHosts!.authFailureHistogram).to.eql([]);
-            // expect(kpiHosts!.uniqueSourceIps).to.equal(121);
-            // expect(kpiHosts!.uniqueSourceIpsHistogram).to.eql([
-            //   {
-            //     x: '2019-02-09T16:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 52,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-09T19:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 0,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-09T22:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 31,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-10T01:00:00.000Z',
-            //     y: {
-            //       __typename: 'Count',
-            //       doc_count: null,
-            //       value: 88,
-            //     },
-            //     __typename: 'HistogramData',
-            //   },
-            // ]);
-            // expect(kpiHosts!.uniqueDestinationIps).to.equal(154);
-            // expect(kpiHosts!.uniqueDestinationIpsHistogram).to.eql([
-            //   {
-            //     x: '2019-02-09T16:00:00.000Z',
-            //     y: { value: 61, doc_count: null, __typename: 'Count' },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-09T19:00:00.000Z',
-            //     y: { value: 0, doc_count: null, __typename: 'Count' },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-09T22:00:00.000Z',
-            //     y: { value: 45, doc_count: null, __typename: 'Count' },
-            //     __typename: 'HistogramData',
-            //   },
-            //   {
-            //     x: '2019-02-10T01:00:00.000Z',
-            //     y: { value: 114, doc_count: null, __typename: 'Count' },
-            //     __typename: 'HistogramData',
-            //   },
-            // ]);
-            // });
           });
       });
     });
