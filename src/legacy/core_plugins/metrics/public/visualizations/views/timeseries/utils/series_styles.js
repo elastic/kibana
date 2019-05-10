@@ -57,14 +57,12 @@ export const getBarStyles = ({ show = true, lineWidth = 1, fill = 1 }, color) =>
 
 export const getSeriesColors = (color, specId) => {
   const map = new Map();
+  /**
+   * TODO: colorValues for each column should be defined.
+   */
+  const seriesColorsValues = { specId, colorValues: [] };
 
-  map.set(
-    {
-      specId,
-      colorValues: [],
-    },
-    color,
-  );
+  map.set(seriesColorsValues, color);
 
   return map;
 };
