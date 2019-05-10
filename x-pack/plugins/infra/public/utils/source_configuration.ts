@@ -15,14 +15,15 @@ export type TimestampLogColumnConfiguration = SourceConfigurationFields.InfraSou
 
 export const isFieldLogColumnConfiguration = (
   logColumnConfiguration: LogColumnConfiguration
-): logColumnConfiguration is FieldLogColumnConfiguration => 'fieldColumn' in logColumnConfiguration;
+): logColumnConfiguration is FieldLogColumnConfiguration =>
+  logColumnConfiguration != null && 'fieldColumn' in logColumnConfiguration;
 
 export const isMessageLogColumnConfiguration = (
   logColumnConfiguration: LogColumnConfiguration
 ): logColumnConfiguration is MessageLogColumnConfiguration =>
-  'messageColumn' in logColumnConfiguration;
+  logColumnConfiguration != null && 'messageColumn' in logColumnConfiguration;
 
 export const isTimestampLogColumnConfiguration = (
   logColumnConfiguration: LogColumnConfiguration
 ): logColumnConfiguration is TimestampLogColumnConfiguration =>
-  'timestampColumn' in logColumnConfiguration;
+  logColumnConfiguration != null && 'timestampColumn' in logColumnConfiguration;
