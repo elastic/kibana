@@ -30,7 +30,7 @@ export function getComputedFields() {
   docvalueFields = _.reject(self.fields.byType.date, 'scripted')
     .map((dateField) => ({
       field: dateField.name,
-      format: dateField.esTypes.indexOf('date_nanos') !== -1 ? 'strict_date_time' : 'date_time',
+      format: dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1 ? 'strict_date_time' : 'date_time',
     }));
 
   _.each(self.getScriptedFields(), function (field) {
