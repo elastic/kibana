@@ -76,7 +76,7 @@ export default function ({ getService }) {
 
         await openIndex(index).expect(200);
 
-        // Make sure the index has been closed
+        // Make sure the index is opened
         const [cat2] = await catIndex(index);
         expect(cat2.status).to.be('open');
       });
