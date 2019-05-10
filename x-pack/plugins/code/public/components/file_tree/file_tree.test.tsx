@@ -44,7 +44,6 @@ test('render correctly', () => {
         location={location}
         closeTreePath={mockFunction}
         openTreePath={mockFunction}
-        fetchRepoTree={mockFunction}
       />
     )
     .toJSON();
