@@ -32,7 +32,7 @@ import { Capabilities } from '../../core/public';
  * };
  * ```
  */
-export type LegacyPlugin = (kibana: LegacyPluginApi) => ArrayOrItem<LegacyPluginSpec[]>;
+export type LegacyPlugin = (kibana: LegacyPluginApi) => ArrayOrItem<LegacyPluginSpec>;
 
 export type ArrayOrItem<T> = T | T[];
 
