@@ -6,7 +6,8 @@
 
 import { Dictionary } from '../../../common/types/common';
 
-import { AggName, FieldName } from './aggregations';
+import { AggName } from './aggregations';
+import { FieldName, FIELD_TYPE } from './fields';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -19,9 +20,35 @@ export type PivotSupportedGroupByAggs =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
 
+export const pivotSupportedGroupByAggs: PivotSupportedGroupByAggs[] = [
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+];
+
 export type PivotSupportedGroupByAggsWithInterval =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
+
+export const pivotSupportedGroupByAggsWithInterval: PivotSupportedGroupByAggsWithInterval[] = [
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
+];
+
+export const pivotGroupByFieldSupport = {
+  [FIELD_TYPE.ATTACHMENT]: [],
+  [FIELD_TYPE.BOOLEAN]: [],
+  [FIELD_TYPE.DATE]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM],
+  [FIELD_TYPE.GEO_POINT]: [],
+  [FIELD_TYPE.GEO_SHAPE]: [],
+  [FIELD_TYPE.IP]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
+  [FIELD_TYPE.MURMUR3]: [],
+  [FIELD_TYPE.NUMBER]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM],
+  [FIELD_TYPE.STRING]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
+  [FIELD_TYPE._SOURCE]: [],
+  [FIELD_TYPE.UNKNOWN]: [],
+  [FIELD_TYPE.CONFLICT]: [],
+};
 
 interface GroupByConfigBase {
   field: FieldName;

@@ -32,6 +32,7 @@ describe('Data Frame: Define Pivot Common', () => {
           label: 'the-field',
           options: [
             { label: 'avg(the-field)' },
+            { label: 'cardinality(the-field)' },
             { label: 'max(the-field)' },
             { label: 'min(the-field)' },
             { label: 'sum(the-field)' },
@@ -41,6 +42,11 @@ describe('Data Frame: Define Pivot Common', () => {
       ],
       aggOptionsData: {
         'avg(the-field)': { agg: 'avg', field: 'the-field', aggName: 'avg(the-field)' },
+        'cardinality(the-field)': {
+          agg: 'cardinality',
+          field: 'the-field',
+          aggName: 'cardinality(the-field)',
+        },
         'max(the-field)': { agg: 'max', field: 'the-field', aggName: 'max(the-field)' },
         'min(the-field)': { agg: 'min', field: 'the-field', aggName: 'min(the-field)' },
         'sum(the-field)': { agg: 'sum', field: 'the-field', aggName: 'sum(the-field)' },
