@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function exploreRepositoryFunctonalTests({
+export default function exploreRepositoryFunctionalTests({
   getService,
   getPageObjects,
 }: TestInvoker) {
@@ -111,18 +111,21 @@ export default function exploreRepositoryFunctonalTests({
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-Directory-src/models')).to.be(true);
         });
+        log.info('src folder opened2');
 
         await testSubjects.click('codeFileTreeNode-Directory-src/models');
         // Then the 'models' folder on the file tree.
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-File-src/models/User.ts')).to.be(true);
         });
+        log.info('src folder opened3');
 
         await testSubjects.click('codeFileTreeNode-File-src/models/User.ts');
         // Then the 'User.ts' file on the file tree.
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
         });
+        log.info('src folder opened4');
 
         // Click breadcrumb does not affect file tree
         await testSubjects.click('codeFileBreadcrumb-src');
@@ -132,6 +135,7 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
+        log.info('src folder opened5');
 
         // open another folder
         await testSubjects.click('codeFileTreeNode-Directory-src-doc');
@@ -140,11 +144,13 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
         });
+        log.info('src folder opened6');
 
         // click src again to focus on this folder
         await testSubjects.click('codeFileTreeNode-Directory-src');
         // then click again to close this folder.
         await testSubjects.click('codeFileTreeNode-Directory-src');
+        log.info('src folder opened7');
 
         await retry.tryForTime(5000, async () => {
           // should only close src folder
