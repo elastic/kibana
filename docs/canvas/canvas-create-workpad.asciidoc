@@ -54,6 +54,8 @@ editor and edit the expression associated with an element directly.
 Each Canvas element is connected to some demo data by default. Once you place the 
 element on your workpad, you can configure it to display your own data.
 
+Each element could contain a different data source. Pages and workpads often contain multiple data sources
+
 From the sidebar editor, click *Data > Change your data source* to connect a new 
 data source to your element.
 
@@ -74,8 +76,12 @@ After you change the data source for an element, update the ... in the ...
 [float]
 === Adding a new page
 You can add additional pages to your Canvas workpad to build out your presentation. 
-From the bottom of the page click *Page 1 of ...* to view all existing pages. 
-Next, click *+* on the righthand side to add a new page. 
+
+. From the bottom of the page click *Page 1 of ...* to view all existing pages. 
+. Click *+* on the righthand side to add a new page. 
+
+[role="screenshot"]
+image::images/canvas_workpad_3_page.png[]
 
 [float]
 === Sharing your workpad

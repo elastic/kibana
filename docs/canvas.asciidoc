@@ -17,11 +17,46 @@ dynamic, multi-page, pixel-perfect, data displays to screens large and small.
 image::canvas/images/canvas-ecommerce.png[]
 
 [float]
+=== Getting started with Canvas
+
+EachCanvas workpad is made up of at least one page. Pages contains elements 
+that you can arrange, style, and connect to a data source to create live data displays.
+
+Install a <<add-sample-data, Kibana sample data set>>. Each sample data set includes 
+a Canvas workpad to go along with the data. Once you've added the data, open *Canvas* 
+and click the name of the workpad to test things out.
+
+
+[float]
+==== Play around with the workpad
+
+
+. Click on any element in the sample workpad.
++ 
+This element is now selected, exposing a menu in the side bar where you can make changes to the element.
++
+[role="screenshot"]
+image::images/canvas_workpad_edit_style.png[]
+
+. Try changing the color palette. Click the Back button in your 
+browser to undo your change.
+
+. Try dragging the chart around the page. Grab the resize handles to make 
+the chart bigger and smaller.
+
+. Now click somewhere off of the element, but not on another element, 
+to deselect it. 
++
+You will notice a change in the sidebar menu. When no element is selected, you have 
+access to the page and workpad-level settings. Feel free to change the page 
+background color or rename the workpad.
+
+
+[float]
 === Ready to learn more? 
 
-Get acquainted with the Canvas workspace:
+Create your own workpad:
 
-* <<canvas-getting-started, Get started with Canvas>>
 * <<canvas-create-workpad, Create a new workpad>>
 
 Dig into the expression language and the functions that drive Canvas:
@@ -31,8 +66,6 @@ Dig into the expression language and the functions that drive Canvas:
 
 
 --
-
-include::canvas/canvas-getting-started.asciidoc[]
 
 include::canvas/canvas-create-workpad.asciidoc[]
 
