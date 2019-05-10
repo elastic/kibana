@@ -131,13 +131,12 @@ describe('constructor', () => {
 
     expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
 
-    expect(FatalErrorsServiceConstructor).toHaveBeenLastCalledWith({
+    expect(FatalErrorsServiceConstructor).toHaveBeenLastCalledWith(
       rootDomElement,
-      injectedMetadata: MockInjectedMetadataService,
-      stopCoreSystem: expect.any(Function),
-    });
+      expect.any(Function)
+    );
 
-    const [{ stopCoreSystem }] = FatalErrorsServiceConstructor.mock.calls[0];
+    const [, stopCoreSystem] = FatalErrorsServiceConstructor.mock.calls[0];
 
     expect(coreSystem.stop).not.toHaveBeenCalled();
     stopCoreSystem();

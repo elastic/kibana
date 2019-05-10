@@ -18,3 +18,4 @@
  */
 
 export { FatalErrorsSetup, FatalErrorsService } from './fatal_errors_service';
+export { FatalErrorInfo } from './get_error_info';
