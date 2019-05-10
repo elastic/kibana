@@ -6,7 +6,7 @@ Object {
     "browser": Object {
       "autoDownload": true,
       "chromium": Object {
-        "disableSandbox": false,
+        "disableSandbox": "<platform dependent>",
         "maxScreenshotDimension": 1950,
         "proxy": Object {
           "enabled": false,
@@ -66,7 +66,7 @@ Object {
     "browser": Object {
       "autoDownload": false,
       "chromium": Object {
-        "disableSandbox": false,
+        "disableSandbox": "<platform dependent>",
         "maxScreenshotDimension": 1950,
         "proxy": Object {
           "enabled": false,
@@ -125,7 +125,7 @@ Object {
     "browser": Object {
       "autoDownload": true,
       "chromium": Object {
-        "disableSandbox": false,
+        "disableSandbox": "<platform dependent>",
         "maxScreenshotDimension": 1950,
         "proxy": Object {
           "enabled": false,
@@ -185,7 +185,7 @@ Object {
     "browser": Object {
       "autoDownload": false,
       "chromium": Object {
-        "disableSandbox": false,
+        "disableSandbox": "<platform dependent>",
         "maxScreenshotDimension": 1950,
         "proxy": Object {
           "enabled": false,

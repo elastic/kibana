@@ -17,8 +17,8 @@ const describeWithContext = describe.each([
 describeWithContext('config schema with context %j', (context) => {
   it('produces correct config', async () => {
     const schema = await getConfigSchema(reporting);
-    await expect(
-      schema.validate({}, { context })
-    ).resolves.toMatchSnapshot();
+    const value = await schema.validate({}, { context });
+    value.capture.browser.chromium.disableSandbox = '<platform dependent>';
+    await expect(value).toMatchSnapshot();
   });
 });
