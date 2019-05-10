@@ -23,6 +23,8 @@ import { relativeOptions } from '../../../../../ui/public/timepicker/relative_op
 
 import { GTE_INTERVAL_RE, INTERVAL_STRING_RE } from '../../../common/interval_regexp';
 
+export const AUTO_INTERVAL = 'auto';
+
 export const unitLookup = {
   s: i18n.translate('tsvb.getInterval.secondsLabel', { defaultMessage: 'seconds' }),
   m: i18n.translate('tsvb.getInterval.minutesLabel', { defaultMessage: 'minutes' }),
@@ -53,7 +55,7 @@ export const isGteInterval = (interval) => GTE_INTERVAL_RE.test(interval);
 
 export const isIntervalValid = (interval) => {
   return isString(interval) &&
-    (interval === 'auto' || INTERVAL_STRING_RE.test(interval) || isGteInterval(interval));
+    (interval === AUTO_INTERVAL || INTERVAL_STRING_RE.test(interval) || isGteInterval(interval));
 };
 
 export const getInterval = (visData, model) => {

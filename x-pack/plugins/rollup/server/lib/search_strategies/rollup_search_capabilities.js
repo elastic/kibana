@@ -22,7 +22,12 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
     }
 
     get defaultTimeInterval() {
-      return get(this.dateHistogram, 'interval', null);
+      return this.dateHistogram.fixed_interval || this.dateHistogram.calendar_interval ||
+        /*
+          Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval] in the future.
+          We can remove the following line only for versions > 8.x
+         */
+        this.dateHistogram.interval || null;
     }
 
     get searchTimezone() {

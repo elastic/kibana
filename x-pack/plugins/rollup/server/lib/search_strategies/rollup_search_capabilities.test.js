@@ -84,14 +84,14 @@ describe('Rollup Search Capabilities', () => {
       expect(rollupSearchCaps.getValidTimeInterval()).toBe('1d');
     });
 
-    test('should return 1w as common interval for 1w(user interval) and 1d(rollup interval) - calendar intervals', () => {
+    test('should return 1w as common interval for 7d(user interval) and 1d(rollup interval) - calendar intervals', () => {
       rollupJobInterval = {
         value: 1,
         unit: 'd',
       };
       userInterval = {
-        value: 1,
-        unit: 'w',
+        value: 7,
+        unit: 'd',
       };
 
       getSuitableUnit = 'w';
