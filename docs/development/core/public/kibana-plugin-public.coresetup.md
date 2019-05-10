@@ -4,7 +4,7 @@
 
 ## CoreSetup interface
 
-Core services exposed to the start lifecycle
+Core services exposed to the setup lifecycle
 
 <b>Signature:</b>
 
@@ -16,6 +16,7 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [application](./kibana-plugin-public.coresetup.application.md) | <code>ApplicationSetup</code> | [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |
 |  [basePath](./kibana-plugin-public.coresetup.basepath.md) | <code>BasePathSetup</code> | [BasePathSetup](./kibana-plugin-public.basepathsetup.md) |
 |  [chrome](./kibana-plugin-public.coresetup.chrome.md) | <code>ChromeSetup</code> | [ChromeSetup](./kibana-plugin-public.chromesetup.md) |
 |  [fatalErrors](./kibana-plugin-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> | [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |

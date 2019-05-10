@@ -30,16 +30,21 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+const createStartContractMock = createSetupContractMock;
+
 type BasePathServiceContract = PublicMethodsOf<BasePathService>;
 const createMock = () => {
   const mocked: jest.Mocked<BasePathServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
   };
   mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const basePathServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

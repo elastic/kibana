@@ -19,6 +19,7 @@ import { RequestExpander } from './request_expander';
 
 export class JavaLauncher implements ILanguageServerLauncher {
   private isRunning: boolean = false;
+  private needModuleArguments: boolean = true;
   constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
@@ -115,8 +116,16 @@ export class JavaLauncher implements ILanguageServerLauncher {
 
     if (this.getSystemJavaHome()) {
       const javaHomePath = this.getSystemJavaHome();
-      if (await this.checkJavaVersion(javaHomePath)) {
+      const javaVersion = await this.getJavaVersion(javaHomePath);
+      if (javaVersion > 8) {
+        // for JDK's versiob > 8, we need extra arguments as default
         return javaHomePath;
+      } else if (javaVersion === 8) {
+        // JDK's version = 8, needn't extra arguments
+        this.needModuleArguments = false;
+        return javaHomePath;
+      } else {
+        // JDK's version < 8, use bundled JDK instead, whose version > 8, so need extra arguments as default
       }
     }
 
@@ -142,33 +151,41 @@ export class JavaLauncher implements ILanguageServerLauncher {
       process.platform === 'win32' ? 'java.exe' : 'java'
     );
 
-    const p = spawn(
-      javaPath,
-      [
-        '-Declipse.application=org.elastic.jdt.ls.core.id1',
-        '-Dosgi.bundles.defaultStartLevel=4',
-        '-Declipse.product=org.elastic.jdt.ls.core.product',
-        '-Dlog.level=ALL',
-        '-noverify',
-        '-Xmx4G',
-        '-jar',
-        path.resolve(installationPath, launchersFound[0]),
-        '-configuration',
-        this.options.jdtConfigPath,
-        '-data',
-        this.options.jdtWorkspacePath,
-      ],
-      {
-        detached: false,
-        stdio: 'pipe',
-        env: {
-          ...process.env,
-          CLIENT_HOST: '127.0.0.1',
-          CLIENT_PORT: port.toString(),
-          JAVA_HOME: javaHomePath,
-        },
-      }
-    );
+    const params: string[] = [
+      '-Declipse.application=org.elastic.jdt.ls.core.id1',
+      '-Dosgi.bundles.defaultStartLevel=4',
+      '-Declipse.product=org.elastic.jdt.ls.core.product',
+      '-Dlog.level=ALL',
+      '-noverify',
+      '-Xmx4G',
+      '-jar',
+      path.resolve(installationPath, launchersFound[0]),
+      '-configuration',
+      this.options.jdtConfigPath,
+      '-data',
+      this.options.jdtWorkspacePath,
+    ];
+
+    if (this.needModuleArguments) {
+      params.push(
+        '--add-modules=ALL-SYSTEM',
+        '--add-opens',
+        'java.base/java.util=ALL-UNNAMED',
+        '--add-opens',
+        'java.base/java.lang=ALL-UNNAMED'
+      );
+    }
+
+    const p = spawn(javaPath, params, {
+      detached: false,
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        CLIENT_HOST: '127.0.0.1',
+        CLIENT_PORT: port.toString(),
+        JAVA_HOME: javaHomePath,
+      },
+    });
     p.stdout.on('data', data => {
       log.stdout(data.toString());
     });
@@ -201,7 +218,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     return '';
   }
 
-  private checkJavaVersion(javaHome: string): Promise<boolean> {
+  private getJavaVersion(javaHome: string): Promise<number> {
     return new Promise((resolve, reject) => {
       execFile(
         path.resolve(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java'),
@@ -209,11 +226,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
         {},
         (error, stdout, stderr) => {
           const javaVersion = this.parseMajorVersion(stderr);
-          if (javaVersion < 8) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
+          resolve(javaVersion);
         }
       );
     });
