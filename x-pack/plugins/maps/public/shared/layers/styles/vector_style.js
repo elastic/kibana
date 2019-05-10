@@ -250,8 +250,9 @@ export class VectorStyle extends AbstractStyle {
   }
 
   addScaledPropertiesBasedOnStyleAndSetFeatureStateMb(featureCollection, mbMap, sourceId) {
-    if (!featureCollection || featureCollection.length === 0) {
-      return false;
+
+    if (!featureCollection) {
+      return;
     }
 
     const scaledFields = this.getDynamicPropertiesArray()
@@ -268,7 +269,7 @@ export class VectorStyle extends AbstractStyle {
       });
 
     if (scaledFields.length === 0) {
-      return false;
+      return;
     }
 
     //scale to [0,1] domain
@@ -294,11 +295,6 @@ export class VectorStyle extends AbstractStyle {
         mbMap.setFeatureState(featureIdentifier, featureState);
       });
     });
-
-    window._sourceId = sourceId;
-    window._mbMap = mbMap;
-
-    return true;
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
@@ -308,13 +304,6 @@ export class VectorStyle extends AbstractStyle {
         return accu;
       }, []);
     const targetName = VectorStyle.getComputedFieldName(fieldName);
-    // return [
-    //   'interpolate',
-    //   ['linear'],
-    //   ['coalesce', ['get', targetName], -1],
-    //   -1, 'rgba(0,0,0,0)',
-    //   ...colorRange
-    // ];
     return [
       'interpolate',
       ['linear'],
@@ -326,12 +315,6 @@ export class VectorStyle extends AbstractStyle {
 
   _getMbDataDrivenSize({ fieldName, minSize, maxSize }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
-    // return   ['interpolate',
-    //   ['linear'],
-    //   ['get', targetName],
-    //   0, minSize,
-    //   1, maxSize
-    // ];
     return   ['interpolate',
       ['linear'],
       ['feature-state', targetName],
