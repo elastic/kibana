@@ -6,10 +6,9 @@
 
 coming[6.8.0]
 
-Each release of {kib} brings new features and product improvements. 
-Here are the highlights of the feature and user experience changes in 6.8.0.
+Each release of {kib} brings new features and product improvements. Here are the 
+highlights of the feature and user experience changes in 6.8.0.
 
-[float]
 Some Elastic Stack security features, such as encrypted communications, 
 file and native authentication, and role-based access control, are now available 
 in more subscription levels. For details, see https://www.elastic.co/subscriptions.
