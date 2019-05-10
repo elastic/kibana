@@ -15,12 +15,13 @@ import { getAllStats, getLocalStats, encryptTelemetry } from '../../../../lib/te
  * @param {Object} config Kibana config.
  * @param {String} start The start time of the request (likely 20m ago).
  * @param {String} end The end time of the request.
+ * @param {Boolean} unencrypted Is the request payload going to be unencrypted.
  * @return {Promise} An array of telemetry objects.
  */
-export async function getTelemetry(req, config, start, end, willEncryptData, statsGetters = {}) {
+export async function getTelemetry(req, config, start, end, unencrypted, statsGetters = {}) {
   const { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = statsGetters;
   let response = [];
-  const useInternalUser = !willEncryptData;
+  const useInternalUser = !unencrypted;
 
   if (config.get('xpack.monitoring.enabled')) {
     try {
