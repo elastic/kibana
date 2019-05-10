@@ -128,7 +128,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
         alignment: 'automatic'
       }
     });
-    expect($(chartEl).find('svg').width()).to.equal(198);
+    expect($(chartEl).find('svg').width()).to.equal(197);
   });
 
   it('creates gauge with vertical mode', function () {
