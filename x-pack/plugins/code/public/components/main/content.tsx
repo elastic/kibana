@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle, EuiLink } from '@elastic/eui';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
-import Markdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
@@ -329,9 +329,22 @@ class CodeContent extends React.PureComponent<Props> {
           );
         }
         if (fileLanguage === LANG_MD) {
+          const markdownRenderers = {
+            link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+              <EuiLink href={href} target="_blank">
+                {children}
+              </EuiLink>
+            ),
+          };
+
           return (
             <div className="markdown-body code-markdown-container kbnMarkdown__body">
-              <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
+              <ReactMarkdown
+                source={fileContent}
+                escapeHtml={true}
+                skipHtml={true}
+                renderers={markdownRenderers}
+              />
             </div>
           );
         } else if (isImage) {

@@ -15,9 +15,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-function newJob() {
-  window.location.href = `#/data_frames/new_job`;
-}
+import { moveToDataFrameWizard } from '../../../../common';
 
 export const CreateJobButton: SFC = () => {
   const disabled =
@@ -26,7 +24,13 @@ export const CreateJobButton: SFC = () => {
     !checkPermission('canStartStopDataFrameJob');
 
   const button = (
-    <EuiButton disabled={disabled} fill onClick={newJob} iconType="plusInCircle" size="s">
+    <EuiButton
+      disabled={disabled}
+      fill
+      onClick={moveToDataFrameWizard}
+      iconType="plusInCircle"
+      size="s"
+    >
       <FormattedMessage
         id="xpack.ml.dataframe.jobsList.createDataFrameButton"
         defaultMessage="Create data frame"
