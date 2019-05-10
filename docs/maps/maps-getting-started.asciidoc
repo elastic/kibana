@@ -65,7 +65,7 @@ and lighter shades symbolize countries with less traffic.
 ===== Join the vector layer with the sample web log index
 
 You now have a vector layer containing the world countries.
-In order to symbolize countries by web traffic, you will need to augment the world country features with the count of Elasticsearch weblog documents originating from each country.
+To symbolize countries by web traffic, you'll need to augment the world country features with the count of Elasticsearch weblog documents originating from each country.
 To do this, you'll create a <<terms-join, terms join>> to link the vector source *World Countries* to
 the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 
