@@ -39,7 +39,7 @@ import {
 
 uiModules
   .get('app/visualize')
-  .factory('SavedVis', function (config, $injector, Promise, savedSearches, Private) {
+  .factory('SavedVis', function (Promise, savedSearches, Private) {
     const Vis = Private(VisProvider);
     const SavedObject = Private(SavedObjectProvider);
     createLegacyClass(SavedVis).inherits(SavedObject);

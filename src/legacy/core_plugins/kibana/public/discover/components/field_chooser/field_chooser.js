@@ -31,7 +31,7 @@ import { uiModules } from 'ui/modules';
 import fieldChooserTemplate from './field_chooser.html';
 const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, globalState, config, $route) {
+app.directive('discFieldChooser', function ($location, config, $route) {
   return {
     restrict: 'E',
     scope: {

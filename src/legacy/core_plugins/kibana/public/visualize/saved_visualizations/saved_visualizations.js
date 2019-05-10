@@ -32,7 +32,7 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http, chrome) {
+app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
   const visTypes = Private(VisTypesRegistryProvider);
 
   const savedObjectClient = Private(SavedObjectsClientProvider);
