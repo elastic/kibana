@@ -160,19 +160,22 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       : null
   );
 
-  const uptimeLink = url.format({
-    pathname: chrome.addBasePath('/app/uptime'),
-    hash: `/?${fromQuery(
-      pick(
-        {
-          dateRangeStart: urlParams.rangeFrom,
-          dateRangeEnd: urlParams.rangeTo,
-          search: urlParams.kuery
-        },
-        (val: string) => !!val
-      )
-    )}`
-  });
+  const uptimeLink =
+    transaction && transaction.url
+      ? url.format({
+          pathname: chrome.addBasePath('/app/uptime'),
+          hash: `/?${fromQuery(
+            pick(
+              {
+                dateRangeStart: urlParams.rangeFrom,
+                dateRangeEnd: urlParams.rangeTo,
+                search: `url.domain:${transaction.url.domain}`
+              },
+              (val: string) => !!val
+            )
+          )}`
+        })
+      : null;
 
   const menuItems = removeEmptyItems([
     ...infraItems,
@@ -190,17 +193,19 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         </DiscoverTransactionLink>
       )
     },
-    {
-      icon: 'uptimeApp',
-      key: 'uptime',
-      child: (
-        <EuiLink href={uptimeLink}>
-          {i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
-            defaultMessage: 'View in Uptime'
-          })}
-        </EuiLink>
-      )
-    }
+    uptimeLink
+      ? {
+          icon: 'uptimeApp',
+          key: 'uptime',
+          child: (
+            <EuiLink href={uptimeLink}>
+              {i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
+                defaultMessage: 'View monitor status'
+              })}
+            </EuiLink>
+          )
+        }
+      : null
   ]).map(({ icon, key, child }) => (
     <EuiContextMenuItem icon={icon} key={key}>
       <EuiFlexGroup gutterSize="s">
