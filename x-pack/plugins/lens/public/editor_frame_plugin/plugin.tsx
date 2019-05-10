@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Datasource, Visualization, EditorFrameSetup, DatasourcePublicAPI } from '../types';
+import { Datasource, Visualization, EditorFrameSetup } from '../types';
 
 import { EditorFrame } from './editor_frame';
 

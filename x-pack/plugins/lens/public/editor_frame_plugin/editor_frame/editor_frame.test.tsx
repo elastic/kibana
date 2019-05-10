@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { EditorFrame } from './editor_frame';
-import { Visualization, Datasource, VisualizationProps, DatasourcePublicAPI } from '../types';
+import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 
 const nextTick = () => new Promise(resolve => setTimeout(resolve));
 
