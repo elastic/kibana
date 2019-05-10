@@ -44,6 +44,7 @@ export interface RepoTreePayload {
 export const fetchRepoTree = createAction<FetchRepoTreePayload>('FETCH REPO TREE');
 export const fetchRepoTreeSuccess = createAction<RepoTreePayload>('FETCH REPO TREE SUCCESS');
 export const fetchRepoTreeFailed = createAction<Error>('FETCH REPO TREE FAILED');
+
 export const resetRepoTree = createAction('CLEAR REPO TREE');
 export const closeTreePath = createAction<string>('CLOSE TREE PATH');
 export const openTreePath = createAction<string>('OPEN TREE PATH');

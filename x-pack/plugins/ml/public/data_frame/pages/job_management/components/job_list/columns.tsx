@@ -6,7 +6,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiText,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, JobId } from './common';
 import { getActions } from './actions';
@@ -79,6 +87,31 @@ export const getColumns = (
       render(item: DataFrameJobListRow) {
         const color = item.state.task_state === 'started' ? 'primary' : 'hollow';
         return <EuiBadge color={color}>{item.state.task_state}</EuiBadge>;
+      },
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
+      sortable: true,
+      truncateText: true,
+      render(item: DataFrameJobListRow) {
+        let progress = 0;
+
+        if (item.state.progress !== undefined) {
+          progress = Math.round(item.state.progress.percent_complete);
+        }
+
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiProgress value={progress} max={100} color="primary" size="m">
+                {progress}%
+              </EuiProgress>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs">{`${progress}%`}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
       },
     },
     {
