@@ -273,8 +273,11 @@ export class VectorStyle extends AbstractStyle {
     }
 
     //scale to [0,1] domain
-    featureCollection.features.forEach(feature => {
-      scaledFields.forEach(({ name, range, computedName }) => {
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      const featureState = {};
+      for (let j = 0; j < scaledFields.length; j++) {
+        const { name, range, computedName } = scaledFields[j];
         const unscaledValue = parseFloat(feature.properties[name]);
         let scaledValue;
         if (isNaN(unscaledValue)) {//cannot scale
@@ -285,16 +288,14 @@ export class VectorStyle extends AbstractStyle {
           scaledValue = (feature.properties[name] - range.min) / range.delta;
         }
         feature.properties[computedName] = scaledValue;
-        const featureIdentifier = {
-          source: sourceId,
-          id: feature.id
-        };
-        const featureState = {
-          [computedName]: scaledValue
-        };
-        mbMap.setFeatureState(featureIdentifier, featureState);
-      });
-    });
+        featureState[computedName] = scaledValue;
+      }
+      const featureIdentifier = {
+        source: sourceId,
+        id: feature.id
+      };
+      mbMap.setFeatureState(featureIdentifier, featureState);
+    }
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
