@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerTestBed } from './testbed';
-export { getRandomString, nextTick } from './lib';
-export { findTestSubject } from './find_test_subject';
-export { getConfigSchema } from './get_config_schema';
+import { createContext, useContext } from 'react';
+import { History } from 'history';
+
+export const HistoryContext = createContext<History | undefined>(undefined);
+
+export const useHistory = () => {
+  return useContext(HistoryContext);
+};

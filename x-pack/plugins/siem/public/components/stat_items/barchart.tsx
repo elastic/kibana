@@ -64,8 +64,9 @@ export const BarChartWithCustomPrompt = pure<{
 }>(({ data, height, width }) => {
   return data &&
     data.length &&
-    data.every(
-      ({ value }) => value != null && value.length > 0 && value.every(chart => chart.x != null)
+    data.some(
+      ({ value }) =>
+        value != null && value.length > 0 && value.every(chart => chart.x != null && chart.x > 0)
     ) ? (
     <BarChartBaseComponent height={height} width={width} data={data} />
   ) : (

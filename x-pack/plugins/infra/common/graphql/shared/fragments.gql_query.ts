@@ -18,6 +18,7 @@ export const sharedFragments = {
       id
       version
       updatedAt
+      origin
     }
   `,
   InfraLogEntryFields: gql`

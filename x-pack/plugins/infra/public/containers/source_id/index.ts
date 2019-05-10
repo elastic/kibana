@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerTestBed } from './testbed';
-export { getRandomString, nextTick } from './lib';
-export { findTestSubject } from './find_test_subject';
-export { getConfigSchema } from './get_config_schema';
+export * from './source_id';
