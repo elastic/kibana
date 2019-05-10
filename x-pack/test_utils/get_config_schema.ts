@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 
-export async function getConfigSchema(pluginProvider: any): Joi.Schema {
+export async function getConfigSchema(pluginProvider: any): Promise<Joi.Schema> {
   class Plugin {
     constructor(public readonly options: any) {}
   }
