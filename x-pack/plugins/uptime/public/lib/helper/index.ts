@@ -5,9 +5,5 @@
  */
 
 export { convertMicrosecondsToMilliseconds } from './convert_measurements';
-export {
-  getApmHref,
-  getInfraContainerHref,
-  getInfraKubernetesHref,
-} from './observability_integration';
+export * from './observability_integration';
 export { UptimeUrlParams, getSupportedUrlParams } from './url_params';
