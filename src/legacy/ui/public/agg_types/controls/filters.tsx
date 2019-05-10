@@ -22,10 +22,12 @@ import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 import { FilterRow } from './filter';
 import { Query } from '../../../../core_plugins/data/public/query_bar';
 
 const generateId = htmlIdGenerator();
+const config = chrome.getUiSettingsClient();
 
 interface FilterValue {
   input: any;
@@ -63,7 +65,14 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
   };
 
   const onAddFilter = () =>
-    updateFilters([...filters, { input: { query: '' }, label: '', id: generateId() }]);
+    updateFilters([
+      ...filters,
+      {
+        input: { query: '', language: config.get('search:queryLanguage') },
+        label: '',
+        id: generateId(),
+      },
+    ]);
   const onRemoveFilter = (id: string) => updateFilters(filters.filter(filter => filter.id !== id));
   const onChangeValue = (id: string, query: Query, label: string) =>
     updateFilters(
