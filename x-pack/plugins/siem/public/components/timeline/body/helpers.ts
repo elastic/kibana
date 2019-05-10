@@ -17,6 +17,8 @@ export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 /** The default minimum width of a column of type `date` */
 export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 240; // px
 
+export const DEFAULT_TIMELINE_WIDTH = 1100; // px
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
   k !== '__typename' && v != null ? v : undefined;

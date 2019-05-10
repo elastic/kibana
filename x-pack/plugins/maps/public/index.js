@@ -24,8 +24,6 @@ import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 
-import 'mapbox-gl/dist/mapbox-gl.css';
-
 import './angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';

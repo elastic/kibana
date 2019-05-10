@@ -11,15 +11,12 @@ import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
-import {
-  KueryFilterQuery,
-  SerializedFilterQuery,
-  timelineActions,
-  timelineSelectors,
-} from '../../../store';
-import { State, timelineModel } from '../../../store';
+import { KueryFilterQuery, SerializedFilterQuery, timelineSelectors } from '../../../store';
+import { State } from '../../../store';
 
 import { SearchOrFilter } from './search_or_filter';
+import { timelineActions } from '../../../store/actions';
+import { KqlMode, TimelineModel } from '../../../store/timeline/model';
 
 interface OwnProps {
   indexPattern: StaticIndexPattern;
@@ -29,7 +26,7 @@ interface OwnProps {
 interface StateReduxProps {
   filterQueryDraft: KueryFilterQuery;
   isFilterQueryDraftValid: boolean;
-  kqlMode?: timelineModel.KqlMode;
+  kqlMode?: KqlMode;
 }
 
 interface DispatchProps {
@@ -39,7 +36,7 @@ interface DispatchProps {
   }>;
   updateKqlMode: ActionCreator<{
     id: string;
-    kqlMode: timelineModel.KqlMode;
+    kqlMode: KqlMode;
   }>;
   setKqlFilterQueryDraft: ActionCreator<{
     id: string;
@@ -103,7 +100,7 @@ const makeMapStateToProps = () => {
   const getKqlFilterQueryDraft = timelineSelectors.getKqlFilterQueryDraftSelector();
   const isFilterQueryDraftValid = timelineSelectors.isFilterQueryDraftValidSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: timelineModel.TimelineModel | {} = getTimeline(state, timelineId);
+    const timeline: TimelineModel | {} = getTimeline(state, timelineId);
     return {
       kqlMode: getOr('filter', 'kqlMode', timeline),
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),

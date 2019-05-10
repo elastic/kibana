@@ -8,7 +8,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
       "getState": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
+      Symbol(observable): [Function],
     }
   }
 >

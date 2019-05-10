@@ -5,8 +5,7 @@
  */
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-
-import { ColumnRenderer } from '.';
+import { ColumnRenderer } from './column_renderer';
 
 const unhandledColumnRenderer = (): never => {
   throw new Error('Unhandled Column Renderer');

@@ -22,6 +22,8 @@ jest.mock('ui/kfetch', () => ({}));
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('brace/mode/groovy', () => ({}));
+
 import { FieldEditorComponent } from './field_editor';
 
 jest.mock('@elastic/eui', () => ({
