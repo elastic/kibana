@@ -247,7 +247,9 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       </code>
                     </span>
                   </span>
-                   or 
+                  <span>
+                     or 
+                  </span>
                   <span>
                     <span
                       className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
@@ -558,6 +560,38 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
+                  Resize from the center
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        DRAG
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
                   Resize and rotate without snapping
                 </dt>
                 <dd
@@ -590,7 +624,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Resize from the center
+                  Select element behind top element
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
@@ -603,7 +637,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       <code
                         className="euiCodeBlock__code"
                       >
-                        ALT
+                        CTRL
                       </code>
                     </span>
                      
@@ -614,7 +648,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       <code
                         className="euiCodeBlock__code"
                       >
-                        DRAG
+                        CLICK
                       </code>
                     </span>
                   </span>
@@ -904,7 +938,9 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       </code>
                     </span>
                   </span>
-                   or 
+                  <span>
+                     or 
+                  </span>
                   <span>
                     <span
                       className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
@@ -981,7 +1017,9 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       </code>
                     </span>
                   </span>
-                   or 
+                  <span>
+                     or 
+                  </span>
                   <span>
                     <span
                       className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
@@ -994,7 +1032,9 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       </code>
                     </span>
                   </span>
-                   or 
+                  <span>
+                     or 
+                  </span>
                   <span>
                     <span
                       className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
@@ -1039,7 +1079,9 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       </code>
                     </span>
                   </span>
-                   or 
+                  <span>
+                     or 
+                  </span>
                   <span>
                     <span
                       className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
@@ -1052,7 +1094,9 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                       </code>
                     </span>
                   </span>
-                   or 
+                  <span>
+                     or 
+                  </span>
                   <span>
                     <span
                       className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"

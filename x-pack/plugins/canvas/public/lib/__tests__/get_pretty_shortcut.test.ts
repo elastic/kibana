@@ -13,50 +13,50 @@ describe('getPrettyShortcut', () => {
     expect(getPrettyShortcut('backspace')).toBe('BACKSPACE');
   });
   test('preserves shortcut order', () => {
-    expect(getPrettyShortcut('cmd+c')).toBe('⌘+C');
-    expect(getPrettyShortcut('c+cmd')).toBe('C+⌘');
+    expect(getPrettyShortcut('command+c')).toBe('⌘+C');
+    expect(getPrettyShortcut('c+command')).toBe('C+⌘');
   });
-  test(`replaces 'cmd' with ⌘`, () => {
-    expect(getPrettyShortcut('cmd')).toBe('⌘');
-    expect(getPrettyShortcut('cmd+c')).toBe('⌘+C');
-    expect(getPrettyShortcut('cmd+shift+b')).toBe('⌘+SHIFT+B');
+  test(`replaces 'command' with ⌘`, () => {
+    expect(getPrettyShortcut('command')).toBe('⌘');
+    expect(getPrettyShortcut('command+c')).toBe('⌘+C');
+    expect(getPrettyShortcut('command+shift+b')).toBe('⌘+SHIFT+B');
   });
-  test(`replaces 'alt' with ⌥`, () => {
-    expect(getPrettyShortcut('alt')).toBe('⌥');
-    expect(getPrettyShortcut('alt+f')).toBe('⌥+F');
-    expect(getPrettyShortcut('alt+shift+G')).toBe('⌥+SHIFT+G');
-    expect(getPrettyShortcut('cmd+alt+shift+G')).toBe('⌘+⌥+SHIFT+G');
+  test(`replaces 'option' with ⌥`, () => {
+    expect(getPrettyShortcut('option')).toBe('⌥');
+    expect(getPrettyShortcut('option+f')).toBe('⌥+F');
+    expect(getPrettyShortcut('option+shift+G')).toBe('⌥+SHIFT+G');
+    expect(getPrettyShortcut('command+option+shift+G')).toBe('⌘+⌥+SHIFT+G');
   });
   test(`replaces 'left' with ←`, () => {
     expect(getPrettyShortcut('left')).toBe('←');
-    expect(getPrettyShortcut('cmd+left')).toBe('⌘+←');
-    expect(getPrettyShortcut('alt+left')).toBe('⌥+←');
-    expect(getPrettyShortcut('alt+shift+left')).toBe('⌥+SHIFT+←');
-    expect(getPrettyShortcut('cmd+shift+left')).toBe('⌘+⌥+SHIFT+←');
-    expect(getPrettyShortcut('cmd+alt+shift+left')).toBe('⌘+⌥+SHIFT+←');
+    expect(getPrettyShortcut('command+left')).toBe('⌘+←');
+    expect(getPrettyShortcut('option+left')).toBe('⌥+←');
+    expect(getPrettyShortcut('option+shift+left')).toBe('⌥+SHIFT+←');
+    expect(getPrettyShortcut('command+shift+left')).toBe('⌘+SHIFT+←');
+    expect(getPrettyShortcut('command+option+shift+left')).toBe('⌘+⌥+SHIFT+←');
   });
   test(`replaces 'right' with →`, () => {
-    expect(getPrettyShortcut('left')).toBe('→');
-    expect(getPrettyShortcut('cmd+left')).toBe('⌘+→');
-    expect(getPrettyShortcut('alt+left')).toBe('⌥+→');
-    expect(getPrettyShortcut('alt+shift+left')).toBe('⌥+SHIFT+→');
-    expect(getPrettyShortcut('cmd+shift+left')).toBe('⌘+⌥+SHIFT+→');
-    expect(getPrettyShortcut('cmd+alt+shift+left')).toBe('⌘+⌥+SHIFT+→');
+    expect(getPrettyShortcut('right')).toBe('→');
+    expect(getPrettyShortcut('command+right')).toBe('⌘+→');
+    expect(getPrettyShortcut('option+right')).toBe('⌥+→');
+    expect(getPrettyShortcut('option+shift+right')).toBe('⌥+SHIFT+→');
+    expect(getPrettyShortcut('command+shift+right')).toBe('⌘+SHIFT+→');
+    expect(getPrettyShortcut('command+option+shift+right')).toBe('⌘+⌥+SHIFT+→');
   });
   test(`replaces 'up' with ←`, () => {
-    expect(getPrettyShortcut('left')).toBe('↑');
-    expect(getPrettyShortcut('cmd+left')).toBe('⌘+↑');
-    expect(getPrettyShortcut('alt+left')).toBe('⌥+↑');
-    expect(getPrettyShortcut('alt+shift+left')).toBe('⌥+SHIFT+↑');
-    expect(getPrettyShortcut('cmd+shift+left')).toBe('⌘+⌥+SHIFT+↑');
-    expect(getPrettyShortcut('cmd+alt+shift+left')).toBe('⌘+⌥+SHIFT+↑');
+    expect(getPrettyShortcut('up')).toBe('↑');
+    expect(getPrettyShortcut('command+up')).toBe('⌘+↑');
+    expect(getPrettyShortcut('option+up')).toBe('⌥+↑');
+    expect(getPrettyShortcut('option+shift+up')).toBe('⌥+SHIFT+↑');
+    expect(getPrettyShortcut('command+shift+up')).toBe('⌘+SHIFT+↑');
+    expect(getPrettyShortcut('command+option+shift+up')).toBe('⌘+⌥+SHIFT+↑');
   });
   test(`replaces 'down' with ↓`, () => {
-    expect(getPrettyShortcut('left')).toBe('↓');
-    expect(getPrettyShortcut('cmd+left')).toBe('⌘+↓');
-    expect(getPrettyShortcut('alt+left')).toBe('⌥+↓');
-    expect(getPrettyShortcut('alt+shift+left')).toBe('⌥+SHIFT+↓');
-    expect(getPrettyShortcut('cmd+shift+left')).toBe('⌘+⌥+SHIFT+↓');
-    expect(getPrettyShortcut('cmd+alt+shift+left')).toBe('⌘+⌥+SHIFT+↓');
+    expect(getPrettyShortcut('down')).toBe('↓');
+    expect(getPrettyShortcut('command+down')).toBe('⌘+↓');
+    expect(getPrettyShortcut('option+down')).toBe('⌥+↓');
+    expect(getPrettyShortcut('option+shift+down')).toBe('⌥+SHIFT+↓');
+    expect(getPrettyShortcut('command+shift+down')).toBe('⌘+SHIFT+↓');
+    expect(getPrettyShortcut('command+option+shift+down')).toBe('⌘+⌥+SHIFT+↓');
   });
 });
