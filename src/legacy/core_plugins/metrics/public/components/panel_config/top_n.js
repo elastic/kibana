@@ -56,8 +56,7 @@ class TopNPanelConfig extends Component {
     super(props);
     this.state = {
       selectedTab: 'data',
-      indexPatternForQuery: {},
-      uiQuerylanguage: uiSettingsQueryLanguage,
+      indexPatternForQuery: {}
     };
   }
 
@@ -160,7 +159,7 @@ class TopNPanelConfig extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : this.state.uiQuerylanguage,
+                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
                       query: model.filter.query,
                     }}
                     screenTitle={'TopNPanelConfigQuery'}
