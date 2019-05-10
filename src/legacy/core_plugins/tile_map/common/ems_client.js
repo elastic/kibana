@@ -129,7 +129,7 @@ export class EMSClient {
   /**
    * this internal method is overridden by the tests to simulate custom manifest.
    */
-  async _getManifest(manifestUrl) {
+  async getManifest(manifestUrl) {
     let result;
     try {
       const url = extendUrl(manifestUrl, { query: this._queryParams });
@@ -250,10 +250,6 @@ export class EMSClient {
 
   async getTMSServices() {
     return await this._loadTMSServices();
-  }
-
-  async getManifest(manifestUrl) {
-    return await this._getManifest(manifestUrl);
   }
 
   async findFileLayerById(id) {

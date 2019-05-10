@@ -31,11 +31,6 @@ const markdownIt = new MarkdownIt({
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
-// Service ids in tiles manifest
-const EMS_BASELAYERID_DARK = 'dark_map';
-const EMS_BASELAYERID_DESATURATED = 'road_map_desaturated';
-const EMS_BASELAYERID_DEFAULT = 'road_map';
-
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
@@ -66,14 +61,14 @@ uiModules.get('kibana')
       }
 
       __debugStubManifestCalls(manifestRetrieval) {
-        const oldGetManifest = this._emsClient._getManifest;
-        this._emsClient._getManifest = manifestRetrieval;
+        const oldGetManifest = this._emsClient.getManifest;
+        this._emsClient.getManifest = manifestRetrieval;
         return {
           removeStub: () => {
-            delete this._emsClient._getManifest;
+            delete this._emsClient.getManifest;
             //not strictly necessary since this is prototype method
-            if (this._emsClient._getManifest !== oldGetManifest) {
-              this._emsClient._getManifest = oldGetManifest;
+            if (this._emsClient.getManifest !== oldGetManifest) {
+              this._emsClient.getManifest = oldGetManifest;
             }
           }
         };
@@ -124,16 +119,15 @@ uiModules.get('kibana')
         if  (mapConfig.includeElasticMapsService) {
           const servicesFromManifest = await this._emsClient.getTMSServices();
           const strippedServiceFromManifest = await Promise.all(servicesFromManifest
-            .filter(service => service.getId() === 'road_map')
-            .map(async (service) => {
+            .filter(tmsService => tmsService.getId() === mapConfig.emsTileLayerId.bright)
+            .map(async (tmsService) => {
             //shim for compatibility
               const shim = {
-                origin: service.getOrigin(),
-                id: service.getId(),
-                name: 'Road Map', //hard code human readable name
-                minZoom: await service.getMinZoom(),
-                maxZoom: await service.getMaxZoom(),
-                attribution: service.getHTMLAttribution()
+                origin: tmsService.getOrigin(),
+                id: tmsService.getId(),
+                minZoom: await tmsService.getMinZoom(),
+                maxZoom: await tmsService.getMaxZoom(),
+                attribution: tmsService.getHTMLAttribution()
               };
               return shim;
             })
@@ -165,14 +159,16 @@ uiModules.get('kibana')
 
       async _getUrlTemplateForEMSTMSLayer(isDesaturated, isDarkMode) {
         const tmsServices = await this._emsClient.getTMSServices();
+        const emsTileLayerId = mapConfig.emsTileLayerId;
         let serviceId;
-        if (isDesaturated) {
-          serviceId = EMS_BASELAYERID_DESATURATED;
-        } else {
-          serviceId = EMS_BASELAYERID_DEFAULT;
-        }
         if (isDarkMode) {
-          serviceId = EMS_BASELAYERID_DARK;
+          serviceId = emsTileLayerId.dark;
+        } else {
+          if (isDesaturated) {
+            serviceId = emsTileLayerId.desaturated;
+          } else {
+            serviceId = emsTileLayerId.bright;
+          }
         }
         const tmsService = tmsServices.find(service => {
           return service.getId() === serviceId;

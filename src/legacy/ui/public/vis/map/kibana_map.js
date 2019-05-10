@@ -109,7 +109,7 @@ export class KibanaMap extends EventEmitter {
     this._containerNode = containerNode;
     this._leafletBaseLayer = null;
     this._baseLayerSettings = null;
-    this._baseLayerIsDesaturated = false; //Deprecated in 7.2.
+    this._baseLayerIsDesaturated = true;
 
     this._leafletDrawControl = null;
     this._leafletFitControl = null;
@@ -538,6 +538,7 @@ export class KibanaMap extends EventEmitter {
     return this._leafletBaseLayer;
   }
 
+  // TODO make this async
   setBaseLayer(settings) {
 
     if (_.isEqual(settings, this._baseLayerSettings)) {
@@ -649,8 +650,6 @@ export class KibanaMap extends EventEmitter {
     this._layers.forEach(layer => layer.updateExtent());
   }
 
-  // TODO Check if base layer is EMS and choose the appropriate style
-  // If base layer is self-hosted, apply client-side styling.
   _updateDesaturation() {
     const tiles = $('img.leaflet-tile-loaded');
     // Don't apply client-side styling to EMS basemaps

@@ -42,6 +42,7 @@ export function maps(kibana) {
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          emsTileLayerId: mapConfig.emsTileLayerId,
         };
       },
       embeddableFactories: [

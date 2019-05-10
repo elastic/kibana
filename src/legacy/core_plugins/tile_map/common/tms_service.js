@@ -37,12 +37,11 @@ export class TMSService {
     return formats;
   }
 
-  _getDefaultStyleUrl(type = 'raster') {
-    const defaultStyle = this._getFormatsOfType(type)[0];
+  _getDefaultStyleUrl() {
+    const defaultStyle = this._getFormatsOfType('raster')[0];
     if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
       return defaultStyle.url;
     }
-    return;
   }
 
   async getUrlTemplate() {
@@ -52,7 +51,7 @@ export class TMSService {
 
   getDisplayName() {
     const serviceName = this._emsClient.getValueInLanguage(this._config.name);
-    return (serviceName) ? serviceName  : '';
+    return serviceName;
   }
 
   getAttributions() {
@@ -71,7 +70,7 @@ export class TMSService {
     const attributions = this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
-      const html = url ? `<a href="${url}">${label}</a>` : label;
+      const html = url ? `<a rel="noreferrer noopener" href="${url}">${label}</a>` : label;
       return this._emsClient.sanitizeHtml(`${html}`);
     });
     return `<p>${attributions.join(' | ')}</p>`;//!!!this is the current convention used in Kibana

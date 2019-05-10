@@ -42,7 +42,7 @@ describe('ems_client', () => {
     const tileService = tiles[0];
     expect(await tileService.getUrlTemplate()).to.be('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
 
-    expect (tileService.getHTMLAttribution()).to.be('<p><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a href="https://openmaptiles.org">OpenMapTiles</a> | <a href="https://www.maptiler.com">MapTiler</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>');
+    expect (tileService.getHTMLAttribution()).to.be('<p><a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>');
     expect (await tileService.getMinZoom()).to.be(0);
     expect (await tileService.getMaxZoom()).to.be(10);
     expect (tileService.hasId('road_map')).to.be(true);
@@ -193,7 +193,7 @@ function getEMSClient(options = {}) {
     ...options
   });
 
-  emsClient._getManifest = async (url) => {
+  emsClient.getManifest = async (url) => {
     //simulate network calls
     if (url.startsWith('https://foobar')) {
       return EMS_CATALOGUE;

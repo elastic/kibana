@@ -43,7 +43,12 @@ describe('service_settings (FKA tilemaptest)', function () {
     $provide.decorator('mapConfig', () => {
       return {
         manifestServiceUrl: manifestUrl,
-        includeElasticMapsService: true
+        includeElasticMapsService: true,
+        emsTileLayerId: {
+          bright: 'road_map',
+          desaturated: 'road_map_desaturated',
+          dark: 'dark_map',
+        },
       };
     });
   }));
@@ -187,7 +192,7 @@ describe('service_settings (FKA tilemaptest)', function () {
             'url': 'https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
             'minZoom': 0,
             'maxZoom': 10,
-            'attribution': '<p><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a href="https://openmaptiles.org">OpenMapTiles</a> | <a href="https://www.maptiler.com">MapTiler</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>',
+            'attribution': '<p><a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>',
             'subdomains': []
           }
         ];

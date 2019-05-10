@@ -24,8 +24,6 @@ import { VegaMapLayer } from './vega_map_layer';
 import { i18n }  from '@kbn/i18n';
 import chrome from 'ui/chrome';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-
 export class VegaMapView extends VegaBaseView {
 
   async _initViewCustomizations() {
@@ -39,9 +37,10 @@ export class VegaMapView extends VegaBaseView {
       // In some cases, Vega may be initialized twice, e.g. after awaiting...
       if (!this._$container) return;
       const mapStyle = mapConfig.mapStyle === 'default' ? 'road_map' : mapConfig.mapStyle;
+      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       baseMapOpts = {
-        url: await this._serviceSettings.getUrlTemplateForTMSLayer(baseMapOpts, true, IS_DARK_THEME),
+        url: await this._serviceSettings.getUrlTemplateForTMSLayer(baseMapOpts, true, isDarkMode),
         ...baseMapOpts
       };
       if (!baseMapOpts) {

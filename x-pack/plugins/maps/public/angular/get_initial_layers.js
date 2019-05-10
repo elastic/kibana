@@ -7,20 +7,22 @@ import _ from 'lodash';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { isMetaDataLoaded, getDataSourcesSync } from '../meta';
-import { DEFAULT_EMS_BRIGHT_TILE_LAYER, DEFAULT_EMS_DARK_TILE_LAYER } from '../../common/constants';
+import chrome from 'ui/chrome';
 
-export function getInitialLayers(savedMapLayerListJSON, darkMode) {
+export function getInitialLayers(savedMapLayerListJSON, isDarkMode) {
 
-  const DEFAULT_EMS_TILE_LAYER = darkMode
-    ? DEFAULT_EMS_DARK_TILE_LAYER
-    : DEFAULT_EMS_BRIGHT_TILE_LAYER;
+  const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
+
+  const defaultEmsTileLayer = isDarkMode
+    ? emsTileLayerId.dark
+    : emsTileLayerId.bright;
 
   if (savedMapLayerListJSON) {
     return JSON.parse(savedMapLayerListJSON);
   }
 
   if (!isMetaDataLoaded()) {
-    const descriptor = EMSTMSSource.createDescriptor(DEFAULT_EMS_TILE_LAYER);
+    const descriptor = EMSTMSSource.createDescriptor(defaultEmsTileLayer);
     const source = new EMSTMSSource(descriptor);
     const layer = source.createDefaultLayer();
     return [

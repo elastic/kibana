@@ -26,8 +26,6 @@ import { toastNotifications } from 'ui/notify';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
 
@@ -201,7 +199,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
       const isDesaturated = this._getMapsParams().isDesaturated;
-      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer, isDesaturated, IS_DARK_THEME);
+      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;

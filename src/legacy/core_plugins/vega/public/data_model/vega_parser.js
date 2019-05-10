@@ -334,7 +334,6 @@ export class VegaParser {
 
     // `false` is a valid value
     res.mapStyle = this._config.mapStyle === undefined ? `default` : this._config.mapStyle;
-
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
       this._onWarning(i18n.translate('vega.vegaParser.mapStyleValueTypeWarningMessage', {
         defaultMessage: '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
