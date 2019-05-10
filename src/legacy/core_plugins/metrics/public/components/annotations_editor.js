@@ -33,6 +33,7 @@ import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { data } from 'plugins/data';
 import chrome from 'ui/chrome';
 const { QueryBar } = data.query.ui;
+// const { QueryBarInput } = data.query.ui;
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 import {
@@ -69,8 +70,7 @@ class AnnotationsEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      indexPatternForQuery: {},
-      uiQueryLanguage: uiSettingsQueryLanguage,
+      indexPatternForQuery: {}
     };
     this.renderRow = this.renderRow.bind(this);
 
@@ -80,9 +80,7 @@ class AnnotationsEditor extends Component {
     await this.fetchIndexPatternsForQuery();
   }
   fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern ?
-      this.props.model.index_pattern :
-      this.props.model.default_index_pattern;
+    const searchIndexPattern = this.props.model.index_pattern || this.props.model.default_index_pattern;
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
   }
@@ -98,9 +96,13 @@ class AnnotationsEditor extends Component {
   handleSubmit = (model, query) => {
     const part = { query_string: query.query };
     collectionActions.handleChange(this.props, _.assign({}, model, part));
+    // collectionActions.handleChange(this.props, {
+    //   ...model,
+    //   ...part
+    // });
   };
   renderRow(row) {
-    const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
+    const defaults = { fields: '', template: '', index_pattern: '*', query_string: { query: '', language: uiSettingsQueryLanguage } };
     const model = { ...defaults, ...row };
     const indexPatternForQuery = this.state.indexPatternForQuery;
     const handleChange = part => {
@@ -184,11 +186,25 @@ class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
+                  {/* <QueryBarInput
+                    query={{
+                      language: model.query_string.language
+                        ? model.query_string.language
+                        : uiSettingsQueryLanguage,
+                      query: model.query_string.query,
+                    }}
+                    screenTitle={'AnnotationsEditor'}
+                    onChange={query => this.handleSubmit(model, query)}
+                    appName={'VisEditor'}
+                    indexPatterns={[indexPatternForQuery]}
+                    store={localStorage || {}}
+                    showDatePicker={false}
+                  /> */}
                   <QueryBar
                     query={{
                       language: model.query_string.language
                         ? model.query_string.language
-                        : this.state.uiQueryLanguage,
+                        : uiSettingsQueryLanguage,
                       query: model.query_string.query,
                     }}
                     screenTitle={'AnnotationsEditor'}

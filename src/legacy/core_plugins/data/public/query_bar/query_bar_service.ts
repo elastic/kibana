@@ -19,6 +19,7 @@
 
 import { once } from 'lodash';
 import { QueryBar } from './components/query_bar';
+import { QueryBarInput } from './components/query_bar_input';
 import { fromUser } from './lib/from_user';
 import { toUser } from './lib/to_user';
 
@@ -40,6 +41,7 @@ export class QueryBarService {
       },
       ui: {
         QueryBar,
+        QueryBarInput,
       },
     };
   }
