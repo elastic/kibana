@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
 
-  describe('field_level_security', () => {
+  describe.only('field_level_security', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
       await esArchiver.load('security/flstest/kibana'); //(savedobject)
