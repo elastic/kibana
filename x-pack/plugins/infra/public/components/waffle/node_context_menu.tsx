@@ -123,7 +123,7 @@ export const NodeContextMenu = injectUICapabilities(
           button={children}
           panelPaddingSize="none"
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
+          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="nodeContextMenu" />
         </EuiPopover>
       );
     }
