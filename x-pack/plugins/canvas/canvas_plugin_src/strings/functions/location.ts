@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { location as locationFn } from '../../functions/browser/location';
+import { location } from '../../functions/browser/location';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof locationFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof location>> = {
   help: i18n.translate('xpack.canvas.functions.locationHelpText', {
     defaultMessage:
       "Use the browser's location functionality to get your current location. " +

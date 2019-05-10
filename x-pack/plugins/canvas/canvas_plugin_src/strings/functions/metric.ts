@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { metric as metricFn } from '../../functions/common/metric';
+import { metric } from '../../functions/common/metric';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof metricFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
   help: i18n.translate('xpack.canvas.functions.metricHelpText', {
     defaultMessage: 'A number with a label',
   }),

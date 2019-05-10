@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { revealImage as revealImageFn } from '../../functions/common/revealImage';
+import { revealImage } from '../../functions/common/revealImage';
 import { FunctionHelp } from '.';
 import { FunctionFactory, Position } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof revealImageFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
     defaultMessage: 'Configure an image reveal element',
   }),

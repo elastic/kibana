@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { gt as gtFn } from '../../functions/common/gt';
+import { gt } from '../../functions/common/gt';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof gtFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof gt>> = {
   help: i18n.translate('xpack.canvas.functions.gtHelpText', {
     defaultMessage: 'Return if the context is greater than the argument',
   }),

@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { plot as plotFn } from '../../functions/common/plot';
+import { plot } from '../../functions/common/plot';
 import { FunctionHelp } from '.';
 import { FunctionFactory, Position } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof plotFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
   help: i18n.translate('xpack.canvas.functions.plotHelpText', {
     defaultMessage: 'Configure a {plot} element',
     values: {

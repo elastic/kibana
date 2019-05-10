@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ply as plyFn } from '../../functions/common/ply';
+import { ply } from '../../functions/common/ply';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof plyFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof ply>> = {
   help: i18n.translate('xpack.canvas.functions.plyHelpText', {
     defaultMessage:
       'Subdivide a {datatable} and pass the resulting tables into an expression, then merge the output',

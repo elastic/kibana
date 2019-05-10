@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { repeatImage as repeatImageFn } from '../../functions/common/repeatImage';
+import { repeatImage } from '../../functions/common/repeatImage';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof repeatImageFn>> = {
-  help: i18n.translate('xpack.canvas.functions.HelpText', {
+export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
+  help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
     defaultMessage: 'Configure a repeating image element',
   }),
   args: {

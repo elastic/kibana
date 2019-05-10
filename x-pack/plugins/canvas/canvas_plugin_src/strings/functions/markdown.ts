@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { markdown as markdownFn } from '../../functions/browser/markdown';
+import { markdown } from '../../functions/browser/markdown';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof markdownFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
   help: i18n.translate('xpack.canvas.functions.markdownHelpText', {
     defaultMessage:
       'An element for rendering {markdown} text. Great for single numbers, metrics or paragraphs of text.',

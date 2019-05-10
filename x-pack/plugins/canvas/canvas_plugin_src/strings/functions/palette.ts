@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { palette as paletteFn } from '../../functions/common/palette';
+import { palette } from '../../functions/common/palette';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof paletteFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof palette>> = {
   help: i18n.translate('xpack.canvas.functions.paletteHelpText', {
     defaultMessage: 'Create a color palette',
   }),

@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { pie as pieFn } from '../../functions/common/pie';
+import { pie } from '../../functions/common/pie';
 import { FunctionHelp } from '.';
 import { FunctionFactory, Position } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof pieFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {
     defaultMessage: 'Configure a pie chart element',
   }),

@@ -5,13 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { progress as progressFn } from '../../functions/common/progress';
+import { progress } from '../../functions/common/progress';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
 import { Shape } from '../../functions/common/progress';
 
-export const help: FunctionHelp<FunctionFactory<typeof progressFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
   help: i18n.translate('xpack.canvas.functions.progressHelpText', {
     defaultMessage: 'Configure a progress element',
   }),

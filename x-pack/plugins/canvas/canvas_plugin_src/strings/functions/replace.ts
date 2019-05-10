@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { replace as replaceFn } from '../../functions/common/replace';
+import { replace } from '../../functions/common/replace';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof replaceFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
   help: i18n.translate('xpack.canvas.functions.replaceImageHelpText', {
     defaultMessage: 'Use a regular expression to replace parts of a string',
   }),

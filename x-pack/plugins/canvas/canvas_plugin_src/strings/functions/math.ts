@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { math as mathFn } from '../../functions/common/math';
+import { math } from '../../functions/common/math';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof mathFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof math>> = {
   help: i18n.translate('xpack.canvas.functions.mathHelpText', {
     defaultMessage:
       'Interpret a math expression, with a number or {datatable} as context. {Datatable} ' +

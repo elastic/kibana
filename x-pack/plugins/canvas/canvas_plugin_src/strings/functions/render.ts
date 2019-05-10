@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { render as renderFn } from '../../functions/common/render';
+import { render } from '../../functions/common/render';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof renderFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof render>> = {
   help: i18n.translate('xpack.canvas.functions.renderHelpText', {
     defaultMessage:
       'Render an input as a specific element and set element level options such as styling',

@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { head as headFn } from '../../functions/common/head';
+import { head } from '../../functions/common/head';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
-export const help: FunctionHelp<FunctionFactory<typeof headFn>> = {
+export const help: FunctionHelp<FunctionFactory<typeof head>> = {
   help: i18n.translate('xpack.canvas.functions.vHelpText', {
     defaultMessage: 'Get the first {n} rows from the {datatable}. Also see `{tail}`',
     values: {
