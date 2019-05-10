@@ -21,6 +21,8 @@ export { QueryBarService } from './query_bar_service';
 
 export { QueryBar } from './components';
 
+export { getQueryLog } from './lib/get_query_log';
+
 export interface Query {
   query: string;
   language: string;

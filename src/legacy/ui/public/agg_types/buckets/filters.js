@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query/src/es_query';
+import { getQueryLog } from '../../../../core_plugins/data/public/query_bar';
 
 const config = chrome.getUiSettingsClient();
 
@@ -46,6 +47,11 @@ export const filtersBucketAgg = new BucketAggType({
       write: function (aggConfig, output) {
         const inFilters = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
+
+        inFilters.forEach((filter) => {
+          const persistedLog = getQueryLog('filtersAgg', filter.input.language);
+          persistedLog.add(filter.input.query);
+        });
 
         const outFilters = _.transform(inFilters, function (filters, filter) {
           let input = _.cloneDeep(filter.input);
