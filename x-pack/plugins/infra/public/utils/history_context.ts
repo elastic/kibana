@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getAllStats } from './monitoring';
-export { getLocalStats } from './local';
-export { createTelemetryUsageCollector } from './usage';
+import { createContext, useContext } from 'react';
+import { History } from 'history';
+
+export const HistoryContext = createContext<History | undefined>(undefined);
+
+export const useHistory = () => {
+  return useContext(HistoryContext);
+};

@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getAllStats } from './monitoring';
-export { getLocalStats } from './local';
-export { createTelemetryUsageCollector } from './usage';
+export * from './source_id';
