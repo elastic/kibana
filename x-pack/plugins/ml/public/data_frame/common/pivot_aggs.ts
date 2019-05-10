@@ -18,15 +18,7 @@ export enum PIVOT_SUPPORTED_AGGS {
   VALUE_COUNT = 'value_count',
 }
 
-type PivotAggSupportedAggs =
-  | PIVOT_SUPPORTED_AGGS.AVG
-  | PIVOT_SUPPORTED_AGGS.CARDINALITY
-  | PIVOT_SUPPORTED_AGGS.MAX
-  | PIVOT_SUPPORTED_AGGS.MIN
-  | PIVOT_SUPPORTED_AGGS.SUM
-  | PIVOT_SUPPORTED_AGGS.VALUE_COUNT;
-
-export const pivotSupportedAggs: PivotAggSupportedAggs[] = [
+export const pivotSupportedAggs: PIVOT_SUPPORTED_AGGS[] = [
   PIVOT_SUPPORTED_AGGS.AVG,
   PIVOT_SUPPORTED_AGGS.CARDINALITY,
   PIVOT_SUPPORTED_AGGS.MAX,
@@ -65,7 +57,7 @@ export const pivotAggsFieldSupport = {
 };
 
 type PivotAgg = {
-  [key in PivotAggSupportedAggs]?: {
+  [key in PIVOT_SUPPORTED_AGGS]?: {
     field: FieldName;
   }
 };
@@ -74,7 +66,7 @@ export type PivotAggDict = { [key in AggName]: PivotAgg };
 
 // The internal representation of an aggregation definition.
 export interface PivotAggsConfig {
-  agg: PivotAggSupportedAggs;
+  agg: PIVOT_SUPPORTED_AGGS;
   field: FieldName;
   aggName: AggName;
 }

@@ -23,6 +23,7 @@ import { PivotPreview } from './pivot_preview';
 
 import {
   DropDownOption,
+  FIELD_TYPE,
   getPivotQuery,
   isKibanaContext,
   KibanaContext,
@@ -30,7 +31,6 @@ import {
   PIVOT_SUPPORTED_AGGS,
   pivotSupportedAggs,
 } from '../../common';
-import { FIELD_TYPE } from './common';
 import { DefinePivotExposedState } from './define_pivot_form';
 
 const defaultSearch = '*';

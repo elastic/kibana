@@ -13,25 +13,22 @@ import {
   DropDownLabel,
   DropDownOption,
   FieldName,
-  FieldType,
   FIELD_TYPE,
   PivotAggsConfigDict,
   pivotAggsFieldSupport,
   PivotGroupByConfigDict,
   pivotGroupByFieldSupport,
-  pivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
 
 interface Field {
   name: FieldName;
-  type: FieldType;
+  type: FIELD_TYPE;
 }
 
 function getDefaultGroupByConfig(
   aggName: string,
-  field: Field,
+  fieldName: FieldName,
   groupByAgg: PIVOT_SUPPORTED_GROUP_BY_AGGS
 ) {
   switch (groupByAgg) {
@@ -39,20 +36,20 @@ function getDefaultGroupByConfig(
       return {
         agg: groupByAgg,
         aggName,
-        field: field.name,
+        field: fieldName,
       };
     case PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM:
       return {
         agg: groupByAgg,
         aggName,
-        field: field.name,
+        field: fieldName,
         interval: '10',
       };
     case PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM:
       return {
         agg: groupByAgg,
         aggName,
-        field: field.name,
+        field: fieldName,
         interval: '1m',
       };
   }
@@ -78,7 +75,7 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
       const aggName = `${groupByAgg}(${field.name})`;
       const groupByOption: DropDownLabel = { label: aggName };
       groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = getDefaultGroupByConfig(aggName, field, groupByAgg);
+      groupByOptionsData[aggName] = getDefaultGroupByConfig(aggName, field.name, groupByAgg);
     });
 
     // Aggregations
