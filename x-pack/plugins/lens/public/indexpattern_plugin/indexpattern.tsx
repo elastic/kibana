@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Datasource, DataType } from '..';
 import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
+import { getIndexPatterns } from './loader';
 
 type OperationType = 'value' | 'terms' | 'date_histogram';
 
@@ -55,16 +56,25 @@ export const indexPatternDatasource: Datasource<
   IndexPatternPersistedState
 > = {
   async initialize(state?: IndexPatternPersistedState) {
+    const indexPatternObjects = await getIndexPatterns();
+    const indexPatterns: { [id: string]: IndexPattern } = {};
+
+    if (indexPatternObjects) {
+      indexPatternObjects.forEach((obj: any) => {
+        indexPatterns[obj.id] = obj;
+      });
+    }
+
     // TODO: Make fetch request to load indexPatterns from saved objects
     if (state) {
       return {
         ...state,
-        indexPatterns: {},
+        indexPatterns,
       };
     }
     return {
-      currentIndexPattern: '',
-      indexPatterns: {},
+      currentIndexPattern: indexPatternObjects ? (indexPatternObjects[0] as IndexPattern).id : '',
+      indexPatterns,
       columns: {},
       columnOrder: [],
     };
@@ -79,7 +89,19 @@ export const indexPatternDatasource: Datasource<
   },
 
   renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-    render(<div>Index Pattern Data Source</div>, domElement);
+    render(
+      <div>
+        Index Pattern Data Source
+        <div>
+          {props.state &&
+            props.state.currentIndexPattern &&
+            Object.keys(props.state.indexPatterns).map(key => (
+              <div key={key}>{props.state.indexPatterns[key].title}</div>
+            ))}
+        </div>
+      </div>,
+      domElement
+    );
   },
 
   getPublicAPI(state, setState) {
