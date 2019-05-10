@@ -5,21 +5,11 @@
  */
 
 import { security } from './index';
-import Joi from 'joi';
-
-async function getConfigSchema() {
-  class Plugin {
-    constructor(options) {
-      this.options = options;
-    }
-  }
-  const plugin = security({ Plugin });
-  return await plugin.options.config(Joi);
-}
+import { getConfigSchema } from '../../test_utils';
 
 describe('config', () => {
   it('produces correct config when running from source', async () => {
-    const schema = await getConfigSchema();
+    const schema = await getConfigSchema(security);
     expect(
       schema.validate(
         {},
@@ -54,7 +44,7 @@ Object {
   });
 
   it('produces correct config when NOT running from source', async () => {
-    const schema = await getConfigSchema();
+    const schema = await getConfigSchema(security);
     expect(
       schema.validate(
         {},

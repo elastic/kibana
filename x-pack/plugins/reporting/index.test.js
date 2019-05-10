@@ -5,22 +5,12 @@
  */
 
 import { reporting } from './index';
-import Joi from 'joi';
-
-async function getConfigSchema() {
-  class Plugin {
-    constructor(options) {
-      this.options = options;
-    }
-  }
-  const plugin = reporting({ Plugin });
-  return await plugin.options.config(Joi);
-}
+import { getConfigSchema } from '../../test_utils';
 
 describe('config', () => {
   describe('dev = false, dist = false', () => {
     it('produces correct config', async () => {
-      const schema = await getConfigSchema();
+      const schema = await getConfigSchema(reporting);
       expect(
         schema.validate(
           {},
@@ -95,7 +85,7 @@ Object {
 
   describe('dev = false, dist = true', () => {
     it('produces correct config', async () => {
-      const schema = await getConfigSchema();
+      const schema = await getConfigSchema(reporting);
       expect(
         schema.validate(
           {},
@@ -169,7 +159,7 @@ Object {
 
   describe('dev = true, dist = false', () => {
     it('produces correct config', async () => {
-      const schema = await getConfigSchema();
+      const schema = await getConfigSchema(reporting);
       expect(
         schema.validate(
           {},
@@ -244,7 +234,7 @@ Object {
 
   describe('dev = true, dist = true', () => {
     it('produces correct config', async () => {
-      const schema = await getConfigSchema();
+      const schema = await getConfigSchema(reporting);
       expect(
         schema.validate(
           {},

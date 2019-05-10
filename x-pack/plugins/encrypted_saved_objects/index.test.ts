@@ -5,19 +5,11 @@
  */
 
 import { encryptedSavedObjects } from './index';
-import Joi from 'joi';
-
-function getConfigSchema(): Joi.Schema {
-  class Plugin {
-    constructor(public readonly options: any) {}
-  }
-  const plugin = encryptedSavedObjects({ Plugin });
-  return plugin.options.config(Joi);
-}
+import { getConfigSchema } from '../../test_utils';
 
 describe('config', () => {
-  it('uses a default encryption key when running from source', () => {
-    const schema = getConfigSchema();
+  it('uses a default encryption key when running from source', async () => {
+    const schema = await getConfigSchema(encryptedSavedObjects);
     expect(
       schema.validate(
         {},
@@ -35,8 +27,8 @@ Object {
 `);
   });
 
-  it('uses no default encryption key when running from dist', () => {
-    const schema = getConfigSchema();
+  it('uses no default encryption key when running from dist', async () => {
+    const schema = await getConfigSchema(encryptedSavedObjects);
     expect(
       schema.validate(
         {},
