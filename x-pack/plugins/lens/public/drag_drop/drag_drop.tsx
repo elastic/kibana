@@ -6,7 +6,7 @@
 
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
-import { DragContext } from './providers';
+import { DragContext, DragContextState } from './providers';
 
 type DroppableEvent = React.DragEvent<HTMLElement>;
 
@@ -54,6 +54,13 @@ interface Props {
   draggable?: boolean;
 }
 
+// For internal usage / test purposes only.
+type InternalProps = Props & {
+  context: DragContextState;
+  isActive: boolean;
+  setIsActive: (isActive: boolean) => void;
+};
+
 /**
  * A draggable / droppable item. Items can be both draggable and droppable at
  * the same time.
@@ -61,14 +68,40 @@ interface Props {
  * @param props
  */
 export function DragDrop(props: Props) {
-  const { dragging, setDragging } = useContext(DragContext);
+  const context = useContext(DragContext);
   const [state, setState] = useState({ isActive: false });
-  const { className, onDrop, value, children, droppable, draggable } = props;
+
+  return (
+    <DragDropInternal
+      context={context}
+      isActive={state.isActive}
+      setIsActive={(isActive: boolean) => setState({ isActive })}
+      {...props}
+    />
+  );
+}
+
+/**
+ * For internal usage / test purposes only.
+ */
+export function DragDropInternal(props: InternalProps) {
+  const {
+    className,
+    onDrop,
+    value,
+    children,
+    droppable,
+    draggable,
+    context,
+    isActive,
+    setIsActive,
+  } = props;
+  const { dragging, setDragging } = context;
   const isDragging = draggable && value === dragging;
 
   const classes = classNames('lnsDragDrop', className, {
     'lnsDragDrop-isDropTarget': droppable,
-    'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
+    'lnsDragDrop-isActiveDropTarget': droppable && isActive,
     'lnsDragDrop-isDragging': isDragging,
   });
 
@@ -100,20 +133,20 @@ export function DragDrop(props: Props) {
     e.preventDefault();
 
     // An optimization to prevent a bunch of React churn.
-    if (!state.isActive) {
-      setState({ ...state, isActive: true });
+    if (!isActive) {
+      setIsActive(true);
     }
   };
 
   const dragLeave = () => {
-    setState({ ...state, isActive: false });
+    setIsActive(false);
   };
 
   const drop = (e: DroppableEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setState({ ...state, isActive: false });
+    setIsActive(false);
     setDragging(undefined);
 
     if (onDrop) {

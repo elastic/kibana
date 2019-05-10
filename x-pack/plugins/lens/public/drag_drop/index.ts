@@ -5,4 +5,4 @@
  */
 
 export * from './providers';
-export * from './drag_drop';
+export { DragDrop } from './drag_drop';

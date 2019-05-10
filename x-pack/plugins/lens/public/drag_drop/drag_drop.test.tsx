@@ -6,17 +6,30 @@
 
 import React from 'react';
 import { render, shallow, mount } from 'enzyme';
-import { DragDrop } from './drag_drop';
-import { ChildDragDropProvider } from './providers';
+import { DragDropInternal } from './drag_drop';
+import { DragContextState } from './providers';
 
 jest.useFakeTimers();
+
+function mockContext(): DragContextState {
+  return {
+    dragging: undefined,
+    setDragging: jest.fn(),
+  };
+}
 
 describe('DragDrop', () => {
   test('renders if nothing is being dragged', () => {
     const component = render(
-      <DragDrop value="hello" draggable>
+      <DragDropInternal
+        value="hello"
+        draggable
+        context={mockContext()}
+        isActive={false}
+        setIsActive={jest.fn()}
+      >
         Hello!
-      </DragDrop>
+      </DragDropInternal>
     );
 
     expect(component).toMatchSnapshot();
@@ -24,7 +37,11 @@ describe('DragDrop', () => {
 
   test('dragover calls preventDefault if droppable is true', () => {
     const preventDefault = jest.fn();
-    const component = shallow(<DragDrop droppable>Hello!</DragDrop>);
+    const component = shallow(
+      <DragDropInternal context={mockContext()} isActive={false} setIsActive={jest.fn()} droppable>
+        Hello!
+      </DragDropInternal>
+    );
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 
@@ -33,7 +50,11 @@ describe('DragDrop', () => {
 
   test('dragover does not call preventDefault if droppable is false', () => {
     const preventDefault = jest.fn();
-    const component = shallow(<DragDrop>Hello!</DragDrop>);
+    const component = shallow(
+      <DragDropInternal context={mockContext()} isActive={false} setIsActive={jest.fn()}>
+        Hello!
+      </DragDropInternal>
+    );
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 
@@ -41,7 +62,7 @@ describe('DragDrop', () => {
   });
 
   test('dragstart sets dragging in the context', async () => {
-    const setDragging = jest.fn();
+    const context = mockContext();
     const dataTransfer = {
       setData: jest.fn(),
       getData: jest.fn(),
@@ -49,9 +70,9 @@ describe('DragDrop', () => {
     const value = {};
 
     const component = mount(
-      <ChildDragDropProvider dragging={undefined} setDragging={setDragging}>
-        <DragDrop value={value}>Hello!</DragDrop>
-      </ChildDragDropProvider>
+      <DragDropInternal value={value} context={context} isActive={false} setIsActive={jest.fn()}>
+        Ahoy!
+      </DragDropInternal>
     );
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragstart', { dataTransfer });
@@ -59,22 +80,29 @@ describe('DragDrop', () => {
     jest.runAllTimers();
 
     expect(dataTransfer.setData).toBeCalledWith('text', 'dragging');
-    expect(setDragging).toBeCalledWith(value);
+    expect(context.setDragging).toBeCalledWith(value);
   });
 
   test('drop resets all the things', async () => {
+    const context = mockContext();
     const preventDefault = jest.fn();
     const stopPropagation = jest.fn();
-    const setDragging = jest.fn();
     const onDrop = jest.fn();
     const value = {};
 
+    context.dragging = 'hola';
+
     const component = mount(
-      <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
-        <DragDrop onDrop={onDrop} value={value}>
-          Hello!
-        </DragDrop>
-      </ChildDragDropProvider>
+      <DragDropInternal
+        value={value}
+        onDrop={onDrop}
+        context={context}
+        isActive={false}
+        setIsActive={jest.fn()}
+        droppable
+      >
+        Ahoy!
+      </DragDropInternal>
     );
 
     component
@@ -83,20 +111,23 @@ describe('DragDrop', () => {
 
     expect(preventDefault).toBeCalled();
     expect(stopPropagation).toBeCalled();
-    expect(setDragging).toBeCalledWith(undefined);
+    expect(context.setDragging).toBeCalledWith(undefined);
     expect(onDrop).toBeCalledWith('hola');
   });
 
   test('droppable is reflected in the className', () => {
     const component = render(
-      <DragDrop
+      <DragDropInternal
+        context={mockContext()}
+        isActive={false}
+        setIsActive={jest.fn()}
         onDrop={(x: any) => {
           throw x;
         }}
         droppable
       >
         Hello!
-      </DragDrop>
+      </DragDropInternal>
     );
 
     expect(component).toMatchSnapshot();
