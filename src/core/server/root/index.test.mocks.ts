@@ -29,5 +29,10 @@ jest.doMock('../config/config_service', () => ({
   ConfigService: jest.fn(() => configService),
 }));
 
-export const mockServer = { preSetup: jest.fn(), setup: jest.fn(), stop: jest.fn(), configService };
+export const mockServer = {
+  setupConfigSchemas: jest.fn(),
+  setup: jest.fn(),
+  stop: jest.fn(),
+  configService,
+};
 jest.mock('../server', () => ({ Server: jest.fn(() => mockServer) }));

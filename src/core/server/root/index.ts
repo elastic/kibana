@@ -47,7 +47,7 @@ export class Root {
 
   public async setup() {
     try {
-      await this.server.preSetup();
+      await this.server.setupConfigSchemas();
       await this.setupLogging();
       this.log.debug('setting up root');
       return await this.server.setup();

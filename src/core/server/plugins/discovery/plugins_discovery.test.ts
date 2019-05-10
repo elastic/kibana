@@ -121,7 +121,7 @@ test('properly iterates through plugin search locations', async () => {
     env,
     logger
   );
-  configService.setSchema(config.path, config.schema);
+  await configService.setSchema(config.path, config.schema);
 
   const pluginsConfig = await configService
     .atPath('plugins', PluginsConfig)

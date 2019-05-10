@@ -243,7 +243,9 @@ export class PluginWrapper<
   }
 
   public getConfigSchema(): PluginConfigSchema {
-    if (!this.manifest.server) return null;
+    if (!this.manifest.server) {
+      return null;
+    }
     const pluginPathServer = join(this.path, 'server');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pluginDefinition = require(pluginPathServer);

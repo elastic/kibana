@@ -60,9 +60,8 @@ const configSchema = schema.object({
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
 });
 
-type SslConfigSchema = TypeOf<typeof configSchema>['ssl'];
-
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
+type SslConfigSchema = ElasticsearchConfigType['ssl'];
 
 export const config = {
   path: 'elasticsearch',
@@ -161,9 +160,9 @@ export class ElasticsearchConfig {
    * headers cannot be overwritten by client-side headers and aren't affected by
    * `requestHeadersWhitelist` configuration.
    */
-  public readonly customHeaders: TypeOf<typeof configSchema>['customHeaders'];
+  public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(rawConfig: TypeOf<typeof configSchema>) {
+  constructor(rawConfig: ElasticsearchConfigType) {
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];

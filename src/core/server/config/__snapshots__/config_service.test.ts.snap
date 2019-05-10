@@ -12,5 +12,3 @@ ExampleClassWithSchema {
   },
 }
 `;
-
-exports[`throws if config at path does not match schema 1`] = `"[key]: expected value of type [string] but got [number]"`;

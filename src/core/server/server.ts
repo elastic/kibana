@@ -54,10 +54,6 @@ export class Server {
     this.elasticsearch = new ElasticsearchService(core);
   }
 
-  public async preSetup() {
-    await this.setupConfigSchemas();
-  }
-
   public async setup() {
     this.log.debug('setting up server');
 
@@ -111,7 +107,7 @@ export class Server {
     httpSetup.registerRouter(router);
   }
 
-  private async setupConfigSchemas() {
+  public async setupConfigSchemas() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
       [elasticsearchConfig.path, elasticsearchConfig.schema],
       [loggingConfig.path, loggingConfig.schema],

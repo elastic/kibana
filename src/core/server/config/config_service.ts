@@ -139,7 +139,7 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
-  private validate(path: ConfigPath, config: Record<string, any>) {
+  private validate(path: ConfigPath, config: Record<string, unknown>) {
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {

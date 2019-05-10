@@ -52,7 +52,7 @@ const logger = loggingServiceMock.create();
   });
 });
 
-beforeEach(() => {
+beforeEach(async () => {
   mockPackage.raw = {
     branch: 'feature-v1',
     version: 'v1',
@@ -70,7 +70,7 @@ beforeEach(() => {
     env,
     logger
   );
-  configService.setSchema(config.path, config.schema);
+  await configService.setSchema(config.path, config.schema);
   pluginsService = new PluginsService({ env, logger, configService });
 
   [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
