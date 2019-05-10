@@ -22,6 +22,8 @@ export {
   ChromeBreadcrumb,
   ChromeService,
   ChromeSetup,
+  ChromeStart,
   ChromeBrand,
   ChromeHelpExtension,
 } from './chrome_service';
+export { ChromeNavLink } from './nav_links';

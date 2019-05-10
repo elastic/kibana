@@ -17,29 +17,5 @@
  * under the License.
  */
 
-import { data } from 'plugins/data';
-const { toUser, fromUser } = data.query.helpers;
-import { uiModules } from '../../modules';
-
-uiModules
-  .get('kibana')
-  .directive('parseQuery', function () {
-
-    return {
-      restrict: 'A',
-      require: 'ngModel',
-      scope: {
-        'ngModel': '='
-      },
-      link: function ($scope, elem, attr, ngModel) {
-        const init = function () {
-          $scope.ngModel = fromUser($scope.ngModel);
-        };
-
-        ngModel.$parsers.push(fromUser);
-        ngModel.$formatters.push(toUser);
-
-        init();
-      }
-    };
-  });
+export { ChromeNavLink } from './nav_link';
+export { NavLinksService } from './nav_links_service';

@@ -17,25 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import $ from 'jquery';
-import { uiModules } from '../../modules';
-const module = uiModules.get('kibana');
+import { onStart } from 'ui/new_platform';
 
-module.directive('clickFocus', function () {
-  return {
-    scope: {
-      clickFocus: '='
-    },
-    restrict: 'A',
-    link: function ($scope, $elem) {
-      function handler() {
-        const focusElem = $.find('input[name=' + $scope.clickFocus + ']');
-        if (focusElem[0]) focusElem[0].focus();
-      }
-
-      $elem.bind('click', handler);
-      $scope.$on('$destroy', _.bindKey($elem, 'unbind', 'click', handler));
-    }
-  };
+onStart(({ core }) => {
+  const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
+  if (timelionUiEnabled === false) {
+    core.chrome.navLinks.update('timelion', { hidden: true });
+  }
 });
