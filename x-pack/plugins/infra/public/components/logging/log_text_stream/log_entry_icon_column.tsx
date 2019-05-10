@@ -34,18 +34,16 @@ export const LogEntryDetailsIconColumn = injectI18n<
     openFlyout: () => void;
   }
 >(({ intl, isHighlighted, isHovered, openFlyout }) => {
+  const label = intl.formatMessage({
+    id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
+    defaultMessage: 'View Details',
+  });
+
   return (
     <LogEntryIconColumn isHighlighted={isHighlighted} isHovered={isHovered}>
       {isHovered ? (
         <AbsoluteIconButtonWrapper>
-          <EuiButtonIcon
-            onClick={openFlyout}
-            iconType="expand"
-            aria-label={intl.formatMessage({
-              id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
-              defaultMessage: 'View Details',
-            })}
-          />
+          <EuiButtonIcon onClick={openFlyout} iconType="expand" title={label} aria-label={label} />
         </AbsoluteIconButtonWrapper>
       ) : null}
     </LogEntryIconColumn>

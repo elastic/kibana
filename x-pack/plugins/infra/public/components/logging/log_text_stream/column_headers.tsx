@@ -5,7 +5,8 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import { injectI18n } from '@kbn/i18n/react';
+import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import {
@@ -17,12 +18,17 @@ import {
 import { LogEntryColumnWidth, LogEntryColumn, LogEntryColumnContent } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 
-export const LogColumnHeaders = memo<{
+export const LogColumnHeaders = injectI18n<{
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidth[];
   showColumnConfiguration: () => void;
-}>(({ columnConfigurations, columnWidths, showColumnConfiguration }) => {
+}>(({ columnConfigurations, columnWidths, intl, showColumnConfiguration }) => {
   const iconColumnWidth = useMemo(() => columnWidths[columnWidths.length - 1], [columnWidths]);
+
+  const showColumnConfigurationLabel = intl.formatMessage({
+    id: 'xpack.infra.logColumnHeaders.configureColumnsLabel',
+    defaultMessage: 'Configure columns',
+  });
 
   return (
     <LogColumnHeadersWrapper>
@@ -65,7 +71,13 @@ export const LogColumnHeaders = memo<{
         data-test-subj="logColumnHeader iconLogColumnHeader"
         key="iconColumnHeader"
       >
-        <EuiButtonIcon color="text" iconType="gear" onClick={showColumnConfiguration} />
+        <EuiButtonIcon
+          aria-label={showColumnConfigurationLabel}
+          color="text"
+          iconType="gear"
+          onClick={showColumnConfiguration}
+          title={showColumnConfigurationLabel}
+        />
       </LogColumnHeader>
     </LogColumnHeadersWrapper>
   );
