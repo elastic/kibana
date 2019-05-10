@@ -28,7 +28,7 @@ import { fromQuery } from '../Links/url_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
-  const minus5 = new Date(transaction['@timestamp']);
+  const minus5 = new Date(plus5.getTime());
 
   plus5.setMinutes(plus5.getMinutes() + 5);
   minus5.setMinutes(minus5.getMinutes() - 5);
@@ -49,12 +49,6 @@ function ActionMenuButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function removeEmptyItems<T extends {}>(
-  items: Array<T | null | undefined>
-): T[] {
-  return items.filter(item => !!item) as T[];
-}
-
 interface Props {
   readonly transaction: Transaction;
 }
@@ -72,7 +66,8 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
   const podId = idx(transaction, _ => _.kubernetes.pod.uid);
   const containerId = idx(transaction, _ => _.container.id);
   const traceId = idx(transaction, _ => _.trace.id);
-  const time = new Date(transaction['@timestamp']).getTime();
+
+  const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
   const infraItems = [
@@ -146,19 +141,16 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       path: `/link-to/host-detail/${hostName}`,
       query: infraMetricsQuery
     }
-  ].map(({ icon, label, condition, path, query }, index) =>
-    !!condition
-      ? {
-          icon,
-          key: `infra-link-${index}`,
-          child: (
-            <InfraLink path={path} query={query}>
-              {label}
-            </InfraLink>
-          )
-        }
-      : null
-  );
+  ].map(({ icon, label, condition, path, query }, index) => ({
+    icon,
+    key: `infra-link-${index}`,
+    child: (
+      <InfraLink path={path} query={query}>
+        {label}
+      </InfraLink>
+    ),
+    condition
+  }));
 
   const uptimeLink =
     transaction && transaction.url
@@ -177,7 +169,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         })
       : null;
 
-  const menuItems = removeEmptyItems([
+  const menuItems = [
     ...infraItems,
     {
       icon: 'discoverApp',
@@ -193,29 +185,32 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         </DiscoverTransactionLink>
       )
     },
-    uptimeLink
-      ? {
-          icon: 'uptimeApp',
-          key: 'uptime',
-          child: (
-            <EuiLink href={uptimeLink}>
-              {i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
-                defaultMessage: 'View monitor status'
-              })}
-            </EuiLink>
-          )
-        }
-      : null
-  ]).map(({ icon, key, child }) => (
-    <EuiContextMenuItem icon={icon} key={key}>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>{child}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="popout" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiContextMenuItem>
-  ));
+    {
+      icon: 'uptimeApp',
+      key: 'uptime',
+      child: (
+        <EuiLink href={uptimeLink}>
+          {i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
+            defaultMessage: 'View monitor status'
+          })}
+        </EuiLink>
+      ),
+      condition: uptimeLink
+    }
+  ]
+    .filter(({ condition }) => condition)
+    .map(({ icon, key, child, condition }) =>
+      condition ? (
+        <EuiContextMenuItem icon={icon} key={key}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>{child}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="popout" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiContextMenuItem>
+      ) : null
+    );
 
   return (
     <EuiPopover
