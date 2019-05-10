@@ -53,7 +53,7 @@ export const getColumns = (eventId: string) => [
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
             <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={field} titleSummary={i18n.FIELD} />
+              <WithCopyToClipboard text={field} titleSummary={i18n.FIELD.toLowerCase()} />
             </EuiToolTip>
           </HoverActionsContainer>
         }
@@ -79,7 +79,7 @@ export const getColumns = (eventId: string) => [
                 hoverContent={
                   <HoverActionsContainer data-test-subj="hover-actions-container">
                     <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-                      <WithCopyToClipboard text={value} titleSummary={i18n.VALUE} />
+                      <WithCopyToClipboard text={value} titleSummary={i18n.VALUE.toLowerCase()} />
                     </EuiToolTip>
                   </HoverActionsContainer>
                 }
