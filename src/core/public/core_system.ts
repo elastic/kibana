@@ -68,7 +68,6 @@ export class CoreSystem {
   private readonly application: ApplicationService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly overlayTargetDomElement: HTMLDivElement;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -97,8 +96,7 @@ export class CoreSystem {
     this.http = new HttpService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
-    this.overlayTargetDomElement = document.createElement('div');
-    this.overlay = new OverlayService(this.overlayTargetDomElement);
+    this.overlay = new OverlayService();
     this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
 
@@ -171,8 +169,10 @@ export class CoreSystem {
       const http = await this.http.start();
       const i18n = await this.i18n.start();
       const application = await this.application.start({ basePath, injectedMetadata });
+      const chrome = await this.chrome.start({ application, basePath });
 
       const notificationsTargetDomElement = document.createElement('div');
+      const overlayTargetDomElement = document.createElement('div');
       const legacyPlatformTargetDomElement = document.createElement('div');
 
       // ensure the rootDomElement is empty
@@ -180,17 +180,18 @@ export class CoreSystem {
       this.rootDomElement.classList.add('coreSystemRootDomElement');
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
-      this.rootDomElement.appendChild(this.overlayTargetDomElement);
+      this.rootDomElement.appendChild(overlayTargetDomElement);
 
       const notifications = await this.notifications.start({
         i18n,
         targetDomElement: notificationsTargetDomElement,
       });
-      const overlays = await this.overlay.start({ i18n });
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
 
       const core: CoreStart = {
         application,
         basePath,
+        chrome,
         http,
         i18n,
         injectedMetadata,

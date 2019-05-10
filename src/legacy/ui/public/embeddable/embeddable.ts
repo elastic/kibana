@@ -40,6 +40,8 @@ export interface EmbeddableMetadata {
    */
   editUrl?: string;
 
+  editLabel?: string;
+
   /**
    * A flag indicating if this embeddable can be edited.
    */
