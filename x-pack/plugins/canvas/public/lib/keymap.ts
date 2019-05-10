@@ -75,21 +75,21 @@ const nextPageShortcut = getShortcuts(']', { modifiers: 'alt', help: 'Go to next
 export const keymap: KeyMap = {
   ELEMENT: {
     displayName: 'Element controls',
-    CUT: getShortcuts('x', { modifiers: ['ctrl'], help: 'Cut' }),
-    COPY: getShortcuts('c', { modifiers: ['ctrl'], help: 'Copy' }),
-    PASTE: getShortcuts('v', { modifiers: ['ctrl'], help: 'Paste' }),
-    CLONE: getShortcuts('d', { modifiers: ['ctrl'], help: 'Clone' }),
+    CUT: getShortcuts('x', { modifiers: 'ctrl', help: 'Cut' }),
+    COPY: getShortcuts('c', { modifiers: 'ctrl', help: 'Copy' }),
+    PASTE: getShortcuts('v', { modifiers: 'ctrl', help: 'Paste' }),
+    CLONE: getShortcuts('d', { modifiers: 'ctrl', help: 'Clone' }),
     DELETE: getShortcuts(['del', 'backspace'], { help: 'Delete' }),
-    BRING_FORWARD: getShortcuts('up', { modifiers: ['ctrl'], help: 'Bring to front' }),
+    BRING_FORWARD: getShortcuts('up', { modifiers: 'ctrl', help: 'Bring to front' }),
     BRING_TO_FRONT: getShortcuts('up', { modifiers: ['ctrl', 'shift'], help: 'Bring forward' }),
-    SEND_BACKWARD: getShortcuts('down', { modifiers: ['ctrl'], help: 'Send backward' }),
+    SEND_BACKWARD: getShortcuts('down', { modifiers: 'ctrl', help: 'Send backward' }),
     SEND_TO_BACK: getShortcuts('down', { modifiers: ['ctrl', 'shift'], help: 'Send to back' }),
     GROUP: getShortcuts('g', { help: 'Group' }),
     UNGROUP: getShortcuts('u', { help: 'Ungroup' }),
   },
   EXPRESSION: {
     displayName: 'Expression controls',
-    RUN: getShortcuts('enter', { modifiers: ['ctrl'], help: 'Run whole expression' }),
+    RUN: getShortcuts('enter', { modifiers: 'ctrl', help: 'Run whole expression' }),
   },
   EDITOR: {
     displayName: 'Editor controls',
@@ -98,30 +98,30 @@ export const keymap: KeyMap = {
     // added for documentation purposes, not handled by `react-shortcuts`
     RESIZE_FROM_CENTER: getShortcuts('drag', {
       modifiers: 'alt',
-      help: 'Resize from the center',
+      help: 'Resize from center',
     }),
     // added for documentation purposes, not handled by `react-shortcuts`
     IGNORE_SNAP: getShortcuts('drag', {
-      modifiers: ['ctrl'],
-      help: 'Resize and rotate without snapping',
+      modifiers: 'ctrl',
+      help: 'Move, resize, and rotate without snapping',
     }),
     // added for documentation purposes, not handled by `react-shortcuts`
     SELECT_BEHIND: getShortcuts('click', {
       modifiers: 'ctrl',
-      help: 'Select element behind top element',
+      help: 'Select element below',
     }),
-    UNDO: getShortcuts('z', { modifiers: ['ctrl'], help: 'Undo last action' }),
+    UNDO: getShortcuts('z', { modifiers: 'ctrl', help: 'Undo last action' }),
     REDO: getShortcuts('z', { modifiers: ['ctrl', 'shift'], help: 'Redo last action' }),
     PREV: previousPageShortcut,
     NEXT: nextPageShortcut,
-    EDITING: getShortcuts('e', { modifiers: ['alt'], help: 'Toggle edit mode' }),
-    GRID: getShortcuts('g', { modifiers: ['alt'], help: 'Show grid' }),
+    EDITING: getShortcuts('e', { modifiers: 'alt', help: 'Toggle edit mode' }),
+    GRID: getShortcuts('g', { modifiers: 'alt', help: 'Show grid' }),
     REFRESH: refreshShortcut,
   },
   PRESENTATION: {
     displayName: 'Presentation controls',
     FULLSCREEN: getShortcuts(['f', 'p'], { modifiers: 'alt', help: 'Enter presentation mode' }),
-    FULLSCREEN_EXIT: getShortcuts(['esc'], { help: 'Exit presentation mode' }),
+    FULLSCREEN_EXIT: getShortcuts('esc', { help: 'Exit presentation mode' }),
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['backspace', 'left'])
@@ -131,6 +131,6 @@ export const keymap: KeyMap = {
       key === 'help' ? osShortcuts : osShortcuts.concat(['space', 'right'])
     ),
     REFRESH: refreshShortcut,
-    PAGE_CYCLE_TOGGLE: getShortcuts(['p'], { help: 'Toggle page cycling' }),
+    PAGE_CYCLE_TOGGLE: getShortcuts('p', { help: 'Toggle page cycling' }),
   },
 };
