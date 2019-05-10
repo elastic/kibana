@@ -120,6 +120,7 @@ const WatchDetailUi = () => {
       {
         available: (action: ActionStatus) => action.isAckable,
         render: (action: ActionStatus) => {
+          const { id: actionId } = action;
           return (
             <EuiToolTip
               content={i18n.translate(
@@ -135,7 +136,7 @@ const WatchDetailUi = () => {
                 onClick={async () => {
                   setIsActionStatusLoading(true);
                   try {
-                    const watchStatus = await ackWatchAction(watchId, action.id);
+                    const watchStatus = await ackWatchAction(watchId, actionId);
                     const newActionStatusesWithErrors = watchStatus.actionStatuses.map(
                       (newActionStatus: ActionStatus) => {
                         const errors = actionErrors && actionErrors[newActionStatus.id];

@@ -48,13 +48,12 @@ export const JsonWatchEditSimulateResults = ({
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
       return Object.keys(actions).map(actionKey => {
         const actionStatus = actionStatuses.find(status => status.id === actionKey);
-        const { state: actionState, lastExecutionReason: actionReason } = actionStatus;
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),
           actionMode: actionModes[actionKey],
-          actionState,
-          actionReason,
+          actionState: actionStatus && actionStatus.state,
+          actionReason: actionStatus && actionStatus.lastExecutionReason,
         };
       });
     }
