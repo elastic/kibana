@@ -17,5 +17,5 @@ export interface PluginSetupContext
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [elasticsearch](./kibana-plugin-server.pluginsetupcontext.elasticsearch.md) | <code>{`<p/>`        adminClient$: Observable&lt;ClusterClient&gt;;`<p/>`        dataClient$: Observable&lt;ClusterClient&gt;;`<p/>`    }</code> |  |
-|  [http](./kibana-plugin-server.pluginsetupcontext.http.md) | <code>{`<p/>`        registerAuth: HttpServiceSetup['registerAuth'];`<p/>`        registerOnRequest: HttpServiceSetup['registerOnRequest'];`<p/>`    }</code> |  |
+|  [http](./kibana-plugin-server.pluginsetupcontext.http.md) | <code>{`<p/>`        registerAuth: HttpServiceSetup['registerAuth'];`<p/>`        registerOnRequest: HttpServiceSetup['registerOnRequest'];`<p/>`        getBasePathFor: HttpServiceSetup['getBasePathFor'];`<p/>`        setBasePathFor: HttpServiceSetup['setBasePathFor'];`<p/>`    }</code> |  |
 

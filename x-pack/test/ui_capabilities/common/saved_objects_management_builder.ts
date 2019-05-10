@@ -8,6 +8,7 @@
 class SavedObjectsTypeUICapabilitiesGroup {
   public all = ['delete', 'edit', 'read'];
   public read = ['read'];
+  public none = [] as string[];
 }
 const savedObjectsTypeUICapabilitiesGroup = new SavedObjectsTypeUICapabilitiesGroup();
 
@@ -38,6 +39,7 @@ export class SavedObjectsManagementBuilder {
       'map',
       'maps-telemetry',
       'canvas-workpad',
+      'canvas-element',
       'infrastructure-ui-source',
       'upgrade-assistant-reindex-operation',
       'upgrade-assistant-telemetry',

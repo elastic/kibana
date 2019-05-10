@@ -15,7 +15,7 @@ import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
 import chrome from 'ui/chrome';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { LicenseContext } from '../../Main/LicenseCheck';
+import { LicenseContext } from '../../../../context/LicenseContext';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
 
@@ -60,18 +60,6 @@ export class ServiceIntegrations extends React.Component<Props, State> {
           this.closePopover();
           this.openFlyout('ML');
         }
-      },
-      {
-        name: i18n.translate(
-          'xpack.apm.serviceDetails.integrationsMenu.viewMLJobsButtonLabel',
-          {
-            defaultMessage: 'View existing ML jobs'
-          }
-        ),
-        icon: 'machineLearningApp',
-        href: chrome.addBasePath('/app/ml'),
-        target: '_blank',
-        onClick: () => this.closePopover()
       }
     ];
   };

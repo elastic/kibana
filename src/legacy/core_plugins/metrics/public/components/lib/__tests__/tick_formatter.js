@@ -78,6 +78,4 @@ describe('createTickFormatter(format, template)', () => {
     const fn = createTickFormatter('number', '{{value', (key) => config[key]);
     expect(fn(1.5556)).to.equal('1.56');
   });
-
-
 });

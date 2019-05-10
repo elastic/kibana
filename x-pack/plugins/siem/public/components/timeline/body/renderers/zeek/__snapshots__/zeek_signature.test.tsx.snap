@@ -1,0 +1,96 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
+<Component
+  data={
+    Object {
+      "_id": "14",
+      "destination": Object {
+        "ip": Array [
+          "207.154.238.205",
+        ],
+        "port": Array [
+          11568,
+        ],
+      },
+      "event": Object {
+        "action": null,
+        "category": null,
+        "dataset": Array [
+          "zeek.connection",
+        ],
+        "id": null,
+        "module": Array [
+          "zeek",
+        ],
+        "severity": null,
+      },
+      "geo": Object {
+        "country_iso_code": Array [
+          "US",
+        ],
+        "region_name": Array [
+          "New York",
+        ],
+      },
+      "host": Object {
+        "id": Array [
+          "37c81253e0fc4c46839c19b981be5177",
+        ],
+        "ip": Array [
+          "207.154.238.205",
+          "10.19.0.5",
+          "fe80::d82b:9aff:fe0d:1e12",
+        ],
+        "name": Array [
+          "zeek-franfurt",
+        ],
+      },
+      "http": null,
+      "network": Object {
+        "transport": Array [
+          "tcp",
+        ],
+      },
+      "source": Object {
+        "ip": Array [
+          "185.176.26.101",
+        ],
+        "port": Array [
+          44059,
+        ],
+      },
+      "suricata": null,
+      "timestamp": "2019-03-07T05:06:51.000Z",
+      "url": null,
+      "zeek": Object {
+        "connection": Object {
+          "history": Array [
+            "Sr",
+          ],
+          "local_orig": Array [
+            false,
+          ],
+          "local_resp": Array [
+            false,
+          ],
+          "missed_bytes": Array [
+            0,
+          ],
+          "state": Array [
+            "REJ",
+          ],
+        },
+        "dns": null,
+        "files": null,
+        "http": null,
+        "notice": null,
+        "session_id": Array [
+          "C8DRTq362Fios6hw16",
+        ],
+        "ssl": null,
+      },
+    }
+  }
+/>
+`;

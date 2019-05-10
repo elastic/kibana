@@ -6,7 +6,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { Beat } from 'plugins/monitoring/components/beats/beat';
 import { timefilter } from 'ui/timefilter';
@@ -20,6 +20,7 @@ uiModule.directive('monitoringBeatsBeat', () => {
       data: '=',
     },
     link(scope, $el) {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
 
       function onBrush({ xaxis }) {
         timefilter.setTime({

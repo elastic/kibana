@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QueryBar Should render the given query 1`] = `
+<EuiFlexGroup
+  className="kbnQueryBar"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <InjectIntl(QueryBarInputUI)
+      appName="discover"
+      indexPatterns={
+        Array [
+          Object {
+            "fields": Array [
+              Object {
+                "aggregatable": true,
+                "esTypes": Array [
+                  "integer",
+                ],
+                "filterable": true,
+                "name": "response",
+                "searchable": true,
+                "type": "number",
+              },
+            ],
+            "id": "1234",
+            "title": "logstash-*",
+          },
+        ]
+      }
+      onChange={[Function]}
+      onSubmit={[Function]}
+      query={
+        Object {
+          "language": "kuery",
+          "query": "response:200",
+        }
+      }
+      screenTitle="Another Screen"
+      store={
+        Object {
+          "clear": [MockFunction],
+          "get": [MockFunction],
+          "remove": [MockFunction],
+          "set": [MockFunction],
+          "store": Object {
+            "clear": [MockFunction],
+            "getItem": [MockFunction],
+            "key": [MockFunction],
+            "length": 0,
+            "removeItem": [MockFunction],
+            "setItem": [MockFunction],
+          },
+        }
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiSuperUpdateButton
+      data-test-subj="querySubmitButton"
+      isDisabled={false}
+      isLoading={false}
+      needsUpdate={false}
+      onClick={[Function]}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

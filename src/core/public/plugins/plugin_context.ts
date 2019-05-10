@@ -18,7 +18,7 @@
  */
 
 import { DiscoveredPlugin } from '../../server';
-import { BasePathSetup } from '../base_path';
+import { BasePathSetup, BasePathStart } from '../base_path';
 import { ChromeSetup } from '../chrome';
 import { CoreContext } from '../core_system';
 import { FatalErrorsSetup } from '../fatal_errors';
@@ -27,8 +27,9 @@ import { NotificationsSetup, NotificationsStart } from '../notifications';
 import { UiSettingsSetup } from '../ui_settings';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CapabilitiesStart } from '../capabilities';
 import { OverlayStart } from '../overlays';
+import { ApplicationStart } from '../application';
+import { HttpSetup, HttpStart } from '../http';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -47,6 +48,7 @@ export interface PluginSetupContext {
   basePath: BasePathSetup;
   chrome: ChromeSetup;
   fatalErrors: FatalErrorsSetup;
+  http: HttpSetup;
   i18n: I18nSetup;
   notifications: NotificationsSetup;
   uiSettings: UiSettingsSetup;
@@ -58,7 +60,9 @@ export interface PluginSetupContext {
  * @public
  */
 export interface PluginStartContext {
-  capabilities: CapabilitiesStart;
+  application: Pick<ApplicationStart, 'capabilities'>;
+  basePath: BasePathStart;
+  http: HttpStart;
   i18n: I18nStart;
   notifications: NotificationsStart;
   overlays: OverlayStart;
@@ -95,6 +99,7 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): PluginSetupContext {
   return {
+    http: deps.http,
     basePath: deps.basePath,
     chrome: deps.chrome,
     fatalErrors: deps.fatalErrors,
@@ -120,7 +125,11 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): PluginStartContext {
   return {
-    capabilities: deps.capabilities,
+    application: {
+      capabilities: deps.application.capabilities,
+    },
+    basePath: deps.basePath,
+    http: deps.http,
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

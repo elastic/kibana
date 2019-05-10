@@ -55,7 +55,7 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
   return (val) => {
     let value;
     if (!isNumber(val)) {
-      value = 0;
+      value = val;
     } else {
       try {
         value = formatter.convert(val, 'text');
