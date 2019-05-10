@@ -181,11 +181,12 @@ export class CoreSystem {
       this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
       const notifications = await this.notifications.start({
         i18n,
+        overlays,
         targetDomElement: notificationsTargetDomElement,
       });
-      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
 
       const core: CoreStart = {
         application,

@@ -25,6 +25,7 @@ import { I18nSetup, I18nStart } from '../../i18n';
 import { UiSettingsSetup } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
+import { OverlayStart } from '../../overlays';
 
 interface SetupDeps {
   i18n: I18nSetup;
@@ -33,6 +34,7 @@ interface SetupDeps {
 
 interface StartDeps {
   i18n: I18nStart;
+  overlays: OverlayStart;
   targetDomElement: HTMLElement;
 }
 
@@ -45,7 +47,8 @@ export class ToastsService {
     return this.api!;
   }
 
-  public start({ i18n, targetDomElement }: StartDeps) {
+  public start({ i18n, overlays, targetDomElement }: StartDeps) {
+    this.api!.registerOverlays(overlays);
     this.targetDomElement = targetDomElement;
 
     render(
