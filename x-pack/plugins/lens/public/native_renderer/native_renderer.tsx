@@ -13,17 +13,28 @@ export interface NativeRendererProps<T> {
   children?: never;
 }
 
-function isShallowDifferent<T>(a: T, b: T): boolean {
-  if (a === b) {
+function is(x: unknown, y: unknown) {
+  return (x === y && (x !== 0 || 1 / (x as number) === 1 / (y as number))) || (x !== x && y !== y);
+}
+
+function isShallowDifferent<T>(objA: T, objB: T): boolean {
+  if (is(objA, objB)) {
     return false;
   }
 
-  if (Object.keys(a).length !== Object.keys(b).length) {
+  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
     return true;
   }
 
-  for (const key in a) {
-    if (!(key in b) || a[key] !== b[key]) {
+  const keysA = Object.keys(objA) as Array<keyof T>;
+  const keysB = Object.keys(objB) as Array<keyof T>;
+
+  if (keysA.length !== keysB.length) {
+    return true;
+  }
+
+  for (let i = 0; i < keysA.length; i++) {
+    if (!window.hasOwnProperty.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
       return true;
     }
   }

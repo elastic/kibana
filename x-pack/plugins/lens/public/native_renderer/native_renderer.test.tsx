@@ -80,6 +80,18 @@ describe('native_renderer', () => {
     expect(renderSpy).lastCalledWith(containerElement, { a: 'def' });
   });
 
+  it('should render again once if props is just a string', () => {
+    const renderSpy = jest.fn();
+    const testProps = 'abc';
+
+    render(<NativeRenderer render={renderSpy} nativeProps={testProps} />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps="def" />, mountpoint);
+    render(<NativeRenderer render={renderSpy} nativeProps="def" />, mountpoint);
+    expect(renderSpy).toHaveBeenCalledTimes(2);
+    const containerElement = mountpoint.firstElementChild;
+    expect(renderSpy).lastCalledWith(containerElement, 'def');
+  });
+
   it('should render again if props are extended', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
