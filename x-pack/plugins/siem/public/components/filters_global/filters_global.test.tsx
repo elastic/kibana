@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 
+import '../../mock/match_media';
 import { FiltersGlobal } from './index';
 
 describe('rendering', () => {

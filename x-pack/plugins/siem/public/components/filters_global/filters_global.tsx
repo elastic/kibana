@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
 import { pure } from 'recompose';
@@ -14,6 +15,9 @@ import { SuperDatePicker } from '../super_date_picker';
 
 const offsetChrome = 49;
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
+
+const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s + ')';
+const disableStickyMq = window.matchMedia(disableSticky);
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
   ${props => `
@@ -30,6 +34,11 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
       top: ${offsetChrome}px !important;
       z-index: ${props.theme.eui.euiZNavigation};
     `}
+
+    @media only ${disableSticky} {
+      position: static !important;
+      z-index: ${props.theme.eui.euiZContent} !important;
+    }
   `}
 `;
 
@@ -46,7 +55,7 @@ export interface FiltersGlobalProps {
 }
 
 export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
-  <Sticky topOffset={-offsetChrome}>
+  <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
       <Aside isSticky={isSticky} style={style}>
         <EuiFlexGroup>
