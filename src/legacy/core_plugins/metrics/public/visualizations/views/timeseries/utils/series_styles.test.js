@@ -17,21 +17,34 @@
  * under the License.
  */
 
-import { getBarStyles, getSeriesColors } from './series_styles';
+import { getBarStyles, getSeriesColors, getAreaStyles } from './series_styles';
 
 describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js', () => {
   let bars;
   let color;
   let specId;
+  let points;
+  let lines;
 
   beforeEach(() => {
     bars = {
       fill: 0.5,
       lineWidth: 2,
-      show: true
+      show: true,
     };
     color = 'rgb(224, 0, 221)';
     specId = 'IT';
+    points = {
+      lineWidth: 1,
+      show: true,
+      radius: 1,
+    };
+    lines = {
+      fill: 0,
+      lineWidth: 1,
+      show: true,
+      steps: true,
+    };
   });
 
   describe('getBarStyles()', () => {
@@ -50,6 +63,20 @@ describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries
   describe('getSeriesColors()', () => {
     test('should match a snapshot', () => {
       expect(getSeriesColors(color, specId)).toMatchSnapshot();
+    });
+  });
+
+  describe('getAreaStyles()', () => {
+    test('should match a snapshot', () => {
+      expect(getAreaStyles({ points, lines, color })).toMatchSnapshot();
+    });
+
+    test('should set default values if points, lines and color are empty', () => {
+      points = {};
+      lines = {};
+      color = '';
+
+      expect(getAreaStyles({ points, lines, color })).toMatchSnapshot();
     });
   });
 });

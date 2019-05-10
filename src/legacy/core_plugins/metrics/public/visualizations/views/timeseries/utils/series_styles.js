@@ -17,31 +17,30 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-// import { CurveType } from '@elastic/charts';
+import { CurveType } from '@elastic/charts';
 
 const DEFAULT_COLOR = '#000';
 
-export const getAreaSeriesStyles = ({ points, lines, color }) => ({
+export const getAreaStyles = ({ points, lines, color }) => ({
   areaSeriesStyle: {
     line: {
-      visible: Boolean(lines),
-      stroke: '',
-      strokeWidth: get(lines, 'lineWidth', 0),
+      stroke: color,
+      strokeWidth: lines.lineWidth || 1,
+      visible: Boolean(lines.show),
     },
     area: {
       fill: color,
-      opacity: get(lines, 'fill', 1),
-      visible: true,
+      opacity: lines.fill <= 0 ? 0 : lines.fill,
+      visible: Boolean(lines.show),
     },
     point: {
-      visible: Boolean(points),
-      radius: get(points, 'radius', 0.5),
-      opacity: 1,
-      stroke: '',
-      strokeWidth: get(points, 'lineWidth', 0),
+      radius: points.radius || 0.5,
+      stroke: color || DEFAULT_COLOR,
+      strokeWidth: points.lineWidth || 5,
+      visible: points.lineWidth > 0 && Boolean(points.show),
     },
   },
+  curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
 });
 
 export const getBarStyles = ({ show = true, lineWidth = 1, fill = 1 }, color) => ({

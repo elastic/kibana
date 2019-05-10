@@ -20,11 +20,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getSpecId, getGroupId, ScaleType, AreaSeries } from '@elastic/charts';
-import { getSeriesColors, getAreaSeriesStyles } from '../utils/series_styles';
+import { getSeriesColors, getAreaStyles } from '../utils/series_styles';
 
 export function AreaSeriesDecorator({
   seriesId,
-  groupId,
+  seriesGroupId,
   name,
   data,
   hideInLegend,
@@ -36,22 +36,23 @@ export function AreaSeriesDecorator({
   yScaleType,
 }) {
   const id = getSpecId(seriesId);
-  const seriesStyle = getAreaSeriesStyles({ points, lines, color });
+  const groupId = getGroupId(seriesGroupId);
+  const customSeriesColors = getSeriesColors(color, id);
+  const areaSeriesStyle = getAreaStyles({ points, lines, color });
+
   const seriesSettings = {
     id,
-    groupId: getGroupId(groupId),
     name,
+    groupId,
     data,
+    customSeriesColors,
     hideInLegend,
-    ...seriesStyle,
-    xAccessor: 0,
-    yAccessors: [1],
-    // todo: props.stack ???
-    stackAccessors: stack ? [0] : null,
+    xAccessor: 0, // todo: Magic number
+    yAccessors: [1], // todo: Magic number
+    stackAccessors: stack ? [0] : null, // todo: props.stack ???
     xScaleType,
     yScaleType,
-    yScaleToDataExtent: false,
-    customSeriesColors: getSeriesColors(color, id),
+    ...areaSeriesStyle,
   };
 
   return (
@@ -61,7 +62,7 @@ export function AreaSeriesDecorator({
 
 AreaSeriesDecorator.propTypes = {
   seriesId: PropTypes.string.isRequired,
-  groupId: PropTypes.string.isRequired,
+  seriesGroupId: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
   hideInLegend: PropTypes.bool.isRequired,
@@ -69,7 +70,7 @@ AreaSeriesDecorator.propTypes = {
     fill: PropTypes.number,
     lineWidth: PropTypes.number,
     show: PropTypes.bool,
-    steps: PropTypes.bool,
+    steps: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]),
   }).isRequired,
   color: PropTypes.string.isRequired,
   stack: PropTypes.bool.isRequired,

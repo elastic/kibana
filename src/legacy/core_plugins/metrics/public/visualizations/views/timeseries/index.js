@@ -122,7 +122,7 @@ export const TimeSeries = ({
               <AreaSeriesDecorator
                 key={`${id}-${label}`}
                 seriesId={id}
-                groupId={groupId}
+                seriesGroupId={groupId}
                 name={label}
                 data={data}
                 hideInLegend={hideInLegend}
