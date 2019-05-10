@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getInfraContainerHref, getInfraKubernetesHref } from '../get_infra_href';
+import { getInfraContainerHref, getInfraKubernetesHref, getInfraIpHref } from '../get_infra_href';
 import { LatestMonitor } from '../../../../../common/graphql/types';
 
 describe('getInfraHref', () => {
@@ -24,6 +24,9 @@ describe('getInfraHref', () => {
           pod: {
             uid: 'test-pod-uid',
           },
+        },
+        monitor: {
+          ip: '151.101.202.217',
         },
       },
     };
@@ -63,5 +66,23 @@ describe('getInfraHref', () => {
     expect.assertions(1);
     delete monitor.ping;
     expect(getInfraKubernetesHref(monitor, 'foo')).toBeUndefined();
+  });
+
+  it('getInfraIpHref creates a link for valid parameters', () => {
+    expect.assertions(2);
+    const result = getInfraIpHref(monitor, 'bar');
+    expect(result).not.toBeUndefined();
+    expect(result).toMatchSnapshot();
+  });
+
+  it('getInfraIpHref does not specify a base path when none is available', () => {
+    expect.assertions(1);
+    expect(getInfraIpHref(monitor, '')).toMatchSnapshot();
+  });
+
+  it('getInfraIpHref returns undefined when ip is present', () => {
+    expect.assertions(1);
+    delete monitor.ping;
+    expect(getInfraIpHref(monitor, 'foo')).toBeUndefined();
   });
 });
