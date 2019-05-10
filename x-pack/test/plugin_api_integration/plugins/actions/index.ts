@@ -6,23 +6,6 @@
 
 import Joi from 'joi';
 import { Legacy } from 'kibana';
-import { Request } from 'hapi';
-import { ActionsPlugin } from '../../../../plugins/actions';
-
-// @ts-ignore
-interface FireRequest extends Request {
-  params: {
-    id: string;
-  };
-  payload: {
-    params: Record<string, any>;
-  };
-  server: {
-    plugins: {
-      actions: ActionsPlugin;
-    };
-  };
-}
 
 // eslint-disable-next-line import/no-default-export
 export default function actionsPlugin(kibana: any) {
@@ -47,7 +30,7 @@ export default function actionsPlugin(kibana: any) {
               .required(),
           },
         },
-        async handler(request: FireRequest) {
+        async handler(request: any) {
           const savedObjectsClient = request.getSavedObjectsClient();
           return await request.server.plugins.actions.fire({
             id: request.params.id,
