@@ -220,8 +220,6 @@ function transformFilterStringToQueryObject(doc) {
           });
         }
       });
-      // migrate aggs filters
-      // migrate panel filters (where are these?)
       newDoc.attributes.visState = JSON.stringify(visState);
     }
   }
