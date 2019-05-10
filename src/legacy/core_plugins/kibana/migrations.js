@@ -160,9 +160,15 @@ function transformFilterStringToQueryObject(doc) {
       // TODO apply to all types (figure out if some do not have a filter somewhere)
       const isMetricTSVBVis = get(visState, 'params.type') === 'metric';
       const isMarkdownTSVBVis = get(visState, 'params.type') === 'markdown';
-      const isTimeSeriesTSVBVis = get(visState, 'params.type') === 'top_n';
-      const isGaugeTSVBVis = get(visState, 'params.type') === 'gauge';
-      const isTableTSVBVis = get(visState, 'params.type') === 'table';
+      /* const isTimeSeriesTSVBVis = get(visState, 'params.type') === 'top_n';  we have filters in:
+        visState.params.series.filter
+        visState.params.series.split_filters[each].filter
+        visState.params.filter
+        visState.params.annotations.query_string
+      */
+      // const isGaugeTSVBVis = get(visState, 'params.type') === 'gauge';
+      // const isTableTSVBVis = get(visState, 'params.type') === 'table';
+      // const isTimeSeriresTSVBVis = get(visState, 'params.type') === 'timeseries';
       if (!isMetricTSVBVis && !isMarkdownTSVBVis) {
         // skip
         return doc;
