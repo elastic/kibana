@@ -4,33 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { LatestMonitor } from '../../../../common/graphql/types';
 import { addBasePath } from './add_base_path';
+import { buildHref } from './build_href';
 
 export const getLoggingContainerHref = (
   monitor: LatestMonitor,
   basePath: string
-): string | undefined => {
-  const containerId = get<string | undefined>(monitor, 'ping.container.id', undefined);
-  if (containerId === undefined) {
-    return containerId;
-  }
-  return addBasePath(
-    basePath,
-    `/app/infra#/logs?logFilter=${encodeURI(
-      `(expression:'container.id : ${containerId}',kind:kuery)`
-    )}`
+): string | undefined =>
+  buildHref(monitor, 'ping.container.id', containerId =>
+    addBasePath(
+      basePath,
+      `/app/infra#/logs?logFilter=${encodeURI(
+        `(expression:'container.id : ${containerId}',kind:kuery)`
+      )}`
+    )
   );
-};
 
-export const getLoggingKubernetesHref = (monitor: LatestMonitor, basePath: string) => {
-  const podUID = get<string | undefined>(monitor, 'ping.kubernetes.pod.uid', undefined);
-  if (podUID === undefined) {
-    return podUID;
-  }
-  return addBasePath(
-    basePath,
-    `/app/infra#/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${podUID}',kind:kuery)`)}`
+export const getLoggingKubernetesHref = (monitor: LatestMonitor, basePath: string) =>
+  buildHref(monitor, 'ping.kubernetes.pod.uid', podUID =>
+    addBasePath(
+      basePath,
+      `/app/infra#/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${podUID}',kind:kuery)`)}`
+    )
   );
-};
+
+export const getLoggingIpHref = (monitor: LatestMonitor, basePath: string) =>
+  buildHref(monitor, 'ping.monitor.ip', ip =>
+    addBasePath(
+      basePath,
+      `/app/infra#/logs?logFilter=(expression:'${encodeURIComponent(
+        `host.ip : ${ip}`
+      )}',kind:kuery)`
+    )
+  );
