@@ -58,7 +58,6 @@ export function registerStatsApi(kbnServer, server, config) {
             extended: Joi.string().valid('', 'true', 'false'),
             legacy: Joi.string().valid('', 'true', 'false'),
             exclude_usage: Joi.string().valid('', 'true', 'false'),
-            wait_for_all_stats: Joi.string().valid('', 'true', 'false').default('true')
           })
         },
         tags: ['api'],
@@ -67,13 +66,12 @@ export function registerStatsApi(kbnServer, server, config) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
         const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
         const shouldGetUsage = req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
-        const shouldWaitForAllStats = req.query.wait_for_all_stats === 'true';
 
         let extended;
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
-          const collectorsReady = shouldWaitForAllStats ? await collectorSet.areAllCollectorsReady() : true;
+          const collectorsReady = await collectorSet.areAllCollectorsReady();
 
           if (shouldGetUsage && !collectorsReady) {
             return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);

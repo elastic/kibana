@@ -30,11 +30,13 @@ import { UsageCollector } from './usage_collector';
  */
 export class CollectorSet {
 
+  static _waitingForAllCollectorsTimestamp = null;
+
   /*
    * @param {Object} server - server object
    * @param {Array} collectors to initialize, usually as a result of filtering another CollectorSet instance
    */
-  constructor(server, collectors = []) {
+  constructor(server, collectors = [], config = null) {
     this._log = getCollectorLogger(server);
     this._collectors = collectors;
 
@@ -44,7 +46,9 @@ export class CollectorSet {
      */
     this.makeStatsCollector = options => new Collector(server, options);
     this.makeUsageCollector = options => new UsageCollector(server, options);
-    this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
+    this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray, config);
+
+    this._maximumWaitTimeForAllCollectorsInS = config ? config.get('stats.maximumWaitTimeForAllCollectorsInS') : 60;
   }
 
   /*
@@ -78,12 +82,32 @@ export class CollectorSet {
       throw new Error(`areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet);
     }
 
+    const collectorTypesNotReady = [];
     let allReady = true;
     await collectorSet.asyncEach(async collector => {
       if (!await collector.isReady()) {
         allReady = false;
+        collectorTypesNotReady.push(collector.type);
       }
     });
+
+    if (!allReady && this._maximumWaitTimeForAllCollectorsInS >= 0) {
+      const nowTimestamp = +new Date();
+      CollectorSet._waitingForAllCollectorsTimestamp = CollectorSet._waitingForAllCollectorsTimestamp || nowTimestamp;
+      const timeWaitedInMS = nowTimestamp - CollectorSet._waitingForAllCollectorsTimestamp;
+      const timeLeftInMS = (this._maximumWaitTimeForAllCollectorsInS * 1000) - timeWaitedInMS;
+      if (timeLeftInMS <= 0) {
+        console.log(`All collectors are not ready (waiting for ${collectorTypesNotReady.join(',')}) `
+        + `but we have waited the required `
+        + `${this._maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`);
+        return true;
+      } else {
+        console.log(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
+      }
+    } else {
+      CollectorSet._waitingForAllCollectorsTimestamp = null;
+    }
+
     return allReady;
   }
 
