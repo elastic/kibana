@@ -10,9 +10,11 @@ import { toastNotifications } from 'ui/notify';
 
 import {
   EuiButton,
+  EuiButtonIcon,
   // Module '"@elastic/eui"' has no exported member 'EuiCard'.
   // @ts-ignore
   EuiCard,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -21,7 +23,7 @@ import {
 
 import { ml } from '../../../services/ml_api_service';
 
-import { KibanaContext, isKibanaContext } from '../../common';
+import { getDataFrameRequest, KibanaContext, isKibanaContext } from '../../common';
 
 export interface JobDetailsExposedState {
   created: boolean;
@@ -162,8 +164,24 @@ export const JobCreateForm: SFC<Props> = React.memo(
       }
     };
 
+    function getJobConfigDevConsoleStatement() {
+      return `PUT _data_frame/transforms/${jobId}
+${JSON.stringify(jobConfig, null, 2)}
+`;
+    }
+
+    const euiCopyText = i18n.translate('xpack.ml.dataframe.jobCreateForm.copyClipboardTooltip', {
+      defaultMessage:
+        'Copy Dev Console statement of the data frame job configuration to the clipboard.',
+    });
+
     return (
       <Fragment>
+        <EuiCopy beforeMessage={euiCopyText} textToCopy={getJobConfigDevConsoleStatement()}>
+          {(copy: () => void) => (
+            <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+          )}
+        </EuiCopy>
         <EuiButton isDisabled={created} onClick={createDataFrame}>
           {i18n.translate('xpack.ml.dataframe.jobCreateForm.createDataFrameButton', {
             defaultMessage: 'Create data frame',
