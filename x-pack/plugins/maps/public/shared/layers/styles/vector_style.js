@@ -326,9 +326,15 @@ export class VectorStyle extends AbstractStyle {
 
   _getMbDataDrivenSize({ fieldName, minSize, maxSize }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
+    // return   ['interpolate',
+    //   ['linear'],
+    //   ['get', targetName],
+    //   0, minSize,
+    //   1, maxSize
+    // ];
     return   ['interpolate',
       ['linear'],
-      ['get', targetName],
+      ['feature-state', targetName],
       0, minSize,
       1, maxSize
     ];
