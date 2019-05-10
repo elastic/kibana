@@ -22,6 +22,8 @@ export interface InfraSource {
   version?: string | null;
   /** The timestamp the source configuration was last persisted at */
   updatedAt?: number | null;
+  /** The origin of the source (one of 'fallback', 'internal', 'stored') */
+  origin: string;
   /** The raw configuration of the source */
   configuration: InfraSourceConfiguration;
   /** The status of the source */
@@ -1051,6 +1053,8 @@ export namespace InfraSourceFields {
     version?: string | null;
 
     updatedAt?: number | null;
+
+    origin: string;
   };
 }
 
