@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('x axis labels', async function () {
+    describe('timezones', async function () {
       const expectedLabels = [
         '2015-09-20 00:00',
         '2015-09-21 00:00',
@@ -212,10 +212,13 @@ export default function ({ getService, getPageObjects }) {
         const toTime = '2015-09-22 16:08:34.554';
         // note that we're setting the absolute time range while we're in 'America/Phoenix' tz
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.common.sleep(10000);
-        const labels = await PageObjects.visualize.getXAxisLabels();
-        log.debug(`Labels: ${labels}`);
-        expect(labels).to.eql([ '10:00', '11:00', '12:00', '13:00', '14:00', '15:00' ]);
+        await PageObjects.visualize.waitForRenderingCount();
+
+        await retry.waitFor('wait for x-axis labels to match expected for Phoenix', async () => {
+          const labels = await PageObjects.visualize.getXAxisLabels();
+          log.debug(`Labels: ${labels}`);
+          return labels.toString() === [ '10:00', '11:00', '12:00', '13:00', '14:00', '15:00' ].toString();
+        });
 
         const expectedTableData = [ [ '09:05', '13', '13,463,070,562.462' ],
           [ '09:10', '23', '11,518,321,384.727' ],
@@ -249,13 +252,13 @@ export default function ({ getService, getPageObjects }) {
         // wait some time before trying to check for rendering count
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.visualize.waitForRenderingCount();
-        await PageObjects.common.sleep(1000);
         log.debug('getXAxisLabels');
 
-        const labels2 = await PageObjects.visualize.getXAxisLabels();
-        log.debug(`Labels2: ${labels2}`);
-        // the x-axis labels are shifted +7 hours
-        expect(labels2).to.eql([ '17:00', '18:00', '19:00', '20:00', '21:00', '22:00' ]);
+        await retry.waitFor('wait for x-axis labels to match expected for UTC', async () => {
+          const labels2 = await PageObjects.visualize.getXAxisLabels();
+          log.debug(`Labels: ${labels2}`);
+          return labels2.toString() === [ '17:00', '18:00', '19:00', '20:00', '21:00', '22:00' ].toString();
+        });
 
         // the expected inspector data is the same but with timestamps shifted +7 hours
         const expectedTableData2 = [ [ '16:05', '13', '13,463,070,562.462' ],
