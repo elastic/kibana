@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { DECIMAL_DEGREES_PRECISION, ES_GEO_FIELD_TYPE } from '../common/constants';
 
 /**
  * Converts Elasticsearch search results into GeoJson FeatureCollection
@@ -25,9 +26,9 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
     const properties = flattenHit(hits[i]);
 
     tmpGeometriesAccumulator.length = 0;//truncate accumulator
-    if (geoFieldType === 'geo_point') {
+    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
       geoPointToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
-    } else if (geoFieldType === 'geo_shape') {
+    } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
       geoShapeToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
     } else {
       const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedFieldTypeErrorMessage', {
@@ -184,8 +185,7 @@ const BOTTOM_RIGHT_INDEX = 2;
 
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   const safePolygon = convertMapExtentToPolygon(mapExtent);
-
-  if (geoFieldType === 'geo_point') {
+  if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
     const verticies = safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
     return {
       geo_bounding_box: {
@@ -195,7 +195,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
         }
       }
     };
-  } else if (geoFieldType === 'geo_shape') {
+  } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
     return {
       geo_shape: {
         [geoFieldName]: {
@@ -205,13 +205,92 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
       }
     };
   } else {
-    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoFieldTypeErrorMessage', {
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.extent.unsupportedGeoFieldTypeErrorMessage', {
       defaultMessage: `Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}`,
       values: { geoFieldType }
     });
     throw new Error(errorMessage);
   }
 }
+
+
+export function createExtentFilterWithMeta(mapExtent, indexPatternId, geoFieldName, geoFieldType) {
+
+  const roundedExtent = {
+    minLon: _.round(mapExtent.minLon, DECIMAL_DEGREES_PRECISION),
+    minLat: _.round(mapExtent.minLat, DECIMAL_DEGREES_PRECISION),
+    maxLon: _.round(mapExtent.maxLon, DECIMAL_DEGREES_PRECISION),
+    maxLat: _.round(mapExtent.maxLat, DECIMAL_DEGREES_PRECISION)
+  };
+
+  const filter = createExtentFilter(roundedExtent, geoFieldName, geoFieldType);
+  filter.meta = {
+    negate: false,
+    index: indexPatternId,
+    alias: i18n.translate('xpack.maps.elasticsearch_geo_utils.extentFilter.aliasTitle', {
+      defaultMessage: `extent at {coordinate}`,
+      values: {
+        coordinate: `[${roundedExtent.minLon}, ${roundedExtent.minLat}, ${roundedExtent.maxLon}, ${roundedExtent.maxLat}]`
+      }
+    })
+  };
+  return filter;
+}
+
+export function createShapeFilterWithMeta(geojsonPolygon, indexPatternId, geoFieldName, geoFieldType) {
+
+  const filter = {
+    meta: {
+      negate: false,
+      index: indexPatternId,
+      alias: i18n.translate('xpack.maps.elasticsearch_geo_utils.shapeFilter.aliasTitle', {
+        defaultMessage: `shape at {coordinate}`,
+        values: {
+          // eslint-disable-next-line max-len
+          coordinate: `${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}`
+        }
+      })
+    }
+  };
+
+  if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+    const pointsArray  = geojsonPolygon.coordinates[0].map(coordinatePair => {
+      return {
+        lon: _.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION),
+        lat: _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)
+      };
+    });
+    filter.geo_polygon = {
+      ignore_unmapped: true,
+      [geoFieldName]: {
+        points: pointsArray
+      }
+    };
+  } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+    const geojsonCoordinateArray  = geojsonPolygon.coordinates[0].map(coordinatePair => {
+      return [_.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION), _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)];
+    });
+    filter.geo_shape = {
+      ignore_unmapped: true,
+      [geoFieldName]: {
+        shape: {
+          type: 'Polygon',
+          coordinates: [geojsonCoordinateArray]
+        },
+        relation: 'INTERSECTS'
+      }
+    };
+  } else {
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.shape.unsupportedGeoFieldTypeErrorMessage', {
+      defaultMessage: `Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}`,
+      values: { geoFieldType }
+    });
+    throw new Error(errorMessage);
+  }
+  return filter;
+}
+
+
 
 function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons

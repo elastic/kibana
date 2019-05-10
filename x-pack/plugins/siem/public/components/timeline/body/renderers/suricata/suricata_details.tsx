@@ -10,11 +10,12 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { NetflowRenderer } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 
-import { SuricataRefs, SuricataSignature } from '.';
+import { NetflowRenderer } from '../netflow';
+import { SuricataSignature } from './suricata_signature';
+import { SuricataRefs } from './suricata_refs';
 
 const Details = styled.div`
   margin: 10px 0;

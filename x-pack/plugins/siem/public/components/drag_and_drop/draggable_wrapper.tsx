@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash/fp';
 import { EuiText } from '@elastic/eui';
-import { defaultTo } from 'lodash/fp';
 import * as React from 'react';
 import {
   Draggable,
@@ -17,13 +17,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { State } from '../../store';
-// This import needs to be directly link to drag_and_drop store or we will have a circular dependency
-import {
-  dragAndDropActions,
-  dragAndDropModel,
-  dragAndDropSelectors,
-} from '../../store/drag_and_drop';
+import { dragAndDropActions } from '../../store/drag_and_drop';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { TruncatableText } from '../truncatable_text';
 
@@ -49,10 +43,6 @@ interface OwnProps {
   width?: string;
 }
 
-interface StateReduxProps {
-  dataProviders?: dragAndDropModel.IdToDataProvider;
-}
-
 interface DispatchProps {
   registerProvider?: ActionCreator<{
     provider: DataProvider;
@@ -62,9 +52,20 @@ interface DispatchProps {
   }>;
 }
 
-type Props = OwnProps & StateReduxProps & DispatchProps;
+type Props = OwnProps & DispatchProps;
 
-class DraggableWrapperComponent extends React.PureComponent<Props> {
+/**
+ * Wraps a draggable component to handle registration / unregistration of the
+ * data provider associated with the item being dropped
+ */
+class DraggableWrapperComponent extends React.Component<Props> {
+  public shouldComponentUpdate = ({ dataProvider, render, width }: Props) =>
+    isEqual(dataProvider, this.props.dataProvider) &&
+    render !== this.props.render &&
+    width === this.props.width
+      ? false
+      : true;
+
   public componentDidMount() {
     const { dataProvider, registerProvider } = this.props;
 
@@ -126,13 +127,8 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
   }
 }
 
-const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
-
-const mapStateToProps = (state: State) =>
-  defaultTo(emptyDataProviders, dragAndDropSelectors.dataProvidersSelector(state));
-
 export const DraggableWrapper = connect(
-  mapStateToProps,
+  null,
   {
     registerProvider: dragAndDropActions.registerProvider,
     unRegisterProvider: dragAndDropActions.unRegisterProvider,

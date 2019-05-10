@@ -7,7 +7,14 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { getIsReadOnly, updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
+import {
+  getIsReadOnly,
+  updateFlyout,
+  FLYOUT_STATE,
+  getOpenTOCDetails,
+  hideTOCDetails,
+  showTOCDetails,
+} from '../../../../../store/ui';
 import {
   fitToLayerExtent,
   setSelectedLayer,
@@ -18,12 +25,13 @@ import {
 
 import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state = {}, ownProps) {
   return {
     isReadOnly: getIsReadOnly(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
     selectedLayer: getSelectedLayer(state),
     hasDirtyStateSelector: hasDirtyState(state),
+    isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
   };
 }
 
@@ -42,7 +50,13 @@ function mapDispatchToProps(dispatch) {
     },
     cloneLayer: layerId => {
       dispatch(cloneLayer(layerId));
-    }
+    },
+    hideTOCDetails: layerId => {
+      dispatch(hideTOCDetails(layerId));
+    },
+    showTOCDetails: layerId => {
+      dispatch(showTOCDetails(layerId));
+    },
   });
 }
 

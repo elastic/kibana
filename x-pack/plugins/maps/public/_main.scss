@@ -23,29 +23,39 @@
 
 .mapContainer {
   flex-grow: 1;
+
+  .mapboxgl-popup {
+    z-index: 100;
+    border-color: $euiColorEmptyShade;
+  }
+
+  .mapboxgl-popup-content {
+    background-color: $euiColorEmptyShade;
+  }
+
+  .mapboxgl-popup-tip {
+    border-top-color: $euiColorEmptyShade !important;
+  }
+
+  .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+    margin-left: $euiSizeM;
+    margin-top: $euiSizeM;
+  }
+
+  .mapboxgl-ctrl-group:not(:empty) {
+    @include euiBottomShadowLarge;
+    background-color: $euiColorEmptyShade;
+    border-radius: $euiBorderRadius;
+
+    > button {
+      @include size($euiSizeXL);
+
+      + button {
+        border: none;
+      }
+    }
+  }
 }
-
-.mapboxgl-popup {
-  z-index: 100;
-  border-color: $euiColorEmptyShade;
-}
-
-.mapboxgl-popup-content {
-  background-color: $euiColorEmptyShade;
-}
-
-.mapboxgl-popup-tip {
-  border-top-color: $euiColorEmptyShade !important;
-}
-
-// This is not good practice to create such a generic class.
-// I can't seem to find it being applied anywhere in GIS
-// .hidden {
-//   display: none
-// }
-
-// EUIFIXTODO:
-
 .euiColorPicker__emptySwatch {
   position: relative;
 }
