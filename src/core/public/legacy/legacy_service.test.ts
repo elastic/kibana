@@ -193,6 +193,7 @@ const defaultSetupDeps = {
 
 const applicationStart = applicationServiceMock.createStartContract();
 const basePathStart = basePathServiceMock.createStartContract();
+const chromeStart = chromeServiceMock.createStartContract();
 const i18nStart = i18nServiceMock.createStartContract();
 const httpStart = httpServiceMock.createStartContract();
 const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
@@ -203,6 +204,7 @@ const defaultStartDeps = {
   core: {
     application: applicationStart,
     basePath: basePathStart,
+    chrome: chromeStart,
     i18n: i18nStart,
     http: httpStart,
     injectedMetadata: injectedMetadataStart,

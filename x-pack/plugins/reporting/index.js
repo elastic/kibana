@@ -128,7 +128,11 @@ export const reporting = (kibana) => {
             size: Joi.number().integer().default(500)
           }).default(),
         }).default(),
-        encryptionKey: Joi.string(),
+        encryptionKey: Joi.when(Joi.ref('$dist'), {
+          is: true,
+          then: Joi.string(),
+          otherwise: Joi.string().default('a'.repeat(32)),
+        }),
         roles: Joi.object({
           allow: Joi.array().items(Joi.string()).default(['reporting_user']),
         }).default(),
