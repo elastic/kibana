@@ -84,14 +84,9 @@ export function createTelemetryUsageCollector(server: KibanaHapiServer) {
   return server.usage.collectorSet.makeUsageCollector({
     type: 'static_telemetry',
     fetch: async () => {
-      try {
-        const configPath: string = server.config().get('xpack.xpack_main.telemetry.config');
-        const telemetryPath = join(dirname(configPath), 'telemetry.yml');
-        return await readTelemetryFile(telemetryPath);
-      } catch (err) {
-        // ignored
-        return undefined;
-      }
+      const configPath: string = server.config().get('xpack.xpack_main.telemetry.config');
+      const telemetryPath = join(dirname(configPath), 'telemetry.yml');
+      return await readTelemetryFile(telemetryPath);
     },
   });
 }
