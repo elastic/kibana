@@ -56,14 +56,13 @@ export class ClusterClient {
     close(): void;
     }
 
-// @public (undocumented)
+// @internal (undocumented)
 export class ConfigService {
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
     constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
-    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
-    atPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
+    atPath<TSchema extends Type<unknown>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
     getConfig$(): Observable<Config>;
     // (undocumented)
     getUnusedPaths(): Promise<string[]>;
@@ -72,7 +71,9 @@ export class ConfigService {
     // (undocumented)
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
     optionalAtPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig | undefined>;
-}
+    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
+    setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
+    }
 
 // @public (undocumented)
 export interface CoreSetup {
@@ -80,25 +81,19 @@ export interface CoreSetup {
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
-    // Warning: (ae-incompatible-release-tags) The symbol "plugins" is marked as @public, but its signature references "PluginsServiceSetup" which is marked as @internal
-    // 
     // (undocumented)
     plugins: PluginsServiceSetup;
 }
 
-// Warning: (ae-missing-release-tag) "CoreStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface CoreStart {
     // (undocumented)
     http: HttpServiceStart;
-    // Warning: (ae-incompatible-release-tags) The symbol "plugins" is marked as @public, but its signature references "PluginsServiceStart" which is marked as @internal
-    // 
     // (undocumented)
     plugins: PluginsServiceStart;
 }
 
-// @internal
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -295,7 +290,7 @@ export interface PluginSetupContext {
     };
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export interface PluginsServiceSetup {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
@@ -306,7 +301,7 @@ export interface PluginsServiceSetup {
     };
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export interface PluginsServiceStart {
     // (undocumented)
     contracts: Map<PluginName, unknown>;

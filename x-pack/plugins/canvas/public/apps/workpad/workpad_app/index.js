@@ -11,6 +11,7 @@ import { canUserWrite, getAppReady } from '../../../state/selectors/app';
 import { getWorkpad, isWriteable } from '../../../state/selectors/workpad';
 import { LoadWorkpad } from './load_workpad';
 import { WorkpadApp as Component } from './workpad_app';
+import { withElementsLoadedTelemetry } from './workpad_telemetry';
 
 const mapStateToProps = state => {
   const appReady = getAppReady(state);
@@ -36,5 +37,6 @@ export const WorkpadApp = compose(
     mapStateToProps,
     mapDispatchToProps
   ),
-  ...branches
+  ...branches,
+  withElementsLoadedTelemetry
 )(Component);

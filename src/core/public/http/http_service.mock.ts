@@ -41,4 +41,5 @@ const createMock = (): jest.Mocked<PublicMethodsOf<HttpService>> => ({
 export const httpServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };
