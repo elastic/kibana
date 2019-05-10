@@ -21,14 +21,15 @@ class GetCsvReportPanelAction extends ContextMenuAction {
   constructor() {
     super(
       {
-        displayName: i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
-          defaultMessage: 'Download CSV',
-        }),
         id: 'downloadCsvReport',
         parentPanelId: 'mainMenu',
       },
       {
         icon: 'document',
+        getDisplayName: () =>
+          i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
+            defaultMessage: 'Download CSV',
+          }),
       }
     );
 
