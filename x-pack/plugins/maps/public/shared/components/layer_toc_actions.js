@@ -11,7 +11,6 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +51,7 @@ export class LayerTocActions extends Component {
   };
 
   _renderPopoverToggleButton() {
-    const { icon, tooltipContent } = this._getIconAndTooltipContent();
+    const { icon, tooltipContent } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
     return (
       <EuiToolTip
         position="top"
@@ -72,55 +71,6 @@ export class LayerTocActions extends Component {
         </EuiButtonEmpty>
       </EuiToolTip>
     );
-  }
-
-  _getIconAndTooltipContent() {
-    const { zoom, layer } = this.props;
-
-    let icon;
-    let tooltipContent;
-    if (layer.hasErrors()) {
-      icon = (
-        <EuiIcon
-          aria-label={i18n.translate('xpack.maps.layerTocActions.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
-          size="m"
-          type="alert"
-          color="warning"
-        />
-      );
-      tooltipContent = layer.getErrors();
-    } else if (layer.isLayerLoading()) {
-      icon = (<EuiLoadingSpinner size="m"/>);
-    } else if (!layer.isVisible()) {
-      icon = (
-        <EuiIcon
-          size="m"
-          type="eyeClosed"
-        />
-      );
-      tooltipContent = i18n.translate('xpack.maps.layerTocActions.layerHiddenTooltip', {
-        defaultMessage: `Layer is hidden.`
-      });
-    } else if (!layer.showAtZoomLevel(zoom)) {
-      const { minZoom, maxZoom } = layer.getZoomConfig();
-      icon = (
-        <EuiIcon
-          size="m"
-          type="expand"
-        />
-      );
-      tooltipContent = i18n.translate('xpack.maps.layerTocActions.zoomFeedbackTooltip', {
-        defaultMessage: `Layer is visible between zoom levels {minZoom} to {maxZoom}.`,
-        values: { minZoom, maxZoom }
-      });
-    } else {
-      icon = layer.getIcon();
-    }
-
-    return {
-      icon,
-      tooltipContent
-    };
   }
 
   _getActionsPanel() {
