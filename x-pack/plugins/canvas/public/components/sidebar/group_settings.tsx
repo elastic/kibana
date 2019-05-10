@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
-// @ts-ignore unconverted component
-import { SidebarHeader } from '../sidebar_header/';
+import React, { FunctionComponent } from 'react';
+import { EuiText } from '@elastic/eui';
 
 export const GroupSettings: FunctionComponent = () => (
-  <Fragment>
-    <SidebarHeader title="Grouped element" groupIsSelected showLayerControls={false} />
-    <EuiSpacer />
-    <EuiText size="s">
-      <p>Ungroup (U) to edit individual element settings.</p>
-      <p>Save this group as a new element to re-use it throughout your workpad.</p>
-    </EuiText>
-  </Fragment>
+  <EuiText size="s">
+    <p>Ungroup (U) to edit individual element settings.</p>
+    <p>Save this group as a new element to re-use it throughout your workpad.</p>
+  </EuiText>
 );

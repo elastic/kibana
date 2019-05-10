@@ -42,7 +42,10 @@ export function parseDataUrl(str: string, withData = false) {
   };
 }
 
-export function isValidDataUrl(str: string) {
+export function isValidDataUrl(str?: string) {
+  if (!str) {
+    return false;
+  }
   return dataurlRegex.test(str);
 }
 

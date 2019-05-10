@@ -57,6 +57,9 @@ export interface CoreSetup {
   plugins: PluginsServiceSetup;
 }
 
+/**
+ * @public
+ */
 export interface CoreStart {
   http: HttpServiceStart;
   plugins: PluginsServiceStart;

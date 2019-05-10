@@ -26,13 +26,16 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
     <Router history={history}>
       <Switch>
         {uiCapabilities.infrastructure.show && (
-          <Redirect from="/" exact={true} to="/infrastructure/snapshot" />
+          <Redirect from="/" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.infrastructure.show && (
-          <Redirect from="/infrastructure" exact={true} to="/infrastructure/snapshot" />
+          <Redirect from="/infrastructure" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.infrastructure.show && (
-          <Redirect from="/home" exact={true} to="/infrastructure/snapshot" />
+          <Redirect from="/infrastructure/snapshot" exact={true} to="/infrastructure/inventory" />
+        )}
+        {uiCapabilities.infrastructure.show && (
+          <Redirect from="/home" exact={true} to="/infrastructure/inventory" />
         )}
         {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
         {uiCapabilities.infrastructure.show && (
