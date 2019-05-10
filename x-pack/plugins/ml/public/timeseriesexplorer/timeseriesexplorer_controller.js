@@ -87,11 +87,11 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   AppState,
   config,
+  globalState,
   i18n) {
 
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectSeverityService');
-  const globalState = $injector.get('globalState');
   const mlJobSelectService = $injector.get('mlJobSelectService');
 
   $scope.timeFieldName = 'timestamp';
@@ -175,7 +175,8 @@ module.controller('MlTimeSeriesExplorerController', function (
               defaultMessage: 'You can only view one job at a time in this dashboard'
             })
           );
-          setGlobalState(globalState, [selectedJobIds[0]]);
+
+          setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
           mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else {
         // if a group has been loaded
@@ -186,12 +187,13 @@ module.controller('MlTimeSeriesExplorerController', function (
                 defaultMessage: 'You can only view one job at a time in this dashboard'
               })
             );
-            setGlobalState(globalState, [selectedJobIds[0]]);
+
+            setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
             mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
           } else if ($scope.jobs.length > 0) {
           // if there are no valid jobs in the group but there are valid jobs
           // in the list of all jobs, select the first
-            setGlobalState(globalState, [$scope.jobs[0].id]);
+            setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
             mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
           } else {
           // if there are no valid jobs left.
@@ -201,7 +203,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
       // if some ids have been filtered out because they were invalid.
       // refresh the URL with the first valid id
-        setGlobalState(globalState, [selectedJobIds[0]]);
+        setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
         mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
       } else if (selectedJobIds.length > 0) {
       // normal behavior. a job ID has been loaded from the URL
@@ -210,7 +212,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
         // no jobs were loaded from the URL, so add the first job
         // from the full jobs list.
-          setGlobalState(globalState, [$scope.jobs[0].id]);
+          setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
           mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
         } else {
         // Jobs exist, but no time series jobs.
