@@ -152,22 +152,19 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
     condition
   }));
 
-  const uptimeLink =
-    transaction && transaction.url
-      ? url.format({
-          pathname: chrome.addBasePath('/app/uptime'),
-          hash: `/?${fromQuery(
-            pick(
-              {
-                dateRangeStart: urlParams.rangeFrom,
-                dateRangeEnd: urlParams.rangeTo,
-                search: `url.domain:${transaction.url.domain}`
-              },
-              (val: string) => !!val
-            )
-          )}`
-        })
-      : null;
+  const uptimeLink = url.format({
+    pathname: chrome.addBasePath('/app/uptime'),
+    hash: `/?${fromQuery(
+      pick(
+        {
+          dateRangeStart: urlParams.rangeFrom,
+          dateRangeEnd: urlParams.rangeTo,
+          search: `url.domain:${idx(transaction, t => t.url.domain)}`
+        },
+        (val: string) => !!val
+      )
+    )}`
+  });
 
   const menuItems = [
     ...infraItems,
@@ -195,7 +192,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
           })}
         </EuiLink>
       ),
-      condition: uptimeLink
+      condition: transaction && transaction.url
     }
   ]
     .filter(({ condition }) => condition)
