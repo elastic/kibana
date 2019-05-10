@@ -117,6 +117,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.getDataFrameTransformsStats = ca({
     urls: [
       {
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stats',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      },
+      {
         fmt: '/_data_frame/transforms/_stats',
       }
     ],

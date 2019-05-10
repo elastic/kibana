@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
+import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 
 import { moveToDataFrameJobsList, moveToDiscover } from '../../common';
 
@@ -64,6 +65,9 @@ export const JobCreateForm: SFC<Props> = React.memo(
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
     const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
+    const [progressPercentComplete, setprogressPercentComplete] = useState<undefined | number>(
+      undefined
+    );
 
     const kibanaContext = useContext(KibanaContext);
 
@@ -176,6 +180,33 @@ export const JobCreateForm: SFC<Props> = React.memo(
       }
     };
 
+    if (started === true && progressPercentComplete === undefined) {
+      // wrapping in function so we can keep the interval id in local scope
+      function startProgressBar() {
+        const interval = setInterval(async () => {
+          try {
+            const stats = await ml.dataFrame.getDataFrameTransformsStats(jobId);
+            const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
+            setprogressPercentComplete(percent);
+            if (percent >= 100) {
+              clearInterval(interval);
+            }
+          } catch (e) {
+            toastNotifications.addDanger(
+              i18n.translate('xpack.ml.dataframe.jobCreateForm.progressErrorMessage', {
+                defaultMessage: 'An error occurred getting the progress percentage: {error}',
+                values: { error: JSON.stringify(e) },
+              })
+            );
+            clearInterval(interval);
+          }
+        }, PROGRESS_JOBS_REFRESH_INTERVAL_MS);
+        setprogressPercentComplete(0);
+      }
+
+      startProgressBar();
+    }
+
     function getJobConfigDevConsoleStatement() {
       return `PUT _data_frame/transforms/${jobId}\n${JSON.stringify(jobConfig, null, 2)}\n\n`;
     }
@@ -269,11 +300,29 @@ export const JobCreateForm: SFC<Props> = React.memo(
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {created && started && (
+        {progressPercentComplete !== undefined && (
           <Fragment>
             <EuiSpacer size="m" />
+            <EuiText size="xs">
+              <strong>
+                {i18n.translate('xpack.ml.dataframe.jobCreateForm.progressTitle', {
+                  defaultMessage: 'Progress',
+                })}
+              </strong>
+            </EuiText>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem style={{ width: '400px' }} grow={false}>
+                <EuiProgress size="l" color="primary" value={progressPercentComplete} max={100} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs">{progressPercentComplete}%</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        )}
+        {created && (
+          <Fragment>
             <EuiHorizontalRule />
-
             <EuiFlexGrid gutterSize="l">
               <EuiFlexItem style={ITEM_STYLE}>
                 <EuiCard
@@ -290,10 +339,10 @@ export const JobCreateForm: SFC<Props> = React.memo(
                   onClick={moveToDataFrameJobsList}
                 />
               </EuiFlexItem>
-              {createIndexPattern === true && indexPatternId === undefined && (
+              {started === true && createIndexPattern === true && indexPatternId === undefined && (
                 <EuiFlexItem style={ITEM_STYLE}>
                   <EuiPanel style={{ position: 'relative' }}>
-                    <EuiProgress size="xs" color="accent" position="absolute" />
+                    <EuiProgress size="xs" color="primary" position="absolute" />
                     <EuiText color="subdued" size="s">
                       <p>
                         {i18n.translate(
@@ -307,7 +356,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
                   </EuiPanel>
                 </EuiFlexItem>
               )}
-              {indexPatternId !== undefined && (
+              {started === true && indexPatternId !== undefined && (
                 <EuiFlexItem style={ITEM_STYLE}>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="discoverApp" />}
