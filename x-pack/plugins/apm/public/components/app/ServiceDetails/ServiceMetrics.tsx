@@ -22,7 +22,7 @@ export function ServiceMetrics({ urlParams, agentName }: ServiceMetricsProps) {
     <React.Fragment>
       <SyncChartGroup
         render={hoverXHandlers => (
-          <EuiFlexGrid columns={2}>
+          <EuiFlexGrid columns={2} gutterSize="s">
             {data.charts.map(chart => (
               <EuiFlexItem key={chart.key}>
                 <EuiPanel>
