@@ -7,9 +7,7 @@
   "defaultIndexPattern": "kibana_sample_data_ecommerce",
   "query": {
     "bool": {
-      "filter": [
-        { "term":  { "_index": "kibana_sample_data_ecommerce" } }
-      ]
+      "filter": [{ "term": { "_index": "kibana_sample_data_ecommerce" } }]
     }
   },
   "jobs": [
@@ -25,6 +23,5 @@
       "job_id": "high_sum_total_sales"
     }
   ],
-  "kibana": {
-}
+  "kibana": {}
 }

@@ -7,9 +7,7 @@
   "defaultIndexPattern": "kibana_sample_data_flights",
   "query": {
     "bool": {
-      "filter": [
-        { "term":  { "_index": "kibana_sample_data_flights" } }
-      ]
+      "filter": [{ "term": { "_index": "kibana_sample_data_flights" } }]
     }
   },
   "jobs": [
@@ -25,6 +23,5 @@
       "job_id": "mean_delay_by_dest_weather"
     }
   ],
-  "kibana": {
-}
+  "kibana": {}
 }
