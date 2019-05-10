@@ -144,7 +144,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     () => {
       loadSource();
     },
-    [loadSource]
+    [loadSource, sourceId]
   );
 
   return {
