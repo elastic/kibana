@@ -149,7 +149,7 @@ export class AbstractLayer {
         />
       );
       tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
-        defaultMessage: `Layer is visible between zoom levels {minZoom} to {maxZoom}.`,
+        defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
         values: { minZoom, maxZoom }
       });
     } else {
