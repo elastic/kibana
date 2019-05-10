@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugin_discovery.test.mocks';
+import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugins_discovery.test.mocks';
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
@@ -26,7 +26,7 @@ import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config'
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { PluginWrapper } from '../plugin';
-import { PluginsConfig } from '../plugins_config';
+import { PluginsConfig, config } from '../plugins_config';
 import { discover } from './plugins_discovery';
 
 const TEST_PLUGIN_SEARCH_PATHS = {
@@ -57,10 +57,6 @@ beforeEach(() => {
       cb(null, []);
     }
   });
-
-  mockStat.mockImplementation((path, cb) =>
-    cb(null, { isDirectory: () => !path.includes('non-dir') })
-  );
 
   mockStat.mockImplementation((path, cb) => {
     if (path.includes('9-inaccessible-dir')) {
@@ -125,6 +121,7 @@ test('properly iterates through plugin search locations', async () => {
     env,
     logger
   );
+  await configService.setSchema(config.path, config.schema);
 
   const pluginsConfig = await configService
     .atPath('plugins', PluginsConfig)
