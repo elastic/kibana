@@ -10,31 +10,21 @@ export function UsageAPIProvider({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');
 
   async function getStats(promise) {
-    console.log('getStats()');
-    try {
-      const result = await promise;
-      console.log('getStats() successful!');
-      return result;
-    }
-    catch (err) {
-      if (err.message.includes('503')) {
-        console.log('getStats()', err.message);
-        return await new Promise(resolve => {
-          setTimeout(async () => {
-            resolve(await getStats(promise));
-          }, 100);
-        });
+    return new Promise((resolve, reject) => setTimeout(async () => {
+      try {
+        resolve(await promise);
+      } catch (err) {
+        reject(err);
       }
-      console.log('getStats() actual err', err.message);
-      throw err;
-    }
+    }, 1));
   }
 
   return {
     async getUsageStatsNoAuth() {
       const { body } = await getStats(supertestNoAuth
-        .get('/api/stats?extended=true')
+        .get('/api/stats?extended=true&wait_for_all_stats=false')
         .set('kbn-xsrf', 'xxx')
+        // .retry(10)
         .expect(401)
       );
       return body.usage;
@@ -42,8 +32,9 @@ export function UsageAPIProvider({ getService }) {
 
     async getUsageStats() {
       const { body } = await getStats(supertest
-        .get('/api/stats?extended=true')
+        .get('/api/stats?extended=true&wait_for_all_stats=false')
         .set('kbn-xsrf', 'xxx')
+        // .retry(10)
         .expect(200)
       );
       return body.usage;

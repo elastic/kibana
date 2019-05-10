@@ -43,7 +43,7 @@ export default function ({ getService }) {
 
         it('should return 401 for extended', async () => {
           await supertestNoAuth
-            .get('/api/stats?extended')
+            .get('/api/stats?extended&wait_for_all_stats=false')
             .expect(401); // unauthorized
         });
       });
