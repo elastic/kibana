@@ -90,12 +90,12 @@ export const MonitorListActionsPopover = ({
                 description: 'This value is shown to users when they hover over the link icon.',
               }
             )}
-            href={getInfraKubernetesHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            href={getInfraKubernetesHref(monitor, basePath)}
             iconType="infraApp"
             message={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.message',
               {
-                defaultMessage: 'Check Infra for pod UID',
+                defaultMessage: 'Show pod metrics',
                 description:
                   'A message explaining that this link will take the user to the Infrastructure UI filtered for the monitor Pod UID.',
               }
@@ -103,7 +103,7 @@ export const MonitorListActionsPopover = ({
             tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.tooltip',
               {
-                defaultMessage: 'Click here to check Infrastructure UI for pod UID "{podUid}".',
+                defaultMessage: 'Check Infrastructure UI for pod UID "{podUid}".',
                 values: {
                   podUid,
                 },
@@ -119,19 +119,18 @@ export const MonitorListActionsPopover = ({
                 defaultMessage: `Check Infrastructure UI for this monitor's container ID`,
               }
             )}
-            href={getInfraContainerHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            href={getInfraContainerHref(monitor, basePath)}
             iconType="infraApp"
             message={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.container.message',
               {
-                defaultMessage: 'Check Infra for container ID',
+                defaultMessage: 'Show container metrics',
               }
             )}
             tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.docker.tooltip',
               {
-                defaultMessage:
-                  'Click here to check Infrastructure UI for container ID "{containerId}"',
+                defaultMessage: 'Check Infrastructure UI for container ID "{containerId}"',
                 values: {
                   containerId,
                 },
