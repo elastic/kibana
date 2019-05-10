@@ -29,7 +29,7 @@ describe('getApmHref', () => {
     expect(result).toMatchSnapshot();
   });
 
-  it('does not add a base path or extra slash when base path is undefined', () => {
+  it('does not add a base path or extra slash when base path is empty string', () => {
     const result = getApmHref(monitor, '', 'now-15m', 'now');
     expect(result).toMatchSnapshot();
   });

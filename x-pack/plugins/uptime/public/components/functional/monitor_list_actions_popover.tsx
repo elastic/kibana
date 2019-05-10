@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LatestMonitor } from '../../../common/graphql/types';
 import { IntegrationLink } from './integration_link';
-import { getApmHref, getInfraContainerHref, getInfraKubernetesHref } from '../../lib/helper';
+import {
+  getApmHref,
+  getInfraContainerHref,
+  getInfraKubernetesHref,
+  getLoggingContainerHref,
+  getLoggingKubernetesHref,
+} from '../../lib/helper';
 
 interface MonitorListActionsPopoverProps {
   basePath: string;
@@ -132,6 +138,60 @@ export const MonitorListActionsPopover = ({
               {
                 defaultMessage:
                   'Click here to check Infrastructure UI for container ID "{containerId}"',
+                values: {
+                  containerId,
+                },
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <IntegrationLink
+            ariaLabel={i18n.translate(
+              'xpack.uptime.monitorList.loggingIntegrationAction.kubernetes.ariaLabel',
+              {
+                defaultMessage: 'Show pod logs',
+              }
+            )}
+            href={getLoggingKubernetesHref(monitor, basePath)}
+            iconType="loggingApp"
+            message={i18n.translate(
+              'xpack.uptime.monitorList.loggingIntegrationAction.kubernetes.message',
+              {
+                defaultMessage: 'Show pod logs',
+              }
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.uptime.monitorList.loggingIntegrationAction.kubernetes.tooltip',
+              {
+                defaultMessage: 'Check for logs for pod UID "{podUid}"',
+                values: {
+                  podUid,
+                },
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <IntegrationLink
+            ariaLabel={i18n.translate(
+              'xpack.uptime.monitorList.loggingIntegrationAction.container.id',
+              {
+                defaultMessage: 'Show container logs',
+              }
+            )}
+            href={getLoggingContainerHref(monitor, basePath)}
+            iconType="loggingApp"
+            message={i18n.translate(
+              'xpack.uptime.monitorList.loggingIntegrationAction.container.message',
+              {
+                defaultMessage: 'Show container logs',
+              }
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.uptime.monitorList.loggingIntegrationAction.container.tooltip',
+              {
+                defaultMessage: 'Check Logging UI for container ID "{containerId}"',
                 values: {
                   containerId,
                 },
