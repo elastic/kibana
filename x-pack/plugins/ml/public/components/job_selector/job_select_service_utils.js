@@ -34,13 +34,6 @@ function getInvalidJobIds(ids) {
   });
 }
 
-function checkGlobalState(globalState) {
-  if (globalState.ml === undefined) {
-    globalState.ml = {};
-    globalState.save();
-  }
-}
-
 function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
   const jobIds = [];
   let groups = [];
@@ -81,14 +74,15 @@ function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
 }
 
 export function setGlobalState(globalState, { selectedIds, selectedGroups }) {
-  checkGlobalState(globalState);
+  if (globalState.ml === undefined) {
+    globalState.ml = {};
+  }
   globalState.ml.jobIds = selectedIds;
-  globalState.ml.groups = selectedGroups;
+  globalState.ml.groups = selectedGroups || [];
   globalState.save();
 }
 
-// called externally to retrieve the selected jobs ids.
-// passing in `true` will load the jobs ids from the URL first
+// called externally to retrieve the selected jobs ids
 export function getSelectedJobIds(globalState) {
   return loadJobIdsFromGlobalState(globalState);
 }
