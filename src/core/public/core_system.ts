@@ -165,6 +165,7 @@ export class CoreSystem {
       const basePath = await this.basePath.start({ injectedMetadata });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ basePath, injectedMetadata });
+      const chrome = await this.chrome.start({ application, basePath });
 
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
@@ -186,6 +187,7 @@ export class CoreSystem {
       const core: CoreStart = {
         application,
         basePath,
+        chrome,
         i18n,
         injectedMetadata,
         notifications,
