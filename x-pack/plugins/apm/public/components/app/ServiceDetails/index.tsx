@@ -13,11 +13,9 @@ import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useUiFilters } from '../../../hooks/useUiFilters';
 
 export function ServiceDetails() {
-  const { urlParams } = useUrlParams();
-  const { uiFilters, uiFiltersKey } = useUiFilters();
+  const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, start, end } = urlParams;
   const { data: serviceDetailsData } = useFetcher(
     () => {
@@ -25,7 +23,7 @@ export function ServiceDetails() {
         return loadServiceDetails({ serviceName, start, end, uiFilters });
       }
     },
-    [serviceName, start, end, uiFiltersKey]
+    [serviceName, start, end, uiFilters]
   );
 
   if (!serviceDetailsData) {

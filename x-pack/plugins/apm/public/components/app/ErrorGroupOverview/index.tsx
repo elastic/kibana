@@ -15,12 +15,12 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { useUiFilters } from '../../../hooks/useUiFilters';
 import {
   loadErrorDistribution,
   loadErrorGroupList
 } from '../../../services/rest/apm/error_groups';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { getUIFilters } from '../../../context/UrlParamsContext';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
@@ -34,7 +34,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   location
 }) => {
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
-  const { uiFilters, uiFiltersKey } = useUiFilters();
+  const uiFilters = getUIFilters(urlParams);
   const { data: errorDistributionData } = useFetcher(
     () => {
       if (serviceName && start && end) {
@@ -46,7 +46,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
         });
       }
     },
-    [serviceName, start, end, uiFiltersKey]
+    [serviceName, start, end, uiFilters]
   );
 
   const { data: errorGroupListData } = useFetcher(
@@ -62,7 +62,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
         });
       }
     },
-    [serviceName, start, end, sortField, sortDirection, uiFiltersKey]
+    [serviceName, start, end, sortField, sortDirection, uiFilters]
   );
 
   if (!errorDistributionData || !errorGroupListData) {

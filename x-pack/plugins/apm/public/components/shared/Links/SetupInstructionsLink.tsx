@@ -9,19 +9,30 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { KibanaLink } from './KibanaLink';
 
+const SETUP_INSTRUCTIONS_LABEL = i18n.translate(
+  'xpack.apm.setupInstructionsButtonLabel',
+  {
+    defaultMessage: 'Setup Instructions'
+  }
+);
+
+// renders a filled button or a link as a kibana link to setup instructions
 export function SetupInstructionsLink({
   buttonFill = false
 }: {
   buttonFill?: boolean;
 }) {
-  const Button = buttonFill ? EuiButton : EuiButtonEmpty;
   return (
     <KibanaLink path={'/home/tutorial/apm'}>
-      <Button size="s" color="primary" fill={buttonFill} iconType="help">
-        {i18n.translate('xpack.apm.setupInstructionsButtonLabel', {
-          defaultMessage: 'Setup Instructions'
-        })}
-      </Button>
+      {buttonFill ? (
+        <EuiButton size="s" color="primary" fill={buttonFill} iconType="help">
+          {SETUP_INSTRUCTIONS_LABEL}
+        </EuiButton>
+      ) : (
+        <EuiButtonEmpty size="s" color="primary" iconType="help">
+          {SETUP_INSTRUCTIONS_LABEL}
+        </EuiButtonEmpty>
+      )}
     </KibanaLink>
   );
 }

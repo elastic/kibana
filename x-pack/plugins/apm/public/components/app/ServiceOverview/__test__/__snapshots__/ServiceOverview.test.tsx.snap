@@ -148,7 +148,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell"
-      width="50%"
+      width="40%"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -173,6 +173,7 @@ NodeList [
     </td>
     <td
       class="euiTableRowCell"
+      width="20%"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -251,7 +252,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell"
-      width="50%"
+      width="40%"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -276,6 +277,7 @@ NodeList [
     </td>
     <td
       class="euiTableRowCell"
+      width="20%"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -288,7 +290,7 @@ NodeList [
         <span
           class="euiToolTipAnchor sc-bdVaJa dequQV"
         >
-          test,dev
+          test, dev
         </span>
       </div>
     </td>

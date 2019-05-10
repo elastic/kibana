@@ -12,7 +12,6 @@ import { CoreSetup } from 'src/core/public';
 import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { UiFiltersProvider } from '../context/UiFiltersContext';
 import { px, topNavHeight, unit, units } from '../style/variables';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { LicenseProvider } from '../context/LicenseContext';
@@ -34,21 +33,19 @@ function App() {
 
   return (
     <UrlParamsProvider>
-      <UiFiltersProvider>
-        <LoadingIndicatorProvider>
-          <MainContainer data-test-subj="apmMainContainer">
-            <UpdateBreadcrumbs />
-            <Route component={ScrollToTopOnPathChange} />
-            <LicenseProvider>
-              <Switch>
-                {routes.map((route, i) => (
-                  <Route key={i} {...route} />
-                ))}
-              </Switch>
-            </LicenseProvider>
-          </MainContainer>
-        </LoadingIndicatorProvider>
-      </UiFiltersProvider>
+      <LoadingIndicatorProvider>
+        <MainContainer data-test-subj="apmMainContainer">
+          <UpdateBreadcrumbs />
+          <Route component={ScrollToTopOnPathChange} />
+          <LicenseProvider>
+            <Switch>
+              {routes.map((route, i) => (
+                <Route key={i} {...route} />
+              ))}
+            </Switch>
+          </LicenseProvider>
+        </MainContainer>
+      </LoadingIndicatorProvider>
     </UrlParamsProvider>
   );
 }

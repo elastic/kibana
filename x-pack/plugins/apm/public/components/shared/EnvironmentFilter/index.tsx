@@ -7,11 +7,9 @@
 import { EuiSelect, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceEnvironments } from '../../../services/rest/apm/services';
 import { useLocation } from '../../../hooks/useLocation';
-import { useUiFilters } from '../../../hooks/useUiFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
@@ -36,7 +34,7 @@ function updateEnvironmentUrl(
 }
 
 function getOptions(environments: string[]) {
-  const SHOW_ALL_OPTION = {
+  const ALL_OPTION = {
     value: ENVIRONMENT_ALL,
     text: i18n.translate('xpack.apm.filter.environment.allLabel', {
       defaultMessage: 'All'
@@ -46,14 +44,14 @@ function getOptions(environments: string[]) {
   const NOT_DEFINED_OPTION = {
     value: ENVIRONMENT_NOT_DEFINED,
     text: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-      defaultMessage: 'Not Defined'
+      defaultMessage: 'Not defined'
     })
   };
 
   const hasUndefinedEnv = environments.includes(ENVIRONMENT_NOT_DEFINED);
   const commonOptions = hasUndefinedEnv
-    ? [SHOW_ALL_OPTION, NOT_DEFINED_OPTION]
-    : [SHOW_ALL_OPTION];
+    ? [ALL_OPTION, NOT_DEFINED_OPTION]
+    : [ALL_OPTION];
   const definedEnvs = environments.filter(
     env => env !== ENVIRONMENT_NOT_DEFINED
   );
@@ -67,7 +65,12 @@ function getOptions(environments: string[]) {
     ...(environmentOptions.length // separate common and environment options
       ? [
           {
-            text: '--',
+            text: `- ${i18n.translate(
+              'xpack.apm.filter.environment.selectEnvironmentLabel',
+              {
+                defaultMessage: 'Select environment'
+              }
+            )} -`,
             disabled: true
           }
         ]
@@ -76,14 +79,9 @@ function getOptions(environments: string[]) {
   ];
 }
 
-const WiderEuiSelect = styled(EuiSelect)`
-  min-width: 192px;
-`;
-
 export const EnvironmentFilter: React.FC = () => {
   const location = useLocation();
-  const { urlParams } = useUrlParams();
-  const { uiFilters } = useUiFilters();
+  const { urlParams, uiFilters } = useUrlParams();
   const { start, end, serviceName } = urlParams;
 
   // TODO fix the bug in urlParams that this code defensively overcomes
@@ -107,7 +105,7 @@ export const EnvironmentFilter: React.FC = () => {
   );
 
   return (
-    <WiderEuiSelect
+    <EuiSelect
       prepend={
         <EuiFormLabel>
           {i18n.translate('xpack.apm.filter.environment.label', {

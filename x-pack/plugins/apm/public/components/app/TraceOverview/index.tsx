@@ -10,11 +10,9 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { loadTraceList } from '../../../services/rest/apm/traces';
 import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useUiFilters } from '../../../hooks/useUiFilters';
 
 export function TraceOverview() {
-  const { urlParams } = useUrlParams();
-  const { uiFilters, uiFiltersKey } = useUiFilters();
+  const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
   const { status, data = [] } = useFetcher(
     () => {
@@ -22,7 +20,7 @@ export function TraceOverview() {
         return loadTraceList({ start, end, uiFilters });
       }
     },
-    [start, end, uiFiltersKey]
+    [start, end, uiFilters]
   );
 
   return (

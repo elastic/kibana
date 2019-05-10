@@ -22,10 +22,10 @@ export const ApmHeader: React.FC = ({ children }) => (
     <EuiSpacer />
 
     <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-      <EuiFlexItem>
+      <EuiFlexItem grow={3}>
         <KueryBar />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1}>
         <EnvironmentFilter />
       </EuiFlexItem>
     </EuiFlexGroup>

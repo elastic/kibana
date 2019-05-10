@@ -30,7 +30,6 @@ import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useUiFilters } from '../../../hooks/useUiFilters';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -63,8 +62,7 @@ function getShortGroupId(errorGroupId?: string) {
 
 export function ErrorGroupDetails() {
   const location = useLocation();
-  const { urlParams } = useUrlParams();
-  const { uiFilters, uiFiltersKey } = useUiFilters();
+  const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, start, end, errorGroupId } = urlParams;
 
   const { data: errorGroupData } = useFetcher(
@@ -79,7 +77,7 @@ export function ErrorGroupDetails() {
         });
       }
     },
-    [serviceName, start, end, errorGroupId, uiFiltersKey]
+    [serviceName, start, end, errorGroupId, uiFilters]
   );
 
   const { data: errorDistributionData } = useFetcher(
@@ -94,7 +92,7 @@ export function ErrorGroupDetails() {
         });
       }
     },
-    [serviceName, start, end, errorGroupId, uiFiltersKey]
+    [serviceName, start, end, errorGroupId, uiFilters]
   );
 
   if (!errorGroupData || !errorDistributionData) {

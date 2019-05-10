@@ -24,13 +24,14 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         "name": "Name",
         "render": [Function],
         "sortable": true,
-        "width": "50%",
+        "width": "40%",
       },
       Object {
         "field": "environments",
         "name": "Environment",
         "render": [Function],
         "sortable": true,
+        "width": "20%",
       },
       Object {
         "field": "agentName",
@@ -81,13 +82,14 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         "name": "Name",
         "render": [Function],
         "sortable": true,
-        "width": "50%",
+        "width": "40%",
       },
       Object {
         "field": "environments",
         "name": "Environment",
         "render": [Function],
         "sortable": true,
+        "width": "20%",
       },
       Object {
         "field": "agentName",

@@ -7,8 +7,8 @@
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
 import { loadMetricsChartData } from '../services/rest/apm/metrics';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { getUIFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
-import { useUiFilters } from './useUiFilters';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: []
@@ -19,7 +19,7 @@ export function useServiceMetricCharts(
   agentName: string
 ) {
   const { serviceName, start, end } = urlParams;
-  const { uiFilters, uiFiltersKey } = useUiFilters();
+  const uiFilters = getUIFilters(urlParams);
   const { data = INITIAL_DATA, error, status } = useFetcher<
     MetricsChartsByAgentAPIResponse
   >(
@@ -34,7 +34,7 @@ export function useServiceMetricCharts(
         });
       }
     },
-    [serviceName, start, end, uiFiltersKey]
+    [serviceName, start, end, uiFilters]
   );
 
   return {

@@ -48,7 +48,7 @@ export const SERVICE_COLUMNS: Array<
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
       defaultMessage: 'Name'
     }),
-    width: '50%',
+    width: '40%',
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
@@ -63,6 +63,7 @@ export const SERVICE_COLUMNS: Array<
     name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
       defaultMessage: 'Environment'
     }),
+    width: '20%',
     sortable: true,
     render: (environments: string[]) => (
       <TruncatedAnchorEuiToolTip
@@ -74,7 +75,7 @@ export const SERVICE_COLUMNS: Array<
           </React.Fragment>
         ))}
       >
-        <>{environments.join(',')}</>
+        <>{environments.join(', ')}</>
       </TruncatedAnchorEuiToolTip>
     )
   },

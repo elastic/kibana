@@ -15,7 +15,7 @@ import { cloneDeep, has, isString, set } from 'lodash';
 import moment from 'moment';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 
-function decodeEsQuery(esQuery?: string) {
+function decodeUiFiltersES(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
@@ -123,7 +123,7 @@ export function setupRequest(req: Legacy.Request): Setup {
   return {
     start: moment.utc(query.start).valueOf(),
     end: moment.utc(query.end).valueOf(),
-    uiFiltersES: decodeEsQuery(query.uiFiltersES) || [],
+    uiFiltersES: decodeUiFiltersES(query.uiFiltersES) || [],
     client,
     config
   };

@@ -6,7 +6,10 @@
 
 import React from 'react';
 import { LocationProvider } from '../../../../context/LocationContext';
-import { UrlParamsContext } from '../../../../context/UrlParamsContext';
+import {
+  UrlParamsContext,
+  getUIFilters
+} from '../../../../context/UrlParamsContext';
 import { tick } from '../../../../utils/testHelpers';
 import { DatePicker } from '../index';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -20,7 +23,11 @@ const MockUrlParamsProvider: React.FC<{
   params?: IUrlParams;
 }> = ({ params = {}, children }) => (
   <UrlParamsContext.Provider
-    value={{ urlParams: params, refreshTimeRange: mockRefreshTimeRange }}
+    value={{
+      urlParams: params,
+      refreshTimeRange: mockRefreshTimeRange,
+      uiFilters: getUIFilters(params)
+    }}
     children={children}
   />
 );
