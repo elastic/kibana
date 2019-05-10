@@ -8,34 +8,47 @@ import { get } from 'lodash';
 import { LatestMonitor } from '../../../../common/graphql/types';
 import { addBasePath } from './add_base_path';
 
+/**
+ * Builds URLs to the designated features by extracting values from the provided
+ * monitor object on a given path. Then returns the result of a provided function
+ * to place the value in its rightful place on the URI string.
+ * @param monitor the data object
+ * @param path the location on the object of the desired data
+ * @param getHref a function that returns the full URL
+ */
+const buildHref = (
+  monitor: LatestMonitor,
+  path: string,
+  getHref: (value: string) => string
+): string | undefined => {
+  const queryValue = get<string | undefined>(monitor, path);
+  if (queryValue === undefined) {
+    return undefined;
+  }
+  return getHref(queryValue);
+};
+
 export const getInfraContainerHref = (
   monitor: LatestMonitor,
-  basePath: string,
-  dateRangeStart: string,
-  dateRangeEnd: string
-): string | undefined => {
-  const containerId = get<string | undefined>(monitor, 'ping.container.id', undefined);
-  if (typeof containerId === 'undefined') {
-    return containerId;
-  }
-  return addBasePath(
-    basePath,
-    `/app/infra#/infrastructure/snapshot?waffleFilter=(expression:'container.id%20:%20${containerId}',kind:kuery)`
+  basePath: string
+): string | undefined =>
+  buildHref(monitor, 'ping.container.id', containerId =>
+    addBasePath(basePath, `/app/infra#/link-to/container-detail/${encodeURIComponent(containerId)}`)
   );
-};
 
 export const getInfraKubernetesHref = (
   monitor: LatestMonitor,
-  basePath: string,
-  dateRangeStart: string,
-  dateRangeEnd: string
-): string | undefined => {
-  const uid = get<string | undefined>(monitor, 'ping.kubernetes.pod.uid', undefined);
-  if (typeof uid === 'undefined') {
-    return uid;
-  }
-  return addBasePath(
-    basePath,
-    `/app/infra#/infrastructure/snapshot?waffleFilter=(expression:'pod.uid%20:%20${uid}',kind:kuery)`
+  basePath: string
+): string | undefined =>
+  buildHref(monitor, 'ping.kubernetes.pod.uid', uid =>
+    addBasePath(basePath, `/app/infra#/link-to/pod-detail/${encodeURIComponent(uid)}`)
   );
-};
+
+export const getInfraIpHref = (monitor: LatestMonitor, basePath: string) =>
+  buildHref(monitor, 'ping.monitor.ip', ip => {
+    const expression = encodeURIComponent(`host.ip : ${ip}`);
+    return addBasePath(
+      basePath,
+      `/app/infra#/infrastructure/inventory?waffleFilter=(expression:'${expression}',kind:kuery)`
+    );
+  });

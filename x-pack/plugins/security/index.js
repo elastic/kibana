@@ -45,7 +45,11 @@ export const security = (kibana) => new kibana.Plugin({
       authProviders: Joi.array().items(Joi.string()).default(['basic']),
       enabled: Joi.boolean().default(true),
       cookieName: Joi.string().default('sid'),
-      encryptionKey: Joi.string(),
+      encryptionKey: Joi.when(Joi.ref('$dist'), {
+        is: true,
+        then: Joi.string(),
+        otherwise: Joi.string().default('a'.repeat(32)),
+      }),
       sessionTimeout: Joi.number().allow(null).default(null),
       secureCookies: Joi.boolean().default(false),
       public: Joi.object({

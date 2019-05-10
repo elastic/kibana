@@ -13,6 +13,7 @@ import { IntegrationLink } from './integration_link';
 import {
   getApmHref,
   getInfraContainerHref,
+  getInfraIpHref,
   getInfraKubernetesHref,
   getLoggingContainerHref,
   getLoggingKubernetesHref,
@@ -37,6 +38,7 @@ export const MonitorListActionsPopover = ({
   const domain = get<string>(ping, 'url.domain', '');
   const podUid = get<string | undefined>(ping, 'kubernetes.pod.uid', undefined);
   const containerId = get<string | undefined>(ping, 'container.id', undefined);
+  const ip = get<string | undefined>(ping, 'monitor.ip');
   return (
     <EuiPopover
       button={
@@ -90,18 +92,44 @@ export const MonitorListActionsPopover = ({
         <EuiFlexItem>
           <IntegrationLink
             ariaLabel={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.ip.ariaLabel',
+              {
+                defaultMessage: `Check Infrastructure UI for this montor's ip address`,
+                description: 'This value is shown as the aria label value for screen readers.',
+              }
+            )}
+            href={getInfraIpHref(monitor, basePath)}
+            iconType="infraApp"
+            message={i18n.translate('xpack.uptime.monitorList.infraIntegrationAction.ip.message', {
+              defaultMessage: 'Show host metrics',
+              description: `A message explaining that this link will take the user to the Infrastructure UI, filtered for this monitor's IP Address`,
+            })}
+            tooltipContent={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.ip.tooltip',
+              {
+                defaultMessage: 'Check Infrastructure UI for the IP "{ip}"',
+                values: {
+                  ip,
+                },
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <IntegrationLink
+            ariaLabel={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.description',
               {
                 defaultMessage: `Check Infrastructure UI for this monitor's pod UID`,
-                description: 'This value is shown to users when they hover over the link icon.',
+                description: 'This value is shown as the aria label value for screen readers.',
               }
             )}
-            href={getInfraKubernetesHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            href={getInfraKubernetesHref(monitor, basePath)}
             iconType="infraApp"
             message={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.message',
               {
-                defaultMessage: 'Check Infra for pod UID',
+                defaultMessage: 'Show pod metrics',
                 description:
                   'A message explaining that this link will take the user to the Infrastructure UI filtered for the monitor Pod UID.',
               }
@@ -109,7 +137,7 @@ export const MonitorListActionsPopover = ({
             tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.tooltip',
               {
-                defaultMessage: 'Click here to check Infrastructure UI for pod UID "{podUid}".',
+                defaultMessage: 'Check Infrastructure UI for pod UID "{podUid}".',
                 values: {
                   podUid,
                 },
@@ -125,19 +153,18 @@ export const MonitorListActionsPopover = ({
                 defaultMessage: `Check Infrastructure UI for this monitor's container ID`,
               }
             )}
-            href={getInfraContainerHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            href={getInfraContainerHref(monitor, basePath)}
             iconType="infraApp"
             message={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.container.message',
               {
-                defaultMessage: 'Check Infra for container ID',
+                defaultMessage: 'Show container metrics',
               }
             )}
             tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.infraIntegrationAction.docker.tooltip',
               {
-                defaultMessage:
-                  'Click here to check Infrastructure UI for container ID "{containerId}"',
+                defaultMessage: 'Check Infrastructure UI for container ID "{containerId}"',
                 values: {
                   containerId,
                 },

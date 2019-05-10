@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getInfraHref getInfraContainerHref creates a link for valid parameters 1`] = `"/foo/app/infra#/link-to/container-detail/test-container-id"`;
+
+exports[`getInfraHref getInfraContainerHref does not specify a base path when none is available 1`] = `"/app/infra#/link-to/container-detail/test-container-id"`;
+
+exports[`getInfraHref getInfraIpHref creates a link for valid parameters 1`] = `"/bar/app/infra#/infrastructure/inventory?waffleFilter=(expression:'host.ip%20%3A%20151.101.202.217',kind:kuery)"`;
+
+exports[`getInfraHref getInfraIpHref does not specify a base path when none is available 1`] = `"/app/infra#/infrastructure/inventory?waffleFilter=(expression:'host.ip%20%3A%20151.101.202.217',kind:kuery)"`;
+
+exports[`getInfraHref getInfraKubernetesHref creates a link for valid parameters 1`] = `"/foo/app/infra#/link-to/pod-detail/test-pod-uid"`;
+
+exports[`getInfraHref getInfraKubernetesHref does not specify a base path when none is available 1`] = `"/app/infra#/link-to/pod-detail/test-pod-uid"`;

@@ -12,13 +12,15 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
-import { WithSource } from '../../containers/with_source';
+import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { InfraNodeType } from '../../graphql/types';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
+import { useSource } from '../../containers/source/source';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
   nodeType: InfraNodeType;
+  sourceId?: string;
 }>;
 
 interface RedirectToNodeLogsProps extends RedirectToNodeLogsType {
@@ -28,46 +30,46 @@ interface RedirectToNodeLogsProps extends RedirectToNodeLogsType {
 export const RedirectToNodeLogs = injectI18n(
   ({
     match: {
-      params: { nodeId, nodeType },
+      params: { nodeId, nodeType, sourceId = 'default' },
     },
     location,
     intl,
-  }: RedirectToNodeLogsProps) => (
-    <WithSource>
-      {({ configuration, isLoading }) => {
-        if (isLoading) {
-          return (
-            <LoadingPage
-              message={intl.formatMessage(
-                {
-                  id: 'xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage',
-                  defaultMessage: 'Loading {nodeType} logs',
-                },
-                {
-                  nodeType,
-                }
-              )}
-            />
-          );
-        }
+  }: RedirectToNodeLogsProps) => {
+    const { source, isLoading } = useSource({ sourceId });
+    const configuration = source && source.configuration;
 
-        if (!configuration) {
-          return null;
-        }
+    if (isLoading) {
+      return (
+        <LoadingPage
+          message={intl.formatMessage(
+            {
+              id: 'xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage',
+              defaultMessage: 'Loading {nodeType} logs',
+            },
+            {
+              nodeType,
+            }
+          )}
+        />
+      );
+    }
 
-        const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
-        const userFilter = getFilterFromLocation(location);
-        const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+    if (!configuration) {
+      return null;
+    }
 
-        const searchString = compose(
-          replaceLogFilterInQueryString(filter),
-          replaceLogPositionInQueryString(getTimeFromLocation(location))
-        )('');
+    const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
+    const userFilter = getFilterFromLocation(location);
+    const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 
-        return <Redirect to={`/logs?${searchString}`} />;
-      }}
-    </WithSource>
-  )
+    const searchString = compose(
+      replaceLogFilterInQueryString(filter),
+      replaceLogPositionInQueryString(getTimeFromLocation(location)),
+      replaceSourceIdInQueryString(sourceId)
+    )('');
+
+    return <Redirect to={`/logs?${searchString}`} />;
+  }
 );
 
 export const getNodeLogsUrl = ({
