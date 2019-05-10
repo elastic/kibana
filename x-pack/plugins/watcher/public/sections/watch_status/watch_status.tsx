@@ -9,9 +9,13 @@ import { EuiPageContent, EuiSpacer } from '@elastic/eui';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { WatchDetail } from './components/watch_detail';
 import { WatchHistory } from './components/watch_history';
 import { listBreadcrumb, statusBreadcrumb } from '../../lib/breadcrumbs';
+import { loadWatchDetail } from '../../lib/api';
+import { WatchDetailsContext } from './watch_details_context';
+import { getPageErrorCode, PageError, SectionLoading } from '../../components';
 
 export const WatchStatus = ({
   match: {
@@ -24,6 +28,12 @@ export const WatchStatus = ({
     };
   };
 }) => {
+  const {
+    error: watchDetailError,
+    data: watchDetail,
+    isLoading: isWatchDetailLoading,
+  } = loadWatchDetail(id);
+
   useEffect(
     () => {
       chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, statusBreadcrumb]);
@@ -31,11 +41,38 @@ export const WatchStatus = ({
     [id]
   );
 
-  return (
-    <EuiPageContent>
-      <WatchDetail watchId={id} />
-      <EuiSpacer size="m" />
-      <WatchHistory watchId={id} />
-    </EuiPageContent>
-  );
+  const errorCode = getPageErrorCode(watchDetailError);
+
+  if (isWatchDetailLoading) {
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.watcher.sections.watchStatus.loadingWatchDetailsDescription"
+          defaultMessage="Loading watch details…"
+        />
+      </SectionLoading>
+    );
+  }
+
+  if (errorCode) {
+    return (
+      <EuiPageContent>
+        <PageError errorCode={errorCode} id={id} />
+      </EuiPageContent>
+    );
+  }
+
+  if (watchDetail) {
+    return (
+      <WatchDetailsContext.Provider value={{ watchDetailError, watchDetail, isWatchDetailLoading }}>
+        <EuiPageContent>
+          <WatchDetail />
+          <EuiSpacer size="m" />
+          <WatchHistory />
+        </EuiPageContent>
+      </WatchDetailsContext.Provider>
+    );
+  }
+
+  return null;
 };

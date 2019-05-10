@@ -7,15 +7,16 @@
 import React, { useEffect, useReducer } from 'react';
 import { isEqual } from 'lodash';
 
-import { EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import { Watch } from 'plugins/watcher/models/watch';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
-import { getPageErrorCode, PageError } from '../../../components';
+import { getPageErrorCode, PageError, SectionLoading } from '../../../components';
 import { loadWatch } from '../../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
 import { JsonWatchEdit } from './json_watch_edit';
@@ -147,7 +148,14 @@ export const WatchEdit = ({
   }
 
   if (!watch) {
-    return <EuiLoadingSpinner />;
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
+          defaultMessage="Loading watch…"
+        />
+      </SectionLoading>
+    );
   }
 
   const pageTitle = getTitle(watch);

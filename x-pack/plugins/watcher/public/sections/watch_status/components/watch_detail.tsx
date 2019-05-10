@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
@@ -23,9 +23,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { loadWatchDetail, ackWatchAction } from '../../../lib/api';
-import { getPageErrorCode, WatchStatus } from '../../../components';
+import { ackWatchAction } from '../../../lib/api';
+import { WatchStatus } from '../../../components';
 import { PAGINATION } from '../../../../common/constants';
+import { WatchDetailsContext } from '../watch_details_context';
 
 interface ActionError {
   code: string;
@@ -38,31 +39,35 @@ interface ActionStatus {
   errors: ActionError[];
 }
 
-const WatchDetailUi = ({ watchId }: { watchId: string }) => {
-  const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
+const WatchDetailUi = () => {
+  const { watchDetail } = useContext(WatchDetailsContext);
 
   const [actionStatuses, setActionStatuses] = useState<ActionStatus[]>([]);
   const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
 
   const [selectedErrorAction, setSelectedErrorAction] = useState<string | null>(null);
 
-  const actionErrors = watchDetail && watchDetail.watchErrors.actionErrors;
+  const {
+    isSystemWatch,
+    id: watchId,
+    watchErrors: { actionErrors },
+    watchStatus: { actionStatuses: currentActionStatuses },
+  } = watchDetail;
+
   const hasActionErrors = actionErrors && Object.keys(actionErrors).length > 0;
 
   useEffect(
     () => {
-      if (watchDetail) {
-        const currentActionStatuses = watchDetail.watchStatus.actionStatuses;
-        const actionStatusesWithErrors =
-          currentActionStatuses &&
-          currentActionStatuses.map((currentActionStatus: ActionStatus) => {
-            return {
-              ...currentActionStatus,
-              errors: actionErrors ? actionErrors[currentActionStatus.id] : [],
-            };
-          });
-        setActionStatuses(actionStatusesWithErrors);
-      }
+      const actionStatusesWithErrors =
+        currentActionStatuses &&
+        currentActionStatuses.map((currentActionStatus: ActionStatus) => {
+          const errors = actionErrors && actionErrors[currentActionStatus.id];
+          return {
+            ...currentActionStatus,
+            errors: errors || [],
+          };
+        });
+      setActionStatuses(actionStatusesWithErrors);
     },
     [watchDetail]
   );
@@ -71,7 +76,7 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
     {
       field: 'id',
       name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.actionHeader', {
-        defaultMessage: 'Action',
+        defaultMessage: 'Name',
       }),
       sortable: true,
       truncateText: true,
@@ -93,9 +98,10 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
       defaultMessage: 'Errors',
     }),
     render: (errors: ActionError[], action: ActionStatus) => {
+      const { id: actionId } = action;
       if (errors && errors.length > 0) {
         return (
-          <EuiButtonEmpty onClick={() => setSelectedErrorAction(action.id)}>
+          <EuiButtonEmpty onClick={() => setSelectedErrorAction(actionId)}>
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.errorsCellText', {
               defaultMessage: '{total, number} {total, plural, one {error} other {errors}}',
               values: {
@@ -114,6 +120,7 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
       {
         available: (action: ActionStatus) => action.isAckable,
         render: (action: ActionStatus) => {
+          const { id: actionId } = action;
           return (
             <EuiToolTip
               content={i18n.translate(
@@ -129,12 +136,13 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
                 onClick={async () => {
                   setIsActionStatusLoading(true);
                   try {
-                    const watchStatus = await ackWatchAction(watchDetail.id, action.id);
+                    const watchStatus = await ackWatchAction(watchId, actionId);
                     const newActionStatusesWithErrors = watchStatus.actionStatuses.map(
                       (newActionStatus: ActionStatus) => {
+                        const errors = actionErrors && actionErrors[newActionStatus.id];
                         return {
                           ...newActionStatus,
-                          errors: actionErrors ? actionErrors[newActionStatus.id] : [],
+                          errors: errors || [],
                         };
                       }
                     );
@@ -171,11 +179,6 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
   const columns = hasActionErrors
     ? [...baseColumns, errorColumn, actionColumn]
     : [...baseColumns, actionColumn];
-
-  // Another part of the UI will surface the error.
-  if (getPageErrorCode(error)) {
-    return null;
-  }
 
   return (
     <Fragment>
@@ -225,7 +228,7 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        {watchDetail && watchDetail.isSystemWatch && (
+        {isSystemWatch && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
@@ -265,11 +268,10 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
         columns={columns}
         pagination={PAGINATION}
         sorting={true}
-        loading={isLoading}
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
-            defaultMessage="No current status"
+            defaultMessage="No actions to show"
           />
         }
       />

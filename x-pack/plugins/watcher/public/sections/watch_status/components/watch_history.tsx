@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 
 import { toastNotifications } from 'ui/notify';
@@ -22,20 +22,19 @@ import {
   EuiLink,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../common/constants';
 import { goToWatchList } from '../../../lib/navigation';
-import { getPageErrorCode, PageError, WatchStatus, DeleteWatchesModal } from '../../../components';
+import { WatchStatus, DeleteWatchesModal, SectionError } from '../../../components';
 import {
   activateWatch,
   deactivateWatch,
-  loadWatchDetail,
   loadWatchHistory,
   loadWatchHistoryDetail,
 } from '../../../lib/api';
+import { WatchDetailsContext } from '../watch_details_context';
 
 const watchHistoryTimeSpanOptions = [
   {
@@ -76,24 +75,25 @@ const watchHistoryTimeSpanOptions = [
   },
 ];
 
-const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
+const WatchHistoryUi = () => {
+  const { watchDetail: loadedWatch } = useContext(WatchDetailsContext);
+
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
   const [detailWatchId, setDetailWatchId] = useState<string | undefined>(undefined);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
+  const [isTogglingActivation, setIsTogglingActivation] = useState<boolean>(false);
 
   const [watchHistoryTimeSpan, setWatchHistoryTimeSpan] = useState<string>(
     watchHistoryTimeSpanOptions[0].value
   );
 
-  const { error: watchDetailError, data: loadedWatch } = loadWatchDetail(watchId);
-
-  if (loadedWatch && isActivated === undefined) {
+  if (isActivated === undefined) {
     // Set initial value for isActivated based on the watch we just loaded.
     setIsActivated(loadedWatch.watchStatus.isActive);
   }
 
   const { error: historyError, data: history, isLoading } = loadWatchHistory(
-    watchId,
+    loadedWatch.id,
     watchHistoryTimeSpan
   );
 
@@ -105,15 +105,38 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     ? JSON.stringify(watchHistoryDetails.details, null, 2)
     : '';
 
-  const errorCode = getPageErrorCode([watchDetailError, historyError, watchHistoryDetailsError]);
-  if (errorCode) {
-    return <PageError errorCode={errorCode} id={watchId} />;
-  }
+  const historySectionTitle = (
+    <EuiTitle size="s">
+      <h2>
+        <FormattedMessage
+          id="xpack.watcher.sections.watchHistory.header"
+          defaultMessage="Execution history"
+        />
+      </h2>
+    </EuiTitle>
+  );
 
+  if (historyError) {
+    return (
+      <Fragment>
+        {historySectionTitle}
+        <EuiSpacer size="s" />
+        <SectionError
+          title={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchHistory.watchExecutionErrorTitle"
+              defaultMessage="Error loading execution history"
+            />
+          }
+          error={historyError}
+        />
+      </Fragment>
+    );
+  }
   const columns = [
     {
       field: 'startTime',
-      name: i18n.translate('xpack.watcher.sections.watchList.watchTable.startTimeHeader', {
+      name: i18n.translate('xpack.watcher.sections.watchHistory.watchTable.startTimeHeader', {
         defaultMessage: 'Trigger time',
       }),
       sortable: true,
@@ -147,9 +170,6 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       }),
       sortable: true,
       truncateText: true,
-      render: (comment: string) => {
-        return <EuiText>{comment}</EuiText>;
-      },
     },
   ];
 
@@ -159,112 +179,145 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   };
 
   const toggleWatchActivation = async () => {
-    try {
-      if (isActivated) {
-        await deactivateWatch(watchId);
-      } else {
-        await activateWatch(watchId);
-      }
+    const toggleActivation = isActivated ? deactivateWatch : activateWatch;
 
-      setIsActivated(!isActivated);
-    } catch (e) {
-      if (e.data.statusCode !== 200) {
-        toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.watcher.sections.watchList.deactivateWatchErrorNotification.descriptionText',
+    setIsTogglingActivation(true);
+
+    const { error } = await toggleActivation(loadedWatch.id);
+
+    setIsTogglingActivation(false);
+
+    if (error) {
+      const message = isActivated
+        ? i18n.translate(
+            'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.deactivateDescriptionText',
             {
               defaultMessage: "Couldn't deactivate watch",
             }
           )
-        );
-      }
+        : i18n.translate(
+            'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.activateDescriptionText',
+            {
+              defaultMessage: "Couldn't activate watch",
+            }
+          );
+      return toastNotifications.addDanger(message);
     }
+
+    setIsActivated(!isActivated);
   };
 
   let flyout;
 
-  if (detailWatchId !== undefined && watchHistoryDetails !== undefined) {
-    const detailColumns = [
-      {
-        field: 'id',
-        name: i18n.translate('xpack.watcher.sections.watchHistory.watchActionStatusTable.id', {
-          defaultMessage: 'Name',
-        }),
-        sortable: true,
-        truncateText: true,
-        render: (id: string) => {
-          return <EuiText>{id}</EuiText>;
+  if (detailWatchId !== undefined) {
+    if (watchHistoryDetailsError) {
+      flyout = (
+        <EuiFlyout
+          data-test-subj="watchHistoryErrorDetailFlyout"
+          onClose={() => setDetailWatchId(undefined)}
+          aria-labelledby="watchHistoryErrorDetailsFlyoutTitle"
+          maxWidth={600}
+        >
+          <EuiFlyoutHeader>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchHistory.watchHistoryDetail.errorTitle"
+                  defaultMessage="Execution details"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+
+          <EuiFlyoutBody>
+            <SectionError
+              title={
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchHistory.watchHistoryDetailsErrorTitle"
+                  defaultMessage="Error loading execution details"
+                />
+              }
+              error={watchHistoryDetailsError}
+            />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      );
+    }
+    if (watchHistoryDetails !== undefined) {
+      const detailColumns = [
+        {
+          field: 'id',
+          name: i18n.translate('xpack.watcher.sections.watchHistory.watchActionStatusTable.id', {
+            defaultMessage: 'Name',
+          }),
+          sortable: true,
+          truncateText: true,
         },
-      },
-      {
-        field: 'state',
-        name: i18n.translate('xpack.watcher.sections.watchHistory.watchActionStatusTable.state', {
-          defaultMessage: 'State',
-        }),
-        sortable: true,
-        truncateText: true,
-        render: (state: string) => <WatchStatus status={state} />,
-      },
-    ];
+        {
+          field: 'state',
+          name: i18n.translate('xpack.watcher.sections.watchHistory.watchActionStatusTable.state', {
+            defaultMessage: 'State',
+          }),
+          sortable: true,
+          truncateText: true,
+          render: (state: string) => <WatchStatus status={state} />,
+        },
+      ];
 
-    flyout = (
-      <EuiFlyout
-        data-test-subj="indexDetailFlyout"
-        onClose={() => setDetailWatchId(undefined)}
-        aria-labelledby="indexDetailsFlyoutTitle"
-        maxWidth={600}
-      >
-        <EuiFlyoutHeader>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
-                defaultMessage="Executed on {date}"
-                values={{ date: watchHistoryDetails.startTime }}
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlyoutHeader>
+      flyout = (
+        <EuiFlyout
+          data-test-subj="watchHistoryDetailFlyout"
+          onClose={() => setDetailWatchId(undefined)}
+          aria-labelledby="watchHistoryDetailsFlyoutTitle"
+          maxWidth={600}
+        >
+          <EuiFlyoutHeader>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
+                  defaultMessage="Executed on {date}"
+                  values={{ date: watchHistoryDetails.startTime }}
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlyoutHeader>
 
-        <EuiFlyoutBody>
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.actionsTitle"
-                defaultMessage="Actions"
-              />
-            </h4>
-          </EuiTitle>
-
-          <EuiInMemoryTable
-            items={(watchHistoryDetails.watchStatus as any).actionStatuses}
-            itemId="id"
-            columns={detailColumns}
-            message={
-              <FormattedMessage
-                id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
-                defaultMessage="No current status to show"
-              />
-            }
-          />
-
-          <EuiSpacer />
-
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.jsonTitle"
-                defaultMessage="JSON"
-              />
-            </h4>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          <EuiCodeBlock language="json">{executionDetail}</EuiCodeBlock>
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    );
+          <EuiFlyoutBody>
+            <EuiTitle size="xs">
+              <h4>
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchHistory.watchHistoryDetail.actionsTitle"
+                  defaultMessage="Actions"
+                />
+              </h4>
+            </EuiTitle>
+            <EuiInMemoryTable
+              items={(watchHistoryDetails.watchStatus as any).actionStatuses}
+              itemId="id"
+              columns={detailColumns}
+              message={
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
+                  defaultMessage="No current status to show"
+                />
+              }
+            />
+            <EuiSpacer />
+            <EuiTitle size="xs">
+              <h4>
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchHistory.watchHistoryDetail.jsonTitle"
+                  defaultMessage="JSON"
+                />
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiCodeBlock language="json">{executionDetail}</EuiCodeBlock>}
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      );
+    }
   }
 
   const activationButtonText = isActivated ? (
@@ -291,16 +344,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         watchesToDelete={watchesToDelete}
       />
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchHistory.header"
-                defaultMessage="Execution history"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{historySectionTitle}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -316,10 +360,13 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
                 )}
               />
             </EuiFlexItem>
-            {loadedWatch && !loadedWatch.isSystemWatch && (
+            {!loadedWatch.isSystemWatch && (
               <Fragment>
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => toggleWatchActivation()}>
+                  <EuiButton
+                    onClick={() => toggleWatchActivation()}
+                    isLoading={isTogglingActivation}
+                  >
                     {activationButtonText}
                   </EuiButton>
                 </EuiFlexItem>
@@ -327,7 +374,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
                   <EuiButton
                     data-test-subj="btnDeleteWatch"
                     onClick={() => {
-                      setWatchesToDelete([watchId]);
+                      setWatchesToDelete([loadedWatch.id]);
                     }}
                     color="danger"
                     disabled={false}
@@ -355,7 +402,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchHistory.watchTable.noCurrentStatus"
-            defaultMessage="No current status"
+            defaultMessage="No execution history to show"
           />
         }
       />
