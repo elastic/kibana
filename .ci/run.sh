@@ -21,7 +21,7 @@ x-pack-intake)
   ./test/scripts/jenkins_xpack.sh
   ;;
 x-pack-ciGroup*)
-  export CI_GROUP=2
+  export CI_GROUP="${JOB##x-pack-ciGroup}"
   ./test/scripts/jenkins_xpack_ci_group.sh
   ;;
 *)
