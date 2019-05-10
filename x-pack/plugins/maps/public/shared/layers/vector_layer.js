@@ -352,10 +352,13 @@ export class VectorLayer extends AbstractLayer {
         id = feature.id;
       } else {
         VectorLayer.idOffsetCounter++;
-        //just POC to illustrate mapbox issue
-        //using feature-state causes a "washing" effect if ids are reusted across different source-results (e.g. source-data is replaced, and when using index in array, that source feature has a different id. this messes up mapbox, still briefly applying the style based ont the old-id
+        // just POC to illustrate mapbox issue
+        // using feature-state causes a "washing" effect i
+        // this is because ids are reusted across different source-results
+        // e.g. source-data is replaced based on new results, and when using index-in-array as the id, that source feature will have a different id across result-sets
+        // this messes up mapbox, still briefly applying the style based ont the feature-ss state with the old ids. this is likely becaues setData and setFeatureState are handled asynchronously and/or batched differently
         //for some reason, ids that cannot be parsed to a number value cannot be used with feature-state
-        //this is the proposed work-around.
+        //this is the proposed work-around (should be polished). just offset the id based on the maximum number of features in a layer. rotate this number this to avoid unbounded growth with some large number (more or less number of vector layers on screen). this way the same ids will not be used across resultsets.
         id = ((VectorLayer.idOffsetCounter % 64) * 2048) +  i;
       }
       feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
