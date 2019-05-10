@@ -7,7 +7,7 @@
 import { reporting } from './index';
 import { getConfigSchema } from '../../test_utils';
 
-describe('config', () => {
+describe('default config', () => {
   describe('dev = false, dist = false', () => {
     it('produces correct config', async () => {
       const schema = await getConfigSchema(reporting);

@@ -7,8 +7,8 @@
 import { encryptedSavedObjects } from './index';
 import { getConfigSchema } from '../../test_utils';
 
-describe('config', () => {
-  it('uses a default encryption key when running from source', async () => {
+describe('default config', () => {
+  it('is correct when running from source', async () => {
     const schema = await getConfigSchema(encryptedSavedObjects);
     await expect(
       schema.validate(
@@ -27,7 +27,7 @@ Object {
 `);
   });
 
-  it('uses no default encryption key when running from dist', async () => {
+  it('is correct when not running from source', async () => {
     const schema = await getConfigSchema(encryptedSavedObjects);
     await expect(
       schema.validate(
