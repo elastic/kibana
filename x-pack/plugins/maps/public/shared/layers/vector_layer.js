@@ -353,7 +353,10 @@ export class VectorLayer extends AbstractLayer {
       } else {
         VectorLayer.idOffsetCounter++;
         //just POC to illustrate mapbox issue
-        id = ((VectorLayer.idOffsetCounter % 4) * 2048) +  i;
+        //using feature-state causes a "washing" effect if ids are reusted across different source-results (e.g. source-data is replaced, and when using index in array, that source feature has a different id. this messes up mapbox, still briefly applying the style based ont the old-id
+        //for some reason, ids that cannot be parsed to a number value cannot be used with feature-state
+        //this is the proposed work-around.
+        id = ((VectorLayer.idOffsetCounter % 64) * 2048) +  i;
       }
       feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
       feature.id = id;
