@@ -30,11 +30,6 @@ export type PivotSupportedGroupByAggsWithInterval =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
 
-export const pivotSupportedGroupByAggsWithInterval: PivotSupportedGroupByAggsWithInterval[] = [
-  PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
-];
-
 export const pivotGroupByFieldSupport = {
   [FIELD_TYPE.ATTACHMENT]: [],
   [FIELD_TYPE.BOOLEAN]: [],
