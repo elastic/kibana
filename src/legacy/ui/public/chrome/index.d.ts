@@ -55,5 +55,4 @@ declare const chrome: Chrome;
 export default chrome;
 export { Chrome };
 export { Breadcrumb } from './api/breadcrumbs';
-export { NavLink } from './api/nav';
 export { HelpExtension } from './api/help_extension';
