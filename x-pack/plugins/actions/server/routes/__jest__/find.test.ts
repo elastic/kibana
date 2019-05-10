@@ -7,7 +7,7 @@
 import { createMockServer } from './_mock_server';
 import { findRoute } from '../find';
 
-const server = createMockServer();
+const { server, actionsClient } = createMockServer();
 findRoute(server);
 
 beforeEach(() => {
@@ -28,25 +28,15 @@ it('sends proper arguments to action find function', async () => {
       'fields=description',
   };
 
-  server.plugins.actions.find.mockResolvedValueOnce({ success: true });
+  actionsClient.find.mockResolvedValueOnce({ success: true });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(server.plugins.actions.find).toMatchInlineSnapshot(`
+  expect(actionsClient.find).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
-      Object {
-        "bulkCreate": [MockFunction],
-        "bulkGet": [MockFunction],
-        "create": [MockFunction],
-        "delete": [MockFunction],
-        "errors": Object {},
-        "find": [MockFunction],
-        "get": [MockFunction],
-        "update": [MockFunction],
-      },
       Object {
         "defaultSearchOperator": "AND",
         "fields": Array [

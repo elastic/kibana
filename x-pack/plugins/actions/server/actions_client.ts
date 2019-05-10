@@ -19,7 +19,14 @@ interface Action {
 interface FireOptions {
   id: string;
   params: Record<string, any>;
-  savedObjectsClient: SavedObjectsClient;
+}
+
+interface CreateOptions {
+  data: Action;
+  options?: {
+    migrationVersion?: Record<string, string>;
+    references?: SavedObjectReference[];
+  };
 }
 
 interface FindOptions {
@@ -36,52 +43,58 @@ interface FindOptions {
   fields?: string[];
 }
 
-interface CreateOptions {
-  migrationVersion?: Record<string, string>;
-  references?: SavedObjectReference[];
+interface ConstructorOptions {
+  actionTypeService: ActionTypeService;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  savedObjectsClient: SavedObjectsClient;
 }
 
-export class ActionService {
+interface UpdateOptions {
+  id: string;
+  data: Action;
+  options: { version?: string; references?: SavedObjectReference[] };
+}
+
+export class ActionsClient {
+  private savedObjectsClient: SavedObjectsClient;
   private actionTypeService: ActionTypeService;
   private encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 
-  constructor(
-    actionTypeService: ActionTypeService,
-    encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin
-  ) {
+  constructor({
+    actionTypeService,
+    encryptedSavedObjectsPlugin,
+    savedObjectsClient,
+  }: ConstructorOptions) {
     this.actionTypeService = actionTypeService;
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
+    this.savedObjectsClient = savedObjectsClient;
   }
 
   /**
    * Create an action
    */
-  public async create(
-    savedObjectsClient: SavedObjectsClient,
-    data: Action,
-    options?: CreateOptions
-  ) {
+  public async create({ data, options }: CreateOptions) {
     const { actionTypeId } = data;
     if (!this.actionTypeService.has(actionTypeId)) {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
     this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
     const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
-    return await savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
+    return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
   }
 
   /**
    * Get an action
    */
-  public async get(savedObjectsClient: SavedObjectsClient, id: string) {
-    return await savedObjectsClient.get('action', id);
+  public async get({ id }: { id: string }) {
+    return await this.savedObjectsClient.get('action', id);
   }
 
   /**
    * Find actions
    */
-  public async find(savedObjectsClient: SavedObjectsClient, options: FindOptions = {}) {
-    return await savedObjectsClient.find({
+  public async find(options: FindOptions = {}) {
+    return await this.savedObjectsClient.find({
       ...options,
       type: 'action',
     });
@@ -90,32 +103,32 @@ export class ActionService {
   /**
    * Delete action
    */
-  public async delete(savedObjectsClient: SavedObjectsClient, id: string) {
-    return await savedObjectsClient.delete('action', id);
+  public async delete({ id }: { id: string }) {
+    return await this.savedObjectsClient.delete('action', id);
   }
 
   /**
    * Update action
    */
-  public async update(
-    savedObjectsClient: SavedObjectsClient,
-    id: string,
-    data: Action,
-    options: { version?: string; references?: SavedObjectReference[] } = {}
-  ) {
+  public async update({ id, data, options = {} }: UpdateOptions) {
     const { actionTypeId } = data;
     if (!this.actionTypeService.has(actionTypeId)) {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
     this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
     const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
-    return await savedObjectsClient.update('action', id, actionWithSplitActionTypeConfig, options);
+    return await this.savedObjectsClient.update(
+      'action',
+      id,
+      actionWithSplitActionTypeConfig,
+      options
+    );
   }
 
   /**
    * Fire an action
    */
-  public async fire({ id, params, savedObjectsClient }: FireOptions) {
+  public async fire({ id, params }: FireOptions) {
     const action = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', id);
     const mergedActionTypeConfig = {
       ...action.attributes.actionTypeConfig,

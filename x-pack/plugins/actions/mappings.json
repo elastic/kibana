@@ -8,7 +8,7 @@
         "type": "keyword"
       },
       "actionTypeConfig": {
-        "dynamic": "true",
+        "enabled": false,
         "type": "object"
       },
       "actionTypeConfigSecrets": {

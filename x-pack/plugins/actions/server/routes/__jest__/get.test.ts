@@ -7,7 +7,7 @@
 import { createMockServer } from './_mock_server';
 import { getRoute } from '../get';
 
-const server = createMockServer();
+const { server, actionsClient } = createMockServer();
 getRoute(server);
 
 beforeEach(() => {
@@ -20,26 +20,18 @@ it('calls get with proper parameters', async () => {
     url: '/api/action/1',
   };
 
-  server.plugins.actions.get.mockResolvedValueOnce({ success: true });
+  actionsClient.get.mockResolvedValueOnce({ success: true });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(server.plugins.actions.get).toMatchInlineSnapshot(`
+  expect(actionsClient.get).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
-        "bulkCreate": [MockFunction],
-        "bulkGet": [MockFunction],
-        "create": [MockFunction],
-        "delete": [MockFunction],
-        "errors": Object {},
-        "find": [MockFunction],
-        "get": [MockFunction],
-        "update": [MockFunction],
+        "id": "1",
       },
-      "1",
     ],
   ],
   "results": Array [

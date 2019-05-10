@@ -7,7 +7,7 @@
 import { createMockServer } from './_mock_server';
 import { createRoute } from '../create';
 
-const server = createMockServer();
+const { server, actionsClient } = createMockServer();
 createRoute(server);
 
 beforeEach(() => {
@@ -37,43 +37,35 @@ it('creates an action with proper parameters', async () => {
     },
   };
 
-  server.plugins.actions.create.mockResolvedValueOnce({ success: true });
+  actionsClient.create.mockResolvedValueOnce({ success: true });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(server.plugins.actions.create).toMatchInlineSnapshot(`
+  expect(actionsClient.create).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
-        "bulkCreate": [MockFunction],
-        "bulkGet": [MockFunction],
-        "create": [MockFunction],
-        "delete": [MockFunction],
-        "errors": Object {},
-        "find": [MockFunction],
-        "get": [MockFunction],
-        "update": [MockFunction],
-      },
-      Object {
-        "actionTypeConfig": Object {
-          "foo": true,
-        },
-        "actionTypeId": "abc",
-        "description": "My description",
-      },
-      Object {
-        "migrationVersion": Object {
-          "abc": "1.2.3",
-        },
-        "references": Array [
-          Object {
-            "id": "234",
-            "name": "ref_0",
-            "type": "bcd",
+        "data": Object {
+          "actionTypeConfig": Object {
+            "foo": true,
           },
-        ],
+          "actionTypeId": "abc",
+          "description": "My description",
+        },
+        "options": Object {
+          "migrationVersion": Object {
+            "abc": "1.2.3",
+          },
+          "references": Array [
+            Object {
+              "id": "234",
+              "name": "ref_0",
+              "type": "bcd",
+            },
+          ],
+        },
       },
     ],
   ],

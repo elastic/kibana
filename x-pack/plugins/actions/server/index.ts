@@ -6,3 +6,4 @@
 
 export { init } from './init';
 export { ActionsPlugin } from './types';
+export { ActionsClient } from './actions_client';

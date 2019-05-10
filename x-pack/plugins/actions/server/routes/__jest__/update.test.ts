@@ -7,7 +7,7 @@
 import { createMockServer } from './_mock_server';
 import { updateRoute } from '../update';
 
-const server = createMockServer();
+const { server, actionsClient } = createMockServer();
 updateRoute(server);
 
 beforeEach(() => {
@@ -35,42 +35,34 @@ it('calls the update function with proper parameters', async () => {
     },
   };
 
-  server.plugins.actions.update.mockResolvedValueOnce({ success: true });
+  actionsClient.update.mockResolvedValueOnce({ success: true });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(server.plugins.actions.update).toMatchInlineSnapshot(`
+  expect(actionsClient.update).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
-        "bulkCreate": [MockFunction],
-        "bulkGet": [MockFunction],
-        "create": [MockFunction],
-        "delete": [MockFunction],
-        "errors": Object {},
-        "find": [MockFunction],
-        "get": [MockFunction],
-        "update": [MockFunction],
-      },
-      "1",
-      Object {
-        "actionTypeConfig": Object {
-          "foo": true,
-        },
-        "actionTypeId": "abc",
-        "description": "My description",
-      },
-      Object {
-        "references": Array [
-          Object {
-            "id": "234",
-            "name": "ref_0",
-            "type": "bcd",
+        "data": Object {
+          "actionTypeConfig": Object {
+            "foo": true,
           },
-        ],
-        "version": "2",
+          "actionTypeId": "abc",
+          "description": "My description",
+        },
+        "id": "1",
+        "options": Object {
+          "references": Array [
+            Object {
+              "id": "234",
+              "name": "ref_0",
+              "type": "bcd",
+            },
+          ],
+          "version": "2",
+        },
       },
     ],
   ],

@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { ActionTypeService } from '../action_type_service';
-import { ActionService } from '../action_service';
+import { ActionsClient } from '../actions_client';
 
 const savedObjectsClient = {
   errors: {} as any,
@@ -36,20 +36,23 @@ describe('create()', () => {
       name: 'My action type',
       async executor() {},
     });
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
-    savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.create(
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
-      {
+    });
+    savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
+    const result = await actionService.create({
+      data: {
         description: 'my description',
         actionTypeId: 'my-action-type',
         actionTypeConfig: {},
       },
-      {
+      options: {
         migrationVersion: {},
         references: [],
-      }
-    );
+      },
+    });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -80,7 +83,11 @@ describe('create()', () => {
 
   test('validates actionTypeConfig', async () => {
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -94,10 +101,12 @@ describe('create()', () => {
       async executor() {},
     });
     await expect(
-      actionService.create(savedObjectsClient, {
-        description: 'my description',
-        actionTypeId: 'my-action-type',
-        actionTypeConfig: {},
+      actionService.create({
+        data: {
+          description: 'my description',
+          actionTypeId: 'my-action-type',
+          actionTypeConfig: {},
+        },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
@@ -106,12 +115,18 @@ describe('create()', () => {
 
   test(`throws an error when an action type doesn't exist`, async () => {
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     await expect(
-      actionService.create(savedObjectsClient, {
-        description: 'my description',
-        actionTypeId: 'unregistered-action-type',
-        actionTypeConfig: {},
+      actionService.create({
+        data: {
+          description: 'my description',
+          actionTypeId: 'unregistered-action-type',
+          actionTypeConfig: {},
+        },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"unregistered-action-type\\" is not registered."`
@@ -127,15 +142,21 @@ describe('create()', () => {
       unencryptedAttributes: ['a', 'c'],
       async executor() {},
     });
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.create(savedObjectsClient, {
-      description: 'my description',
-      actionTypeId: 'my-action-type',
-      actionTypeConfig: {
-        a: true,
-        b: true,
-        c: true,
+    const result = await actionService.create({
+      data: {
+        description: 'my description',
+        actionTypeId: 'my-action-type',
+        actionTypeConfig: {
+          a: true,
+          b: true,
+          c: true,
+        },
       },
     });
     expect(result).toEqual(expectedResult);
@@ -173,9 +194,13 @@ describe('get()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     savedObjectsClient.get.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.get(savedObjectsClient, '1');
+    const result = await actionService.get({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.get).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -200,9 +225,13 @@ describe('find()', () => {
   test('calls savedObjectsClient with parameters', async () => {
     const expectedResult = Symbol();
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.find(savedObjectsClient, {});
+    const result = await actionService.find({});
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.find).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -228,9 +257,13 @@ describe('delete()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.delete(savedObjectsClient, '1');
+    const result = await actionService.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.delete).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -260,18 +293,21 @@ describe('update()', () => {
       name: 'My action type',
       async executor() {},
     });
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
-    savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.update(
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
-      'my-action',
-      {
+    });
+    savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
+    const result = await actionService.update({
+      id: 'my-action',
+      data: {
         description: 'my description',
         actionTypeId: 'my-action-type',
         actionTypeConfig: {},
       },
-      {}
-    );
+      options: {},
+    });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.update).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -300,7 +336,11 @@ describe('update()', () => {
 
   test('validates actionTypeConfig', async () => {
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -314,16 +354,15 @@ describe('update()', () => {
       async executor() {},
     });
     await expect(
-      actionService.update(
-        savedObjectsClient,
-        'my-action',
-        {
+      actionService.update({
+        id: 'my-action',
+        data: {
           description: 'my description',
           actionTypeId: 'my-action-type',
           actionTypeConfig: {},
         },
-        {}
-      )
+        options: {},
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -331,18 +370,21 @@ describe('update()', () => {
 
   test(`throws an error when action type doesn't exist`, async () => {
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     await expect(
-      actionService.update(
-        savedObjectsClient,
-        'my-action',
-        {
+      actionService.update({
+        id: 'my-action',
+        data: {
           description: 'my description',
           actionTypeId: 'unregistered-action-type',
           actionTypeConfig: {},
         },
-        {}
-      )
+        options: {},
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"unregistered-action-type\\" is not registered."`
     );
@@ -357,12 +399,15 @@ describe('update()', () => {
       unencryptedAttributes: ['a', 'c'],
       async executor() {},
     });
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
-    savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.update(
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
-      'my-action',
-      {
+    });
+    savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
+    const result = await actionService.update({
+      id: 'my-action',
+      data: {
         description: 'my description',
         actionTypeId: 'my-action-type',
         actionTypeConfig: {
@@ -371,8 +416,8 @@ describe('update()', () => {
           c: true,
         },
       },
-      {}
-    );
+      options: {},
+    });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.update).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -408,7 +453,11 @@ describe('update()', () => {
 describe('fire()', () => {
   test('fires an action with all given parameters', async () => {
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
     actionTypeService.register({
       id: 'mock',
@@ -427,7 +476,6 @@ describe('fire()', () => {
     const result = await actionService.fire({
       id: 'mock-action',
       params: { baz: false },
-      savedObjectsClient,
     });
     expect(result).toEqual({ success: true });
     expect(mockActionType).toMatchInlineSnapshot(`
@@ -459,7 +507,11 @@ describe('fire()', () => {
 
   test(`throws an error when the action type isn't registered`, async () => {
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: 'mock-action',
       attributes: {
@@ -470,7 +522,7 @@ describe('fire()', () => {
       },
     });
     await expect(
-      actionService.fire({ savedObjectsClient, id: 'mock-action', params: { baz: false } })
+      actionService.fire({ id: 'mock-action', params: { baz: false } })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"non-registered-action-type\\" is not registered."`
     );
@@ -478,7 +530,11 @@ describe('fire()', () => {
 
   test('merges encrypted and unencrypted attributes', async () => {
     const actionTypeService = new ActionTypeService();
-    const actionService = new ActionService(actionTypeService, mockEncryptedSavedObjects);
+    const actionService = new ActionsClient({
+      actionTypeService,
+      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      savedObjectsClient,
+    });
     const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
     actionTypeService.register({
       id: 'mock',
@@ -502,7 +558,6 @@ describe('fire()', () => {
     const result = await actionService.fire({
       id: 'mock-action',
       params: { baz: false },
-      savedObjectsClient,
     });
     expect(result).toEqual({ success: true });
     expect(mockActionType).toMatchInlineSnapshot(`

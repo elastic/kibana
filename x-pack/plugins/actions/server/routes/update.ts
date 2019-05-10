@@ -59,13 +59,12 @@ export function updateRoute(server: Hapi.Server) {
       const { id } = request.params;
       const { attributes, version, references } = request.payload;
       const options = { version, references };
-      const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.plugins.actions.update(
-        savedObjectsClient,
+      const actionsClient = request.getActionsClient();
+      return await actionsClient.update({
         id,
-        attributes,
-        options
-      );
+        data: attributes,
+        options,
+      });
     },
   });
 }

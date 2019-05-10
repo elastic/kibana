@@ -28,8 +28,8 @@ export function getRoute(server: Hapi.Server) {
     },
     async handler(request: GetRequest) {
       const { id } = request.params;
-      const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.plugins.actions.get(savedObjectsClient, id);
+      const actionsClient = request.getActionsClient();
+      return await actionsClient.get({ id });
     },
   });
 }

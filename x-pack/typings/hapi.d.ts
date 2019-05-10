@@ -10,9 +10,12 @@ import { CloudPlugin } from '../plugins/cloud';
 import { EncryptedSavedObjectsPlugin } from '../plugins/encrypted_saved_objects';
 import { XPackMainPlugin } from '../plugins/xpack_main/xpack_main';
 import { SecurityPlugin } from '../plugins/security';
-import { ActionsPlugin } from '../plugins/actions';
+import { ActionsPlugin, ActionsClient } from '../plugins/actions';
 
 declare module 'hapi' {
+  interface Request {
+    getActionsClient: () => ActionsClient;
+  }
   interface PluginProperties {
     cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;

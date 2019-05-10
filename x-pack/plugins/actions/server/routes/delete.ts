@@ -28,8 +28,8 @@ export function deleteRoute(server: Hapi.Server) {
     },
     async handler(request: DeleteRequest) {
       const { id } = request.params;
-      const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.plugins.actions.delete(savedObjectsClient, id);
+      const actionsClient = request.getActionsClient();
+      return await actionsClient.delete({ id });
     },
   });
 }

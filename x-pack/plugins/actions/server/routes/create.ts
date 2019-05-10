@@ -32,6 +32,9 @@ export function createRoute(server: Hapi.Server) {
     path: `/api/action`,
     options: {
       validate: {
+        options: {
+          abortEarly: false,
+        },
         payload: Joi.object().keys({
           attributes: Joi.object()
             .keys({
@@ -54,15 +57,15 @@ export function createRoute(server: Hapi.Server) {
       },
     },
     async handler(request: CreateRequest) {
-      const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.plugins.actions.create(
-        savedObjectsClient,
-        request.payload.attributes,
-        {
+      const actionsClient = request.getActionsClient();
+
+      return await actionsClient.create({
+        data: request.payload.attributes,
+        options: {
           migrationVersion: request.payload.migrationVersion,
           references: request.payload.references,
-        }
-      );
+        },
+      });
     },
   });
 }

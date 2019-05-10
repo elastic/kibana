@@ -7,7 +7,7 @@
 import { createMockServer } from './_mock_server';
 import { listActionTypesRoute } from '../list_action_types';
 
-const server = createMockServer();
+const { server, actionTypeService } = createMockServer();
 listActionTypesRoute(server);
 
 beforeEach(() => {
@@ -20,12 +20,12 @@ it('calls the list function', async () => {
     url: '/api/action/types',
   };
 
-  server.plugins.actions.listTypes.mockResolvedValueOnce({ success: true });
+  actionTypeService.listTypes.mockResolvedValueOnce({ success: true });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(server.plugins.actions.listTypes).toMatchInlineSnapshot(`
+  expect(actionTypeService.listTypes).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [],
