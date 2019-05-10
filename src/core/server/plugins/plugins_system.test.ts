@@ -23,9 +23,11 @@ import {
 } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
+
+import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
+import { configServiceMock } from '../config/config_service.mock';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
@@ -58,7 +60,8 @@ function createPlugin(
 }
 
 let pluginsSystem: PluginsSystem;
-let configService: ConfigService;
+const configService = configServiceMock.create();
+configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
 let coreContext: CoreContext;
 const setupDeps = {
@@ -68,13 +71,7 @@ const setupDeps = {
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
-  configService = new ConfigService(
-    new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
-    env,
-    logger
-  );
-
-  coreContext = { env, logger, configService };
+  coreContext = { env, logger, configService: configService as any };
 
   pluginsSystem = new PluginsSystem(coreContext);
 });
