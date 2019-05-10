@@ -6,8 +6,7 @@ Canvas is a creative space for presenting data. You can create a Canvas workpad
 to combine colors, shapes, and text, to bring dynamic, pixel-perfect data displays 
 to screens large and small. 
 
-A Canvas workpad is your drawing space. In this tutorial, you'll learn how to create
-and configure your own workpad, and add text, data elements, and visual assets. 
+A Canvas workpad is your drawing space that you can configure to add text, data elements, and visual assets. 
 
 Before you start, you will need to have your own {es} data source connected in {kib}, 
 or you can use one of {kib}'s <<add-sample-data, sample data sets>>. 
@@ -59,18 +58,20 @@ Each element could contain a different data source. Pages and workpads often con
 From the sidebar editor, click *Data > Change your data source* to connect a new 
 data source to your element.
 
-There are four types of data sources to choose from: 
+There are four types of data sources to choose from. 
 
 Timelion::
-* 
+* Uses <<timelion-inline-help, Timelion syntax>> to retrieve a timeseries
 Demo data::
-* Elements are connected to demo data by default
+* Provides mock data set (connected to sample elements by default)
 Elasticsearch SQL::
-* {ref}/sql-overview.html
+* Uses {ref}/sql-overview.html[{es} SQL] to get a data table
 {es} raw documents:: 
-* sd
+* Pulls back raw documents from an {es} index
 
-After you change the data source for an element, update the ... in the ... 
+After you change the data source for an element, you also need to tell the element
+which values you want to display. Select the element, and click *Display* in the 
+sidebar to specify the values the element should show.
 
 
 [float]
@@ -85,6 +86,9 @@ image::images/canvas_workpad_3_page.png[]
 
 [float]
 === Sharing your workpad
-You can share your workpad in *Display* mode or download.. 
+Sharing icons are available on the top left, next to *Refresh*.
+
+* Click the fullscreen icon to display your workpad in fullscreen mode. 
+* Click the share workscreen icon to download your workpad as a PDF report or JSON object. 
 
 

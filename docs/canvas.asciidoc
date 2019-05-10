@@ -13,18 +13,19 @@ drag and drop assets — and turn your presentations and reports into dynamic wo
 Canvas combines data with colors, shapes, text, and your own imagination to bring 
 dynamic, multi-page, pixel-perfect, data displays to screens large and small. 
 
-[role="screenshot"]
-image::canvas/images/canvas-ecommerce.png[]
 
 [float]
 === Getting started with Canvas
 
-EachCanvas workpad is made up of at least one page. Pages contains elements 
-that you can arrange, style, and connect to a data source to create live data displays.
+Each Canvas workpad is made up of at least one page. Pages contain elements, which you 
+can arrange and style, and connect to data to create dynamic presentations.
 
-Install a <<add-sample-data, Kibana sample data set>>. Each sample data set includes 
-a Canvas workpad to go along with the data. Once you've added the data, open *Canvas* 
-and click the name of the workpad to test things out.
+You can install a <<add-sample-data, Kibana sample data set>> to play around. 
+Each sample data set includes a Canvas workpad to go along with the data. Once you've 
+added the data, open *Canvas* and click the name of the workpad to test things out.
+
+[role="screenshot"]
+image::canvas/images/canvas-ecommerce.png[eCommerce sample workpad]
 
 
 [float]
@@ -44,7 +45,7 @@ browser to undo your change.
 . Try dragging the chart around the page. Grab the resize handles to make 
 the chart bigger and smaller.
 
-. Now click somewhere off of the element, but not on another element, 
+. Now click somewhere off of the element (just not on another element) 
 to deselect it. 
 +
 You will notice a change in the sidebar menu. When no element is selected, you have 
@@ -55,14 +56,9 @@ background color or rename the workpad.
 [float]
 === Ready to learn more? 
 
-Create your own workpad:
-
 * <<canvas-create-workpad, Create a new workpad>>
+* <<canvas-function-reference, Learn about the functions that drive Canvas>> 
 
-Dig into the expression language and the functions that drive Canvas:
-
-* <<canvas-common-functions>> 
-* <<canvas-tinymath-functions>>
 
 
 --
