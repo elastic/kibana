@@ -27,9 +27,9 @@ describe('fromQuery', () => {
     expect(
       fromQuery({
         traceId: 'bar',
-        transactionId: 'john-doe'
+        transactionId: 'john doe'
       })
-    ).toEqual('traceId=bar&transactionId=john-doe');
+    ).toEqual('traceId=bar&transactionId=john%20doe');
   });
 
   it('should not encode range params', () => {
@@ -51,6 +51,18 @@ describe('fromQuery', () => {
         refreshInterval: 5000
       })
     ).toEqual('flyoutDetailTab=&refreshPaused=true&refreshInterval=5000');
+  });
+});
+
+describe('fromQuery and toQuery', () => {
+  it('should encode and decode correctly', () => {
+    expect(
+      fromQuery(
+        toQuery(
+          '?name=john%20doe&rangeFrom=2019-03-03T12:00:00.000Z&path=a%2Fb'
+        )
+      )
+    ).toEqual('name=john%20doe&rangeFrom=2019-03-03T12:00:00.000Z&path=a%2Fb');
   });
 });
 
