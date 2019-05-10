@@ -13,7 +13,10 @@ export default function(kibana: any) {
       server.plugins.actions.registerType({
         id: 'test',
         name: 'Test',
-        async executor(actionTypeConfig: any, params: any) {},
+        unencryptedAttributes: ['unencrypted'],
+        async executor({ actionTypeConfig, params }: { actionTypeConfig: any; params: any }) {
+          return { success: true, actionTypeConfig, params };
+        },
       });
     },
   });
