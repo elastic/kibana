@@ -9,6 +9,7 @@ import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { KpiHostsData } from '../../../../graphql/types';
 import { StatItem, StatItems, StatItemsComponent, StatItemsProps } from '../../../stat_items';
 import * as i18n from './translations';
@@ -86,13 +87,19 @@ const fieldTitleMapping: StatItems[] = [
   },
 ];
 
+const FlexGroupSpinner = styled(EuiFlexGroup)`
+   {
+    min-height: 247;
+  }
+`;
+
 export const KpiHostsComponent = React.memo<KpiHostsProps>(({ data, loading }) => {
   return loading ? (
-    <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 247 }}>
+    <FlexGroupSpinner justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </FlexGroupSpinner>
   ) : (
     <EuiFlexGroup>
       {fieldTitleMapping.map(stat => {

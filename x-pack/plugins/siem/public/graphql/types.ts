@@ -1052,17 +1052,37 @@ export interface UsersItem {
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
+  networkEventsHistogram?: KpiNetworkHistogramData[] | null;
+
   uniqueFlowId?: number | null;
 
   activeAgents?: number | null;
 
   uniqueSourcePrivateIps?: number | null;
 
+  uniqueSourcePrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
+
   uniqueDestinationPrivateIps?: number | null;
+
+  uniqueDestinationPrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
 
   dnsQueries?: number | null;
 
   tlsHandshakes?: number | null;
+}
+
+export interface KpiNetworkHistogramData {
+  key_as_string?: string | null;
+
+  count?: KpiNetworkCount | null;
+
+  doc_count?: number | null;
+}
+
+export interface KpiNetworkCount {
+  value?: number | null;
+
+  doc_count?: number | null;
 }
 
 export interface KpiHostsData {
@@ -1092,10 +1112,12 @@ export interface KpiHostHistogramData {
 
   key_as_string?: string | null;
 
-  count?: Count | null;
+  count?: KpiHostCount | null;
+
+  doc_count?: number | null;
 }
 
-export interface Count {
+export interface KpiHostCount {
   value?: number | null;
 
   doc_count?: number | null;
@@ -2956,15 +2978,15 @@ export namespace GetKpiHostsQuery {
     uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
   };
 
-  export type HostsHistogram = ChartFields.Fragment;
+  export type HostsHistogram = KpiHostChartFields.Fragment;
 
-  export type AuthSuccessHistogram = ChartFields.Fragment;
+  export type AuthSuccessHistogram = KpiHostChartFields.Fragment;
 
-  export type AuthFailureHistogram = ChartFields.Fragment;
+  export type AuthFailureHistogram = KpiHostChartFields.Fragment;
 
-  export type UniqueSourceIpsHistogram = ChartFields.Fragment;
+  export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
-  export type UniqueDestinationIpsHistogram = ChartFields.Fragment;
+  export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
 }
 
 export namespace GetKpiNetworkQuery {
@@ -2994,18 +3016,30 @@ export namespace GetKpiNetworkQuery {
 
     networkEvents?: number | null;
 
+    networkEventsHistogram?: NetworkEventsHistogram[] | null;
+
     uniqueFlowId?: number | null;
 
     activeAgents?: number | null;
 
     uniqueSourcePrivateIps?: number | null;
 
+    uniqueSourcePrivateIpsHistogram?: UniqueSourcePrivateIpsHistogram[] | null;
+
     uniqueDestinationPrivateIps?: number | null;
+
+    uniqueDestinationPrivateIpsHistogram?: UniqueDestinationPrivateIpsHistogram[] | null;
 
     dnsQueries?: number | null;
 
     tlsHandshakes?: number | null;
   };
+
+  export type NetworkEventsHistogram = KpiNetworkChartFields.Fragment;
+
+  export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
+
+  export type UniqueDestinationPrivateIpsHistogram = KpiNetworkChartFields.Fragment;
 }
 
 export namespace GetNetworkDnsQuery {
@@ -5031,7 +5065,7 @@ export namespace GetUsersQuery {
   };
 }
 
-export namespace ChartFields {
+export namespace KpiHostChartFields {
   export type Fragment = {
     __typename?: 'KpiHostHistogramData';
 
@@ -5041,10 +5075,28 @@ export namespace ChartFields {
   };
 
   export type Y = {
-    __typename?: 'Count';
+    __typename?: 'KpiHostCount';
 
     value?: number | null;
 
     doc_count?: number | null;
+  };
+}
+
+export namespace KpiNetworkChartFields {
+  export type Fragment = {
+    __typename?: 'KpiNetworkHistogramData';
+
+    key_as_string?: string | null;
+
+    doc_count?: number | null;
+
+    count?: Count | null;
+  };
+
+  export type Count = {
+    __typename?: 'KpiNetworkCount';
+
+    value?: number | null;
   };
 }

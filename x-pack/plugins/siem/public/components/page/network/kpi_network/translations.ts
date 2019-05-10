@@ -18,17 +18,35 @@ export const ACTIVE_AGENTS = i18n.translate('xpack.siem.kpiNetwork.source.active
   defaultMessage: 'Active Agents',
 });
 
+export const UNIQUE_IPS = i18n.translate('xpack.siem.kpiNetwork.source.uniqueIpsTitle', {
+  defaultMessage: 'Unique IPs',
+});
+
+export const UNIQUE_SOURCE_PRIVATE_IPS_ABBREVIATION = i18n.translate(
+  'xpack.siem.kpiNetwork.source.uniqueSourcePrivateIpsAbbreviationTitle',
+  {
+    defaultMessage: 'Src.',
+  }
+);
+
 export const UNIQUE_SOURCE_PRIVATE_IPS = i18n.translate(
   'xpack.siem.kpiNetwork.source.uniqueSourcePrivateIpsTitle',
   {
-    defaultMessage: 'Unique Source IPs',
+    defaultMessage: 'Source',
   }
 );
 
 export const UNIQUE_DESTINATION_PRIVATE_IPS = i18n.translate(
   'xpack.siem.kpiNetwork.source.uniqueDestinationPrivateIpsTitle',
   {
-    defaultMessage: 'Unique Destination IPs',
+    defaultMessage: 'Destination',
+  }
+);
+
+export const UNIQUE_DESTINATION_PRIVATE_IPS_ABBREVIATION = i18n.translate(
+  'xpack.siem.kpiNetwork.source.uniqueDestinationPrivateIpsAbbreviationTitle',
+  {
+    defaultMessage: 'Dist.',
   }
 );
 

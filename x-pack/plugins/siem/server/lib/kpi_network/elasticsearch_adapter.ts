@@ -47,9 +47,13 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
         ],
       }
     );
-
     return {
       networkEvents: getOr(null, 'responses.0.hits.total.value', response),
+      networkEventsHistogram: getOr(
+        null,
+        'responses.0.aggregations.network_events_histogram.buckets',
+        response
+      ),
       uniqueFlowId: getOr(null, 'responses.0.aggregations.unique_flow_id.value', response),
       activeAgents: getOr(null, 'responses.0.aggregations.active_agents.value', response),
       uniqueSourcePrivateIps: getOr(
@@ -57,9 +61,19 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
         'responses.1.aggregations.unique_private_ips.value',
         response
       ),
+      uniqueSourcePrivateIpsHistogram: getOr(
+        null,
+        'responses.1.aggregations.histogram.buckets',
+        response
+      ),
       uniqueDestinationPrivateIps: getOr(
         null,
         'responses.2.aggregations.unique_private_ips.value',
+        response
+      ),
+      uniqueDestinationPrivateIpsHistogram: getOr(
+        null,
+        'responses.2.aggregations.histogram.buckets',
         response
       ),
       dnsQueries: getOr(null, 'responses.3.hits.total.value', response),

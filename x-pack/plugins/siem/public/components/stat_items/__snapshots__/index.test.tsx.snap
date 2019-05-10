@@ -75,7 +75,7 @@ exports[`Stat Items disable charts it renders the default widget 1`] = `
                                       data-test-subj="stat-title"
                                     >
                                       --
-                                       
+
                                     </p>
                                   </EuiTitle>
                                 </Styled(EuiTitle)>
@@ -180,7 +180,7 @@ exports[`Stat Items disable charts it renders the default widget 2`] = `
                                       data-test-subj="stat-title"
                                     >
                                       --
-                                       
+
                                     </p>
                                   </EuiTitle>
                                 </Styled(EuiTitle)>
@@ -401,7 +401,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                       data-test-subj="stat-title"
                                     >
                                       1,714
-                                       
+
                                       Source
                                     </p>
                                   </EuiTitle>
@@ -492,7 +492,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                       data-test-subj="stat-title"
                                     >
                                       2,359
-                                       
+
                                       Dest.
                                     </p>
                                   </EuiTitle>

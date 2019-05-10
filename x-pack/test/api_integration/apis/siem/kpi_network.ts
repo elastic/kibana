@@ -19,6 +19,15 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
 
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const expectedResult = {
+        networkEvents: 6157,
+        uniqueFlowId: 712,
+        activeAgents: 1,
+        uniqueSourcePrivateIps: 8,
+        uniqueDestinationPrivateIps: 9,
+        dnsQueries: 169,
+        tlsHandshakes: 62,
+      };
 
       it('Make sure that we get KpiNetwork data', () => {
         return client
@@ -36,13 +45,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
           })
           .then(resp => {
             const kpiNetwork = resp.data.source.KpiNetwork;
-            expect(kpiNetwork!.networkEvents).to.be(6157);
-            expect(kpiNetwork!.uniqueFlowId).to.be(712);
-            expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
-            expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
-            expect(kpiNetwork!.dnsQueries).to.equal(169);
-            expect(kpiNetwork!.tlsHandshakes).to.equal(62);
+            expect(kpiNetwork).to.eql(expectedResult);
           });
       });
     });
@@ -53,7 +56,15 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
 
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
-
+      const expectedResult = {
+        networkEvents: 6157,
+        uniqueFlowId: 712,
+        activeAgents: 1,
+        uniqueSourcePrivateIps: 8,
+        uniqueDestinationPrivateIps: 9,
+        dnsQueries: 169,
+        tlsHandshakes: 62,
+      };
       it('Make sure that we get KpiNetwork data', () => {
         return client
           .query<GetKpiNetworkQuery.Query>({
@@ -70,13 +81,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
           })
           .then(resp => {
             const kpiNetwork = resp.data.source.KpiNetwork;
-            expect(kpiNetwork!.networkEvents).to.be(6157);
-            expect(kpiNetwork!.uniqueFlowId).to.be(712);
-            expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
-            expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
-            expect(kpiNetwork!.dnsQueries).to.equal(169);
-            expect(kpiNetwork!.tlsHandshakes).to.equal(62);
+            expect(kpiNetwork).to.eql(expectedResult);
           });
       });
     });

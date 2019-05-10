@@ -7,12 +7,26 @@
 import gql from 'graphql-tag';
 
 export const kpiNetworkSchema = gql`
+  type KpiNetworkCount {
+    value: Float
+    doc_count: Float
+  }
+
+  type KpiNetworkHistogramData {
+    key_as_string: String
+    count: KpiNetworkCount
+    doc_count: Float
+  }
+
   type KpiNetworkData {
     networkEvents: Float
+    networkEventsHistogram: [KpiNetworkHistogramData!]
     uniqueFlowId: Float
     activeAgents: Float
     uniqueSourcePrivateIps: Float
+    uniqueSourcePrivateIpsHistogram: [KpiNetworkHistogramData!]
     uniqueDestinationPrivateIps: Float
+    uniqueDestinationPrivateIpsHistogram: [KpiNetworkHistogramData!]
     dnsQueries: Float
     tlsHandshakes: Float
   }
