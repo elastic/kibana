@@ -64,8 +64,9 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
   const aggOptions: EuiComboBoxOptionProps[] = [];
   const aggOptionsData: PivotAggsConfigDict = {};
 
+  const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
-    .filter(field => field.aggregatable === true)
+    .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
     .map((field): Field => ({ name: field.name, type: field.type as FIELD_TYPE }));
 
   fields.forEach(field => {
