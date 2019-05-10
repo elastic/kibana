@@ -71,7 +71,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const merge = _.partial(_.merge, rawConfig);
 
   if (opts.oss) {
-    _.unset(rawConfig, 'xpack');
+    delete rawConfig.xpack;
   }
 
   if (opts.dev) {
