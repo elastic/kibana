@@ -128,6 +128,7 @@ export class AddLayerPanel extends Component {
   }
 
   _renderFlyout() {
+    const panelTitle = this.state.importView ? 'Import file' : 'Add layer';
     return (
       <EuiFlexGroup
         direction="column"
@@ -138,7 +139,7 @@ export class AddLayerPanel extends Component {
             <h2>
               <FormattedMessage
                 id="xpack.maps.addLayerPanel.panelTitle"
-                defaultMessage={this.state.importView ? 'Import file' : 'Add layer'}
+                defaultMessage={panelTitle}
               />
             </h2>
           </EuiTitle>
