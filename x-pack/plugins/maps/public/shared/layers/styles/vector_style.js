@@ -249,13 +249,8 @@ export class VectorStyle extends AbstractStyle {
     return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  addScaledPropertiesBasedOnStyleAndSetFeatureStateMb(featureCollection, mbMap, sourceId) {
-
-    if (!featureCollection) {
-      return;
-    }
-
-    const scaledFields = this.getDynamicPropertiesArray()
+  _getScaledFields() {
+    return this.getDynamicPropertiesArray()
       .map(({ options }) => {
         const name = options.field.name;
         return {
@@ -268,6 +263,29 @@ export class VectorStyle extends AbstractStyle {
         return !!range;
       });
 
+  }
+
+  clearFeatureState(featureCollection, mbMap, sourceId) {
+    const tmpFeatureIdentifier = {
+      source: null,
+      id: null
+    };
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      tmpFeatureIdentifier.source = sourceId;
+      tmpFeatureIdentifier.id = feature.id;
+      mbMap.removeFeatureState(tmpFeatureIdentifier);
+    }
+
+  }
+
+  setFeatureState(featureCollection, mbMap, sourceId) {
+
+    if (!featureCollection) {
+      return;
+    }
+
+    const scaledFields  = this._getScaledFields();
     if (scaledFields.length === 0) {
       return;
     }

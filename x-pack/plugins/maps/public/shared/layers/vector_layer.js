@@ -388,18 +388,21 @@ export class VectorLayer extends AbstractLayer {
     const mbGeoJSONSource = mbMap.getSource(this.getId());
 
     const featureCollection = this._getSourceFeatureCollection();
+    const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
+
     if (!featureCollection) {
+      if (featureCollectionOnMap) {
+        this._style.clearFeatureState(featureCollectionOnMap, mbMap, this.getId());
+      }
       mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
       return;
     }
 
-    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
-    if (featureCollection !== dataBoundToMap) {
+
+    if (featureCollection !== featureCollectionOnMap) {
       mbGeoJSONSource.setData(featureCollection);
     }
-
-    this._style.addScaledPropertiesBasedOnStyleAndSetFeatureStateMb(featureCollection, mbMap, this.getId());
-
+    this._style.setFeatureState(featureCollection, mbMap, this.getId());
   }
 
   _setMbPointsProperties(mbMap) {
