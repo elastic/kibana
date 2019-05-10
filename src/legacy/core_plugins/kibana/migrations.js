@@ -156,23 +156,37 @@ function transformFilterStringToQueryObject(doc) {
       // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
-      // we need to migrate all filters where they are applied and for now, we migrate only the types that are tested in the functional tests
-      // TODO apply to all types (figure out if some do not have a filter somewhere)
-      const isMetricTSVBVis = get(visState, 'params.type') === 'metric';
-      const isMarkdownTSVBVis = get(visState, 'params.type') === 'markdown';
-      /* const isTimeSeriesTSVBVis = get(visState, 'params.type') === 'top_n';  we have filters in:
-        visState.params.series.filter
-        visState.params.series.split_filters[each].filter
-        visState.params.filter
-        visState.params.annotations.query_string
-      */
-      // const isGaugeTSVBVis = get(visState, 'params.type') === 'gauge';
-      // const isTableTSVBVis = get(visState, 'params.type') === 'table';
-      // const isTimeSeriresTSVBVis = get(visState, 'params.type') === 'timeseries';
-      if (!isMetricTSVBVis && !isMarkdownTSVBVis) {
+      const visType = get(visState, 'params.type');
+      const tsvbTypes = ['metric', 'markdown', 'top_n', 'gauge', 'table', 'timeseries'];
+      if (tsvbTypes.indexOf(visType) === -1) {
         // skip
         return doc;
       }
+      // migrate the params fitler
+      const params = get(visState, 'params');
+      if (params.filter && typeof params.filter === 'string') {
+        const paramsFilterObject = {
+          query: params.filter,
+          language: 'lucene',
+        };
+        params.filter = paramsFilterObject;
+      }
+
+      // migrate the annotations query string:
+      const annotations = get(visState, 'params.annotations') || [];
+      annotations.forEach((item) => {
+        if (!item.query_string) {
+          // we don't need to transform anything if there isn't a filter at all
+          return;
+        }
+        if (typeof item.query_string === 'string') {
+          const itemQueryStringObject = {
+            query: item.query_string,
+            language: 'lucene',
+          };
+          item.query_string = itemQueryStringObject;
+        }
+      });
       // migrate the series filters
       const series = get(visState, 'params.series') || [];
       series.forEach((item) => {
@@ -206,8 +220,6 @@ function transformFilterStringToQueryObject(doc) {
           });
         }
       });
-      // migrate aggs filters
-      // migrate panel filters (where are these?)
       newDoc.attributes.visState = JSON.stringify(visState);
     }
   }
