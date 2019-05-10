@@ -11,7 +11,7 @@ describe('config', () => {
   describe('dev = false, dist = false', () => {
     it('produces correct config', async () => {
       const schema = await getConfigSchema(reporting);
-      expect(
+      await expect(
         schema.validate(
           {},
           {
@@ -86,7 +86,7 @@ Object {
   describe('dev = false, dist = true', () => {
     it('produces correct config', async () => {
       const schema = await getConfigSchema(reporting);
-      expect(
+      await expect(
         schema.validate(
           {},
           {
@@ -160,7 +160,7 @@ Object {
   describe('dev = true, dist = false', () => {
     it('produces correct config', async () => {
       const schema = await getConfigSchema(reporting);
-      expect(
+      await expect(
         schema.validate(
           {},
           {
@@ -235,7 +235,7 @@ Object {
   describe('dev = true, dist = true', () => {
     it('produces correct config', async () => {
       const schema = await getConfigSchema(reporting);
-      expect(
+      await expect(
         schema.validate(
           {},
           {
