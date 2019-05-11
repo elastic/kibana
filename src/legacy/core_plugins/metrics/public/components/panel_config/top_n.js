@@ -85,7 +85,7 @@ class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '' };
+    const defaults = { drilldown_url: '', filter: { query: '', language: uiSettingsQueryLanguage } };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
@@ -160,7 +160,7 @@ class TopNPanelConfig extends Component {
                   <QueryBar
                     query={{
                       language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
-                      query: model.filter.query,
+                      query: model.filter.query || '',
                     }}
                     screenTitle={'TopNPanelConfigQuery'}
                     onSubmit={this.handleSubmit}

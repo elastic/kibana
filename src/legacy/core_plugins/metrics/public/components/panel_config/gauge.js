@@ -97,7 +97,7 @@ class GaugePanelConfigUi extends Component {
     const { intl } = this.props;
     const defaults = {
       gauge_max: '',
-      filter: '',
+      filter: { query: '', language: uiSettingsQueryLanguage },
       gauge_style: 'circle',
       gauge_inner_width: '',
       gauge_width: ''
@@ -169,8 +169,8 @@ class GaugePanelConfigUi extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : this.state.uiQueryLanguage,
-                      query: model.filter.query,
+                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      query: model.filter.query || '',
                     }}
                     screenTitle={'GaugePanelConfigQuery'}
                     onSubmit={this.handleSubmit}

@@ -101,7 +101,13 @@ class TablePanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '', pivot_label: '', pivot_rows: 10, pivot_type: '' };
+    const defaults = {
+      drilldown_url: '',
+      filter: { query: '', language: uiSettingsQueryLanguage },
+      pivot_label: '',
+      pivot_rows: 10,
+      pivot_type: '',
+    };
     const model = { ...defaults, ...this.props.model };
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
@@ -187,7 +193,7 @@ class TablePanelConfig extends Component {
             visData$={this.props.visData$}
             onChange={this.props.onChange}
             indexPatterns={this.state.indexPatternForQuery}
-            uiQueryLanguage={this.state.uiQueryLanguage}
+            uiQueryLanguage={uiSettingsQueryLanguage}
           />
         </div>
       );
@@ -248,10 +254,10 @@ class TablePanelConfig extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : this.state.uiQueryLanguage,
-                      query: model.filter.query,
+                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      query: model.filter.query || '',
                     }}
-                    screenTitle={'TimeseriesPanelConfigQuery'}
+                    screenTitle={'TablePanelConfigQuery'}
                     onSubmit={this.handleSubmit}
                     appName={'VisEditor'}
                     indexPatterns={[this.state.indexPatternForQuery]}

@@ -52,8 +52,7 @@ class MetricPanelConfig extends Component {
     super(props);
     this.state = {
       selectedTab: 'data',
-      indexPatternForQuery: {},
-      uiQueryLanguage: uiSettingsQueryLanguage,
+      indexPatternForQuery: {}
     };
   }
 
@@ -88,7 +87,7 @@ class MetricPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { filter: '' };
+    const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     let view;
@@ -138,8 +137,8 @@ class MetricPanelConfig extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : this.state.uiQueryLanguage,
-                      query: model.filter.query,
+                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      query: model.filter.query || '',
                     }}
                     screenTitle={'MetricPanelConfigQuery'}
                     onSubmit={this.handleSubmit}
