@@ -9,6 +9,7 @@
  * searches into the FilterBar component.
  */
 export const QUERY = {
+  DEFAULT_BUCKET_COUNT: 25,
   SIMPLE_QUERY_STRING_FIELDS: [
     'monitor.id',
     'monitor.url',

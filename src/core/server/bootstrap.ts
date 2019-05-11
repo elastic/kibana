@@ -29,10 +29,6 @@ interface KibanaFeatures {
   // that are orchestrated by the "master" process (dev mode only feature).
   isClusterModeSupported: boolean;
 
-  // Indicates whether we should strip x-pack config options from the config
-  // development only feature used in conjunction with the `--oss` flag
-  stripXpackConfig: boolean;
-
   // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
   isReplModeSupported: boolean;
 }

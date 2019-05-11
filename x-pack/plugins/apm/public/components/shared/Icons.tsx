@@ -6,17 +6,15 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { units } from '../../style/variables';
 
 export function Ellipsis({ horizontal }: { horizontal: boolean }) {
   return (
     <EuiIcon
       style={{
         transition: 'transform 0.1s',
-        transform: `rotate(${horizontal ? 90 : 0}deg)`,
-        marginRight: units.half
+        transform: `rotate(${horizontal ? 90 : 0}deg)`
       }}
-      type="boxesVertical"
+      type="arrowRight"
     />
   );
 }
