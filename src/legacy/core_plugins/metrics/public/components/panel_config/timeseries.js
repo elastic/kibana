@@ -211,7 +211,7 @@ class TimeseriesPanelConfigUi extends Component {
                   <QueryBar
                     query={{
                       language: model.filter.language ? model.filter.language : 'kuery',
-                      query: model.filter.query,
+                      query: model.filter.query || '',
                     }}
                     screenTitle={'TimeseriesPanelConfigQuery'}
                     onSubmit={this.handleSubmit}
