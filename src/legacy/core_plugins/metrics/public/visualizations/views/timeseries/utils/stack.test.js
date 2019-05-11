@@ -17,16 +17,16 @@
  * under the License.
  */
 
+import { getStackAccessors } from './stack';
 
-export const CurveType = {
-  CURVE_CARDINAL: 0,
-  CURVE_NATURAL: 1,
-  CURVE_MONOTONE_X: 2,
-  CURVE_MONOTONE_Y: 3,
-  CURVE_BASIS: 4,
-  CURVE_CATMULL_ROM: 5,
-  CURVE_STEP: 6,
-  CURVE_STEP_AFTER: 7,
-  CURVE_STEP_BEFORE: 8,
-  LINEAR: 9
-};
+describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/stack.js', () => {
+  describe('getStackAccessors()', () => {
+    test('should return [0] if stack is true', () => {
+      expect(getStackAccessors(true)).toEqual([0]);
+    });
+
+    test('should return null if stack is false', () => {
+      expect(getStackAccessors(false)).toBe(null);
+    });
+  });
+});

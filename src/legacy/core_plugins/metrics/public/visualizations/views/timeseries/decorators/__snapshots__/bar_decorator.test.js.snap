@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/decorators/bar_decorator.js <BarSeriesDecorator /> should render and match a snapshot 1`] = `
+<BarSeries
+  barSeriesStyle={
+    Object {
+      "border": Object {
+        "stroke": "rgb(0, 156, 224)",
+        "strokeWidth": 2,
+        "visible": true,
+      },
+      "opacity": 0.5,
+    }
+  }
+  customSeriesColors={
+    Map {
+      Object {
+        "colorValues": Array [],
+        "specId": "id:61ca57f1-469d-11e7-af02-69e470af7417:Rome",
+      } => "rgb(0, 156, 224)",
+    }
+  }
+  data={
+    Array [
+      Array [
+        1556917200000,
+        7,
+      ],
+      Array [
+        1557003600000,
+        9,
+      ],
+    ]
+  }
+  groupId="groupId:yaxis_main_group"
+  hideInLegend={false}
+  id="id:61ca57f1-469d-11e7-af02-69e470af7417:Rome"
+  name="Rome"
+  stackAccessors={null}
+  xAccessor={0}
+  xScaleType="time"
+  yAccessors={
+    Array [
+      1,
+    ]
+  }
+  yScaleType="linear"
+/>
+`;

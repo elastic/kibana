@@ -21,6 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
 import { getSeriesColors, getBarStyles } from '../utils/series_styles';
+import { getStackAccessors } from '../utils/stack';
 
 export function BarSeriesDecorator({
   seriesId,
@@ -38,6 +39,7 @@ export function BarSeriesDecorator({
   const groupId = getGroupId(seriesGroupId);
   const customSeriesColors = getSeriesColors(color, id);
   const barSeriesStyle = getBarStyles(bars, color);
+  const stackAccessors = getStackAccessors(stack);
 
   const seriesSettings = {
     id,
@@ -48,7 +50,7 @@ export function BarSeriesDecorator({
     hideInLegend,
     xAccessor: 0, // todo: Magic number
     yAccessors: [1], // todo: Magic number
-    stackAccessors: stack ? [0] : null, // todo: props.stack ???
+    stackAccessors,
     xScaleType,
     yScaleType,
     ...barSeriesStyle,
