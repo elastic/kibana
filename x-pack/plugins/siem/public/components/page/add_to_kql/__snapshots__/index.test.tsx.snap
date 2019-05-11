@@ -8,7 +8,7 @@ exports[`AddToKql Component Rendering 1`] = `
       "getState": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
+      Symbol(observable): [Function],
     }
   }
 >

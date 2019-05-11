@@ -8,5 +8,5 @@ import './components/forecasting_modal';
 import './components/timeseries_chart/timeseries_chart_directive';
 import './timeseriesexplorer_controller.js';
 import './timeseries_search_service.js';
-import 'plugins/ml/components/job_select_list';
+import 'plugins/ml/components/job_selector';
 import 'plugins/ml/components/chart_tooltip';

@@ -14,6 +14,7 @@ import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/con
 import { createMapStore } from '../store/store';
 import { addLayerWithoutDataSync } from '../actions/store_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { capabilities } from 'ui/capabilities';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
 
@@ -63,11 +64,14 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
     const indexPatterns = await this._getIndexPatterns(savedMap.layerListJSON);
 
+    const editable = capabilities.get().maps.save;
+
     return new MapEmbeddable({
       onEmbeddableStateChanged,
       embeddableConfig: panelMetadata.embeddableConfig,
       savedMap,
       editUrl: chrome.addBasePath(createMapPath(panelMetadata.id)),
+      editable,
       indexPatterns,
     });
   }
