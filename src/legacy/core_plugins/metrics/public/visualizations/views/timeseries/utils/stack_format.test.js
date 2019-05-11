@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getStackAccessors } from './stack';
+import { getStackAccessors } from './stack_format';
 
 describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/stack.js', () => {
   describe('getStackAccessors()', () => {

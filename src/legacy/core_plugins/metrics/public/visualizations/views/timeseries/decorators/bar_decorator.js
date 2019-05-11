@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
 import { getSeriesColors, getBarStyles } from '../utils/series_styles';
-import { getStackAccessors } from '../utils/stack';
+import { getStackAccessors } from '../utils/stack_format';
 
 export function BarSeriesDecorator({
   seriesId,
