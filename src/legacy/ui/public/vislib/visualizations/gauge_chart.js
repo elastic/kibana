@@ -111,18 +111,8 @@ export function GaugeChartProvider(Private) {
               .attr('width', width);
 
             const g = svg.append('g');
-
             const gauges = self.gauge.drawGauge(g, series, width, height);
-
             svg.attr('height', height);
-            //center the visualisation, Arc is centered differently, there's only
-            //a part of the circle visible and the circle is larger
-            const transformX = width / 2;
-            const transformY =
-              gaugeConfig.gaugeType === 'Arc'
-                ? height / (2 *  0.75)
-                : height / 2;
-            g.attr('transform', `translate(${transformX}, ${transformY})`);
 
             self.addEvents(gauges);
           });
