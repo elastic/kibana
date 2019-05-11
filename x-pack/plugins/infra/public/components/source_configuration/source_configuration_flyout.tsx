@@ -84,6 +84,11 @@ export const SourceConfigurationFlyout = injectI18n(
       ]
     );
 
+    const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
+      shouldAllowEdit,
+      source,
+    ]);
+
     if (!isVisible || !source || !source.configuration) {
       return null;
     }
@@ -101,14 +106,14 @@ export const SourceConfigurationFlyout = injectI18n(
             <NameConfigurationPanel
               isLoading={isLoading}
               nameFieldProps={indicesConfigurationProps.name}
-              readOnly={!shouldAllowEdit}
+              readOnly={!isWriteable}
             />
             <EuiSpacer />
             <IndicesConfigurationPanel
               isLoading={isLoading}
               logAliasFieldProps={indicesConfigurationProps.logAlias}
               metricAliasFieldProps={indicesConfigurationProps.metricAlias}
-              readOnly={!shouldAllowEdit}
+              readOnly={!isWriteable}
             />
             <EuiSpacer />
             <FieldsConfigurationPanel
@@ -116,7 +121,7 @@ export const SourceConfigurationFlyout = injectI18n(
               hostFieldProps={indicesConfigurationProps.hostField}
               isLoading={isLoading}
               podFieldProps={indicesConfigurationProps.podField}
-              readOnly={!shouldAllowEdit}
+              readOnly={!isWriteable}
               tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
               timestampFieldProps={indicesConfigurationProps.timestampField}
             />
@@ -153,7 +158,7 @@ export const SourceConfigurationFlyout = injectI18n(
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
             <h2 id="sourceConfigurationTitle">
-              {shouldAllowEdit ? (
+              {isWriteable ? (
                 <FormattedMessage
                   id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
                   defaultMessage="Configure source"
@@ -216,7 +221,7 @@ export const SourceConfigurationFlyout = injectI18n(
               )}
             </EuiFlexItem>
             <EuiFlexItem />
-            {shouldAllowEdit && (
+            {isWriteable && (
               <EuiFlexItem grow={false}>
                 {isLoading ? (
                   <EuiButton color="primary" isLoading fill>
