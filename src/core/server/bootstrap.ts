@@ -61,13 +61,10 @@ export async function bootstrap({
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
   });
 
-  const rawConfigService = new RawConfigService(env.configs, rawConfig => {
-    if (features.stripXpackConfig) {
-      delete rawConfig.xpack;
-    }
-
-    return new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig));
-  });
+  const rawConfigService = new RawConfigService(
+    env.configs,
+    rawConfig => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
+  );
 
   rawConfigService.loadConfig();
 
