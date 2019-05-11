@@ -73,7 +73,7 @@ describe.each([
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ x: 0, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
       {
         key: 'uniqueDestinationIps',
         value: [{ x: 0, y: 'uniqueDestinationIps' }],
@@ -125,6 +125,16 @@ describe.each([
       {
         key: 'uniqueDestinationIps',
         value: [{}],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ x: 0, y: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ x: 0, y: 'uniqueDestinationIps' }],
         color: '#490092',
       },
     ],

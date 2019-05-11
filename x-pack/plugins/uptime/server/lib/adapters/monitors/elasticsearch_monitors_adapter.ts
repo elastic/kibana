@@ -19,6 +19,7 @@ import {
 import { dropLatestBucket, getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -72,9 +73,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         size: 0,
         aggs: {
           timeseries: {
-            auto_date_histogram: {
+            date_histogram: {
               field: '@timestamp',
-              buckets: 25,
+              interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
               status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
@@ -271,9 +272,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                 },
               },
               histogram: {
-                auto_date_histogram: {
+                date_histogram: {
                   field: '@timestamp',
-                  buckets: 25,
+                  interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
                 },
                 aggs: {
                   status: {
