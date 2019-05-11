@@ -33,7 +33,7 @@ const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
-  const defaults = { filter: '' };
+  const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
