@@ -27,7 +27,7 @@ import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 uiModules
   .get('kibana', ['RecursionHelper'])
-  .directive('kbnAggTable', function (config, RecursionHelper) {
+  .directive('kbnAggTable', function ($filter, config, Private, RecursionHelper) {
 
     return {
       restrict: 'E',
