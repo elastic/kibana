@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const ADD_DATA = i18n.translate('xpack.siem.appSettings.addData', {
-  defaultMessage: 'Add Data',
-});
-
-export const THEME = i18n.translate('xpack.siem.appSettings.theme', {
-  defaultMessage: 'Theme',
+window.matchMedia = jest.fn().mockImplementation(query => {
+  return {
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  };
 });
