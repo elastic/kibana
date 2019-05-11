@@ -73,7 +73,13 @@ export function formatHit(indexPattern, defaultFormat) {
     }
 
     const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
-    return partials[fieldName] = convert(hit, val, fieldName);
+    const valConverted = convert(hit, val, fieldName);
+    if(this.timeFieldName === fieldName && this.isTimeNanosBased()) {
+      const nanoSec = val.substring(20, 29);
+      return partials[fieldName] = `${valConverted} (${nanoSec} ns)`;
+    } else {
+      return partials[fieldName] = valConverted;
+    }
   };
 
   return formatHit;
