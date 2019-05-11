@@ -39,9 +39,6 @@ class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
-    this.state = {
-      uiQuerylanguage: uiSettingsQueryLanguage,
-    };
   }
 
   handleChange(item, name) {
@@ -68,7 +65,7 @@ class FilterItemsUi extends Component {
     const newFilter = () => ({
       color: this.props.model.color,
       id: uuid.v1(),
-      filter: { language: model.filter.language ? model.filter.language : 'kuery', query: '' },
+      filter: { language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage, query: '' },
     });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
@@ -88,7 +85,7 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryBar
-            query={{ language: model.filter.language ? model.filter.language : this.state.uiQuerylanguage, query: model.filter.query }}
+            query={{ language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage, query: model.filter.query || '' }}
             screenTitle={'DataMetricsGroupByFiltersFilter'}
             placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
             aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
