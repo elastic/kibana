@@ -8,6 +8,7 @@ import fs from 'fs';
 import util from 'util';
 
 import { ProgressReporter } from '.';
+import { TEXT_FILE_LIMIT } from '../../common/file';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -189,6 +190,21 @@ export class LspIndexer extends AbstractIndexer {
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
 
+    const localFilePath = `${localRepoPath}${filePath}`;
+    const lstat = util.promisify(fs.lstat);
+    const stat = await lstat(localFilePath);
+
+    const readLink = util.promisify(fs.readlink);
+    const readFile = util.promisify(fs.readFile);
+    const content = stat.isSymbolicLink()
+      ? await readLink(localFilePath, 'utf8')
+      : await readFile(localFilePath, 'utf8');
+
+    if (content.length > TEXT_FILE_LIMIT) {
+      this.log.debug(`File size exceeds limit. Skip index.`);
+      return stats;
+    }
+
     try {
       const response = await this.lspService.sendRequest('textDocument/full', {
         textDocument: {
@@ -216,16 +232,6 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Index symbols or references error. Skip to file indexing.`);
       this.log.error(error);
     }
-
-    const localFilePath = `${localRepoPath}${filePath}`;
-    const lstat = util.promisify(fs.lstat);
-    const stat = await lstat(localFilePath);
-
-    const readLink = util.promisify(fs.readlink);
-    const readFile = util.promisify(fs.readFile);
-    const content = stat.isSymbolicLink()
-      ? await readLink(localFilePath, 'utf8')
-      : await readFile(localFilePath, 'utf8');
 
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {

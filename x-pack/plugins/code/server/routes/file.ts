@@ -20,8 +20,7 @@ import { detectLanguage } from '../utils/detect_language';
 import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
-
-const TEXT_FILE_LIMIT = 1024 * 1024; // 1mb
+import { TEXT_FILE_LIMIT } from '../../common/file';
 
 export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
   async function repoExists(req: hapi.Request, repoUri: string) {
