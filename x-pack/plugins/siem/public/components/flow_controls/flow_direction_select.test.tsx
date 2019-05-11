@@ -20,7 +20,6 @@ describe('Select Flow Direction', () => {
     test('it renders the basic group button for uni-direction and bi-direction', () => {
       const wrapper = shallow(
         <FlowDirectionSelect
-          id={TestFlowDirectionId}
           selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}
         />
@@ -40,22 +39,18 @@ describe('Select Flow Direction', () => {
       };
       const wrapper = mount(
         <FlowDirectionSelect
-          id={TestFlowDirectionId}
           selectedDirection={FlowDirection.uniDirectional}
           onChangeDirection={mockOnChange}
         />
       );
 
       wrapper
-        .find('input[value="biDirectional"]')
+        .find(`[data-test-subj="${FlowDirection.biDirectional}"]`)
         .first()
-        .simulate('change', event);
+        .simulate('click', event);
       wrapper.update();
 
-      expect(mockOnChange.mock.calls[0]).toEqual([
-        `${TestFlowDirectionId}-select-flow-direction-biDirectional`,
-        'biDirectional',
-      ]);
+      expect(mockOnChange.mock.calls[0]).toEqual(['biDirectional']);
     });
   });
 });
