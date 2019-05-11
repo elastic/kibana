@@ -18,10 +18,10 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
 import { getSeriesColors, getBarStyles } from '../utils/series_styles';
 import { getStackAccessors } from '../utils/stack_format';
+import { PanelEntities } from '../model/panel';
 
 export function BarSeriesDecorator({
   seriesId,
@@ -61,22 +61,7 @@ export function BarSeriesDecorator({
   );
 }
 
-BarSeriesDecorator.propTypes = {
-  seriesId: PropTypes.string.isRequired,
-  seriesGroupId: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
-  hideInLegend: PropTypes.bool.isRequired,
-  bars: PropTypes.shape({
-    fill: PropTypes.number,
-    lineWidth: PropTypes.number,
-    show: PropTypes.boolean,
-  }).isRequired,
-  color: PropTypes.string.isRequired,
-  stack: PropTypes.bool.isRequired,
-  xScaleType: PropTypes.string,
-  yScaleType: PropTypes.string,
-};
+BarSeriesDecorator.propTypes = PanelEntities.BarChart;
 
 BarSeriesDecorator.defaultProps = {
   yScaleType: ScaleType.Linear,
