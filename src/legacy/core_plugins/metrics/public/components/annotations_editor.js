@@ -102,7 +102,11 @@ class AnnotationsEditor extends Component {
     // });
   };
   renderRow(row) {
-    const defaults = { fields: '', template: '', index_pattern: '*', query_string: { query: '', language: uiSettingsQueryLanguage } };
+    const defaults = {
+      fields: '', template: '',
+      index_pattern: '*',
+      query_string: { query: '', language: uiSettingsQueryLanguage }
+    };
     const model = { ...defaults, ...row };
     const indexPatternForQuery = this.state.indexPatternForQuery;
     const handleChange = part => {
@@ -205,7 +209,7 @@ class AnnotationsEditor extends Component {
                       language: model.query_string.language
                         ? model.query_string.language
                         : uiSettingsQueryLanguage,
-                      query: model.query_string.query,
+                      query: model.query_string.query || '',
                     }}
                     screenTitle={'AnnotationsEditor'}
                     onSubmit={query => this.handleSubmit(model, query)}
