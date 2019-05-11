@@ -1,22 +1,37 @@
-**Run**
+# Contributing
+
+### Run
 
 ```
-# Compile and run
-npx ts-node ./src/index.ts --branch 6.1 --upstream sqren/backport-demo --all
+yarn start --branch 6.1 --upstream sqren/backport-demo --all
 ```
 
 or
 
 ```
 # Compile
-yarn build
+yarn tsc
 
 # Run
 node dist/index.js --branch 6.1 --upstream sqren/backport-demo --all
 ```
 
-**Test**
+### Debug
+
+**Run tests**
 
 ```
 yarn test
+```
+
+**Run tests continously**
+
+```
+yarn test --watch
+```
+
+**Compile typescript continously**
+
+```
+yarn tsc --watch
 ```

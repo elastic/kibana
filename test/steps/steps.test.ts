@@ -6,82 +6,51 @@ import { commitsMock } from '../mocks/commits';
 import { initSteps } from '../../src/steps/steps';
 import * as github from '../../src/services/github';
 import * as rpc from '../../src/services/rpc';
+import { BackportOptions } from '../../src/options/options';
 
 function mockGetPullRequest(
   axiosMock: MockAdapter,
-  owner: string,
-  repoName: string,
-  commitSha: string,
-  accessToken: string
+  { repoName, repoOwner, accessToken }: BackportOptions,
+  commitSha: string
 ) {
   return axiosMock
     .onGet(
-      `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}+base:master&access_token=${accessToken}`
+      `https://api.github.com/search/issues?q=repo:${repoOwner}/${repoName}+${commitSha}+base:master&access_token=${accessToken}`
     )
-    .reply(200, {
-      items: [
-        {
-          number: `Pull number for ${commitSha}`
-        }
-      ]
-    });
+    .reply(200, { items: [{ number: `Pull number for ${commitSha}` }] });
 }
 
 function mockVerifyAccessToken(
   axiosMock: MockAdapter,
-  owner: string,
-  repoName: string,
-  accessToken: string
+  { repoName, repoOwner, accessToken }: BackportOptions
 ) {
   return axiosMock
     .onHead(
-      `https://api.github.com/repos/${owner}/${repoName}?access_token=${accessToken}`
+      `https://api.github.com/repos/${repoOwner}/${repoName}?access_token=${accessToken}`
     )
     .reply(200);
 }
 
 function mockGetCommits(
   axiosMock: MockAdapter,
-  {
-    owner = 'elastic',
-    repoName = 'kibana',
-    accessToken = 'myAccessToken',
-    author = 'sqren',
-    perPage = 5,
-    res
-  }: {
-    owner?: string;
-    repoName?: string;
-    accessToken?: string;
-    author?: string;
-    perPage?: number;
-    res: {}[];
-  }
+  { repoName, repoOwner, accessToken, username }: BackportOptions,
+  res: any
 ) {
   return axiosMock
     .onGet(
-      `https://api.github.com/repos/${owner}/${repoName}/commits?access_token=${accessToken}&per_page=${perPage}&author=${author}`
+      `https://api.github.com/repos/${repoOwner}/${repoName}/commits?access_token=${accessToken}&per_page=5&author=${username}`
     )
     .reply(200, res);
 }
 
 function mockCreatePullRequest(
   axiosMock: MockAdapter,
-  {
-    owner = 'elastic',
-    repoName = 'kibana',
-    accessToken = 'myAccessToken',
-    res
-  }: {
-    owner?: string;
-    repoName?: string;
-    accessToken?: string;
-    res: any;
-  }
+  { repoName, repoOwner, accessToken }: BackportOptions,
+  res: any
 ) {
   return axiosMock
     .onPost(
-      `https://api.github.com/repos/${owner}/${repoName}/pulls?access_token=${accessToken}`
+      `https://api.github.com/repos/${repoOwner}/${repoName}/pulls?access_token=${accessToken}`
     )
     .reply(200, res);
 }
@@ -97,10 +66,30 @@ describe('run through steps', () => {
   });
 
   beforeEach(async () => {
-    const owner = 'elastic';
-    const repoName = 'kibana';
-    const upstream = `${owner}/${repoName}`;
-    const accessToken = 'myAccessToken';
+    const options = {
+      accessToken: 'myAccessToken',
+      all: false,
+      apiHostname: 'api.github.com',
+      branches: [],
+      branchChoices: [
+        { name: '6.x' },
+        { name: '6.0' },
+        { name: '5.6' },
+        { name: '5.5' },
+        { name: '5.4' }
+      ],
+      gitHostname: 'github.com',
+      labels: [],
+      multiple: false,
+      multipleBranches: false,
+      multipleCommits: false,
+      prDescription: 'myPrDescription',
+      prTitle: 'myPrTitle',
+      repoName: 'kibana',
+      repoOwner: 'elastic',
+      sha: undefined,
+      username: 'sqren'
+    };
 
     execMock = jest.spyOn(childProcess, 'exec');
 
@@ -119,72 +108,19 @@ describe('run through steps', () => {
           pullNumber: 'myPullRequestNumber'
         }
       })
-      .mockResolvedValueOnce({
-        promptResult: '6.2'
-      });
+      .mockResolvedValueOnce({ promptResult: '6.2' });
 
     axiosMock = new MockAdapter(axios);
-
-    mockVerifyAccessToken(axiosMock, owner, repoName, accessToken);
-
-    mockGetCommits(axiosMock, {
-      owner,
-      repoName,
-      accessToken,
-      res: commitsMock
+    mockVerifyAccessToken(axiosMock, options);
+    mockGetCommits(axiosMock, options, commitsMock);
+    mockGetPullRequest(axiosMock, options, 'commitSha');
+    mockGetPullRequest(axiosMock, options, 'commitSha2');
+    mockGetPullRequest(axiosMock, options, 'commitSha3');
+    mockCreatePullRequest(axiosMock, options, {
+      res: { html_url: 'myHtmlUrl' }
     });
 
-    mockGetPullRequest(
-      axiosMock,
-      owner,
-      repoName,
-      'commitSha',
-      'myAccessToken'
-    );
-    mockGetPullRequest(
-      axiosMock,
-      owner,
-      repoName,
-      'commitSha2',
-      'myAccessToken'
-    );
-    mockGetPullRequest(
-      axiosMock,
-      owner,
-      repoName,
-      'commitSha3',
-      'myAccessToken'
-    );
-
-    mockCreatePullRequest(axiosMock, {
-      res: {
-        html_url: 'myHtmlUrl'
-      }
-    });
-
-    await initSteps({
-      accessToken: 'myAccessToken',
-      all: false,
-      apiHostname: 'api.github.com',
-      branches: [],
-      branchChoices: [
-        { name: '6.x' },
-        { name: '6.0' },
-        { name: '5.6' },
-        { name: '5.5' },
-        { name: '5.4' }
-      ],
-      gitHostname: 'github.com',
-      labels: [],
-      multiple: false,
-      multipleBranches: false,
-      multipleCommits: false,
-      prTitle: 'myPrTitle',
-      prDescription: 'myPrDescription',
-      sha: undefined,
-      upstream,
-      username: 'sqren'
-    });
+    await initSteps(options);
   });
 
   it('should make correct requests', () => {
@@ -193,24 +129,28 @@ describe('run through steps', () => {
 
   it('getCommit should be called with correct args', () => {
     expect(github.fetchCommitsByAuthor).toHaveBeenCalledWith(
-      'elastic',
-      'kibana',
-      'sqren',
-      'api.github.com'
+      expect.objectContaining({
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        username: 'sqren',
+        apiHostname: 'api.github.com'
+      })
     );
   });
 
   it('createPullRequest should be called with correct args', () => {
     expect(github.createPullRequest).toHaveBeenCalledWith(
-      'elastic',
-      'kibana',
+      expect.objectContaining({
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        apiHostname: 'api.github.com'
+      }),
       {
         base: '6.2',
         body: `Backports the following commits to 6.2:\n - myCommitMessage (#myPullRequestNumber)\n\nmyPrDescription`,
         head: 'sqren:backport/6.2/pr-myPullRequestNumber',
         title: 'myPrTitle'
-      },
-      'api.github.com'
+      }
     );
   });
 

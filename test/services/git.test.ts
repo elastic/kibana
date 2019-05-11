@@ -1,16 +1,19 @@
 import { addRemote } from '../../src/services/git';
 import * as rpc from '../../src/services/rpc';
+import { BackportOptions } from '../../src/options/options';
 
 describe('addRemote', () => {
   it('add correct origin remote', async () => {
     const spy = jest.spyOn(rpc, 'exec').mockResolvedValue({} as any);
-    await addRemote({
-      accessToken: 'myAccessToken',
-      owner: 'elastic',
-      repoName: 'kibana',
-      username: 'elastic',
-      gitHostname: 'github.com'
-    });
+    await addRemote(
+      {
+        accessToken: 'myAccessToken',
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        gitHostname: 'github.com'
+      } as BackportOptions,
+      'elastic'
+    );
 
     return expect(spy).toHaveBeenCalledWith(
       'git remote add elastic https://myAccessToken@github.com/elastic/kibana.git',
@@ -20,13 +23,15 @@ describe('addRemote', () => {
 
   it('add correct user remote', async () => {
     const spy = jest.spyOn(rpc, 'exec').mockResolvedValue({} as any);
-    await addRemote({
-      accessToken: 'myAccessToken',
-      owner: 'elastic',
-      repoName: 'kibana',
-      username: 'sqren',
-      gitHostname: 'github.com'
-    });
+    await addRemote(
+      {
+        accessToken: 'myAccessToken',
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        gitHostname: 'github.com'
+      } as BackportOptions,
+      'sqren'
+    );
 
     return expect(spy).toHaveBeenCalledWith(
       'git remote add sqren https://myAccessToken@github.com/sqren/kibana.git',
@@ -36,13 +41,15 @@ describe('addRemote', () => {
 
   it('allows custom github url', async () => {
     const spy = jest.spyOn(rpc, 'exec').mockResolvedValue({} as any);
-    await addRemote({
-      accessToken: 'myAccessToken',
-      owner: 'elastic',
-      repoName: 'kibana',
-      username: 'sqren',
-      gitHostname: 'github.my-company.com'
-    });
+    await addRemote(
+      {
+        accessToken: 'myAccessToken',
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        gitHostname: 'github.my-company.com'
+      } as BackportOptions,
+      'sqren'
+    );
 
     return expect(spy).toHaveBeenCalledWith(
       'git remote add sqren https://myAccessToken@github.my-company.com/sqren/kibana.git',

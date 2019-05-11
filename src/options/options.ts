@@ -5,7 +5,7 @@ import { getOptionsFromConfigFiles } from './config/config';
 import { PromiseReturnType } from '../types/commons';
 import { getGlobalConfigPath } from '../services/env';
 
-export type BackportOptions = PromiseReturnType<typeof getOptions>;
+export type BackportOptions = Readonly<PromiseReturnType<typeof getOptions>>;
 export async function getOptions(argv: typeof process.argv) {
   const optionsFromConfig = await getOptionsFromConfigFiles();
   const optionsFromCli = getOptionsFromCliArgs(optionsFromConfig, argv);
@@ -66,7 +66,8 @@ export function validateOptions({
     );
   }
 
-  if (!upstream) {
+  const [repoOwner, repoName] = (upstream || '').split('/');
+  if (!repoOwner || !repoName) {
     throw new HandledError(
       getErrorMessage({ field: 'upstream', exampleValue: 'elastic/kibana' })
     );
@@ -79,6 +80,8 @@ export function validateOptions({
   }
 
   return {
+    repoOwner,
+    repoName,
     accessToken,
     all,
     apiHostname,
@@ -92,7 +95,6 @@ export function validateOptions({
     prTitle,
     prDescription,
     sha,
-    upstream,
     username
   };
 }

@@ -27,14 +27,14 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
     "cover": "jest --coverage",
     "format": "prettier \"./src/**/*.ts\" --write",
     "lint": "tsc -p ./test/tsconfig.json && eslint ./src/**/*.ts",
     "postinstall": "test -f ./dist/scripts/runPostinstall.js && node ./dist/scripts/runPostinstall.js || echo 'Dist folder missing'",
     "prepublishOnly": "tsc",
     "publish-dry-run": "tar -tf $(npm pack)",
-    "test": "jest"
+    "test": "jest",
+    "start": "ts-node --transpile-only ./src/index.ts"
   },
   "lint-staged": {
     "*.ts": [
@@ -127,6 +127,6 @@
     "prettier": "^1.17.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
-    "typescript": "^3.4.4"
+    "typescript": "^3.4.5"
   }
 }

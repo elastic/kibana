@@ -16,31 +16,19 @@ import {
   push,
   resetAndPullMaster
 } from '../services/git';
+import { BackportOptions } from '../options/options';
 
 export function doBackportVersions(
-  owner: string,
-  repoName: string,
+  options: BackportOptions,
   commits: Commit[],
-  branches: string[],
-  username: string,
-  labels: string[],
-  prTitle: string,
-  prDescription: string | undefined,
-  apiHostname: string
+  branches: string[]
 ) {
-  return sequentially(branches, async branch => {
+  return sequentially(branches, async baseBranch => {
     try {
-      const pullRequest = await doBackportVersion(
-        owner,
-        repoName,
+      const pullRequest = await doBackportVersion(options, {
         commits,
-        branch,
-        username,
-        labels,
-        prTitle,
-        prDescription,
-        apiHostname
-      );
+        baseBranch
+      });
       log(`View pull request: ${pullRequest.html_url}`);
     } catch (e) {
       if (e.name === 'HandledError') {
@@ -54,67 +42,38 @@ export function doBackportVersions(
 }
 
 export async function doBackportVersion(
-  owner: string,
-  repoName: string,
-  commits: Commit[],
-  baseBranch: string,
-  username: string,
-  labels: string[] = [],
-  prTitle: string,
-  prDescription: string | undefined,
-  apiHostname: string
+  options: BackportOptions,
+  {
+    commits,
+    baseBranch
+  }: {
+    commits: Commit[];
+    baseBranch: string;
+  }
 ) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const refValues = commits.map(commit => getReferenceLong(commit)).join(', ');
   log(`Backporting ${refValues} to ${baseBranch}:`);
 
   await withSpinner({ text: 'Pulling latest changes' }, async () => {
-    await resetAndPullMaster({ owner, repoName });
-    await createAndCheckoutBranch({
-      owner,
-      repoName,
-      baseBranch: baseBranch,
-      featureBranch: featureBranch
-    });
+    await resetAndPullMaster(options);
+    await createAndCheckoutBranch(options, baseBranch, featureBranch);
   });
 
   await sequentially(commits, commit =>
-    cherrypickAndConfirm(owner, repoName, commit.sha)
+    cherrypickAndConfirm(options, commit.sha)
   );
 
   await withSpinner(
-    { text: `Pushing branch ${username}:${featureBranch}` },
-    () =>
-      push({
-        owner,
-        repoName,
-        remoteName: username,
-        branchName: featureBranch
-      })
+    { text: `Pushing branch ${options.username}:${featureBranch}` },
+    () => push(options, featureBranch)
   );
 
   return withSpinner({ text: 'Creating pull request' }, async () => {
-    const payload = getPullRequestPayload(
-      baseBranch,
-      commits,
-      username,
-      prTitle,
-      prDescription
-    );
-    const pullRequest = await createPullRequest(
-      owner,
-      repoName,
-      payload,
-      apiHostname
-    );
-    if (labels.length > 0) {
-      await addLabelsToPullRequest(
-        owner,
-        repoName,
-        pullRequest.number,
-        labels,
-        apiHostname
-      );
+    const payload = getPullRequestPayload(options, baseBranch, commits);
+    const pullRequest = await createPullRequest(options, payload);
+    if (options.labels.length > 0) {
+      await addLabelsToPullRequest(options, pullRequest.number);
     }
     return pullRequest;
   });
@@ -145,21 +104,16 @@ function getReferenceShort(commit: Commit) {
     : `commit-${getShortSha(commit.sha)}`;
 }
 
-async function cherrypickAndConfirm(
-  owner: string,
-  repoName: string,
-  sha: string
-) {
+async function cherrypickAndConfirm(options: BackportOptions, sha: string) {
   const spinner = ora(`Cherry-picking commit ${getShortSha(sha)}`).start();
   try {
-    await cherrypick({ owner, repoName, sha });
+    await cherrypick(options, sha);
     spinner.succeed();
   } catch (e) {
     spinner.fail(`Cherry-picking failed.\n`);
     log(
       `Please resolve conflicts in: ${getRepoPath(
-        owner,
-        repoName
+        options
       )} and when all conflicts have been resolved and staged run:`
     );
     log(`
@@ -171,11 +125,11 @@ async function cherrypickAndConfirm(
       throw e;
     }
 
-    await resolveConflictsOrAbort(owner, repoName);
+    await resolveConflictsOrAbort(options);
   }
 }
 
-async function resolveConflictsOrAbort(owner: string, repoName: string) {
+async function resolveConflictsOrAbort(options: BackportOptions) {
   const res = await confirmPrompt(
     'Press enter when you have commited all changes'
   );
@@ -183,9 +137,9 @@ async function resolveConflictsOrAbort(owner: string, repoName: string) {
     throw new HandledError('Aborted');
   }
 
-  const isDirty = await isIndexDirty({ owner, repoName });
+  const isDirty = await isIndexDirty(options);
   if (isDirty) {
-    await resolveConflictsOrAbort(owner, repoName);
+    await resolveConflictsOrAbort(options);
   }
 }
 
@@ -206,11 +160,9 @@ function getPullRequestTitle(
 }
 
 export function getPullRequestPayload(
+  { prDescription, prTitle, username }: BackportOptions,
   baseBranch: string,
-  commits: Commit[],
-  username: string,
-  prTitle: string,
-  prDescription: string | undefined
+  commits: Commit[]
 ) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const commitRefs = commits

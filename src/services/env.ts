@@ -1,5 +1,6 @@
 import path from 'path';
 import os from 'os';
+import { BackportOptions } from '../options/options';
 
 export function getGlobalConfigPath() {
   const homedir = os.homedir();
@@ -11,12 +12,12 @@ export function getReposPath() {
   return path.join(homedir, '.backport', 'repositories');
 }
 
-export function getRepoOwnerPath(owner: string) {
+export function getRepoOwnerPath({ repoOwner }: BackportOptions) {
   const homedir = os.homedir();
-  return path.join(homedir, '.backport', 'repositories', owner);
+  return path.join(homedir, '.backport', 'repositories', repoOwner);
 }
 
-export function getRepoPath(owner: string, repoName: string) {
+export function getRepoPath({ repoOwner, repoName }: BackportOptions) {
   const homedir = os.homedir();
-  return path.join(homedir, '.backport', 'repositories', owner, repoName);
+  return path.join(homedir, '.backport', 'repositories', repoOwner, repoName);
 }

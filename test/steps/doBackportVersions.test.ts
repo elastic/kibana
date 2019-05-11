@@ -8,6 +8,7 @@ import { PromiseReturnType } from '../../src/types/commons';
 import last from 'lodash.last';
 import * as prompts from '../../src/services/prompts';
 import * as logger from '../../src/services/logger';
+import { BackportOptions } from '../../src/options/options';
 
 describe('doBackportVersion', () => {
   let axiosMockInstance: jest.Mock;
@@ -35,31 +36,33 @@ describe('doBackportVersion', () => {
     let execSpy: jest.SpyInstance;
     let res: PromiseReturnType<typeof doBackportVersion>;
     beforeEach(async () => {
-      const commits = [
-        {
-          sha: 'mySha',
-          message: 'myCommitMessage',
-          pullNumber: 1000
-        },
-        {
-          sha: 'mySha2',
-          message: 'myOtherCommitMessage',
-          pullNumber: 2000
-        }
-      ];
-
       execSpy = jest.spyOn(childProcess, 'exec');
 
       res = await doBackportVersion(
-        'elastic',
-        'kibana',
-        commits,
-        '6.x',
-        'sqren',
-        ['backport'],
-        '[{baseBranch}] {commitMessages}',
-        'myPrSuffix',
-        'api.github.com'
+        {
+          repoOwner: 'elastic',
+          repoName: 'kibana',
+          username: 'sqren',
+          labels: ['backport'],
+          prTitle: '[{baseBranch}] {commitMessages}',
+          prDescription: 'myPrSuffix',
+          apiHostname: 'api.github.com'
+        } as BackportOptions,
+        {
+          commits: [
+            {
+              sha: 'mySha',
+              message: 'myCommitMessage',
+              pullNumber: 1000
+            },
+            {
+              sha: 'mySha2',
+              message: 'myOtherCommitMessage',
+              pullNumber: 2000
+            }
+          ],
+          baseBranch: '6.x'
+        }
       );
     });
 
@@ -95,23 +98,19 @@ describe('doBackportVersion', () => {
 
   describe('when commit does not have a pull request reference', () => {
     beforeEach(async () => {
-      const commits = [
-        {
-          sha: 'mySha',
-          message: 'myCommitMessage'
-        }
-      ];
-
       await doBackportVersion(
-        'elastic',
-        'kibana',
-        commits,
-        '6.x',
-        'sqren',
-        ['backport'],
-        '[{baseBranch}] {commitMessages}',
-        undefined,
-        'api.github.com'
+        {
+          repoOwner: 'elastic',
+          repoName: 'kibana',
+          username: 'sqren',
+          labels: ['backport'],
+          prTitle: '[{baseBranch}] {commitMessages}',
+          apiHostname: 'api.github.com'
+        } as BackportOptions,
+        {
+          commits: [{ sha: 'mySha', message: 'myCommitMessage' }],
+          baseBranch: '6.x'
+        }
       );
     });
 
@@ -140,12 +139,6 @@ describe('doBackportVersion', () => {
   describe('when cherry-picking fails', () => {
     function didResolveConflict(didResolve: boolean) {
       const logSpy = jest.spyOn(logger, 'log');
-      const commits = [
-        {
-          sha: 'mySha',
-          message: 'myCommitMessage'
-        }
-      ];
 
       const execSpy = jest
         .spyOn(childProcess, 'exec')
@@ -166,15 +159,18 @@ describe('doBackportVersion', () => {
       spyOn(prompts, 'confirmPrompt').and.returnValue(didResolve);
 
       const promise = doBackportVersion(
-        'elastic',
-        'kibana',
-        commits,
-        '6.x',
-        'sqren',
-        ['backport'],
-        'myPrTitle',
-        undefined,
-        'api.github.com'
+        {
+          repoOwner: 'elastic',
+          repoName: 'kibana',
+          username: 'sqren',
+          labels: ['backport'],
+          prTitle: '[{baseBranch}] {commitMessages}',
+          apiHostname: 'api.github.com'
+        } as BackportOptions,
+        {
+          commits: [{ sha: 'mySha', message: 'myCommitMessage' }],
+          baseBranch: '6.x'
+        }
       );
 
       return { logSpy, execSpy, promise };

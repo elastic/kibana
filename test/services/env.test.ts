@@ -4,6 +4,7 @@ import {
   getRepoOwnerPath,
   getRepoPath
 } from '../../src/services/env';
+import { BackportOptions } from '../../src/options/options';
 
 describe('env.js', () => {
   test('getGlobalConfigPath', () => {
@@ -15,14 +16,17 @@ describe('env.js', () => {
   });
 
   test('getRepoOwnerPath', () => {
-    expect(getRepoOwnerPath('elastic')).toBe(
+    expect(getRepoOwnerPath({ repoOwner: 'elastic' } as BackportOptions)).toBe(
       '/myHomeDir/.backport/repositories/elastic'
     );
   });
 
   test('getRepoPath', () => {
-    expect(getRepoPath('elastic', 'kibana')).toBe(
-      '/myHomeDir/.backport/repositories/elastic/kibana'
-    );
+    expect(
+      getRepoPath({
+        repoOwner: 'elastic',
+        repoName: 'kibana'
+      } as BackportOptions)
+    ).toBe('/myHomeDir/.backport/repositories/elastic/kibana');
   });
 });

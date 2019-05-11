@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "@typescript-eslint/no-object-literal-type-assertion": "off",
+    "@typescript-eslint/no-explicit-any": "off"
+  }
+}

@@ -3,6 +3,7 @@ import axios from 'axios';
 import nock from 'nock';
 import httpAdapter from 'axios/lib/adapters/http';
 import { getCommitBySha } from '../../src/steps/getCommits';
+import { BackportOptions } from '../../src/options/options';
 
 axios.defaults.adapter = httpAdapter;
 
@@ -22,12 +23,12 @@ describe('getCommitBySha', () => {
         items: []
       });
 
-    const commits = await getCommitBySha(
-      'elastic',
-      'kibana',
-      'myCommitSha',
-      'api.github.com'
-    );
+    const commits = await getCommitBySha({
+      repoOwner: 'elastic',
+      repoName: 'kibana',
+      sha: 'myCommitSha',
+      apiHostname: 'api.github.com'
+    } as BackportOptions & { sha: string });
     expect(commits).toEqual({
       message: '[Chrome] Bootstrap Angular into document.body (#15158)',
       sha: 'myCommitSha',
@@ -44,7 +45,12 @@ describe('getCommitBySha', () => {
       });
 
     await expect(
-      getCommitBySha('elastic', 'kibana', 'myCommitSha', 'api.github.com')
+      getCommitBySha({
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        sha: 'myCommitSha',
+        apiHostname: 'api.github.com'
+      } as BackportOptions & { sha: string })
     ).rejects.toThrowError('No commit found for SHA: myCommitSha');
   });
 
@@ -64,7 +70,12 @@ describe('getCommitBySha', () => {
       });
 
     expect(
-      await getCommitBySha('elastic', 'kibana', 'myCommitSha', 'api.github.com')
+      await getCommitBySha({
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        sha: 'myCommitSha',
+        apiHostname: 'api.github.com'
+      } as BackportOptions & { sha: string })
     ).toEqual({
       message: '[Chrome] Bootstrap Angular into document.body (#15158)',
       pullNumber: 1338,
