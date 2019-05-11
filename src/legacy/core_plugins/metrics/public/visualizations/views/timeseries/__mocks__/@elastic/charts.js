@@ -42,3 +42,4 @@ export const getSpecId = x => `id:${x}`;
 export const getGroupId = x => `groupId:${x}`;
 
 export const BarSeries = () => null;
+export const AreaSeries = () => null;

@@ -18,9 +18,10 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { getSpecId, getGroupId, ScaleType, AreaSeries } from '@elastic/charts';
 import { getSeriesColors, getAreaStyles } from '../utils/series_styles';
+import { PanelEntities } from '../model/panel';
+import { getStackAccessors } from '../utils/stack_format';
 
 export function AreaSeriesDecorator({
   seriesId,
@@ -39,6 +40,7 @@ export function AreaSeriesDecorator({
   const groupId = getGroupId(seriesGroupId);
   const customSeriesColors = getSeriesColors(color, id);
   const areaSeriesStyle = getAreaStyles({ points, lines, color });
+  const stackAccessors = getStackAccessors(stack);
 
   const seriesSettings = {
     id,
@@ -49,7 +51,7 @@ export function AreaSeriesDecorator({
     hideInLegend,
     xAccessor: 0, // todo: Magic number
     yAccessors: [1], // todo: Magic number
-    stackAccessors: stack ? [0] : null, // todo: props.stack ???
+    stackAccessors,
     xScaleType,
     yScaleType,
     ...areaSeriesStyle,
@@ -60,28 +62,7 @@ export function AreaSeriesDecorator({
   );
 }
 
-AreaSeriesDecorator.propTypes = {
-  seriesId: PropTypes.string.isRequired,
-  seriesGroupId: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
-  hideInLegend: PropTypes.bool.isRequired,
-  lines: PropTypes.shape({
-    fill: PropTypes.number,
-    lineWidth: PropTypes.number,
-    show: PropTypes.bool,
-    steps: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]),
-  }).isRequired,
-  color: PropTypes.string.isRequired,
-  stack: PropTypes.bool.isRequired,
-  points: PropTypes.shape({
-    lineWidth: PropTypes.number,
-    radius: PropTypes.number,
-    show: PropTypes.bool,
-  }).isRequired,
-  xScaleType: PropTypes.string,
-  yScaleType: PropTypes.string,
-};
+AreaSeriesDecorator.propTypes = PanelEntities.AreaChart;
 
 AreaSeriesDecorator.defaultProps = {
   yScaleType: ScaleType.Linear,
