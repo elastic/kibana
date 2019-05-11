@@ -58,7 +58,6 @@ class MarkdownPanelConfigUi extends Component {
     this.state = {
       selectedTab: 'markdown',
       indexPatternForQuery: {},
-      uiQueryLanguage: uiSettingsQueryLanguage,
     };
     this.handleCSSChange = this.handleCSSChange.bind(this);
   }
@@ -96,7 +95,7 @@ class MarkdownPanelConfigUi extends Component {
   }
 
   render() {
-    const defaults = { filter: '' };
+    const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
@@ -178,10 +177,10 @@ class MarkdownPanelConfigUi extends Component {
                 >
                   <QueryBar
                     query={{
-                      language: model.filter.language ? model.filter.language : this.state.uiQueryLanguage,
-                      query: model.filter.query,
+                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      query: model.filter.query || '',
                     }}
-                    screenTitle={'TimeseriesPanelConfigQuery'}
+                    screenTitle={'MarkdownPanelConfigQuery'}
                     onSubmit={this.handleSubmit}
                     appName={'VisEditor'}
                     indexPatterns={[this.state.indexPatternForQuery]}
