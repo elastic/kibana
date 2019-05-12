@@ -134,22 +134,25 @@ function getSuggestions(
   visualizations: Record<string, Visualization>,
   currentColumnRoles: DimensionRole[]
 ) {
-  return Object.entries(visualizations)
-    .map(([visualizationId, visualization]) => {
-      const datasourceTableMetas: Record<string, TableColumn[]> = {};
-      datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
-        datasourceTableMetas[datasourceSuggestionId] = tableColumns;
-      });
-      return visualization
-        .getSuggestions({
-          tableColumns: datasourceTableMetas,
-          roles: currentColumnRoles,
-        })
-        .map(suggestion => ({
-          ...suggestion,
-          visualizationId,
-        }));
-    })
-    .flat()
-    .sort(({ score: scoreA }, { score: scoreB }) => scoreA - scoreB);
+  return (
+    Object.entries(visualizations)
+      .map(([visualizationId, visualization]) => {
+        const datasourceTableMetas: Record<string, TableColumn[]> = {};
+        datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
+          datasourceTableMetas[datasourceSuggestionId] = tableColumns;
+        });
+        return visualization
+          .getSuggestions({
+            tableColumns: datasourceTableMetas,
+            roles: currentColumnRoles,
+          })
+          .map(suggestion => ({
+            ...suggestion,
+            visualizationId,
+          }));
+      })
+      // TODO why is flatMap not available here?
+      .reduce((globalList, currentList) => [...globalList, ...currentList], [])
+      .sort(({ score: scoreA }, { score: scoreB }) => scoreA - scoreB)
+  );
 }

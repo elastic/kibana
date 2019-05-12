@@ -5,7 +5,7 @@
  */
 
 import { EditorFramePlugin } from './plugin';
-import { Visualization, Datasource } from '../types';
+import { createMockDatasource, createMockVisualization } from './mock_extensions';
 
 const nextTick = () => new Promise(resolve => setTimeout(resolve));
 
@@ -51,17 +51,8 @@ describe('editor_frame plugin', () => {
   });
 
   it('should initialize and render provided datasource', async () => {
+    const mockDatasource = createMockDatasource();
     const publicAPI = pluginInstance.setup();
-    const mockDatasource = {
-      getDatasourceSuggestionsForField: jest.fn(),
-      getDatasourceSuggestionsFromCurrentState: jest.fn(),
-      getPersistableState: jest.fn(),
-      getPublicAPI: jest.fn(),
-      initialize: jest.fn(() => Promise.resolve()),
-      renderDataPanel: jest.fn(),
-      toExpression: jest.fn(),
-    };
-
     publicAPI.registerDatasource('test', mockDatasource);
 
     const instance = publicAPI.createInstance({});
@@ -76,25 +67,9 @@ describe('editor_frame plugin', () => {
   });
 
   it('should initialize visualization and render config panel', async () => {
+    const mockDatasource = createMockDatasource();
+    const mockVisualization = createMockVisualization();
     const publicAPI = pluginInstance.setup();
-    const mockDatasource: Datasource = {
-      getDatasourceSuggestionsForField: jest.fn(),
-      getDatasourceSuggestionsFromCurrentState: jest.fn(),
-      getPersistableState: jest.fn(),
-      getPublicAPI: jest.fn(),
-      initialize: jest.fn(() => Promise.resolve()),
-      renderDataPanel: jest.fn(),
-      toExpression: jest.fn(),
-    };
-
-    const mockVisualization: Visualization = {
-      getMappingOfTableToRoles: jest.fn(),
-      getPersistableState: jest.fn(),
-      getSuggestions: jest.fn(),
-      initialize: jest.fn(),
-      renderConfigPanel: jest.fn(),
-      toExpression: jest.fn(),
-    };
 
     publicAPI.registerDatasource('test', mockDatasource);
     publicAPI.registerVisualization('test', mockVisualization);

@@ -9,29 +9,11 @@ import { mount, ReactWrapper } from 'enzyme';
 import { EditorFrame } from './editor_frame';
 import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 import { act } from 'react-dom/test-utils';
+import { createMockVisualization, createMockDatasource } from '../mock_extensions';
 
 const nextTick = () => new Promise(resolve => setTimeout(resolve));
 
 describe('editor_frame', () => {
-  const getMockVisualization = () => ({
-    getMappingOfTableToRoles: jest.fn(),
-    getPersistableState: jest.fn(),
-    getSuggestions: jest.fn(),
-    initialize: jest.fn(),
-    renderConfigPanel: jest.fn(),
-    toExpression: jest.fn(),
-  });
-
-  const getMockDatasource = () => ({
-    getDatasourceSuggestionsForField: jest.fn(),
-    getDatasourceSuggestionsFromCurrentState: jest.fn(),
-    getPersistableState: jest.fn(),
-    getPublicAPI: jest.fn(),
-    initialize: jest.fn(() => Promise.resolve()),
-    renderDataPanel: jest.fn(),
-    toExpression: jest.fn(),
-  });
-
   let mockVisualization: Visualization;
   let mockDatasource: Datasource;
 
@@ -39,11 +21,11 @@ describe('editor_frame', () => {
   let mockDatasource2: Datasource;
 
   beforeEach(() => {
-    mockVisualization = getMockVisualization();
-    mockVisualization2 = getMockVisualization();
+    mockVisualization = createMockVisualization();
+    mockVisualization2 = createMockVisualization();
 
-    mockDatasource = getMockDatasource();
-    mockDatasource2 = getMockDatasource();
+    mockDatasource = createMockDatasource();
+    mockDatasource2 = createMockDatasource();
   });
 
   describe('initialization', () => {
