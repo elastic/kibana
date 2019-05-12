@@ -1034,7 +1034,9 @@ const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const down = true; // this function won't be called otherwise
   const depthIndex =
-    config.depthSelect && metaHeld
+    config.depthSelect &&
+    metaHeld &&
+    (!hoveredShapes.length || hoveredShapes[0].type !== 'annotation')
       ? (prev.depthIndex + (down && !prev.down ? 1 : 0)) % hoveredShapes.length
       : 0;
   return {
