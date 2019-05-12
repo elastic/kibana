@@ -7,6 +7,7 @@
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 import { ContextFunction, Filter } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   query: string;
@@ -15,29 +16,31 @@ interface Arguments {
 }
 
 export function essql(): ContextFunction<'essql', Filter, Arguments, any> {
+  const { help, args: argHelp } = getFunctionHelp().essql;
+
   return {
     name: 'essql',
     type: 'datatable',
     context: {
       types: ['filter'],
     },
-    help: 'Elasticsearch SQL',
+    help,
     args: {
       query: {
         aliases: ['_', 'q'],
         types: ['string'],
-        help: 'SQL query',
+        help: argHelp.query,
       },
       count: {
         types: ['number'],
-        help: 'The number of docs to pull back. Smaller numbers perform better',
+        help: argHelp.count,
         default: 1000,
       },
       timezone: {
         aliases: ['tz'],
         types: ['string'],
         default: 'UTC',
-        help: 'Timezone to use for date operations, valid ISO formats and UTC offsets both work',
+        help: argHelp.timezone,
       },
     },
     fn: (context, args, handlers) =>

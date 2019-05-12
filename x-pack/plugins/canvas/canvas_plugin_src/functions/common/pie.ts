@@ -11,6 +11,7 @@ import keyBy from 'lodash.keyby';
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
+import { getFunctionHelp } from '../../strings';
 import {
   ContextFunction,
   Legend,
@@ -77,61 +78,63 @@ interface Arguments {
 }
 
 export function pie(): ContextFunction<'pie', PointSeries, Arguments, Render<Pie>> {
+  const { help, args: argHelp } = getFunctionHelp().pie;
+
   return {
     name: 'pie',
     aliases: [],
     type: 'render',
-    help: 'Configure a pie chart element',
+    help,
     context: {
       types: ['pointseries'],
     },
     args: {
       palette: {
         types: ['palette', 'null'],
-        help: 'A palette object for describing the colors to use on this pie',
+        help: argHelp.palette,
         default: '{palette}',
       },
       seriesStyle: {
         multi: true,
         types: ['seriesStyle', 'null'],
-        help: 'A style of a specific series',
+        help: argHelp.seriesStyle,
       },
       radius: {
         types: ['string', 'number'],
-        help: `Radius of the pie as a percentage (between 0 and 1) of the available space. Set to 'auto' to automatically set radius`,
+        help: argHelp.radius,
         default: 'auto',
       },
       hole: {
         types: ['number'],
         default: 0,
-        help: 'Draw a hole in the pie, 0-100, as a percentage of the pie radius',
+        help: argHelp.hole,
       },
       labels: {
         types: ['boolean'],
         default: true,
-        help: 'Show pie labels',
+        help: argHelp.labels,
         options: [true, false],
       },
       labelRadius: {
         types: ['number'],
         default: 100,
-        help: 'Percentage of area of container to use as radius for the label circle',
+        help: argHelp.labelRadius,
       },
       font: {
         types: ['style'],
-        help: 'Label font',
+        help: argHelp.font,
         default: '{font}',
       },
       legend: {
         types: ['string', 'boolean'],
-        help: 'Legend position, nw, sw, ne, se or false',
+        help: argHelp.legend,
         default: false,
-        options: ['nw', 'sw', 'ne', 'se', false],
+        options: Object.values(Legend).concat(false),
       },
       tilt: {
         types: ['number'],
         default: 1,
-        help: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
+        help: argHelp.tilt,
       },
     },
     fn: (context, args) => {
