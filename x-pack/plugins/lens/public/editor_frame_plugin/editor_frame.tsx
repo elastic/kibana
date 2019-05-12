@@ -19,18 +19,18 @@ interface DatasourceState {
   datasourceName: string;
   visualizationName: string;
 
-  datasourceState: any;
-  visualizationState: any;
+  datasourceState: unknown;
+  visualizationState: unknown;
 }
 
 interface UpdateDatasourceAction {
   type: 'UPDATE_DATASOURCE';
-  payload: any;
+  payload: unknown;
 }
 
 interface UpdateVisualizationAction {
   type: 'UPDATE_VISUALIZATION';
-  payload: any;
+  payload: unknown;
 }
 
 type Action = UpdateDatasourceAction | UpdateVisualizationAction;
@@ -86,7 +86,7 @@ export function EditorFrame(props: EditorFrameProps) {
         render={props.datasources[state.datasourceName].renderDataPanel}
         nativeProps={{
           state: state.datasourceState,
-          setState: (newState: any) =>
+          setState: (newState: unknown) =>
             dispatch({
               type: 'UPDATE_DATASOURCE',
               payload: newState,
@@ -106,7 +106,7 @@ export function EditorFrame(props: EditorFrameProps) {
               })
           ),
           state: state.visualizationState,
-          setState: (newState: any) =>
+          setState: (newState: unknown) =>
             dispatch({
               type: 'UPDATE_VISUALIZATION',
               payload: newState,

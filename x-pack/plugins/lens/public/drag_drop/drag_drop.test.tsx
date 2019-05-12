@@ -90,7 +90,7 @@ describe('DragDrop', () => {
   test('droppable is reflected in the className', () => {
     const component = render(
       <DragDrop
-        onDrop={(x: any) => {
+        onDrop={(x: unknown) => {
           throw x;
         }}
         droppable

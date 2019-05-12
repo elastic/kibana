@@ -12,6 +12,7 @@ import { PLUGIN_ID } from './common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const lens = (kibana: any) => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
