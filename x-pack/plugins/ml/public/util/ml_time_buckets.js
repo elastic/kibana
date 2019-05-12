@@ -14,17 +14,20 @@
 import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
+import chrome from 'ui/chrome';
 
-import { TimeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
+import { timeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
 import { inherits } from 'plugins/ml/util/inherits';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.
 
 import { TimeBuckets } from 'ui/time_buckets';
-export function IntervalHelperProvider(Private, config) {
+const config = chrome.getUiSettingsClient();
 
-  const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
+export function IntervalHelperProvider() {
+
+  const calcAuto = timeBucketsCalcAutoIntervalProvider();
   inherits(MlTimeBuckets, TimeBuckets);
 
   function MlTimeBuckets() {
