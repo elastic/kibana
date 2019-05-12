@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
   configPanel: React.ReactNode;
+  suggestionsPanel?: React.ReactNode;
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
@@ -17,7 +18,10 @@ export function FrameLayout(props: FrameLayoutProps) {
     <EuiFlexGroup>
       {/* TODO style this and add workspace prop and loading flags */}
       <EuiFlexItem>{props.dataPanel}</EuiFlexItem>
-      <EuiFlexItem>{props.configPanel}</EuiFlexItem>
+      <EuiFlexItem>
+        {props.configPanel}
+        {props.suggestionsPanel}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

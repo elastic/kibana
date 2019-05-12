@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useReducer, useMemo } from 'react';
-import { Datasource, Visualization } from '../../types';
+import { Datasource, Visualization, TableColumn } from '../../types';
 import { reducer, getInitialState } from '../state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
@@ -60,6 +60,32 @@ export function EditorFrame(props: EditorFrameProps) {
     [props.datasources, state.datasourceIsLoading, state.activeDatasource, state.datasourceState]
   );
 
+  if (state.activeDatasource && !state.datasourceIsLoading) {
+    const datasourceTableSuggestions = props.datasources[
+      state.activeDatasource
+    ].getDatasourceSuggestionsFromCurrentState(state.datasourceState);
+
+    const visualizationSuggestions = Object.values(props.visualizations)
+      .flatMap(visualization => {
+        const datasourceTableMetas: Record<string, TableColumn[]> = {};
+
+        datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
+          datasourceTableMetas[datasourceSuggestionId] = tableColumns;
+        });
+
+        return visualization.getSuggestions({
+          tableColumns: datasourceTableMetas,
+          roles: state.activeVisualization
+            ? props.visualizations[state.activeVisualization].getMappingOfTableToRoles(
+                state.visualizationState[state.activeVisualization],
+                datasourcePublicAPI!
+              )
+            : [],
+        });
+      })
+      .sort(({ score: scoreA }, { score: scoreB }) => scoreA - scoreB);
+  }
+
   return (
     <FrameLayout
       dataPanel={
@@ -83,6 +109,7 @@ export function EditorFrame(props: EditorFrameProps) {
           />
         )
       }
+      suggestionsPanel={<div>Suggestions</div>}
     />
   );
 }
