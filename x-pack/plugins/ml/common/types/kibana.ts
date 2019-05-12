@@ -12,3 +12,5 @@ import { IndexPattern } from 'ui/index_patterns';
 export interface IndexPatternWithType extends IndexPattern {
   type?: string;
 }
+
+export type IndexPatternTitle = string;
