@@ -151,7 +151,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
       process.platform === 'win32' ? 'java.exe' : 'java'
     );
 
-    let params: string[] = [
+    const params: string[] = [
       '-Declipse.application=org.elastic.jdt.ls.core.id1',
       '-Dosgi.bundles.defaultStartLevel=4',
       '-Declipse.product=org.elastic.jdt.ls.core.product',
@@ -167,27 +167,25 @@ export class JavaLauncher implements ILanguageServerLauncher {
     ];
 
     if (this.needModuleArguments) {
-      params.push('--add-modules=ALL-SYSTEM',
-                  '--add-opens',
-                  'java.base/java.util=ALL-UNNAMED',
-                  '--add-opens',
-                  'java.base/java.lang=ALL-UNNAMED');
+      params.push(
+        '--add-modules=ALL-SYSTEM',
+        '--add-opens',
+        'java.base/java.util=ALL-UNNAMED',
+        '--add-opens',
+        'java.base/java.lang=ALL-UNNAMED'
+      );
     }
 
-    const p = spawn(
-      javaPath,
-      params,
-      {
-        detached: false,
-        stdio: 'pipe',
-        env: {
-          ...process.env,
-          CLIENT_HOST: '127.0.0.1',
-          CLIENT_PORT: port.toString(),
-          JAVA_HOME: javaHomePath,
-        },
-      }
-    );
+    const p = spawn(javaPath, params, {
+      detached: false,
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        CLIENT_HOST: '127.0.0.1',
+        CLIENT_PORT: port.toString(),
+        JAVA_HOME: javaHomePath,
+      },
+    });
     p.stdout.on('data', data => {
       log.stdout(data.toString());
     });

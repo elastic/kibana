@@ -14,6 +14,7 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
 import { getLocalizationUsageCollector } from './server/lib/get_localization_usage_collector';
+import { createTelemetryUsageCollector } from './server/lib/telemetry';
 import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
 import {
   xpackInfoRoute,
@@ -51,6 +52,8 @@ export const xpackMain = (kibana) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         telemetry: Joi.object({
+          // `config` is used internally and not intended to be set
+          config: Joi.string().default(Joi.ref('$defaultConfigPath')),
           enabled: Joi.boolean().default(true),
           url: Joi.when('$dev', {
             is: true,
@@ -128,14 +131,18 @@ export const xpackMain = (kibana) => {
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
       setupXPackMain(server);
-      registerOssFeatures(server.plugins.xpack_main.registerFeature);
+      const { types: savedObjectTypes } = server.savedObjects;
+      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes);
 
       // register routes
       xpackInfoRoute(server);
       telemetryRoute(server);
       settingsRoute(server, this.kbnServer);
       featuresRoute(server);
+
+      // usage collection
       server.usage.collectorSet.register(getLocalizationUsageCollector(server));
+      server.usage.collectorSet.register(createTelemetryUsageCollector(server));
     }
   });
 };

@@ -30,6 +30,7 @@ import {
   VisualizeLoaderParams,
   VisualizeUpdateParams,
 } from 'ui/visualize/loader/types';
+import { i18n } from '@kbn/i18n';
 
 export interface VisualizeEmbeddableConfiguration {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
@@ -63,6 +64,9 @@ export class VisualizeEmbeddable extends Embeddable {
     super({
       title: savedVisualization.title,
       editUrl,
+      editLabel: i18n.translate('kbn.embeddable.visualize.editLabel', {
+        defaultMessage: 'Edit visualization',
+      }),
       editable,
       indexPatterns,
     });

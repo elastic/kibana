@@ -8,19 +8,24 @@ import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import chrome, { Breadcrumb } from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
+import { FiltersGlobal } from '../../components/filters_global';
+import { HeaderPage } from '../../components/header_page';
+import { LastEventTime } from '../../components/last_event_time';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { manageQuery } from '../../components/page/manage_query';
 import { DomainsTable } from '../../components/page/network/domains_table';
+import { FlowTargetSelectConnected } from '../../components/page/network/flow_target_select_connected';
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { FlowTarget, IndexType } from '../../graphql/types';
+import { FlowTarget, IndexType, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
 import { TlsTable } from '../../components/page/network/tls_table';
@@ -44,6 +49,8 @@ interface IPDetailsComponentReduxProps {
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
+const indexTypes = [IndexType.FILEBEAT, IndexType.PACKETBEAT];
+
 const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
@@ -52,11 +59,20 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     filterQuery,
     flowTarget,
   }) => (
-    <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
+    <WithSource sourceId="default" indexTypes={indexTypes}>
       {({ filebeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
-          <>
-            <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
+          <StickyContainer>
+            <FiltersGlobal>
+              <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
+            </FiltersGlobal>
+
+            <HeaderPage
+              subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+              title={ip}
+            >
+              <FlowTargetSelectConnected />
+            </HeaderPage>
 
             <GlobalTime>
               {({ to, from, setQuery }) => (
@@ -77,9 +93,8 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       />
                     )}
                   </IpOverviewQuery>
-                  <EuiSpacer size="s" />
-                  <EuiHorizontalRule margin="xs" />
-                  <EuiSpacer />
+
+                  <EuiHorizontalRule />
 
                   <DomainsQuery
                     endDate={to}
@@ -166,7 +181,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                 </>
               )}
             </GlobalTime>
-          </>
+          </StickyContainer>
         ) : (
           <EmptyPage
             title={i18n.NO_FILEBEAT_INDICES}

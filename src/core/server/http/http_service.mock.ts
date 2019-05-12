@@ -26,6 +26,8 @@ const createSetupContractMock = () => {
     registerAuth: jest.fn(),
     registerOnRequest: jest.fn(),
     registerRouter: jest.fn(),
+    getBasePathFor: jest.fn(),
+    setBasePathFor: jest.fn(),
     // we can mock some hapi server method when we need it
     server: {} as Server,
   };
