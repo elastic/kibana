@@ -9,13 +9,16 @@ import { LICENSE_STATUS_VALID } from '../../../../common/constants';
 
 export const licensePreRoutingFactory = (server, pluginId) => {
   return () => {
-    // License checking and enable/disable logic
     const xpackMainPlugin = server.plugins.xpack_main;
     const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
-    if (licenseCheckResults.status !== LICENSE_STATUS_VALID) {
-      const error = new Error(licenseCheckResults.message);
-      const statusCode = 403;
-      throw wrapCustomError(error, statusCode);
+
+    // Apps which don't have any license restrictions will return undefined license check results.
+    if (licenseCheckResults) {
+      if (licenseCheckResults.status !== LICENSE_STATUS_VALID) {
+        const error = new Error(licenseCheckResults.message);
+        const statusCode = 403;
+        throw wrapCustomError(error, statusCode);
+      }
     }
 
     return null;
