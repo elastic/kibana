@@ -5,11 +5,19 @@
  */
 
 import React, { useEffect, useReducer, useMemo } from 'react';
-import { Datasource, Visualization, TableColumn } from '../../types';
+import {
+  Datasource,
+  Visualization,
+  TableColumn,
+  DatasourcePublicAPI,
+  DatasourceSuggestion,
+  DimensionRole,
+} from '../../types';
 import { reducer, getInitialState } from '../state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
+import { SuggestionPanelWrapper } from './suggestion_panel_wrapper';
 
 export interface EditorFrameProps {
   datasources: Record<string, Datasource>;
@@ -60,46 +68,37 @@ export function EditorFrame(props: EditorFrameProps) {
     [props.datasources, state.datasourceIsLoading, state.activeDatasource, state.datasourceState]
   );
 
-  if (state.activeDatasource && !state.datasourceIsLoading) {
-    const datasourceTableSuggestions = props.datasources[
-      state.activeDatasource
-    ].getDatasourceSuggestionsFromCurrentState(state.datasourceState);
+  const datasourceIsActive = Boolean(state.activeDatasource && !state.datasourceIsLoading);
 
-    const visualizationSuggestions = Object.values(props.visualizations)
-      .flatMap(visualization => {
-        const datasourceTableMetas: Record<string, TableColumn[]> = {};
+  if (datasourceIsActive) {
+    const suggestions =
+      state.activeDatasource && !state.datasourceIsLoading
+        ? getSuggestions(
+            props.datasources[state.activeDatasource].getDatasourceSuggestionsFromCurrentState(
+              state.activeDatasource
+            ),
+            props.visualizations,
+            state.activeVisualization
+              ? props.visualizations[state.activeVisualization].getMappingOfTableToRoles(
+                  state.visualizationState[state.activeVisualization],
+                  datasourcePublicAPI!
+                )
+              : []
+          )
+        : [];
 
-        datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
-          datasourceTableMetas[datasourceSuggestionId] = tableColumns;
-        });
-
-        return visualization.getSuggestions({
-          tableColumns: datasourceTableMetas,
-          roles: state.activeVisualization
-            ? props.visualizations[state.activeVisualization].getMappingOfTableToRoles(
-                state.visualizationState[state.activeVisualization],
-                datasourcePublicAPI!
-              )
-            : [],
-        });
-      })
-      .sort(({ score: scoreA }, { score: scoreB }) => scoreA - scoreB);
-  }
-
-  return (
-    <FrameLayout
-      dataPanel={
-        <DataPanelWrapper
-          activeDatasource={state.activeDatasource}
-          datasourceIsLoading={state.datasourceIsLoading}
-          datasourceState={state.datasourceState}
-          datasources={props.datasources}
-          dispatch={dispatch}
-        />
-      }
-      configPanel={
-        state.activeDatasource &&
-        !state.datasourceIsLoading && (
+    return (
+      <FrameLayout
+        dataPanel={
+          <DataPanelWrapper
+            activeDatasource={state.activeDatasource}
+            datasourceIsLoading={state.datasourceIsLoading}
+            datasourceState={state.datasourceState}
+            datasources={props.datasources}
+            dispatch={dispatch}
+          />
+        }
+        configPanel={
           <ConfigPanelWrapper
             visualizations={props.visualizations}
             activeVisualization={state.activeVisualization}
@@ -107,9 +106,50 @@ export function EditorFrame(props: EditorFrameProps) {
             dispatch={dispatch}
             visualizationState={state.visualizationState}
           />
-        )
-      }
-      suggestionsPanel={<div>Suggestions</div>}
-    />
-  );
+        }
+        suggestionsPanel={<SuggestionPanelWrapper suggestions={suggestions} dispatch={dispatch} />}
+      />
+    );
+  } else {
+    return (
+      <FrameLayout
+        dataPanel={
+          <DataPanelWrapper
+            activeDatasource={state.activeDatasource}
+            datasourceIsLoading={state.datasourceIsLoading}
+            datasourceState={state.datasourceState}
+            datasources={props.datasources}
+            dispatch={dispatch}
+          />
+        }
+        configPanel={null}
+        suggestionsPanel={null}
+      />
+    );
+  }
+}
+
+function getSuggestions(
+  datasourceTableSuggestions: DatasourceSuggestion[],
+  visualizations: Record<string, Visualization>,
+  currentColumnRoles: DimensionRole[]
+) {
+  return Object.entries(visualizations)
+    .map(([visualizationId, visualization]) => {
+      const datasourceTableMetas: Record<string, TableColumn[]> = {};
+      datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
+        datasourceTableMetas[datasourceSuggestionId] = tableColumns;
+      });
+      return visualization
+        .getSuggestions({
+          tableColumns: datasourceTableMetas,
+          roles: currentColumnRoles,
+        })
+        .map(suggestion => ({
+          ...suggestion,
+          visualizationId,
+        }));
+    })
+    .flat()
+    .sort(({ score: scoreA }, { score: scoreB }) => scoreA - scoreB);
 }
