@@ -86,7 +86,7 @@ export class HttpService {
   }
 
   // eslint-disable-next-line no-unused-params
-  public start(deps: Deps) {}
+  public start() {}
 
   public stop() {
     this.stop$.next();
@@ -96,4 +96,5 @@ export class HttpService {
 
 /** @public */
 export type HttpSetup = ReturnType<HttpService['setup']>;
+/** @public */
 export type HttpStart = ReturnType<HttpService['start']>;

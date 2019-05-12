@@ -87,7 +87,7 @@ describe('Histogram', () => {
       const tooltips = wrapper.find('Tooltip');
 
       expect(tooltips.length).toBe(1);
-      expect(tooltips.prop('header')).toBe('811 - 869 ms');
+      expect(tooltips.prop('header')).toBe('811 - 927 ms');
       expect(tooltips.prop('tooltipPoints')).toEqual([
         { value: '49.0 occurrences' }
       ]);
@@ -102,8 +102,9 @@ describe('Histogram', () => {
             transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
           },
           style: { cursor: 'pointer' },
-          x: 869010,
+          xCenter: 869010,
           x0: 811076,
+          x: 926944,
           y: 49
         }
       });
@@ -129,8 +130,9 @@ describe('Histogram', () => {
           transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
         },
         style: { cursor: 'pointer' },
-        x: 869010,
+        xCenter: 869010,
         x0: 811076,
+        x: 926944,
         y: 49
       });
     });

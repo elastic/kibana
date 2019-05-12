@@ -86,7 +86,7 @@ export interface Source {
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
-  HostDetails: HostItem;
+  HostOverview: HostItem;
 
   HostFirstLastSeen: FirstLastSeenHost;
 
@@ -101,6 +101,8 @@ export interface Source {
   Users: UsersData;
 
   KpiNetwork?: KpiNetworkData | null;
+
+  KpiHosts: KpiHostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -866,37 +868,27 @@ export interface HostItem {
 
   lastSeen?: Date | null;
 
-  host?: HostFields | null;
+  host?: HostEcsFields | null;
+
+  cloud?: CloudFields | null;
 }
 
-export interface HostFields {
-  architecture?: string | null;
+export interface CloudFields {
+  instance?: CloudInstance | null;
 
-  id?: string | null;
+  machine?: CloudMachine | null;
 
-  ip?: (string | null)[] | null;
+  provider?: (string | null)[] | null;
 
-  mac?: (string | null)[] | null;
-
-  name?: string | null;
-
-  os?: OsFields | null;
-
-  type?: string | null;
+  region?: (string | null)[] | null;
 }
 
-export interface OsFields {
-  platform?: string | null;
+export interface CloudInstance {
+  id?: (string | null)[] | null;
+}
 
-  name?: string | null;
-
-  full?: string | null;
-
-  family?: string | null;
-
-  version?: string | null;
-
-  kernel?: string | null;
+export interface CloudMachine {
+  type?: (string | null)[] | null;
 }
 
 export interface FirstLastSeenHost {
@@ -1071,6 +1063,42 @@ export interface KpiNetworkData {
   tlsHandshakes?: number | null;
 }
 
+export interface KpiHostsData {
+  hosts?: number | null;
+
+  hostsHistogram?: KpiHostHistogramData[] | null;
+
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+}
+
+export interface KpiHostHistogramData {
+  key?: number | null;
+
+  key_as_string?: string | null;
+
+  count?: Count | null;
+}
+
+export interface Count {
+  value?: number | null;
+
+  doc_count?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1206,6 +1234,36 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface OsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
+}
+
+export interface HostFields {
+  architecture?: string | null;
+
+  id?: string | null;
+
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
+
+  name?: string | null;
+
+  os?: OsFields | null;
+
+  type?: string | null;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -1334,7 +1392,7 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface HostDetailsSourceArgs {
+export interface HostOverviewSourceArgs {
   id?: string | null;
 
   hostName: string;
@@ -1410,6 +1468,13 @@ export interface UsersSourceArgs {
   timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
+export interface KpiHostsSourceArgs {
   id?: string | null;
 
   timerange: TimerangeInput;
@@ -1607,7 +1672,7 @@ export namespace SourceResolvers {
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
-    HostDetails?: HostDetailsResolver<HostItem, TypeParent, Context>;
+    HostOverview?: HostOverviewResolver<HostItem, TypeParent, Context>;
 
     HostFirstLastSeen?: HostFirstLastSeenResolver<FirstLastSeenHost, TypeParent, Context>;
 
@@ -1622,6 +1687,8 @@ export namespace SourceResolvers {
     Users?: UsersResolver<UsersData, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
+
+    KpiHosts?: KpiHostsResolver<KpiHostsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
 
@@ -1740,13 +1807,13 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
   }
 
-  export type HostDetailsResolver<R = HostItem, Parent = Source, Context = SiemContext> = Resolver<
+  export type HostOverviewResolver<R = HostItem, Parent = Source, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context,
-    HostDetailsArgs
+    HostOverviewArgs
   >;
-  export interface HostDetailsArgs {
+  export interface HostOverviewArgs {
     id?: string | null;
 
     hostName: string;
@@ -1867,6 +1934,20 @@ export namespace SourceResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context, KpiNetworkArgs>;
   export interface KpiNetworkArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
+  }
+
+  export type KpiHostsResolver<R = KpiHostsData, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    KpiHostsArgs
+  >;
+  export interface KpiHostsArgs {
     id?: string | null;
 
     timerange: TimerangeInput;
@@ -4448,7 +4529,9 @@ export namespace HostItemResolvers {
 
     lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
 
-    host?: HostResolver<HostFields | null, TypeParent, Context>;
+    host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
+
+    cloud?: CloudResolver<CloudFields | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SiemContext> = Resolver<
@@ -4462,109 +4545,70 @@ export namespace HostItemResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
-    R = HostFields | null,
+    R = HostEcsFields | null,
+    Parent = HostItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CloudResolver<
+    R = CloudFields | null,
     Parent = HostItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace HostFieldsResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = HostFields> {
-    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+export namespace CloudFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = CloudFields> {
+    instance?: InstanceResolver<CloudInstance | null, TypeParent, Context>;
 
-    id?: IdResolver<string | null, TypeParent, Context>;
+    machine?: MachineResolver<CloudMachine | null, TypeParent, Context>;
 
-    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+    provider?: ProviderResolver<(string | null)[] | null, TypeParent, Context>;
 
-    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    os?: OsResolver<OsFields | null, TypeParent, Context>;
-
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    region?: RegionResolver<(string | null)[] | null, TypeParent, Context>;
   }
 
-  export type ArchitectureResolver<
-    R = string | null,
-    Parent = HostFields,
+  export type InstanceResolver<
+    R = CloudInstance | null,
+    Parent = CloudFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type IdResolver<R = string | null, Parent = HostFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type IpResolver<
+  export type MachineResolver<
+    R = CloudMachine | null,
+    Parent = CloudFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ProviderResolver<
     R = (string | null)[] | null,
-    Parent = HostFields,
+    Parent = CloudFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type MacResolver<
+  export type RegionResolver<
     R = (string | null)[] | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type OsResolver<
-    R = OsFields | null,
-    Parent = HostFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TypeResolver<
-    R = string | null,
-    Parent = HostFields,
+    Parent = CloudFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace OsFieldsResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = OsFields> {
-    platform?: PlatformResolver<string | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    full?: FullResolver<string | null, TypeParent, Context>;
-
-    family?: FamilyResolver<string | null, TypeParent, Context>;
-
-    version?: VersionResolver<string | null, TypeParent, Context>;
-
-    kernel?: KernelResolver<string | null, TypeParent, Context>;
+export namespace CloudInstanceResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = CloudInstance> {
+    id?: IdResolver<(string | null)[] | null, TypeParent, Context>;
   }
 
-  export type PlatformResolver<
-    R = string | null,
-    Parent = OsFields,
+  export type IdResolver<
+    R = (string | null)[] | null,
+    Parent = CloudInstance,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type NameResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type FullResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type FamilyResolver<
-    R = string | null,
-    Parent = OsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type VersionResolver<
-    R = string | null,
-    Parent = OsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type KernelResolver<
-    R = string | null,
-    Parent = OsFields,
+}
+
+export namespace CloudMachineResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = CloudMachine> {
+    type?: TypeResolver<(string | null)[] | null, TypeParent, Context>;
+  }
+
+  export type TypeResolver<
+    R = (string | null)[] | null,
+    Parent = CloudMachine,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -5139,6 +5183,142 @@ export namespace KpiNetworkDataResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace KpiHostsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiHostsData> {
+    hosts?: HostsResolver<number | null, TypeParent, Context>;
+
+    hostsHistogram?: HostsHistogramResolver<KpiHostHistogramData[] | null, TypeParent, Context>;
+
+    authSuccess?: AuthSuccessResolver<number | null, TypeParent, Context>;
+
+    authSuccessHistogram?: AuthSuccessHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    authFailure?: AuthFailureResolver<number | null, TypeParent, Context>;
+
+    authFailureHistogram?: AuthFailureHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    uniqueSourceIps?: UniqueSourceIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    uniqueDestinationIps?: UniqueDestinationIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+  }
+
+  export type HostsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HostsHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthSuccessResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthSuccessHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace KpiHostHistogramDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiHostHistogramData> {
+    key?: KeyResolver<number | null, TypeParent, Context>;
+
+    key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
+
+    count?: CountResolver<Count | null, TypeParent, Context>;
+  }
+
+  export type KeyResolver<
+    R = number | null,
+    Parent = KpiHostHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KeyAsStringResolver<
+    R = string | null,
+    Parent = KpiHostHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CountResolver<
+    R = Count | null,
+    Parent = KpiHostHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CountResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = Count> {
+    value?: ValueResolver<number | null, TypeParent, Context>;
+
+    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
+  }
+
+  export type ValueResolver<R = number | null, Parent = Count, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type DocCountResolver<R = number | null, Parent = Count, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace NetworkTopNFlowDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkTopNFlowData> {
     edges?: EdgesResolver<NetworkTopNFlowEdges[], TypeParent, Context>;
@@ -5579,4 +5759,105 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace OsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = OsFields> {
+    platform?: PlatformResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    full?: FullResolver<string | null, TypeParent, Context>;
+
+    family?: FamilyResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+
+    kernel?: KernelResolver<string | null, TypeParent, Context>;
+  }
+
+  export type PlatformResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FullResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FamilyResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KernelResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HostFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = HostFields> {
+    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+
+    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    os?: OsResolver<OsFields | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ArchitectureResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IdResolver<R = string | null, Parent = HostFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IpResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MacResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OsResolver<
+    R = OsFields | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }

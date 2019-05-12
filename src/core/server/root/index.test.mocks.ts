@@ -19,7 +19,7 @@
 
 import { loggingServiceMock } from '../logging/logging_service.mock';
 export const logger = loggingServiceMock.create();
-jest.doMock('../logging', () => ({
+jest.doMock('../logging/logging_service', () => ({
   LoggingService: jest.fn(() => logger),
 }));
 
@@ -29,5 +29,10 @@ jest.doMock('../config/config_service', () => ({
   ConfigService: jest.fn(() => configService),
 }));
 
-export const mockServer = { setup: jest.fn(), stop: jest.fn() };
+export const mockServer = {
+  setupConfigSchemas: jest.fn(),
+  setup: jest.fn(),
+  stop: jest.fn(),
+  configService,
+};
 jest.mock('../server', () => ({ Server: jest.fn(() => mockServer) }));

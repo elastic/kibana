@@ -11,6 +11,7 @@ import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
 import { IpDetails } from './ip_details';
+import { KpiHosts } from './kpi_hosts';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
 import { Overview } from './overview';
@@ -30,6 +31,7 @@ export interface AppDomainLibs {
   kpiNetwork: KpiNetwork;
   overview: Overview;
   uncommonProcesses: UncommonProcesses;
+  kpiHosts: KpiHosts;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
