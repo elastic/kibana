@@ -1496,12 +1496,13 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.3.tgz#94d38a35bd315efa7a6918b22695128fc40a885e"
   integrity sha512-0OyB9oztlYIq8F1LHjcNf+T089PKfYw78tgUY+q2dtox/jmb4xzFKtI9kv1hwAt5tcgBUTtUMK9kszpSh1UZaQ==
 
-"@elastic/request-crypto@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.0.0.tgz#f5120d5847230c9d83266ddaddcd48debb0586d3"
-  integrity sha512-R25MNPkRhBgrVLqafHemHW8tu1Aybd+ADzAfI7pdrE4dxqgxUdh19gx4NwjPxgb5roIhjFv3YzvXRO51wPKxDg==
+"@elastic/request-crypto@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.0.2.tgz#bf27bf009227166f3eeb2b5193a108752335ebd3"
+  integrity sha512-8FtGYl7LebhmJmEDWiGn3MorvNiGWSYPqhvgRlKXjNakEuLoPBBe0DHxbwLkj08CMLWczXcO2ixqBPY7fEhJpA==
   dependencies:
     "@elastic/node-crypto" "^0.1.2"
+    "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
 
 "@elastic/ui-ace@0.2.3":
@@ -3459,6 +3460,13 @@
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.1.4.tgz#093d1beae11541aef25999d70aa09286fd025b1a"
   integrity sha512-tR1ekaXUGpmzOcDXWU9BW73YfA2/VW1DF1FH+wlJ82BbCSnWTbdX+JkqWQXWKIGsFPnPsYadbXfNgz28g+ccWg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/node-jose@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@types/node-jose/-/node-jose-1.1.0.tgz#26e1d234b41a39035482443ef35414bf34ba5d8b"
+  integrity sha512-ws1RJCQmIDww6/OEW1WcLCqDXZmNMWLoGgW5TEIR7pqJDaGrOkgH8hVw96Wx4rmu65r3/ZiDsb9LjpoizAnlww==
   dependencies:
     "@types/node" "*"
 

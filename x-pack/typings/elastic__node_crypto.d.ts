@@ -5,21 +5,3 @@
  */
 
 declare module '@elastic/node-crypto';
-declare module 'node-jose' {
-  export interface JWK {
-    [x: string]: any;
-  }
-  export interface JWE {
-    [x: string]: any;
-  }
-  export interface JWKS {
-    [x: string]: any;
-  }
-  export interface Util {
-    [x: string]: any;
-  }
-
-  export const JWK: JWK;
-  export const JWE: JWE;
-  export const util: Util;
-}
