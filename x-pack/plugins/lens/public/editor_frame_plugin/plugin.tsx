@@ -10,15 +10,11 @@ import { Datasource, Visualization, EditorFrameSetup } from '../types';
 
 import { EditorFrame } from './editor_frame';
 
-class EditorFramePlugin {
+export class EditorFramePlugin {
   constructor() {}
 
-  private datasources: {
-    [key: string]: Datasource;
-  } = {};
-  private visualizations: {
-    [key: string]: Visualization;
-  } = {};
+  private datasources: Record<string, Datasource> = {};
+  private visualizations: Record<string, Visualization> = {};
 
   public setup(): EditorFrameSetup {
     return {
@@ -26,6 +22,9 @@ class EditorFramePlugin {
         let domElement: Element;
         return {
           mount: (element: Element) => {
+            if (domElement) {
+              unmountComponentAtNode(domElement);
+            }
             domElement = element;
             render(
               <EditorFrame
@@ -44,15 +43,8 @@ class EditorFramePlugin {
           },
         };
       },
-      registerDatasource: async (name, datasource) => {
-        // casting it to an unknown datasource. This doesn't introduce runtime errors
-        // because each type T is always also an unknown, but typescript won't do it
-        // on it's own because we are loosing type information here.
-        // So it's basically explicitly saying "I'm dropping the information about type T here
-        // because this information isn't useful to me." but without using any which can leak
-        // const state = await datasource.initialize();
-
-        this.datasources[name] = datasource as Datasource<unknown>;
+      registerDatasource: (name, datasource) => {
+        this.datasources[name] = datasource as Datasource<unknown, unknown>;
       },
       registerVisualization: (name, visualization) => {
         this.visualizations[name] = visualization as Visualization<unknown, unknown>;

@@ -12,8 +12,8 @@ import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
 
 export interface EditorFrameProps {
-  datasources: { [key: string]: Datasource };
-  visualizations: { [key: string]: Visualization };
+  datasources: Record<string, Datasource>;
+  visualizations: Record<string, Visualization>;
 
   initialDatasource: string | null;
   initialVisualization: string | null;
