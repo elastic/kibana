@@ -1325,36 +1325,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^3.11.2":
-  version "3.11.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.11.2.tgz#3644eeb7c0d17d6c368cfb380c2d2ef268655d72"
-  integrity sha512-ILU4ijT5GZC4usnbab/IVq1brQ6tFgkfBPwa4ixRtN5TlS+BWjPPVPFfIO3j4K9PijXE6XISfs8L2HkH1IDdtA==
-  dependencies:
-    "@types/d3-shape" "^1.3.1"
-    "@types/luxon" "^1.11.1"
-    classnames "^2.2.6"
-    d3-array "^2.0.3"
-    d3-collection "^1.0.7"
-    d3-scale "^2.2.2"
-    d3-shape "^1.3.4"
-    fp-ts "^1.14.2"
-    konva "^2.6.0"
-    lodash "^4.17.11"
-    luxon "^1.11.3"
-    mobx "^4.9.2"
-    mobx-react "^5.4.3"
-    newtype-ts "^0.2.4"
-    prop-types "^15.7.2"
-    react "^16.8.3"
-    react-dom "^16.8.3"
-    react-konva "16.8.3"
-    react-spring "^8.0.8"
-    resize-observer-polyfill "^1.5.1"
-
-"@elastic/charts@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.0.0.tgz#321313873985deb69106d479ee6a827eb81c890a"
-  integrity sha512-j/DfpdsKOx/QEbWJ6CvLlLP6XUYWqAHyuho3+38HngnoZSPzLGLte/ymW1CnaNYthQGTS9/4a47aZCkvQ6EdBw==
+"@elastic/charts@^4.2.1":
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.1.tgz#af50f73a4e41e30f07a2de3ee814fc9277fc476e"
+  integrity sha512-f01basHDEYnGN0eCNX6TpbmChWeuaK5jlvmsmmd1sL5odC26iz6ARE3JlhuqmwuYKm5c1saTE2aSQ3l0rc/DFA==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
