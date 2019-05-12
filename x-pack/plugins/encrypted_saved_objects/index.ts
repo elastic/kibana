@@ -26,7 +26,13 @@ export const encryptedSavedObjects = (kibana: any) =>
     config(Joi: Root) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        encryptionKey: Joi.string().min(32),
+        encryptionKey: Joi.when(Joi.ref('$dist'), {
+          is: true,
+          then: Joi.string().min(32),
+          otherwise: Joi.string()
+            .min(32)
+            .default('a'.repeat(32)),
+        }),
       }).default();
     },
 

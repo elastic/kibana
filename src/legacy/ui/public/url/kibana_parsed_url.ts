@@ -106,7 +106,7 @@ export class KibanaParsedUrl {
     return query._g || '';
   }
 
-  public setGlobalState(newGlobalState: string) {
+  public setGlobalState(newGlobalState: string | string[]) {
     if (!this.appPath) {
       return;
     }

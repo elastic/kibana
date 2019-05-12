@@ -10,13 +10,18 @@ import { SourceConfigurationFlyoutState } from '../../components/source_configur
 import { LogFlyout } from '../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
 import { Source } from '../../containers/source';
+import { useSourceId } from '../../containers/source_id';
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => (
-  <Source.Provider sourceId="default">
-    <SourceConfigurationFlyoutState.Provider>
-      <LogViewConfiguration.Provider>
-        <LogFlyout.Provider sourceId="default">{children}</LogFlyout.Provider>
-      </LogViewConfiguration.Provider>
-    </SourceConfigurationFlyoutState.Provider>
-  </Source.Provider>
-);
+export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
+  const [sourceId] = useSourceId();
+
+  return (
+    <Source.Provider sourceId={sourceId}>
+      <SourceConfigurationFlyoutState.Provider>
+        <LogViewConfiguration.Provider>
+          <LogFlyout.Provider>{children}</LogFlyout.Provider>
+        </LogViewConfiguration.Provider>
+      </SourceConfigurationFlyoutState.Provider>
+    </Source.Provider>
+  );
+};

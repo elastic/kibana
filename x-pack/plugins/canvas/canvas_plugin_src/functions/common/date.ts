@@ -6,6 +6,7 @@
 
 import moment from 'moment';
 import { NullContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   value: string | null;
@@ -13,25 +14,24 @@ interface Arguments {
 }
 
 export function date(): NullContextFunction<'date', Arguments, number> {
+  const { help, args: argHelp } = getFunctionHelp().date;
+
   return {
     name: 'date',
     type: 'number',
     context: {
       types: ['null'],
     },
-    help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch',
+    help,
     args: {
       value: {
         aliases: ['_'],
         types: ['string', 'null'],
-        help:
-          'An optional date string to parse into milliseconds since epoch ' +
-          'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format',
+        help: argHelp.value,
       },
       format: {
         types: ['string'],
-        help:
-          'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
+        help: argHelp.format,
       },
     },
     fn: (_context, args) => {

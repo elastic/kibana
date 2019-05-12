@@ -50,6 +50,8 @@ export interface InfraSource {
   version?: string | null;
   /** The timestamp the source configuration was last persisted at */
   updatedAt?: number | null;
+  /** The origin of the source (one of 'fallback', 'internal', 'stored') */
+  origin: string;
   /** The raw configuration of the source */
   configuration: InfraSourceConfiguration;
   /** The status of the source */
@@ -290,6 +292,8 @@ export interface InfraSnapshotNodePath {
   value: string;
 
   label: string;
+
+  ip?: string | null;
 }
 
 export interface InfraSnapshotNodeMetric {
@@ -627,6 +631,8 @@ export namespace InfraSourceResolvers {
     version?: VersionResolver<string | null, TypeParent, Context>;
     /** The timestamp the source configuration was last persisted at */
     updatedAt?: UpdatedAtResolver<number | null, TypeParent, Context>;
+    /** The origin of the source (one of 'fallback', 'internal', 'stored') */
+    origin?: OriginResolver<string, TypeParent, Context>;
     /** The raw configuration of the source */
     configuration?: ConfigurationResolver<InfraSourceConfiguration, TypeParent, Context>;
     /** The status of the source */
@@ -662,6 +668,11 @@ export namespace InfraSourceResolvers {
     Parent = InfraSource,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
+  export type OriginResolver<R = string, Parent = InfraSource, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type ConfigurationResolver<
     R = InfraSourceConfiguration,
     Parent = InfraSource,
@@ -1455,6 +1466,8 @@ export namespace InfraSnapshotNodePathResolvers {
     value?: ValueResolver<string, TypeParent, Context>;
 
     label?: LabelResolver<string, TypeParent, Context>;
+
+    ip?: IpResolver<string | null, TypeParent, Context>;
   }
 
   export type ValueResolver<
@@ -1464,6 +1477,11 @@ export namespace InfraSnapshotNodePathResolvers {
   > = Resolver<R, Parent, Context>;
   export type LabelResolver<
     R = string,
+    Parent = InfraSnapshotNodePath,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type IpResolver<
+    R = string | null,
     Parent = InfraSnapshotNodePath,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;

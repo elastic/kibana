@@ -72,6 +72,8 @@ export interface Source {
   Users: UsersData;
 
   KpiNetwork?: KpiNetworkData | null;
+
+  KpiHosts: KpiHostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -1032,6 +1034,42 @@ export interface KpiNetworkData {
   tlsHandshakes?: number | null;
 }
 
+export interface KpiHostsData {
+  hosts?: number | null;
+
+  hostsHistogram?: KpiHostHistogramData[] | null;
+
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+}
+
+export interface KpiHostHistogramData {
+  key?: number | null;
+
+  key_as_string?: string | null;
+
+  count?: Count | null;
+}
+
+export interface Count {
+  value?: number | null;
+
+  doc_count?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1401,6 +1439,13 @@ export interface UsersSourceArgs {
   timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
+export interface KpiHostsSourceArgs {
   id?: string | null;
 
   timerange: TimerangeInput;
@@ -1890,13 +1935,15 @@ export namespace GetEventsQuery {
 
     host?: Host | null;
 
+    message?: ToStringArray | null;
+
     source?: _Source | null;
 
     destination?: Destination | null;
 
-    geo?: Geo | null;
-
     suricata?: Suricata | null;
+
+    user?: User | null;
 
     zeek?: Zeek | null;
   };
@@ -1906,13 +1953,15 @@ export namespace GetEventsQuery {
 
     action?: ToStringArray | null;
 
-    severity?: ToNumberArray | null;
+    category?: ToStringArray | null;
+
+    dataset?: ToStringArray | null;
+
+    id?: ToStringArray | null;
 
     module?: ToStringArray | null;
 
-    category?: ToStringArray | null;
-
-    id?: ToStringArray | null;
+    severity?: ToNumberArray | null;
   };
 
   export type Host = {
@@ -1941,14 +1990,6 @@ export namespace GetEventsQuery {
     port?: ToNumberArray | null;
   };
 
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    region_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-  };
-
   export type Suricata = {
     __typename?: 'SuricataEcsFields';
 
@@ -1971,6 +2012,12 @@ export namespace GetEventsQuery {
     signature?: ToStringArray | null;
 
     signature_id?: ToNumberArray | null;
+  };
+
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    name?: ToStringArray | null;
   };
 
   export type Zeek = {
@@ -2401,6 +2448,62 @@ export namespace GetIpOverviewQuery {
 
     version?: ToStringArray | null;
   };
+}
+
+export namespace GetKpiHostsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHosts: KpiHosts;
+  };
+
+  export type KpiHosts = {
+    __typename?: 'KpiHostsData';
+
+    hosts?: number | null;
+
+    hostsHistogram?: HostsHistogram[] | null;
+
+    authSuccess?: number | null;
+
+    authSuccessHistogram?: AuthSuccessHistogram[] | null;
+
+    authFailure?: number | null;
+
+    authFailureHistogram?: AuthFailureHistogram[] | null;
+
+    uniqueSourceIps?: number | null;
+
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
+
+    uniqueDestinationIps?: number | null;
+
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+  };
+
+  export type HostsHistogram = ChartFields.Fragment;
+
+  export type AuthSuccessHistogram = ChartFields.Fragment;
+
+  export type AuthFailureHistogram = ChartFields.Fragment;
+
+  export type UniqueSourceIpsHistogram = ChartFields.Fragment;
+
+  export type UniqueDestinationIpsHistogram = ChartFields.Fragment;
 }
 
 export namespace GetKpiNetworkQuery {
@@ -3783,5 +3886,23 @@ export namespace GetUsersQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace ChartFields {
+  export type Fragment = {
+    __typename?: 'KpiHostHistogramData';
+
+    x?: string | null;
+
+    y?: Y | null;
+  };
+
+  export type Y = {
+    __typename?: 'Count';
+
+    value?: number | null;
+
+    doc_count?: number | null;
   };
 }
