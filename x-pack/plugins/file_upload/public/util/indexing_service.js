@@ -6,12 +6,11 @@
 
 import { http } from './http_service';
 import chrome from 'ui/chrome';
-import { chunk } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../maps/public/kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
+import { sizeLimitedChunking } from './size_limited_chunking';
 
-const CHUNK_SIZE = 10000;
 const IMPORT_RETRIES = 5;
 const basePath = chrome.addBasePath('/api/fileupload');
 const fileType = 'json';
@@ -123,7 +122,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
     };
   }
 
-  const chunks = chunk(data, CHUNK_SIZE);
+  const chunks = sizeLimitedChunking(data);
 
   let success = true;
   let failures = [];
