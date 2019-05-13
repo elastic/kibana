@@ -152,12 +152,16 @@ export const loadIndexPatterns = async () => {
   return savedObjects;
 };
 
-export const getWatchVisualizationData = async (watchModel: BaseWatch, visualizeOptions: any) => {
-  const response = await getHttpClient().post(`${basePath}/watch/visualize`, {
-    watch: watchModel.upstreamJson,
-    options: visualizeOptions.upstreamJson,
+export const getWatchVisualizationData = (watchModel: BaseWatch, visualizeOptions: any) => {
+  return useRequest({
+    path: `${basePath}/watch/visualize`,
+    method: 'post',
+    body: {
+      watch: watchModel.upstreamJson,
+      options: visualizeOptions.upstreamJson,
+    },
+    processData: ({ visualizeData }: { visualizeData: any }) => visualizeData,
   });
-  return response.data;
 };
 
 export const loadSettings = () => {

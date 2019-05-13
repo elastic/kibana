@@ -142,6 +142,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
       const theFields = await getFields(watch.index);
       setFields(theFields);
       setTimeFieldOptions(getTimeFieldOptions(theFields));
+      setWatchProperty('timeFields', theFields);
     }
     getIndexPatterns();
   };
@@ -181,6 +182,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   const andThresholdText = i18n.translate('xpack.watcher.sections.watchEdit.threshold.andLabel', {
     defaultMessage: 'AND',
   });
+
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -231,9 +233,10 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
           />
         </ErrableFormRow>
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <ErrableFormRow
               id="indexSelectSearchBox"
+              fullWidth
               label={
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.titlePanel.indicesToQueryLabel"
@@ -251,6 +254,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               }
             >
               <EuiComboBox
+                fullWidth
                 noSuggestions={!indexOptions.length}
                 options={indexOptions}
                 selectedOptions={(watch.index || []).map((anIndex: string) => {
@@ -262,8 +266,16 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 onChange={async (selected: EuiComboBoxOptionProps[]) => {
                   setWatchProperty('index', selected.map(aSelected => aSelected.value));
                   const indices = selected.map(s => s.value as string);
+
+                  // reset the time field if indices are deleted
+                  if (indices.length === 0) {
+                    setTimeFieldOptions(getTimeFieldOptions([]));
+                    setWatchProperty('timeFields', []);
+                    return;
+                  }
                   const theFields = await getFields(indices);
                   setFields(theFields);
+                  setWatchProperty('timeFields', theFields);
 
                   setTimeFieldOptions(getTimeFieldOptions(theFields));
                 }}
@@ -281,6 +293,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
           <EuiFlexItem grow={false}>
             <ErrableFormRow
               id="timeField"
+              fullWidth
               label={
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldLabel"
@@ -293,6 +306,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
             >
               <EuiSelect
                 options={timeFieldOptions}
+                fullWidth
                 name="watchTimeField"
                 value={watch.timeField}
                 onChange={e => {
@@ -309,6 +323,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
           <EuiFlexItem>
             <ErrableFormRow
               id="watchInterval"
+              fullWidth
               label={intl.formatMessage({
                 id: 'xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel',
                 defaultMessage: 'Run watch every',
@@ -320,6 +335,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiFieldNumber
+                    fullWidth
                     min={1}
                     value={watch.triggerIntervalSize}
                     onChange={e => {
@@ -336,6 +352,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiSelect
+                    fullWidth
                     value={watch.triggerIntervalUnit}
                     aria-label={intl.formatMessage({
                       id: 'xpack.watcher.sections.watchEdit.titlePanel.durationAriaLabel',
@@ -383,10 +400,19 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
         <EuiSpacer />
         {shouldShowThresholdExpression ? (
           <Fragment>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchEdit.watchConditionSectionTitle"
+                  defaultMessage="Matching the following condition"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
             {hasExpressionErrors ? (
               <Fragment>
                 <EuiText color="danger">{expressionErrorMessage}</EuiText>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
               </Fragment>
             ) : null}
             <EuiFlexGroup gutterSize="s">
@@ -691,7 +717,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                         />
                       </EuiFlexItem>
                       {Array.from(Array(comparators[watch.thresholdComparator].requiredValues)).map(
-                        (notUsed, i) => {
+                        (_notUsed, i) => {
                           return (
                             <Fragment key={`threshold${i}`}>
                               {i > 0 ? (
@@ -799,9 +825,12 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {hasErrors ? null : <WatchVisualization />}
-            <EuiSpacer />
-            <WatchActionsPanel actionErrors={actionErrors} />
+            {hasErrors ? null : (
+              <Fragment>
+                <WatchVisualization />
+                <WatchActionsPanel actionErrors={actionErrors} />
+              </Fragment>
+            )}
             <EuiSpacer />
           </Fragment>
         ) : null}
