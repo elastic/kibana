@@ -2,26 +2,10 @@ import { readConfigFile } from './readConfigFile';
 import { mkdirp, chmod, writeFile } from '../../services/rpc';
 import { getGlobalConfigPath, getReposPath } from '../../services/env';
 
-interface GlobalConfig {
-  username?: string;
-  accessToken?: string;
-  prTitle?: string;
-  prDescription?: string;
-
-  // the following are overwritable by project config:
-  all?: boolean;
-  apiHostname?: string;
-  gitHostname?: string;
-  multiple?: boolean;
-  multipleCommits?: boolean;
-  multipleBranches?: boolean;
-}
-
 export async function getGlobalConfig() {
   await maybeCreateGlobalConfigAndFolder();
-
   const globalConfigPath = getGlobalConfigPath();
-  return readConfigFile<GlobalConfig>(globalConfigPath);
+  return readConfigFile(globalConfigPath);
 }
 
 export async function maybeCreateGlobalConfigAndFolder() {

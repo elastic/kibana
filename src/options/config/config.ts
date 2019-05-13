@@ -1,6 +1,8 @@
 import { getGlobalConfig } from './globalConfig';
 import { getProjectConfig } from './projectConfig';
 import { PromiseReturnType } from '../../types/commons';
+import { Config } from '../../types/Config';
+import isString from 'lodash.isstring';
 
 export type OptionsFromConfigFiles = PromiseReturnType<
   typeof getOptionsFromConfigFiles
@@ -10,6 +12,11 @@ export async function getOptionsFromConfigFiles() {
     getProjectConfig(),
     getGlobalConfig()
   ]);
+
+  const { branches, ...combinedConfig } = {
+    ...globalConfig,
+    ...projectConfig
+  };
 
   return {
     // defaults
@@ -21,9 +28,26 @@ export async function getOptionsFromConfigFiles() {
     prTitle: '[{baseBranch}] {commitMessages}',
     gitHostname: 'github.com',
     apiHostname: 'api.github.com',
-
-    // options from config files
-    ...globalConfig,
-    ...projectConfig
+    branchChoices: getBranchesAsObjects(branches),
+    ...combinedConfig
   };
+}
+
+// in the config `branches` can either a string or an object.
+// We need to transform it so that it is always treated as an object troughout the application
+function getBranchesAsObjects(branches?: Config['branches']) {
+  if (!branches) {
+    return;
+  }
+
+  return branches.map(choice => {
+    if (isString(choice)) {
+      return {
+        name: choice,
+        checked: false
+      };
+    }
+
+    return choice;
+  });
 }

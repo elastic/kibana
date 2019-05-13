@@ -9,16 +9,15 @@ import isEmpty from 'lodash.isempty';
 import ora = require('ora');
 
 export async function getCommits(options: BackportOptions) {
-  const { sha } = options; // must extract sha to satisfy the ts gods
-  if (sha) {
-    return [await getCommitBySha({ ...options, sha })];
+  if (options.sha) {
+    return [await getCommitBySha({ ...options, sha: options.sha })]; // must extract sha to satisfy the ts gods
   }
 
   return await getCommitsByPrompt(options);
 }
 
 export async function getCommitBySha(
-  options: BackportOptions & { sha: string }
+  options: BackportOptions & { sha: string } // sha is required
 ) {
   const spinner = ora(`Loading commit "${getShortSha(options.sha)}"`).start();
   try {

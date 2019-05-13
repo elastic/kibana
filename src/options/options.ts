@@ -9,7 +9,7 @@ export type BackportOptions = Readonly<PromiseReturnType<typeof getOptions>>;
 export async function getOptions(argv: typeof process.argv) {
   const optionsFromConfig = await getOptionsFromConfigFiles();
   const optionsFromCli = getOptionsFromCliArgs(optionsFromConfig, argv);
-  return validateOptions(optionsFromCli);
+  return validateRequiredOptions(optionsFromCli);
 }
 
 const GLOBAL_CONFIG_DOCS_LINK =
@@ -25,11 +25,12 @@ function getErrorMessage({
   field: keyof OptionsFromCliArgs;
   exampleValue: string;
 }) {
+  // all properties can theoretically go into either config file but it is not recommended
+  // to add `username` or `accessToken` in the project config (.backportrc.json)
   const isGlobalConfigProperty =
     field === 'accessToken' || field === 'username';
 
   const globalConfigPath = getGlobalConfigPath();
-
   const configFileMessage = isGlobalConfigProperty
     ? `Config file: "${globalConfigPath}". Read more: ${GLOBAL_CONFIG_DOCS_LINK}`
     : `Config file: ".backportrc.json". Read more: ${PROJECT_CONFIG_DOCS_LINK}`;
@@ -37,64 +38,40 @@ function getErrorMessage({
   return `Invalid option "${field}"\n\nYou can add it with either:\n - ${configFileMessage}\n - CLI: "--${field} ${exampleValue}"`;
 }
 
-export function validateOptions({
-  accessToken,
-  all,
-  apiHostname,
-  branchChoices,
-  branches,
-  gitHostname,
-  labels,
-  multiple,
-  multipleBranches,
-  multipleCommits,
-  prTitle,
-  prDescription,
-  sha,
-  upstream,
-  username
+export function validateRequiredOptions({
+  upstream = '',
+  ...options
 }: OptionsFromCliArgs) {
-  if (!accessToken) {
+  if (!options.accessToken) {
     throw new HandledError(
       getErrorMessage({ field: 'accessToken', exampleValue: 'myAccessToken' })
     );
   }
 
-  if (isEmpty(branches) && isEmpty(branchChoices)) {
+  if (isEmpty(options.branches) && isEmpty(options.branchChoices)) {
     throw new HandledError(
       getErrorMessage({ field: 'branches', exampleValue: '6.1' })
     );
   }
 
-  const [repoOwner, repoName] = (upstream || '').split('/');
+  const [repoOwner, repoName] = upstream.split('/');
   if (!repoOwner || !repoName) {
     throw new HandledError(
       getErrorMessage({ field: 'upstream', exampleValue: 'elastic/kibana' })
     );
   }
 
-  if (!username) {
+  if (!options.username) {
     throw new HandledError(
       getErrorMessage({ field: 'username', exampleValue: 'sqren' })
     );
   }
 
   return {
-    repoOwner,
+    ...options,
+    accessToken: options.accessToken,
     repoName,
-    accessToken,
-    all,
-    apiHostname,
-    branchChoices,
-    branches,
-    labels,
-    gitHostname,
-    multiple,
-    multipleBranches,
-    multipleCommits,
-    prTitle,
-    prDescription,
-    sha,
-    username
+    repoOwner,
+    username: options.username
   };
 }

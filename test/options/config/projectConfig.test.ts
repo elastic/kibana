@@ -22,9 +22,9 @@ describe('getProjectConfig', () => {
       expect(findUp).toHaveBeenCalledWith('.backportrc.json');
     });
 
-    it('should return config with branchChoices', () => {
+    it('should return config with branches', () => {
       expect(projectConfig).toEqual({
-        branchChoices: [{ checked: false, name: '6.x' }],
+        branches: ['6.x'],
         upstream: 'elastic/kibana'
       });
     });

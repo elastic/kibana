@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`validateOptions should throw when accessToken is empty 1`] = `
+exports[`validateRequiredOptions should throw when accessToken is empty 1`] = `
 "Invalid option \\"accessToken\\"
 
 You can add it with either:
@@ -8,7 +8,7 @@ You can add it with either:
  - CLI: \\"--accessToken myAccessToken\\""
 `;
 
-exports[`validateOptions should throw when accessToken is missing 1`] = `
+exports[`validateRequiredOptions should throw when accessToken is missing 1`] = `
 "Invalid option \\"accessToken\\"
 
 You can add it with either:
@@ -16,7 +16,7 @@ You can add it with either:
  - CLI: \\"--accessToken myAccessToken\\""
 `;
 
-exports[`validateOptions should throw when both branches and branchChoices are missing 1`] = `
+exports[`validateRequiredOptions should throw when both branches and branchChoices are missing 1`] = `
 "Invalid option \\"branches\\"
 
 You can add it with either:
@@ -24,7 +24,7 @@ You can add it with either:
  - CLI: \\"--branches 6.1\\""
 `;
 
-exports[`validateOptions should throw when upstream is empty 1`] = `
+exports[`validateRequiredOptions should throw when upstream is empty 1`] = `
 "Invalid option \\"upstream\\"
 
 You can add it with either:
@@ -32,7 +32,7 @@ You can add it with either:
  - CLI: \\"--upstream elastic/kibana\\""
 `;
 
-exports[`validateOptions should throw when upstream is missing 1`] = `
+exports[`validateRequiredOptions should throw when upstream is missing 1`] = `
 "Invalid option \\"upstream\\"
 
 You can add it with either:
@@ -40,7 +40,7 @@ You can add it with either:
  - CLI: \\"--upstream elastic/kibana\\""
 `;
 
-exports[`validateOptions should throw when username is empty 1`] = `
+exports[`validateRequiredOptions should throw when username is empty 1`] = `
 "Invalid option \\"username\\"
 
 You can add it with either:
@@ -48,7 +48,7 @@ You can add it with either:
  - CLI: \\"--username sqren\\""
 `;
 
-exports[`validateOptions should throw when username is missing 1`] = `
+exports[`validateRequiredOptions should throw when username is missing 1`] = `
 "Invalid option \\"username\\"
 
 You can add it with either:

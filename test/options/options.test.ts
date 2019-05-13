@@ -1,4 +1,4 @@
-import { validateOptions } from '../../src/options/options';
+import { validateRequiredOptions } from '../../src/options/options';
 
 const validOptions = {
   accessToken: 'myAccessToken',
@@ -18,15 +18,15 @@ const validOptions = {
   username: 'sqren'
 };
 
-describe('validateOptions', () => {
+describe('validateRequiredOptions', () => {
   describe('should not throw', () => {
     it('when all options are valid and `branches` is given', () => {
-      expect(() => validateOptions(validOptions)).not.toThrow();
+      expect(() => validateRequiredOptions(validOptions)).not.toThrow();
     });
 
     it('when all options are valid and `branchChoices` is given', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           branchChoices: [{ name: 'branchA' }],
           branches: []
@@ -38,7 +38,7 @@ describe('validateOptions', () => {
   describe('should throw', () => {
     it('when accessToken is missing', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           accessToken: undefined
         })
@@ -47,7 +47,7 @@ describe('validateOptions', () => {
 
     it('when accessToken is empty', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           accessToken: ''
         })
@@ -56,7 +56,7 @@ describe('validateOptions', () => {
 
     it('when both branches and branchChoices are missing', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           branchChoices: [],
           branches: []
@@ -66,7 +66,7 @@ describe('validateOptions', () => {
 
     it('when upstream is missing', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           upstream: undefined
         })
@@ -75,7 +75,7 @@ describe('validateOptions', () => {
 
     it('when upstream is empty', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           upstream: ''
         })
@@ -84,7 +84,7 @@ describe('validateOptions', () => {
 
     it('when username is missing', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           username: undefined
         })
@@ -93,7 +93,7 @@ describe('validateOptions', () => {
 
     it('when username is empty', () => {
       expect(() =>
-        validateOptions({
+        validateRequiredOptions({
           ...validOptions,
           username: ''
         })

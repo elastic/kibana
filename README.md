@@ -61,6 +61,7 @@ Where:
 - `GIT_CONFIG_FILE`: Must point to a local [`.gitconfig`](https://gist.github.com/sqren/618ab2f77ffb8b5388d675fe705ed6da) file that contains the user's name and email.
 
 You can now use `backport` as if it was installed on the host machine.
+
 </details>
 
 ## Usage
@@ -79,28 +80,26 @@ or run this from anywhere:
 
 The above commands will start an interactive prompt. You can use the `arrow keys` to choose options, `<space>` to select checkboxes and `<enter>` to proceed.
 
-### CLI Arguments
+### CLI arguments
 
-| Option          | Description                               | Accepts                  |
-| --------------- | ----------------------------------------- | ------------------------ |
-| --accessToken   | Github access token                       | string                   |
-| --all           | Show all commits                          | boolean (default: false) |
-| --apiHostname   | Hostname for the Github API               | string                   |
-| --branch        | Branch to backport to                     | string                   |
-| --gitHostname   | Hostname for Github                       | string                   |
-| --labels        | Pull request labels                       | string                   |
-| --multiple      | Backport multiple commits and/or branches | boolean                  |
-| --prDescription | Description to be added to pull request   | string                   |
-| --prTitle       | Title for the pull request                | string                   |
-| --sha           | Commit sha to backport                    | string                   |
-| --upstream      | Name of repository                        | string                   |
-| --username      | Github username                           | string                   |
-| --help          | Show help                                 |                          |
-| -v, --version   | Show version number                       |                          |
+| Option          | Description                             | Default                         | Type    |
+| --------------- | --------------------------------------- | ------------------------------- | ------- |
+| --accessToken   | Github access token                     |                                 | string  |
+| --all           | Show commits from other than me         | false                           | boolean |
+| --apiHostname   | Hostname for the Github API             | api.github.com                  | string  |
+| --branch        | Branch to backport to                   |                                 | string  |
+| --gitHostname   | Hostname for Git remotes                | github.com                      | string  |
+| --labels        | Pull request labels                     |                                 | string  |
+| --multiple      | Select multiple branches and/or commits | false                           | boolean |
+| --prDescription | Pull request description suffix         |                                 | string  |
+| --prTitle       | Pull request title pattern              | [{baseBranch}] {commitMessages} | string  |
+| --sha           | Sha of commit to backport               |                                 | string  |
+| --upstream      | Name of organization and repository     |                                 | string  |
+| --username      | Github username                         |                                 | string  |
+| --help          | Show help                               |                                 |         |
+| -v, --version   | Show version number                     |                                 |         |
 
-### Additional documentation
-
-- [Configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md)
+All of the CLI arguments can also be configured via the [configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md) in the config files.
 
 ## Contributing
 

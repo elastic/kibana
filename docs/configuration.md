@@ -104,8 +104,8 @@ CLI: `--labels myLabel --labels myOtherLabel`
 
 #### `prTitle`
 
-Text that will be the pull request title. Note: You can access the base branch (`baseBranch`) and commit message (`commitMessages`) strings by wrapping them in curly braces (See Example).
-If there are multiple commits the commit messages will be concatenated and separated by pipes.
+Pull request title pattern. You can access the base branch (`{baseBranch}`) and commit message (`{commitMessages}`) via the special accessors in quotes.
+Multiple commits will be concatenated and separated by pipes.
 
 Example: `"{commitMessages} backport for {baseBranch}"`
 
@@ -115,7 +115,8 @@ CLI: `--prTitle "My PR Title"`
 
 #### `prDescription`
 
-Text that will be added to the pull request body.
+Pull request description.
+Will be added to the end of the pull request description.
 
 CLI: `--prDescription "skip-ci"`
 
