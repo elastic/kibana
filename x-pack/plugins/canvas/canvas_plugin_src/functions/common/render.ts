@@ -5,6 +5,7 @@
  */
 
 import { ContextFunction, Render, ContainerStyle } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   as: string | null;
@@ -13,29 +14,30 @@ interface Arguments {
 }
 
 export function render(): ContextFunction<'render', Render<any>, Arguments, Render<Arguments>> {
+  const { help, args: argHelp } = getFunctionHelp().render;
+
   return {
     name: 'render',
     aliases: [],
     type: 'render',
-    help: 'Render an input as a specific element and set element level options such as styling',
+    help,
     context: {
       types: ['render'],
     },
     args: {
       as: {
         types: ['string', 'null'],
-        help:
-          'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+        help: argHelp.as,
         options: ['debug', 'error', 'image', 'pie', 'plot', 'shape', 'table', 'text'],
       },
       css: {
         types: ['string', 'null'],
         default: '"* > * {}"',
-        help: 'Any block of custom CSS to be scoped to this element.',
+        help: argHelp.css,
       },
       containerStyle: {
         types: ['containerStyle', 'null'],
-        help: 'Style for the container, including background, border, and opacity',
+        help: argHelp.containerStyle,
       },
     },
     fn: (context, args) => {
