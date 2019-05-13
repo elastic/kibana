@@ -51,7 +51,7 @@ for {ml} analysis.
 
 [NOTE] 
 ===============================
-* If your index pattern does not contain a time field, you cannot use the *Data Visualizer*. 
+* If your index pattern does not contain a time field, you cannot use the *Index Data Visualizer*. 
 * If your data is located outside of {es}, you cannot use {kib} to create
 your jobs and you cannot use {dfeeds} to retrieve your data in real time.
 Machine learning analysis is still possible, however, by using APIs to
