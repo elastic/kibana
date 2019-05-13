@@ -78,7 +78,7 @@ export function JsonUploadAndParse({
   // Index data
   useEffect(() => {
     const filesAreEqual = _.isEqual(indexedFile, parsedFile);
-    if (!boolIndexData || filesAreEqual || !indexReady) {
+    if (!boolIndexData || filesAreEqual || !indexReady || indexRequestInFlight) {
       return;
     }
     setIndexRequestInFlight(true);
@@ -97,7 +97,8 @@ export function JsonUploadAndParse({
 
   }, [
     selectedIndexType, boolIndexData, parsedFile, indexedFile, transformDetails,
-    indexName, onIndexAddSuccess, onIndexAddError, appName, indexReady
+    indexName, onIndexAddSuccess, onIndexAddError, appName, indexReady,
+    indexRequestInFlight
   ]);
 
   // Index data request complete
