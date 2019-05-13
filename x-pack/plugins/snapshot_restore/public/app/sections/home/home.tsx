@@ -82,7 +82,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiTitle size="l">
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={true}>
-              <h1>
+              <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreTitle"
                   defaultMessage="Snapshot Repositories"

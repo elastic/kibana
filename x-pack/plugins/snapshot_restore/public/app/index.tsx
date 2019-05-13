@@ -18,20 +18,26 @@ export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
  * App dependencies
  */
 let DependenciesContext: React.Context<AppDependencies>;
+let appDependencies: AppDependencies;
 
-export const useAppDependencies = () => useContext<AppDependencies>(DependenciesContext);
+export const setAppDependencies = (deps: AppDependencies) => {
+  appDependencies = deps;
+  DependenciesContext = createContext<AppDependencies>(appDependencies);
+  return DependenciesContext;
+};
 
-const ReactApp: React.FunctionComponent<AppDependencies> = ({ core, plugins }) => {
+export const useAppDependencies = () => {
+  if (!DependenciesContext) {
+    throw new Error(`The app dependencies Context hasn't been set.
+    Use the "setAppDependencies()" method when bootstrapping the app.`);
+  }
+  return useContext<AppDependencies>(DependenciesContext);
+};
+
+const ReactApp: React.FunctionComponent = (/* { core, plugins }*/) => {
   const {
     i18n: { Context: I18nContext },
-  } = core;
-
-  const appDependencies: AppDependencies = {
-    core,
-    plugins,
-  };
-
-  DependenciesContext = createContext<AppDependencies>(appDependencies);
+  } = appDependencies.core;
 
   return (
     <I18nContext>
@@ -51,5 +57,6 @@ export const renderReact = async (
   core: AppCore,
   plugins: AppPlugins
 ): Promise<void> => {
-  render(<ReactApp core={core} plugins={plugins} />, elem);
+  setAppDependencies({ core, plugins });
+  render(<ReactApp />, elem);
 };
