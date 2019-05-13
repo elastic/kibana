@@ -6,6 +6,7 @@
 
 import { omit, pick, find } from 'lodash';
 import { ContextFunction, Datatable, DatatableColumn } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   include: string | null;
@@ -13,23 +14,24 @@ interface Arguments {
 }
 
 export function columns(): ContextFunction<'columns', Datatable, Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().columns;
+
   return {
     name: 'columns',
     type: 'datatable',
-    help:
-      'Include or exclude columns from a data table. If you specify both, this will exclude first',
+    help,
     context: {
       types: ['datatable'],
     },
     args: {
       include: {
         types: ['string'],
-        help: 'A comma separated list of column names to keep in the table',
+        help: argHelp.include,
         default: null,
       },
       exclude: {
         types: ['string'],
-        help: 'A comma separated list of column names to remove from the table',
+        help: argHelp.exclude,
         default: null,
       },
     },

@@ -22,6 +22,7 @@ import { uiModules } from '../../../modules';
 import { Header } from './components/header';
 import { wrapInI18nContext } from 'ui/i18n';
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+import { getNewPlatform } from '../../../new_platform';
 
 const module = uiModules.get('kibana');
 
@@ -29,6 +30,8 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private, uiCapabili
   const { recentlyAccessed } = require('ui/persisted_log');
   const navControls = Private(chromeHeaderNavControlsRegistry);
   const homeHref = chrome.addBasePath('/app/kibana#/home');
+  const newPlatform = getNewPlatform();
+  const newPlatformStart = newPlatform.start.core;
 
   return reactDirective(wrapInI18nContext(Header), [
     // scope accepted by directive, passed in as React props
@@ -41,9 +44,9 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private, uiCapabili
     badge$: chrome.badge.get$(),
     breadcrumbs$: chrome.breadcrumbs.get$(),
     helpExtension$: chrome.helpExtension.get$(),
-    navLinks$: chrome.getNavLinks$(),
+    navLinks$: newPlatformStart.chrome.navLinks.getNavLinks$(),
     recentlyAccessed$: recentlyAccessed.get$(),
-    forceAppSwitcherNavigation$: chrome.getForceAppSwitcherNavigation$(),
+    forceAppSwitcherNavigation$: newPlatformStart.chrome.navLinks.getForceAppSwitcherNavigation$(),
     navControls,
     homeHref,
     uiCapabilities,

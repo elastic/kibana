@@ -6,6 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const PAGE_TITLE = i18n.translate('xpack.siem.overview.pageTitle', {
+  defaultMessage: 'SIEM',
+});
+
+export const PAGE_SUBTITLE = i18n.translate('xpack.siem.overview.pageSubtitle', {
+  defaultMessage: 'Security Information & Event Management with the Elastic Stack',
+});
+
 export const NO_FILEBEAT_INDICES = i18n.translate(
   'xpack.siem.overview.network.noFilebeatIndicies',
   {
