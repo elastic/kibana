@@ -21,17 +21,33 @@ import {
   EuiButtonEmpty
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
+import { Storage } from '../../../../../../../src/legacy/ui/public/storage/storage';
+import { STORAGE_KEY } from '../../../../common/constants';
+
+const storage = new Storage(window.localStorage);
+const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
 
 export class Flyout extends Component {
   constructor(props) {
     super(props);
 
+
+    let esMonitoringUrl = storage.get(ES_MONITORING_URL_KEY);
+    if (!esMonitoringUrl) {
+      esMonitoringUrl = props.monitoringHosts ? props.monitoringHosts[0] : '';
+    }
+
     this.state = {
       activeStep: 1,
-      esMonitoringUrl: props.monitoringHosts ? props.monitoringHosts[0] : '',
+      esMonitoringUrl,
       hasCheckedMigrationStatus: false,
       checkingMigrationStatus: false,
     };
+  }
+
+  setEsMonitoringUrl = esMonitoringUrl => {
+    storage.set(ES_MONITORING_URL_KEY, esMonitoringUrl);
+    this.setState({ esMonitoringUrl });
   }
 
   renderActiveStep() {
@@ -56,7 +72,7 @@ export class Flyout extends Component {
               <EuiFieldText
                 value={esMonitoringUrl}
                 placeholder="http://localhost:9200"
-                onChange={e => this.setState({ esMonitoringUrl: e.target.value })}
+                onChange={e => this.setEsMonitoringUrl(e.target.value)}
               />
             </EuiFormRow>
           </EuiForm>
