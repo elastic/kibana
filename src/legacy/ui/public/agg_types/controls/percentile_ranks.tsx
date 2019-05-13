@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,40 +26,38 @@ import { NumberList } from '../number_list/new_number_list';
 
 function PercentileRanksEditor({
   agg,
-  isInvalid,
+  showValidation,
   value,
   setTouched,
   setValidity,
   setValue,
 }: AggParamEditorProps<Array<number | undefined>>) {
   const label = i18n.translate('common.ui.aggTypes.valuesLabel', { defaultMessage: 'Values' });
+  const [isValid, setIsValid] = useState(true);
 
-  // useEffect(
-  //   () => {
-  //     if (value.length === 0) {
-  //       setValidity(false);
-  //     }
-  //   },
-  //   [value]
-  // );
+  const setModelValidy = (isListValid: boolean) => {
+    setIsValid(isListValid);
+    setValidity(isListValid);
+  };
 
   return (
     <EuiFormRow
-      isInvalid={isInvalid}
       label={label}
+      labelType="legend"
       fullWidth={true}
       id={`visEditorPercentileRanksLabel${agg.id}`}
+      isInvalid={showValidation ? !isValid : false}
       className="visEditorSidebar__aggParamFormRow"
     >
       <NumberList
-        labelledbyId={`visEditorPercentileRanksLabel${agg.id}`}
+        labelledbyId={`visEditorPercentileRanksLabel${agg.id}-legend`}
         numberArray={value}
         range="[-Infinity,Infinity]"
         unitName="value"
-        showValidation={isInvalid}
+        showValidation={showValidation}
         onChange={setValue}
         setTouched={setTouched}
-        setValidity={setValidity}
+        setValidity={setModelValidy}
       />
     </EuiFormRow>
   );

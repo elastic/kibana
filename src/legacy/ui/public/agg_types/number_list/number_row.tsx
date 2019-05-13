@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { Range } from '../../utils/range';
 
 interface NumberRowProps {
+  autoFocus: boolean;
   disableDelete: boolean;
   isInvalid: boolean;
   labelledbyId: string;
@@ -39,9 +40,11 @@ export interface NumberRowModel {
   id: string;
   isInvalid: boolean;
   value: number | '';
+  errors?: string[];
 }
 
 function NumberRow({
+  autoFocus,
   disableDelete,
   model,
   isInvalid,
@@ -66,6 +69,7 @@ function NumberRow({
       <EuiFlexItem>
         <EuiFieldNumber
           aria-labelledby={labelledbyId}
+          autoFocus={autoFocus}
           isInvalid={isInvalid}
           onChange={onValueChanged}
           value={model.value}
