@@ -9,10 +9,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
+import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
-import { timelineActions } from '../../store';
 
 import * as i18n from './translations';
+import { timelineActions } from '../../store/actions';
 
 const TimelinesContainer = styled.div`
   width: 100%:
@@ -27,15 +28,19 @@ export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 class Timelines extends React.PureComponent<DispatchProps> {
   public render() {
     return (
-      <TimelinesContainer>
-        <StatefulOpenTimeline
-          deleteTimelines={this.deleteTimelines}
-          openTimeline={this.openTimeline}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={[]}
-          title={i18n.ALL_TIMELINES}
-        />
-      </TimelinesContainer>
+      <>
+        <HeaderPage title={i18n.PAGE_TITLE} />
+
+        <TimelinesContainer>
+          <StatefulOpenTimeline
+            deleteTimelines={this.deleteTimelines}
+            openTimeline={this.openTimeline}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={[]}
+            title={i18n.ALL_TIMELINES_PANEL_TITLE}
+          />
+        </TimelinesContainer>
+      </>
     );
   }
 

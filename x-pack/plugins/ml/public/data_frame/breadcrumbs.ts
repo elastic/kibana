@@ -20,7 +20,7 @@ export function getDataFrameBreadcrumbs() {
     ML_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameLabel', {
-        defaultMessage: 'Data Frame',
+        defaultMessage: 'Data Frames',
       }),
       href: '',
     },
@@ -29,9 +29,9 @@ export function getDataFrameBreadcrumbs() {
 
 const DATA_FRAME_HOME = {
   text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameLabel', {
-    defaultMessage: 'Data Frame',
+    defaultMessage: 'Data Frames',
   }),
-  href: '#/data_frame',
+  href: '#/data_frames',
 };
 
 export function getDataFrameCreateBreadcrumbs() {

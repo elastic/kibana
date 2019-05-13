@@ -13,9 +13,12 @@
   pointer-events: none; /* 1 */
 }
 
+.mapWidgetOverlay__rightSideWrapper {
+  overflow: hidden; // Fixes Chrome overflow
+}
+
 .mapWidgetOverlay__rightSide {
-  min-width: 19rem;
-  max-width: 24rem;
+  width: $euiSize * 20;
 }
 
 .mapWidgetOverlay__layerWrapper {

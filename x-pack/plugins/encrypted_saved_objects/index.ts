@@ -12,6 +12,11 @@ import { AuditLogger } from '../../server/lib/audit_logger';
 
 import { CONFIG_PREFIX, PLUGIN_ID, Plugin } from './server/plugin';
 
+/**
+ * Public interface of the security plugin for the legacy plugin system.
+ */
+export type EncryptedSavedObjectsPlugin = ReturnType<Plugin['setup']>;
+
 export const encryptedSavedObjects = (kibana: any) =>
   new kibana.Plugin({
     id: PLUGIN_ID,
@@ -21,7 +26,13 @@ export const encryptedSavedObjects = (kibana: any) =>
     config(Joi: Root) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        encryptionKey: Joi.string().min(32),
+        encryptionKey: Joi.when(Joi.ref('$dist'), {
+          is: true,
+          then: Joi.string().min(32),
+          otherwise: Joi.string()
+            .min(32)
+            .default('a'.repeat(32)),
+        }),
       }).default();
     },
 

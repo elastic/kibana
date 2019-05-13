@@ -24,8 +24,8 @@ export const EVENT_ACTION = i18n.translate('xpack.siem.eventsTable.eventTypeActi
   defaultMessage: 'Event Action',
 });
 
-export const EVENT_TYPE = i18n.translate('xpack.siem.eventsTable.eventTypeTitle', {
-  defaultMessage: 'Event type',
+export const EVENT_CATEGORY = i18n.translate('xpack.siem.eventsTable.eventCategoryTitle', {
+  defaultMessage: 'Event Category',
 });
 
 export const SOURCE = i18n.translate('xpack.siem.eventsTable.sourceTitle', {
@@ -36,8 +36,16 @@ export const DESTINATION = i18n.translate('xpack.siem.eventsTable.destinationTit
   defaultMessage: 'Destination',
 });
 
-export const LOCATION = i18n.translate('xpack.siem.eventsTable.locationTitle', {
-  defaultMessage: 'Location',
+export const MESSAGE = i18n.translate('xpack.siem.eventsTable.messageTitle', {
+  defaultMessage: 'Message',
+});
+
+export const EVENT_MODULE_DATASET = i18n.translate('xpack.siem.eventsTable.moduleDatasetTitle', {
+  defaultMessage: 'Module/Dataset',
+});
+
+export const USER = i18n.translate('xpack.siem.eventsTable.userTitle', {
+  defaultMessage: 'User',
 });
 
 export const ROWS_5 = i18n.translate('xpack.siem.eventsTable.rows', {
