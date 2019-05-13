@@ -16,12 +16,14 @@ const appDependencies = {
 
 type ComponentType = ComponentClass<any> | FunctionComponent<any>;
 
-export const WithAppDependencies = (Comp: ComponentType) => (props: any) => {
-  const DependenciesContext = setAppDependencies(appDependencies);
+export const WithProviders = (Comp: ComponentType) => {
+  const AppDependenciesProvider = setAppDependencies(appDependencies);
 
-  return (
-    <DependenciesContext.Provider value={appDependencies}>
-      <Comp {...props} />
-    </DependenciesContext.Provider>
-  );
+  return (props: any) => {
+    return (
+      <AppDependenciesProvider value={appDependencies}>
+        <Comp {...props} />
+      </AppDependenciesProvider>
+    );
+  };
 };

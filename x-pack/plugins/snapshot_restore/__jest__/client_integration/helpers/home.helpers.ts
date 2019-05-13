@@ -7,7 +7,7 @@
 import { registerTestBed } from '../../../../../test_utils';
 import { SnapshotRestoreHome } from '../../../public/app/sections/home/home';
 import { BASE_PATH } from '../../../public/app/constants';
-import { WithAppDependencies } from './providers';
+import { WithProviders } from './providers';
 
 const testBedConfig = {
   memoryRouter: {
@@ -16,4 +16,4 @@ const testBedConfig = {
   },
 };
 
-export const setup = registerTestBed(WithAppDependencies(SnapshotRestoreHome), testBedConfig);
+export const setup = registerTestBed(WithProviders(SnapshotRestoreHome), testBedConfig);
