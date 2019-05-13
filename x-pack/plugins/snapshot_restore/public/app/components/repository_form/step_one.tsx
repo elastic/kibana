@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -213,7 +214,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     }
 
     return (
-      <EuiFlexGrid columns={3}>
+      <EuiFlexGrid columns={4}>
         {repositoryTypes.map((type: RepositoryType, index: number) => renderTypeCard(type, index))}
       </EuiFlexGrid>
     );
@@ -221,19 +222,18 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
 
   const renderTypeField = () => {
     return (
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.fields.typeDescriptionTitle"
-                defaultMessage="Repository type"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          repositoryTypes.includes(REPOSITORY_TYPES.fs) &&
+      <Fragment>
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.fields.typeDescriptionTitle"
+              defaultMessage="Repository type"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText id="repositoryTypeDescription" size="s" color="subdued">
+          {repositoryTypes.includes(REPOSITORY_TYPES.fs) &&
           repositoryTypes.includes(REPOSITORY_TYPES.url) ? (
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription"
@@ -251,11 +251,8 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
                 docLink: pluginDocLink,
               }}
             />
-          )
-        }
-        idAria="repositoryTypeDescription"
-        fullWidth
-      >
+          )}
+        </EuiText>
         <EuiFormRow
           hasEmptyLabelSpace
           describedByIds={['repositoryTypeDescription']}
@@ -265,7 +262,8 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         >
           {renderTypes()}
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+        <EuiSpacer size="m" />
+      </Fragment>
     );
   };
 
