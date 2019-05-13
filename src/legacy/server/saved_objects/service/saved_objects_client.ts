@@ -19,6 +19,8 @@
 
 import { errors, SavedObjectsRepository } from './lib';
 
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
 export interface BaseOptions {
   namespace?: string;
 }
@@ -34,7 +36,9 @@ export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
   id?: string;
   type: string;
   attributes: T;
-  extraDocumentProperties?: string[];
+  references?: SavedObjectReference[];
+  migrationVersion?: MigrationVersion;
+  // extraDocumentProperties?: string[];
 }
 
 export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
@@ -63,6 +67,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
 
 export interface UpdateOptions extends BaseOptions {
   version?: string;
+  references?: SavedObjectReference[];
 }
 
 export interface BulkGetObject {
@@ -73,6 +78,10 @@ export interface BulkGetObject {
 export type BulkGetObjects = BulkGetObject[];
 
 export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObject<T>>;
+}
+
+export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -110,7 +119,11 @@ export interface SavedObjectReference {
 
 export type GetResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
 export type CreateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
-export type UpdateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
+
+export interface UpdateResponse<T extends SavedObjectAttributes = any>
+  extends Omit<SavedObject<T>, 'attributes'> {
+  attributes: Partial<T>;
+}
 
 export class SavedObjectsClient {
   /**
@@ -233,7 +246,7 @@ export class SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id, options = {}) {
+  async delete(type: string, id: string, options: BaseOptions = {}) {
     return this._repository.delete(type, id, options);
   }
 
@@ -253,7 +266,9 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(options = {}) {
+  async find<T extends SavedObjectAttributes = any>(
+    options: FindOptions
+  ): Promise<FindResponse<T>> {
     return this._repository.find(options);
   }
 
@@ -271,7 +286,10 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = [], options = {}) {
+  async bulkGet<T extends SavedObjectAttributes = any>(
+    objects: BulkGetObjects = [],
+    options: BaseOptions = {}
+  ): Promise<BulkGetResponse<T>> {
     return this._repository.bulkGet(objects, options);
   }
 
@@ -284,7 +302,11 @@ export class SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id, options = {}) {
+  async get<T extends SavedObjectAttributes = any>(
+    type: string,
+    id: string,
+    options: BaseOptions = {}
+  ): Promise<GetResponse<T>> {
     return this._repository.get(type, id, options);
   }
 
@@ -298,7 +320,12 @@ export class SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async update(type, id, attributes, options = {}) {
+  async update<T extends SavedObjectAttributes = any>(
+    type: string,
+    id: string,
+    attributes: Partial<T>,
+    options: UpdateOptions = {}
+  ): Promise<UpdateResponse<T>> {
     return this._repository.update(type, id, attributes, options);
   }
 }

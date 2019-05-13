@@ -18,18 +18,77 @@
  */
 
 import { omit } from 'lodash';
-import { getRootPropertiesObjects } from '../../../mappings';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
+import { SavedObjectsSchema } from '../../schema';
+import { KibanaMigrator } from '../../migrations';
+import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
+import {
+  BulkCreateObject,
+  CreateOptions,
+  SavedObject,
+  FindOptions,
+  BulkCreateResponse,
+  SavedObjectAttributes,
+  FindResponse,
+  BulkGetObject,
+  BulkGetResponse,
+  GetResponse,
+  UpdateOptions,
+  UpdateResponse,
+  CreateResponse,
+  BaseOptions,
+  MigrationVersion,
+} from '../saved_objects_client';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
+interface Left<T> {
+  tag: 'left';
+  error: T;
+}
+interface Right<T> {
+  tag: 'right';
+  value: T;
+}
+type Either<L, R> = Left<L> | Right<R>;
+const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
+  return either.tag === 'left';
+};
+
+export interface SavedObjectsRepositoryOptions {
+  index: string | string[];
+  mappings: IndexMapping;
+  callCluster: CallCluster;
+  schema: SavedObjectsSchema;
+  serializer: SavedObjectsSerializer;
+  migrator: KibanaMigrator;
+  allowedTypes: string[];
+  onBeforeWrite: () => Promise<void>;
+}
+
+export interface IncrementCounterOptions extends BaseOptions {
+  migrationVersion?: MigrationVersion;
+}
+
 export class SavedObjectsRepository {
-  constructor(options) {
+  // TODO: change into readonly paramater properties
+  private _migrator: KibanaMigrator;
+  private _index: string | string[];
+  private _mappings: IndexMapping;
+  private _schema: SavedObjectsSchema;
+  private _allowedTypes: string[];
+  private _onBeforeWrite: () => Promise<void>;
+  private _unwrappedCallCluster: CallCluster;
+  private _serializer: SavedObjectsSerializer;
+
+  constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
       mappings,
@@ -38,7 +97,7 @@ export class SavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
-      onBeforeWrite = () => {},
+      onBeforeWrite = () => Promise.resolve(),
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -58,7 +117,7 @@ export class SavedObjectsRepository {
     this._allowedTypes = allowedTypes;
 
     this._onBeforeWrite = onBeforeWrite;
-    this._unwrappedCallCluster = async (...args) => {
+    this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
       await migrator.awaitMigration();
       return callCluster(...args);
     };
@@ -79,10 +138,14 @@ export class SavedObjectsRepository {
    * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async create(type, attributes = {}, options = {}) {
-    const { id, migrationVersion, overwrite = false, namespace, references = [] } = options;
+  public async create<T extends SavedObjectAttributes>(
+    type: string,
+    attributes: T,
+    options: CreateOptions = { overwrite: false, references: [] }
+  ): Promise<CreateResponse<T>> {
+    const { id, migrationVersion, overwrite, namespace, references } = options;
 
-    if (!this._isTypeAllowed(type)) {
+    if (!this._allowedTypes.includes(type)) {
       throw errors.createUnsupportedTypeError(type);
     }
 
@@ -100,7 +163,7 @@ export class SavedObjectsRepository {
         references,
       });
 
-      const raw = this._serializer.savedObjectToRaw(migrated);
+      const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
@@ -132,16 +195,20 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
-  async bulkCreate(objects, options = {}) {
+  async bulkCreate<T extends SavedObjectAttributes = any>(
+    objects: Array<BulkCreateObject<T>>,
+    options: CreateOptions = {}
+  ): Promise<BulkCreateResponse<T>> {
     const { namespace, overwrite = false } = options;
     const time = this._getCurrentTime();
-    const bulkCreateParams = [];
+    const bulkCreateParams: object[] = [];
 
     let requestIndexCounter = 0;
-    const expectedResults = objects.map(object => {
-      if (!this._isTypeAllowed(object.type)) {
+    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+      if (!this._allowedTypes.includes(object.type)) {
         return {
-          response: {
+          tag: 'left',
+          error: {
             id: object.id,
             type: object.type,
             error: errors.createUnsupportedTypeError(object.type).output.payload,
@@ -153,17 +220,15 @@ export class SavedObjectsRepository {
       const expectedResult = {
         esRequestIndex: requestIndexCounter++,
         requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(
-          this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            namespace,
-            updated_at: time,
-            references: object.references || [],
-          })
-        ),
+        rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
+          id: object.id,
+          type: object.type,
+          attributes: object.attributes,
+          migrationVersion: object.migrationVersion,
+          namespace,
+          updated_at: time,
+          references: object.references || [],
+        }) as SanitizedSavedObjectDoc),
       };
 
       bulkCreateParams.push(
@@ -175,7 +240,7 @@ export class SavedObjectsRepository {
         expectedResult.rawMigratedDoc._source
       );
 
-      return expectedResult;
+      return { tag: 'right', value: expectedResult };
     });
 
     const esResponse = await this._writeToCluster('bulk', {
@@ -186,18 +251,18 @@ export class SavedObjectsRepository {
 
     return {
       saved_objects: expectedResults.map(expectedResult => {
-        if (expectedResult.response) {
-          return expectedResult.response;
+        if (isLeft(expectedResult)) {
+          return expectedResult.error;
         }
 
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult;
+        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
         const response = esResponse.items[esRequestIndex];
         const {
           error,
           _id: responseId,
           _seq_no: seqNo,
           _primary_term: primaryTerm,
-        } = Object.values(response)[0];
+        } = Object.values(response)[0] as any;
 
         const {
           _source: { type, [type]: attributes, references = [] },
@@ -242,8 +307,8 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id, options = {}) {
-    if (!this._isTypeAllowed(type)) {
+  async delete(type: string, id: string, options: BaseOptions = {}): Promise<{}> {
+    if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError();
     }
 
@@ -279,7 +344,7 @@ export class SavedObjectsRepository {
    * @param {string} namespace
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
-  async deleteByNamespace(namespace) {
+  async deleteByNamespace(namespace: string): Promise<any> {
     if (!namespace || typeof namespace !== 'string') {
       throw new TypeError(`namespace is required, and must be a string`);
     }
@@ -320,27 +385,25 @@ export class SavedObjectsRepository {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(options = {}) {
-    const {
-      search,
-      defaultSearchOperator = 'OR',
-      searchFields,
-      hasReference,
-      page = 1,
-      perPage = 20,
-      sortField,
-      sortOrder,
-      fields,
-      namespace,
-    } = options;
-    let { type } = options;
-
+  async find<T extends SavedObjectAttributes = any>({
+    search,
+    defaultSearchOperator = 'OR',
+    searchFields,
+    hasReference,
+    page = 1,
+    perPage = 20,
+    sortField,
+    sortOrder,
+    fields,
+    namespace,
+    type,
+  }: FindOptions): Promise<FindResponse<T>> {
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
     }
 
     if (Array.isArray(type)) {
-      type = type.filter(type => this._isTypeAllowed(type));
+      type = type.filter(t => this._allowedTypes.includes(t));
       if (type.length === 0) {
         return {
           page,
@@ -350,7 +413,7 @@ export class SavedObjectsRepository {
         };
       }
     } else {
-      if (!this._isTypeAllowed(type)) {
+      if (!this._allowedTypes.includes(type)) {
         return {
           page,
           per_page: perPage,
@@ -407,7 +470,7 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => this._rawToSavedObject(hit)),
+      saved_objects: response.hits.hits.map((hit: any) => this._rawToSavedObject(hit)),
     };
   }
 
@@ -425,46 +488,51 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = [], options = {}) {
+  async bulkGet<T extends SavedObjectAttributes = any>(
+    objects: BulkGetObject[] = [],
+    options: BaseOptions = {}
+  ): Promise<BulkGetResponse<T>> {
     const { namespace } = options;
 
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
 
-    const unsupportedTypes = [];
+    const unsupportedTypeObjects = objects
+      .filter(o => !this._allowedTypes.includes(o.type))
+      .map(({ type, id }) => {
+        return ({
+          id,
+          type,
+          error: errors.createUnsupportedTypeError(type).output.payload,
+        } as any) as SavedObject<T>;
+      });
+
+    const supportedTypeObjects = objects.filter(o => this._allowedTypes.includes(o.type));
+
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
-        docs: objects.reduce((acc, { type, id, fields }) => {
-          if (this._isTypeAllowed(type)) {
-            acc.push({
-              _id: this._serializer.generateRawId(namespace, type, id),
-              _source: includedFields(type, fields),
-            });
-          } else {
-            unsupportedTypes.push({
-              id,
-              type,
-              error: errors.createUnsupportedTypeError(type).output.payload,
-            });
-          }
-          return acc;
-        }, []),
+        docs: supportedTypeObjects.map(({ type, id, fields }) => {
+          return {
+            _id: this._serializer.generateRawId(namespace, type, id),
+            _source: includedFields(type, fields),
+          };
+        }),
       },
     });
 
     return {
-      saved_objects: response.docs
+      saved_objects: (response.docs as any[])
         .map((doc, i) => {
-          const { id, type } = objects[i];
+          const { id, type } = supportedTypeObjects[i]; // NOTE: Was objects[i] which seems like bug?
 
           if (!doc.found) {
-            return {
+            return ({
               id,
               type,
               error: { statusCode: 404, message: 'Not found' },
-            };
+            } as any) as SavedObject<T>;
           }
 
           const time = doc._source.updated_at;
@@ -478,7 +546,7 @@ export class SavedObjectsRepository {
             migrationVersion: doc._source.migrationVersion,
           };
         })
-        .concat(unsupportedTypes),
+        .concat(unsupportedTypeObjects),
     };
   }
 
@@ -491,8 +559,12 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id, options = {}) {
-    if (!this._isTypeAllowed(type)) {
+  async get<T extends SavedObjectAttributes = any>(
+    type: string,
+    id: string,
+    options: BaseOptions = {}
+  ): Promise<GetResponse<T>> {
+    if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError(type, id);
     }
 
@@ -535,8 +607,13 @@ export class SavedObjectsRepository {
    * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise}
    */
-  async update(type, id, attributes, options = {}) {
-    if (!this._isTypeAllowed(type)) {
+  async update<T extends SavedObjectAttributes = any>(
+    type: string,
+    id: string,
+    attributes: Partial<T>,
+    options: UpdateOptions = {}
+  ): Promise<UpdateResponse<T>> {
+    if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError(type, id);
     }
 
@@ -583,14 +660,19 @@ export class SavedObjectsRepository {
    * @property {object} [options.migrationVersion=undefined]
    * @returns {promise}
    */
-  async incrementCounter(type, id, counterFieldName, options = {}) {
+  async incrementCounter(
+    type: string,
+    id: string,
+    counterFieldName: string,
+    options: IncrementCounterOptions = {}
+  ) {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
     if (typeof counterFieldName !== 'string') {
       throw new Error('"counterFieldName" argument must be a string');
     }
-    if (!this._isTypeAllowed(type)) {
+    if (!this._allowedTypes.includes(type)) {
       throw errors.createUnsupportedTypeError(type);
     }
 
@@ -606,7 +688,7 @@ export class SavedObjectsRepository {
       updated_at: time,
     });
 
-    const raw = this._serializer.savedObjectToRaw(migrated);
+    const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
@@ -646,24 +728,24 @@ export class SavedObjectsRepository {
     };
   }
 
-  async _writeToCluster(method, params) {
+  private async _writeToCluster(...args: Parameters<CallCluster>) {
     try {
       await this._onBeforeWrite();
-      return await this._callCluster(method, params);
+      return await this._callCluster(...args);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  async _callCluster(method, params) {
+  private async _callCluster(...args: Parameters<CallCluster>) {
     try {
-      return await this._unwrappedCallCluster(method, params);
+      return await this._unwrappedCallCluster(...args);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  _getCurrentTime() {
+  private _getCurrentTime() {
     return new Date().toISOString();
   }
 
@@ -671,18 +753,8 @@ export class SavedObjectsRepository {
   // includes the namespace, and we use this for migrating documents. However, we don't
   // want the namespcae to be returned from the repository, as the repository scopes each
   // method transparently to the specified namespace.
-  _rawToSavedObject(raw) {
+  private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
-  }
-
-  _isTypeAllowed(types) {
-    const toCheck = [].concat(types);
-    for (const type of toCheck) {
-      if (!this._allowedTypes.includes(type)) {
-        return false;
-      }
-    }
-    return true;
   }
 }
