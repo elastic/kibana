@@ -15,6 +15,7 @@ import {
   EuiCallOut
 } from '@elastic/eui';
 import { formatDateTimeLocal } from '../../../../common/formatting';
+import { Monospace } from './components/monospace';
 
 export function getKibanaInstructions(product, {
   doneWithMigration,
@@ -27,7 +28,7 @@ export function getKibanaInstructions(product, {
     title: 'Disable the default collection of Kibana monitoring metrics',
     children: (
       <Fragment>
-        <p>Add the following setting in the Kibana configuration file (kibana.yml):</p>
+        <p>Add the following setting in the Kibana configuration file (<Monospace>kibana.yml</Monospace>):</p>
         <EuiSpacer size="s"/>
         <EuiCodeBlock
           isCopyable
@@ -37,7 +38,7 @@ export function getKibanaInstructions(product, {
         </EuiCodeBlock>
         <EuiSpacer size="s"/>
         <p>
-          Leave the xpack.monitoring.enabled set to its default value (true).
+          Leave the <Monospace>xpack.monitoring.enabled</Monospace> set to its default value (true).
         </p>
       </Fragment>
     )
@@ -48,9 +49,9 @@ export function getKibanaInstructions(product, {
     children: (
       <Fragment>
         <p>
-          Follow
+          Follow&nbsp;
           <EuiLink href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html" target="_blank">
-            the instructions here
+          the instructions here
           </EuiLink>
         </p>
       </Fragment>
@@ -72,7 +73,7 @@ export function getKibanaInstructions(product, {
         <p>
           By default the module will collect Kibana monitoring metrics from http://localhost:5601.
           If the local Kibana instance has a different address,
-          you must specify it via the hosts setting in the modules.d/kibana-xpack.yml file.
+          you must specify it via the <Monospace>hosts</Monospace> setting in the <Monospace>modules.d/kibana-xpack.yml</Monospace> file.
         </p>
       </Fragment>
     )

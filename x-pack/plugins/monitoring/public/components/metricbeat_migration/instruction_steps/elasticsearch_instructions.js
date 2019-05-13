@@ -15,6 +15,7 @@ import {
   EuiCallOut
 } from '@elastic/eui';
 import { formatDateTimeLocal } from '../../../../common/formatting';
+import { Monospace } from './components/monospace';
 
 export function getElasticsearchInstructions(product, {
   doneWithMigration,
@@ -29,7 +30,7 @@ export function getElasticsearchInstructions(product, {
       <Fragment>
         <p>
           Disable the default collection of Elasticsearch monitoring metrics.
-          Set xpack.monitoring.elasticsearch.collection.enabled to false on each node in the production cluster.
+          Set <Monospace>xpack.monitoring.elasticsearch.collection.enabled</Monospace> to false on each node in the production cluster.
         </p>
         <EuiSpacer size="s"/>
         <EuiCodeBlock
