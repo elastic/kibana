@@ -26,7 +26,7 @@ export function SuggestionPanelWrapper(props: SuggestionPanelWrapperProps) {
         return (
           <button
             key={index}
-            data-test-subj={`suggestion`}
+            data-test-subj="suggestion"
             onClick={() => {
               // TODO single action for that?
               props.dispatch({
