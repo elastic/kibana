@@ -145,13 +145,14 @@ function getSuggestions(
             tableColumns: datasourceTableMetas,
             roles: currentColumnRoles,
           })
-          .map(suggestion => ({
+          .map(({ datasourceSuggestionId, ...suggestion }) => ({
             ...suggestion,
             visualizationId,
+            datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
           }));
       })
       // TODO why is flatMap not available here?
       .reduce((globalList, currentList) => [...globalList, ...currentList], [])
-      .sort(({ score: scoreA }, { score: scoreB }) => scoreA - scoreB)
+      .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA)
   );
 }

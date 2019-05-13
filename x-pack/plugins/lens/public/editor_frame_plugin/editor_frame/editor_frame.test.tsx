@@ -420,4 +420,168 @@ describe('editor_frame', () => {
       );
     });
   });
+
+  describe('suggestions', () => {
+    it('should fetch suggestions of currently active datasource', async () => {
+      mount(
+        <EditorFrame
+          visualizations={{
+            testVis: mockVisualization,
+          }}
+          datasources={{
+            testDatasource: mockDatasource,
+            testDatasource2: mockDatasource2,
+          }}
+          initialDatasource="testDatasource"
+          initialVisualization="testVis"
+        />
+      );
+
+      await nextTick();
+
+      expect(mockDatasource.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
+      expect(mockDatasource2.getDatasourceSuggestionsFromCurrentState).not.toHaveBeenCalled();
+    });
+
+    it('should fetch suggestions of all visualizations', async () => {
+      mount(
+        <EditorFrame
+          visualizations={{
+            testVis: mockVisualization,
+            testVis2: mockVisualization2,
+          }}
+          datasources={{
+            testDatasource: mockDatasource,
+            testDatasource2: mockDatasource2,
+          }}
+          initialDatasource="testDatasource"
+          initialVisualization="testVis"
+        />
+      );
+
+      await nextTick();
+
+      expect(mockVisualization.getSuggestions).toHaveBeenCalled();
+      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
+    });
+
+    it('should display suggestions in descending order', async () => {
+      const instance = mount(
+        <EditorFrame
+          visualizations={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.5,
+                  state: {},
+                  title: 'Suggestion2',
+                },
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.8,
+                  state: {},
+                  title: 'Suggestion1',
+                },
+              ],
+            },
+            testVis2: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.4,
+                  state: {},
+                  title: 'Suggestion4',
+                },
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.45,
+                  state: {},
+                  title: 'Suggestion3',
+                },
+              ],
+            },
+          }}
+          datasources={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+            },
+          }}
+          initialDatasource="testDatasource"
+          initialVisualization="testVis"
+        />
+      );
+
+      await nextTick();
+
+      // TODO why is this necessary?
+      instance.update();
+      const suggestions = instance.find('[data-test-subj="suggestion"]');
+      expect(suggestions.map(el => el.text())).toEqual([
+        'Suggestion1',
+        'Suggestion2',
+        'Suggestion3',
+        'Suggestion4',
+      ]);
+    });
+
+    it('should switch to suggested visualization', async () => {
+      const newDatasourceState = {};
+      const suggestionVisState = {};
+      const instance = mount(
+        <EditorFrame
+          visualizations={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.8,
+                  state: suggestionVisState,
+                  title: 'Suggestion1',
+                },
+              ],
+            },
+            testVis2: mockVisualization2,
+          }}
+          datasources={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsFromCurrentState: () => [
+                { state: newDatasourceState, tableColumns: [] },
+              ],
+            },
+          }}
+          initialDatasource="testDatasource"
+          initialVisualization="testVis2"
+        />
+      );
+
+      await nextTick();
+
+      // TODO why is this necessary?
+      instance.update();
+
+      act(() => {
+        instance.find('[data-test-subj="suggestion"]').simulate('click');
+      });
+
+      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: suggestionVisState,
+        })
+      );
+      expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: newDatasourceState,
+        })
+      );
+    });
+  });
 });

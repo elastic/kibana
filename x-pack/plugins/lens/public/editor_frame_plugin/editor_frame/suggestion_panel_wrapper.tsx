@@ -8,8 +8,13 @@ import React from 'react';
 import { Action } from '../state_management';
 import { VisualizationSuggestion } from '../../types';
 
+export type Suggestion = Pick<
+  VisualizationSuggestion,
+  Exclude<keyof VisualizationSuggestion, 'datasourceSuggestionId'>
+> & { visualizationId: string; datasourceState: unknown };
+
 interface SuggestionPanelWrapperProps {
-  suggestions: Array<VisualizationSuggestion & { visualizationId: string }>;
+  suggestions: Suggestion[];
   dispatch: (action: Action) => void;
 }
 
@@ -17,14 +22,18 @@ export function SuggestionPanelWrapper(props: SuggestionPanelWrapperProps) {
   return (
     <>
       <h2>Suggestions</h2>
-      {(props.suggestions || []).map(suggestion => {
+      {(props.suggestions || []).map((suggestion, index) => {
         return (
           <button
+            key={index}
+            data-test-subj={`suggestion`}
             onClick={() => {
+              // TODO single action for that?
               props.dispatch({
                 type: 'SWITCH_VISUALIZATION',
                 newVisulizationId: suggestion.visualizationId,
                 initialState: suggestion.state,
+                datasourceState: suggestion.datasourceState,
               });
             }}
           >
