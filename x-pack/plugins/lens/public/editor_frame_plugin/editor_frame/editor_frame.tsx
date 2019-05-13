@@ -9,7 +9,6 @@ import {
   Datasource,
   Visualization,
   TableColumn,
-  DatasourcePublicAPI,
   DatasourceSuggestion,
   DimensionRole,
 } from '../../types';
