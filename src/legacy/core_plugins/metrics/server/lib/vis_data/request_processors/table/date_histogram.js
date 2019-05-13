@@ -25,7 +25,7 @@ import { calculateAggRoot } from './calculate_agg_root';
 
 export default function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
-    const { timeField, interval } = getIntervalAndTimefield(panel);
+    const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
     const { from, to }  = getTimerange(req);
     const  timezone = capabilities.searchTimezone;
