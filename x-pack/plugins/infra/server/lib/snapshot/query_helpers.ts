@@ -14,7 +14,9 @@ export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => 
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
-    id: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } },
+    id: {
+      terms: { field: options.sourceConfiguration.fields[options.nodeType] },
+    },
   });
   sources.push({
     name: { terms: { field: NAME_FIELDS[options.nodeType] } },

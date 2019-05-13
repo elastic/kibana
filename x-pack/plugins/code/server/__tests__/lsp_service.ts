@@ -8,7 +8,7 @@ import Git from '@elastic/nodegit';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
 import path from 'path';
-// import rimraf from 'rimraf';
+import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import assert from 'assert';
@@ -39,15 +39,16 @@ const packagejson = `
 }
 `;
 describe('lsp_service tests', () => {
+  let firstCommitSha = '';
+  let secondCommitSha = '';
   async function prepareProject(repoPath: string) {
     mkdirp.sync(repoPath);
     const repo = await Git.Repository.init(repoPath, 0);
     const helloContent = "console.log('hello world');";
     fs.writeFileSync(path.join(repo.workdir(), filename), helloContent, 'utf8');
-    fs.writeFileSync(path.join(repo.workdir(), 'package.json'), packagejson, 'utf8');
-    const index = await repo.refreshIndex();
+
+    let index = await repo.refreshIndex();
     await index.addByPath(filename);
-    await index.addByPath('package.json');
     index.write();
     const treeId = await index.writeTree();
     const committer = Git.Signature.create('tester', 'test@test.com', Date.now() / 1000, 60);
@@ -59,8 +60,22 @@ describe('lsp_service tests', () => {
       treeId,
       []
     );
-    // eslint-disable-next-line no-console
-    console.log(`created commit ${commit.tostrS()}`);
+    firstCommitSha = commit.tostrS();
+    fs.writeFileSync(path.join(repo.workdir(), 'package.json'), packagejson, 'utf8');
+    index = await repo.refreshIndex();
+    await index.addByPath('package.json');
+    index.write();
+    const treeId2 = await index.writeTree();
+    const commit2 = await repo.createCommit(
+      'HEAD',
+      committer,
+      committer,
+      'commit2 for test',
+      treeId2,
+      [commit]
+    );
+    secondCommitSha = commit2.tostrS();
+
     return repo;
   }
 
@@ -109,11 +124,9 @@ describe('lsp_service tests', () => {
     return path.resolve(pa) === path.resolve(pb);
   }
 
-  it('process a hover request', async () => {
+  function mockLspService() {
     const esClient = mockEsClient();
-    const revision = 'master';
-
-    const lspservice = new LspService(
+    return new LspService(
       '127.0.0.1',
       serverOptions,
       esClient,
@@ -121,24 +134,34 @@ describe('lsp_service tests', () => {
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient)
     );
+  }
+
+  async function sendHoverRequest(lspservice: LspService, revision: string) {
+    const method = 'textDocument/hover';
+
+    const params = {
+      textDocument: {
+        uri: `git://${repoUri}/blob/${revision}/${filename}`,
+      },
+      position: {
+        line: 0,
+        character: 1,
+      },
+    };
+    return await lspservice.sendRequest(method, params);
+  }
+
+  it('process a hover request', async () => {
+    const lspservice = mockLspService();
     try {
-      const params = {
-        textDocument: {
-          uri: `git://${repoUri}/blob/${revision}/${filename}`,
-        },
-        position: {
-          line: 0,
-          character: 1,
-        },
-      };
       const workspaceHandler = lspservice.workspaceHandler;
       const wsSpy = sinon.spy(workspaceHandler, 'handleRequest');
       const controller = lspservice.controller;
       const ctrlSpy = sinon.spy(controller, 'handleRequest');
 
-      const method = 'textDocument/hover';
+      const revision = 'master';
 
-      const response = await lspservice.sendRequest(method, params);
+      const response = await sendHoverRequest(lspservice, revision);
       assert.ok(response);
       assert.ok(response.result.contents);
 
@@ -172,30 +195,11 @@ describe('lsp_service tests', () => {
   }).timeout(10000);
 
   it('unload a workspace', async () => {
-    const esClient = mockEsClient();
-    const revision = 'master';
-    const lspservice = new LspService(
-      '127.0.0.1',
-      serverOptions,
-      esClient,
-      installManager,
-      new ConsoleLoggerFactory(),
-      new RepositoryConfigController(esClient)
-    );
+    const lspservice = mockLspService();
     try {
-      const params = {
-        textDocument: {
-          uri: `git://${repoUri}/blob/${revision}/${filename}`,
-        },
-        position: {
-          line: 0,
-          character: 1,
-        },
-      };
-
-      const method = 'textDocument/hover';
+      const revision = 'master';
       // send a dummy request to open a workspace;
-      const response = await lspservice.sendRequest(method, params);
+      const response = await sendHoverRequest(lspservice, revision);
       assert.ok(response);
       const workspacePath = path.resolve(serverOptions.workspacePath, repoUri, revision);
       const workspaceFolderExists = fs.existsSync(workspacePath);
@@ -222,6 +226,67 @@ describe('lsp_service tests', () => {
       // the workspace folder should be deleted
       const exists = fs.existsSync(realWorkspacePath);
       assert.strictEqual(exists, false);
+      return;
+    } finally {
+      await lspservice.shutdown();
+    }
+    // @ts-ignore
+  }).timeout(10000);
+
+  it('should work if a worktree exists', async () => {
+    const lspservice = mockLspService();
+    try {
+      const revision = 'master';
+      // send a dummy request to open a workspace;
+      const response = await sendHoverRequest(lspservice, revision);
+      assert.ok(response);
+      const workspacePath = path.resolve(serverOptions.workspacePath, repoUri, revision);
+      const workspaceFolderExists = fs.existsSync(workspacePath);
+      // workspace is opened
+      assert.ok(workspaceFolderExists);
+      const bareRepoWorktree = path.join(
+        serverOptions.repoPath,
+        repoUri,
+        'worktrees',
+        `workspace-${revision}`
+      );
+      // worktree is exists
+      const bareRepoWorktreeExists = fs.existsSync(bareRepoWorktree);
+      assert.ok(bareRepoWorktreeExists);
+      // delete the workspace folder but leave worktree
+      rimraf.sync(workspacePath);
+      // send a dummy request to open it again
+      await sendHoverRequest(lspservice, revision);
+      assert.ok(fs.existsSync(workspacePath));
+
+      return;
+    } finally {
+      await lspservice.shutdown();
+    }
+    // @ts-ignore
+  }).timeout(10000);
+
+  it('should update if a worktree is not the newest', async () => {
+    const lspservice = mockLspService();
+    try {
+      const revision = 'master';
+      // send a dummy request to open a workspace;
+      const response = await sendHoverRequest(lspservice, revision);
+      assert.ok(response);
+      const workspacePath = path.resolve(serverOptions.workspacePath, repoUri, revision);
+      const workspaceRepo = await Git.Repository.open(workspacePath);
+      // workspace is newest now
+      assert.strictEqual((await workspaceRepo.getHeadCommit()).sha(), secondCommitSha);
+      const firstCommit = await workspaceRepo.getCommit(firstCommitSha);
+      // reset workspace to an older one
+      // @ts-ignore
+      await Git.Reset.reset(workspaceRepo, firstCommit, Git.Reset.TYPE.HARD, {});
+      assert.strictEqual((await workspaceRepo.getHeadCommit()).sha(), firstCommitSha);
+
+      // send a request again;
+      await sendHoverRequest(lspservice, revision);
+      // workspace_handler should update workspace to the newest one
+      assert.strictEqual((await workspaceRepo.getHeadCommit()).sha(), secondCommitSha);
       return;
     } finally {
       await lspservice.shutdown();

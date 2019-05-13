@@ -176,9 +176,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
-
     const featureCollection = await this.getGeoJsonPoints(layerName, searchFilters);
-
     return {
       data: featureCollection,
       meta: {

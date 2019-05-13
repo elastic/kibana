@@ -5,23 +5,26 @@
  */
 
 import { Function } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   condition: boolean[] | null;
 }
 
 export function all(): Function<'all', Arguments, boolean> {
+  const { help, args: argHelp } = getFunctionHelp().all;
+
   return {
     name: 'all',
     type: 'boolean',
-    help: 'Return true if all of the conditions are true',
+    help,
     args: {
       condition: {
         aliases: ['_'],
         types: ['boolean', 'null'],
         required: true,
         multi: true,
-        help: 'One or more conditions to check',
+        help: argHelp.condition,
       },
     },
     fn: (_context, args) => {

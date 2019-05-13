@@ -24,6 +24,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nSetup } from '../i18n';
+import { OverlayRef } from './overlay_service';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -36,7 +37,7 @@ import { I18nSetup } from '../i18n';
  *
  * @public
  */
-export class FlyoutRef {
+export class FlyoutRef implements OverlayRef {
   /**
    * An Promise that will resolve once this flyout is closed.
    *

@@ -9,7 +9,9 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { CardItem, CardItems, CardItemsComponent } from '../../../../components/card_items';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import styled from 'styled-components';
+import { StatItem, StatItems, StatItemsComponent } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
@@ -19,86 +21,95 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-const fieldTitleMapping: Readonly<CardItems[]> = [
+const fieldTitleMapping: Readonly<StatItems[]> = [
   {
     fields: [
       {
         key: 'networkEvents',
-        description: i18n.NETWORK_EVENTS,
         value: null,
       },
     ],
+    description: i18n.NETWORK_EVENTS,
   },
   {
     fields: [
       {
         key: 'uniqueFlowId',
-        description: i18n.UNIQUE_ID,
         value: null,
       },
     ],
+    description: i18n.UNIQUE_ID,
   },
   {
     fields: [
       {
         key: 'activeAgents',
-        description: i18n.ACTIVE_AGENTS,
         value: null,
       },
     ],
+    description: i18n.ACTIVE_AGENTS,
   },
   {
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
-        description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
         value: null,
       },
     ],
+    description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
   },
   {
     fields: [
       {
         key: 'uniqueDestinationPrivateIps',
-        description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
         value: null,
       },
     ],
+    description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
   },
   {
     fields: [
       {
         key: 'dnsQueries',
-        description: i18n.DNS_QUERIES,
         value: null,
       },
     ],
+    description: i18n.DNS_QUERIES,
   },
   {
     fields: [
       {
         key: 'tlsHandshakes',
-        description: i18n.TLS_HANDSHAKES,
         value: null,
       },
     ],
+    description: i18n.TLS_HANDSHAKES,
   },
 ];
 
+const FlexGroup = styled(EuiFlexGroup)`
+  margin-height: 86px;
+`;
+
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
-  return (
+  return loading ? (
+    <FlexGroup justifyContent="center" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </FlexGroup>
+  ) : (
     <EuiFlexGroup>
-      {fieldTitleMapping.map(card => (
-        <CardItemsComponent
-          key={`kpi-network-summary-${card.fields[0].description}`}
-          isLoading={loading}
-          description={card.description}
-          fields={addValueToFields(card.fields, data)}
+      {fieldTitleMapping.map(stat => (
+        <StatItemsComponent
+          key={`kpi-network-summary-${stat.fields[0].key}`}
+          description={stat.description}
+          fields={addValueToFields(stat.fields, data)}
         />
       ))}
     </EuiFlexGroup>
   );
 });
 
-const addValueToFields = (fields: CardItem[], data: KpiNetworkData): CardItem[] =>
+const addValueToFields = (fields: StatItem[], data: KpiNetworkData): StatItem[] =>
   fields.map(field => ({ ...field, value: get(field.key, data) }));
