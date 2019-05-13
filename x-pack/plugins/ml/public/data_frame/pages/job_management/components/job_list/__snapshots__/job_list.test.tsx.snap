@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List <DataFrameJobList /> Minimal initialization 1`] = `
+<EuiEmptyPrompt
+  actions={
+    Array [
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
+      >
+        Create your first data frame job
+      </EuiButtonEmpty>,
+    ]
+  }
+  iconColor="subdued"
+  title={
+    <h2>
+      No data frame jobs found
+    </h2>
+  }
+/>
+`;

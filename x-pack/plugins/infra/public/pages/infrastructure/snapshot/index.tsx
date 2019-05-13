@@ -52,7 +52,7 @@ export const SnapshotPage = injectUICapabilities(
             intl.formatMessage(
               {
                 id: 'xpack.infra.infrastructureSnapshotPage.documentTitle',
-                defaultMessage: '{previousTitle} | Snapshot',
+                defaultMessage: '{previousTitle} | Inventory',
               },
               {
                 previousTitle,

@@ -19,4 +19,4 @@
 
 export * from './plugins_service';
 export { Plugin, PluginInitializer } from './plugin';
-export { PluginInitializerContext, PluginSetupContext } from './plugin_context';
+export { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';

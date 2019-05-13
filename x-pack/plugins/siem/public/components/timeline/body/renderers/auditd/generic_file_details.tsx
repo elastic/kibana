@@ -11,13 +11,16 @@ import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { Args, Details, NetflowRenderer, ProcessDraggable, TokensFlexItem } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
 
-import { SessionUserHostWorkingDir } from '.';
 import * as i18n from './translations';
+import { NetflowRenderer } from '../netflow';
+import { TokensFlexItem, Details } from '../helpers';
+import { ProcessDraggable } from '../process_draggable';
+import { Args } from '../args';
+import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
 
 interface Props {
   id: string;
