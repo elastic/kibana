@@ -185,6 +185,20 @@ export class I18nService {
           defaultMessage: 'You are in a popup. To exit this popup, hit Escape.',
         }
       ),
+      'euiSelectable.loadingOptions': i18n.translate('core.euiSelectable.loadingOptions', {
+        defaultMessage: 'Loading options',
+        description: 'Placeholder message while data is asynchronously loaded',
+      }),
+      'euiSelectable.noAvailableOptions': i18n.translate('core.euiSelectable.noAvailableOptions', {
+        defaultMessage: "There aren't any options available",
+      }),
+      'euiSelectable.noMatchingOptions': ({ searchValue }: EuiValues) => (
+        <FormattedMessage
+          id="core.euiSelectable.noMatchingOptions"
+          defaultMessage="{searchValue} doesn't match any options"
+          values={{ searchValue }}
+        />
+      ),
       'euiStep.completeStep': i18n.translate('core.euiStep.completeStep', {
         defaultMessage: 'Step',
         description:
@@ -290,4 +304,7 @@ export interface I18nSetup {
   Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
 }
 
+/**
+ * @public
+ */
 export type I18nStart = I18nSetup;

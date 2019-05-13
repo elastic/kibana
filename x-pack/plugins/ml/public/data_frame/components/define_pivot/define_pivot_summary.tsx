@@ -24,7 +24,8 @@ import { PivotPreview } from './pivot_preview';
 import {
   DropDownOption,
   getPivotQuery,
-  IndexPatternContext,
+  isKibanaContext,
+  KibanaContext,
   PivotAggsConfigDict,
   PIVOT_SUPPORTED_AGGS,
   pivotSupportedAggs,
@@ -40,11 +41,13 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
   groupByList,
   aggList,
 }) => {
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)
@@ -65,15 +68,13 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
       ) {
         const label = `${agg}(${field.name})`;
         aggOption.options.push({ label });
-        const formRowLabel = `${agg}_${field.name}`;
-        aggOptionsData[label] = { agg, field: field.name, formRowLabel };
+        const aggName = `${agg}_${field.name}`;
+        aggOptionsData[label] = { agg, field: field.name, aggName };
       }
     });
     aggOptions.push(aggOption);
   });
 
-  const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupByList;
   const pivotQuery = getPivotQuery(search);
 
   const displaySearch = search === defaultSearch ? emptySearch : search;
@@ -103,14 +104,14 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
               defaultMessage: 'Aggregations',
             })}
           >
-            <AggListSummary list={aggList} optionsData={aggOptionsData} />
+            <AggListSummary list={aggList} />
           </EuiFormRow>
         </EuiForm>
       </EuiFlexItem>
 
       <EuiFlexItem>
         <EuiText>
-          <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery} />
+          <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

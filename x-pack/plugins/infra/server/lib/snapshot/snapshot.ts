@@ -17,7 +17,12 @@ import { InfraSources } from '../sources';
 
 import { JsonObject } from '../../../common/typed_json';
 import { SNAPSHOT_COMPOSITE_REQUEST_SIZE } from './constants';
-import { getGroupedNodesSources, getMetricsAggregations, getMetricsSources } from './query_helpers';
+import {
+  getGroupedNodesSources,
+  getMetricsAggregations,
+  getMetricsSources,
+  getDateHistogramOffset,
+} from './query_helpers';
 import {
   getNodeMetrics,
   getNodeMetricsForLookup,
@@ -25,6 +30,7 @@ import {
   InfraSnapshotNodeGroupByBucket,
   InfraSnapshotNodeMetricsBucket,
 } from './response_helpers';
+import { IP_FIELDS } from '../constants';
 
 export interface InfraSnapshotRequestOptions {
   nodeType: InfraNodeType;
@@ -91,6 +97,17 @@ const requestGroupedNodes = async (
             size: SNAPSHOT_COMPOSITE_REQUEST_SIZE,
             sources: getGroupedNodesSources(options),
           },
+          aggs: {
+            ip: {
+              top_hits: {
+                sort: [{ [options.sourceConfiguration.fields.timestamp]: { order: 'desc' } }],
+                _source: {
+                  includes: [IP_FIELDS[options.nodeType]],
+                },
+                size: 1,
+              },
+            },
+          },
         },
       },
     },
@@ -121,7 +138,6 @@ const requestNodeMetrics = async (
       query: {
         bool: {
           filter: [
-            ...createQueryFilterClauses(options.filterQuery),
             {
               range: {
                 [options.sourceConfiguration.fields.timestamp]: {
@@ -146,6 +162,11 @@ const requestNodeMetrics = async (
               date_histogram: {
                 field: options.sourceConfiguration.fields.timestamp,
                 interval: options.timerange.interval || '1m',
+                offset: getDateHistogramOffset(options),
+                extended_bounds: {
+                  min: options.timerange.from,
+                  max: options.timerange.to,
+                },
               },
               aggregations: getMetricsAggregations(options),
             },
@@ -221,7 +242,7 @@ const mergeNodeBuckets = (
   return nodeGroupByBuckets.map(node => {
     return {
       path: getNodePath(node, options),
-      metric: getNodeMetrics(nodeMetricsForLookup[node.key.node], options),
+      metric: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
     };
   });
 };

@@ -70,12 +70,16 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
 
+  if (opts.oss) {
+    delete rawConfig.xpack;
+  }
+
   if (opts.dev) {
     set('env', 'development');
     set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'elastic');
+      set('elasticsearch.username', 'kibana');
     }
 
     if (!has('elasticsearch.password')) {
@@ -212,8 +216,6 @@ export default function (program) {
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
-          isOssModeSupported: !IS_KIBANA_DISTRIBUTABLE,
-          isXPackInstalled: XPACK_INSTALLED,
           isReplModeSupported: CAN_REPL,
         },
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),

@@ -67,6 +67,8 @@ export const getTooltipState = ({ map }) => {
 
 export const getMapReady = ({ map }) => map && map.ready;
 
+export const getMapInitError = ({ map }) => map.mapInitError;
+
 export const getGoto = ({ map }) => map && map.goto;
 
 export const getSelectedLayerId = ({ map }) => {
@@ -80,6 +82,8 @@ export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapReadyLayerList
   ? map.waitingForMapReadyLayerList
   : [];
+
+export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
 
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
@@ -110,6 +114,8 @@ export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
 export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
+
+export const getDrawState = ({ map }) => map.mapState.drawState;
 
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
@@ -145,7 +151,6 @@ export const getDataFilters = createSelector(
     };
   }
 );
-
 
 export const getLayerList = createSelector(
   getLayerListRaw,

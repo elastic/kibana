@@ -22,23 +22,35 @@ import { HttpService } from './http_service';
 
 const createSetupContractMock = () => {
   const setupContract = {
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
     options: {} as ServerOptions,
     registerAuth: jest.fn(),
     registerOnRequest: jest.fn(),
+    registerRouter: jest.fn(),
+    getBasePathFor: jest.fn(),
+    setBasePathFor: jest.fn(),
+    // we can mock some hapi server method when we need it
+    server: {} as Server,
   };
   return setupContract;
+};
+
+const createStartContractMock = () => {
+  const startContract = {
+    isListening: jest.fn(),
+  };
+  startContract.isListening.mockReturnValue(true);
+  return startContract;
 };
 
 type HttpServiceContract = PublicMethodsOf<HttpService>;
 const createHttpServiceMock = () => {
   const mocked: jest.Mocked<HttpServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
-    registerRouter: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 

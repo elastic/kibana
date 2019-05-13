@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './aggregations';
 export * from './dropdown';
-export * from './index_pattern_context';
+export * from './kibana_context';
+export * from './navigation';
 export * from './pivot_aggs';
 export * from './pivot_group_by';
 export * from './request';

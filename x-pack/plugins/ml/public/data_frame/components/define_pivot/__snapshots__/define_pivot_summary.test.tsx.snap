@@ -5,32 +5,31 @@ exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
   <ContextProvider
     value={
       Object {
-        "fields": Array [],
-        "title": "the-index-pattern-title",
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "title": "the-index-pattern-title",
+        },
+        "indexPatterns": Object {},
+        "kibanaConfig": Object {},
       }
     }
   >
     <DefinePivotSummary
       aggList={
-        Array [
-          "the-agg-name",
-        ]
-      }
-      aggs={
-        Array [
-          Object {
+        Object {
+          "the-agg-name": Object {
             "agg": "avg",
+            "aggName": "the-agg-label",
             "field": "the-agg-field",
-            "formRowLabel": "the-agg-label",
           },
-        ]
+        }
       }
       groupByList={
         Object {
           "the-group-by-name": Object {
             "agg": "terms",
+            "aggName": "the-group-by-label",
             "field": "the-group-by-field",
-            "formRowLabel": "the-group-by-label",
           },
         }
       }

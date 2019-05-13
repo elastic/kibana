@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Load More Table Component rendering it renders the default load more table 1`] = `
+<LoadMoreTable
+  columns={
+    Array [
+      Object {
+        "field": "node.host.name",
+        "hideForMobile": false,
+        "name": "Host",
+        "render": [Function],
+        "truncateText": false,
+      },
+      Object {
+        "field": "node.host.firstSeen",
+        "hideForMobile": false,
+        "name": "First seen",
+        "render": [Function],
+        "truncateText": false,
+      },
+      Object {
+        "field": "node.host.os",
+        "hideForMobile": false,
+        "name": "OS",
+        "render": [Function],
+        "truncateText": false,
+      },
+      Object {
+        "field": "node.host.version",
+        "hideForMobile": false,
+        "name": "Version",
+        "render": [Function],
+        "truncateText": false,
+      },
+    ]
+  }
+  hasNextPage={true}
+  headerCount={1}
+  headerSupplement={
+    <p>
+      My test supplement.
+    </p>
+  }
+  headerTitle="Hosts"
+  headerTooltip="My test tooltip"
+  headerUnit="Test Unit"
+  itemsPerRow={
+    Array [
+      Object {
+        "numberOfRow": 2,
+        "text": "2 rows",
+      },
+      Object {
+        "numberOfRow": 5,
+        "text": "5 rows",
+      },
+      Object {
+        "numberOfRow": 10,
+        "text": "10 rows",
+      },
+      Object {
+        "numberOfRow": 20,
+        "text": "20 rows",
+      },
+      Object {
+        "numberOfRow": 50,
+        "text": "50 rows",
+      },
+    ]
+  }
+  limit={1}
+  loadMore={[Function]}
+  loading={false}
+  loadingTitle="Hosts"
+  pageOfItems={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "host": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "firstSeen": "2018-12-06T15:40:53.319Z",
+          "name": "elrond.elstc.co",
+          "os": "Ubuntu",
+          "version": "18.04.1 LTS (Bionic Beaver)",
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "host": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "firstSeen": "2018-12-07T14:12:38.560Z",
+          "name": "siem-kibana",
+          "os": "Debian GNU/Linux",
+          "version": "9 (stretch)",
+        },
+      },
+    ]
+  }
+  updateLimitPagination={[Function]}
+/>
+`;

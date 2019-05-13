@@ -18,6 +18,8 @@
  */
 
 import path from 'path';
+import { parse } from 'url';
+
 import request from 'request';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { Router } from '../router';
@@ -27,12 +29,12 @@ import { url as onReqUrl } from './__fixtures__/plugins/dummy_on_request/server/
 describe('http service', () => {
   describe('setup contract', () => {
     describe('#registerAuth()', () => {
-      const dummySecurityPlugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_security');
+      const plugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_security');
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeAll(async () => {
         root = kbnTestServer.createRoot(
           {
-            plugins: { paths: [dummySecurityPlugin] },
+            plugins: { paths: [plugin] },
           },
           {
             dev: true,
@@ -43,10 +45,10 @@ describe('http service', () => {
         router.get({ path: authUrl.auth, validate: false }, async (req, res) =>
           res.ok({ content: 'ok' })
         );
-        // TODO fix me when registerRouter is available before HTTP server is run
-        (root as any).server.http.registerRouter(router);
 
-        await root.setup();
+        const { http } = await root.setup();
+        http.registerRouter(router);
+        await root.start();
       }, 30000);
 
       afterAll(async () => await root.shutdown());
@@ -109,15 +111,12 @@ describe('http service', () => {
     });
 
     describe('#registerOnRequest()', () => {
-      const dummyOnRequestPlugin = path.resolve(
-        __dirname,
-        './__fixtures__/plugins/dummy_on_request'
-      );
+      const plugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_on_request');
       let root: ReturnType<typeof kbnTestServer.createRoot>;
-      beforeAll(async () => {
+      beforeEach(async () => {
         root = kbnTestServer.createRoot(
           {
-            plugins: { paths: [dummyOnRequestPlugin] },
+            plugins: { paths: [plugin] },
           },
           {
             dev: true,
@@ -129,13 +128,14 @@ describe('http service', () => {
         [onReqUrl.root, onReqUrl.independentReq].forEach(url =>
           router.get({ path: url, validate: false }, async (req, res) => res.ok({ content: 'ok' }))
         );
-        // TODO fix me when registerRouter is available before HTTP server is run
-        (root as any).server.http.registerRouter(router);
 
-        await root.setup();
+        const { http } = await root.setup();
+        http.registerRouter(router);
+
+        await root.start();
       }, 30000);
 
-      afterAll(async () => await root.shutdown());
+      afterEach(async () => await root.shutdown());
       it('Should support passing request through to the route handler', async () => {
         await kbnTestServer.request.get(root, onReqUrl.root).expect(200, { content: 'ok' });
       });
@@ -157,6 +157,80 @@ describe('http service', () => {
       });
       it(`Shouldn't share request object between interceptors`, async () => {
         await kbnTestServer.request.get(root, onReqUrl.independentReq).expect(200);
+      });
+    });
+
+    describe('#registerOnRequest() toolkit', () => {
+      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      beforeEach(async () => {
+        root = kbnTestServer.createRoot();
+      }, 30000);
+
+      afterEach(async () => await root.shutdown());
+      it('supports Url change on the flight', async () => {
+        const { http } = await root.setup();
+        http.registerOnRequest((req, t) => {
+          t.setUrl(parse('/new-url'));
+          return t.next();
+        });
+
+        const router = new Router('/');
+        router.get({ path: '/new-url', validate: false }, async (req, res) =>
+          res.ok({ key: 'new-url-reached' })
+        );
+        http.registerRouter(router);
+
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/').expect(200, { key: 'new-url-reached' });
+      });
+
+      it('url re-write works for legacy server as well', async () => {
+        const { http } = await root.setup();
+        const newUrl = '/new-url';
+        http.registerOnRequest((req, t) => {
+          t.setUrl(newUrl);
+          return t.next();
+        });
+
+        await root.start();
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: newUrl,
+          handler: () => 'ok-from-legacy',
+        });
+
+        await kbnTestServer.request.get(root, '/').expect(200, 'ok-from-legacy');
+      });
+    });
+
+    describe('#getBasePathFor()/#setBasePathFor()', () => {
+      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      beforeEach(async () => {
+        root = kbnTestServer.createRoot();
+      }, 30000);
+
+      afterEach(async () => await root.shutdown());
+      it('basePath information for an incoming request is available in legacy server', async () => {
+        const reqBasePath = '/requests-specific-base-path';
+        const { http } = await root.setup();
+        http.registerOnRequest((req, t) => {
+          http.setBasePathFor(req, reqBasePath);
+          return t.next();
+        });
+
+        await root.start();
+
+        const legacyUrl = '/legacy';
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: legacyUrl,
+          handler: kbnServer.newPlatform.setup.core.http.getBasePathFor,
+        });
+
+        await kbnTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);
       });
     });
   });

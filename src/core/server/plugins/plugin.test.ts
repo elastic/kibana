@@ -19,10 +19,14 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
-import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
+import { schema } from '@kbn/config-schema';
+
+import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
+import { configServiceMock } from '../config/config_service.mock';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { PluginWrapper, PluginManifest } from './plugin';
@@ -56,20 +60,19 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
   };
 }
 
-let configService: ConfigService;
+const configService = configServiceMock.create();
+configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
+
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = { elasticsearch: elasticsearchServiceMock.createSetupContract() };
+const setupDeps = {
+  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+  http: httpServiceMock.createSetupContract(),
+};
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
-  configService = new ConfigService(
-    new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
-    env,
-    logger
-  );
-
-  coreContext = { env, logger, configService };
+  coreContext = { env, logger, configService: configService as any };
 });
 
 afterEach(() => {
@@ -175,6 +178,44 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
   expect(mockPluginInstance.setup).toHaveBeenCalledWith(setupContext, setupDependencies);
 });
 
+test('`start` fails if setup is not called first', async () => {
+  const manifest = createPluginManifest();
+  const plugin = new PluginWrapper(
+    'some-plugin-path',
+    manifest,
+    createPluginInitializerContext(coreContext, manifest)
+  );
+
+  await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
+  );
+});
+
+test('`start` calls plugin.start with context and dependencies', async () => {
+  const manifest = createPluginManifest();
+  const plugin = new PluginWrapper(
+    'plugin-with-initializer-path',
+    manifest,
+    createPluginInitializerContext(coreContext, manifest)
+  );
+  const context = { any: 'thing' } as any;
+  const deps = { otherDep: 'value' };
+
+  const pluginStartContract = { contract: 'start-contract' };
+  const mockPluginInstance = {
+    setup: jest.fn(),
+    start: jest.fn().mockResolvedValue(pluginStartContract),
+  };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {} as any);
+
+  const startContract = await plugin.start(context, deps);
+
+  expect(startContract).toBe(pluginStartContract);
+  expect(mockPluginInstance.start).toHaveBeenCalledWith(context, deps);
+});
+
 test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
   const plugin = new PluginWrapper(
@@ -220,4 +261,71 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 
   await expect(plugin.stop()).resolves.toBeUndefined();
   expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);
+});
+
+describe('#getConfigSchema()', () => {
+  it('reads config schema from plugin', () => {
+    const pluginSchema = schema.any();
+    jest.doMock(
+      'plugin-with-schema/server',
+      () => ({
+        config: {
+          schema: pluginSchema,
+        },
+      }),
+      { virtual: true }
+    );
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper(
+      'plugin-with-schema',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+
+    expect(plugin.getConfigSchema()).toBe(pluginSchema);
+  });
+
+  it('returns null if config definition not specified', () => {
+    jest.doMock('plugin-with-no-definition/server', () => ({}), { virtual: true });
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper(
+      'plugin-with-no-definition',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+    expect(plugin.getConfigSchema()).toBe(null);
+  });
+
+  it('returns null for plugins without a server part', () => {
+    const manifest = createPluginManifest({ server: false });
+    const plugin = new PluginWrapper(
+      'plugin-with-no-definition',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+    expect(plugin.getConfigSchema()).toBe(null);
+  });
+
+  it('throws if plugin contains invalid schema', () => {
+    jest.doMock(
+      'plugin-invalid-schema/server',
+      () => ({
+        config: {
+          schema: {
+            validate: () => null,
+          },
+        },
+      }),
+      { virtual: true }
+    );
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper(
+      'plugin-invalid-schema',
+      manifest,
+      createPluginInitializerContext(coreContext, manifest)
+    );
+    expect(() => plugin.getConfigSchema()).toThrowErrorMatchingInlineSnapshot(
+      `"Configuration schema expected to be an instance of Type"`
+    );
+  });
 });
