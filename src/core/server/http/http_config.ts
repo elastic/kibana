@@ -85,6 +85,11 @@ const createHttpSchema = schema.object(
 
 export type HttpConfigType = TypeOf<typeof createHttpSchema>;
 
+export const config = {
+  path: 'server',
+  schema: createHttpSchema,
+};
+
 export class HttpConfig {
   /**
    * @internal
@@ -104,15 +109,15 @@ export class HttpConfig {
   /**
    * @internal
    */
-  constructor(config: HttpConfigType, env: Env) {
-    this.autoListen = config.autoListen;
-    this.host = config.host;
-    this.port = config.port;
-    this.cors = config.cors;
-    this.maxPayload = config.maxPayload;
-    this.basePath = config.basePath;
-    this.rewriteBasePath = config.rewriteBasePath;
+  constructor(rawConfig: HttpConfigType, env: Env) {
+    this.autoListen = rawConfig.autoListen;
+    this.host = rawConfig.host;
+    this.port = rawConfig.port;
+    this.cors = rawConfig.cors;
+    this.maxPayload = rawConfig.maxPayload;
+    this.basePath = rawConfig.basePath;
+    this.rewriteBasePath = rawConfig.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
-    this.ssl = new SslConfig(config.ssl);
+    this.ssl = new SslConfig(rawConfig.ssl);
   }
 }
