@@ -61,9 +61,9 @@ describe('createTickFormatter(format, template)', () => {
     expect(fn(1500)).to.equal('1.5k/s');
   });
 
-  it('returns zero if passed a string', () => {
+  it('returns "foo" if passed a string', () => {
     const fn = createTickFormatter();
-    expect(fn('100')).to.equal('0');
+    expect(fn('foo')).to.equal('foo');
   });
 
   it('returns value if passed a bad formatter', () => {
