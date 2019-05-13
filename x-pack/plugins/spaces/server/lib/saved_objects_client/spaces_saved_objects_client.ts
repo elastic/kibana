@@ -58,7 +58,7 @@ const throwErrorIfTypesContainsSpace = (types: string[]) => {
   }
 };
 
-export class SpacesSavedObjectsClient implements SavedObjectsClient {
+export class SpacesSavedObjectsClient implements PublicMethodsOf<SavedObjectsClient> {
   public readonly errors: any;
   private readonly client: SavedObjectsClient;
   private readonly spaceId: string;
@@ -101,7 +101,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
+   * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]

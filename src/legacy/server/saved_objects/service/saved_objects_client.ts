@@ -101,7 +101,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
   version?: string;
-  updated_at?: string;
+  updated_at?: Date;
   error?: {
     message: string;
     statusCode: number;

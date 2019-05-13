@@ -17,29 +17,20 @@
  * under the License.
  */
 
-import { ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export interface SavedObjectsService<Request = any> {
-  // ATTENTION: these types are incomplete
-  addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
-    Request
-  >['addClientWrapperFactory'];
-  getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
-  SavedObjectsClient: SavedObjectsClient;
-  types: string[];
-  getSavedObjectsRepository(...rest: any[]): any;
-}
+const create = () => {
+  const mock: jest.Mocked<PublicMethodsOf<SavedObjectsClient>> = {
+    create: jest.fn(),
+    bulkCreate: jest.fn(),
+    delete: jest.fn(),
+    bulkGet: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
 
-export { SavedObjectsClientWrapperFactory } from './lib';
-export {
-  FindOptions,
-  GetResponse,
-  UpdateResponse,
-  CreateResponse,
-  MigrationVersion,
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClient,
-  SavedObjectReference,
-} from './saved_objects_client';
+  return mock;
+};
+
+export const SavedObjectsClientMock = { create };

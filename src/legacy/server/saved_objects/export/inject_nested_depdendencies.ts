@@ -34,7 +34,7 @@ export function getObjectReferencesToFetch(savedObjectsMap: Map<string, SavedObj
 
 export async function injectNestedDependencies(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: PublicMethodsOf<SavedObjectsClient>
 ) {
   const savedObjectsMap = new Map<string, SavedObject>();
   for (const savedObject of savedObjects) {

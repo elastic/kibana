@@ -32,9 +32,7 @@ describe('includedFields', () => {
 
   it('accepts type as string array', () => {
     const fields = includedFields(['config', 'secret'], 'foo');
-    expect(fields).toMatchInlineSnapshot(
-      '',
-      `
+    expect(fields).toMatchInlineSnapshot(`
 Array [
   "config.foo",
   "secret.foo",
@@ -45,8 +43,7 @@ Array [
   "updated_at",
   "foo",
 ]
-`
-    );
+`);
   });
 
   it('accepts field as string', () => {

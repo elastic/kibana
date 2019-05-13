@@ -64,7 +64,7 @@ export interface SavedObjectReference {
  */
 interface SavedObjectDoc {
   attributes: object;
-  id: string;
+  id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
   migrationVersion?: MigrationVersion;

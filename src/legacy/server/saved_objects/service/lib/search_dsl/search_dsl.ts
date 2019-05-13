@@ -25,7 +25,7 @@ import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 
 interface GetSearchDslOptions {
-  type: string;
+  type: string | string[];
   search?: string;
   defaultSearchOperator?: string;
   searchFields?: string[];

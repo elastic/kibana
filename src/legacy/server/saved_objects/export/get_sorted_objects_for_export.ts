@@ -30,7 +30,7 @@ interface ObjectToExport {
 interface ExportObjectsOptions {
   types?: string[];
   objects?: ObjectToExport[];
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: PublicMethodsOf<SavedObjectsClient>;
   exportSizeLimit: number;
   includeReferencesDeep?: boolean;
 }
@@ -44,7 +44,7 @@ async function fetchObjectsToExport({
   objects?: ObjectToExport[];
   types?: string[];
   exportSizeLimit: number;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: PublicMethodsOf<SavedObjectsClient>;
 }) {
   if (objects) {
     if (objects.length > exportSizeLimit) {
