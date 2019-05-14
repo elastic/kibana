@@ -10,6 +10,7 @@ import {
   EuiColorPicker,
   EuiFormControlLayout
 } from '@elastic/eui';
+import { staticColorShape } from '../style_option_shapes';
 
 export function StaticColorSelection({ onChange, styleOptions }) {
   const onColorChange = color => {
@@ -28,8 +29,6 @@ export function StaticColorSelection({ onChange, styleOptions }) {
 }
 
 StaticColorSelection.propTypes = {
-  styleOptions: PropTypes.shape({
-    color: PropTypes.string.isRequired,
-  }).isRequired,
+  styleOptions: staticColorShape.isRequired,
   onChange: PropTypes.func.isRequired
 };

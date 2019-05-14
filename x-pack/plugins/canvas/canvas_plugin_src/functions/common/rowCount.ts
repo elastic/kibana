@@ -5,8 +5,11 @@
  */
 
 import { ContextFunction, Datatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 export function rowCount(): ContextFunction<'rowCount', Datatable, {}, number> {
+  const { help } = getFunctionHelp().rowCount;
+
   return {
     name: 'rowCount',
     aliases: [],
@@ -14,8 +17,7 @@ export function rowCount(): ContextFunction<'rowCount', Datatable, {}, number> {
     context: {
       types: ['datatable'],
     },
-    help:
-      'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
+    help,
     args: {},
     fn: context => context.rows.length,
   };

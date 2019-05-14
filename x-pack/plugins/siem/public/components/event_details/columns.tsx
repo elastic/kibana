@@ -8,11 +8,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiToolTip } from '@elast
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { DefaultDraggable } from '../draggables';
+import { DetailItem, ToStringArray } from '../../graphql/types';
+import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
+import { getIconFromType, getExampleText } from './helpers';
 import { SelectableText } from '../selectable_text';
+import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { WithHoverActions } from '../with_hover_actions';
 
-import { getIconFromType, ItemValues } from './helpers';
 import * as i18n from './translations';
 
 const HoverActionsContainer = styled(EuiPanel)`
@@ -27,7 +30,7 @@ const HoverActionsContainer = styled(EuiPanel)`
   width: 30px;
 `;
 
-export const getColumns = (id: string) => [
+export const getColumns = (eventId: string) => [
   {
     field: 'type',
     name: '',
@@ -63,29 +66,52 @@ export const getColumns = (id: string) => [
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (values: ItemValues[]) => (
+    render: (values: ToStringArray | null | undefined, data: DetailItem) => (
       <EuiFlexGroup direction="column" alignItems="flexStart" component="span" gutterSize="none">
-        {values.map(item => (
-          <EuiFlexItem grow={false} component="span" key={`${id}-value-${item.valueAsString}`}>
-            <WithHoverActions
-              hoverContent={
-                <HoverActionsContainer data-test-subj="hover-actions-container">
-                  <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-                    <WithCopyToClipboard text={item.valueAsString} titleSummary={i18n.VALUE} />
-                  </EuiToolTip>
-                </HoverActionsContainer>
-              }
-              render={() => item.value}
-            />
-          </EuiFlexItem>
-        ))}
+        {values != null &&
+          values.map((value, i) => (
+            <EuiFlexItem
+              grow={false}
+              component="span"
+              key={`${eventId}-${data.field}-${i}-${value}`}
+            >
+              <WithHoverActions
+                hoverContent={
+                  <HoverActionsContainer data-test-subj="hover-actions-container">
+                    <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
+                      <WithCopyToClipboard text={value} titleSummary={i18n.VALUE} />
+                    </EuiToolTip>
+                  </HoverActionsContainer>
+                }
+                render={() => (
+                  <DefaultDraggable
+                    data-test-subj="ip"
+                    field={data.field}
+                    id={`event-details-field-value-${eventId}-${data.field}-${i}-${value}`}
+                    tooltipContent={data.field}
+                    value={value}
+                  >
+                    <FormattedFieldValue
+                      contextId={'event-details-field-value'}
+                      eventId={eventId}
+                      fieldName={data.field}
+                      fieldType={data.type}
+                      value={value}
+                    />
+                  </DefaultDraggable>
+                )}
+              />
+            </EuiFlexItem>
+          ))}
       </EuiFlexGroup>
     ),
   },
   {
     field: 'description',
     name: i18n.DESCRIPTION,
-    render: (description: string) => <SelectableText>{description}</SelectableText>,
+    render: (description: string | null | undefined, data: DetailItem) => (
+      <SelectableText>{`${description || ''} ${getExampleText(data)}`}</SelectableText>
+    ),
     sortable: true,
     truncateText: true,
     width: '50%',

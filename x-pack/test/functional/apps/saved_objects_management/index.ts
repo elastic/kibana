@@ -7,7 +7,7 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function advancedSettingsApp({
+export default function savedObjectsManagementApp({
   loadTestFile,
 }: KibanaFunctionalTestDefaultProviders) {
   describe('Saved objects management', function savedObjectsManagementAppTestSuite() {

@@ -30,7 +30,7 @@ export function ServiceDetails() {
     return null;
   }
 
-  const isRumAgent = isRumAgentName(serviceDetailsData.agentName || '');
+  const isRumAgent = isRumAgentName(serviceDetailsData.agentName);
 
   return (
     <React.Fragment>
@@ -56,6 +56,7 @@ export function ServiceDetails() {
         urlParams={urlParams}
         transactionTypes={serviceDetailsData.types}
         isRumAgent={isRumAgent}
+        agentName={serviceDetailsData.agentName}
       />
     </React.Fragment>
   );

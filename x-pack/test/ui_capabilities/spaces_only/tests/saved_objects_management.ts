@@ -22,14 +22,32 @@ export default function savedObjectsManagementTests({
   describe('savedObjectsManagement', () => {
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
-        // spaces don't affect saved objects management, so we assert the same thing for every scenario
-        const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
-        expect(uiCapabilities.success).to.be(true);
-        expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-        const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
-          savedObjectsManagementBuilder.uiCapabilities('all')
-        );
-        expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
+        switch (scenario.id) {
+          case 'nothing_space':
+            // Saved Objects Managment is not available when everything is disabled.
+            const nothingSpaceCapabilities = await uiCapabilitiesService.get({
+              spaceId: scenario.id,
+            });
+            expect(nothingSpaceCapabilities.success).to.be(true);
+            expect(nothingSpaceCapabilities.value).to.have.property('savedObjectsManagement');
+            const nothingSpaceExpected = mapValues(
+              nothingSpaceCapabilities.value!.savedObjectsManagement,
+              () => savedObjectsManagementBuilder.uiCapabilities('none')
+            );
+            expect(nothingSpaceCapabilities.value!.savedObjectsManagement).to.eql(
+              nothingSpaceExpected
+            );
+            break;
+          default:
+            // Otherwise it's available without restriction
+            const uiCapabilities = await uiCapabilitiesService.get({ spaceId: scenario.id });
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
+            const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+              savedObjectsManagementBuilder.uiCapabilities('all')
+            );
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
+        }
       });
     });
   });
