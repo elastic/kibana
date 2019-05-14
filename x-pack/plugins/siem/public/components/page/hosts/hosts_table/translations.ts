@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const HOSTS = i18n.translate('xpack.siem.hostsTable.hostsTitle', {
-  defaultMessage: 'Hosts',
+  defaultMessage: 'All Hosts',
 });
 
 export const UNIT = (totalCount: number) =>

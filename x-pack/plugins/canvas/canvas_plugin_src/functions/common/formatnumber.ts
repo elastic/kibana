@@ -6,16 +6,19 @@
 
 import numeral from '@elastic/numeral';
 import { ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   format: string;
 }
 
 export function formatnumber(): ContextFunction<'formatnumber', number, Arguments, string> {
+  const { help, args: argHelp } = getFunctionHelp().formatnumber;
+
   return {
     name: 'formatnumber',
     type: 'string',
-    help: 'Turn a number into a string using a NumberJS format',
+    help,
     context: {
       types: ['number'],
     },
@@ -23,7 +26,7 @@ export function formatnumber(): ContextFunction<'formatnumber', number, Argument
       format: {
         aliases: ['_'],
         types: ['string'],
-        help: 'NumeralJS format string http://numeraljs.com/#format',
+        help: argHelp.format,
       },
     },
     fn: (context, args) => {

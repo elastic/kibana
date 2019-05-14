@@ -29,15 +29,8 @@ interface KibanaFeatures {
   // that are orchestrated by the "master" process (dev mode only feature).
   isClusterModeSupported: boolean;
 
-  // Indicates whether we can run Kibana without X-Pack plugin pack even if it's
-  // installed (dev mode only feature).
-  isOssModeSupported: boolean;
-
   // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
   isReplModeSupported: boolean;
-
-  // Indicates whether X-Pack plugin pack is installed and available.
-  isXPackInstalled: boolean;
 }
 
 interface BootstrapArgs {
