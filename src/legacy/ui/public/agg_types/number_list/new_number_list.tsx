@@ -226,7 +226,7 @@ function getNext(list: NumberRowModel[], range: Range): number | '' {
 function getInitList(list: Array<number | undefined>): NumberRowModel[] {
   return list.length
     ? list.map(num => ({
-        value: num === undefined ? EMPTY_STRING : num,
+        value: (num === undefined ? EMPTY_STRING : num) as NumberRowModel['value'],
         id: generateId(),
         isInvalid: false,
       }))
@@ -246,7 +246,7 @@ function getUpdatedModels(
   }
   return numberList.map((number, index) => {
     const model = modelList[index] || { id: generateId() };
-    const newValue = number === undefined ? EMPTY_STRING : number;
+    const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
     return {
       ...model,
       value: newValue,
