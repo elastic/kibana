@@ -6,16 +6,19 @@
 
 import moment from 'moment';
 import { ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   format: string;
 }
 
 export function rounddate(): ContextFunction<'rounddate', number, Arguments, number> {
+  const { help, args: argHelp } = getFunctionHelp().rounddate;
+
   return {
     name: 'rounddate',
     type: 'number',
-    help: 'Round ms since epoch using a moment formatting string. Returns ms since epoch',
+    help,
     context: {
       types: ['number'],
     },
@@ -23,8 +26,7 @@ export function rounddate(): ContextFunction<'rounddate', number, Arguments, num
       format: {
         aliases: ['_'],
         types: ['string'],
-        help:
-          'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/). For example "YYYY-MM" would round to the month',
+        help: argHelp.format,
       },
     },
     fn: (context, args) => {

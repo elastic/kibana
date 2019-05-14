@@ -9,6 +9,7 @@ import { evaluate } from 'tinymath';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 import { ContextFunction, Datatable, isDatatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   expression: string;
@@ -17,12 +18,12 @@ interface Arguments {
 type Context = number | Datatable;
 
 export function math(): ContextFunction<'math', Context, Arguments, number> {
+  const { help, args: argHelp } = getFunctionHelp().math;
+
   return {
     name: 'math',
     type: 'number',
-    help:
-      'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. ' +
-      'If you pass in a number it is available as "value" (without the quotes)',
+    help,
     context: {
       types: ['number', 'datatable'],
     },
@@ -30,8 +31,7 @@ export function math(): ContextFunction<'math', Context, Arguments, number> {
       expression: {
         aliases: ['_'],
         types: ['string'],
-        help:
-          'An evaluated TinyMath expression. (See [TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html))',
+        help: argHelp.expression,
       },
     },
     fn: (context, args) => {
