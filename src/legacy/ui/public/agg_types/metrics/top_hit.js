@@ -23,9 +23,11 @@ import '../directives/auto_select_if_only_one';
 import '../directives/scroll_bottom';
 import '../filters/sort_prefix_first';
 import topSortEditor from '../controls/top_sort.html';
-import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { i18n } from '@kbn/i18n';
+import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
+import { SizeParamEditor } from '../controls/size';
+import { TopAggregateParamEditor } from '../controls/top_aggregate';
 
 const isNumber = function (type) {
   return type === 'number';
@@ -97,47 +99,47 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'aggregate',
-      type: 'optioned',
-      editor: aggregateAndSizeEditor,
+      type: 'select',
+      editorComponent: wrapWithInlineComp(TopAggregateParamEditor),
       options: [
         {
-          display: i18n.translate('common.ui.aggTypes.metrics.topHit.minLabel', {
+          text: i18n.translate('common.ui.aggTypes.metrics.topHit.minLabel', {
             defaultMessage: 'Min'
           }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
-          val: 'min'
+          value: 'min'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.metrics.topHit.maxLabel', {
+          text: i18n.translate('common.ui.aggTypes.metrics.topHit.maxLabel', {
             defaultMessage: 'Max'
           }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
-          val: 'max'
+          value: 'max'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.metrics.topHit.sumLabel', {
+          text: i18n.translate('common.ui.aggTypes.metrics.topHit.sumLabel', {
             defaultMessage: 'Sum'
           }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
-          val: 'sum'
+          value: 'sum'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.metrics.topHit.averageLabel', {
+          text: i18n.translate('common.ui.aggTypes.metrics.topHit.averageLabel', {
             defaultMessage: 'Average'
           }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
-          val: 'average'
+          value: 'average'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.metrics.topHit.concatenateLabel', {
+          text: i18n.translate('common.ui.aggTypes.metrics.topHit.concatenateLabel', {
             defaultMessage: 'Concatenate'
           }),
           isCompatibleType: _.constant(true),
@@ -145,27 +147,14 @@ export const topHitMetricAgg = new MetricAggType({
             return name === 'metric' || name === 'table';
           },
           disabled: true,
-          val: 'concat'
+          value: 'concat'
         }
       ],
-      controller: function ($scope) {
-        $scope.options = [];
-        $scope.$watchGroup([ 'vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
-          if (fieldType && visName) {
-            $scope.options = _.filter($scope.aggParam.options, option => {
-              return option.isCompatibleVis(visName) && option.isCompatibleType(fieldType);
-            });
-            if ($scope.options.length === 1) {
-              $scope.agg.params.aggregate = $scope.options[0];
-            }
-          }
-        });
-      },
       write: _.noop
     },
     {
       name: 'size',
-      editor: null, // size setting is done together with the aggregation setting
+      editorComponent: wrapWithInlineComp(SizeParamEditor),
       default: 1
     },
     {
@@ -247,7 +236,7 @@ export const topHitMetricAgg = new MetricAggType({
       if (!_.compact(values).length) {
         return null;
       }
-      switch (agg.params.aggregate.val) {
+      switch (agg.params.aggregate.value) {
         case 'max':
           return _.max(values);
         case 'min':

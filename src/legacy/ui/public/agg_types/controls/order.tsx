@@ -30,6 +30,7 @@ function OrderParamEditor({
   setValue,
   setValidity,
   setTouched,
+  wrappedWithInlineComp,
 }: AggParamEditorProps<SelectValueProp> & SelectParamEditorProps) {
   const label = i18n.translate('common.ui.aggTypes.orderLabel', {
     defaultMessage: 'Order',
@@ -48,7 +49,7 @@ function OrderParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className="visEditorSidebar__aggParamFormRow"
+      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
     >
       <EuiSelect
         options={aggParam.options.raw}

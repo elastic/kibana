@@ -33,6 +33,8 @@ export interface AggParamEditorProps<T> {
   indexedFields?: FieldParamType[];
   showValidation: boolean;
   value: T;
+  visName: string;
+  wrappedWithInlineComp?: boolean;
   setValidity(isValid: boolean): void;
   setValue(value?: T): void;
   setTouched(): void;

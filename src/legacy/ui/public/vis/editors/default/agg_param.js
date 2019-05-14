@@ -35,6 +35,7 @@ uiModules
     ['setValidity', { watchDepth: 'reference' }],
     'showValidation',
     'value',
+    'visName'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -62,6 +63,7 @@ uiModules
             indexed-fields="indexedFields"
             show-validation="showValidation"
             value="paramValue"
+            visName="vis.type.name"
             on-change="onChange"
             set-touched="setTouched"
             set-validity="setValidity"

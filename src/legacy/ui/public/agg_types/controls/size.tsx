@@ -20,19 +20,37 @@
 import React, { useEffect } from 'react';
 import { isUndefined } from 'lodash';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function SizeParamEditor({
+  agg,
   value,
   setValue,
   showValidation,
   setValidity,
   setTouched,
+  wrappedWithInlineComp,
 }: AggParamEditorProps<number | ''>) {
-  const label = i18n.translate('common.ui.aggTypes.sizeLabel', {
-    defaultMessage: 'Size',
-  });
+  const label = (
+    <>
+      <FormattedMessage id="common.ui.aggTypes.sizeLabel" defaultMessage="Size" />
+      {agg.type.name === 'top_hits' ? (
+        <>
+          {' '}
+          <EuiIconTip
+            position="right"
+            content={i18n.translate('common.ui.aggTypes.sizeTooltip', {
+              defaultMessage:
+                "Request top-K hits. Multiple hits will be combined via 'aggregate with'.",
+            })}
+            type="questionInCircle"
+          />
+        </>
+      ) : null}
+    </>
+  );
   const isValid = Number(value) > 0;
 
   useEffect(
@@ -47,7 +65,7 @@ function SizeParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className="visEditorSidebar__aggParamFormRow"
+      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}
