@@ -9,32 +9,45 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+const Header = styled.header<{ border?: boolean }>`
+  ${props => `
+    margin-bottom: ${props.theme.eui.euiSizeL};
+
+    ${props.border &&
+      `
+      border-bottom: ${props.theme.eui.euiBorderThin};
+      padding-bottom: ${props.theme.eui.euiSizeL};
+    `}
+  `}
+`;
+
 export interface HeaderPanelProps {
+  border?: boolean;
   children?: React.ReactNode;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   tooltip?: string;
 }
 
-export const HeaderPanel = pure<HeaderPanelProps>(({ children, subtitle, title, tooltip }) => (
-  <FlexGroup alignItems="center">
-    <EuiFlexItem>
-      <EuiTitle>
-        <h2 data-test-subj="page_headline_title">
-          {title}{' '}
-          {tooltip && <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />}
-        </h2>
-      </EuiTitle>
+export const HeaderPanel = pure<HeaderPanelProps>(
+  ({ border, children, subtitle, title, tooltip }) => (
+    <Header border={border}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiTitle>
+            <h2 data-test-subj="page_headline_title">
+              {title}{' '}
+              {tooltip && <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />}
+            </h2>
+          </EuiTitle>
 
-      <EuiText color="subdued" size="s">
-        {subtitle}
-      </EuiText>
-    </EuiFlexItem>
+          <EuiText color="subdued" size="s">
+            {subtitle}
+          </EuiText>
+        </EuiFlexItem>
 
-    {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
-  </FlexGroup>
-));
-
-const FlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: 12px;
-`;
+        {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
+      </EuiFlexGroup>
+    </Header>
+  )
+);

@@ -6,16 +6,19 @@
 
 import moment from 'moment';
 import { ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   format: string;
 }
 
 export function formatdate(): ContextFunction<'formatdate', number, Arguments, string> {
+  const { help, args: argHelp } = getFunctionHelp().formatdate;
+
   return {
     name: 'formatdate',
     type: 'string',
-    help: 'Output a ms since epoch number as a formatted string',
+    help,
     context: {
       types: ['number'],
     },
@@ -23,7 +26,7 @@ export function formatdate(): ContextFunction<'formatdate', number, Arguments, s
       format: {
         aliases: ['_'],
         types: ['string'],
-        help: 'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
+        help: argHelp.format,
       },
     },
     fn: (context, args) => {
