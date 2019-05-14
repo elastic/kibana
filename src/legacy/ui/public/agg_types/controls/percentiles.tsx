@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../../vis/editors/default';
 import { NumberList } from '../number_list';
 
-function PercentileRanksEditor({
+function PercentilesEditor({
   agg,
   showValidation,
   value,
@@ -32,8 +32,8 @@ function PercentileRanksEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<Array<number | undefined>>) {
-  const label = i18n.translate('common.ui.aggTypes.percentileRanks.valuesLabel', {
-    defaultMessage: 'Values',
+  const label = i18n.translate('common.ui.aggTypes.percentiles.percentsLabel', {
+    defaultMessage: 'Percents',
   });
   const [isValid, setIsValid] = useState(true);
 
@@ -47,16 +47,17 @@ function PercentileRanksEditor({
       label={label}
       labelType="legend"
       fullWidth={true}
-      id={`visEditorPercentileRanksLabel${agg.id}`}
+      id={`visEditorPercentileLabel${agg.id}`}
       isInvalid={showValidation ? !isValid : false}
       className="visEditorSidebar__aggParamFormRow"
     >
       <NumberList
-        labelledbyId={`visEditorPercentileRanksLabel${agg.id}-legend`}
+        labelledbyId={`visEditorPercentileLabel${agg.id}-legend`}
         numberArray={value}
-        range="[-Infinity,Infinity]"
-        unitName={i18n.translate('common.ui.aggTypes.percentileRanks.valueUnitNameText', {
-          defaultMessage: 'value',
+        range="[0,100]"
+        validateAscendingOrder={false}
+        unitName={i18n.translate('common.ui.aggTypes.percentileRanks.percentUnitNameText', {
+          defaultMessage: 'percent',
         })}
         showValidation={showValidation}
         onChange={setValue}
@@ -67,4 +68,4 @@ function PercentileRanksEditor({
   );
 }
 
-export { PercentileRanksEditor };
+export { PercentilesEditor };

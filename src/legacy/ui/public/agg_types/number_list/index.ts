@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './number_list';
+export { NumberList } from './number_list';

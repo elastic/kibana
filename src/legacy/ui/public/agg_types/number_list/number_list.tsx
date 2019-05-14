@@ -60,7 +60,7 @@ function NumberList({
   // responsible for discarding changes
   useEffect(
     () => {
-      const updatedModels = getUpdatedModels(numberArray, models);
+      const updatedModels = getUpdatedModels(numberArray, models, numberRange);
       if (validateAscendingOrder) {
         validateOrder(updatedModels, setAscendingError);
       }
@@ -136,13 +136,13 @@ function NumberList({
             onBlur={() => onBlur(model)}
             autoFocus={models.length !== 1 && arrayIndex === models.length - 1}
           />
-          {model.errors && model.errors.length > 0 && (
+          {showValidation && model.isInvalid && model.errors && model.errors.length > 0 && (
             <EuiFormErrorText>{model.errors.join('\n')}</EuiFormErrorText>
           )}
           <EuiSpacer size="s" />
         </Fragment>
       ))}
-      {ascendingError && <EuiFormErrorText>{ascendingError}</EuiFormErrorText>}
+      {showValidation && ascendingError && <EuiFormErrorText>{ascendingError}</EuiFormErrorText>}
       <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiButton iconType="plusInCircle" fill={true} fullWidth={true} onClick={onAdd} size="s">
@@ -197,7 +197,8 @@ function hasInvalidValues(modelList: NumberRowModel[]): boolean {
 
 function getUpdatedModels(
   numberList: Array<number | undefined>,
-  modelList: NumberRowModel[]
+  modelList: NumberRowModel[],
+  numberRange: Range
 ): NumberRowModel[] {
   if (!numberList.length) {
     return modelList;
@@ -205,10 +206,12 @@ function getUpdatedModels(
   return numberList.map((number, index) => {
     const model = modelList[index] || { id: generateId() };
     const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
+    const { isValid, errors } = validateValue(newValue, numberRange);
     return {
       ...model,
       value: newValue,
-      isInvalid: newValue === model.value ? model.isInvalid : false,
+      isInvalid: !isValid,
+      errors,
     };
   });
 }
