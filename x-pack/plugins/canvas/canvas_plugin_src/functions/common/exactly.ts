@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Filter, ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -11,6 +12,8 @@ interface Arguments {
 }
 
 export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter> {
+  const { help, args: argHelp } = getFunctionHelp().exactly;
+
   return {
     name: 'exactly',
     aliases: [],
@@ -18,17 +21,17 @@ export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter>
     context: {
       types: ['filter'],
     },
-    help: 'Create a filter that matches a given column for a perfectly exact value',
+    help,
     args: {
       column: {
         types: ['string'],
         aliases: ['field', 'c'],
-        help: 'The column or field to attach the filter to',
+        help: argHelp.column,
       },
       value: {
         types: ['string'],
         aliases: ['v', 'val'],
-        help: 'The value to match exactly, including white space and capitalization',
+        help: argHelp.value,
       },
     },
     fn: (context, args) => {

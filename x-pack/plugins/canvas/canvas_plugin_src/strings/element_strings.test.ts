@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18nProvider } from './i18n_provider';
-i18nProvider.init();
-
 import { getElementStrings } from '.';
 import { elementSpecs } from '../elements';
-
-beforeAll(() => {
-  i18nProvider.init();
-});
 
 describe('ElementStrings', () => {
   const elementStrings = getElementStrings();

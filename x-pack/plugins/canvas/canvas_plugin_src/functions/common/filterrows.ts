@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Datatable, ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   fn: (datatable: Datatable) => Promise<boolean>;
@@ -15,6 +16,8 @@ export function filterrows(): ContextFunction<
   Arguments,
   Promise<Datatable>
 > {
+  const { help, args: argHelp } = getFunctionHelp().filterrows;
+
   return {
     name: 'filterrows',
     aliases: [],
@@ -22,15 +25,13 @@ export function filterrows(): ContextFunction<
     context: {
       types: ['datatable'],
     },
-    help: 'Filter rows in a datatable based on the return value of a subexpression.',
+    help,
     args: {
       fn: {
         resolve: false,
         aliases: ['_'],
         types: ['boolean'],
-        help:
-          'An expression to pass each rows in the datatable into. The expression should return a boolean. ' +
-          'A true value will preserve the row, and a false value will remove it.',
+        help: argHelp.fn,
       },
     },
     fn(context, { fn }) {
