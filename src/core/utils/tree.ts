@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export * from './get';
-export * from './pick';
-export * from './assert_never';
-export * from './url';
-export * from './tree';
+export function isSubtree(leafPath: string, rootPath: string, delimiter = '.') {
+  if (!leafPath || !rootPath) return false;
+  const leafSegments = leafPath.split(delimiter);
+  const rootSegments = rootPath.split(delimiter);
+  let i = 0;
+  while (i < rootSegments.length) {
+    if (leafSegments[i] !== rootSegments[i]) return false;
+    i++;
+  }
+  return true;
+}

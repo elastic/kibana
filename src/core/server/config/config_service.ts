@@ -24,6 +24,7 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
+import { isSubtree } from '../../utils/tree';
 
 /** @internal */
 export class ConfigService {
@@ -196,4 +197,4 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  * handled paths.
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
-  handledPaths.some(handledPath => path.startsWith(handledPath));
+  handledPaths.some(handledPath => isSubtree(path, handledPath));

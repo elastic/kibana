@@ -21,6 +21,7 @@ import { difference, get, set } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
 import { getTransform } from '../../deprecation';
+import { isSubtree } from '../../../core/utils';
 
 const getFlattenedKeys = object => Object.keys(getFlattenedObject(object));
 
@@ -68,7 +69,7 @@ async function getUnusedConfigKeys(
   return difference(inputKeys, appliedKeys).filter(
     unusedConfigKey =>
       !coreHandledConfigPaths.some(usedInCoreConfigKey =>
-        unusedConfigKey.startsWith(usedInCoreConfigKey)
+        isSubtree(unusedConfigKey, usedInCoreConfigKey)
       )
   );
 }
