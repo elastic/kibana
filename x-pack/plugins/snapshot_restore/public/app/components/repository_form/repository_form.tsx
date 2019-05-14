@@ -112,7 +112,11 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiForm isInvalid={hasValidationErrors} error={validationErrors}>
+    <EuiForm
+      isInvalid={hasValidationErrors}
+      error={validationErrors}
+      data-test-subj="repositoryForm"
+    >
       {currentStep === 1 && !isEditing ? renderStepOne() : renderStepTwo()}
     </EuiForm>
   );

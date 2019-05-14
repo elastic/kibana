@@ -133,7 +133,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
               color="primary"
               iconType="arrowLeft"
               onClick={onBack}
-              data-test-subj="srRepositoryFormSubmitButton"
+              data-test-subj="backButton"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.backButtonLabel"
@@ -148,7 +148,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
             iconType="check"
             onClick={onSave}
             fill
-            data-test-subj="srRepositoryFormSubmitButton"
+            data-test-subj="submitButton"
             isLoading={isSaving}
           >
             {isSaving ? savingLabel : saveLabel}

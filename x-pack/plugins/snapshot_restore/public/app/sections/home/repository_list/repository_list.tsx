@@ -118,7 +118,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             })}
             fill
             iconType="plusInCircle"
-            data-test-subj="srRepositoriesEmptyPromptAddButton"
+            data-test-subj="addButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.addRepositoryButtonLabel"
@@ -126,6 +126,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             />
           </EuiButton>
         }
+        data-test-subj="emptyPrompt"
       />
     );
   } else {
