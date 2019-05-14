@@ -11,6 +11,7 @@ import header from './header.png';
 export const progressGauge: ElementFactory = () => ({
   name: 'progressGauge',
   displayName: 'Progress gauge',
+  tags: ['chart', 'proportion'],
   help: 'Displays progress as a portion of a gauge',
   width: 200,
   height: 200,
