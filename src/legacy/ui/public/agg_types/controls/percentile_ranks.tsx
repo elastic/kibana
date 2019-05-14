@@ -32,7 +32,9 @@ function PercentileRanksEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<Array<number | undefined>>) {
-  const label = i18n.translate('common.ui.aggTypes.valuesLabel', { defaultMessage: 'Values' });
+  const label = i18n.translate('common.ui.aggTypes.percentileRanks.valuesLabel', {
+    defaultMessage: 'Values',
+  });
   const [isValid, setIsValid] = useState(true);
 
   const setModelValidy = (isListValid: boolean) => {
@@ -53,7 +55,9 @@ function PercentileRanksEditor({
         labelledbyId={`visEditorPercentileRanksLabel${agg.id}-legend`}
         numberArray={value}
         range="[-Infinity,Infinity]"
-        unitName="value"
+        unitName={i18n.translate('common.ui.aggTypes.percentileRanks.valueUnitNameText', {
+          defaultMessage: 'value',
+        })}
         showValidation={showValidation}
         onChange={setValue}
         setTouched={setTouched}

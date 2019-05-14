@@ -54,9 +54,12 @@ function NumberRow({
   onDelete,
   onChange,
 }: NumberRowProps) {
-  const deleteBtnAriaLabel = i18n.translate('common.ui.numberList.removeUnitButtonAriaLabel', {
-    defaultMessage: 'Remove this rank value',
-  });
+  const deleteBtnAriaLabel = i18n.translate(
+    'common.ui.aggTypes.numberList.removeUnitButtonAriaLabel',
+    {
+      defaultMessage: 'Remove this rank value',
+    }
+  );
 
   const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) =>
     onChange({
@@ -71,6 +74,9 @@ function NumberRow({
           aria-labelledby={labelledbyId}
           autoFocus={autoFocus}
           isInvalid={isInvalid}
+          placeholder={i18n.translate('common.ui.aggTypes.numberList.enterValuePlaceholder', {
+            defaultMessage: 'Enter a value',
+          })}
           onChange={onValueChanged}
           value={model.value}
           fullWidth={true}

@@ -28,13 +28,13 @@ import { NumberRow, NumberRowModel } from './number_row';
 
 const EMPTY_STRING = '';
 interface NumberListProps {
+  labelledbyId: string;
   numberArray: Array<number | undefined>;
+  range?: string;
+  showValidation: boolean;
   unitName: string;
   validateAscendingOrder?: boolean;
-  labelledbyId: string;
-  showValidation: boolean;
-  range?: string;
-  onChange(list: any[]): void;
+  onChange(list: Array<number | undefined>): void;
   setTouched(): void;
   setValidity(isValid: boolean): void;
 }
@@ -43,8 +43,8 @@ const defaultRange = parseRange('[0,Infinity)');
 const generateId = htmlIdGenerator();
 
 function NumberList({
-  numberArray,
   labelledbyId,
+  numberArray,
   range,
   showValidation,
   unitName,
@@ -55,13 +55,14 @@ function NumberList({
 }: NumberListProps) {
   const numberRange = getRange(range);
   const [models, setModels] = useState(getInitList(numberArray));
-  const [ascendingError, setAscendingError] = useState('');
+  const [ascendingError, setAscendingError] = useState(EMPTY_STRING);
 
+  // responsible for discarding changes
   useEffect(
     () => {
       const updatedModels = getUpdatedModels(numberArray, models);
       if (validateAscendingOrder) {
-        validateOrder(updatedModels);
+        validateOrder(updatedModels, setAscendingError);
       }
       setModels(updatedModels);
     },
@@ -75,31 +76,9 @@ function NumberList({
     [models]
   );
 
-  function validateOrder(list: NumberRowModel[]) {
-    let isInvalidOrder = false;
-    list.forEach((model, index, array) => {
-      const previousModel = array[index - 1];
-      if (previousModel && model.value !== EMPTY_STRING) {
-        model.isInvalid = model.value <= previousModel.value;
-
-        if (model.isInvalid) {
-          isInvalidOrder = true;
-        }
-      }
-    });
-
-    setAscendingError(
-      isInvalidOrder
-        ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
-            defaultMessage: 'The values should be in ascending order.',
-          })
-        : ''
-    );
-  }
-
   const onChangeValue = ({ id, value }: { id: string; value: string }) => {
-    const parsedValue = parse(value, numberRange);
-    const { isValid, errors } = validateValue(parsedValue, id);
+    const parsedValue = parse(value);
+    const { isValid, errors } = validateValue(parsedValue, numberRange);
     setValidity(isValid);
 
     const currentModel = models.find(model => model.id === id);
@@ -110,27 +89,6 @@ function NumberList({
     }
 
     onUpdate(models);
-  };
-
-  const validateValue = (value: number | '', id: string) => {
-    const result = {
-      isValid: true,
-      errors: [] as string[],
-    };
-
-    if (value === EMPTY_STRING) {
-      result.isValid = false;
-    } else if (!numberRange.within(value)) {
-      result.isValid = false;
-      result.errors.push(
-        i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
-          defaultMessage: 'The value should be in the range: {range}.',
-          values: { range: `[${numberRange.min}, ${numberRange.max}]` },
-        })
-      );
-    }
-
-    return result;
   };
 
   // Add an item to the end of the list
@@ -176,7 +134,7 @@ function NumberList({
             onDelete={onDelete}
             onChange={onChangeValue}
             onBlur={() => onBlur(model)}
-            autoFocus={arrayIndex === models.length - 1}
+            autoFocus={models.length !== 1 && arrayIndex === models.length - 1}
           />
           {model.errors && model.errors.length > 0 && (
             <EuiFormErrorText>{model.errors.join('\n')}</EuiFormErrorText>
@@ -189,7 +147,7 @@ function NumberList({
       <EuiFlexItem>
         <EuiButton iconType="plusInCircle" fill={true} fullWidth={true} onClick={onAdd} size="s">
           <FormattedMessage
-            id="common.ui.numberList.addUnitButtonLabel"
+            id="common.ui.aggTypes.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"
             values={{ unitName }}
           />
@@ -199,9 +157,9 @@ function NumberList({
   );
 }
 
-function parse(value: string, range: Range) {
+function parse(value: string) {
   const parsedValue = parseFloat(value);
-  return isNaN(parsedValue) ? '' : parsedValue;
+  return isNaN(parsedValue) ? EMPTY_STRING : parsedValue;
 }
 
 function getRange(range?: string) {
@@ -253,6 +211,49 @@ function getUpdatedModels(
       isInvalid: newValue === model.value ? model.isInvalid : false,
     };
   });
+}
+
+function validateOrder(list: NumberRowModel[], setAscendingError: (message: string) => void) {
+  let isInvalidOrder = false;
+  list.forEach((model, index, array) => {
+    const previousModel = array[index - 1];
+    if (previousModel && model.value !== EMPTY_STRING) {
+      model.isInvalid = model.value <= previousModel.value;
+
+      if (model.isInvalid) {
+        isInvalidOrder = true;
+      }
+    }
+  });
+
+  setAscendingError(
+    isInvalidOrder
+      ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
+          defaultMessage: 'The values should be in ascending order.',
+        })
+      : EMPTY_STRING
+  );
+}
+
+function validateValue(value: number | '', numberRange: Range) {
+  const result = {
+    isValid: true,
+    errors: [] as string[],
+  };
+
+  if (value === EMPTY_STRING) {
+    result.isValid = false;
+  } else if (!numberRange.within(value)) {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
+        defaultMessage: 'The value should be in the range: {range}.',
+        values: { range: `[${numberRange.min}, ${numberRange.max}]` },
+      })
+    );
+  }
+
+  return result;
 }
 
 export { NumberList };
