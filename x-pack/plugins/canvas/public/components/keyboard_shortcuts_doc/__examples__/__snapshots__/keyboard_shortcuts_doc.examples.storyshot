@@ -560,7 +560,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Resize from the center
+                  Resize from center
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
@@ -592,7 +592,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Resize and rotate without snapping
+                  Move, resize, and rotate without snapping
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
@@ -624,7 +624,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Select element behind top element
+                  Select element below
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
