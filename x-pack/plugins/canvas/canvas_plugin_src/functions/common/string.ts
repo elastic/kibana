@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Function } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   value: string[];
 }
 
 export function string(): Function<'string', Arguments, string> {
+  const { help, args: argHelp } = getFunctionHelp().string;
+
   return {
     name: 'string',
     aliases: [],
     type: 'string',
-    help:
-      'Output a string made of other strings. Mostly useful when combined with sub-expressions that output a string, ' +
-      ' or something castable to a string',
+    help,
     args: {
       value: {
         aliases: ['_'],
         types: ['string'],
         multi: true,
-        help: "One or more strings to join together. Don't forget spaces where needed!",
+        help: argHelp.value,
       },
     },
     fn: (_context, args) => args.value.join(''),

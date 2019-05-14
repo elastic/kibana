@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALL_TIMELINES = i18n.translate('xpack.siem.pages.timeline.allTimelinesTitle', {
-  defaultMessage: 'All Timelines',
+export const PAGE_TITLE = i18n.translate('xpack.siem.timelines.pageTitle', {
+  defaultMessage: 'Timelines',
 });
+
+export const ALL_TIMELINES_PANEL_TITLE = i18n.translate(
+  'xpack.siem.timelines.allTimelines.panelTitle',
+  {
+    defaultMessage: 'All Timelines',
+  }
+);

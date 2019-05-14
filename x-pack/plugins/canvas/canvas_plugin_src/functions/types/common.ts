@@ -87,7 +87,19 @@ export interface Datatable {
   type: 'datatable';
 }
 
-export type Legend = 'nw' | 'sw' | 'ne' | 'se';
+export enum Legend {
+  NORTH_WEST = 'nw',
+  SOUTH_WEST = 'sw',
+  NORTH_EAST = 'ne',
+  SOUTH_EAST = 'se',
+}
+
+export enum Position {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+  RIGHT = 'right',
+}
 
 /**
  * Allowed column names in a PointSeries
@@ -149,7 +161,7 @@ export interface Ticks {
 export interface AxisConfig {
   type: 'axisConfig';
   show: boolean;
-  position: 'bottom' | 'top' | 'left' | 'right';
+  position: Position;
   min: number;
   max: number;
   tickSize: number;

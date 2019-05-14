@@ -46,6 +46,7 @@
 /x-pack/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/plugins/rollup/  @elastic/es-ui
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
 
 # Kibana TSVB external contractors
