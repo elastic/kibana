@@ -43,7 +43,7 @@ class PipelineEditorUi extends React.Component {
     } = this.props;
 
     const pipelineWorkersSet = typeof settings['pipeline.workers'] === 'number';
-    const pipelineWorkers = pipelineWorkersSet ? settings['pipeline.workers'] : 1;
+    const pipelineWorkers = pipelineWorkersSet ? settings['pipeline.workers'] : null;
     this.state = {
       maxBytesNumber: settings['queue.max_bytes.number'],
       maxBytesUnit: settings['queue.max_bytes.units'],
@@ -337,6 +337,7 @@ class PipelineEditorUi extends React.Component {
             >
               <EuiFieldNumber
                 data-test-subj="inputWorkers"
+                min={0}
                 onChange={e => this.handleNumberChange('pipeline.workers', e.target.value)}
                 value={this.state.pipeline.settings['pipeline.workers']}
               />
