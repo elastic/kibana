@@ -41,7 +41,7 @@ export async function loadIndexTemplate(templateName, httpClient = getHttpClient
   if (!templateName) {
     return {};
   }
-  const response = await httpClient.get(`${apiPrefix}/template/${templateName}`);
+  const response = await httpClient.get(`${apiPrefix}/templates/${templateName}`);
   return response.data;
 }
 
@@ -50,50 +50,42 @@ export async function loadPolicies(withIndices, httpClient = getHttpClient()) {
   return response.data;
 }
 
+export async function savePolicy(policy, httpClient = getHttpClient()) {
+  const response = await httpClient.post(`${apiPrefix}/policies`, policy);
+  return response.data;
+}
+
 export async function deletePolicy(policyName, httpClient = getHttpClient()) {
   const response = await httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_DELETE, httpClient);
-  return response.data;
-}
-
-export async function saveLifecycle(lifecycle, httpClient = getHttpClient()) {
-  const response = await httpClient.post(`${apiPrefix}/lifecycle`, { lifecycle });
-  return response.data;
-}
-
-export async function getAffectedIndices(indexTemplateName, policyName, httpClient = getHttpClient()) {
-  const path = policyName
-    ? `${apiPrefix}/indices/affected/${indexTemplateName}/${encodeURIComponent(policyName)}`
-    : `${apiPrefix}/indices/affected/${indexTemplateName}`;
-  const response = await httpClient.get(path);
+  trackUiMetric(UIM_POLICY_DELETE);
   return response.data;
 }
 
 export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/retry`, { indexNames });
   // Only track successful actions.
-  trackUiMetric(UIM_INDEX_RETRY_STEP, httpClient);
+  trackUiMetric(UIM_INDEX_RETRY_STEP);
   return response.data;
 };
 
 export const removeLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_DETACH_INDEX, httpClient);
+  trackUiMetric(UIM_POLICY_DETACH_INDEX);
   return response.data;
 };
 
 export const addLifecyclePolicyToIndex = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/add`, body);
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_ATTACH_INDEX, httpClient);
+  trackUiMetric(UIM_POLICY_ATTACH_INDEX);
   return response.data;
 };
 
 export const addLifecyclePolicyToTemplate = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/template`, body);
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_ATTACH_INDEX_TEMPLATE, httpClient);
+  trackUiMetric(UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response.data;
 };

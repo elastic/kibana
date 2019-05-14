@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { TransactionLink } from '../../../shared/Links/TransactionLink';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
@@ -109,7 +109,7 @@ export const Transaction: React.SFC<Props> = ({
     <EuiPanel paddingSize="m">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h5>
               {i18n.translate(
                 'xpack.apm.transactionDetails.transactionSampleTitle',
@@ -124,10 +124,7 @@ export const Transaction: React.SFC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <TransactionActionMenu
-                transaction={transaction}
-                location={location}
-              />
+              <TransactionActionMenu transaction={transaction} />
             </EuiFlexItem>
             <MaybeViewTraceLink
               transaction={transaction}
@@ -136,8 +133,6 @@ export const Transaction: React.SFC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer />
 
       <StickyTransactionProperties
         errorCount={

@@ -92,6 +92,7 @@ describe('resolveImportErrors()', () => {
       objectLimit: 4,
       retries: [],
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -124,6 +125,7 @@ Object {
         },
       ],
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -141,6 +143,7 @@ Object {
             "title": "My Visualization",
           },
           "id": "3",
+          "migrationVersion": Object {},
           "references": Array [],
           "type": "visualization",
         },
@@ -179,6 +182,7 @@ Object {
         },
       ],
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -196,6 +200,7 @@ Object {
             "title": "My Index Pattern",
           },
           "id": "1",
+          "migrationVersion": Object {},
           "references": Array [],
           "type": "index-pattern",
         },
@@ -243,6 +248,7 @@ Object {
         },
       ],
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -260,6 +266,7 @@ Object {
             "title": "My Dashboard",
           },
           "id": "4",
+          "migrationVersion": Object {},
           "references": Array [
             Object {
               "id": "13",
@@ -309,6 +316,7 @@ Object {
         replaceReferences: [],
       })),
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -420,6 +428,7 @@ Object {
         },
       ],
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -472,5 +481,49 @@ Object {
   ],
 }
 `);
+  });
+
+  test('validates object types', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}');
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [],
+    });
+    const result = await resolveImportErrors({
+      readStream,
+      objectLimit: 5,
+      retries: [
+        {
+          id: 'i',
+          type: 'wigwags',
+          overwrite: false,
+          replaceReferences: [],
+        },
+      ],
+      savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "error": Object {
+        "type": "unsupported_type",
+      },
+      "id": "1",
+      "title": "my title",
+      "type": "wigwags",
+    },
+  ],
+  "success": false,
+  "successCount": 0,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
   });
 });

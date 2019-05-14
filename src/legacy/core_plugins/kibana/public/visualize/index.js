@@ -22,6 +22,7 @@ import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
 import 'ui/filter_bar';
 import uiRoutes from 'ui/routes';
+import 'ui/capabilities/route_setup';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
@@ -30,7 +31,23 @@ import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs'
 
 uiRoutes
   .defaults(/visualize/, {
-    requireDefaultIndex: true
+    requireDefaultIndex: true,
+    requireUICapability: 'visualize.show',
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.visualize.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.visualize.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.visualize.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save visualizations',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when(VisualizeConstants.LANDING_PAGE_PATH, {
     template: visualizeListingTemplate,

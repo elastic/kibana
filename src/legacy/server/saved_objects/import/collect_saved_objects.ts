@@ -27,13 +27,23 @@ import {
 } from '../../../utils/streams';
 import { SavedObject } from '../service';
 import { createLimitStream } from './create_limit_stream';
+import { ImportError } from './types';
 
-export async function collectSavedObjects(
-  readStream: Readable,
-  objectLimit: number,
-  filter?: (obj: SavedObject) => boolean
-): Promise<SavedObject[]> {
-  return (await createPromiseFromStreams([
+interface CollectSavedObjectsOptions {
+  readStream: Readable;
+  objectLimit: number;
+  filter?: (obj: SavedObject) => boolean;
+  supportedTypes: string[];
+}
+
+export async function collectSavedObjects({
+  readStream,
+  objectLimit,
+  filter,
+  supportedTypes,
+}: CollectSavedObjectsOptions) {
+  const errors: ImportError[] = [];
+  const collectedObjects: SavedObject[] = await createPromiseFromStreams([
     readStream,
     createSplitStream('\n'),
     createMapStream((str: string) => {
@@ -43,7 +53,29 @@ export async function collectSavedObjects(
     }),
     createFilterStream<SavedObject>(obj => !!obj),
     createLimitStream(objectLimit),
+    createFilterStream<SavedObject>(obj => {
+      if (supportedTypes.includes(obj.type)) {
+        return true;
+      }
+      errors.push({
+        id: obj.id,
+        type: obj.type,
+        title: obj.attributes.title,
+        error: {
+          type: 'unsupported_type',
+        },
+      });
+      return false;
+    }),
     createFilterStream<SavedObject>(obj => (filter ? filter(obj) : true)),
+    createMapStream((obj: SavedObject) => {
+      // Ensure migrations execute on every saved object
+      return Object.assign({ migrationVersion: {} }, obj);
+    }),
     createConcatStream([]),
-  ])) as SavedObject[];
+  ]);
+  return {
+    errors,
+    collectedObjects,
+  };
 }

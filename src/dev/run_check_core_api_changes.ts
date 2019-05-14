@@ -18,43 +18,61 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Extractor, IExtractorConfig } from '@microsoft/api-extractor';
+import {
+  Extractor,
+  IConfigFile,
+  ExtractorLogLevel,
+  ExtractorConfig,
+  ExtractorResult,
+  ExtractorMessage,
+} from '@microsoft/api-extractor';
 import chalk from 'chalk';
 import dedent from 'dedent';
 import execa from 'execa';
 import fs from 'fs';
+import path from 'path';
 import getopts from 'getopts';
 
-const apiExtractorConfig = (folder: string): IExtractorConfig => {
-  return {
+const apiExtractorConfig = (folder: string): ExtractorConfig => {
+  const config: IConfigFile = {
     compiler: {
-      configType: 'tsconfig',
-      rootFolder: '.',
+      tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
-    project: {
-      entryPointSourceFile: `target/types/${folder}/index.d.ts`,
-    },
-    apiReviewFile: {
+    projectFolder: path.resolve('./'),
+    mainEntryPointFilePath: `target/types/${folder}/index.d.ts`,
+    apiReport: {
       enabled: true,
-      apiReviewFolder: `./src/core/${folder}/`,
-      tempFolder: `./build/${folder}/`,
+      reportFileName: `${folder}.api.md`,
+      reportFolder: `<projectFolder>/src/core/${folder}/`,
+      reportTempFolder: `<projectFolder>/build/${folder}/`,
     },
-    apiJsonFile: {
+    docModel: {
       enabled: true,
-      outputFolder: `./build/${folder}`,
+      apiJsonFilePath: `./build/${folder}/${folder}.api.json`,
     },
-    dtsRollup: {
+    tsdocMetadata: {
       enabled: false,
-      trimming: true,
-      publishFolderForInternal: '',
-      publishFolderForBeta: '',
-      publishFolderForPublic: '',
-      mainDtsRollupPath: '',
     },
-    policies: {
-      namespaceSupport: 'permissive',
+    messages: {
+      extractorMessageReporting: {
+        default: {
+          logLevel: 'warning' as ExtractorLogLevel.Warning,
+          addToApiReportFile: true,
+        },
+        'ae-internal-missing-underscore': {
+          logLevel: 'none' as ExtractorLogLevel.None,
+          addToApiReportFile: false,
+        },
+      },
     },
   };
+  const con = ExtractorConfig.prepare({
+    configObject: config,
+    configObjectFullPath: undefined,
+    packageJsonFullPath: path.resolve('package.json'),
+  });
+
+  return con;
 };
 
 const runBuildTypes = async () => {
@@ -67,62 +85,58 @@ const runApiDocumenter = async (folder: string) => {
   );
 };
 
-const isApiChangedWarning = (warning: string) => {
-  return warning.startsWith('You have changed the public API signature for this project.');
-};
-
 const renameExtractedApiPackageName = async (folder: string) => {
-  const json = JSON.parse(fs.readFileSync(`build/${folder}/kibana.api.json`).toString());
+  const json = JSON.parse(fs.readFileSync(`build/${folder}/${folder}.api.json`).toString());
   json.canonicalReference = `kibana-plugin-${folder}`;
   json.name = `kibana-plugin-${folder}`;
-  fs.writeFileSync(`build/${folder}/kibana.api.json`, JSON.stringify(json, null, 2));
+  fs.writeFileSync(`build/${folder}/${folder}.api.json`, JSON.stringify(json, null, 2));
 };
 
 /**
  * Runs api-extractor with a custom logger in order to extract results from the process
  *
- * TODO: Once Microsoft/web-build-tools#1133 is fixed, use the updated interface instead
- *  of parsing log strings.
  */
-const runApiExtractor = (folder: string, acceptChanges: boolean = false) => {
-  // Because of the internals of api-extractor ILogger can't be implemented as a typescript Class
-  const warnings = [] as string[];
-  const errors = [] as string[];
-
-  const memoryLogger = {
-    logVerbose(message: string) {
-      return null;
-    },
-
-    logInfo(message: string) {
-      return null;
-    },
-
-    logWarning(message: string) {
-      warnings.push(message);
-    },
-
-    logError(message: string) {
-      errors.push(message);
-    },
-  };
-
+const runApiExtractor = (
+  log: ToolingLog,
+  folder: string,
+  acceptChanges: boolean = false
+): ExtractorResult => {
+  const config = apiExtractorConfig(folder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
-    // e.g. on developer's machine. For example, if the *.api.ts output file
+    // e.g. on developer's machine. For example, if the *.api.md output file
     // has differences, it will be automatically overwritten for a
     // local build, whereas this should report an error for a production build.
     localBuild: acceptChanges,
-    customLogger: memoryLogger,
+    messageCallback: (message: ExtractorMessage) => {
+      if (message.messageId === 'console-api-report-not-copied') {
+        // ConsoleMessageId.ApiReportNotCopied
+        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(
+          'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
+            "\t 1. Commit the updated documentation and API review file '" +
+            config.reportFilePath +
+            "' \n" +
+            "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
+        );
+        message.handled = true;
+      } else if (message.messageId === 'console-api-report-copied') {
+        // ConsoleMessageId.ApiReportCopied
+        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(
+          "Please commit the updated API documentation and the API review file: '" +
+            config.reportFilePath
+        );
+        message.handled = true;
+      } else if (message.messageId === 'console-api-report-unchanged') {
+        // ConsoleMessageId.ApiReportUnchanged
+        log.info(`Core ${folder} API: no changes detected ✔`);
+        message.handled = true;
+      }
+    },
   };
 
-  const extractor = new Extractor(apiExtractorConfig(folder), options);
-  extractor.processProject();
-
-  const printableWarnings = warnings.filter(msg => !isApiChangedWarning(msg));
-  const apiChanged = warnings.some(isApiChangedWarning);
-
-  return { apiChanged, warnings: printableWarnings, errors };
+  return Extractor.invoke(config, options);
 };
 
 async function run(folder: string): Promise<boolean> {
@@ -188,34 +202,17 @@ async function run(folder: string): Promise<boolean> {
     return false;
   }
 
-  const { apiChanged, warnings, errors } = runApiExtractor(folder, opts.accept);
-  await renameExtractedApiPackageName(folder);
+  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
 
-  const apiReviewFilePath =
-    apiExtractorConfig(folder)!.apiReviewFile!.apiReviewFolder + 'kibana.api.md';
-
-  if (apiChanged && opts.accept) {
-    log.warning(`You have changed the public signature of the ${folder} Core API`);
-    log.warning(
-      `Please commit the updated API documentation and the review file in '${apiReviewFilePath}' \n`
-    );
+  // If we're not accepting changes and there's a failure, exit.
+  if (!opts.accept && !succeeded) {
+    return false;
   }
 
-  if (apiChanged && !opts.accept) {
-    log.warning('You have changed the public signature of the Kibana Core API');
-    log.warning(
-      'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
-        `\t 1. Commit the updated documentation and API review file ${apiReviewFilePath}' \n` +
-        "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
-    );
-  }
-
-  if (!apiChanged) {
-    log.info(`Core ${folder} API: no changes detected ✔`);
-  }
-
-  if (opts.accept || opts.docs) {
+  // Attempt to generate docs even if api-extractor didn't succeed
+  if ((opts.accept && apiReportChanged) || opts.docs) {
     try {
+      await renameExtractedApiPackageName(folder);
       await runApiDocumenter(folder);
     } catch (e) {
       log.error(e);
@@ -224,20 +221,10 @@ async function run(folder: string): Promise<boolean> {
     log.info(`Core ${folder} API: updated documentation ✔`);
   }
 
-  // If the API changed and we're not accepting the changes, exit process with error
-  if (apiChanged && !opts.accept) {
-    return false;
-  }
-
-  // If any errors or warnings occured, exit with an error
-  if (errors.length > 0 || warnings.length > 0) {
-    log.error(`Core ${folder} API: api-extractor failed with the following errors or warnings:`);
-    errors.forEach(msg => log.error(msg));
-    warnings.forEach(msg => log.warning(msg));
-    return false;
-  }
-
-  return true;
+  // If the api signature changed or any errors or warnings occured, exit with an error
+  // NOTE: Because of https://github.com/Microsoft/web-build-tools/issues/1258
+  //  api-extractor will not return `succeeded: false` when the API changes.
+  return !apiReportChanged && succeeded;
 }
 
 (async () => {

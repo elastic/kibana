@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_providers';
 
 export function initEditorConfig() {
@@ -45,29 +46,28 @@ export function initEditorConfig() {
         },
         interval: {
           base: interval,
-          help: `Must be a multiple of rollup configuration interval: ${interval}`
+          help: i18n.translate('xpack.rollupJobs.editorConfig.histogram.interval.helpText', {
+            defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
+            values: { interval }
+          })
         }
       } : {};
     }
 
     // Set date histogram time zone based on rollup capabilities
     if (aggTypeName === 'date_histogram') {
-      const timezone = fieldAgg.time_zone || 'UTC';
       const interval = fieldAgg.interval;
       return {
-        time_zone: {
-          fixedValue: timezone,
-        },
-        interval: {
-          fixedValue: 'custom',
-        },
         useNormalizedEsInterval: {
           fixedValue: false,
         },
-        customInterval: {
+        interval: {
           default: interval,
           timeBase: interval,
-          help: `Must be a multiple of rollup configuration interval: ${interval}`
+          help: i18n.translate('xpack.rollupJobs.editorConfig.dateHistogram.customInterval.helpText', {
+            defaultMessage: 'Must be a multiple of rollup configuration interval: {interval}',
+            values: { interval }
+          })
         }
       };
     }

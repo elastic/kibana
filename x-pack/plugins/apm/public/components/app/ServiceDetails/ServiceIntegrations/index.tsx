@@ -11,17 +11,15 @@ import {
   EuiPopover
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
 import chrome from 'ui/chrome';
-import { IUrlParams } from '../../../../store/urlParams';
-import { LicenseContext } from '../../Main/LicenseCheck';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { LicenseContext } from '../../../../context/LicenseContext';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
 
 interface Props {
-  location: Location;
   transactionTypes: string[];
   urlParams: IUrlParams;
 }
@@ -62,18 +60,6 @@ export class ServiceIntegrations extends React.Component<Props, State> {
           this.closePopover();
           this.openFlyout('ML');
         }
-      },
-      {
-        name: i18n.translate(
-          'xpack.apm.serviceDetails.integrationsMenu.viewMLJobsButtonLabel',
-          {
-            defaultMessage: 'View existing ML jobs'
-          }
-        ),
-        icon: 'machineLearningApp',
-        href: chrome.addBasePath('/app/ml'),
-        target: '_blank',
-        onClick: () => this.closePopover()
       }
     ];
   };
@@ -164,14 +150,12 @@ export class ServiceIntegrations extends React.Component<Props, State> {
               />
             </EuiPopover>
             <MachineLearningFlyout
-              location={this.props.location}
               isOpen={this.state.activeFlyout === 'ML'}
               onClose={this.closeFlyouts}
               urlParams={this.props.urlParams}
               serviceTransactionTypes={this.props.transactionTypes}
             />
             <WatcherFlyout
-              location={this.props.location}
               isOpen={this.state.activeFlyout === 'Watcher'}
               onClose={this.closeFlyouts}
               urlParams={this.props.urlParams}

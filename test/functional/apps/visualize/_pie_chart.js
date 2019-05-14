@@ -92,8 +92,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         log.debug('Click field machine.os.raw');
         await PageObjects.visualize.selectField('machine.os.raw');
-        await PageObjects.visualize.toggleOtherBucket();
-        await PageObjects.visualize.toggleMissingBucket();
+        await PageObjects.visualize.toggleOtherBucket(2);
+        await PageObjects.visualize.toggleMissingBucket(2);
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
         await pieChart.expectPieChartLabels(expectedTableData);
@@ -131,8 +131,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         log.debug('Click field geo.src');
         await PageObjects.visualize.selectField('geo.src');
-        await PageObjects.visualize.toggleOtherBucket();
-        await PageObjects.visualize.toggleMissingBucket();
+        await PageObjects.visualize.toggleOtherBucket(3);
+        await PageObjects.visualize.toggleMissingBucket(3);
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
         await pieChart.expectPieChartLabels(expectedTableData);

@@ -44,13 +44,12 @@ export const CreatePackageJsonTask = {
       engines: {
         node: pkg.engines.node,
       },
-      workspaces: pkg.workspaces,
       resolutions: pkg.resolutions,
+      workspaces: pkg.workspaces,
       dependencies: pkg.dependencies
     };
 
     if (build.isOss()) {
-      delete newPkg.dependencies['x-pack'];
       newPkg.workspaces.packages = newPkg.workspaces.packages.filter(p => !p.startsWith('x-pack'));
     }
 
@@ -70,6 +69,7 @@ export const RemovePackageJsonDepsTask = {
 
     delete pkg.dependencies;
     delete pkg.private;
+    delete pkg.resolutions;
 
     await write(
       build.resolvePath('package.json'),

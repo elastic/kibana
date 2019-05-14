@@ -42,7 +42,9 @@ export class AbstractLayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
+    layerDescriptor.applyGlobalQuery = _.get(options, 'applyGlobalQuery', true);
     layerDescriptor.style = _.get(options, 'style',  {});
+
     return layerDescriptor;
   }
 
@@ -103,7 +105,11 @@ export class AbstractLayer {
     console.warn('Icon not available for this layer type');
   }
 
-  getTOCDetails() {
+  hasLegendDetails() {
+    return false;
+  }
+
+  getLegendDetails() {
     return null;
   }
 
@@ -144,15 +150,15 @@ export class AbstractLayer {
     return this._descriptor.query;
   }
 
+  getApplyGlobalQuery() {
+    return this._descriptor.applyGlobalQuery;
+  }
+
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
       maxZoom: this._descriptor.maxZoom,
     };
-  }
-
-  getSupportedStyles() {
-    return [];
   }
 
   getCurrentStyle() {
@@ -244,7 +250,6 @@ export class AbstractLayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-
   async getBounds() {
     return {
       min_lon: -180,
@@ -254,12 +259,20 @@ export class AbstractLayer {
     };
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor(options);
+  renderStyleEditor({ onStyleDescriptorChange }) {
+    return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  getQueryableIndexPatternIds() {
+    if (this.getApplyGlobalQuery()) {
+      return this.getIndexPatternIds();
+    }
+
+    return [];
   }
 
   async getOrdinalFields() {

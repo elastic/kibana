@@ -9,14 +9,27 @@ import {
   EsSupertestWithoutAuthProvider,
   SupertestWithoutAuthProvider,
   UsageAPIProvider,
-  InfraOpsGraphQLProvider
+  InfraOpsGraphQLClientProvider,
+  InfraOpsGraphQLClientFactoryProvider,
+  SiemGraphQLProvider,
+  InfraOpsSourceConfigurationProvider,
 } from './services';
 
-export default async function ({ readConfigFile }) {
+import {
+  SecurityServiceProvider,
+  SpacesServiceProvider,
+} from '../common/services';
 
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
-  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
+export default async function ({ readConfigFile }) {
+  const kibanaAPITestsConfig = await readConfigFile(
+    require.resolve('../../../test/api_integration/config.js')
+  );
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../functional/config.js')
+  );
+  const kibanaCommonConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
 
   return {
     testFiles: [require.resolve('./apis')],
@@ -26,12 +39,17 @@ export default async function ({ readConfigFile }) {
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-      infraOpsGraphQLClient: InfraOpsGraphQLProvider,
+      infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
+      infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
+      siemGraphQLClient: SiemGraphQLProvider,
+      infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
       chance: kibanaAPITestsConfig.get('services.chance'),
+      security: SecurityServiceProvider,
+      spaces: SpacesServiceProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
@@ -44,6 +62,12 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
       ],
     },
-    esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
+        'node.attr.name=apiIntegrationTestNode'
+      ],
+    },
   };
 }

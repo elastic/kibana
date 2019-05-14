@@ -1,0 +1,154 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
+<Fragment>
+  <EuiDescribedFormGroup
+    description={
+      <p>
+        <FormattedMessage
+          defaultMessage="Specifies the Kibana privilege for this role."
+          id="xpack.security.management.editRole.simplePrivilegeForm.specifyPrivilegeForRoleDescription"
+          values={Object {}}
+        />
+      </p>
+    }
+    fullWidth={false}
+    gutterSize="l"
+    title={
+      <h3>
+        <FormattedMessage
+          defaultMessage="Kibana privileges"
+          id="xpack.security.management.editRole.simplePrivilegeForm.kibanaPrivilegesTitle"
+          values={Object {}}
+        />
+      </h3>
+    }
+    titleSize="xs"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={true}
+      labelType="label"
+    >
+      <EuiSuperSelect
+        compressed={false}
+        disabled={false}
+        fullWidth={false}
+        hasDividers={true}
+        isInvalid={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "dropdownDisplay": <EuiText>
+                <strong>
+                  <FormattedMessage
+                    defaultMessage="None"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdown"
+                    values={Object {}}
+                  />
+                </strong>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="No access to Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText>
+                <FormattedMessage
+                  defaultMessage="None"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeInput"
+                  values={Object {}}
+                />
+              </EuiText>,
+              "value": "none",
+            },
+            Object {
+              "dropdownDisplay": <EuiText>
+                <strong>
+                  <FormattedMessage
+                    defaultMessage="Custom"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdown"
+                    values={Object {}}
+                  />
+                </strong>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="Customize access to Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText>
+                <FormattedMessage
+                  defaultMessage="Custom"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeInput"
+                  values={Object {}}
+                />
+              </EuiText>,
+              "value": "custom",
+            },
+            Object {
+              "dropdownDisplay": <EuiText>
+                <strong>
+                  <FormattedMessage
+                    defaultMessage="Read"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdown"
+                    values={Object {}}
+                  />
+                </strong>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="Grants read-only access to all of Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText>
+                <FormattedMessage
+                  defaultMessage="Read"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
+                  values={Object {}}
+                />
+              </EuiText>,
+              "value": "read",
+            },
+            Object {
+              "dropdownDisplay": <EuiText>
+                <strong>
+                  <FormattedMessage
+                    defaultMessage="All"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown"
+                    values={Object {}}
+                  />
+                </strong>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="Grants full access to all of Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
+                </p>
+              </EuiText>,
+              "inputDisplay": <EuiText>
+                <FormattedMessage
+                  defaultMessage="All"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput"
+                  values={Object {}}
+                />
+              </EuiText>,
+              "value": "all",
+            },
+          ]
+        }
+        valueOfSelected="none"
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+</Fragment>
+`;

@@ -5,13 +5,13 @@
  */
 
 import { BucketAgg, ESFilter } from 'elasticsearch';
+import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
-import { idx } from '../../../common/idx';
 import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
@@ -65,7 +65,7 @@ export async function getService(serviceName: string, setup: Setup) {
   const { aggregations } = await client<void, Aggs>('search', params);
   const buckets = idx(aggregations, _ => _.types.buckets) || [];
   const types = buckets.map(bucket => bucket.key);
-  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
+  const agentName = idx(aggregations, _ => _.agents.buckets[0].key) || '';
   return {
     serviceName,
     types,

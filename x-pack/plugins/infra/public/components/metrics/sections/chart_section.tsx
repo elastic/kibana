@@ -21,16 +21,16 @@ import Color from 'color';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ReactText } from 'react';
-import { InfraDataSeries, InfraMetricData } from '../../../graphql/types';
+import { InfraDataSeries, InfraMetricData, InfraTimerangeInput } from '../../../graphql/types';
 import { InfraFormatter, InfraFormatterType } from '../../../lib/lib';
 import {
   InfraMetricLayoutSection,
   InfraMetricLayoutVisualizationType,
 } from '../../../pages/metrics/layouts/types';
-import { metricTimeActions } from '../../../store';
 import { createFormatter } from '../../../utils/formatters';
 
 const MARGIN_LEFT = 60;
+
 const chartComponentsByType = {
   [InfraMetricLayoutVisualizationType.line]: EuiLineSeries,
   [InfraMetricLayoutVisualizationType.area]: EuiAreaSeries,
@@ -40,7 +40,7 @@ const chartComponentsByType = {
 interface Props {
   section: InfraMetricLayoutSection;
   metric: InfraMetricData;
-  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
   isLiveStreaming?: boolean;
@@ -168,7 +168,7 @@ export const ChartSection = injectI18n(
       const itemsFormatter = createItemsFormatter(formatterFunction, seriesLabels, seriesColors);
       return (
         <EuiPageContentBody>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3 id={section.id}>{section.label}</h3>
           </EuiTitle>
           <div style={{ height: 200 }}>
@@ -176,6 +176,7 @@ export const ChartSection = injectI18n(
               <EuiXAxis marginLeft={MARGIN_LEFT} />
               <EuiYAxis tickFormat={formatterFunction} marginLeft={MARGIN_LEFT} />
               <EuiCrosshairX
+                marginLeft={MARGIN_LEFT}
                 seriesNames={seriesLabels}
                 itemsFormat={itemsFormatter}
                 titleFormat={titleFormatter}
@@ -225,7 +226,8 @@ export const ChartSection = injectI18n(
         onChangeRangeTime({
           to: endX.valueOf(),
           from: startX.valueOf(),
-        } as metricTimeActions.MetricRangeTimeState);
+          interval: '>=1m',
+        });
       }
     };
   }

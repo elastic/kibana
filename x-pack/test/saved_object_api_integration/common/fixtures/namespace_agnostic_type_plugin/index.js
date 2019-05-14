@@ -8,9 +8,14 @@ import mappings from './mappings.json';
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: [],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     name: 'namespace_agnostic_type_plugin',
     uiExports: {
+      savedObjectsManagement: {
+        globaltype: {
+          isImportableAndExportable: true,
+        },
+      },
       savedObjectSchemas: {
         globaltype: {
           isNamespaceAgnostic: true
@@ -20,5 +25,31 @@ export default function (kibana) {
     },
 
     config() {},
+
+    init(server) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'namespace_agnostic_type_plugin',
+        name: 'namespace_agnostic_type_plugin',
+        icon: 'upArrow',
+        navLinkId: 'namespace_agnostic_type_plugin',
+        app: [],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['globaltype'],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['globaltype'],
+            },
+            ui: [],
+          }
+        }
+      });
+    }
   });
 }

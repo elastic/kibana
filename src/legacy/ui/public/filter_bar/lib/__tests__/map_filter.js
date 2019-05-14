@@ -19,30 +19,25 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapFilterProvider } from '../map_filter';
+import { mapFilter } from '../map_filter';
+import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
-  let mapFilter;
-  let $rootScope;
-
+  let mockIndexPatterns;
 
   beforeEach(ngMock.module(
     'kibana',
-    'kibana/courier',
-    function ($provide) {
-      $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
-    }
+    'kibana/courier'
   ));
 
-  beforeEach(ngMock.inject(function (_$rootScope_, Private) {
-    mapFilter = Private(FilterBarLibMapFilterProvider);
-    $rootScope = _$rootScope_;
+  beforeEach(ngMock.inject(function (Private) {
+    mockIndexPatterns = Private(IndexPatternMock);
   }));
 
   describe('mapFilter()', function () {
     it('should map query filters', function (done) {
       const before = { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } };
-      mapFilter(before).then(function (after) {
+      mapFilter(mockIndexPatterns, before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', '_type');
         expect(after.meta).to.have.property('value', 'apache');
@@ -50,12 +45,11 @@ describe('Filter Bar Directive', function () {
         expect(after.meta).to.have.property('negate', false);
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should map exists filters', function (done) {
       const before = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
-      mapFilter(before).then(function (after) {
+      mapFilter(mockIndexPatterns, before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', '@timestamp');
         expect(after.meta).to.have.property('value', 'exists');
@@ -63,12 +57,11 @@ describe('Filter Bar Directive', function () {
         expect(after.meta).to.have.property('negate', false);
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should map missing filters', function (done) {
       const before = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
-      mapFilter(before).then(function (after) {
+      mapFilter(mockIndexPatterns, before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', '@timestamp');
         expect(after.meta).to.have.property('value', 'missing');
@@ -76,12 +69,11 @@ describe('Filter Bar Directive', function () {
         expect(after.meta).to.have.property('negate', false);
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should map json filter', function (done) {
       const before = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
-      mapFilter(before).then(function (after) {
+      mapFilter(mockIndexPatterns, before).then(function (after) {
         expect(after).to.have.property('meta');
         expect(after.meta).to.have.property('key', 'query');
         expect(after.meta).to.have.property('value', '{"match_all":{}}');
@@ -89,17 +81,15 @@ describe('Filter Bar Directive', function () {
         expect(after.meta).to.have.property('negate', false);
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should finish with a catch', function (done) {
       const before = { meta: { index: 'logstash-*' } };
-      mapFilter(before).catch(function (error) {
+      mapFilter(mockIndexPatterns, before).catch(function (error) {
         expect(error).to.be.an(Error);
         expect(error.message).to.be('No mappings have been found for filter.');
         done();
       });
-      $rootScope.$apply();
     });
 
   });

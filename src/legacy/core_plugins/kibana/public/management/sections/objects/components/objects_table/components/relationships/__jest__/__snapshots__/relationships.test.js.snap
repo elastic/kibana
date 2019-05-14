@@ -9,10 +9,11 @@ exports[`Relationships should render dashboards normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -32,53 +33,53 @@ exports[`Relationships should render dashboards normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList>
-      <EuiDescriptionListTitle
-        style={
-          Object {
-            "marginBottom": "1rem",
-          }
-        }
+    <div>
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <EuiCallOut
-          color="success"
-          size="m"
-          title={
-            <FormattedMessage
-              defaultMessage="Dashboard"
-              id="kbn.management.objects.objectsTable.relationships.dashboard.calloutTitle"
-              values={Object {}}
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Here are some visualizations used on this dashboard. You can safely delete this dashboard and the visualizations will still work properly."
-              id="kbn.management.objects.objectsTable.relationships.dashboard.calloutText"
-              values={Object {}}
-            />
-          </p>
-        </EuiCallOut>
-      </EuiDescriptionListTitle>
+        <p>
+          Here are the saved objects related to MyDashboard. Deleting this dashboard affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [
             Object {
+              "align": "center",
+              "description": "Type of the saved object",
+              "field": "type",
+              "name": "Type",
               "render": [Function],
-              "width": "24px",
+              "sortable": false,
+              "width": "50px",
             },
             Object {
-              "field": "title",
+              "dataType": "string",
+              "field": "relationship",
+              "name": "Direct relationship",
+              "render": [Function],
+              "sortable": false,
+              "width": "125px",
+            },
+            Object {
+              "dataType": "string",
+              "description": "Title of the saved object",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
+              "sortable": false,
             },
             Object {
               "actions": Array [
                 Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
+                  "available": [Function],
+                  "description": "Inspect this saved object",
+                  "icon": "inspect",
+                  "name": "Inspect",
                   "onClick": [Function],
+                  "type": "icon",
                 },
               ],
               "name": "Actions",
@@ -90,17 +91,76 @@ exports[`Relationships should render dashboards normally 1`] = `
           Array [
             Object {
               "id": "1",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/1",
+                "icon": "visualizeApp",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/visualize/edit/1",
+                  "uiCapabilitiesPath": "visualize.show",
+                },
+                "title": "My Visualization Title 1",
+              },
+              "relationship": "child",
+              "type": "visualization",
             },
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/2",
+                "icon": "visualizeApp",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/visualize/edit/2",
+                  "uiCapabilitiesPath": "visualize.show",
+                },
+                "title": "My Visualization Title 2",
+              },
+              "relationship": "child",
+              "type": "visualization",
             },
           ]
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "relationship",
+                "multiSelect": "or",
+                "name": "Direct relationship",
+                "options": Array [
+                  Object {
+                    "name": "parent",
+                    "value": "parent",
+                    "view": "Parent",
+                  },
+                  Object {
+                    "name": "child",
+                    "value": "child",
+                    "view": "Child",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
-    </EuiDescriptionList>
+    </div>
   </EuiFlyoutBody>
 </EuiFlyout>
 `;
@@ -114,10 +174,11 @@ exports[`Relationships should render errors 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -163,10 +224,11 @@ exports[`Relationships should render index patterns normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -186,47 +248,53 @@ exports[`Relationships should render index patterns normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList>
-      <EuiDescriptionListTitle
-        style={
-          Object {
-            "marginBottom": "1rem",
-          }
-        }
+    <div>
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <EuiCallOut
-          color="warning"
-          size="m"
-          title={
-            <FormattedMessage
-              defaultMessage="Warning"
-              id="kbn.management.objects.objectsTable.relationships.warningTitle"
-              values={Object {}}
-            />
-          }
-        >
-          <p />
-        </EuiCallOut>
-      </EuiDescriptionListTitle>
+        <p>
+          Here are the saved objects related to MyIndexPattern*. Deleting this index-pattern affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [
             Object {
+              "align": "center",
+              "description": "Type of the saved object",
+              "field": "type",
+              "name": "Type",
               "render": [Function],
-              "width": "24px",
+              "sortable": false,
+              "width": "50px",
             },
             Object {
-              "field": "title",
+              "dataType": "string",
+              "field": "relationship",
+              "name": "Direct relationship",
+              "render": [Function],
+              "sortable": false,
+              "width": "125px",
+            },
+            Object {
+              "dataType": "string",
+              "description": "Title of the saved object",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
+              "sortable": false,
             },
             Object {
               "actions": Array [
                 Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
+                  "available": [Function],
+                  "description": "Inspect this saved object",
+                  "icon": "inspect",
+                  "name": "Inspect",
                   "onClick": [Function],
+                  "type": "icon",
                 },
               ],
               "name": "Actions",
@@ -238,72 +306,81 @@ exports[`Relationships should render index patterns normally 1`] = `
           Array [
             Object {
               "id": "1",
-            },
-          ]
-        }
-        pagination={true}
-        responsive={true}
-        sorting={false}
-      />
-      <EuiDescriptionListTitle
-        style={
-          Object {
-            "marginBottom": "1rem",
-          }
-        }
-      >
-        <EuiCallOut
-          color="warning"
-          size="m"
-          title={
-            <FormattedMessage
-              defaultMessage="Warning"
-              id="kbn.management.objects.objectsTable.relationships.warningTitle"
-              values={Object {}}
-            />
-          }
-        >
-          <p />
-        </EuiCallOut>
-      </EuiDescriptionListTitle>
-      <EuiInMemoryTable
-        columns={
-          Array [
-            Object {
-              "render": [Function],
-              "width": "24px",
-            },
-            Object {
-              "field": "title",
-              "name": "Title",
-              "render": [Function],
-            },
-            Object {
-              "actions": Array [
-                Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
-                  "onClick": [Function],
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedSearches/1",
+                "icon": "search",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/discover/1",
+                  "uiCapabilitiesPath": "discover.show",
                 },
-              ],
-              "name": "Actions",
+                "title": "My Search Title",
+              },
+              "relationship": "parent",
+              "type": "search",
             },
-          ]
-        }
-        executeQueryOptions={Object {}}
-        items={
-          Array [
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/2",
+                "icon": "visualizeApp",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/visualize/edit/2",
+                  "uiCapabilitiesPath": "visualize.show",
+                },
+                "title": "My Visualization Title",
+              },
+              "relationship": "parent",
+              "type": "visualization",
             },
           ]
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "relationship",
+                "multiSelect": "or",
+                "name": "Direct relationship",
+                "options": Array [
+                  Object {
+                    "name": "parent",
+                    "value": "parent",
+                    "view": "Parent",
+                  },
+                  Object {
+                    "name": "child",
+                    "value": "child",
+                    "view": "Child",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "search",
+                    "value": "search",
+                    "view": "search",
+                  },
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
-    </EuiDescriptionList>
+    </div>
   </EuiFlyoutBody>
 </EuiFlyout>
 `;
@@ -317,10 +394,11 @@ exports[`Relationships should render searches normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -340,53 +418,53 @@ exports[`Relationships should render searches normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList>
-      <EuiDescriptionListTitle
-        style={
-          Object {
-            "marginBottom": "1rem",
-          }
-        }
+    <div>
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <EuiCallOut
-          color="success"
-          size="m"
-          title={
-            <FormattedMessage
-              defaultMessage="Saved Search"
-              id="kbn.management.objects.objectsTable.relationships.search.calloutTitle"
-              values={Object {}}
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Here is the index pattern tied to this saved search."
-              id="kbn.management.objects.objectsTable.relationships.search.calloutText"
-              values={Object {}}
-            />
-          </p>
-        </EuiCallOut>
-      </EuiDescriptionListTitle>
+        <p>
+          Here are the saved objects related to MySearch. Deleting this search affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [
             Object {
+              "align": "center",
+              "description": "Type of the saved object",
+              "field": "type",
+              "name": "Type",
               "render": [Function],
-              "width": "24px",
+              "sortable": false,
+              "width": "50px",
             },
             Object {
-              "field": "title",
+              "dataType": "string",
+              "field": "relationship",
+              "name": "Direct relationship",
+              "render": [Function],
+              "sortable": false,
+              "width": "125px",
+            },
+            Object {
+              "dataType": "string",
+              "description": "Title of the saved object",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
+              "sortable": false,
             },
             Object {
               "actions": Array [
                 Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
+                  "available": [Function],
+                  "description": "Inspect this saved object",
+                  "icon": "inspect",
+                  "name": "Inspect",
                   "onClick": [Function],
+                  "type": "icon",
                 },
               ],
               "name": "Actions",
@@ -398,78 +476,81 @@ exports[`Relationships should render searches normally 1`] = `
           Array [
             Object {
               "id": "1",
-            },
-          ]
-        }
-        pagination={true}
-        responsive={true}
-        sorting={false}
-      />
-      <EuiDescriptionListTitle
-        style={
-          Object {
-            "marginBottom": "1rem",
-          }
-        }
-      >
-        <EuiCallOut
-          color="warning"
-          size="m"
-          title={
-            <FormattedMessage
-              defaultMessage="Warning"
-              id="kbn.management.objects.objectsTable.relationships.warningTitle"
-              values={Object {}}
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Here are some visualizations that use this saved search. If you delete this saved search, these visualizations will not longer work properly."
-              id="kbn.management.objects.objectsTable.relationships.search.visualizations.calloutText"
-              values={Object {}}
-            />
-          </p>
-        </EuiCallOut>
-      </EuiDescriptionListTitle>
-      <EuiInMemoryTable
-        columns={
-          Array [
-            Object {
-              "render": [Function],
-              "width": "24px",
-            },
-            Object {
-              "field": "title",
-              "name": "Title",
-              "render": [Function],
-            },
-            Object {
-              "actions": Array [
-                Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
-                  "onClick": [Function],
+              "meta": Object {
+                "editUrl": "/management/kibana/index_patterns/1",
+                "icon": "indexPatternApp",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/management/kibana/index_patterns/1",
+                  "uiCapabilitiesPath": "management.kibana.index_patterns",
                 },
-              ],
-              "name": "Actions",
+                "title": "My Index Pattern",
+              },
+              "relationship": "child",
+              "type": "index-pattern",
             },
-          ]
-        }
-        executeQueryOptions={Object {}}
-        items={
-          Array [
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/2",
+                "icon": "visualizeApp",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/visualize/edit/2",
+                  "uiCapabilitiesPath": "visualize.show",
+                },
+                "title": "My Visualization Title",
+              },
+              "relationship": "parent",
+              "type": "visualization",
             },
           ]
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "relationship",
+                "multiSelect": "or",
+                "name": "Direct relationship",
+                "options": Array [
+                  Object {
+                    "name": "parent",
+                    "value": "parent",
+                    "view": "Parent",
+                  },
+                  Object {
+                    "name": "child",
+                    "value": "child",
+                    "view": "Child",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "index-pattern",
+                    "value": "index-pattern",
+                    "view": "index-pattern",
+                  },
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
-    </EuiDescriptionList>
+    </div>
   </EuiFlyoutBody>
 </EuiFlyout>
 `;
@@ -483,10 +564,11 @@ exports[`Relationships should render visualizations normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -506,53 +588,53 @@ exports[`Relationships should render visualizations normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList>
-      <EuiDescriptionListTitle
-        style={
-          Object {
-            "marginBottom": "1rem",
-          }
-        }
+    <div>
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <EuiCallOut
-          color="warning"
-          size="m"
-          title={
-            <FormattedMessage
-              defaultMessage="Warning"
-              id="kbn.management.objects.objectsTable.relationships.warningTitle"
-              values={Object {}}
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Here are some dashboards which contain this visualization. If you delete this visualization, these dashboards will no longer show them."
-              id="kbn.management.objects.objectsTable.relationships.visualization.calloutText"
-              values={Object {}}
-            />
-          </p>
-        </EuiCallOut>
-      </EuiDescriptionListTitle>
+        <p>
+          Here are the saved objects related to MyViz. Deleting this visualization affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [
             Object {
+              "align": "center",
+              "description": "Type of the saved object",
+              "field": "type",
+              "name": "Type",
               "render": [Function],
-              "width": "24px",
+              "sortable": false,
+              "width": "50px",
             },
             Object {
-              "field": "title",
+              "dataType": "string",
+              "field": "relationship",
+              "name": "Direct relationship",
+              "render": [Function],
+              "sortable": false,
+              "width": "125px",
+            },
+            Object {
+              "dataType": "string",
+              "description": "Title of the saved object",
+              "field": "meta.title",
               "name": "Title",
               "render": [Function],
+              "sortable": false,
             },
             Object {
               "actions": Array [
                 Object {
-                  "description": "View this saved object within Kibana",
-                  "icon": "eye",
-                  "name": "In app",
+                  "available": [Function],
+                  "description": "Inspect this saved object",
+                  "icon": "inspect",
+                  "name": "Inspect",
                   "onClick": [Function],
+                  "type": "icon",
                 },
               ],
               "name": "Actions",
@@ -564,17 +646,76 @@ exports[`Relationships should render visualizations normally 1`] = `
           Array [
             Object {
               "id": "1",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedDashboards/1",
+                "icon": "dashboardApp",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/dashboard/1",
+                  "uiCapabilitiesPath": "dashboard.show",
+                },
+                "title": "My Dashboard 1",
+              },
+              "relationship": "parent",
+              "type": "dashboard",
             },
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedDashboards/2",
+                "icon": "dashboardApp",
+                "inAppUrl": Object {
+                  "path": "/app/kibana#/dashboard/2",
+                  "uiCapabilitiesPath": "dashboard.show",
+                },
+                "title": "My Dashboard 2",
+              },
+              "relationship": "parent",
+              "type": "dashboard",
             },
           ]
         }
         pagination={true}
         responsive={true}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "relationship",
+                "multiSelect": "or",
+                "name": "Direct relationship",
+                "options": Array [
+                  Object {
+                    "name": "parent",
+                    "value": "parent",
+                    "view": "Parent",
+                  },
+                  Object {
+                    "name": "child",
+                    "value": "child",
+                    "view": "Child",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "dashboard",
+                    "value": "dashboard",
+                    "view": "dashboard",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
         sorting={false}
       />
-    </EuiDescriptionList>
+    </div>
   </EuiFlyoutBody>
 </EuiFlyout>
 `;

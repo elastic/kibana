@@ -270,7 +270,8 @@ describe('geoPointToGeometry', () => {
 
   it('Should convert value stored as geo-point string', () => {
     const value = `${lat},${lon}`;
-    const points = geoPointToGeometry(value);
+    const points = [];
+    geoPointToGeometry(value, points);
     expect(points.length).toBe(1);
     expect(points[0].type).toBe('Point');
     expect(points[0].coordinates).toEqual([lon, lat]);
@@ -278,7 +279,8 @@ describe('geoPointToGeometry', () => {
 
   it('Should convert value stored as geo-point array', () => {
     const value = [lon, lat];
-    const points = geoPointToGeometry(value);
+    const points = [];
+    geoPointToGeometry(value, points);
     expect(points.length).toBe(1);
     expect(points[0].type).toBe('Point');
     expect(points[0].coordinates).toEqual([lon, lat]);
@@ -289,7 +291,8 @@ describe('geoPointToGeometry', () => {
       lat,
       lon,
     };
-    const points = geoPointToGeometry(value);
+    const points = [];
+    geoPointToGeometry(value, points);
     expect(points.length).toBe(1);
     expect(points[0].type).toBe('Point');
     expect(points[0].coordinates).toEqual([lon, lat]);
@@ -305,7 +308,8 @@ describe('geoPointToGeometry', () => {
       },
       `${lat2},${lon2}`
     ];
-    const points = geoPointToGeometry(value);
+    const points = [];
+    geoPointToGeometry(value, points);
     expect(points.length).toBe(2);
     expect(points[0].coordinates).toEqual([lon, lat]);
     expect(points[1].coordinates).toEqual([lon2, lat2]);
@@ -319,7 +323,8 @@ describe('geoShapeToGeometry', () => {
       type: 'linestring',
       coordinates: coordinates
     };
-    const shapes = geoShapeToGeometry(value);
+    const shapes = [];
+    geoShapeToGeometry(value, shapes);
     expect(shapes.length).toBe(1);
     expect(shapes[0].type).toBe('LineString');
     expect(shapes[0].coordinates).toEqual(coordinates);
@@ -338,7 +343,8 @@ describe('geoShapeToGeometry', () => {
         coordinates: pointCoordinates
       }
     ];
-    const shapes = geoShapeToGeometry(value);
+    const shapes = [];
+    geoShapeToGeometry(value, shapes);
     expect(shapes.length).toBe(2);
     expect(shapes[0].type).toBe('LineString');
     expect(shapes[0].coordinates).toEqual(linestringCoordinates);

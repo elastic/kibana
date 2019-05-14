@@ -56,12 +56,14 @@ export class PluginSpec {
       version,
       kibanaVersion,
       uiExports,
+      uiCapabilities,
       publicDir,
       configPrefix,
       config,
       deprecations,
       preInit,
       init,
+      postInit,
       isEnabled,
     } = options;
 
@@ -73,6 +75,7 @@ export class PluginSpec {
 
     this._publicDir = publicDir;
     this._uiExports = uiExports;
+    this._uiCapabilities = uiCapabilities;
 
     this._configPrefix = configPrefix;
     this._configSchemaProvider = config;
@@ -81,6 +84,7 @@ export class PluginSpec {
     this._isEnabled = isEnabled;
     this._preInit = preInit;
     this._init = init;
+    this._postInit = postInit;
 
     if (!this.getId()) {
       throw createInvalidPluginError(this, 'Unable to determine plugin id');
@@ -168,12 +172,20 @@ export class PluginSpec {
     return this._uiExports;
   }
 
+  getUiCapabilitiesProvider() {
+    return this._uiCapabilities;
+  }
+
   getPreInitHandler() {
     return this._preInit;
   }
 
   getInitHandler() {
     return this._init;
+  }
+
+  getPostInitHandler() {
+    return this._postInit;
   }
 
   getConfigPrefix() {

@@ -2,10 +2,7 @@
 
 exports[`Header should render a different name, prompt, and beta tag if provided 1`] = `
 <div>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
@@ -31,13 +28,11 @@ exports[`Header should render a different name, prompt, and beta tag if provided
       grow={false}
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
@@ -63,10 +58,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
 
 exports[`Header should render normally 1`] = `
 <div>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
@@ -87,13 +79,11 @@ exports[`Header should render normally 1`] = `
       grow={false}
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
@@ -113,10 +103,7 @@ exports[`Header should render normally 1`] = `
 
 exports[`Header should render without including system indices 1`] = `
 <div>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
@@ -137,13 +124,11 @@ exports[`Header should render without including system indices 1`] = `
       grow={false}
     >
       <EuiText
-        grow={true}
         size="s"
       >
         <p>
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."

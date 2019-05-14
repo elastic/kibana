@@ -19,7 +19,7 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 import { trimLeft, trimRight } from 'lodash';
 
 function resolveUri(base, path) {
@@ -31,7 +31,9 @@ function resolveUri(base, path) {
   } else {
     // pathToUse has query string, append '&pretty'
     pathToUse = `${pathToUse}&pretty`;
-  }
+  } // appending pretty here to have Elasticsearch do the JSON formatting, as doing
+  // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
+  // measurement precision)
   return pathToUse;
 }
 
@@ -65,19 +67,22 @@ export const createProxyRoute = ({
   path: '/api/console/proxy',
   method: 'POST',
   config: {
+    tags: ['access:console'],
     payload: {
       output: 'stream',
-      parse: false
+      parse: false,
     },
 
     validate: {
-      query: Joi.object().keys({
-        method: Joi.string()
-          .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
-          .insensitive()
-          .required(),
-        path: Joi.string().required()
-      }).unknown(true),
+      query: Joi.object()
+        .keys({
+          method: Joi.string()
+            .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
+            .insensitive()
+            .required(),
+          path: Joi.string().required(),
+        })
+        .unknown(true),
     },
 
     pre: [
@@ -100,13 +105,8 @@ export const createProxyRoute = ({
       const { path, method } = query;
       const uri = resolveUri(baseUrl, path);
 
-      const {
-        timeout,
-        rejectUnauthorized,
-        agent,
-        headers,
-      } = getConfigForReq(req, uri);
-      const makeRequest = async (payloadToSend) => {
+      const { timeout, rejectUnauthorized, agent, headers } = getConfigForReq(req, uri);
+      const makeRequest = async payloadToSend => {
         const wreckOptions = {
           payload: payloadToSend,
           timeout,
@@ -114,29 +114,33 @@ export const createProxyRoute = ({
           agent,
           headers: {
             ...headers,
-            ...getProxyHeaders(req)
+            ...getProxyHeaders(req),
           },
         };
 
         const esResponse = await Wreck.request(method, uri, wreckOptions);
 
         if (method.toUpperCase() !== 'HEAD') {
-          return h.response(esResponse)
+          return h
+            .response(esResponse)
             .code(esResponse.statusCode)
             .header('warning', esResponse.headers.warning);
         }
 
-        return h.response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+        return h
+          .response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
           .code(esResponse.statusCode)
           .type('text/plain')
           .header('warning', esResponse.headers.warning);
       };
+      // Wreck assumes that DELETE requests will not have a body, and thus it does not
+      // parse the payload to pass it along, so we have to do this manually here.
       if (method.toUpperCase() === 'DELETE') {
         const data = await Wreck.read(payload);
         return await makeRequest(data);
       } else {
         return await makeRequest(payload);
       }
-    }
-  }
+    },
+  },
 });

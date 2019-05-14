@@ -13,4 +13,41 @@ export const sharedFragments = {
       tiebreaker
     }
   `,
+  InfraSourceFields: gql`
+    fragment InfraSourceFields on InfraSource {
+      id
+      version
+      updatedAt
+      origin
+    }
+  `,
+  InfraLogEntryFields: gql`
+    fragment InfraLogEntryFields on InfraLogEntry {
+      gid
+      key {
+        time
+        tiebreaker
+      }
+      columns {
+        ... on InfraLogEntryTimestampColumn {
+          timestamp
+        }
+        ... on InfraLogEntryMessageColumn {
+          message {
+            ... on InfraLogMessageFieldSegment {
+              field
+              value
+            }
+            ... on InfraLogMessageConstantSegment {
+              constant
+            }
+          }
+        }
+        ... on InfraLogEntryFieldColumn {
+          field
+          value
+        }
+      }
+    }
+  `,
 };

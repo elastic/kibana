@@ -5,7 +5,8 @@
  */
 
 import { useContext, useEffect, useState } from 'react';
-import { GlobalFetchContext } from '../components/app/Main/GlobalFetchIndicator';
+import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
+import { useComponentId } from './useComponentId';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -13,14 +14,12 @@ export enum FETCH_STATUS {
   FAILURE = 'failure'
 }
 
-// use this in request methods to signal to `useFetch` that all arguments are not yet available
-export class MissingArgumentsError extends Error {}
-
 export function useFetcher<Response>(
-  fn: () => Promise<Response>,
+  fn: () => Promise<Response> | undefined,
   useEffectKey: Array<string | boolean | number | undefined>
 ) {
-  const { dispatchStatus } = useContext(GlobalFetchContext);
+  const id = useComponentId();
+  const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<{
     data?: Response;
     status?: FETCH_STATUS;
@@ -29,26 +28,19 @@ export function useFetcher<Response>(
 
   useEffect(() => {
     let didCancel = false;
-    let didFinish = false;
 
-    // only apply the loading indicator if the promise did not resolve immediately
-    // the promise will resolve immediately if the value was found in cache
-    requestAnimationFrame(() => {
-      if (!didFinish && !didCancel) {
-        dispatchStatus({ name: fn.name, isLoading: true });
-        setResult({
-          data: result.data, // preserve data from previous state while loading next state
-          status: FETCH_STATUS.LOADING,
-          error: undefined
-        });
-      }
+    dispatchStatus({ id, isLoading: true });
+    setResult({
+      data: result.data, // preserve data from previous state while loading next state
+      status: FETCH_STATUS.LOADING,
+      error: undefined
     });
 
     async function doFetch() {
       try {
         const data = await fn();
         if (!didCancel) {
-          dispatchStatus({ name: fn.name, isLoading: false });
+          dispatchStatus({ id, isLoading: false });
           setResult({
             data,
             status: FETCH_STATUS.SUCCESS,
@@ -56,11 +48,8 @@ export function useFetcher<Response>(
           });
         }
       } catch (e) {
-        if (e instanceof MissingArgumentsError) {
-          return;
-        }
         if (!didCancel) {
-          dispatchStatus({ name: fn.name, isLoading: false });
+          dispatchStatus({ id, isLoading: false });
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
@@ -68,13 +57,12 @@ export function useFetcher<Response>(
           });
         }
       }
-      didFinish = true;
     }
 
     doFetch();
 
     return () => {
-      dispatchStatus({ name: fn.name, isLoading: false });
+      dispatchStatus({ id, isLoading: false });
       didCancel = true;
     };
   }, useEffectKey);

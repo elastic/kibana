@@ -7,13 +7,9 @@
 import Joi from 'joi';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { handleError } from '../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import {
-  INDEX_PATTERN_KIBANA,
-  INDEX_PATTERN_ELASTICSEARCH,
-  INDEX_PATTERN_LOGSTASH,
-  INDEX_PATTERN_BEATS,
-  INDEX_ALERTS
+  INDEX_PATTERN_FILEBEAT
 } from '../../../../../common/constants';
 
 export function clusterRoute(server) {
@@ -38,15 +34,7 @@ export function clusterRoute(server) {
       }
     },
     handler: (req) => {
-      const config = server.config();
-      const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-      const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
-      const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
-      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
-      const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
-      const indexPatterns = { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, apmIndexPattern, alertsIndex };
+      const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
       const options = {
         clusterUuid: req.params.clusterUuid,
         start: req.payload.timeRange.min,

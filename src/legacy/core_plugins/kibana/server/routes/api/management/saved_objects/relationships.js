@@ -32,6 +32,7 @@ export function registerRelationships(server) {
         }),
         query: Joi.object().keys({
           size: Joi.number().default(10000),
+          savedObjectTypes: Joi.array().single().items(Joi.string()).required()
         }),
       },
     },
@@ -40,13 +41,15 @@ export function registerRelationships(server) {
       const type = req.params.type;
       const id = req.params.id;
       const size = req.query.size;
+      const savedObjectTypes = req.query.savedObjectTypes;
       const savedObjectsClient = req.getSavedObjectsClient();
+      const savedObjectsManagement = req.server.getSavedObjectsManagement();
 
       return await findRelationships(type, id, {
         size,
         savedObjectsClient,
-        // Pass in all types except space, spaces wrapper will throw error
-        savedObjectTypes: server.savedObjects.types.filter(type => type !== 'space'),
+        savedObjectsManagement,
+        savedObjectTypes,
       });
     },
   });

@@ -5,24 +5,13 @@
  */
 
 import Boom from 'boom';
-import { Request } from 'hapi';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
+import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-
-/**
- * Represents available provider options.
- */
-interface ProviderOptions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-  client: Cluster;
-  log: (tags: string[], message: string) => void;
-}
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -52,19 +41,18 @@ interface ProviderState {
 }
 
 /**
- * Defines the shape of the request body containing SAML response.
- */
-interface SAMLResponsePayload {
-  SAMLResponse: string;
-  RelayState?: string;
-}
-
-/**
  * Defines the shape of the request query containing SAML request.
  */
 interface SAMLRequestQuery {
   SAMLRequest: string;
 }
+
+/**
+ * Defines the shape of the request with a body containing SAML response.
+ */
+type RequestWithSAMLPayload = Legacy.Request & {
+  payload: { SAMLResponse: string; RelayState?: string };
+};
 
 /**
  * If request with access token fails with `401 Unauthorized` then this token is no
@@ -87,10 +75,12 @@ function isAccessTokenExpiredError(err?: any) {
 
 /**
  * Checks whether request payload contains SAML response from IdP.
- * @param payload HTTP request body payload.
+ * @param request Request instance.
  */
-function isSAMLResponsePayload(payload: any): payload is SAMLResponsePayload {
-  return payload && payload.SAMLResponse;
+function isRequestWithSAMLResponsePayload(
+  request: Legacy.Request
+): request is RequestWithSAMLPayload {
+  return request.payload != null && !!(request.payload as any).SAMLResponse;
 }
 
 /**
@@ -104,23 +94,14 @@ function isSAMLRequestQuery(query: any): query is SAMLRequestQuery {
 /**
  * Provider that supports SAML request authentication.
  */
-export class SAMLAuthenticationProvider {
-  /**
-   * Instantiates SAMLAuthenticationProvider.
-   * @param options Options that may be needed by authentication provider.
-   */
-  constructor(private readonly options: ProviderOptions) {}
-
+export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs SAML request authentication.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: Request, state?: ProviderState | null) {
-    this.options.log(
-      ['debug', 'security', 'saml'],
-      `Trying to authenticate user request to ${request.url.path}.`
-    );
+  public async authenticate(request: Legacy.Request, state?: ProviderState | null) {
+    this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     let {
       authenticationResult,
@@ -138,9 +119,20 @@ export class SAMLAuthenticationProvider {
       }
     }
 
-    if (authenticationResult.notHandled()) {
-      // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
-      authenticationResult = await this.authenticateViaPayload(request, state);
+    // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
+    if (isRequestWithSAMLResponsePayload(request)) {
+      if (authenticationResult.notHandled()) {
+        authenticationResult = await this.authenticateViaPayload(request, state);
+      } else if (authenticationResult.succeeded()) {
+        // If user has been authenticated via session, but request also includes SAML payload
+        // we should check whether this payload is for the exactly same user and if not
+        // we'll re-authenticate user and forward to a page with the respective warning.
+        authenticationResult = await this.authenticateViaNewPayload(
+          request,
+          (authenticationResult.state || state) as ProviderState,
+          authenticationResult.user as AuthenticatedUser
+        );
+      }
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to
@@ -152,77 +144,33 @@ export class SAMLAuthenticationProvider {
 
   /**
    * Invalidates SAML access token if it exists.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: Request, state?: ProviderState) {
-    this.options.log(
-      ['debug', 'security', 'saml'],
-      `Trying to deauthenticate user via ${request.url.path}.`
-    );
+  public async deauthenticate(request: Legacy.Request, state?: ProviderState) {
+    this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
     if ((!state || !state.accessToken) && !isSAMLRequestQuery(request.query)) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'There is neither access token nor SAML session to invalidate.'
-      );
+      this.debug('There is neither access token nor SAML session to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    let logoutArgs: [
-      'shield.samlInvalidate' | 'shield.samlLogout',
-      { body: Record<string, unknown> }
-    ];
-    if (isSAMLRequestQuery(request.query)) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'Logout has been initiated by the Identity Provider.'
-      );
-      logoutArgs = [
-        'shield.samlInvalidate',
-        // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-        {
-          body: {
-            queryString: request.url.search ? request.url.search.slice(1) : '',
-            acs: this.getACS(),
-          },
-        },
-      ];
-    } else {
-      this.options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the user.');
-      logoutArgs = [
-        'shield.samlLogout',
-        { body: { token: state!.accessToken, refresh_token: state!.refreshToken } },
-      ];
-    }
-
     try {
-      // This operation should be performed on behalf of the user with a privilege that normal
-      // user usually doesn't have `cluster:admin/xpack/security/saml/logout (invalidate)`.
-      const { redirect } = await this.options.client.callWithInternalUser(...logoutArgs);
-
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'User session has been successfully invalidated.'
-      );
+      const redirect = isSAMLRequestQuery(request.query)
+        ? await this.performIdPInitiatedSingleLogout(request)
+        : await this.performUserInitiatedSingleLogout(state!.accessToken!, state!.refreshToken!);
 
       // Having non-null `redirect` field within logout response means that IdP
       // supports SAML Single Logout and we should redirect user to the specified
       // location to properly complete logout.
       if (redirect != null) {
-        this.options.log(
-          ['debug', 'security', 'saml'],
-          'Redirecting user to Identity Provider to complete logout.'
-        );
+        this.debug('Redirecting user to Identity Provider to complete logout.');
         return DeauthenticationResult.redirectTo(redirect);
       }
 
       return DeauthenticationResult.redirectTo('/logged_out');
     } catch (err) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        `Failed to deauthenticate user: ${err.message}`
-      );
+      this.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
     }
   }
@@ -230,23 +178,20 @@ export class SAMLAuthenticationProvider {
   /**
    * Validates whether request contains `Bearer ***` Authorization header and just passes it
    * forward to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Request) {
-    this.options.log(['debug', 'security', 'saml'], 'Trying to authenticate via header.');
+  private async authenticateViaHeader(request: Legacy.Request) {
+    this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
     if (!authorization) {
-      this.options.log(['debug', 'security', 'saml'], 'Authorization header is not presented.');
+      this.debug('Authorization header is not presented.');
       return { authenticationResult: AuthenticationResult.notHandled() };
     }
 
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'bearer') {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        `Unsupported authentication schema: ${authenticationSchema}`
-      );
+      this.debug(`Unsupported authentication schema: ${authenticationSchema}`);
       return {
         authenticationResult: AuthenticationResult.notHandled(),
         headerNotRecognized: true,
@@ -256,14 +201,10 @@ export class SAMLAuthenticationProvider {
     try {
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
-      this.options.log(['debug', 'security', 'saml'], 'Request has been authenticated via header.');
-
+      this.debug('Request has been authenticated via header.');
       return { authenticationResult: AuthenticationResult.succeeded(user) };
     } catch (err) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        `Failed to authenticate request via header: ${err.message}`
-      );
+      this.debug(`Failed to authenticate request via header: ${err.message}`);
       return { authenticationResult: AuthenticationResult.failed(err) };
     }
   }
@@ -280,19 +221,14 @@ export class SAMLAuthenticationProvider {
    * When login succeeds access token is stored in the state and user is redirected to the URL
    * that was requested before SAML handshake or to default Kibana location in case of IdP
    * initiated login.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  private async authenticateViaPayload(request: Request, state?: ProviderState | null) {
-    this.options.log(
-      ['debug', 'security', 'saml'],
-      'Trying to authenticate via SAML response payload.'
-    );
-
-    if (!isSAMLResponsePayload(request.payload)) {
-      this.options.log(['debug', 'security', 'saml'], 'SAML response payload is not found.');
-      return AuthenticationResult.notHandled();
-    }
+  private async authenticateViaPayload(
+    request: RequestWithSAMLPayload,
+    state?: ProviderState | null
+  ) {
+    this.debug('Trying to authenticate via SAML response payload.');
 
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail.
@@ -302,23 +238,17 @@ export class SAMLAuthenticationProvider {
     };
     if (state && (!stateRequestId || !stateRedirectURL)) {
       const message = 'SAML response state does not have corresponding request id or redirect URL.';
-      this.options.log(['debug', 'security', 'saml'], message);
+      this.debug(message);
 
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
     // When we don't have state and hence request id we assume that SAMLResponse came from the IdP initiated login.
-    if (stateRequestId) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'Authentication has been previously initiated by Kibana.'
-      );
-    } else {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'Authentication has been initiated by Identity Provider.'
-      );
-    }
+    this.debug(
+      stateRequestId
+        ? 'Authentication has been previously initiated by Kibana.'
+        : 'Authentication has been initiated by Identity Provider.'
+    );
 
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
@@ -333,35 +263,103 @@ export class SAMLAuthenticationProvider {
         },
       });
 
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'Request has been authenticated via SAML response.'
-      );
-
+      this.debug('Request has been authenticated via SAML response.');
       return AuthenticationResult.redirectTo(stateRedirectURL || `${this.options.basePath}/`, {
         accessToken,
         refreshToken,
       });
     } catch (err) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        `Failed to authenticate request via SAML response: ${err.message}`
-      );
+      this.debug(`Failed to authenticate request via SAML response: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
 
   /**
+   * Validates whether user retrieved using session is the same as the user defined in the SAML payload.
+   * If we can successfully exchange this SAML payload to access and refresh tokens, then we'll
+   * invalidate tokens from the existing session and use the new ones instead.
+   *
+   * The tokens are stored in the state and user is redirected to the default Kibana location, unless
+   * we detect that user from existing session isn't the same as defined in SAML payload. In this case
+   * we'll forward user to a page with the respective warning.
+   * @param request Request instance.
+   * @param existingState State existing user session is based on.
+   * @param user User returned for the existing session.
+   */
+  private async authenticateViaNewPayload(
+    request: RequestWithSAMLPayload,
+    existingState: ProviderState,
+    user: AuthenticatedUser
+  ) {
+    this.debug('Trying to authenticate via SAML response payload with existing valid session.');
+
+    // First let's try to authenticate via SAML Response payload.
+    const payloadAuthenticationResult = await this.authenticateViaPayload(request);
+    if (payloadAuthenticationResult.failed()) {
+      return payloadAuthenticationResult;
+    } else if (!payloadAuthenticationResult.shouldUpdateState()) {
+      // Should never happen, but if it does - it's a bug.
+      return AuthenticationResult.failed(
+        new Error('Authentication via SAML payload did not produce access and refresh tokens.')
+      );
+    }
+
+    const newState = payloadAuthenticationResult.state as ProviderState;
+
+    // Then use received tokens to retrieve user information. We need just username and authentication
+    // realm, once ES starts returning this info from `saml/authenticate` we can get rid of this call.
+    const newUserAuthenticationResult = await this.authenticateViaState(request, newState);
+    if (newUserAuthenticationResult.failed()) {
+      return newUserAuthenticationResult;
+    } else if (newUserAuthenticationResult.user === undefined) {
+      // Should never happen, but if it does - it's a bug.
+      return AuthenticationResult.failed(
+        new Error('Could not retrieve user information using tokens produced for the SAML payload.')
+      );
+    }
+
+    // Now let's invalidate tokens from the existing session.
+    try {
+      await this.performIdPInitiatedLocalLogout(
+        existingState.accessToken!,
+        existingState.refreshToken!
+      );
+    } catch (err) {
+      this.debug(`Failed to perform IdP initiated local logout: ${err.message}`);
+      return AuthenticationResult.failed(err);
+    }
+
+    if (
+      newUserAuthenticationResult.user.username !== user.username ||
+      newUserAuthenticationResult.user.authentication_realm.name !== user.authentication_realm.name
+    ) {
+      this.debug(
+        'Authentication initiated by Identity Provider is for a different user than currently authenticated.'
+      );
+
+      return AuthenticationResult.redirectTo(
+        `${this.options.basePath}/overwritten_session`,
+        newState
+      );
+    }
+
+    this.debug(
+      'Authentication initiated by Identity Provider is for currently authenticated user.'
+    );
+    return payloadAuthenticationResult;
+  }
+
+  /**
    * Tries to extract access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Request, { accessToken }: ProviderState) {
-    this.options.log(['debug', 'security', 'saml'], 'Trying to authenticate via state.');
+  private async authenticateViaState(request: Legacy.Request, { accessToken }: ProviderState) {
+    this.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
-      this.options.log(['debug', 'security', 'saml'], 'Access token is not found in state.');
+      this.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
@@ -370,14 +368,10 @@ export class SAMLAuthenticationProvider {
     try {
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
-      this.options.log(['debug', 'security', 'saml'], 'Request has been authenticated via state.');
-
+      this.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user);
     } catch (err) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        `Failed to authenticate request via state: ${err.message}`
-      );
+      this.debug(`Failed to authenticate request via state: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
@@ -394,14 +388,17 @@ export class SAMLAuthenticationProvider {
    * This method is only called when authentication via access token stored in the state failed because of expired
    * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
    * authenticate user with it.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(request: Request, { refreshToken }: ProviderState) {
-    this.options.log(['debug', 'security', 'saml'], 'Trying to refresh access token.');
+  private async authenticateViaRefreshToken(
+    request: Legacy.Request,
+    { refreshToken }: ProviderState
+  ) {
+    this.debug('Trying to refresh access token.');
 
     if (!refreshToken) {
-      this.options.log(['debug', 'security', 'saml'], 'Refresh token is not found in state.');
+      this.debug('Refresh token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
@@ -414,29 +411,19 @@ export class SAMLAuthenticationProvider {
         body: { grant_type: 'refresh_token', refresh_token: refreshToken },
       });
 
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'Access token has been successfully refreshed.'
-      );
+      this.debug('Access token has been successfully refreshed.');
 
       request.headers.authorization = `Bearer ${newAccessToken}`;
 
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'Request has been authenticated via refreshed token.'
-      );
-
+      this.debug('Request has been authenticated via refreshed token.');
       return AuthenticationResult.succeeded(user, {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
       });
     } catch (err) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        `Failed to refresh access token: ${err.message}`
-      );
+      this.debug(`Failed to refresh access token: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
@@ -465,10 +452,7 @@ export class SAMLAuthenticationProvider {
       // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
       if (getErrorStatusCode(err) === 400) {
         if (canRedirectRequest(request)) {
-          this.options.log(
-            ['debug', 'security', 'saml'],
-            'Both access and refresh tokens are expired. Re-initiating SAML handshake.'
-          );
+          this.debug('Both access and refresh tokens are expired. Re-initiating SAML handshake.');
           return this.authenticateViaHandshake(request);
         }
 
@@ -483,17 +467,14 @@ export class SAMLAuthenticationProvider {
 
   /**
    * Tries to start SAML handshake and eventually receive a token.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private async authenticateViaHandshake(request: Request) {
-    this.options.log(['debug', 'security', 'saml'], 'Trying to initiate SAML handshake.');
+  private async authenticateViaHandshake(request: Legacy.Request) {
+    this.debug('Trying to initiate SAML handshake.');
 
     // If client can't handle redirect response, we shouldn't initiate SAML handshake.
     if (!canRedirectRequest(request)) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'SAML handshake can not be initiated by AJAX requests.'
-      );
+      this.debug('SAML handshake can not be initiated by AJAX requests.');
       return AuthenticationResult.notHandled();
     }
 
@@ -505,10 +486,7 @@ export class SAMLAuthenticationProvider {
         { body: { acs: this.getACS() } }
       );
 
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        'Redirecting to Identity Provider with SAML request.'
-      );
+      this.debug('Redirecting to Identity Provider with SAML request.');
 
       return AuthenticationResult.redirectTo(
         redirect,
@@ -516,12 +494,94 @@ export class SAMLAuthenticationProvider {
         { requestId, nextURL: `${request.getBasePath()}${request.url.path}` }
       );
     } catch (err) {
-      this.options.log(
-        ['debug', 'security', 'saml'],
-        `Failed to initiate SAML handshake: ${err.message}`
-      );
+      this.debug(`Failed to initiate SAML handshake: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
+  }
+
+  /**
+   * Invalidates access and refresh tokens without calling `saml/logout`.
+   * @param accessToken Access token to invalidate.
+   * @param refreshToken Refresh token to invalidate.
+   */
+  private async performIdPInitiatedLocalLogout(accessToken: string, refreshToken: string) {
+    this.debug('Local logout has been initiated by the Identity Provider.');
+
+    // First invalidate old access token.
+    const {
+      invalidated_tokens: invalidatedAccessTokensCount,
+    } = await this.options.client.callWithInternalUser('shield.deleteAccessToken', {
+      body: { token: accessToken },
+    });
+
+    if (invalidatedAccessTokensCount === 0) {
+      this.debug('User access token was already invalidated.');
+    } else if (invalidatedAccessTokensCount === 1) {
+      this.debug('User access token has been successfully invalidated.');
+    } else {
+      this.debug(
+        `${invalidatedAccessTokensCount} user access tokens were invalidated, this is unexpected.`
+      );
+    }
+
+    // Then invalidate old refresh token.
+    const {
+      invalidated_tokens: invalidatedRefreshTokensCount,
+    } = await this.options.client.callWithInternalUser('shield.deleteAccessToken', {
+      body: { refresh_token: refreshToken },
+    });
+
+    if (invalidatedRefreshTokensCount === 0) {
+      this.debug('User refresh token was already invalidated.');
+    } else if (invalidatedRefreshTokensCount === 1) {
+      this.debug('User refresh token has been successfully invalidated.');
+    } else {
+      this.debug(
+        `${invalidatedRefreshTokensCount} user refresh tokens were invalidated, this is unexpected.`
+      );
+    }
+  }
+
+  /**
+   * Calls `saml/logout` with access and refresh tokens and redirects user to the Identity Provider if needed.
+   * @param accessToken Access token to invalidate.
+   * @param refreshToken Refresh token to invalidate.
+   */
+  private async performUserInitiatedSingleLogout(accessToken: string, refreshToken: string) {
+    this.debug('Single logout has been initiated by the user.');
+
+    // This operation should be performed on behalf of the user with a privilege that normal
+    // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
+    const { redirect } = await this.options.client.callWithInternalUser('shield.samlLogout', {
+      body: { token: accessToken, refresh_token: refreshToken },
+    });
+
+    this.debug('User session has been successfully invalidated.');
+
+    return redirect;
+  }
+
+  /**
+   * Calls `saml/invalidate` with the `SAMLRequest` query string parameter received from the Identity
+   * Provider and redirects user back to the Identity Provider if needed.
+   * @param request Request instance.
+   */
+  private async performIdPInitiatedSingleLogout(request: Legacy.Request) {
+    this.debug('Single logout has been initiated by the Identity Provider.');
+
+    // This operation should be performed on behalf of the user with a privilege that normal
+    // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
+    const { redirect } = await this.options.client.callWithInternalUser('shield.samlInvalidate', {
+      // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
+      body: {
+        queryString: request.url.search ? request.url.search.slice(1) : '',
+        acs: this.getACS(),
+      },
+    });
+
+    this.debug('User session has been successfully invalidated.');
+
+    return redirect;
   }
 
   /**
@@ -532,5 +592,13 @@ export class SAMLAuthenticationProvider {
       `${this.options.protocol}://${this.options.hostname}:${this.options.port}` +
       `${this.options.basePath}/api/security/v1/saml`
     );
+  }
+
+  /**
+   * Logs message with `debug` level and saml/security related tags.
+   * @param message Message to log.
+   */
+  private debug(message: string) {
+    this.options.log(['debug', 'security', 'saml'], message);
   }
 }

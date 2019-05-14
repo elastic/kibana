@@ -63,10 +63,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           type: 'wigwags',
           title: 'Wigwags title',
           error: {
-            message: `Unsupported saved object type: 'wigwags': Bad Request`,
-            statusCode: 400,
-            error: 'Bad Request',
-            type: 'unknown',
+            type: 'unsupported_type',
           },
         },
       ],
@@ -77,23 +74,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create`,
-    });
-  };
-
-  const expectRbacForbiddenWithUnknownType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype,wigwags, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create,action:saved_objects/wigwags/bulk_create`,
-    });
-  };
-
-  const expectRbacForbiddenForUnknownType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype,wigwags, missing action:saved_objects/wigwags/bulk_create`,
+      message: `Unable to bulk_create dashboard,globaltype`,
     });
   };
 
@@ -112,7 +93,11 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
           .auth(user.username, user.password)
-          .attach('file', Buffer.from(JSON.stringify(data), 'utf8'), 'export.ndjson')
+          .attach(
+            'file',
+            Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+            'export.ndjson'
+          )
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });
@@ -131,7 +116,11 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
             .query({ overwrite: true })
             .auth(user.username, user.password)
-            .attach('file', Buffer.from(JSON.stringify(data), 'utf8'), 'export.ndjson')
+            .attach(
+              'file',
+              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              'export.ndjson'
+            )
             .expect(tests.unknownType.statusCode)
             .then(tests.unknownType.response);
         });
@@ -148,7 +137,5 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
-    expectRbacForbiddenWithUnknownType,
-    expectRbacForbiddenForUnknownType,
   };
 }

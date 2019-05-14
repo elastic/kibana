@@ -20,11 +20,17 @@ import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embedd
 
 class SamplePanelLink extends ContextMenuAction {
   constructor() {
-    super({
-      displayName: 'Sample Panel Link',
-      id: 'samplePanelLink',
-      parentPanelId: 'mainMenu',
-    });
+    super(
+      {
+        id: 'samplePanelLink',
+        parentPanelId: 'mainMenu',
+      },
+      {
+        getDisplayName: () => {
+          return 'Sample Panel Link';
+        },
+      }
+    );
   }
 
   public getHref = () => {

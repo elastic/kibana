@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import Boom from 'boom';
+
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
@@ -51,6 +54,24 @@ export const registerCcrRoutes = (server) => {
       pre: [ licensePreRouting ]
     },
     handler: async (request) => {
+      const xpackMainPlugin = server.plugins.xpack_main;
+      const xpackInfo = (xpackMainPlugin && xpackMainPlugin.info);
+
+      if (!xpackInfo) {
+        // xpackInfo is updated via poll, so it may not be available until polling has begun.
+        // In this rare situation, tell the client the service is temporarily unavailable.
+        throw new Boom('Security info unavailable', { statusCode: 503 });
+      }
+
+      const securityInfo = (xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security'));
+      if (!securityInfo || !securityInfo.isAvailable() || !securityInfo.isEnabled()) {
+        // If security isn't enabled or available (in the case where security is enabled but license reverted to Basic) let the user use CCR.
+        return {
+          hasPermission: true,
+          missingClusterPrivileges: [],
+        };
+      }
+
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
