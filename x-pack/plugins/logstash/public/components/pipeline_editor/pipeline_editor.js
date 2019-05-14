@@ -352,6 +352,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputBatchSize"
+                  min={0}
                   onChange={e => this.handleNumberChange('pipeline.batch.size', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.size']}
                 />
@@ -365,6 +366,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputBatchDelay"
+                  min={0}
                   onChange={e => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.delay']}
                 />
@@ -394,6 +396,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputQueueMaxBytesNumber"
+                  min={0}
                   onChange={e => this.handleMaxByteNumberChange(e.target.value)}
                   value={this.state.maxBytesNumber}
                 />
@@ -415,6 +418,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputQueueCheckpointWrites"
+                  min={0}
                   onChange={e => this.handleNumberChange('queue.checkpoint.writes', e.target.value)}
                   value={this.state.pipeline.settings['queue.checkpoint.writes']}
                 />
