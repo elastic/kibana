@@ -7,7 +7,7 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VECTOR_FEATURE_TYPES } from '../vector_feature_types';
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
@@ -319,11 +319,11 @@ export class ESGeoGridSource extends AbstractESSource {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 
-  async getSupportedFeatures() {
+  async getSupportedShapeTypes() {
     if (this._descriptor.requestType === RENDER_AS.GRID) {
-      return [VECTOR_FEATURE_TYPES.POLYGON];
+      return [VECTOR_SHAPE_TYPES.POLYGON];
     }
 
-    return [VECTOR_FEATURE_TYPES.POINT];
+    return [VECTOR_SHAPE_TYPES.POINT];
   }
 }

@@ -14,7 +14,7 @@ import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
-import { VECTOR_FEATURE_TYPES } from '../sources/vector_feature_types';
+import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -144,7 +144,7 @@ export class VectorStyle extends AbstractStyle {
         };
       });
 
-    const supportedFeatures = await this._source.getSupportedFeatures();
+    const supportedFeatures = await this._source.getSupportedShapeTypes();
     const isSingleFeatureType = supportedFeatures.length === 1;
 
     if (scaledFields.length === 0 && isSingleFeatureType) {
@@ -239,10 +239,10 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getIsPointsOnly = async () => {
-    const supportedFeatures = await this._source.getSupportedFeatures();
+    const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === VECTOR_FEATURE_TYPES.POINT;
+      return supportedFeatures[0] === VECTOR_SHAPE_TYPES.POINT;
     }
 
     if (!this._descriptor.__styleMeta) {
@@ -254,10 +254,10 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getIsLinesOnly = async () => {
-    const supportedFeatures = await this._source.getSupportedFeatures();
+    const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === VECTOR_FEATURE_TYPES.LINE;
+      return supportedFeatures[0] === VECTOR_SHAPE_TYPES.LINE;
     }
 
     if (!this._descriptor.__styleMeta) {
@@ -269,10 +269,10 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getIsPolygonsOnly = async () => {
-    const supportedFeatures = await this._source.getSupportedFeatures();
+    const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === VECTOR_FEATURE_TYPES.POLYGON;
+      return supportedFeatures[0] === VECTOR_SHAPE_TYPES.POLYGON;
     }
 
     if (!this._descriptor.__styleMeta) {

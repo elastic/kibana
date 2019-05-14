@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const VECTOR_FEATURE_TYPES = {
+export const VECTOR_SHAPE_TYPES = {
   POINT: 'POINT',
   LINE: 'LINE',
   POLYGON: 'POLYGON'

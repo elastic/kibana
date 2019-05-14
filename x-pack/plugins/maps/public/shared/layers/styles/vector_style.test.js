@@ -6,7 +6,7 @@
 
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../util/data_request';
-import { VECTOR_FEATURE_TYPES } from '../sources/vector_feature_types';
+import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
@@ -72,8 +72,8 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
 describe('pluckStyleMetaFromSourceDataRequest', () => {
 
   const sourceMock = {
-    getSupportedFeatures: () => {
-      return Object.values(VECTOR_FEATURE_TYPES);
+    getSupportedShapeTypes: () => {
+      return Object.values(VECTOR_SHAPE_TYPES);
     }
   };
 

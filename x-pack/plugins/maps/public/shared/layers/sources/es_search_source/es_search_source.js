@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VECTOR_FEATURE_TYPES } from '../vector_feature_types';
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
@@ -198,7 +198,7 @@ export class ESSearchSource extends AbstractESSource {
       });
   }
 
-  async getSupportedFeatures() {
+  async getSupportedShapeTypes() {
     let geoFieldType;
     try {
       const geoField = this._getGeoField();
@@ -208,9 +208,9 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     if (geoFieldType === 'geo_point') {
-      return [VECTOR_FEATURE_TYPES.POINT];
+      return [VECTOR_SHAPE_TYPES.POINT];
     }
 
-    return Object.values(VECTOR_FEATURE_TYPES);
+    return Object.values(VECTOR_SHAPE_TYPES);
   }
 }
