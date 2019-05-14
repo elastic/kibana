@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Function } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 export function clear(): Function<'clear', {}, null> {
+  const { help } = getFunctionHelp().clear;
+
   return {
     name: 'clear',
     type: 'null',
-    help: 'Clears context and returns null',
+    help,
     args: {},
     fn: () => null,
   };
