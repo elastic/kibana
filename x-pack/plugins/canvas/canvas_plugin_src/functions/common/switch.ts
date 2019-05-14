@@ -5,6 +5,7 @@
  */
 
 import { Function, Case } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   case: Array<() => Promise<Case>>;
@@ -12,21 +13,23 @@ interface Arguments {
 }
 
 export function switchFn(): Function<'switch', Arguments, any> {
+  const { help, args: argHelp } = getFunctionHelp().switch;
+
   return {
     name: 'switch',
-    help: 'Perform conditional logic with multiple conditions',
+    help,
     args: {
       case: {
         types: ['case'],
         aliases: ['_'],
         resolve: false,
         multi: true,
-        help: 'The list of conditions to check',
+        help: argHelp.case,
       },
       default: {
         aliases: ['finally'],
         resolve: false,
-        help: 'The default case if no cases match',
+        help: argHelp.default,
       },
     },
     fn: async (context, args) => {
