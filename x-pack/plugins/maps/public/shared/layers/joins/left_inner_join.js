@@ -50,9 +50,14 @@ export class LeftInnerJoin {
   }
 
 
-  joinPropertiesToFeature(feature, propertiesMap, joinFields) {
-    for (let j = 0; j < joinFields.length; j++) {
-      const { propertyKey } = joinFields[j];
+  canJoin(feature, propertiesMap) {
+    const joinKey = feature.properties[this._descriptor.leftField];
+    return propertiesMap && propertiesMap.has(joinKey);
+  }
+
+  joinPropertiesToFeature(feature, propertiesMap, rightMetricFields) {
+    for (let j = 0; j < rightMetricFields.length; j++) {
+      const { propertyKey } = rightMetricFields[j];
       delete feature.properties[propertyKey];
       const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
       delete feature.properties[stylePropertyName];
@@ -60,6 +65,9 @@ export class LeftInnerJoin {
     const joinKey = feature.properties[this._descriptor.leftField];
     if (propertiesMap && propertiesMap.has(joinKey)) {
       Object.assign(feature.properties,  propertiesMap.get(joinKey));
+      return true;
+    }else {
+      return false;
     }
   }
 

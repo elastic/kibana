@@ -8,7 +8,7 @@ import turf from 'turf';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
@@ -349,29 +349,42 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-
   async _performInnerJoins(sourceResult, joinStates, updateSourceData) {
 
     let shouldUpdate = false;
     for (let i = 0; i < sourceResult.featureCollection.features.length; i++) {
       const feature = sourceResult.featureCollection.features[i];
+      const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
+      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = true;//new visibility will be determined based on join-results
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
         const leftInnerJoin = joinState.join;
-        const joinFields = leftInnerJoin.getRightMetricFields();
+        const rightMetricFields = leftInnerJoin.getRightMetricFields();
+
+        let canJoin;
         if (sourceResult.refreshed || joinState.dataHasChanged) {
           // Perform join when
           // - source data changed but join data has not
           // - join data changed but source data has not
           // - both source and join data changed
-          leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, joinFields);
+          canJoin = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
           shouldUpdate = true;
+        } else {
+          //re-evalute visibility
+          canJoin = leftInnerJoin.canJoin(feature, joinState.propertiesMap);
         }
+        feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] && canJoin;
+      }
+
+      if (oldVisbility !== feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]) {
+        shouldUpdate = true;
       }
     }
 
     if (shouldUpdate) {
       updateSourceData(sourceResult.featureCollection);
+    } else {
+      console.log('no need to upadate');
     }
   }
 
