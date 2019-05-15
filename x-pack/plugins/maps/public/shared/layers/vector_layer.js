@@ -392,7 +392,7 @@ export class VectorLayer extends AbstractLayer {
           canJoin = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
           shouldUpdate = true;
         } else {
-          //re-evalute visibility
+          //re-evalute visibility based on join
           canJoin = leftInnerJoin.canJoin(feature, joinState.propertiesMap);
         }
         feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] && canJoin;
@@ -404,7 +404,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     if (shouldUpdate) {
-      updateSourceData(sourceResult.featureCollection);
+      updateSourceData({ ...sourceResult.featureCollection });
     }
   }
 
@@ -428,8 +428,8 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
-    const mbGeoJSONSource = mbMap.getSource(this.getId());
 
+    const mbGeoJSONSource = mbMap.getSource(this.getId());
     const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
       mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
@@ -437,12 +437,9 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
-    if (featureCollection !== dataBoundToMap) {
-      mbGeoJSONSource.setData(featureCollection);
-    }
-
+    const shouldRefreshDueToDataChange = featureCollection !== dataBoundToMap;
     const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
-    if (shouldRefresh) {
+    if (shouldRefresh || shouldRefreshDueToDataChange) {
       mbGeoJSONSource.setData(featureCollection);
     }
   }
