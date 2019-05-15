@@ -107,10 +107,10 @@ export const CreateStaticModulesFsTask = {
 
     // Delete node_modules folder
     await deleteAll(
-      log,
       [
         `${build.resolvePath('node_modules')}/**`
-      ]
+      ],
+      log
     );
   }
 };
