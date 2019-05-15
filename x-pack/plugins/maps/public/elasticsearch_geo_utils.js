@@ -87,7 +87,6 @@ export function geoPointToGeometry(value, accumulator) {
   }
 
   if (typeof value === 'object' && _.has(value, 'lat') && _.has(value, 'lon')) {
-    // Geo-point expressed as an object with the format: { lon, lat }
     accumulator.push(pointGeometryFactory(value.lat, value.lon));
     return;
   }
@@ -105,7 +104,6 @@ export function geoPointToGeometry(value, accumulator) {
   if (value.length === 2
       && typeof value[0] === 'number'
       && typeof value[1] === 'number') {
-    // Geo-point expressed as an array with the format: [lon, lat]
     const lat = value[1];
     const lon = value[0];
     accumulator.push(pointGeometryFactory(lat, lon));
@@ -155,8 +153,13 @@ export function convertESShapeToGeojsonGeometry(value) {
       break;
     case 'envelope':
     case 'circle':
-      // TODO handle envelope and circle geometry types which exist in elasticsearch but not in geojson
-      throw new Error(`Unable to convert ${geoJson.type} geometry to geojson, not supported`);
+      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.convert.unsupportedGeometryTypeErrorMessage', {
+        defaultMessage: `Unable to convert {geometryType} geometry to geojson, not supported`,
+        values: {
+          geometryType: geoJson.type
+        }
+      });
+      throw new Error(errorMessage);
   }
   return geoJson;
 }
