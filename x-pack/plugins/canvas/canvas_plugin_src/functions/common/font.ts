@@ -7,6 +7,7 @@
 // @ts-ignore no @typed def
 import inlineStyle from 'inline-style';
 import { openSans } from '../../../common/lib/fonts';
+import { getFunctionHelp } from '../../strings';
 import {
   CSSStyle,
   FontFamily,
@@ -14,7 +15,6 @@ import {
   NullContextFunction,
   Style,
   TextAlignment,
-  FONT_WEIGHTS,
   TEXT_ALIGNMENTS,
 } from '../types';
 
@@ -30,62 +30,63 @@ interface Arguments {
 }
 
 export function font(): NullContextFunction<'font', Arguments, Style> {
+  const { help, args: argHelp } = getFunctionHelp().font;
+
   return {
     name: 'font',
     aliases: [],
     type: 'style',
-    help: 'Create a font style',
+    help,
     context: {
       types: ['null'],
     },
     args: {
       align: {
         default: 'left',
-        help: 'Horizontal text alignment',
+        help: argHelp.align,
         options: TEXT_ALIGNMENTS,
         types: ['string'],
       },
       color: {
-        help: 'Text color',
+        help: argHelp.color,
         types: ['string', 'null'],
       },
       family: {
         default: `"${openSans.value}"`,
-        help: 'An acceptable CSS web font string',
+        help: argHelp.family,
         types: ['string'],
       },
       italic: {
         default: false,
-        help: 'Italicize, true or false',
+        help: argHelp.italic,
         options: [true, false],
         types: ['boolean'],
       },
       lHeight: {
         aliases: ['lineHeight'],
-        help: 'Line height (px)',
+        help: argHelp.lHeight,
         types: ['number'],
       },
       size: {
         default: 14,
-        help: 'Font size (px)',
+        help: argHelp.size,
         types: ['number'],
       },
       underline: {
         default: false,
-        help: 'Underline the text, true or false',
+        help: argHelp.underline,
         options: [true, false],
         types: ['boolean'],
       },
       weight: {
         default: 'normal',
-        help:
-          'Set the font weight, e.g. normal, bold, bolder, lighter, 100, 200, 300, 400, 500, 600, 700, 800, 900',
-        options: FONT_WEIGHTS,
+        help: argHelp.weight,
+        options: Object.values(FontWeight),
         types: ['string'],
       },
     },
     fn: (_context, args) => {
-      if (!FONT_WEIGHTS.includes(args.weight)) {
+      if (!Object.values(FontWeight).includes(args.weight)) {
         throw new Error(`Invalid font weight: '${args.weight}'`);
       }
       if (!TEXT_ALIGNMENTS.includes(args.align)) {
