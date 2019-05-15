@@ -1,0 +1,160 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Domains Table Component Rendering it renders the default Domains table 1`] = `
+<Connect(DomainsTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "samsungtv-kitchen.iot.sr.local.example.com",
+        },
+        "node": Object {
+          "destination": Object {
+            "domainName": "samsungtv-kitchen.iot.sr.local.example.com",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 96,
+          },
+          "network": Object {
+            "bytes": 1054651765,
+            "direction": Array [],
+            "packets": 707990,
+          },
+          "source": null,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "row.exmaple.com",
+        },
+        "node": Object {
+          "destination": Object {
+            "domainName": ".row.exmaple.com",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 6,
+          },
+          "network": Object {
+            "bytes": 0,
+            "direction": Array [],
+            "packets": 0,
+          },
+          "source": null,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "10.10.10.10",
+        },
+        "node": Object {
+          "destination": Object {
+            "domainName": "10.10.10.10",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 1,
+          },
+          "network": Object {
+            "bytes": 0,
+            "direction": Array [],
+            "packets": 0,
+          },
+          "source": null,
+        },
+      },
+    ]
+  }
+  flowTarget="source"
+  hasNextPage={false}
+  indexPattern={
+    Object {
+      "fields": Array [
+        Object {
+          "aggregatable": true,
+          "name": "@timestamp",
+          "searchable": true,
+          "type": "date",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "@version",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.ephemeral_id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.hostname",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test1",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test2",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test3",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test4",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test5",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test6",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test7",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+      ],
+      "title": "filebeat-*,auditbeat-*,packetbeat-*",
+    }
+  }
+  ip="10.10.10.10"
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="10"
+  totalCount={1}
+  type="details"
+/>
+`;

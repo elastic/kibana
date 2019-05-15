@@ -6,6 +6,8 @@
 
 import { Dictionary } from '../../../../common/types/common';
 
+import { SimpleQuery } from '../../common';
+
 export type EsFieldName = string;
 
 type EsId = string;
@@ -77,4 +79,17 @@ export const toggleSelectedField = (
   }
   selectedFields.sort();
   return selectedFields;
+};
+
+export const getSourceIndexDevConsoleStatement = (
+  query: SimpleQuery,
+  indexPatternTitle: string
+) => {
+  return `GET ${indexPatternTitle}/_search\n${JSON.stringify(
+    {
+      query,
+    },
+    null,
+    2
+  )}\n`;
 };

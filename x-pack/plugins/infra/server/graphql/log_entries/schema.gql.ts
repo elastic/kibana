@@ -17,7 +17,7 @@ export const logEntriesSchema = gql`
     highlights: [String!]!
   }
 
-  "A segment of the log entry message that was derived from a field"
+  "A segment of the log entry message that was derived from a string literal"
   type InfraLogMessageConstantSegment {
     "The segment's message"
     constant: String!
@@ -25,6 +25,32 @@ export const logEntriesSchema = gql`
 
   "A segment of the log entry message"
   union InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment
+
+  "A special built-in column that contains the log entry's timestamp"
+  type InfraLogEntryTimestampColumn {
+    "The timestamp"
+    timestamp: Float!
+  }
+
+  "A special built-in column that contains the log entry's constructed message"
+  type InfraLogEntryMessageColumn {
+    "A list of the formatted log entry segments"
+    message: [InfraLogMessageSegment!]!
+  }
+
+  "A column that contains the value of a field of the log entry"
+  type InfraLogEntryFieldColumn {
+    "The field name of the column"
+    field: String!
+    "The value of the field in the log entry"
+    value: String!
+  }
+
+  "A column of a log entry"
+  union InfraLogEntryColumn =
+      InfraLogEntryTimestampColumn
+    | InfraLogEntryMessageColumn
+    | InfraLogEntryFieldColumn
 
   "A log entry"
   type InfraLogEntry {
@@ -34,8 +60,8 @@ export const logEntriesSchema = gql`
     gid: String!
     "The source id"
     source: String!
-    "A list of the formatted log entry segments"
-    message: [InfraLogMessageSegment!]!
+    "The columns used for rendering the log entry"
+    columns: [InfraLogEntryColumn!]!
   }
 
   "A log summary bucket"
@@ -90,6 +116,8 @@ export const logEntriesSchema = gql`
     id: ID!
     "The index where the document was found"
     index: String!
+    "Time key for the document - derived from the source configuration timestamp and tiebreaker settings"
+    key: InfraTimeKey!
     "An array of flattened fields and values"
     fields: [InfraLogItemField!]!
   }

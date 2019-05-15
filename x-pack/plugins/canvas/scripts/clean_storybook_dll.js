@@ -7,4 +7,4 @@
 const del = require('del');
 const { DLL_OUTPUT } = require('../.storybook/constants');
 
-del.sync([DLL_OUTPUT]);
+del.sync([DLL_OUTPUT], { force: true });

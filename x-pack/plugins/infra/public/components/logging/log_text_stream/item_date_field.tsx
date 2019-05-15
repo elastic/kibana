@@ -5,42 +5,48 @@
  */
 
 import { darken, transparentize } from 'polished';
-import * as React from 'react';
-import { css } from 'styled-components';
+import React, { memo } from 'react';
 
+import { css } from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
 import { tintOrShade } from '../../../utils/styles';
+import { useFormattedTime } from '../../formatted_time';
 import { LogTextStreamItemField } from './item_field';
 
 interface LogTextStreamItemDateFieldProps {
-  children: React.ReactNode;
+  dataTestSubj?: string;
   hasHighlights: boolean;
+  isHighlighted: boolean;
   isHovered: boolean;
   scale: TextScale;
+  time: number;
 }
 
-export class LogTextStreamItemDateField extends React.PureComponent<
-  LogTextStreamItemDateFieldProps,
-  {}
-> {
-  public render() {
-    const { children, hasHighlights, isHovered, scale } = this.props;
+export const LogTextStreamItemDateField = memo<LogTextStreamItemDateFieldProps>(
+  ({ dataTestSubj, hasHighlights, isHighlighted, isHovered, scale, time }) => {
+    const formattedTime = useFormattedTime(time);
 
     return (
       <LogTextStreamItemDateFieldWrapper
+        data-test-subj={dataTestSubj}
         hasHighlights={hasHighlights}
         isHovered={isHovered}
+        isHighlighted={isHighlighted}
         scale={scale}
       >
-        {children}
+        {formattedTime}
       </LogTextStreamItemDateFieldWrapper>
     );
   }
-}
+);
 
 const highlightedFieldStyle = css`
   background-color: ${props =>
-    tintOrShade(props.theme.eui.euiTextColor, props.theme.eui.euiColorSecondary, 0.15)};
+    tintOrShade(
+      props.theme.eui.euiTextColor as any,
+      props.theme.eui.euiColorSecondary as any,
+      0.15
+    )};
   border-color: ${props => props.theme.eui.euiColorSecondary};
 `;
 
@@ -59,13 +65,13 @@ const hoveredFieldStyle = css`
 const LogTextStreamItemDateFieldWrapper = LogTextStreamItemField.extend.attrs<{
   hasHighlights: boolean;
   isHovered: boolean;
+  isHighlighted: boolean;
 }>({})`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   border-right: solid 2px ${props => props.theme.eui.euiColorLightShade};
   color: ${props => props.theme.eui.euiColorDarkShade};
   white-space: pre;
-  padding: 0 ${props => props.theme.eui.paddingSizes.l};
 
   ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
-  ${props => (props.isHovered ? hoveredFieldStyle : '')};
+  ${props => (props.isHovered || props.isHighlighted ? hoveredFieldStyle : '')};
 `;

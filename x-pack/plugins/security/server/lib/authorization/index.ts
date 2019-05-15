@@ -5,7 +5,6 @@
  */
 
 export { Actions } from './actions';
-// @ts-ignore
 export { createAuthorizationService } from './service';
 export { disableUICapabilitesFactory } from './disable_ui_capabilities';
 export { initAPIAuthorization } from './api_authorization';

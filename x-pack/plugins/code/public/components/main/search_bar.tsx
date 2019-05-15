@@ -28,6 +28,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   defaultSearchScope?: Repository;
 }
 
+// TODO(mengwei): refactor this with the SearchBar in ../search_bar/
 export class CodeSearchBar extends React.Component<Props> {
   public state = {
     searchScope: SearchScope.DEFAULT,

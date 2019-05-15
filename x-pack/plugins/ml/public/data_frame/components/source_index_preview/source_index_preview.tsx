@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -28,6 +29,7 @@ import {
 
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
+  compressed: boolean;
   itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
   isExpandable: boolean;
 }
@@ -36,11 +38,12 @@ const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<Expandabl
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { IndexPatternContext, SimpleQuery } from '../../common';
+import { isKibanaContext, KibanaContext, SimpleQuery } from '../../common';
 
 import {
   EsDoc,
   EsFieldName,
+  getSourceIndexDevConsoleStatement,
   getSelectableFields,
   MAX_COLUMNS,
   toggleSelectedField,
@@ -49,6 +52,8 @@ import { ExpandedRow } from './expanded_row';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
+
+const CELL_CLICK_ENABLED = false;
 
 // Defining our own ENUM here.
 // EUI's SortDirection wasn't usable as a union type
@@ -87,14 +92,30 @@ interface Props {
 }
 
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
-  const indexPattern = useContext(IndexPatternContext);
+  const [clearTable, setClearTable] = useState(false);
 
-  if (indexPattern === null) {
+  const kibanaContext = useContext(KibanaContext);
+
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 
+  const indexPattern = kibanaContext.currentIndexPattern;
+
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
+
+  // EuiInMemoryTable has an issue with dynamic sortable columns
+  // and will trigger a full page Kibana error in such a case.
+  // The following is a workaround until this is solved upstream:
+  // - If the sortable/columns config changes,
+  //   the table will be unmounted/not rendered.
+  //   This is what setClearTable(true) in toggleColumn() does.
+  // - After that on next render it gets re-enabled. To make sure React
+  //   doesn't consolidate the state updates, setTimeout is used.
+  if (clearTable) {
+    setTimeout(() => setClearTable(false), 0);
+  }
 
   function toggleColumnsPopover() {
     setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -106,6 +127,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   function toggleColumn(column: EsFieldName) {
     // spread to a new array otherwise the component wouldn't re-render
+    setClearTable(true);
     setSelectedFields([...toggleSelectedField(selectedFields, column)]);
   }
 
@@ -191,7 +213,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       truncateText: true,
     } as Dictionary<any>;
 
-    if (cellClick) {
+    if (CELL_CLICK_ENABLED && cellClick) {
       column.render = (d: string) => (
         <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
           {d}
@@ -236,6 +258,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     });
   }
 
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
+  });
+
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -243,7 +269,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -298,6 +324,16 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                 </EuiPopover>
               </EuiText>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy
+                beforeMessage={euiCopyText}
+                textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
+              >
+                {(copy: () => void) => (
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -305,17 +341,23 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       {status !== SOURCE_INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      <ExpandableTable
-        items={tableItems}
-        columns={columns}
-        pagination={true}
-        hasActions={false}
-        isSelectable={false}
-        itemId="_id"
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isExpandable={true}
-        sorting={sorting}
-      />
+      {clearTable === false && (
+        <ExpandableTable
+          compressed
+          items={tableItems}
+          columns={columns}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
+          hasActions={false}
+          isSelectable={false}
+          itemId="_id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable={true}
+          sorting={sorting}
+        />
+      )}
     </EuiPanel>
   );
 });

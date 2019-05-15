@@ -44,6 +44,12 @@ exports[`it renders without crashing 1`] = `
             "label": "monitor_ml",
           },
           Object {
+            "label": "manage_data_frame_transforms",
+          },
+          Object {
+            "label": "monitor_data_frame_transforms",
+          },
+          Object {
             "label": "manage_watcher",
           },
           Object {

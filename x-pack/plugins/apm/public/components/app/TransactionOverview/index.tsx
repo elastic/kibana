@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
@@ -25,8 +24,10 @@ import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
+import { history } from '../../../utils/history';
+import { useLocation } from '../../../hooks/useLocation';
 
-interface TransactionOverviewProps extends RouteComponentProps {
+interface Props {
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
 }
@@ -50,12 +51,11 @@ function getRedirectLocation({
   }
 }
 
-export function TransactionOverviewView({
+export function TransactionOverview({
   urlParams,
-  serviceTransactionTypes,
-  location,
-  history
-}: TransactionOverviewProps) {
+  serviceTransactionTypes
+}: Props) {
+  const location = useLocation();
   const { serviceName, transactionType } = urlParams;
 
   // redirect to first transaction type
@@ -120,7 +120,7 @@ export function TransactionOverviewView({
         urlParams={urlParams}
       />
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiPanel>
         <EuiTitle size="xs">
@@ -135,5 +135,3 @@ export function TransactionOverviewView({
     </React.Fragment>
   );
 }
-
-export const TransactionOverview = withRouter(TransactionOverviewView);

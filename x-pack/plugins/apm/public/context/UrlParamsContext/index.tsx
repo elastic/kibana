@@ -35,7 +35,7 @@ export function urlParamsReducer(
 ): IUrlParams {
   switch (action.type) {
     case LOCATION_UPDATE: {
-      return resolveUrlParams(action.location);
+      return resolveUrlParams(action.location, state);
     }
 
     case TIME_RANGE_REFRESH:
@@ -59,7 +59,7 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
   const location = useLocation();
   const [urlParams, dispatch] = useReducer(
     urlParamsReducer,
-    resolveUrlParams(location)
+    resolveUrlParams(location, {})
   );
 
   function refreshTimeRange(time: TimeRange) {

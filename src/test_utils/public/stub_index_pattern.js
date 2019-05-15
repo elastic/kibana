@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
-import Promise from 'bluebird';
 import { IndexPatternProvider, getRoutes } from 'ui/index_patterns/_index_pattern';
 import { formatHit } from 'ui/index_patterns/_format_hit';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
@@ -45,12 +43,6 @@ export default function (Private) {
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
-    this.toIndexList = _.constant(Promise.resolve(pattern.split(',')));
-    this.toDetailedIndexList = _.constant(Promise.resolve(pattern.split(',').map(index => ({
-      index,
-      min: 0,
-      max: 1
-    }))));
     this.getComputedFields = getComputedFields.bind(this);
     this.flattenHit = flattenHit(this);
     this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));

@@ -191,7 +191,7 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
           {
             bool: {
               should: [
-                { range: { 'kibana_stats.kibana.version': { lt: '6.7.3' } } },
+                { range: { 'kibana_stats.kibana.version': { lt: '6.7.2' } } },
                 { term: { 'kibana_stats.kibana.version': '7.0.0' } },
               ]
             }

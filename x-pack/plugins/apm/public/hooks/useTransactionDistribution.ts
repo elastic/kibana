@@ -18,35 +18,38 @@ const INITIAL_DATA = {
 export function useTransactionDistribution(urlParams: IUrlParams) {
   const {
     serviceName,
+    start,
+    end,
     transactionType,
     transactionId,
     traceId,
-    start,
-    end,
     transactionName,
     kuery
   } = urlParams;
 
   const { data = INITIAL_DATA, status, error } = useFetcher(
-    () =>
-      loadTransactionDistribution({
-        serviceName,
-        transactionType,
-        transactionId,
-        traceId,
-        start,
-        end,
-        transactionName,
-        kuery
-      }),
+    () => {
+      if (serviceName && start && end && transactionType && transactionName) {
+        return loadTransactionDistribution({
+          serviceName,
+          start,
+          end,
+          transactionType,
+          transactionName,
+          transactionId,
+          traceId,
+          kuery
+        });
+      }
+    },
     [
       serviceName,
-      transactionType,
-      transactionId,
-      traceId,
       start,
       end,
+      transactionType,
       transactionName,
+      transactionId,
+      traceId,
       kuery
     ]
   );

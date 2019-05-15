@@ -7,8 +7,6 @@
 import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
 import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
-import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
@@ -18,11 +16,13 @@ export async function loadTransactionList({
   end,
   kuery,
   transactionType
-}: IUrlParams) {
-  if (!(serviceName && transactionType && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionType: string;
+  kuery: string | undefined;
+}) {
   return await callApi<TransactionListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}`,
     query: {
@@ -42,11 +42,16 @@ export async function loadTransactionDistribution({
   transactionId,
   traceId,
   kuery
-}: IUrlParams) {
-  if (!(serviceName && transactionName && transactionType && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionType: string;
+  transactionName: string;
+  transactionId?: string;
+  traceId?: string;
+  kuery: string | undefined;
+}) {
   return callApi<ITransactionDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
       transactionName
@@ -68,11 +73,14 @@ export async function loadTransactionDetailsCharts({
   kuery,
   transactionType,
   transactionName
-}: IUrlParams) {
-  if (!(serviceName && transactionName && transactionType && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionType: string;
+  transactionName: string;
+  kuery: string | undefined;
+}) {
   return callApi<TimeSeriesAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
       transactionName
@@ -91,11 +99,13 @@ export async function loadTransactionOverviewCharts({
   end,
   kuery,
   transactionType
-}: IUrlParams) {
-  if (!(serviceName && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionType?: string;
+  kuery: string | undefined;
+}) {
   const pathname = transactionType
     ? `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/charts`
     : `/api/apm/services/${serviceName}/transaction_groups/charts`;

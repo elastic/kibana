@@ -105,7 +105,11 @@ export class AbstractLayer {
     console.warn('Icon not available for this layer type');
   }
 
-  getTOCDetails() {
+  hasLegendDetails() {
+    return false;
+  }
+
+  getLegendDetails() {
     return null;
   }
 
@@ -155,10 +159,6 @@ export class AbstractLayer {
       minZoom: this._descriptor.minZoom,
       maxZoom: this._descriptor.maxZoom,
     };
-  }
-
-  getSupportedStyles() {
-    return [];
   }
 
   getCurrentStyle() {
@@ -250,7 +250,6 @@ export class AbstractLayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-
   async getBounds() {
     return {
       min_lon: -180,
@@ -260,8 +259,8 @@ export class AbstractLayer {
     };
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor(options);
+  renderStyleEditor({ onStyleDescriptorChange }) {
+    return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
   getIndexPatternIds() {

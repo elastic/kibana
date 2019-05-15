@@ -10,6 +10,7 @@ import header from './header.png';
 export const horizontalBarChart: ElementFactory = () => ({
   name: 'horizontalBarChart',
   displayName: 'Horizontal bar chart',
+  tags: ['chart'],
   help: 'A customizable horizontal bar chart',
   image: header,
   expression: `filters

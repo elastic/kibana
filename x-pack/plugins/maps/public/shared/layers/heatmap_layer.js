@@ -33,10 +33,6 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  getSupportedStyles() {
-    return [HeatmapStyle];
-  }
-
   getIndexPatternIds() {
     return this._source.getIndexPatternIds();
   }

@@ -8,6 +8,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiProgress,
   EuiText,
@@ -187,9 +188,9 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <EuiText color="subdued" size="s">
-              <a href={'https://' + uri} target="_blank">
+              <EuiLink href={'https://' + uri} target="_blank">
                 {uri}
-              </a>
+              </EuiLink>
             </EuiText>
           </EuiFlexItem>
           {enableManagement && projectManagement}

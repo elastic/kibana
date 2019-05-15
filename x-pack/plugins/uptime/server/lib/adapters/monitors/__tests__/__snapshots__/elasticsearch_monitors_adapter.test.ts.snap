@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticsearchMonitorsAdapter will return kubernetes information if contained in hits 1`] = `
+Object {
+  "downSeries": Array [],
+  "id": Object {
+    "key": "foo",
+    "url": "bar",
+  },
+  "ping": Object {
+    "@timestamp": "2018-10-30T18:51:59.800Z",
+    "container": Object {
+      "id": "container_id",
+    },
+    "kubernetes": Object {
+      "pod": Object {
+        "uid": "kubernetes_pod_uid",
+      },
+    },
+    "monitor": Object {
+      "status": "up",
+    },
+    "timestamp": "2018-10-30T18:51:59.800Z",
+  },
+  "upSeries": Array [],
+}
+`;

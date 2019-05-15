@@ -50,6 +50,10 @@ export function statusMixin(kbnServer, server, config) {
   });
   oppsy.start(config.get('ops.interval'));
 
+  server.events.on('stop', () => {
+    oppsy.stop();
+  });
+
   // init routes
   registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);

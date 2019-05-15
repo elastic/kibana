@@ -51,7 +51,7 @@ export function disableUICapabilitesFactory(
 
         throw new Error(`Expected value type of boolean or object, but found ${value}`);
       })
-    );
+    ) as UICapabilities;
   };
 
   const usingPrivileges = async (uiCapabilities: UICapabilities) => {
@@ -143,7 +143,7 @@ export function disableUICapabilitesFactory(
           );
         }
       );
-    });
+    }) as UICapabilities;
   };
 
   return {

@@ -9,7 +9,6 @@ import { createSelector } from 'reselect';
 import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
 import {
-  flyoutOptionsSelectors as localFlyoutOptionsSelectors,
   logFilterSelectors as localLogFilterSelectors,
   logPositionSelectors as localLogPositionSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
@@ -30,7 +29,6 @@ export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPosi
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffleOptionsSelectors);
-export const flyoutOptionsSelectors = globalizeSelectors(selectLocal, localFlyoutOptionsSelectors);
 
 /**
  * remote selectors

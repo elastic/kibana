@@ -63,16 +63,36 @@ function getShortGroupId(errorGroupId?: string) {
 export function ErrorGroupDetails() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { serviceName, start, end, errorGroupId } = urlParams;
+  const { serviceName, start, end, errorGroupId, kuery } = urlParams;
 
   const { data: errorGroupData } = useFetcher(
-    () => loadErrorGroupDetails({ serviceName, start, end, errorGroupId }),
-    [serviceName, start, end, errorGroupId]
+    () => {
+      if (serviceName && start && end && errorGroupId) {
+        return loadErrorGroupDetails({
+          serviceName,
+          start,
+          end,
+          errorGroupId,
+          kuery
+        });
+      }
+    },
+    [serviceName, start, end, errorGroupId, kuery]
   );
 
   const { data: errorDistributionData } = useFetcher(
-    () => loadErrorDistribution({ serviceName, start, end }),
-    [serviceName, start, end]
+    () => {
+      if (serviceName && start && end && errorGroupId) {
+        return loadErrorDistribution({
+          serviceName,
+          start,
+          end,
+          errorGroupId,
+          kuery
+        });
+      }
+    },
+    [serviceName, start, end, errorGroupId, kuery]
   );
 
   if (!errorGroupData || !errorDistributionData) {
@@ -166,7 +186,7 @@ export function ErrorGroupDetails() {
           )}
         />
       </EuiPanel>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {showDetails && (
         <DetailView
           errorGroup={errorGroupData}

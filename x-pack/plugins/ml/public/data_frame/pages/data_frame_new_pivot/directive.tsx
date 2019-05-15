@@ -11,27 +11,42 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
+import { IPrivate } from 'ui/private';
+import { InjectorService } from '../../../../common/types/angular';
 
 // @ts-ignore
 import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
+// Simple drop-in type until new_job_utils offers types.
+type CreateSearchItems = () => { indexPattern: StaticIndexPattern };
 
-import { IndexPatternContext } from '../../common';
+import { KibanaContext } from '../../common';
 import { Page } from './page';
 
-module.directive('mlNewDataFrame', ($route: any, Private: any) => {
+module.directive('mlNewDataFrame', ($injector: InjectorService) => {
   return {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      const createSearchItems = Private(SearchItemsProvider);
+      const indexPatterns = $injector.get('indexPatterns');
+      const kibanaConfig = $injector.get('config');
+      const Private: IPrivate = $injector.get('Private');
+
+      const createSearchItems: CreateSearchItems = Private(SearchItemsProvider);
       const { indexPattern } = createSearchItems();
+
+      const kibanaContext = {
+        currentIndexPattern: indexPattern,
+        indexPatterns,
+        kibanaConfig,
+      };
 
       ReactDOM.render(
         <I18nContext>
-          <IndexPatternContext.Provider value={indexPattern}>
+          <KibanaContext.Provider value={kibanaContext}>
             {React.createElement(Page)}
-          </IndexPatternContext.Provider>
+          </KibanaContext.Provider>
         </I18nContext>,
         element[0]
       );

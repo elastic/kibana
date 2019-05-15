@@ -64,7 +64,7 @@ export interface InfraMetricModelSeries {
 
 export interface InfraMetricModelBasicMetric {
   id: string;
-  field: string;
+  field?: string | null;
   type: InfraMetricModelMetricType;
 }
 
