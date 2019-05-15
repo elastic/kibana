@@ -390,9 +390,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         const text = await element.getVisibleText();
         return text;
       }));
-      // .flat() replacement
       return values.filter(item => item.length > 0);
-      //reduce((acc, val) => [...acc, ...val], []);
     }
 
     async clickMetricEditor() {
@@ -568,23 +566,17 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getInterval() {
-      const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option[selected]`);
-      return await intervalElement.getProperty('label');
+      return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
-      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      const option = await input.findByCssSelector(`option[label="${newValue}"]`);
-      await option.click();
+      return await comboBox.set('visEditorInterval', newValue);
     }
 
     async setCustomInterval(newValue) {
-      await this.setInterval('Custom');
-      const input = await find.byCssSelector('input[name="customInterval"]');
-      await input.clearValue();
-      await input.type(newValue);
+      log.debug(`Visualize.setCustomInterval(${newValue})`);
+      return await comboBox.setCustom('visEditorInterval', newValue);
     }
 
     async getNumericInterval(agg = 2) {
@@ -600,10 +592,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
-    async setSize(newValue) {
-      const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
-      await input.clearValue();
-      await input.type(String(newValue));
+    async setSize(newValue, aggId) {
+      const dataTestSubj = aggId ? `aggregationEditor${aggId} sizeParamEditor` : 'sizeParamEditor';
+      await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {

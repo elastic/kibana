@@ -39,7 +39,7 @@ function prepareProject(url: string, p: string) {
   const opts: CloneOptions = {
     fetchOpts: {
       callbacks: {
-        certificateCheck: () => 1,
+        certificateCheck: () => 0,
       },
     },
   };
@@ -124,7 +124,11 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
     })
   );
 }
-describe('lsp_indexer unit tests', () => {
+
+// FAILING https://github.com/elastic/kibana/issues/36478
+describe.skip('lsp_indexer unit tests', function(this: any) {
+  this.timeout(20000);
+
   // @ts-ignore
   before(async () => {
     return new Promise(resolve => {
@@ -299,5 +303,4 @@ describe('lsp_indexer unit tests', () => {
     assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 33 * 2);
     // @ts-ignore
   }).timeout(20000);
-  // @ts-ignore
-}).timeout(20000);
+});

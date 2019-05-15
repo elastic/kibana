@@ -15,6 +15,7 @@ import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
+import { getFunctionHelp } from '../../../strings';
 import {
   AxisConfig,
   ContextFunction,
@@ -24,7 +25,6 @@ import {
   Style,
   Palette,
   Legend,
-  DatatableColumn,
 } from '../../types';
 
 interface Arguments {
@@ -38,11 +38,13 @@ interface Arguments {
 }
 
 export function plot(): ContextFunction<'plot', PointSeries, Arguments, Render<any>> {
+  const { help, args: argHelp } = getFunctionHelp().plot;
+
   return {
     name: 'plot',
     aliases: [],
     type: 'render',
-    help: 'Configure a plot element',
+    help,
     context: {
       types: ['pointseries'],
     },
@@ -50,38 +52,38 @@ export function plot(): ContextFunction<'plot', PointSeries, Arguments, Render<a
       seriesStyle: {
         multi: true,
         types: ['seriesStyle', 'null'],
-        help: 'A style of a specific series',
+        help: argHelp.seriesStyle,
       },
       defaultStyle: {
         multi: false,
         types: ['seriesStyle'],
-        help: 'The default style to use for every series',
+        help: argHelp.defaultStyle,
         default: '{seriesStyle points=5}',
       },
       palette: {
         types: ['palette'],
-        help: 'A palette object for describing the colors to use on this plot',
+        help: argHelp.palette,
         default: '{palette}',
       },
       font: {
         types: ['style'],
-        help: 'Legend and tick mark fonts',
+        help: argHelp.font,
         default: '{font}',
       },
       legend: {
         types: ['string', 'boolean'],
-        help: 'Legend position, nw, sw, ne, se or false',
+        help: argHelp.legend,
         default: 'ne',
-        options: ['nw', 'sw', 'ne', 'se', false],
+        options: Object.values(Legend).concat(false),
       },
       yaxis: {
         types: ['boolean', 'axisConfig'],
-        help: 'Axis configuration, or false to disable',
+        help: argHelp.yaxis,
         default: true,
       },
       xaxis: {
         types: ['boolean', 'axisConfig'],
-        help: 'Axis configuration, or false to disable',
+        help: argHelp.xaxis,
         default: true,
       },
     },
@@ -110,16 +112,8 @@ export function plot(): ContextFunction<'plot', PointSeries, Arguments, Render<a
               text?: string;
             } = {};
 
-            const x =
-              get<DatatableColumn[], DatatableColumn['type']>(context.columns, 'x.type') ===
-              'string'
-                ? ticks.x.hash[point.x]
-                : point.x;
-            const y =
-              get<DatatableColumn[], DatatableColumn['type']>(context.columns, 'y.type') ===
-              'string'
-                ? ticks.y.hash[point.y]
-                : point.y;
+            const x = get(context.columns, 'x.type') === 'string' ? ticks.x.hash[point.x] : point.x;
+            const y = get(context.columns, 'y.type') === 'string' ? ticks.y.hash[point.y] : point.y;
 
             if (point.size != null) {
               attrs.size = point.size;

@@ -22,11 +22,15 @@ jest.mock('ui/kfetch', () => ({}));
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('brace/mode/groovy', () => ({}));
+
 import { FieldEditorComponent } from './field_editor';
 
 jest.mock('@elastic/eui', () => ({
+  EuiBasicTable: 'eui-basic-table',
   EuiButton: 'eui-button',
   EuiButtonEmpty: 'eui-button-empty',
+  EuiCallOut: 'eui-call-out',
   EuiCode: 'eui-code',
   EuiConfirmModal: 'eui-confirm-modal',
   EuiFieldNumber: 'eui-field-number',
@@ -200,4 +204,28 @@ describe('FieldEditor', () => {
     component.update();
     expect(component).toMatchSnapshot();
   });
+
+  it('should show multiple type field warning with a table containing indices', async () => {
+    const testField = {
+      ...field,
+      name: 'test-conflict',
+      conflictDescriptions: {
+        long: ['index_name_1', 'index_name_2'],
+        text: ['index_name_3']
+      }
+    };
+    const component = shallowWithIntl(
+      <FieldEditorComponent
+        indexPattern={indexPattern}
+        field={testField}
+        helpers={helpers}
+      />
+    );
+
+    await new Promise(resolve => process.nextTick(resolve));
+    component.instance().onFieldChange('name', 'foobar');
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
 });

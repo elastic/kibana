@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { NullContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 const name = 'seriesStyle';
 
@@ -23,50 +24,48 @@ interface Return extends Arguments {
 }
 
 export function seriesStyle(): NullContextFunction<'seriesStyle', Arguments, Return> {
+  const { help, args: argHelp } = getFunctionHelp().seriesStyle;
+
   return {
     name,
-    help:
-      'Creates an object used for describing the properties of a series on a chart.' +
-      ' You would usually use this inside of a charting function',
+    help,
     context: {
       types: ['null'],
     },
     args: {
       label: {
         types: ['string'],
-        help:
-          'The label of the line this style applies to, not the name you would like to give the line',
+        help: argHelp.label,
       },
       color: {
         types: ['string', 'null'],
-        help: 'Color to assign the line',
+        help: argHelp.color,
       },
       lines: {
         types: ['number'],
-        help: 'Width of the line',
+        help: argHelp.lines,
       },
       bars: {
         types: ['number'],
-        help: 'Width of bars',
+        help: argHelp.bars,
       },
       points: {
         types: ['number'],
-        help: 'Size of points on line',
+        help: argHelp.points,
       },
       fill: {
         types: ['number', 'boolean'],
-        help: 'Should we fill points?',
+        help: argHelp.fill,
         default: false,
         options: [true, false],
       },
       stack: {
         types: ['number', 'null'],
-        help:
-          'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
+        help: argHelp.stack,
       },
       horizontalBars: {
         types: ['boolean'],
-        help: 'Sets the orientation of bars in the chart to horizontal',
+        help: argHelp.horizontalBars,
         options: [true, false],
       },
     },
