@@ -19,20 +19,28 @@
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { HttpService } from '../../core/public/http';
-import { BasePathService } from '../../core/public/base_path';
+import { InjectedMetadataSetup } from '../../core/public/injected_metadata';
+import { FatalErrorsSetup } from '../../core/public/fatal_errors';
 import { fatalErrorsServiceMock } from '../../core/public/fatal_errors/fatal_errors_service.mock';
 import { injectedMetadataServiceMock } from '../../core/public/injected_metadata/injected_metadata_service.mock';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-export function setup() {
-  const httpService = new HttpService();
-  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
-  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+export type SetupTap = (
+  { injectedMetadata: InjectedMetadataSetup, fatalErrors: FatalErrorsSetup }
+) => void;
 
+const defaultTap: SetupTap = ({ injectedMetadata }) => {
   injectedMetadata.getBasePath.mockReturnValue('http://localhost/myBase');
+};
 
-  const basePath = new BasePathService().setup({ injectedMetadata });
-  const http = httpService.setup({ basePath, fatalErrors, injectedMetadata });
+export function setup(tap: SetupTap = defaultTap) {
+  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
 
-  return { httpService, fatalErrors, http };
+  tap({ injectedMetadata, fatalErrors });
+
+  const httpService = new HttpService();
+  const http = httpService.setup({ fatalErrors, injectedMetadata });
+
+  return { httpService, injectedMetadata, fatalErrors, http };
 }

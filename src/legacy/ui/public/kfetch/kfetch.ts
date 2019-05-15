@@ -21,7 +21,7 @@ import { merge } from 'lodash';
 // @ts-ignore not really worth typing
 import { KFetchError } from './kfetch_error';
 
-import { HttpSetup } from '../../../../core/public';
+import { IHttpService } from '../../../../core/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { HttpRequestInit } from '../../../../core/public/http/types';
 
@@ -49,7 +49,7 @@ const interceptors: Interceptor[] = [];
 export const resetInterceptors = () => (interceptors.length = 0);
 export const addInterceptor = (interceptor: Interceptor) => interceptors.push(interceptor);
 
-export function createKfetch(http: HttpSetup) {
+export function createKfetch(http: IHttpService) {
   return function kfetch(
     options: KFetchOptions,
     { prependBasePath = true }: KFetchKibanaOptions = {}

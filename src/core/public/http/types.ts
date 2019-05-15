@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../base_path';
+import { Observable } from 'rxjs';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 
@@ -39,10 +39,9 @@ export interface HttpRequestInit {
   signal?: AbortSignal | null;
   window?: any;
 }
-export interface Deps {
-  basePath: BasePathSetup;
+export interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
+  fatalErrors: FatalErrorsSetup | null;
 }
 export interface HttpFetchQuery {
   [key: string]: string | number | boolean | undefined;
@@ -51,5 +50,22 @@ export interface HttpFetchOptions extends HttpRequestInit {
   query?: HttpFetchQuery;
   prependBasePath?: boolean;
   headers?: HttpHeadersInit;
+}
+export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+export interface IHttpService {
+  stop(): void;
+  getBasePath(): string;
+  addToPath(path: string): string;
+  removeFromPath(path: string): string;
+  fetch: HttpHandler;
+  delete: HttpHandler;
+  get: HttpHandler;
+  head: HttpHandler;
+  options: HttpHandler;
+  patch: HttpHandler;
+  post: HttpHandler;
+  put: HttpHandler;
+  addLoadingCount(count$: Observable<number>): void;
+  getLoadingCount$(): Observable<number>;
 }
 export type HttpBody = BodyInit | null;

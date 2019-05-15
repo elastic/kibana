@@ -20,12 +20,12 @@
 import { createKfetch, KFetchKibanaOptions, KFetchOptions } from './kfetch';
 export { addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
 
-import { HttpSetup } from '../../../../core/public';
+import { IHttpService } from '../../../../core/public';
 
-let http: HttpSetup;
+let http: IHttpService;
 let kfetchInstance: (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => any;
 
-export function __newPlatformSetup__(httpSetup: HttpSetup) {
+export function __newPlatformSetup__(httpSetup: IHttpService) {
   if (http) {
     throw new Error('ui/kfetch already initialized with New Platform APIs');
   }

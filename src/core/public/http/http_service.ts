@@ -17,84 +17,31 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import {
-  distinctUntilChanged,
-  endWith,
-  map,
-  pairwise,
-  startWith,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
-
-import { Deps } from './types';
-import { setup } from './fetch';
+import { HttpDeps, IHttpService } from './types';
+import { setup } from './http_setup';
 
 /** @internal */
 export class HttpService {
-  private readonly loadingCount$ = new Rx.BehaviorSubject(0);
-  private readonly stop$ = new Rx.Subject();
+  private satupService!: IHttpService;
+  private startedService!: IHttpService;
 
-  public setup(deps: Deps) {
-    const { fetch, shorthand } = setup(deps);
-
-    return {
-      fetch,
-      delete: shorthand('DELETE'),
-      get: shorthand('GET'),
-      head: shorthand('HEAD'),
-      options: shorthand('OPTIONS'),
-      patch: shorthand('PATCH'),
-      post: shorthand('POST'),
-      put: shorthand('PUT'),
-      addLoadingCount: (count$: Rx.Observable<number>) => {
-        count$
-          .pipe(
-            distinctUntilChanged(),
-
-            tap(count => {
-              if (count < 0) {
-                throw new Error(
-                  'Observables passed to loadingCount.add() must only emit positive numbers'
-                );
-              }
-            }),
-
-            // use takeUntil() so that we can finish each stream on stop() the same way we do when they complete,
-            // by removing the previous count from the total
-            takeUntil(this.stop$),
-            endWith(0),
-            startWith(0),
-            pairwise(),
-            map(([prev, next]) => next - prev)
-          )
-          .subscribe({
-            next: delta => {
-              this.loadingCount$.next(this.loadingCount$.getValue() + delta);
-            },
-            error: error => {
-              deps.fatalErrors.add(error);
-            },
-          });
-      },
-
-      getLoadingCount$: () => {
-        return this.loadingCount$.pipe(distinctUntilChanged());
-      },
-    };
+  public setup(deps: HttpDeps): IHttpService {
+    this.satupService = setup(deps.injectedMetadata, deps.fatalErrors);
+    return this.satupService;
   }
 
-  // eslint-disable-next-line no-unused-params
-  public start() {}
+  public start(deps: HttpDeps): IHttpService {
+    this.startedService = setup(deps.injectedMetadata, deps.fatalErrors);
+    return this.startedService;
+  }
 
   public stop() {
-    this.stop$.next();
-    this.loadingCount$.complete();
+    if (this.satupService) {
+      this.satupService.stop();
+    }
+
+    if (this.startedService) {
+      this.startedService.stop();
+    }
   }
 }
-
-/** @public */
-export type HttpSetup = ReturnType<HttpService['setup']>;
-/** @public */
-export type HttpStart = ReturnType<HttpService['start']>;
