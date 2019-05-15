@@ -21,8 +21,8 @@ describe('<SnapshotRestoreHome />', () => {
   });
 
   describe('on component mount', () => {
-    it('should set the correct app title', () => {
-      const { exists, find } = setup();
+    it('should set the correct app title', async () => {
+      const { exists, find } = await setup();
       expect(exists('appTitle')).toBe(true);
       expect(find('appTitle').text()).toEqual('Snapshot Repositories');
     });

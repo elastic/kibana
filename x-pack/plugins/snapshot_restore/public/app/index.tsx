@@ -36,6 +36,8 @@ const getAppProviders = (deps: AppDependencies) => {
   const {
     i18n: { Context: I18nContext },
   } = deps.core;
+
+  // Create App dependencies context and get its provider
   const AppDependenciesProvider = setAppDependencies(deps);
 
   return ({ children }: { children: ReactNode }) => (
@@ -50,9 +52,7 @@ const getAppProviders = (deps: AppDependencies) => {
 };
 
 export const renderReact = async (elem: Element, core: AppCore, plugins: AppPlugins) => {
-  const deps = { core, plugins };
-
-  const Providers = getAppProviders(deps);
+  const Providers = getAppProviders({ core, plugins });
 
   render(
     <Providers>

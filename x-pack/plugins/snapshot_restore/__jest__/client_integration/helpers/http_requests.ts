@@ -27,8 +27,13 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     );
   };
 
+  const setLoadRepositoryTypesResponse = (response: HttpResponse = []) => {
+    server.respondWith('GET', `${API_BASE_PATH}/repository_types`, JSON.stringify(response));
+  };
+
   return {
     setLoadRepositoriesResponse,
+    setLoadRepositoryTypesResponse,
   };
 };
 

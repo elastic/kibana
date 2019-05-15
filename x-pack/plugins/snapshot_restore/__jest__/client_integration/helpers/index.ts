@@ -5,6 +5,8 @@
  */
 
 import { setup as homeSetup } from './home.helpers';
+import { setup as repositoryAddSetup } from './repository_add.helpers';
+import { setup as repositoryEditSetup } from './repository_edit.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
@@ -12,4 +14,6 @@ export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {
   home: { setup: homeSetup },
+  repositoryAdd: { setup: repositoryAddSetup },
+  repositoryEdit: { setup: repositoryEditSetup },
 };

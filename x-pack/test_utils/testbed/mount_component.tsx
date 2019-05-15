@@ -7,21 +7,22 @@
 import React, { ComponentType } from 'react';
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
 import { MemoryRouterConfig } from './types';
 
-export const mountComponent = (
+export const mountComponent = async (
   Component: ComponentType,
   memoryRouter: MemoryRouterConfig,
   store: Store | null,
   props: any
-): ReactWrapper => {
+): Promise<ReactWrapper> => {
   const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
-  let Comp;
+  let Comp: ComponentType;
 
   if (wrapWithRouter) {
     const { componentRoutePath, onRouter, initialEntries, initialIndex } = memoryRouter!;
@@ -39,7 +40,23 @@ export const mountComponent = (
     Comp = store !== null ? WithStore(store)(Component) : Component;
   }
 
-  return mountWithIntl(<Comp {...props} />);
+  /**
+   * In order for hooks with effects to work in our tests
+   * we need to wrap the mounting under the new act "async"
+   * that ships with React 16.9.0
+   *
+   * https://github.com/facebook/react/pull/14853
+   * https://github.com/threepointone/react-act-examples/blob/master/sync.md
+   */
+  let component: ReactWrapper;
+
+  // @ts-ignore
+  await act(async () => {
+    component = mountWithIntl(<Comp {...props} />);
+  });
+
+  // @ts-ignore
+  return component;
 };
 
 export const getJSXComponentWithProps = (Component: ComponentType, props: any) => (

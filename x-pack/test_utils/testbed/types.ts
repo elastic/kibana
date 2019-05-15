@@ -7,7 +7,7 @@
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 
-export type SetupFunc<T> = (props?: any) => TestBed<T>;
+export type SetupFunc<T> = (props?: any) => Promise<TestBed<T>>;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */

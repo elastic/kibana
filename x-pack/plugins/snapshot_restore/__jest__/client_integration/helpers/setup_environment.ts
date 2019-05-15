@@ -5,12 +5,18 @@
  */
 
 import axios from 'axios';
+import { i18n } from '@kbn/i18n';
 
 import { httpService } from '../../../public/app/services/http';
+import { breadcrumbService } from '../../../public/app/services/navigation';
+import { textService } from '../../../public/app/services/text';
+import { chrome } from '../../../public/test/mocks';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
   httpService.init(axios.create(), { addBasePath: (path: string) => path });
+  breadcrumbService.init(chrome, {});
+  textService.init(i18n);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

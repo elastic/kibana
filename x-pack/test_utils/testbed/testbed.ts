@@ -60,11 +60,11 @@ export const registerTestBed = <T extends string = string>(
     memoryRouter.onRouter(reactRouterMock);
   }
 
-  const setup: SetupFunc<T> = props => {
+  const setup: SetupFunc<T> = async props => {
     // If a function is provided we execute it
     const storeToMount = typeof store === 'function' ? store() : store!;
 
-    const component = mountComponent(Component, memoryRouter, storeToMount, {
+    const component = await mountComponent(Component, memoryRouter, storeToMount, {
       ...defaultProps,
       ...props,
     });

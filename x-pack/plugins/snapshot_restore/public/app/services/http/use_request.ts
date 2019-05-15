@@ -30,7 +30,7 @@ export const sendRequest = async ({
   try {
     const response = await httpService.httpClient[method](path, body);
 
-    if (!response.data) {
+    if (typeof response.data === 'undefined') {
       throw new Error(response.statusText);
     }
 
