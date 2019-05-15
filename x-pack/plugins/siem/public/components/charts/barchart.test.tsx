@@ -8,7 +8,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { BarChartBaseComponent, BarChartWithCustomPrompt } from './barchart';
-import { BarChartData } from '.';
+import { BarChartData } from './common';
 
 describe('BarChartBaseComponent', () => {
   let wrapper: ReactWrapper;

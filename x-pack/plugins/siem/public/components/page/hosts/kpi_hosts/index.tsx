@@ -11,15 +11,9 @@ import { pure } from 'recompose';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { KpiHostsData } from '../../../../graphql/types';
-import {
-  AreaChartData,
-  BarChartData,
-  StatItem,
-  StatItems,
-  StatItemsComponent,
-  StatItemsProps,
-} from '../../../stat_items';
+import { StatItem, StatItems, StatItemsComponent, StatItemsProps } from '../../../stat_items';
 import * as i18n from './translations';
+import { BarChartData, AreaChartData } from '../../../charts/common';
 
 interface KpiHostsProps {
   data: KpiHostsData;

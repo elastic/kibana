@@ -8,7 +8,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
-import { AreaChartData } from '.';
+import { AreaChartData } from './common';
 
 describe('AreaChartBaseComponent', () => {
   let wrapper: ReactWrapper;

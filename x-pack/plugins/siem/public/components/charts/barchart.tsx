@@ -12,7 +12,7 @@ import {
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import { EuiSeriesChart, EuiBarSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
-import { BarChartData, WrappedByAutoSizer, ChartHolder } from '.';
+import { BarChartData, WrappedByAutoSizer, ChartHolder } from './common';
 import { AutoSizer } from '../auto_sizer';
 
 const { SCALE, ORIENTATION } = EuiSeriesChartUtils;
