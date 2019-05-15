@@ -349,32 +349,39 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
+
+  async _performInnerJoins(sourceResult, joinStates, updateSourceData) {
+
+    const activeJoinStates = joinStates.filter(joinState => {
+      // Perform join when
+      // - source data changed but join data has not
+      // - join data changed but source data has not
+      // - both source and join data changed
+      return sourceResult.refreshed || joinState.dataHasChanged;
+    });
+
+    if (activeJoinStates.length) {
+      activeJoinStates.forEach(joinState => {
+        joinState.join.joinPropertiesToFeatureCollection(
+          sourceResult.featureCollection,
+          joinState.propertiesMap);
+      });
+      updateSourceData(sourceResult.featureCollection);
+    }
+  }
+
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
 
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-
-    if (sourceResult.featureCollection && sourceResult.featureCollection.features.length) {
-      const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-      const activeJoinStates = joinStates.filter(joinState => {
-        // Perform join when
-        // - source data changed but join data has not
-        // - join data changed but source data has not
-        // - both source and join data changed
-        return sourceResult.refreshed || joinState.dataHasChanged;
-      });
-
-      if (activeJoinStates.length) {
-        activeJoinStates.forEach(joinState => {
-          joinState.join.joinPropertiesToFeatureCollection(
-            sourceResult.featureCollection,
-            joinState.propertiesMap);
-        });
-        updateSourceData(sourceResult.featureCollection);
-      }
+    if (!sourceResult.featureCollection || !sourceResult.featureCollection.features.length) {
+      return;
     }
+
+    const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+    await this._performInnerJoins(sourceResult, joinStates, updateSourceData);
   }
 
   _getSourceFeatureCollection() {

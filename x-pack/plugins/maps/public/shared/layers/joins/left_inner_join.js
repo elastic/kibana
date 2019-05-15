@@ -45,21 +45,26 @@ export class LeftInnerJoin {
     return this._descriptor.leftField;
   }
 
+
+  joinPropertiesToFeature(feature, propertiesMap, joinFields) {
+    for (let j = 0; j < joinFields.length; j++) {
+      const { propertyKey } = joinFields[j];
+      delete feature.properties[propertyKey];
+      const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
+      delete feature.properties[stylePropertyName];
+    }
+    const joinKey = feature.properties[this._descriptor.leftField];
+    if (propertiesMap && propertiesMap.has(joinKey)) {
+      Object.assign(feature.properties,  propertiesMap.get(joinKey));
+    }
+  }
+
   joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
     const joinFields = this._rightSource.getMetricFields();
-    featureCollection.features.forEach(feature => {
-      // Clean up old join property values
-      joinFields.forEach(({ propertyKey }) => {
-        delete feature.properties[propertyKey];
-        const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
-        delete feature.properties[stylePropertyName];
-      });
-
-      const joinKey = feature.properties[this._descriptor.leftField];
-      if (propertiesMap && propertiesMap.has(joinKey)) {
-        Object.assign(feature.properties,  propertiesMap.get(joinKey));
-      }
-    });
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      this.joinPropertiesToFeature(feature, propertiesMap, joinFields);
+    }
   }
 
   getRightJoinSource() {
