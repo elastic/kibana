@@ -11,8 +11,8 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import url from 'url';
 
-import { DocumentSearchResult, SearchScope } from '../../../model';
-import { changeSearchScope, SearchOptions } from '../../actions';
+import { DocumentSearchResult, SearchOptions, SearchScope } from '../../../model';
+import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { ProjectItem } from '../admin_page/project_item';
@@ -209,9 +209,10 @@ class SearchPage extends React.PureComponent<Props, State> {
           />
           <div className="codeContainer__search--main">
             <SearchBar
-              repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
+              searchOptions={this.props.searchOptions}
               query={this.props.query}
               onSearchScopeChanged={this.props.onSearchScopeChanged}
+              enableSubmitWhenOptionsChanged={true}
               ref={(element: any) => (this.searchBar = element)}
             />
             {mainComp}
