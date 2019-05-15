@@ -45,10 +45,10 @@ browser to undo your change.
 . Try dragging the chart around the page. Grab the resize handles to make 
 the chart bigger and smaller.
 
-. Now click somewhere off of the element (just not on another element) 
+. Click somewhere off of the element (just not on another element) 
 to deselect it. 
 +
-When When no element is selected, the editor in the sidebar changes to give you 
+When no element is selected, the editor in the sidebar changes to give you 
 access to the page and workpad-level settings. Try changing the page 
 background color and renaming the workpad.
 

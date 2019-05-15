@@ -4,8 +4,8 @@
 
 Canvas is a creative space for presenting data. You can create a Canvas workpad 
 to combine colors, shapes, and text, to bring dynamic, pixel-perfect data displays 
-to screens large and small. A workpad is your drawing space that you can configure 
-to add text, data elements, and visual assets. 
+to screens large and small. A workpad is your drawing space where you can add text, 
+data elements, and visual assets. 
 
 Before you start, you will need to have your own {es} data source connected in {kib}, 
 or you can use one of {kib}'s <<add-sample-data, sample data sets>>. 
@@ -34,14 +34,14 @@ Adding text::
 side. From this menu you can add text content, and configure text styles.
 
 Adding assets:: 
-* Click *Manage assets* to import new images
-* Select an image from your library to add an image element to your workpad
+* Click *Manage assets* to import new images.
+* Select an image from your library to add an image element to your workpad.
 
 Displaying data:: 
 * Click *Add element* to choose from available data elements, such as a coordinate plot, 
 line chart, pie chart, and more. Select an element type to add it to your workpad.
-* The new element is connected to some demo data, so you will need to edit its 
-*Data* source to connect the element to the data you want to display. 
+* The new element is connected to some demo data, so you will need to change its 
+data source to connect the element to the data you want to display. 
 * Click on the element in the workpad to open the sidebar editor. From this editor, 
 you to can edit an element's *Display* settings and *Data* source. 
 * You can also open the *Expression editor* on the bottom right to bypass the sidebar
@@ -50,9 +50,8 @@ editor and edit the expression associated with an element directly.
 [float]
 === Working with data sources 
 Each Canvas element is connected to some demo data by default. Once you place the 
-element on your workpad, you can configure it to display your own data.
-
-Each element can display a different data source. Pages and workpads often contain multiple data sources.
+element on your workpad, you can configure it to display your own data. Each element 
+can display a different data source. Pages and workpads often contain multiple data sources.
 
 From the sidebar editor, click *Data > Change your data source* to connect a new 
 data source to your element.
@@ -70,7 +69,7 @@ Elasticsearch SQL::
 
 After you change the data source for an element, next you need to tell the element
 how to process and display that data. Select the element, and click *Display* in the 
-sidebar to specify the values that the element should display.
+sidebar to open the editor where you can specify the values that the element should display.
 
 
 [float]
