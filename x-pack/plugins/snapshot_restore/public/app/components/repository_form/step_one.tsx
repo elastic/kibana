@@ -160,7 +160,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             onClick: () => onTypeChange(type),
             isSelected: isSelectedType,
           }}
-          data-test-subj="repositoryType"
+          data-test-subj={`${type}RepositoryType`}
         />
       </EuiFlexItem>
     );

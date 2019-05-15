@@ -29,6 +29,29 @@ export interface RepositorySettingsValidation {
   [key: string]: string[];
 }
 
+export const INVALID_NAME_CHARS = ['"', '*', '\\', '<', '|', ',', '>', '/', '?'];
+
+const isStringEmpty = (str: string | null): boolean => {
+  return str ? !Boolean(str.trim()) : true;
+};
+
+const doesStringContainChar = (string: string, char: string | string[]) => {
+  const chars = Array.isArray(char) ? char : [char];
+  const total = chars.length;
+  let containsChar = false;
+  let charFound: string | null = null;
+
+  for (let i = 0; i < total; i++) {
+    if (string.includes(chars[i])) {
+      containsChar = true;
+      charFound = chars[i];
+      break;
+    }
+  }
+
+  return { containsChar, charFound };
+};
+
 export const validateRepository = (
   repository: Repository | EmptyRepository,
   validateSettings: boolean = true
@@ -56,6 +79,17 @@ export const validateRepository = (
     ];
   }
 
+  const nameCharValidation = doesStringContainChar(name, INVALID_NAME_CHARS);
+
+  if (nameCharValidation.containsChar) {
+    validation.errors.name = [
+      i18n.translate('xpack.snapshotRestore.repositoryValidation.nameRequired', {
+        defaultMessage: 'Character "{char}" is not allowed in the name.',
+        values: { char: nameCharValidation.charFound },
+      }),
+    ];
+  }
+
   if (
     isStringEmpty(type) ||
     (type === REPOSITORY_TYPES.source && isStringEmpty(settings.delegateType))
@@ -72,10 +106,6 @@ export const validateRepository = (
   }
 
   return validation;
-};
-
-const isStringEmpty = (str: string | null): boolean => {
-  return str ? !Boolean(str.trim()) : true;
 };
 
 const validateRepositorySettings = (

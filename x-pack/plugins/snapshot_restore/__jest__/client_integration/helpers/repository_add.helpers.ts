@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../test_utils';
+import { registerTestBed, TestBed } from '../../../../../test_utils';
 import { RepositoryAdd } from '../../../public/app/sections/repository_add';
 import { WithProviders } from './providers';
 
 const initTestBed = registerTestBed(WithProviders(RepositoryAdd));
 
-export const setup = async () => {
+export interface RepositoryAddTestBed extends TestBed {
+  actions: {
+    clickNextButton: () => void;
+    clickSubmitButton: () => void;
+    selectRepositoryType: (type: string) => void;
+  };
+}
+
+export const setup = async (): Promise<RepositoryAddTestBed> => {
   const testBed = await initTestBed();
 
   // User actions
@@ -18,10 +26,23 @@ export const setup = async () => {
     testBed.find('nextButton').simulate('click');
   };
 
+  const clickSubmitButton = () => {
+    testBed.find('submitButton').simulate('click');
+  };
+
+  const selectRepositoryType = (type: string) => {
+    testBed
+      .find(`${type}RepositoryType`)
+      .find('button')
+      .simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
       clickNextButton,
+      clickSubmitButton,
+      selectRepositoryType,
     },
   };
 };

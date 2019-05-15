@@ -53,7 +53,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Snapshots"
         />
       ),
-      testSubj: 'srSnapshotsTab',
     },
     {
       id: 'repositories' as Section,
@@ -63,7 +62,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Repositories"
         />
       ),
-      testSubj: 'srRepositoriesTab',
     },
   ];
 
@@ -121,7 +119,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
               key={tab.id}
-              data-test-subject={tab.testSubj}
+              data-test-subj="tab"
             >
               {tab.name}
             </EuiTab>

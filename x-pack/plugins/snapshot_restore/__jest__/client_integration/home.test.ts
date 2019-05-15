@@ -20,14 +20,18 @@ describe('<SnapshotRestoreHome />', () => {
   });
 
   describe('on component mount', () => {
-    it('should set the correct app title', async () => {
-      const { exists, find } = await setup();
+    beforeEach(async () => {
+      testBed = await setup();
+    });
+
+    it('should set the correct app title', () => {
+      const { exists, find } = testBed;
       expect(exists('appTitle')).toBe(true);
       expect(find('appTitle').text()).toEqual('Snapshot Repositories');
     });
 
-    it('should display a loading while fetching the repositories', async () => {
-      const { exists, find } = await setup();
+    it('should display a loading while fetching the repositories', () => {
+      const { exists, find } = testBed;
       expect(exists('sectionLoading')).toBe(true);
       expect(find('sectionLoading').text()).toEqual('Loading repositories…');
     });
@@ -42,7 +46,7 @@ describe('<SnapshotRestoreHome />', () => {
       const { component, exists } = await setup();
 
       await act(async () => {
-        await nextTick(350);
+        await nextTick();
         component.update();
       });
 
@@ -66,7 +70,7 @@ describe('<SnapshotRestoreHome />', () => {
       testBed = await setup();
 
       await act(async () => {
-        await nextTick(350);
+        await nextTick();
         testBed.component.update();
       });
     });
@@ -88,12 +92,45 @@ describe('<SnapshotRestoreHome />', () => {
 
       await act(async () => {
         actions.clickRepositoryAt(0);
-        await nextTick(500);
+
+        await nextTick();
         component.update();
       });
 
       expect(exists('repositoryDetail')).toBe(true);
       expect(find('repositoryDetail.title').text()).toEqual(repo1.name);
+    });
+  });
+
+  describe('tabs', () => {
+    beforeEach(async () => {
+      testBed = await setup();
+
+      await act(async () => {
+        await nextTick();
+        testBed.component.update();
+      });
+    });
+
+    test('should have 2 tabs', () => {
+      const { find } = testBed;
+
+      expect(find('tab').length).toBe(2);
+      expect(find('tab').map(t => t.text())).toEqual(['Snapshots', 'Repositories']);
+    });
+
+    test('should navigate to snapshot list tab', () => {
+      const { find, exists } = testBed;
+
+      expect(exists('repositoryList')).toBe(true);
+      expect(exists('snapshotList')).toBe(false);
+
+      find('tab')
+        .at(0)
+        .simulate('click');
+
+      expect(exists('repositoryList')).toBe(false);
+      expect(exists('snapshotList')).toBe(true);
     });
   });
 });

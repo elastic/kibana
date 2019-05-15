@@ -83,16 +83,18 @@ export const useRequest = ({
       uimActionType,
     };
 
-    let response;
+    const response = await sendRequest(requestBody);
 
-    if (timeout) {
-      [response] = await Promise.all([
-        sendRequest(requestBody),
-        new Promise(resolve => setTimeout(resolve, timeout)),
-      ]);
-    } else {
-      response = await sendRequest(requestBody);
-    }
+    // let response;
+
+    // if (timeout) {
+    //   [response] = await Promise.all([
+    //     sendRequest(requestBody),
+    //     new Promise(resolve => setTimeout(resolve, timeout)),
+    //   ]);
+    // } else {
+    //   response = await sendRequest(requestBody);
+    // }
 
     // Don't update state if an outdated request has resolved.
     if (isOutdatedRequest) {
