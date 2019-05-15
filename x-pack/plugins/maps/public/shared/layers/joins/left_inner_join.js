@@ -31,8 +31,12 @@ export class LeftInnerJoin {
     return false;
   }
 
+  getRightMetricFields() {
+    return this._rightSource.getMetricFields();
+  }
+
   getJoinFields() {
-    return this._rightSource.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
+    return this.getRightMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
     });
   }
@@ -60,7 +64,7 @@ export class LeftInnerJoin {
   }
 
   joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
-    const joinFields = this._rightSource.getMetricFields();
+    const joinFields = this.getRightMetricFields();
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
       this.joinPropertiesToFeature(feature, propertiesMap, joinFields);

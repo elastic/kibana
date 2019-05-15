@@ -352,20 +352,25 @@ export class VectorLayer extends AbstractLayer {
 
   async _performInnerJoins(sourceResult, joinStates, updateSourceData) {
 
-    const activeJoinStates = joinStates.filter(joinState => {
-      // Perform join when
-      // - source data changed but join data has not
-      // - join data changed but source data has not
-      // - both source and join data changed
-      return sourceResult.refreshed || joinState.dataHasChanged;
-    });
+    let shouldUpdate = false;
+    for (let i = 0; i < sourceResult.featureCollection.features.length; i++) {
+      const feature = sourceResult.featureCollection.features[i];
+      for (let j = 0; j < joinStates.length; j++) {
+        const joinState = joinStates[j];
+        const leftInnerJoin = joinState.join;
+        const joinFields = leftInnerJoin.getRightMetricFields();
+        if (sourceResult.refreshed || joinState.dataHasChanged) {
+          // Perform join when
+          // - source data changed but join data has not
+          // - join data changed but source data has not
+          // - both source and join data changed
+          leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, joinFields);
+          shouldUpdate = true;
+        }
+      }
+    }
 
-    if (activeJoinStates.length) {
-      activeJoinStates.forEach(joinState => {
-        joinState.join.joinPropertiesToFeatureCollection(
-          sourceResult.featureCollection,
-          joinState.propertiesMap);
-      });
+    if (shouldUpdate) {
       updateSourceData(sourceResult.featureCollection);
     }
   }
