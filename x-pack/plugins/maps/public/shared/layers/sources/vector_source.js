@@ -123,4 +123,8 @@ export class AbstractVectorSource extends AbstractSource {
       VECTOR_SHAPE_TYPES.POLYGON
     ];
   }
+
+  getSourceTooltipContent(/* sourceDataRequest */) {
+    return null;
+  }
 }
