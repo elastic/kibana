@@ -364,14 +364,14 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      data-test-subj="srRepositoryDetailsFlyout"
+      data-test-subj="repositoryDetail"
       aria-labelledby="srRepositoryDetailsFlyoutTitle"
       size="m"
       maxWidth={400}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id="srRepositoryDetailsFlyoutTitle" data-test-subj="srRepositoryDetailsFlyoutTitle">
+          <h2 id="srRepositoryDetailsFlyoutTitle" data-test-subj="title">
             {repositoryName}
           </h2>
         </EuiTitle>

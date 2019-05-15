@@ -59,6 +59,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
           <EuiLink
             onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
             href={openRepositoryDetailsUrl(name)}
+            data-test-subj="repositoryLink"
           >
             {name}
           </EuiLink>
@@ -262,11 +263,12 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       pagination={pagination}
       isSelectable={true}
       rowProps={() => ({
-        'data-test-subj': 'srRepositoryListTableRow',
+        'data-test-subj': 'row',
       })}
       cellProps={(item: any, column: any) => ({
-        'data-test-subj': `srRepositoryListTableCell-${column.field}`,
+        'data-test-subj': `cell`,
       })}
+      data-test-subj="repositoryTable"
     />
   );
 };

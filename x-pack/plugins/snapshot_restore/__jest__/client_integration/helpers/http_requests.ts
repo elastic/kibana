@@ -22,13 +22,13 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
     server.respondWith(
       'GET',
-      `${API_BASE_PATH}/repositories`,
+      `${API_BASE_PATH}repositories`,
       mockResponse(defaultResponse, response)
     );
   };
 
   const setLoadRepositoryTypesResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}/repository_types`, JSON.stringify(response));
+    server.respondWith('GET', `${API_BASE_PATH}repository_types`, JSON.stringify(response));
   };
 
   return {

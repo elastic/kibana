@@ -118,7 +118,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             })}
             fill
             iconType="plusInCircle"
-            data-test-subj="addButton"
+            data-test-subj="registerRepositoryButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.addRepositoryButtonLabel"
