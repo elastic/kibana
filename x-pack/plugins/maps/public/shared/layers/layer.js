@@ -115,9 +115,9 @@ export class AbstractLayer {
     };
   }
 
-  getIconAndTooltipContent(currentZoomLevel) {
+  getIconAndTooltipContent(zoomLevel) {
     let icon;
-    let tooltipContent;
+    let tooltipContent = null;
     if (this.hasErrors()) {
       icon = (
         <EuiIcon
@@ -140,7 +140,7 @@ export class AbstractLayer {
       tooltipContent = i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
         defaultMessage: `Layer is hidden.`
       });
-    } else if (!this.showAtZoomLevel(currentZoomLevel)) {
+    } else if (!this.showAtZoomLevel(zoomLevel)) {
       const { minZoom, maxZoom } = this.getZoomConfig();
       icon = (
         <EuiIcon
