@@ -401,15 +401,10 @@ export class VectorLayer extends AbstractLayer {
 
   _syncFeatureCollectionWithMb(mbMap) {
 
-    window._mbMap = mbMap;
-
     const mbGeoJSONSource = mbMap.getSource(this.getId());
 
     const featureCollection = this._getSourceFeatureCollection();
     const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
-
-    window._fc = featureCollection;
-    window._fcom = featureCollectionOnMap;
 
     if (!featureCollection) {
       if (featureCollectionOnMap) {
