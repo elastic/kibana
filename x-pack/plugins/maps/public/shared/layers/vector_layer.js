@@ -8,7 +8,11 @@ import turf from 'turf';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
+import {
+  FEATURE_ID_PROPERTY_NAME,
+  SOURCE_DATA_ID_ORIGIN,
+  FEATURE_VISIBLE_PROPERTY_NAME
+} from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
@@ -18,19 +22,37 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
-
-const CLOSED_SHAPE_MB_FILTER = [
-  'any',
-  ['==', ['geometry-type'], 'Polygon'],
-  ['==', ['geometry-type'], 'MultiPolygon']
+const VISIBILITY_FILTER_CLAUSE = [  'all',
+  [
+    '==',
+    ['get', FEATURE_VISIBLE_PROPERTY_NAME],
+    true
+  ]
+];
+const FILL_LAYER_MB_FILTER = [
+  ...VISIBILITY_FILTER_CLAUSE,
+  [
+    'any',
+    ['==', ['geometry-type'], 'Polygon'],
+    ['==', ['geometry-type'], 'MultiPolygon']
+  ]
 ];
 
-const ALL_SHAPE_MB_FILTER = [
-  'any',
-  ['==', ['geometry-type'], 'Polygon'],
-  ['==', ['geometry-type'], 'MultiPolygon'],
-  ['==', ['geometry-type'], 'LineString'],
-  ['==', ['geometry-type'], 'MultiLineString']
+const LINE_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
+  [
+    'any',
+    ['==', ['geometry-type'], 'Polygon'],
+    ['==', ['geometry-type'], 'MultiPolygon'],
+    ['==', ['geometry-type'], 'LineString'],
+    ['==', ['geometry-type'], 'MultiLineString']
+  ]];
+
+const POINT_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
+  [
+    'any',
+    ['==', ['geometry-type'], 'Point'],
+    ['==', ['geometry-type'], 'MultiPoint']
+  ]
 ];
 
 export class VectorLayer extends AbstractLayer {
@@ -383,8 +405,6 @@ export class VectorLayer extends AbstractLayer {
 
     if (shouldUpdate) {
       updateSourceData(sourceResult.featureCollection);
-    } else {
-      console.log('no need to upadate');
     }
   }
 
@@ -438,7 +458,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
+      mbMap.setFilter(pointLayerId, POINT_LAYER_MB_FILTER);
     }
     this._style.setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
@@ -460,7 +480,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(fillLayerId, CLOSED_SHAPE_MB_FILTER);
+      mbMap.setFilter(fillLayerId, FILL_LAYER_MB_FILTER);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       mbMap.addLayer({
@@ -469,7 +489,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(lineLayerId, ALL_SHAPE_MB_FILTER);
+      mbMap.setFilter(lineLayerId, LINE_LAYER_MB_FILTER);
     }
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
