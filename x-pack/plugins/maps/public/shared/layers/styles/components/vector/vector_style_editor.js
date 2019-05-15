@@ -58,6 +58,12 @@ export class VectorStyleEditor extends Component {
       return;
     }
 
+    if (_.isEqual(supportedFeatures, this.state.supportedFeatures)
+      && isPointsOnly === this.state.isPointsOnly
+      && isLinesOnly === this.state.isLinesOnly) {
+      return;
+    }
+
     let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
     if (isPointsOnly) {
       selectedFeature = VECTOR_SHAPE_TYPES.POINT;
@@ -70,6 +76,8 @@ export class VectorStyleEditor extends Component {
       this.setState({
         supportedFeatures,
         selectedFeature,
+        isPointsOnly,
+        isLinesOnly,
       });
     }
   }
