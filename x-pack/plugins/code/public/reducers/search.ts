@@ -8,7 +8,7 @@ import produce from 'immer';
 
 import { Action, handleActions } from 'redux-actions';
 
-import { DocumentSearchResult, RepositoryUri, SearchScope } from '../../model';
+import { DocumentSearchResult, RepositoryUri, SearchOptions, SearchScope } from '../../model';
 import {
   changeSearchScope,
   documentSearch as documentSearchQuery,
@@ -20,7 +20,6 @@ import {
   RepositorySearchPayload,
   repositorySearchSuccess,
   saveSearchOptions,
-  SearchOptions,
   searchReposForScope,
   searchReposForScopeSuccess,
   turnOnDefaultRepoScope,
@@ -177,6 +176,7 @@ export const search = handleActions<SearchState, any>(
       }),
     [String(turnOnDefaultRepoScope)]: (state: SearchState, action: Action<any>) =>
       produce<SearchState>(state, draft => {
+        draft.searchOptions.defaultRepoScope = action.payload;
         draft.searchOptions.defaultRepoScopeOn = true;
       }),
   },
