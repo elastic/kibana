@@ -26,9 +26,12 @@ export default function({ getPageObjects }: FtrProviderContext) {
 
   async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
     await visualBuilder.markdownSwitchSubTab('data');
+    await visualBuilder.toggleAutoApplyChanges();
+
     await visualBuilder.setMarkdownDataVariable('', variableName);
 
     await visualBuilder.markdownSwitchSubTab('markdown');
+    await visualBuilder.applyChanges();
     const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
     rerenderedTable.forEach(row => {
       // eslint-disable-next-line no-unused-expressions
@@ -36,6 +39,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
         ? expect(row.key).to.include.string(checkedValue)
         : expect(row.key).to.not.include.string(checkedValue);
     });
+    await visualBuilder.toggleAutoApplyChanges();
   }
 
   describe('visual builder', function describeIndexTests() {
@@ -97,8 +101,11 @@ export default function({ getPageObjects }: FtrProviderContext) {
 
       it('should change variable name', async () => {
         const VARIABLE = 'variable';
+        await visualBuilder.toggleAutoApplyChanges();
         await visualBuilder.markdownSwitchSubTab('data');
+
         await visualBuilder.setMarkdownDataVariable(VARIABLE, VARIABLE);
+        await visualBuilder.applyChanges();
         await visualBuilder.markdownSwitchSubTab('markdown');
         const table = await visualBuilder.getMarkdownTableVariables();
 
@@ -109,6 +116,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
             ? expect(row.key).to.not.include.string(VARIABLE)
             : expect(row.key).to.include.string(VARIABLE);
         });
+        await visualBuilder.toggleAutoApplyChanges();
 
         await cleanupMarkdownData(VARIABLE, VARIABLE);
       });
@@ -116,15 +124,18 @@ export default function({ getPageObjects }: FtrProviderContext) {
       it('should change label name', async () => {
         const BASE_LABEL = 'count';
         const LABEL = 'label';
+        await visualBuilder.toggleAutoApplyChanges();
         await visualBuilder.markdownSwitchSubTab('data');
 
         await visualBuilder.setMarkdownDataVariable(LABEL, LABEL);
 
         await visualBuilder.markdownSwitchSubTab('markdown');
+        await visualBuilder.applyChanges();
         const table = await visualBuilder.getMarkdownTableVariables();
         table.forEach(row => {
           expect(row.key).to.contain(LABEL);
         });
+        await visualBuilder.toggleAutoApplyChanges();
         await cleanupMarkdownData(LABEL, BASE_LABEL);
       });
     });

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { delay } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -114,10 +113,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async getMarkdownTableVariables(): Promise<
       Array<{ key: string; value: string; selector: WebElementWrapper }>
     > {
-      await delay(100); // stale element workaround
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
-      await delay(100); // stale element workaround
       const exists = await find.existsByDisplayedByCssSelector(variablesSelector);
       if (!exists) {
         log.debug('variable list is empty');
@@ -257,7 +254,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       });
     }
 
-    public async selectAggType(value: string, nth: number = 0): Promise<void> {
+    public async toggleAutoApplyChanges() {
+      const input = await find.byCssSelector('#tsvbAutoApplyInput');
+      await input.click();
+    }
+
+    public async applyChanges() {
+      const applyBtn = await testSubjects.find('applyBtn');
+      await applyBtn.click();
+    }
+
+    public async selectAggType(value: string, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
       await comboBox.setElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
