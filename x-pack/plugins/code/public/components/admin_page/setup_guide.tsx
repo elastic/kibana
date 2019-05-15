@@ -141,10 +141,11 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
             )}
             {this.props.setupOk === true && (
               <React.Fragment>
-                <EuiSpacer size="xs" />
+                <EuiSpacer size="s" />
                 <EuiButton iconType="sortLeft">
                   <Link to="/admin">Back To Project Dashboard</Link>
                 </EuiButton>
+                <EuiSpacer size="s" />
               </React.Fragment>
             )}
             <EuiPanel>
@@ -158,7 +159,7 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
         </div>
       );
     }
-    return <div className="condeContainer__setup">{setup}</div>;
+    return <div className="codeContainer__setup">{setup}</div>;
   }
 }
 
