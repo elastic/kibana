@@ -267,7 +267,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
                         isLoading={loading}
                         onClick={this.props.loadMore}
                       >
-                        {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
+                        {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -296,10 +296,6 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
 }
 
 export const BasicTableContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  height: auto;
   position: relative;
 `;
 

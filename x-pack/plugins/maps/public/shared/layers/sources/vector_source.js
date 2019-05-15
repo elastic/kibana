@@ -114,4 +114,8 @@ export class AbstractVectorSource extends AbstractSource {
   isJoinable() {
     return true;
   }
+
+  getSourceTooltipContent(/* sourceDataRequest */) {
+    return null;
+  }
 }

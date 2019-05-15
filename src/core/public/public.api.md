@@ -87,10 +87,30 @@ export interface ChromeBreadcrumb {
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
+// @public (undocumented)
+export interface ChromeNavLink {
+    readonly active?: boolean;
+    readonly baseUrl: string;
+    readonly disabled?: boolean;
+    readonly euiIconType?: string;
+    readonly hidden?: boolean;
+    readonly icon?: string;
+    readonly id: string;
+    readonly linkToLastSubUrl?: boolean;
+    readonly order: number;
+    readonly subUrlBase?: string;
+    readonly title: string;
+    readonly tooltip?: string;
+    readonly url?: string;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
+
+// @public (undocumented)
+export type ChromeStart = ReturnType<ChromeService['start']>;
 
 // @internal (undocumented)
 export interface CoreContext {
@@ -124,6 +144,8 @@ export interface CoreStart {
     application: ApplicationStart;
     // (undocumented)
     basePath: BasePathStart;
+    // (undocumented)
+    chrome: ChromeStart;
     // (undocumented)
     http: HttpStart;
     // (undocumented)
@@ -354,6 +376,8 @@ export interface PluginStartContext {
     application: Pick<ApplicationStart, 'capabilities'>;
     // (undocumented)
     basePath: BasePathStart;
+    // (undocumented)
+    chrome: ChromeStart;
     // (undocumented)
     http: HttpStart;
     // (undocumented)
