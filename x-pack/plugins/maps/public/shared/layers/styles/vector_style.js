@@ -11,7 +11,7 @@ import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
-import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
@@ -157,13 +157,13 @@ export class VectorStyle extends AbstractStyle {
     let hasPolygons = false;
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
-      if (!hasPoints && ['Point', 'MultiPoint'].includes(feature.geometry.type)) {
+      if (!hasPoints && [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT].includes(feature.geometry.type)) {
         hasPoints = true;
       }
-      if (!hasLines && ['LineString', 'MultiLineString'].includes(feature.geometry.type)) {
+      if (!hasLines && [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING].includes(feature.geometry.type)) {
         hasLines = true;
       }
-      if (!hasPolygons && ['Polygon', 'MultiPolygon'].includes(feature.geometry.type)) {
+      if (!hasPolygons && [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON].includes(feature.geometry.type)) {
         hasPolygons = true;
       }
 
