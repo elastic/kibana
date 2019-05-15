@@ -77,6 +77,10 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 }
 
 export function init(server: Server, options: any) {
+  if (!options.enabled) {
+    return;
+  }
+
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
   const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
@@ -170,6 +174,9 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     new ServerLoggerFactory(server),
     repoConfigController
   );
+  server.events.on('stop', async () => {
+    await lspService.shutdown();
+  });
   // Initialize indexing factories.
   const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, esClient, log);
 
@@ -249,7 +256,15 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   fileRoute(codeServerRouter, serverOptions);
   workspaceRoute(codeServerRouter, serverOptions);
   symbolByQnameRoute(codeServerRouter, log);
-  installRoute(codeServerRouter, lspService, installManager);
+  installRoute(codeServerRouter, lspService);
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
+
+  server.events.on('stop', () => {
+    if (!serverOptions.disableIndexScheduler) {
+      indexScheduler.stop();
+    }
+    updateScheduler.stop();
+    queue.destroy();
+  });
 }

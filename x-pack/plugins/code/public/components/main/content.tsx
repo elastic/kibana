@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle, EuiLink } from '@elastic/eui';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
-import Markdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
@@ -17,12 +17,12 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import {
   FileTree,
   FileTreeItemType,
+  SearchOptions,
   SearchScope,
   WorkerReservedProgress,
-  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, SearchOptions } from '../../actions';
+import { changeSearchScope, FetchFileResponse } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
 import {
@@ -53,7 +53,8 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
   searchOptions: SearchOptions;
-  currentRepository?: Repository;
+  fileTreeLoading: boolean;
+  query: string;
 }
 const LANG_MD = 'markdown';
 
@@ -223,12 +224,12 @@ class CodeContent extends React.PureComponent<Props> {
     return (
       <div className="codeContainer__main">
         <TopBar
-          defaultSearchScope={this.props.currentRepository}
           routeParams={this.props.match.params}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          query={this.props.query}
         />
         {this.renderContent()}
       </div>
@@ -271,7 +272,7 @@ class CodeContent extends React.PureComponent<Props> {
       return this.renderProgress();
     }
 
-    const { file, match, tree } = this.props;
+    const { file, match, tree, fileTreeLoading } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
@@ -279,7 +280,7 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <div className="codeContainer__directoryView">
-            <Directory node={node} />
+            <Directory node={node} loading={fileTreeLoading} />
             <CommitHistory
               repoUri={repoUri}
               header={
@@ -288,6 +289,7 @@ class CodeContent extends React.PureComponent<Props> {
                     <h3>Recent Commits</h3>
                   </EuiTitle>
                   <EuiButton
+                    size="s"
                     href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${encodeRevisionString(
                       revision
                     )}/${path || ''}`}
@@ -327,9 +329,22 @@ class CodeContent extends React.PureComponent<Props> {
           );
         }
         if (fileLanguage === LANG_MD) {
+          const markdownRenderers = {
+            link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+              <EuiLink href={href} target="_blank">
+                {children}
+              </EuiLink>
+            ),
+          };
+
           return (
             <div className="markdown-body code-markdown-container kbnMarkdown__body">
-              <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
+              <ReactMarkdown
+                source={fileContent}
+                escapeHtml={true}
+                skipHtml={true}
+                renderers={markdownRenderers}
+              />
             </div>
           );
         } else if (isImage) {
@@ -341,13 +356,13 @@ class CodeContent extends React.PureComponent<Props> {
           );
         }
         return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame">
+          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
             <Editor showBlame={false} />
           </EuiFlexGroup>
         );
       case PathTypes.blame:
         return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame">
+          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
             <Editor showBlame={true} />
           </EuiFlexGroup>
         );
@@ -373,13 +388,14 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
   file: state.file.file,
   tree: state.file.tree,
+  fileTreeLoading: state.file.fileTreeLoading,
   currentTree: currentTreeSelector(state),
   branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
-  currentRepository: state.repository.currentRepository,
+  query: state.search.query,
 });
 
 const mapDispatchToProps = {

@@ -28,19 +28,26 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { FatalErrorsSetup } from '../fatal_errors';
-
-interface Deps {
-  fatalErrors: FatalErrorsSetup;
-}
+import { Deps } from './types';
+import { setup } from './fetch';
 
 /** @internal */
 export class HttpService {
   private readonly loadingCount$ = new Rx.BehaviorSubject(0);
   private readonly stop$ = new Rx.Subject();
 
-  public setup({ fatalErrors }: Deps) {
+  public setup(deps: Deps) {
+    const { fetch, shorthand } = setup(deps);
+
     return {
+      fetch,
+      delete: shorthand('DELETE'),
+      get: shorthand('GET'),
+      head: shorthand('HEAD'),
+      options: shorthand('OPTIONS'),
+      patch: shorthand('PATCH'),
+      post: shorthand('POST'),
+      put: shorthand('PUT'),
       addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
           .pipe(
@@ -67,7 +74,7 @@ export class HttpService {
               this.loadingCount$.next(this.loadingCount$.getValue() + delta);
             },
             error: error => {
-              fatalErrors.add(error);
+              deps.fatalErrors.add(error);
             },
           });
       },
@@ -78,6 +85,9 @@ export class HttpService {
     };
   }
 
+  // eslint-disable-next-line no-unused-params
+  public start() {}
+
   public stop() {
     this.stop$.next();
     this.loadingCount$.complete();
@@ -86,3 +96,5 @@ export class HttpService {
 
 /** @public */
 export type HttpSetup = ReturnType<HttpService['setup']>;
+/** @public */
+export type HttpStart = ReturnType<HttpService['start']>;

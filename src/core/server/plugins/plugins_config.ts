@@ -30,7 +30,11 @@ const pluginsSchema = schema.object({
   paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
-type PluginsConfigType = TypeOf<typeof pluginsSchema>;
+export type PluginsConfigType = TypeOf<typeof pluginsSchema>;
+export const config = {
+  path: 'plugins',
+  schema: pluginsSchema,
+};
 
 /** @internal */
 export class PluginsConfig {
@@ -51,10 +55,10 @@ export class PluginsConfig {
    */
   public readonly additionalPluginPaths: ReadonlyArray<string>;
 
-  constructor(config: PluginsConfigType, env: Env) {
-    this.initialize = config.initialize;
+  constructor(rawConfig: PluginsConfigType, env: Env) {
+    this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     // Only allow custom plugin paths in dev.
-    this.additionalPluginPaths = env.mode.dev ? config.paths : [];
+    this.additionalPluginPaths = env.mode.dev ? rawConfig.paths : [];
   }
 }

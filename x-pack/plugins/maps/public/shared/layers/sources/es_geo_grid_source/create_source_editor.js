@@ -20,9 +20,10 @@ import {
   EuiComboBox,
   EuiSpacer,
 } from '@elastic/eui';
+import { ES_GEO_FIELD_TYPE } from '../../../../../common/constants';
 
 function filterGeoField({ type }) {
-  return ['geo_point'].includes(type);
+  return [ES_GEO_FIELD_TYPE.GEO_POINT].includes(type);
 }
 
 const requestTypeOptions = [
@@ -206,7 +207,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternPlaceholder', {
             defaultMessage: 'Select index pattern'
           })}
-          fieldTypes={['geo_point']}
+          fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT]}
           onNoIndexPatterns={this._onNoIndexPatterns}
         />
       </EuiFormRow>

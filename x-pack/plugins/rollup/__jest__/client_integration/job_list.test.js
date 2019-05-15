@@ -28,6 +28,10 @@ jest.mock('ui/chrome', () => ({
   }
 }));
 
+jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+  trackUiMetric: jest.fn(),
+}));
+
 jest.mock('../../public/crud_app/services', () => {
   const services = require.requireActual('../../public/crud_app/services');
   return {

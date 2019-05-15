@@ -52,7 +52,7 @@ export const SnapshotPage = injectUICapabilities(
             intl.formatMessage(
               {
                 id: 'xpack.infra.infrastructureSnapshotPage.documentTitle',
-                defaultMessage: '{previousTitle} | Snapshot',
+                defaultMessage: '{previousTitle} | Inventory',
               },
               {
                 previousTitle,
@@ -70,6 +70,7 @@ export const SnapshotPage = injectUICapabilities(
               }),
             },
           ]}
+          readOnlyBadge={!uiCapabilities.infrastructure.save}
         />
         <SourceConfigurationFlyout
           shouldAllowEdit={uiCapabilities.infrastructure.configureSource as boolean}

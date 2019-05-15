@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <GroupByListSummary /> Minimal initialization 1`] = `
+<Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="s"
+  >
+    <GroupByLabelSummary
+      item={
+        Object {
+          "agg": "terms",
+          "aggName": "the-group-by-label",
+          "field": "the-group-by-field",
+        }
+      }
+      optionsDataId="the-options-data-id"
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

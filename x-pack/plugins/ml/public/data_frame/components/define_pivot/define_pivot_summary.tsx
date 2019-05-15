@@ -18,55 +18,48 @@ import {
 } from '@elastic/eui';
 
 import { AggListSummary } from '../../components/aggregation_list';
-import { GroupByList } from '../../components/group_by_list/list';
+import { GroupByListSummary } from '../../components/group_by_list';
 import { PivotPreview } from './pivot_preview';
 
-import { Dictionary } from '../../../../common/types/common';
 import {
-  DropDownLabel,
   DropDownOption,
-  IndexPatternContext,
-  Label,
-  OptionsDataElement,
+  getPivotQuery,
+  isKibanaContext,
+  KibanaContext,
+  PivotAggsConfigDict,
   PIVOT_SUPPORTED_AGGS,
   pivotSupportedAggs,
-  SimpleQuery,
 } from '../../common';
 import { FIELD_TYPE } from './common';
+import { DefinePivotExposedState } from './define_pivot_form';
 
 const defaultSearch = '*';
 const emptySearch = '';
 
-interface Props {
-  search: string;
-  groupBy: Label[];
-  aggList: Label[];
-}
+export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
+  search,
+  groupByList,
+  aggList,
+}) => {
+  const kibanaContext = useContext(KibanaContext);
 
-export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => {
-  const indexPattern = useContext(IndexPatternContext);
-
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)
     .map(field => ({ name: field.name, type: field.type }));
 
-  // The available fields for group by
-  const groupByOptions: EuiComboBoxOptionProps[] = [];
-  fields.forEach(field => {
-    const o: DropDownLabel = { label: field.name };
-    groupByOptions.push(o);
-  });
-
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
-  const aggOptionsData: Dictionary<OptionsDataElement> = {};
+  const aggOptionsData: PivotAggsConfigDict = {};
 
   fields.forEach(field => {
-    const o: DropDownOption = { label: field.name, options: [] };
+    // aggregations
+    const aggOption: DropDownOption = { label: field.name, options: [] };
     pivotSupportedAggs.forEach(agg => {
       if (
         (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
@@ -74,23 +67,15 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
         (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
       ) {
         const label = `${agg}(${field.name})`;
-        o.options.push({ label });
-        const formRowLabel = `${agg}_${field.name}`;
-        aggOptionsData[label] = { agg, field: field.name, formRowLabel };
+        aggOption.options.push({ label });
+        const aggName = `${agg}_${field.name}`;
+        aggOptionsData[label] = { agg, field: field.name, aggName };
       }
     });
-    aggOptions.push(o);
+    aggOptions.push(aggOption);
   });
 
-  const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupBy;
-
-  const pivotQuery: SimpleQuery = {
-    query_string: {
-      query: search,
-      default_operator: 'AND',
-    },
-  };
+  const pivotQuery = getPivotQuery(search);
 
   const displaySearch = search === defaultSearch ? emptySearch : search;
 
@@ -111,7 +96,7 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
               defaultMessage: 'Group by',
             })}
           >
-            <GroupByList list={pivotGroupBy} />
+            <GroupByListSummary list={groupByList} />
           </EuiFormRow>
 
           <EuiFormRow
@@ -119,14 +104,14 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
               defaultMessage: 'Aggregations',
             })}
           >
-            <AggListSummary list={aggList} optionsData={aggOptionsData} />
+            <AggListSummary list={aggList} />
           </EuiFormRow>
         </EuiForm>
       </EuiFlexItem>
 
       <EuiFlexItem>
         <EuiText>
-          <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery} />
+          <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

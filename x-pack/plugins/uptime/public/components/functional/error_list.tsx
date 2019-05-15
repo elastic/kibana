@@ -23,13 +23,17 @@ import { ErrorListItem, Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { errorListQuery } from '../../queries';
 
+interface ErrorListProps {
+  linkParameters?: string;
+}
+
 interface ErrorListQueryResult {
   errorList?: ErrorListItem[];
 }
 
-type Props = UptimeGraphQLQueryProps<ErrorListQueryResult>;
+type Props = UptimeGraphQLQueryProps<ErrorListQueryResult> & ErrorListProps;
 
-export const ErrorListComponent = ({ data, loading }: Props) => (
+export const ErrorListComponent = ({ data, linkParameters, loading }: Props) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
@@ -70,7 +74,7 @@ export const ErrorListComponent = ({ data, loading }: Props) => (
           }),
           render: (id: string, { name }: ErrorListItem) => (
             <EuiLink>
-              <Link to={`/monitor/${id}`}>{name || id}</Link>
+              <Link to={`/monitor/${id}${linkParameters}`}>{name || id}</Link>
             </EuiLink>
           ),
           width: '25%',
@@ -106,7 +110,7 @@ export const ErrorListComponent = ({ data, loading }: Props) => (
   </EuiPanel>
 );
 
-export const ErrorList = withUptimeGraphQL<ErrorListQueryResult>(
+export const ErrorList = withUptimeGraphQL<ErrorListQueryResult, ErrorListProps>(
   ErrorListComponent,
   errorListQuery
 );

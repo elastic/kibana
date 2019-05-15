@@ -5,9 +5,9 @@
     ],
     "query": {
       "bool": {
-        "filter": [
-          { "term":  { "metricset.name": "filesystem" } }
-        ],
+        "filter": {
+          "term":  { "event.dataset": "system.filesystem" }
+        },
         "must": {
           "exists": { "field": "system.filesystem.used.pct" }
         }

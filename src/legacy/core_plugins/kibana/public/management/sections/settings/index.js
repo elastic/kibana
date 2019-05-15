@@ -63,6 +63,21 @@ uiRoutes
     template: indexTemplate,
     k7Breadcrumbs: getBreadcrumbs,
     requireUICapability: 'management.kibana.settings',
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.advancedSettings.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.management.advancedSettings.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.management.advancedSettings.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save advanced settings',
+        }),
+        iconType: 'glasses'
+      };
+    }
   });
 
 uiModules.get('apps/management')

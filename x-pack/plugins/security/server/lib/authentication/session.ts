@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
 import { Legacy } from 'kibana';
 
@@ -29,7 +28,7 @@ interface InternalSession {
   expires: number | null;
 }
 
-function assertRequest(request: Request) {
+function assertRequest(request: Legacy.Request) {
   if (!request || typeof request !== 'object') {
     throw new Error(`Request should be a valid object, was [${typeof request}].`);
   }
@@ -47,7 +46,7 @@ export class Session {
   /**
    * Instantiates Session. Constructor is not supposed to be used directly. To make sure that all
    * `Session` dependencies/plugins are properly initialized one should use static `Session.create` instead.
-   * @param server HapiJS Server instance.
+   * @param server Server instance.
    */
   constructor(private readonly server: Legacy.Server) {
     this.ttl = this.server.config().get<number | null>('xpack.security.sessionTimeout');
@@ -55,9 +54,9 @@ export class Session {
 
   /**
    * Retrieves session value from the session storage (e.g. cookie).
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  async get(request: Request) {
+  async get<T>(request: Legacy.Request) {
     assertRequest(request);
 
     try {
@@ -65,12 +64,12 @@ export class Session {
 
       // If it's not an array, just return the session value
       if (!Array.isArray(session)) {
-        return session.value;
+        return session.value as T;
       }
 
       // If we have an array with one value, we're good also
       if (session.length === 1) {
-        return session[0].value;
+        return session[0].value as T;
       }
 
       // Otherwise, we have more than one and won't be authing the user because we don't
@@ -88,10 +87,10 @@ export class Session {
 
   /**
    * Puts current session value into the session storage.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param value Any object that will be associated with the request.
    */
-  async set(request: Request, value: unknown) {
+  async set(request: Legacy.Request, value: unknown) {
     assertRequest(request);
 
     request.cookieAuth.set({
@@ -102,9 +101,9 @@ export class Session {
 
   /**
    * Clears current session.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  async clear(request: Request) {
+  async clear(request: Legacy.Request) {
     assertRequest(request);
 
     request.cookieAuth.clear();
@@ -112,7 +111,7 @@ export class Session {
 
   /**
    * Prepares and creates a session instance.
-   * @param server HapiJS Server instance.
+   * @param server Server instance.
    */
   static async create(server: Legacy.Server) {
     // Register HAPI plugin that manages session cookie and delegate parsing of the session cookie to it.
@@ -151,10 +150,10 @@ export class Session {
   /**
    * Validation function that is passed to hapi-auth-cookie plugin and is responsible
    * only for cookie expiration time validation.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param session Session value object retrieved from cookie.
    */
-  private static validateCookie(request: Request, session: InternalSession) {
+  private static validateCookie(request: Legacy.Request, session: InternalSession) {
     if (session.expires && session.expires < Date.now()) {
       return { valid: false };
     }

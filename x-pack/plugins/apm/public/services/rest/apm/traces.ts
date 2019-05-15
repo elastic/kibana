@@ -6,16 +6,18 @@
 
 import { TraceListAPIResponse } from '../../../../server/lib/traces/get_top_traces';
 import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
-import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
-export async function loadTrace({ traceId, start, end }: IUrlParams) {
-  if (!(traceId && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+export async function loadTrace({
+  traceId,
+  start,
+  end
+}: {
+  traceId: string;
+  start: string;
+  end: string;
+}) {
   return callApi<TraceAPIResponse>({
     pathname: `/api/apm/traces/${traceId}`,
     query: {
@@ -25,11 +27,15 @@ export async function loadTrace({ traceId, start, end }: IUrlParams) {
   });
 }
 
-export async function loadTraceList({ start, end, kuery }: IUrlParams) {
-  if (!(start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+export async function loadTraceList({
+  start,
+  end,
+  kuery
+}: {
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<TraceListAPIResponse>({
     pathname: '/api/apm/traces',
     query: {

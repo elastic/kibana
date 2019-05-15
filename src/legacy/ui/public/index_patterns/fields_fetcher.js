@@ -20,22 +20,9 @@
 export function createFieldsFetcher(apiClient, config) {
   class FieldsFetcher {
     fetch(indexPattern) {
-      if (indexPattern.isTimeBasedInterval()) {
-        const interval = indexPattern.getInterval().name;
-        return this.fetchForTimePattern(indexPattern.title, interval);
-      }
-
       return this.fetchForWildcard(indexPattern.title, {
         type: indexPattern.type,
         params: indexPattern.typeMeta && indexPattern.typeMeta.params,
-      });
-    }
-
-    fetchForTimePattern(indexPatternId) {
-      return apiClient.getFieldsForTimePattern({
-        pattern: indexPatternId,
-        lookBack: config.get('indexPattern:fieldMapping:lookBack'),
-        metaFields: config.get('metaFields'),
       });
     }
 

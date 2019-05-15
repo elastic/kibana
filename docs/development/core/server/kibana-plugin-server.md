@@ -21,7 +21,9 @@
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) |  |
+|  [CoreStart](./kibana-plugin-server.corestart.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
+|  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
@@ -29,6 +31,7 @@
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginSetupContext](./kibana-plugin-server.pluginsetupcontext.md) | Context passed to the plugins <code>setup</code> method. |
+|  [PluginStartContext](./kibana-plugin-server.pluginstartcontext.md) | Context passed to the plugins <code>start</code> method. |
 
 ## Type Aliases
 

@@ -125,9 +125,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  android/
+                  android
                 </div>
               </span>
             </div>
@@ -187,9 +187,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  futures/
+                  futures
                 </div>
               </span>
             </div>
@@ -248,9 +248,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  guava/
+                  guava
                 </div>
               </span>
             </div>
@@ -312,9 +312,9 @@ exports[`render correctly 1`] = `
                     className="codeFileTree__directory"
                   >
                     <div
-                      className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                      className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                     >
-                      javadoc-link/
+                      javadoc-link
                     </div>
                   </span>
                 </div>
@@ -358,7 +358,7 @@ exports[`render correctly 1`] = `
                     className="codeFileTree__directory"
                   >
                     <div
-                      className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                      className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                     >
                       <div
                         className="euiTextColor euiTextColor--default"
@@ -423,9 +423,9 @@ exports[`render correctly 1`] = `
                     className="codeFileTree__directory"
                   >
                     <div
-                      className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                      className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                     >
-                      src/com/google/
+                      src/com/google
                     </div>
                   </span>
                 </div>
@@ -490,9 +490,9 @@ exports[`render correctly 1`] = `
                         className="codeFileTree__directory"
                       >
                         <div
-                          className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                          className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                         >
-                          common/
+                          common
                         </div>
                       </span>
                     </div>
@@ -552,9 +552,9 @@ exports[`render correctly 1`] = `
                         className="codeFileTree__directory"
                       >
                         <div
-                          className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                          className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                         >
-                          thirdparty/publicsuffix/
+                          thirdparty/publicsuffix
                         </div>
                       </span>
                     </div>
@@ -618,9 +618,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  guava-bom/
+                  guava-bom
                 </div>
               </span>
             </div>
@@ -680,9 +680,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  guava-gwt/
+                  guava-gwt
                 </div>
               </span>
             </div>
@@ -742,9 +742,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  guava-testlib/
+                  guava-testlib
                 </div>
               </span>
             </div>
@@ -804,9 +804,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  guava-tests/
+                  guava-tests
                 </div>
               </span>
             </div>
@@ -866,9 +866,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  refactorings/
+                  refactorings
                 </div>
               </span>
             </div>
@@ -928,9 +928,9 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  util/
+                  util
                 </div>
               </span>
             </div>
@@ -974,7 +974,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1024,7 +1024,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1074,7 +1074,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1124,7 +1124,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1174,7 +1174,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1224,7 +1224,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1274,7 +1274,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1324,7 +1324,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1374,7 +1374,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"
@@ -1424,7 +1424,7 @@ exports[`render correctly 1`] = `
                 className="codeFileTree__directory"
               >
                 <div
-                  className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  className="euiText euiText--extraSmall eui-displayInlineBlock euiText--constrainedWidth"
                 >
                   <div
                     className="euiTextColor euiTextColor--default"

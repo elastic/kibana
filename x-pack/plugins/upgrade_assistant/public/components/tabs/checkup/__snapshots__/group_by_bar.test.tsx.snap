@@ -7,7 +7,7 @@ exports[`GroupByBar renders 1`] = `
   <EuiFilterGroup>
     <EuiFilterButton
       color="text"
-      grow={false}
+      grow={true}
       hasActiveFilters={true}
       iconSide="right"
       key="message"
@@ -18,7 +18,7 @@ exports[`GroupByBar renders 1`] = `
     </EuiFilterButton>
     <EuiFilterButton
       color="text"
-      grow={false}
+      grow={true}
       hasActiveFilters={false}
       iconSide="right"
       key="index"

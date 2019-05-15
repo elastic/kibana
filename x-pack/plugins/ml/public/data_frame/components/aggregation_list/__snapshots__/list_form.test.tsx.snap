@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <AggListForm /> Minimal initialization 1`] = `
+<Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="s"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <AggLabelForm
+          deleteHandler={[Function]}
+          item={
+            Object {
+              "agg": "avg",
+              "aggName": "the-form-row-label",
+              "field": "the-field",
+            }
+          }
+          onChange={[Function]}
+          options={Object {}}
+          otherAggNames={Array []}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

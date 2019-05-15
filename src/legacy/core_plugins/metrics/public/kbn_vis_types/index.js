@@ -22,6 +22,8 @@ import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
+import { PANEL_TYPES } from '../../common/panel_types';
+
 // register the provider with the visTypes registry so that other know it exists
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 VisTypesRegistryProvider.register(MetricsVisProvider);
@@ -41,7 +43,7 @@ export default function MetricsVisProvider(Private, i18n) {
     visConfig: {
       defaults: {
         id: '61ca57f0-469d-11e7-af02-69e470af7417',
-        type: 'timeseries',
+        type: PANEL_TYPES.TIMESERIES,
         series: [
           {
             id: '61ca57f1-469d-11e7-af02-69e470af7417',

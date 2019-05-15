@@ -21,16 +21,19 @@ export function useTransactionDetailsCharts(urlParams: IUrlParams) {
   } = urlParams;
 
   const { data, error, status } = useFetcher(
-    () =>
-      loadTransactionDetailsCharts({
-        serviceName,
-        transactionName,
-        transactionType,
-        start,
-        end,
-        kuery
-      }),
-    [serviceName, transactionName, transactionType, start, end, kuery]
+    () => {
+      if (serviceName && start && end && transactionName && transactionType) {
+        return loadTransactionDetailsCharts({
+          serviceName,
+          start,
+          end,
+          transactionName,
+          transactionType,
+          kuery
+        });
+      }
+    },
+    [serviceName, start, end, transactionName, transactionType, kuery]
   );
 
   const memoizedData = useMemo(() => getTransactionCharts(urlParams, data), [

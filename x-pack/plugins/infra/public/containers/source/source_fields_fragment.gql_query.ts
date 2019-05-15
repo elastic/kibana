@@ -20,6 +20,24 @@ export const sourceConfigurationFieldsFragment = gql`
       tiebreaker
       timestamp
     }
+    logColumns {
+      ... on InfraSourceTimestampLogColumn {
+        timestampColumn {
+          id
+        }
+      }
+      ... on InfraSourceMessageLogColumn {
+        messageColumn {
+          id
+        }
+      }
+      ... on InfraSourceFieldLogColumn {
+        fieldColumn {
+          id
+          field
+        }
+      }
+    }
   }
 `;
 

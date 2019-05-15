@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <PivotPreview /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "title": "the-index-pattern-title",
+        },
+        "indexPatterns": Object {},
+        "kibanaConfig": Object {},
+      }
+    }
+  >
+    <Component
+      aggs={
+        Object {
+          "the-agg-name": Object {
+            "agg": "avg",
+            "aggName": "the-agg-label",
+            "field": "the-agg-field",
+          },
+        }
+      }
+      groupBy={
+        Object {
+          "the-group-by-name": Object {
+            "agg": "terms",
+            "aggName": "the-group-by-label",
+            "field": "the-group-by-field",
+          },
+        }
+      }
+      query={
+        Object {
+          "query_string": Object {
+            "default_operator": "AND",
+            "query": "the-query",
+          },
+        }
+      }
+    />
+  </ContextProvider>
+</div>
+`;

@@ -35,7 +35,6 @@ interface Props {
   onChange: (indexPrivilege: RoleIndexPrivilege) => void;
   onDelete: () => void;
   isReadOnlyRole: boolean;
-  allowDelete: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
@@ -70,7 +69,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         <EuiHorizontalRule />
         <EuiFlexGroup className="index-privilege-form">
           <EuiFlexItem>{this.getPrivilegeForm()}</EuiFlexItem>
-          {this.props.allowDelete && (
+          {!this.props.isReadOnlyRole && (
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon
@@ -251,7 +250,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   private getGrantedDocumentsControl = () => {
-    const { allowDocumentLevelSecurity, indexPrivilege } = this.props;
+    const { allowDocumentLevelSecurity, indexPrivilege, isReadOnlyRole } = this.props;
 
     if (!allowDocumentLevelSecurity) {
       return null;
@@ -275,6 +274,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 compressed={true}
                 checked={this.state.queryExpanded}
                 onChange={this.toggleDocumentQuery}
+                disabled={isReadOnlyRole}
               />
             }
           </EuiFlexItem>

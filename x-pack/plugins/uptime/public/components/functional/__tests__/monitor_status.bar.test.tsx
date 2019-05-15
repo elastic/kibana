@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { Ping } from '../../../../common/graphql/types';
@@ -15,7 +16,9 @@ describe('MonitorStatusBar component', () => {
   beforeEach(() => {
     monitorStatus = [
       {
-        timestamp: '1554820772000',
+        timestamp: moment(new Date())
+          .subtract(15, 'm')
+          .toString(),
         monitor: {
           duration: {
             us: 1234567,
@@ -33,6 +36,6 @@ describe('MonitorStatusBar component', () => {
     const component = renderWithIntl(
       <MonitorStatusBarComponent loading={false} data={{ monitorStatus }} monitorId="foo" />
     );
-    expect(component.text()).toContain('1235ms');
+    expect(component).toMatchSnapshot();
   });
 });

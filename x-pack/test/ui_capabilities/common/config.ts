@@ -50,6 +50,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'foo_plugin')}`,
+          '--optimize.enabled=false',
         ],
       },
     };

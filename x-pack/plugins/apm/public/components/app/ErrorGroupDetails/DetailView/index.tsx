@@ -49,10 +49,10 @@ interface Props {
 }
 
 // TODO: Move query-string-based tabs into a re-usable component?
-function getCurrentTab<T extends { key: string; label: string }>(
-  tabs: T[] = [],
+function getCurrentTab(
+  tabs: ErrorTab[] = [],
   currentTabKey: string | undefined
-): T {
+) {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ? selectedTab : first(tabs) || {};
 }

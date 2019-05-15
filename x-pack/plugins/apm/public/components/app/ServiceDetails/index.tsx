@@ -18,7 +18,11 @@ export function ServiceDetails() {
   const { urlParams } = useUrlParams();
   const { serviceName, start, end, kuery } = urlParams;
   const { data: serviceDetailsData } = useFetcher(
-    () => loadServiceDetails({ serviceName, start, end, kuery }),
+    () => {
+      if (serviceName && start && end) {
+        return loadServiceDetails({ serviceName, start, end, kuery });
+      }
+    },
     [serviceName, start, end, kuery]
   );
 
@@ -26,7 +30,7 @@ export function ServiceDetails() {
     return null;
   }
 
-  const isRumAgent = isRumAgentName(serviceDetailsData.agentName || '');
+  const isRumAgent = isRumAgentName(serviceDetailsData.agentName);
 
   return (
     <React.Fragment>
@@ -52,6 +56,7 @@ export function ServiceDetails() {
         urlParams={urlParams}
         transactionTypes={serviceDetailsData.types}
         isRumAgent={isRumAgent}
+        agentName={serviceDetailsData.agentName}
       />
     </React.Fragment>
   );

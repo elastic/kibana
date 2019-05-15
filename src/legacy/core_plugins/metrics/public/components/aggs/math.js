@@ -69,6 +69,7 @@ class MathAgg extends Component {
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
+        dragHandleProps={this.props.dragHandleProps}
       >
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>

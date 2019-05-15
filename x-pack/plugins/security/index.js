@@ -45,7 +45,11 @@ export const security = (kibana) => new kibana.Plugin({
       authProviders: Joi.array().items(Joi.string()).default(['basic']),
       enabled: Joi.boolean().default(true),
       cookieName: Joi.string().default('sid'),
-      encryptionKey: Joi.string(),
+      encryptionKey: Joi.when(Joi.ref('$dist'), {
+        is: true,
+        then: Joi.string(),
+        otherwise: Joi.string().default('a'.repeat(32)),
+      }),
       sessionTimeout: Joi.number().allow(null).default(null),
       secureCookies: Joi.boolean().default(false),
       public: Joi.object({
@@ -109,28 +113,6 @@ export const security = (kibana) => new kibana.Plugin({
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
       };
-    },
-    replaceInjectedVars: async function (originalInjectedVars, request, server) {
-      // if we have a license which doesn't enable security, or we're a legacy user
-      // we shouldn't disable any ui capabilities
-      const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbacForRequest(request)) {
-        return originalInjectedVars;
-      }
-
-      const disableUICapabilites = disableUICapabilitesFactory(server, request);
-      // if we're an anonymous route, we disable all ui capabilities
-      if (request.route.settings.auth === false) {
-        return {
-          ...originalInjectedVars,
-          uiCapabilities: disableUICapabilites.all(originalInjectedVars.uiCapabilities)
-        };
-      }
-
-      return {
-        ...originalInjectedVars,
-        uiCapabilities: await disableUICapabilites.usingPrivileges(originalInjectedVars.uiCapabilities)
-      };
     }
   },
 
@@ -180,7 +162,7 @@ export const security = (kibana) => new kibana.Plugin({
     const authorization = createAuthorizationService(server, xpackInfoFeature, xpackMainPlugin, spaces);
     server.expose('authorization', deepFreeze(authorization));
 
-    const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
+    const auditLogger = new SecurityAuditLogger(new AuditLogger(server, 'security', server.config(), xpackInfo));
 
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
@@ -198,7 +180,7 @@ export const security = (kibana) => new kibana.Plugin({
       return new savedObjects.SavedObjectsClient(callWithRequestRepository);
     });
 
-    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_SAFE_INTEGER, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
@@ -241,6 +223,23 @@ export const security = (kibana) => new kibana.Plugin({
           layout,
         }
       };
+    });
+
+    server.registerCapabilitiesModifier((request, uiCapabilities) => {
+      // if we have a license which doesn't enable security, or we're a legacy user
+      // we shouldn't disable any ui capabilities
+      const { authorization } = server.plugins.security;
+      if (!authorization.mode.useRbacForRequest(request)) {
+        return uiCapabilities;
+      }
+
+      const disableUICapabilites = disableUICapabilitesFactory(server, request);
+      // if we're an anonymous route, we disable all ui capabilities
+      if (request.route.settings.auth === false) {
+        return disableUICapabilites.all(uiCapabilities);
+      }
+
+      return disableUICapabilites.usingPrivileges(uiCapabilities);
     });
   }
 });

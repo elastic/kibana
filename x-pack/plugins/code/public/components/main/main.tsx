@@ -20,6 +20,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
   loadingStructureTree: boolean;
   hasStructure: boolean;
+  languageServerInitializing: boolean;
 }
 
 class CodeMain extends React.Component<Props> {
@@ -42,7 +43,12 @@ class CodeMain extends React.Component<Props> {
   }
 
   public render() {
-    const { loadingFileTree, loadingStructureTree, hasStructure } = this.props;
+    const {
+      loadingFileTree,
+      loadingStructureTree,
+      hasStructure,
+      languageServerInitializing,
+    } = this.props;
     return (
       <div className="codeContainer__root">
         <div className="codeContainer__rootInner">
@@ -51,6 +57,7 @@ class CodeMain extends React.Component<Props> {
               loadingFileTree={loadingFileTree}
               loadingStructureTree={loadingStructureTree}
               hasStructure={hasStructure}
+              languageServerInitializing={languageServerInitializing}
             />
             <Content />
           </React.Fragment>
@@ -62,9 +69,10 @@ class CodeMain extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  loadingFileTree: state.file.loading,
+  loadingFileTree: state.file.rootFileTreeLoading,
   loadingStructureTree: state.symbol.loading,
   hasStructure: structureSelector(state).length > 0 && !state.symbol.error,
+  languageServerInitializing: state.symbol.languageServerInitializing,
 });
 
 export const Main = connect(mapStateToProps)(CodeMain);

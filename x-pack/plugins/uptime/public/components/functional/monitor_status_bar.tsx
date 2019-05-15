@@ -95,7 +95,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
             )}
             grow={false}
           >
-            {moment(parseInt(timestamp, 10)).fromNow()}
+            {moment(new Date(timestamp).valueOf()).fromNow()}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

@@ -26,11 +26,13 @@ import { notify, addAppRedirectMessageToUrl, fatalError, toastNotifications } fr
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+import { getNewPlatform } from 'ui/new_platform';
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
+import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './angular-venn-simple.js';
@@ -80,6 +82,7 @@ uiRoutes
   .when('/home', {
     template: appTemplate,
     k7Breadcrumbs: getHomeBreadcrumbs,
+    badge: getReadonlyBadge,
     resolve: {
       //Copied from example found in wizard.js ( Kibana TODO - can't
       // IndexPatternsProvider abstract these implementation details better?)
@@ -756,7 +759,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
       .on('zoom', redraw));
 
 
-  const managementUrl = chrome.getNavLinkById('kibana:management').url;
+  const managementUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:management').url;
   const url = `${managementUrl}/kibana/index_patterns`;
 
   if ($scope.indices.length === 0) {

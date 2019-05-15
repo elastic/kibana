@@ -1,4 +1,9 @@
-/* eslint-disable */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+/* tslint:disable */
 
 // ====================================================
 // START: Typescript template
@@ -45,9 +50,11 @@ export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
   /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: UnsignedInteger | null;
+  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
+
+  container?: Container | null;
 
   docker?: Docker | null;
 
@@ -90,6 +97,22 @@ export interface Beat {
   timezone?: string | null;
 
   type?: string | null;
+}
+
+export interface Container {
+  id?: string | null;
+
+  image?: ContainerImage | null;
+
+  name?: string | null;
+
+  runtime?: string | null;
+}
+
+export interface ContainerImage {
+  name?: string | null;
+
+  tag?: string | null;
 }
 
 export interface Docker {

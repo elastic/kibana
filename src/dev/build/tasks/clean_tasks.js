@@ -29,6 +29,7 @@ export const CleanTask = {
     await deleteAll([
       config.resolveFromRepo('build'),
       config.resolveFromRepo('target'),
+      config.resolveFromRepo('.node_binaries'),
     ], log);
   },
 };

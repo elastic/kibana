@@ -29,7 +29,13 @@ export class TestRepoManager {
       if (!fs.existsSync(path)) {
         rimraf(path, error => {
           console.log(`begin to import ${url} to ${path}`);
-          Git.Clone.clone(url, path).then(repo => {
+          Git.Clone.clone(url, path, {
+            fetchOpts: {
+              callbacks: {
+                certificateCheck: () => 0,
+              },
+            },
+          }).then(repo => {
             console.log(`import ${url} done`);
             resolve(repo);
           });

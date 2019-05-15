@@ -11,6 +11,7 @@
 /.kibana-plugin-helpers.dev.*
 !/plugins/infra/**/target
 .cache
+!/plugins/siem/**/target
 
 # We don't want any yarn.lock files in here
 /yarn.lock

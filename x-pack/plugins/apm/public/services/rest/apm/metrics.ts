@@ -4,23 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsChartAPIResponse } from '../../../../server/lib/metrics/get_all_metrics_chart_data';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { MetricsChartsByAgentAPIResponse } from '../../../../server/lib/metrics/get_metrics_chart_data_by_agent';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
-export async function loadMetricsChartDataForService({
+export async function loadMetricsChartData({
   serviceName,
+  agentName,
   start,
   end,
   kuery
-}: IUrlParams) {
-  return callApi<MetricsChartAPIResponse>({
+}: {
+  serviceName: string;
+  agentName: string;
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
+  return callApi<MetricsChartsByAgentAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/metrics/charts`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      esFilterQuery: await getEncodedEsQuery(kuery),
+      agentName
     }
   });
 }
