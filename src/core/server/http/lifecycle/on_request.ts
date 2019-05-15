@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Url } from 'url';
 import Boom from 'boom';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
 import { KibanaRequest } from '../router';
@@ -64,13 +65,9 @@ export interface OnRequestToolkit {
   redirected: (url: string) => OnRequestResult;
   /** Fail the request with specified error. */
   rejected: (error: Error, options?: { statusCode?: number }) => OnRequestResult;
+  /** Change url for an incoming request. */
+  setUrl: (newUrl: string | Url) => void;
 }
-
-const toolkit: OnRequestToolkit = {
-  next: OnRequestResult.next,
-  redirected: OnRequestResult.redirected,
-  rejected: OnRequestResult.rejected,
-};
 
 /** @public */
 export type OnRequestHandler<Params = any, Query = any, Body = any> = (
@@ -86,11 +83,20 @@ export type OnRequestHandler<Params = any, Query = any, Body = any> = (
  */
 export function adoptToHapiOnRequestFormat(fn: OnRequestHandler) {
   return async function interceptRequest(
-    req: Request,
+    request: Request,
     h: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     try {
-      const result = await fn(KibanaRequest.from(req, undefined), toolkit);
+      const result = await fn(KibanaRequest.from(request, undefined), {
+        next: OnRequestResult.next,
+        redirected: OnRequestResult.redirected,
+        rejected: OnRequestResult.rejected,
+        setUrl: (newUrl: string | Url) => {
+          request.setUrl(newUrl);
+          // We should update raw request as well since it can be proxied to the old platform
+          request.raw.req.url = typeof newUrl === 'string' ? newUrl : newUrl.href;
+        },
+      });
       if (OnRequestResult.isValidResult(result)) {
         if (result.isNext()) {
           return h.continue;

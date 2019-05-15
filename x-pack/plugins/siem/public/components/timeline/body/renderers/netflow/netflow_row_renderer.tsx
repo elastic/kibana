@@ -8,8 +8,6 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Row, RowRenderer, RowRendererContainer } from '../';
-
 import { asArrayIfExists } from '../../../../../lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
@@ -42,19 +40,21 @@ import {
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from '../../../../source_destination/geo_fields';
 import {
+  DESTINATION_BYTES_FIELD_NAME,
+  DESTINATION_PACKETS_FIELD_NAME,
+  SOURCE_BYTES_FIELD_NAME,
+  SOURCE_PACKETS_FIELD_NAME,
+} from '../../../../source_destination/source_destination_arrows';
+import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { Row } from '../helpers';
+import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
   NETWORK_DIRECTION_FIELD_NAME,
   NETWORK_PACKETS_FIELD_NAME,
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
-} from '../../../../source_destination/network';
-import {
-  DESTINATION_BYTES_FIELD_NAME,
-  DESTINATION_PACKETS_FIELD_NAME,
-  SOURCE_BYTES_FIELD_NAME,
-  SOURCE_PACKETS_FIELD_NAME,
-} from '../../../../source_destination/source_destination_arrows';
+} from '../../../../source_destination/field_names';
 
 const Details = styled.div`
   margin: 10px 0;

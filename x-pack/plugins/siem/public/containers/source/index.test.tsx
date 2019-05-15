@@ -4,50 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { StaticIndexPatternField } from 'ui/index_patterns';
 
 import { IndexType } from '../../graphql/types';
+import { wait } from '../../lib/helpers';
 
-import { BrowserFields, WithSource } from '.';
+import { WithSource } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 describe('Index Fields & Browser Fields', () => {
   test('Index Fields', async () => {
-    let indexFields: StaticIndexPatternField[] = [];
-    const wrapper = mount(
+    mount(
       <MockedProvider mocks={mocksSource} addTypename={false}>
         <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
           {({ indexPattern }) => {
-            indexFields = indexPattern.fields;
+            if (!isEqual(indexPattern.fields, [])) {
+              expect(indexPattern.fields).toEqual(mockIndexFields);
+            }
+
             return null;
           }}
         </WithSource>
       </MockedProvider>
     );
+
     // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
-    wrapper.update();
-    expect(indexFields).toEqual(mockIndexFields);
+    await wait();
   });
 
   test('Browser Fields', async () => {
-    let browserFieldsResult: BrowserFields;
-    const wrapper = mount(
+    mount(
       <MockedProvider mocks={mocksSource} addTypename={false}>
         <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
           {({ browserFields }) => {
-            browserFieldsResult = browserFields;
+            if (!isEqual(browserFields, {})) {
+              expect(browserFields).toEqual(mockBrowserFields);
+            }
+
             return null;
           }}
         </WithSource>
       </MockedProvider>
     );
+
     // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
-    wrapper.update();
-    expect(browserFieldsResult!).toEqual(mockBrowserFields);
+    await wait();
   });
 });

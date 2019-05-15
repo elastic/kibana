@@ -4,12 +4,12 @@ exports[`DroppableWrapper rendering it renders against the snapshot 1`] = `
 <ThemeProvider
   theme={[Function]}
 >
-  <Connect(pure(Component))>
+  <Connect(DragDropContextWrapperComponent)>
     <pure(Component)
       droppableId="testing"
     >
       draggable wrapper content
     </pure(Component)>
-  </Connect(pure(Component))>
+  </Connect(DragDropContextWrapperComponent)>
 </ThemeProvider>
 `;

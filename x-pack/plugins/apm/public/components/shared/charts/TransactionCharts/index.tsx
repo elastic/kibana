@@ -139,7 +139,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     return (
       <SyncChartGroup
         render={hoverXHandlers => (
-          <EuiFlexGrid columns={2}>
+          <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
               <EuiPanel>
                 <React.Fragment>

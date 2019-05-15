@@ -29,6 +29,10 @@
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking discover.clickFieldListItemVisualize
 
+// NOTE: Scripted field input is managed by Ace editor, which automatically
+//   appends closing braces, for exmaple, if you type opening square brace [
+//   it will automatically insert a a closing square brace ], etc.
+
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
@@ -65,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
-      await PageObjects.settings.setScriptedFieldScript(`doc['iHaveNoClosingTick].value`);
+      await PageObjects.settings.setScriptedFieldScript(`i n v a l i d  s c r i p t`);
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async () => {
         const invalidScriptErrorExists = await testSubjects.exists('invalidScriptError');
@@ -110,11 +114,9 @@ export default function ({ getService, getPageObjects }) {
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        const script = `if (doc['machine.ram'].size() == 0) {
-          return -1;
-        } else {
-          return doc['machine.ram'].value / (1024 * 1024 * 1024);
-        }`;
+        const script = `if (doc['machine.ram'].size() == 0) return -1;
+          else return doc['machine.ram'].value / (1024 * 1024 * 1024);
+        `;
         await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);

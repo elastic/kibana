@@ -45,7 +45,7 @@ import {
   NETWORK_PACKETS_FIELD_NAME,
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
-} from './network';
+} from './field_names';
 
 const getSourceDestinationInstance = () => (
   <SourceDestination

@@ -26,3 +26,7 @@ export {
   SavedObjectReference,
   SavedObjectsService,
 } from './service';
+
+export { SavedObjectsSchema } from './schema';
+
+export { SavedObjectsManagement } from './management';

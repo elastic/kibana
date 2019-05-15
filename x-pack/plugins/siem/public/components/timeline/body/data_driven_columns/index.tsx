@@ -14,7 +14,8 @@ import { CELL_RESIZE_HANDLE_WIDTH, CellResizeHandle } from '../../../resize_hand
 import { OnColumnResized } from '../../events';
 import { ColumnHeader } from '../column_headers/column_header';
 import { FullHeightFlexItem } from '../column_headers/common/styles';
-import { ColumnRenderer, getColumnRenderer } from '../renderers';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { getColumnRenderer } from '../renderers/get_column_renderer';
 
 interface Props {
   _id: string;

@@ -7,13 +7,13 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
-import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
+import { VectorIcon } from './components/vector/legend/vector_icon';
+import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -131,7 +131,7 @@ export class VectorStyle extends AbstractStyle {
       return {};
     }
 
-    const scaledFields = this._getDynamicPropertiesArray()
+    const scaledFields = this.getDynamicPropertiesArray()
       .map(({ options }) => {
         return {
           name: options.field.name,
@@ -194,7 +194,7 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties || {};
   }
 
-  _getDynamicPropertiesArray() {
+  getDynamicPropertiesArray() {
     const styles = this.getProperties();
     return Object.keys(styles)
       .map(styleName => {
@@ -224,48 +224,29 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getIcon = () => {
-    let style = {
-      stroke: 'grey',
-      strokeWidth: '1px',
-      fill: 'none'
-    };
-    const isDynamic = this._isPropertyDynamic('fillColor');
-    if (!isDynamic) {
-      const { fillColor, lineColor } = this._descriptor.properties;
-      const stroke = _.get(lineColor, 'options.color');
-      const fill = _.get(fillColor, 'options.color');
-
-      style = {
-        ...style,
-        ...stroke && { stroke },
-        ...fill && { fill },
-      };
-    }
-
+    const styles = this.getProperties();
     return (
-      this._getIsPointsOnly()
-        ? <FillableCircle style={style}/>
-        : <FillableVector style={style}/>
+      <VectorIcon
+        isPointsOnly={this._getIsPointsOnly()}
+        fillColor={styles.fillColor}
+        lineColor={styles.lineColor}
+      />
     );
   }
 
-  getColorRamp() {
-    const color = _.get(this._descriptor, 'properties.fillColor.options.color');
-    return color && this._isPropertyDynamic('fillColor')
-      ? <ColorGradient color={color}/>
-      : null;
-  }
+  getLegendDetails() {
+    const styles = this.getProperties();
+    const styleProperties = Object.keys(styles).map(styleName => {
+      const { type, options } = styles[styleName];
+      return {
+        name: styleName,
+        type,
+        options,
+        range: options && options.field && options.field.name ? this._getFieldRange(options.field.name) : null,
+      };
+    });
 
-  getTOCDetails() {
-    const isDynamic = this._isPropertyDynamic('fillColor');
-    if (isDynamic) {
-      return (
-        <React.Fragment>
-          {this.getColorRamp()}
-        </React.Fragment>
-      );
-    }
-    return null;
+    return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
   addScaledPropertiesBasedOnStyle(featureCollection) {
@@ -273,7 +254,7 @@ export class VectorStyle extends AbstractStyle {
       return false;
     }
 
-    const scaledFields = this._getDynamicPropertiesArray()
+    const scaledFields = this.getDynamicPropertiesArray()
       .map(({ options }) => {
         const name = options.field.name;
         return {

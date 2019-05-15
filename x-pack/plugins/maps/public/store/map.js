@@ -38,7 +38,9 @@ import {
   REMOVE_TRACKED_LAYER_STATE,
   UPDATE_SOURCE_DATA_REQUEST,
   SET_TOOLTIP_STATE,
-  SET_SCROLL_ZOOM
+  SET_SCROLL_ZOOM,
+  SET_MAP_INIT_ERROR,
+  UPDATE_DRAW_STATE,
 } from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -86,6 +88,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
 
 const INITIAL_STATE = {
   ready: false,
+  mapInitError: null,
   goto: null,
   tooltipState: null,
   mapState: {
@@ -102,17 +105,26 @@ const INITIAL_STATE = {
     filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
+    drawState: null
   },
   selectedLayerId: null,
   __transientLayerId: null,
   layerList: [],
-  waitingForMapReadyLayerList: [],
+  waitingForMapReadyLayerList: []
 };
 
 
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    case UPDATE_DRAW_STATE:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          drawState: action.drawState
+        }
+      };
     case REMOVE_TRACKED_LAYER_STATE:
       return removeTrackedLayerState(state, action.layerId);
     case TRACK_CURRENT_LAYER_STATE:
@@ -306,6 +318,11 @@ export function map(state = INITIAL_STATE, action) {
           ...state.mapState,
           scrollZoom: action.scrollZoom,
         }
+      };
+    case SET_MAP_INIT_ERROR:
+      return {
+        ...state,
+        mapInitError: action.errorMessage
       };
     default:
       return state;

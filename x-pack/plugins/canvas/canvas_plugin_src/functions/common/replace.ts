@@ -5,6 +5,7 @@
  */
 
 import { ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   pattern: string;
@@ -12,10 +13,12 @@ interface Arguments {
   replacement: string;
 }
 export function replace(): ContextFunction<'replace', string, Arguments, string> {
+  const { help, args: argHelp } = getFunctionHelp().replace;
+
   return {
     name: 'replace',
     type: 'string',
-    help: 'Use a regular expression to replace parts of a string',
+    help,
     context: {
       types: ['string'],
     },
@@ -23,20 +26,17 @@ export function replace(): ContextFunction<'replace', string, Arguments, string>
       pattern: {
         aliases: ['_', 'regex'],
         types: ['string'],
-        help:
-          'The text or pattern of a JavaScript regular expression, eg "[aeiou]". You can use capture groups here.',
+        help: argHelp.pattern,
       },
       flags: {
         aliases: ['modifiers'],
         types: ['string'],
-        help:
-          'Specify flags. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp for reference.',
+        help: argHelp.flags,
         default: 'g',
       },
       replacement: {
         types: ['string'],
-        help:
-          'The replacement for the matching parts of string. Capture groups can be accessed by their index, eg $1',
+        help: argHelp.replacement,
         default: '""',
       },
     },
