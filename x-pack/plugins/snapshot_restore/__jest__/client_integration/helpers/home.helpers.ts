@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, findTestSubject } from '../../../../../test_utils';
+import { registerTestBed, findTestSubject, TestBed } from '../../../../../test_utils';
 import { SnapshotRestoreHome } from '../../../public/app/sections/home/home';
 import { BASE_PATH } from '../../../public/app/constants';
 import { WithProviders } from './providers';
@@ -18,7 +18,14 @@ const testBedConfig = {
 
 const initTestBed = registerTestBed(WithProviders(SnapshotRestoreHome), testBedConfig);
 
-export const setup = async () => {
+export interface HomeTestBed extends TestBed {
+  actions: {
+    selectRepositoryAt: (index: number) => void;
+    clickRepositoryAt: (index: number) => void;
+  };
+}
+
+export const setup = async (): Promise<HomeTestBed> => {
   const testBed = await initTestBed();
   const TABLE = 'repositoryTable';
 

@@ -31,9 +31,20 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     server.respondWith('GET', `${API_BASE_PATH}repository_types`, JSON.stringify(response));
   };
 
+  const setGetRepositoryResponse = (response: HttpResponse) => {
+    const defaultResponse = {};
+
+    server.respondWith(
+      'GET',
+      /api\/snapshot_restore\/repositories\/.+/,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
+    setGetRepositoryResponse,
   };
 };
 

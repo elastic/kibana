@@ -23,7 +23,7 @@ export interface EuiTableMetaData {
   tableCellsValues: string[][];
 }
 
-export interface TestBed<T> {
+export interface TestBed<T = string> {
   /** The comonent under test */
   component: ReactWrapper;
   /**
@@ -41,14 +41,14 @@ export interface TestBed<T> {
    *
    * @example
    *
-```ts
-find('nameInput');
-// or more specific,
-// "nameInput" is a child of "myForm"
-find('myForm.nameInput');
-```
+    ```ts
+    find('nameInput');
+    // or more specific,
+    // "nameInput" is a child of "myForm"
+    find('myForm.nameInput');
+    ```
    */
-  find: (testSubject: T) => ReactWrapper;
+  find: (testSubject: T) => ReactWrapper<any>;
   /**
    * Update the props of the mounted component
    *

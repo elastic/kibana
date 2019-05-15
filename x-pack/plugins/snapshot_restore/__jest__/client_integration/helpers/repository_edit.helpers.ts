@@ -7,5 +7,13 @@
 import { registerTestBed } from '../../../../../test_utils';
 import { RepositoryEdit } from '../../../public/app/sections/repository_edit';
 import { WithProviders } from './providers';
+import { REPOSITORY_NAME } from './constant';
 
-export const setup = registerTestBed(WithProviders(RepositoryEdit));
+const testBedConfig = {
+  memoryRouter: {
+    initialEntries: [`/${REPOSITORY_NAME}`],
+    componentRoutePath: '/:name',
+  },
+};
+
+export const setup = registerTestBed(WithProviders(RepositoryEdit), testBedConfig);

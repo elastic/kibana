@@ -64,7 +64,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h2>
+            <h2 data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.settingsTitle"
                 defaultMessage="{repositoryName} settings"
@@ -193,11 +193,11 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <Fragment>
+    <div data-test-subj="stepTwo">
       {renderSettings()}
       {renderFormValidationError()}
       {renderSaveError()}
       {renderActions()}
-    </Fragment>
+    </div>
   );
 };

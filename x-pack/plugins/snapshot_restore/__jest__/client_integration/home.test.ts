@@ -5,13 +5,15 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import * as fixtures from '../../test/fixtures';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { HomeTestBed } from './helpers/home.helpers';
 
 const { setup } = pageHelpers.home;
 
 describe('<SnapshotRestoreHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
+  let testBed: HomeTestBed;
 
   afterAll(() => {
     server.restore();
@@ -58,17 +60,19 @@ describe('<SnapshotRestoreHome />', () => {
       settings: { url: 'file:///tmp/es-backups' },
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repo1, repo2] });
-    });
 
-    it('should list them in the table', async () => {
-      const { component, table } = await setup();
+      testBed = await setup();
 
       await act(async () => {
         await nextTick(350);
-        component.update();
+        testBed.component.update();
       });
+    });
+
+    it('should list them in the table', async () => {
+      const { table } = testBed;
 
       const { tableCellsValues } = table.getMetaData('repositoryTable');
       const [row1, row2] = tableCellsValues;
@@ -78,12 +82,7 @@ describe('<SnapshotRestoreHome />', () => {
     });
 
     it('should show the detail when clicking on a repository', async () => {
-      const { component, exists, find, actions } = await setup();
-
-      await act(async () => {
-        await nextTick(350);
-        component.update();
-      });
+      const { component, exists, find, actions } = testBed;
 
       expect(exists('repositoryDetail')).toBe(false);
 
