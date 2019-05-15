@@ -29,7 +29,8 @@ export class MonacoHelper {
 
   constructor(
     public readonly container: HTMLElement,
-    private readonly editorActions: EditorActions
+    private readonly editorActions: EditorActions,
+    private readonly urlQuery: string
   ) {
     this.handleCopy = this.handleCopy.bind(this);
   }
@@ -80,7 +81,7 @@ export class MonacoHelper {
           this.editor!.layout();
         });
       });
-      registerReferencesAction(this.editor);
+      registerReferencesAction(this.editor, this.urlQuery);
       const hoverController: HoverController = new HoverController(this.editor);
       hoverController.setReduxActions(this.editorActions);
       document.addEventListener('copy', this.handleCopy);

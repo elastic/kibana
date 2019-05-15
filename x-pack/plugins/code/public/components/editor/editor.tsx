@@ -57,7 +57,7 @@ export class EditorComponent extends React.Component<IProps> {
 
   public componentDidMount(): void {
     this.container = document.getElementById('mainEditor') as HTMLElement;
-    this.monaco = new MonacoHelper(this.container, this.props);
+    this.monaco = new MonacoHelper(this.container, this.props, this.props.location.search);
 
     const { file } = this.props;
     if (file && file.content) {
