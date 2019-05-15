@@ -22,8 +22,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { unique } from 'lodash';
 import React, { Component } from 'react';
-import { Repository } from '../../../../model';
-import { SearchOptions as ISearchOptions } from '../../../actions';
+import { SearchOptions as ISearchOptions, Repository } from '../../../../model';
 
 interface State {
   isFlyoutOpen: boolean;

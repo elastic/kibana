@@ -10,8 +10,8 @@ import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import url from 'url';
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import { Repository, SearchScope } from '../../../model';
-import { changeSearchScope, SearchOptions } from '../../actions';
+import { Repository, SearchOptions, SearchScope } from '../../../model';
+import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
 import { SearchBar } from '../search_bar';
 import { EmptyProject } from './empty_project';
@@ -126,9 +126,10 @@ class AdminPage extends React.PureComponent<Props, State> {
         <div className="codeContainer__rootInner">
           <div className="codeContainer__adminWrapper">
             <SearchBar
-              repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
+              searchOptions={this.props.searchOptions}
               query={this.props.query}
               onSearchScopeChanged={this.props.onSearchScopeChanged}
+              enableSubmitWhenOptionsChanged={false}
               ref={element => (this.searchBar = element)}
             />
             <div className="codeContainer__adminMain">
