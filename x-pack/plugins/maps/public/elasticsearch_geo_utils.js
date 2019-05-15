@@ -168,7 +168,13 @@ function convertWKTStringToGeojson(value) {
   try {
     return parse(value);
   } catch (e) {
-    throw new Error(`Unable to convert ${value} to geojson. Valid WKT expected.`);
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.wkt.invalidWKTErrorMessage', {
+      defaultMessage: `Unable to convert {wkt} to geojson. Valid WKT expected.`,
+      values: {
+        wkt: value
+      }
+    });
+    throw new Error(errorMessage);
   }
 }
 
