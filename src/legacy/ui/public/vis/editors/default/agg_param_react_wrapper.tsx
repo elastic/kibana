@@ -19,23 +19,11 @@
 
 import React, { useEffect } from 'react';
 
-import { AggParam } from '../../../agg_types';
-import { FieldParamType } from '../../../agg_types/param_types';
-import { AggConfig } from '../../agg_config';
-import { AggParamEditorProps } from './agg_param_editor_props';
-import { EditorConfig } from '../config/types';
+import { AggParamEditorProps, AggParamCommonProps } from './agg_param_editor_props';
 
-interface AggParamReactWrapperProps<T> {
-  agg: AggConfig;
-  aggParam: AggParam;
-  editorConfig: EditorConfig;
-  indexedFields: FieldParamType[];
-  showValidation: boolean;
+interface AggParamReactWrapperProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
-  value: T;
   onChange(value?: T): void;
-  setTouched(): void;
-  setValidity(isValid: boolean): void;
 }
 
 function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
