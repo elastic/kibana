@@ -54,15 +54,15 @@ export class VectorStyleEditor extends Component {
     const isPointsOnly = await this.props.loadIsPointsOnly();
     const isLinesOnly = await this.props.loadIsLinesOnly();
 
+    if (!this._isMounted) {
+      return;
+    }
+
     let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
     if (isPointsOnly) {
       selectedFeature = VECTOR_SHAPE_TYPES.POINT;
     } else if (isLinesOnly) {
       selectedFeature = VECTOR_SHAPE_TYPES.LINE;
-    }
-
-    if (!this._isMounted) {
-      return;
     }
 
     if (!_.isEqual(supportedFeatures, this.state.supportedFeatures) ||
@@ -195,15 +195,15 @@ export class VectorStyleEditor extends Component {
 
     const featureButtons = [
       {
-        id: VECTOR_SHAPE_TYPES.LINE,
-        label: i18n.translate('xpack.maps.vectorStyleEditor.lineLabel', {
-          defaultMessage: 'Lines'
-        })
-      },
-      {
         id: VECTOR_SHAPE_TYPES.POINT,
         label: i18n.translate('xpack.maps.vectorStyleEditor.pointLabel', {
           defaultMessage: 'Points'
+        })
+      },
+      {
+        id: VECTOR_SHAPE_TYPES.LINE,
+        label: i18n.translate('xpack.maps.vectorStyleEditor.lineLabel', {
+          defaultMessage: 'Lines'
         })
       },
       {

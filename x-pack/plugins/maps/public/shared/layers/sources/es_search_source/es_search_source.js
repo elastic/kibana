@@ -13,7 +13,7 @@ import { AbstractESSource } from '../es_source';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH } from '../../../../../common/constants';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
@@ -207,10 +207,14 @@ export class ESSearchSource extends AbstractESSource {
       // ignore exeception
     }
 
-    if (geoFieldType === 'geo_point') {
+    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
       return [VECTOR_SHAPE_TYPES.POINT];
     }
 
-    return Object.values(VECTOR_SHAPE_TYPES);
+    return [
+      VECTOR_SHAPE_TYPES.POINT,
+      VECTOR_SHAPE_TYPES.LINE,
+      VECTOR_SHAPE_TYPES.POLYGON
+    ];
   }
 }

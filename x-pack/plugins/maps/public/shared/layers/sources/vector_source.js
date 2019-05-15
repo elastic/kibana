@@ -117,6 +117,10 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   async getSupportedShapeTypes() {
-    return Object.values(VECTOR_SHAPE_TYPES);
+    return [
+      VECTOR_SHAPE_TYPES.POINT,
+      VECTOR_SHAPE_TYPES.LINE,
+      VECTOR_SHAPE_TYPES.POLYGON
+    ];
   }
 }

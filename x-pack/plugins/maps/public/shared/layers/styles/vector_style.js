@@ -66,8 +66,8 @@ export class VectorStyle extends AbstractStyle {
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
         layer={layer}
-        loadIsPointsOnly={this.getIsPointsOnly}
-        loadIsLinesOnly={this.getIsLinesOnly}
+        loadIsPointsOnly={this._getIsPointsOnly}
+        loadIsLinesOnly={this._getIsLinesOnly}
       />
     );
   }
@@ -238,7 +238,7 @@ export class VectorStyle extends AbstractStyle {
     return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
   }
 
-  getIsPointsOnly = async () => {
+  _getIsPointsOnly = async () => {
     const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
@@ -253,7 +253,7 @@ export class VectorStyle extends AbstractStyle {
     return hasPoints && !hasLines && !hasPolygons;
   }
 
-  getIsLinesOnly = async () => {
+  _getIsLinesOnly = async () => {
     const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
@@ -268,7 +268,7 @@ export class VectorStyle extends AbstractStyle {
     return hasLines && !hasPoints && !hasPolygons;
   }
 
-  getIsPolygonsOnly = async () => {
+  _getIsPolygonsOnly = async () => {
     const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
@@ -291,8 +291,8 @@ export class VectorStyle extends AbstractStyle {
     const styles = this.getProperties();
     return (
       <VectorIcon
-        loadIsPointsOnly={this.getIsPointsOnly}
-        loadIsLinesOnly={this.getIsLinesOnly}
+        loadIsPointsOnly={this._getIsPointsOnly}
+        loadIsLinesOnly={this._getIsLinesOnly}
         fillColor={styles.fillColor}
         lineColor={styles.lineColor}
       />
