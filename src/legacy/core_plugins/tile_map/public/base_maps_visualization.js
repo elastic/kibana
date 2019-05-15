@@ -145,7 +145,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
     async _updateBaseLayer() {
 
-      const DEFAULT_EMS_BASEMAP = 'road_map';
+      const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
 
       if (!this._kibanaMap) {
         return;
@@ -158,7 +158,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
-            : tmsServices.find(s => s.id === DEFAULT_EMS_BASEMAP);
+            : tmsServices.find(s => s.id === emsTileLayerId.bright);
           if (initBasemapLayer) { this._setTmsLayer(initBasemapLayer); }
         } catch (e) {
           toastNotifications.addWarning(e.message);
@@ -198,7 +198,10 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      const isDesaturated = this._getMapsParams().isDesaturated;
+      let isDesaturated = this._getMapsParams().isDesaturated;
+      if (typeof isDesaturated !== 'boolean') {
+        isDesaturated = true;
+      }
       const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
       const meta = await (await emsServiceSettings).getAttributesForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);

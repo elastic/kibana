@@ -178,6 +178,7 @@ uiModules.get('kibana')
           minzoom: await tmsService.getMinZoom(),
           maxzoom: await tmsService.getMaxZoom(),
           attribution: await tmsService.getHTMLAttribution(),
+          origin: ORIGIN.EMS,
         };
       }
 
@@ -186,22 +187,24 @@ uiModules.get('kibana')
           return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
         } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
           const config = tilemapsConfig.deprecated.config;
-          return _.pick(config, [
+          const attrs = _.pick(config, [
             'url',
             'minzoom',
             'maxzoom',
             'attribution',
           ]);
+          return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
         } else {
           //this is an older config. need to resolve this dynamically.
           if (tmsServiceConfig.id === TMS_IN_YML_ID) {
             const config = tilemapsConfig.deprecated.config;
-            return _.pick(config, [
+            const attrs = _.pick(config, [
               'url',
               'minzoom',
               'maxzoom',
               'attribution',
             ]);
+            return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
           } else {
             //assume ems
             return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
