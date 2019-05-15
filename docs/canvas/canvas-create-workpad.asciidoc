@@ -4,9 +4,8 @@
 
 Canvas is a creative space for presenting data. You can create a Canvas workpad 
 to combine colors, shapes, and text, to bring dynamic, pixel-perfect data displays 
-to screens large and small. 
-
-A Canvas workpad is your drawing space that you can configure to add text, data elements, and visual assets. 
+to screens large and small. A workpad is your drawing space that you can configure 
+to add text, data elements, and visual assets. 
 
 Before you start, you will need to have your own {es} data source connected in {kib}, 
 or you can use one of {kib}'s <<add-sample-data, sample data sets>>. 
@@ -53,12 +52,12 @@ editor and edit the expression associated with an element directly.
 Each Canvas element is connected to some demo data by default. Once you place the 
 element on your workpad, you can configure it to display your own data.
 
-Each element could contain a different data source. Pages and workpads often contain multiple data sources
+Each element can display a different data source. Pages and workpads often contain multiple data sources.
 
 From the sidebar editor, click *Data > Change your data source* to connect a new 
 data source to your element.
 
-There are four types of data sources to choose from. 
+There are four types of data sources to choose from: 
 
 Timelion::
 * Uses <<timelion-inline-help, Timelion syntax>> to retrieve a timeseries
@@ -69,14 +68,15 @@ Elasticsearch SQL::
 {es} raw documents:: 
 * Pulls back raw documents from an {es} index
 
-After you change the data source for an element, you also need to tell the element
-which values you want to display. Select the element, and click *Display* in the 
-sidebar to specify the values the element should show.
+After you change the data source for an element, next you need to tell the element
+how to process and display that data. Select the element, and click *Display* in the 
+sidebar to specify the values that the element should display.
 
 
 [float]
 === Adding a new page
 You can add additional pages to your Canvas workpad to build out your presentation. 
+Pages are similar to slides in a presentation. 
 
 . From the bottom of the page click *Page 1 of ...* to view all existing pages. 
 . Click *+* on the righthand side to add a new page. 
@@ -90,5 +90,8 @@ Sharing icons are available on the top left, next to *Refresh*.
 
 * Click the fullscreen icon to display your workpad in fullscreen mode. 
 * Click the share workscreen icon to download your workpad as a PDF report or JSON object. 
+
+[role="screenshot"]
+image::canvas/images/canvas-share.png[]
 
 

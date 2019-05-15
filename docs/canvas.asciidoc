@@ -29,12 +29,12 @@ image::canvas/images/canvas-ecommerce.png[eCommerce sample workpad]
 
 
 [float]
-==== Play around with the workpad
+==== Explore the sample workpad
 
 
 . Click on any element in the sample workpad.
 + 
-This element is now selected, exposing a menu in the side bar where you can make changes to the element.
+When you select an element, an editor opens in the side bar where you can make changes to the element.
 +
 [role="screenshot"]
 image::images/canvas_workpad_edit_style.png[]
@@ -48,9 +48,9 @@ the chart bigger and smaller.
 . Now click somewhere off of the element (just not on another element) 
 to deselect it. 
 +
-You will notice a change in the sidebar menu. When no element is selected, you have 
-access to the page and workpad-level settings. Feel free to change the page 
-background color or rename the workpad.
+When When no element is selected, the editor in the sidebar changes to give you 
+access to the page and workpad-level settings. Try changing the page 
+background color and renaming the workpad.
 
 
 [float]
