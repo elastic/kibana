@@ -65,9 +65,43 @@ export class IndexSettings extends Component {
     }
   }
 
+  _onIndexChange = ({ target }) => {
+    const name = target.value;
+    const errorMessage = this._isIndexNameValid(name, this.state.indexNames);
+    this.setState({ indexNameError: errorMessage });
+    this.props.setIndexName(name);
+  }
+
+  _isIndexNameValid = (name, indexNames) => {
+    if (indexNames.find(i => i === name)) {
+      return (
+        <FormattedMessage
+          id="xpack.file_upload.indexNameAlreadyExistsErrorMessage"
+          defaultMessage="Index name already exists"
+        />
+      );
+    }
+
+    const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
+    if (
+      (name !== name.toLowerCase()) || // name should be lowercase
+      (name === '.' || name === '..')   || // name can't be . or ..
+      name.match(/^[-_+]/) !== null  || // name can't start with these chars
+      name.match(reg) !== null // name can't contain these chars
+    ) {
+      return (
+        <FormattedMessage
+          id="xpack.file_upload.indexNameContainsIllegalCharactersErrorMessage"
+          defaultMessage="Index name contains illegal characters"
+        />
+      );
+    }
+    return '';
+  }
+
   render() {
-    const { setIndexName, setSelectedIndexType, indexTypes } = this.props;
-    const { indexNameError, indexDisabled, indexName, indexNames } = this.state;
+    const { setSelectedIndexType, indexTypes } = this.props;
+    const { indexNameError, indexDisabled, indexName } = this.state;
 
     return (
       <Fragment>
@@ -132,7 +166,7 @@ export class IndexSettings extends Component {
             disabled={indexDisabled}
             placeholder={'Enter Index Name'}
             value={indexName}
-            onChange={onIndexChange(setIndexName, err => this.setState({ indexNameError: err }), indexNames)}
+            onChange={this._onIndexChange}
             isInvalid={indexNameError !== ''}
             aria-label={'Index name, required field'}
           />
@@ -145,38 +179,3 @@ export class IndexSettings extends Component {
   }
 }
 
-function onIndexChange(setIndex, setIndexNameError, indexNames) {
-  return ({ target }) => {
-    const name = target.value;
-    const errorMessage = isIndexNameValid(name, indexNames);
-    setIndexNameError(errorMessage);
-    setIndex(name);
-  };
-}
-
-function isIndexNameValid(name, indexNames) {
-  if (indexNames.find(i => i === name)) {
-    return (
-      <FormattedMessage
-        id="xpack.file_upload.indexNameAlreadyExistsErrorMessage"
-        defaultMessage="Index name already exists"
-      />
-    );
-  }
-
-  const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
-  if (
-    (name !== name.toLowerCase()) || // name should be lowercase
-    (name === '.' || name === '..')   || // name can't be . or ..
-    name.match(/^[-_+]/) !== null  || // name can't start with these chars
-    name.match(reg) !== null // name can't contain these chars
-  ) {
-    return (
-      <FormattedMessage
-        id="xpack.file_upload.indexNameContainsIllegalCharactersErrorMessage"
-        defaultMessage="Index name contains illegal characters"
-      />
-    );
-  }
-  return '';
-}
