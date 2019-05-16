@@ -28,7 +28,11 @@ export function isAgentName(agentName: string): boolean {
   return Object.values(agentNames).includes(agentName as AgentName);
 }
 
-export function isRumAgentName(agentName: string): boolean {
+export function isRumAgentName(agentName: string | undefined) {
+  if (!agentName) {
+    return false;
+  }
+
   return ([agentNames['js-base'], agentNames['rum-js']] as string[]).includes(
     agentName
   );

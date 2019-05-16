@@ -33,6 +33,11 @@ export async function getAnomalySeries({
     return;
   }
 
+  // don't fetch anomalies if kuery filter is applied
+  if (setup.esFilterQuery) {
+    return;
+  }
+
   const mlBucketSize = await getMlBucketSize({
     serviceName,
     transactionType,

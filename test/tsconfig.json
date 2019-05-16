@@ -4,6 +4,10 @@
     "types": [
       "node",
       "mocha"
+    ],
+    "lib": [
+      "esnext",
+      "dom"
     ]
   },
   "include": [

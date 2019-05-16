@@ -10,6 +10,32 @@ import moment from 'moment';
 import { standaloneClusterFilter } from './standalone_clusters';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
+export function createTimeFilter(options) {
+  const { start, end } = options;
+  if (!start && !end) {
+    return null;
+  }
+
+  const timestampField = get(options, 'metric.timestampField');
+  if (!timestampField) {
+    throw new MissingRequiredError('metric.timestampField');
+  }
+  const timeRangeFilter = {
+    range: {
+      [timestampField]: {
+        format: 'epoch_millis'
+      }
+    }
+  };
+  if (start) {
+    timeRangeFilter.range[timestampField].gte = moment.utc(start).valueOf();
+  }
+  if (end) {
+    timeRangeFilter.range[timestampField].lte = moment.utc(end).valueOf();
+  }
+  return timeRangeFilter;
+}
+
 /*
  * Creates the boilerplace for querying monitoring data, including filling in
  * document UUIDs, start time and end time, and injecting additional filters.
@@ -25,7 +51,7 @@ import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
  */
 export function createQuery(options) {
   options = defaults(options, { filters: [] });
-  const { type, clusterUuid, uuid, start, end, filters } = options;
+  const { type, clusterUuid, uuid, filters } = options;
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
@@ -53,22 +79,10 @@ export function createQuery(options) {
   if (!timestampField) {
     throw new MissingRequiredError('metric.timestampField');
   }
-  const timeRangeFilter = {
-    range: {
-      [timestampField]: {
-        format: 'epoch_millis'
-      }
-    }
-  };
-  if (start) {
-    timeRangeFilter.range[timestampField].gte = moment.utc(start).valueOf();
-  }
-  if (end) {
-    timeRangeFilter.range[timestampField].lte = moment.utc(end).valueOf();
-  }
+  const timeRangeFilter = createTimeFilter(options);
 
   const combinedFilters = [typeFilter, clusterUuidFilter, uuidFilter, ...filters];
-  if (end || start) {
+  if (timeRangeFilter) {
     combinedFilters.push(timeRangeFilter);
   }
 

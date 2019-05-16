@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonIcon, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import { EuiButtonIcon, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -22,8 +22,7 @@ test('it renders without crashing', () => {
     formIndex: 0,
     indexPatterns: [],
     availableFields: [],
-    isReservedRole: false,
-    allowDelete: true,
+    isReadOnlyRole: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -49,8 +48,7 @@ describe('delete button', () => {
     formIndex: 0,
     indexPatterns: [],
     availableFields: [],
-    isReservedRole: false,
-    allowDelete: true,
+    isReadOnlyRole: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -59,19 +57,19 @@ describe('delete button', () => {
     intl: {} as any,
   };
 
-  test('it is hidden when allowDelete is false', () => {
+  test('it is hidden when isReadOnlyRole is true', () => {
     const testProps = {
       ...props,
-      allowDelete: false,
+      isReadOnlyRole: true,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
 
-  test('it is shown when allowDelete is true', () => {
+  test('it is shown when isReadOnlyRole is false', () => {
     const testProps = {
       ...props,
-      allowDelete: true,
+      isReadOnlyRole: false,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
@@ -80,7 +78,7 @@ describe('delete button', () => {
   test('it invokes onDelete when clicked', () => {
     const testProps = {
       ...props,
-      allowDelete: true,
+      isReadOnlyRole: false,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     wrapper.find(EuiButtonIcon).simulate('click');
@@ -101,8 +99,7 @@ describe(`document level security`, () => {
     formIndex: 0,
     indexPatterns: [],
     availableFields: [],
-    isReservedRole: false,
-    allowDelete: true,
+    isReadOnlyRole: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -118,7 +115,7 @@ describe(`document level security`, () => {
     };
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
-    expect(wrapper.find(EuiSwitch)).toHaveLength(0);
+    expect(wrapper.find('EuiSwitch[data-test-subj="restrictDocumentsQuery0"]')).toHaveLength(0);
     expect(wrapper.find(EuiTextArea)).toHaveLength(0);
   });
 
@@ -132,7 +129,7 @@ describe(`document level security`, () => {
     };
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
-    expect(wrapper.find(EuiSwitch)).toHaveLength(1);
+    expect(wrapper.find('EuiSwitch[data-test-subj="restrictDocumentsQuery0"]')).toHaveLength(1);
     expect(wrapper.find(EuiTextArea)).toHaveLength(0);
   });
 
@@ -142,7 +139,7 @@ describe(`document level security`, () => {
     };
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
-    expect(wrapper.find(EuiSwitch)).toHaveLength(1);
+    expect(wrapper.find('EuiSwitch[data-test-subj="restrictDocumentsQuery0"]')).toHaveLength(1);
     expect(wrapper.find(EuiTextArea)).toHaveLength(1);
   });
 });
@@ -160,8 +157,7 @@ describe('field level security', () => {
     formIndex: 0,
     indexPatterns: [],
     availableFields: [],
-    isReservedRole: false,
-    allowDelete: true,
+    isReadOnlyRole: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -170,23 +166,41 @@ describe('field level security', () => {
     intl: {} as any,
   };
 
-  test(`input is hidden when FLS is not allowed`, () => {
+  test(`inputs are hidden when FLS is not allowed`, () => {
     const testProps = {
       ...props,
       allowFieldLevelSecurity: false,
     };
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+    expect(wrapper.find('EuiSwitch[data-test-subj="restrictFieldsQuery0"]')).toHaveLength(0);
     expect(wrapper.find('.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(0);
+    expect(wrapper.find('.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(0);
   });
 
-  test('input is shown when allowed', () => {
+  test('only the switch is shown when allowed, and FLS is empty', () => {
+    const testProps = {
+      ...props,
+      indexPrivilege: {
+        ...props.indexPrivilege,
+        field_security: {},
+      },
+    };
+
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+    expect(wrapper.find('EuiSwitch[data-test-subj="restrictFieldsQuery0"]')).toHaveLength(1);
+    expect(wrapper.find('.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(0);
+    expect(wrapper.find('.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(0);
+  });
+
+  test('inputs are shown when allowed', () => {
     const testProps = {
       ...props,
     };
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
+    expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
   });
 
   test('it displays a warning when no fields are granted', () => {
@@ -196,12 +210,14 @@ describe('field level security', () => {
         ...props.indexPrivilege,
         field_security: {
           grant: [],
+          except: ['foo'],
         },
       },
     };
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
+    expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('.euiFormHelpText')).toHaveLength(1);
   });
 
@@ -212,6 +228,7 @@ describe('field level security', () => {
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
+    expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('.euiFormHelpText')).toHaveLength(0);
   });
 });

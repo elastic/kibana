@@ -22,6 +22,7 @@ import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
+import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 
 const metricAggs = [
   {
@@ -169,41 +170,45 @@ function filterByPanelType(panelType) {
 }
 
 function AggSelectUi(props) {
-  const { siblings, panelType, value, onChange, intl, ...rest } = props;
-  const selectedOption = allAggOptions.find(option => {
-    return value === option.value;
+  const { siblings, panelType, value, onChange, intl, uiRestrictions, ...rest } = props;
+
+  const selectedOptions = allAggOptions.filter(option => {
+    return value === option.value && isMetricEnabled(option.value, uiRestrictions);
   });
-  const selectedOptions = selectedOption ? [selectedOption] : [];
 
   let enablePipelines = siblings.some(
     s => !!metricAggs.find(m => m.value === s.type)
   );
+
   if (siblings.length <= 1) enablePipelines = false;
 
   let options;
   if (panelType === 'metrics') {
     options = metricAggs;
   } else {
+    const disableSiblingAggs = agg => ({ ...agg, disabled: !enablePipelines || !isMetricEnabled(agg.value, uiRestrictions) });
+
     options = [
       {
         label: intl.formatMessage({ id: 'tsvb.aggSelect.aggGroups.metricAggLabel', defaultMessage: 'Metric Aggregations' }),
-        options: metricAggs,
+        options: metricAggs
+          .map(agg => ({ ...agg, disabled: !isMetricEnabled(agg.value, uiRestrictions) })),
       },
       {
         label: intl.formatMessage({
           id: 'tsvb.aggSelect.aggGroups.parentPipelineAggLabel', defaultMessage: 'Parent Pipeline Aggregations' }),
         options: pipelineAggs
           .filter(filterByPanelType(panelType))
-          .map(agg => ({ ...agg, disabled: !enablePipelines })),
+          .map(disableSiblingAggs),
       },
       {
         label: intl.formatMessage({
           id: 'tsvb.aggSelect.aggGroups.siblingPipelineAggLabel', defaultMessage: 'Sibling Pipeline Aggregations' }),
-        options: siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
+        options: siblingAggs.map(disableSiblingAggs),
       },
       {
         label: intl.formatMessage({ id: 'tsvb.aggSelect.aggGroups.specialAggLabel', defaultMessage: 'Special Aggregations' }),
-        options: specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
+        options: specialAggs.map(disableSiblingAggs),
       },
     ];
   }
@@ -233,6 +238,7 @@ AggSelectUi.propTypes = {
   panelType: PropTypes.string,
   siblings: PropTypes.array,
   value: PropTypes.string,
+  uiRestrictions: PropTypes.object,
 };
 
 const AggSelect = injectI18n(AggSelectUi);

@@ -16,8 +16,6 @@ import { promisify } from 'util';
 const FIXTURES_FOLDER = resolve(__dirname, '__fixtures__');
 const SRC_FILE_UNCOMPRESSED = resolve(FIXTURES_FOLDER, 'file.md');
 const SRC_FILE_COMPRESSED_ZIP = `${SRC_FILE_UNCOMPRESSED}.zip`;
-const SRC_FILE_COMPRESSED_BZ2 = `${SRC_FILE_UNCOMPRESSED}.bz2`;
-const SRC_FILE_COMPRESSED_TAR_BZ2 = `${SRC_FILE_UNCOMPRESSED}.tar.bz2`;
 const EXTRACT_TARGET_FOLDER = resolve(FIXTURES_FOLDER, 'extract_target');
 const EXTRACT_TARGET_FILE = resolve(EXTRACT_TARGET_FOLDER, 'file.md');
 
@@ -97,59 +95,6 @@ describe('extract', () => {
         let thrownException;
         try {
           await extract(SRC_FILE_COMPRESSED_ZIP, EXTRACT_TARGET_FOLDER);
-        } catch (e) {
-          thrownException = e;
-        }
-
-        expect(thrownException).to.be.an(ExtractError);
-        expect(thrownException.cause.code).to.eql('EACCES');
-      });
-    }
-  });
-
-  describe('bunzip2()', () => {
-    it('throws an Error given a non-bz2 file', async () => {
-      let thrownException;
-      try {
-        await extract(SRC_FILE_UNCOMPRESSED, EXTRACT_TARGET_FOLDER);
-      } catch (e) {
-        thrownException = e;
-      }
-
-      expect(thrownException).to.be.an(ExtractError);
-    });
-
-    it('throws an Error given a non-tar.bz2 file', async () => {
-      let thrownException;
-      try {
-        await extract(SRC_FILE_COMPRESSED_BZ2, EXTRACT_TARGET_FOLDER);
-      } catch (e) {
-        thrownException = e;
-      }
-
-      expect(thrownException).to.be.an(ExtractError);
-    });
-
-    it('successfully extracts a valid tar.bz2 file to the given target', async () => {
-      await extract(SRC_FILE_COMPRESSED_TAR_BZ2, EXTRACT_TARGET_FOLDER);
-
-      const stats = fs.statSync(EXTRACT_TARGET_FILE);
-      expect(stats).to.be.an(Object);
-
-      const srcFileHash = await fileHash(SRC_FILE_UNCOMPRESSED);
-      const targetFileHash = await fileHash(EXTRACT_TARGET_FILE);
-      expect(targetFileHash).to.eql(srcFileHash);
-    });
-
-    if (isWindows) {
-      it(`Windows doesn't support chmod, so it's missing access tests. Windows is throwing EEXIST.`);
-    } else {
-      it('throws an ExtractError with cause.code of EACESS when target is un-writeable', async () => {
-        await fsp.mkdir(EXTRACT_TARGET_FOLDER, 0o444);
-
-        let thrownException;
-        try {
-          await extract(SRC_FILE_COMPRESSED_TAR_BZ2, EXTRACT_TARGET_FOLDER);
         } catch (e) {
           thrownException = e;
         }

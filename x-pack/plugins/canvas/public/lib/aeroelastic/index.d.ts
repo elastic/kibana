@@ -40,14 +40,6 @@ export type PlainFun = (...args: Json[]) => Json;
 export type Selector = (...fns: Resolve[]) => Resolve;
 type Resolve = ((obj: State) => Json);
 
-//
-export interface Meta {
-  silent: boolean;
-}
 export type TypeName = string;
 export type Payload = JsonMap;
 export type UpdaterFunction = (arg: State) => State;
-export type ChangeCallbackFunction = (
-  { type, state }: { type: TypeName; state: State },
-  meta: Meta
-) => void;

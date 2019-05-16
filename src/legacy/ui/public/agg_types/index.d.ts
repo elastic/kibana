@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { AggParam } from './agg_param';
+export { AggParam, AggParamOption } from './agg_param';
 export { AggType } from './agg_type';

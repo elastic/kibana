@@ -60,7 +60,12 @@ module.exports = {
       plugins: ['prettier'],
       rules: Object.assign(
         {
-          'prettier/prettier': ['error'],
+          'prettier/prettier': [
+            'error',
+            {
+              endOfLine: 'auto',
+            },
+          ],
         },
         require('eslint-config-prettier').rules,
         require('eslint-config-prettier/react').rules
@@ -132,11 +137,13 @@ module.exports = {
                 ],
                 from: [
                   'src/core/public/**/*',
-                  '!src/core/public/index*',
+                  '!src/core/public/index.ts',
+                  '!src/core/public/mocks.ts',
                   '!src/core/public/utils/**/*',
 
                   'src/core/server/**/*',
-                  '!src/core/server/index*',
+                  '!src/core/server/index.ts',
+                  '!src/core/server/mocks.ts',
 
                   'src/plugins/**/public/**/*',
                   '!src/plugins/**/public/index*',
@@ -386,6 +393,17 @@ module.exports = {
       files: ['x-pack/plugins/ml/**/*.js'],
       rules: {
         'no-shadow': 'error',
+      },
+    },
+
+    /**
+     * SIEM overrides
+     */
+    {
+      files: ['x-pack/plugins/siem/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        'import/order': 'error',
       },
     },
 

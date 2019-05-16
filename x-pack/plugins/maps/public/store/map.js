@@ -23,6 +23,7 @@ import {
   SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
+  SET_LAYER_STYLE_META,
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_SOURCE_PROP,
@@ -36,7 +37,10 @@ import {
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE,
   UPDATE_SOURCE_DATA_REQUEST,
-  SET_TOOLTIP_STATE
+  SET_TOOLTIP_STATE,
+  SET_SCROLL_ZOOM,
+  SET_MAP_INIT_ERROR,
+  UPDATE_DRAW_STATE,
 } from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -84,6 +88,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
 
 const INITIAL_STATE = {
   ready: false,
+  mapInitError: null,
   goto: null,
   tooltipState: null,
   mapState: {
@@ -92,6 +97,7 @@ const INITIAL_STATE = {
       lon: -100.41,
       lat: 32.82
     },
+    scrollZoom: true,
     extent: null,
     mouseCoordinates: null,
     timeFilters: null,
@@ -99,17 +105,26 @@ const INITIAL_STATE = {
     filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
+    drawState: null
   },
   selectedLayerId: null,
   __transientLayerId: null,
   layerList: [],
-  waitingForMapReadyLayerList: [],
+  waitingForMapReadyLayerList: []
 };
 
 
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    case UPDATE_DRAW_STATE:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          drawState: action.drawState
+        }
+      };
     case REMOVE_TRACKED_LAYER_STATE:
       return removeTrackedLayerState(state, action.layerId);
     case TRACK_CURRENT_LAYER_STATE:
@@ -166,7 +181,7 @@ export function map(state = INITIAL_STATE, action) {
           ...layerList.slice(0, layerIdx),
           {
             ...layerList[layerIdx],
-            __isInErrorState: true,
+            __isInErrorState: action.isInErrorState,
             __errorMessage: action.errorMessage
           },
           ...layerList.slice(layerIdx + 1)
@@ -288,6 +303,27 @@ export function map(state = INITIAL_STATE, action) {
       const styleLayerId = action.layerId;
       return updateLayerInList(state, styleLayerId, 'style',
         { ...action.style });
+    case SET_LAYER_STYLE_META:
+      const { layerId, styleMeta } = action;
+      const index = getLayerIndex(state.layerList, layerId);
+      if (index === -1) {
+        return state;
+      }
+
+      return updateLayerInList(state, layerId, 'style', { ...state.layerList[index].style, __styleMeta: styleMeta });
+    case SET_SCROLL_ZOOM:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          scrollZoom: action.scrollZoom,
+        }
+      };
+    case SET_MAP_INIT_ERROR:
+      return {
+        ...state,
+        mapInitError: action.errorMessage
+      };
     default:
       return state;
   }
@@ -413,6 +449,7 @@ function rollbackTrackedLayerState(state, layerId) {
   if (!layer) {
     return state;
   }
+
   const trackedLayerDescriptor = layer[TRACKED_LAYER_DESCRIPTOR];
 
   //this assumes that any nested temp-state in the layer-descriptor (e.g. of styles), is not relevant and can be recovered easily (e.g. this is not the case for __dataRequests)

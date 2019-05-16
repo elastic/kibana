@@ -27,6 +27,7 @@ interface AutocompleteFieldProps {
   placeholder?: string;
   suggestions: AutocompleteSuggestion[];
   value: string;
+  autoFocus?: boolean;
 }
 
 interface AutocompleteFieldState {
@@ -86,7 +87,7 @@ export class AutocompleteField extends React.Component<
   }
 
   public componentDidMount() {
-    if (this.inputElement) {
+    if (this.inputElement && this.props.autoFocus) {
       this.inputElement.focus();
     }
   }
@@ -224,7 +225,7 @@ export class AutocompleteField extends React.Component<
 
   private updateSuggestions = () => {
     const inputCursorPosition = this.inputElement ? this.inputElement.selectionStart || 0 : 0;
-    this.props.loadSuggestions(this.props.value, inputCursorPosition, 10);
+    this.props.loadSuggestions(this.props.value, inputCursorPosition, 200);
   };
 }
 
@@ -307,6 +308,7 @@ const SuggestionsPanel = euiStyled(EuiPanel).attrs({
   position: absolute;
   width: 100%;
   margin-top: 2px;
-  overflow: hidden;
+  overflow: hidden scroll;
   z-index: ${props => props.theme.eui.euiZLevel1};
+  max-height: 322px;
 `;

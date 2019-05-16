@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
     'header',
     'settings',
     'timePicker',
+    'share',
   ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
@@ -165,9 +166,14 @@ export default function ({ getService, getPageObjects }) {
         expect(reportingMenuItemExists).to.be(false);
       });
 
-      it('does not show the sharing menu item', async () => {
+      it('shows the sharing menu item', async () => {
         const shareMenuItemExists = await testSubjects.exists('shareTopNavButton');
-        expect(shareMenuItemExists).to.be(false);
+        expect(shareMenuItemExists).to.be(true);
+      });
+
+      it(`Permalinks doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
       });
 
       it('does not show the visualization edit icon', async () => {

@@ -15,6 +15,9 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ES_SEARCH } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
+import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
+import { getTermsFields } from '../../../utils/get_terms_fields';
+
 import { DEFAULT_ES_DOC_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 export class ESSearchSource extends AbstractESSource {
@@ -167,43 +170,47 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    const filteredProperties = {};
-    this._descriptor.tooltipProperties.forEach(propertyName => {
-      filteredProperties[propertyName] = _.get(properties, propertyName, '-');
-    });
-
+    const tooltipProps = [];
     let indexPattern;
     try {
       indexPattern = await this._getIndexPattern();
     } catch(error) {
       console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
-      return filteredProperties;
+      return [];
     }
 
     this._descriptor.tooltipProperties.forEach(propertyName => {
-      const field = indexPattern.fields.byName[propertyName];
-      if (!field) {
-        return;
-      }
-      const htmlConverter = field.format.getConverterFor('html');
-      filteredProperties[propertyName] = (htmlConverter) ? htmlConverter(filteredProperties[propertyName]) :
-        field.format.convert(filteredProperties[propertyName]);
+      tooltipProps.push(new ESTooltipProperty(propertyName, properties[propertyName], indexPattern));
     });
-
-    return filteredProperties;
+    return tooltipProps;
   }
 
   isFilterByMapBounds() {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     const indexPattern = await this._getIndexPattern();
-    const stringFields = indexPattern.fields.filter(field => {
-      return field.type === 'string' && field.subType !== 'multi';
-    });
-    return stringFields.map(stringField => {
-      return { name: stringField.name, label: stringField.name };
+    return getTermsFields(indexPattern.fields)
+      .map(field => {
+        return { name: field.name, label: field.name };
+      });
+  }
+
+  getSourceTooltipContent(sourceDataRequest) {
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
+
+    if (meta.areResultsTrimmed) {
+      return i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
+        defaultMessage: `Results limited to first {count} matching documents.`,
+        values: { count: featureCollection.features.length }
+      });
+    }
+
+    return i18n.translate('xpack.maps.esSearch.featureCountMsg', {
+      defaultMessage: `Found {count} documents.`,
+      values: { count: featureCollection.features.length }
     });
   }
 }

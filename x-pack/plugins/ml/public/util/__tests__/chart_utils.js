@@ -201,10 +201,36 @@ describe('ML - chart utils', () => {
       ],
     };
 
+    const overScriptFieldModelPlotConfig = {
+      metricFunction: 'count',
+      functionDescription: 'count',
+      fieldName: 'highest_registered_domain',
+      entityFields: [
+        {
+          fieldName: 'highest_registered_domain',
+          fieldValue: 'elastic.co',
+          fieldType: 'over',
+        }
+      ],
+      datafeedConfig: {
+        script_fields: {
+          highest_registered_domain: {
+            script: {
+              source: 'return domainSplit(doc[\'query\'].value, params).get(1);',
+              lang: 'painless'
+            },
+            ignore_failure: false
+          }
+        }
+      }
+    };
+
     it('returns single metric chart type as expected for configs', () => {
       expect(getChartType(singleMetricConfig)).to.be(CHART_TYPE.SINGLE_METRIC);
       expect(getChartType(multiMetricConfig)).to.be(CHART_TYPE.SINGLE_METRIC);
       expect(getChartType(varpModelPlotConfig)).to.be(CHART_TYPE.SINGLE_METRIC);
+      expect(getChartType(overScriptFieldModelPlotConfig)).to.be(CHART_TYPE.SINGLE_METRIC);
+
     });
 
     it('returns event distribution chart type as expected for configs', () => {

@@ -16,12 +16,11 @@ exports[`NoServicesMessage should show a "no services installed" message, a link
       <p>
         You may also have old data that needs to be migrated.
          
-        <Connect(UnconnectedKibanaLink)
-          hash="/management/elasticsearch/upgrade_assistant"
-          pathname="/app/kibana"
+        <KibanaLink
+          path="/management/elasticsearch/upgrade_assistant"
         >
           Learn more by visiting the Kibana Upgrade Assistant
-        </Connect(UnconnectedKibanaLink)>
+        </KibanaLink>
         .
       </p>
     </React.Fragment>

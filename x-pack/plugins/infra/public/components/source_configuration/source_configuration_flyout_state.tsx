@@ -4,10 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import createContainer from 'constate-latest';
+import { useCallback, useState } from 'react';
 
-import { WithBinary, WithBinaryProps } from '../../containers/primitives/with_binary';
+export const useSourceConfigurationFlyoutState = ({
+  initialVisibility = false,
+}: {
+  initialVisibility?: boolean;
+} = {}) => {
+  const [isVisible, setIsVisible] = useState<boolean>(initialVisibility);
 
-export const WithSourceConfigurationFlyoutState: React.SFC<WithBinaryProps> = props => (
-  <WithBinary {...props} context="source-configuration-flyout" />
-);
+  const toggleIsVisible = useCallback(
+    () => setIsVisible(isCurrentlyVisible => !isCurrentlyVisible),
+    [setIsVisible]
+  );
+
+  const show = useCallback(() => setIsVisible(true), [setIsVisible]);
+  const hide = useCallback(() => setIsVisible(false), [setIsVisible]);
+
+  return {
+    hide,
+    isVisible,
+    show,
+    toggleIsVisible,
+  };
+};
+
+export const SourceConfigurationFlyoutState = createContainer(useSourceConfigurationFlyoutState);

@@ -19,7 +19,7 @@
 
 export let metadata = null;
 
-export function __newPlatformInit__(legacyMetadata) {
+export function __newPlatformSetup__(legacyMetadata) {
   if (metadata === null) {
     metadata = legacyMetadata;
   } else {

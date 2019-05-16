@@ -19,59 +19,43 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable, Subscription } from 'rxjs';
 
 import { Toast } from '@elastic/eui';
 import { I18nSetup } from '../../i18n';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsSetup } from './toasts_start';
+import { ToastsApi } from './toasts_api';
 
-interface Params {
-  targetDomElement$: Observable<HTMLElement>;
-}
-
-interface Deps {
+interface StartDeps {
   i18n: I18nSetup;
+  targetDomElement: HTMLElement;
 }
 
 export class ToastsService {
-  private domElemSubscription?: Subscription;
+  private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
 
-  constructor(private readonly params: Params) {}
+  public setup() {
+    this.api = new ToastsApi();
+    return this.api!;
+  }
 
-  public setup({ i18n }: Deps) {
-    const toasts = new ToastsSetup();
+  public start({ i18n, targetDomElement }: StartDeps) {
+    this.targetDomElement = targetDomElement;
 
-    this.domElemSubscription = this.params.targetDomElement$.subscribe({
-      next: targetDomElement => {
-        this.cleanupTargetDomElement();
-        this.targetDomElement = targetDomElement;
+    render(
+      <i18n.Context>
+        <GlobalToastList
+          dismissToast={(toast: Toast) => this.api!.remove(toast)}
+          toasts$={this.api!.get$()}
+        />
+      </i18n.Context>,
+      targetDomElement
+    );
 
-        render(
-          <i18n.Context>
-            <GlobalToastList
-              dismissToast={(toast: Toast) => toasts.remove(toast)}
-              toasts$={toasts.get$()}
-            />
-          </i18n.Context>,
-          targetDomElement
-        );
-      },
-    });
-
-    return toasts;
+    return this.api!;
   }
 
   public stop() {
-    this.cleanupTargetDomElement();
-
-    if (this.domElemSubscription) {
-      this.domElemSubscription.unsubscribe();
-    }
-  }
-
-  private cleanupTargetDomElement() {
     if (this.targetDomElement) {
       unmountComponentAtNode(this.targetDomElement);
       this.targetDomElement.textContent = '';

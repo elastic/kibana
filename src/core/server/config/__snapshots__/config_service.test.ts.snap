@@ -12,7 +12,3 @@ ExampleClassWithSchema {
   },
 }
 `;
-
-exports[`throws error if config class does not implement 'schema' 1`] = `[Error: The config class [ExampleClass] did not contain a static 'schema' field, which is required when creating a config instance]`;
-
-exports[`throws if config at path does not match schema 1`] = `"[key]: expected value of type [string] but got [number]"`;

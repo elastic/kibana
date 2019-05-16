@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { flatten } from 'lodash';
+import { CoreSetup } from 'src/core/server';
 import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';
 import { initTracesApi } from '../traces';
@@ -13,9 +13,14 @@ import { initTracesApi } from '../traces';
 describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;
 
-  async function testRouteFailures(init: (server: Server) => void) {
+  async function testRouteFailures(init: (core: CoreSetup) => void) {
     const mockServer = { route: jest.fn() };
-    init((mockServer as unknown) as Server);
+    const mockCore = ({
+      http: {
+        server: mockServer
+      }
+    } as unknown) as CoreSetup;
+    init(mockCore);
     expect(mockServer.route).toHaveBeenCalled();
 
     const mockCluster = {

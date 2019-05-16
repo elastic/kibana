@@ -14,24 +14,40 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import moment from 'moment';
 import React from 'react';
-
 import euiStyled from '../../../../../common/eui_styled_components';
+import { TimeKey } from '../../../common/time';
 import { InfraLogItem, InfraLogItemField } from '../../graphql/types';
 import { InfraLoadingPanel } from '../loading';
+
 interface Props {
   flyoutItem: InfraLogItem | null;
-  hideFlyout: () => void;
+  setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string) => void;
+  setTarget: (timeKey: TimeKey, flyoutItemId: string) => void;
   intl: InjectedIntl;
   loading: boolean;
 }
 
 export const LogFlyout = injectI18n(
-  ({ flyoutItem, loading, hideFlyout, setFilter, intl }: Props) => {
+  ({ flyoutItem, loading, setFlyoutVisibility, setFilter, setTarget, intl }: Props) => {
     const handleFilter = (field: InfraLogItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;
       setFilter(filter);
+
+      if (flyoutItem && flyoutItem.key) {
+        const timestampMoment = moment(flyoutItem.key.time);
+        if (timestampMoment.isValid()) {
+          setTarget(
+            {
+              time: timestampMoment.valueOf(),
+              tiebreaker: flyoutItem.key.tiebreaker,
+            },
+            flyoutItem.id
+          );
+        }
+      }
     };
 
     const columns = [
@@ -55,7 +71,7 @@ export const LogFlyout = injectI18n(
             <EuiToolTip
               content={intl.formatMessage({
                 id: 'xpack.infra.logFlyout.setFilterTooltip',
-                defaultMessage: 'Set Filter',
+                defaultMessage: 'View event with filter',
               })}
             >
               <EuiButtonIcon
@@ -74,7 +90,7 @@ export const LogFlyout = injectI18n(
       },
     ];
     return (
-      <EuiFlyout onClose={() => hideFlyout()} size="m">
+      <EuiFlyout onClose={() => setFlyoutVisibility(false)} size="m">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h3 id="flyoutTitle">

@@ -30,9 +30,11 @@ interface RouteConfiguration {
   resolve?: object;
   template?: string;
   k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
+  requireUICapability?: string;
 }
 
 interface RouteManager {
+  addSetupWork(cb: (...args: any[]) => void): void;
   when(path: string, routeConfiguration: RouteConfiguration): RouteManager;
   otherwise(routeConfiguration: RouteConfiguration): RouteManager;
   defaults(path: string | RegExp, defaults: RouteConfiguration): RouteManager;

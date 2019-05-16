@@ -16,10 +16,6 @@ export class TileStyle extends AbstractStyle {
     this._descriptor = TileStyle.createDescriptor(styleDescriptor.properties);
   }
 
-  static canEdit(styleInstance) {
-    return styleInstance.constructor === TileStyle;
-  }
-
   static createDescriptor(properties = {}) {
     return {
       type: TileStyle.type,

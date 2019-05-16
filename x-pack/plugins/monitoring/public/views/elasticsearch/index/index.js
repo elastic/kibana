@@ -90,12 +90,15 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           $scope.labels = labels.index;
         }
 
+
         this.renderReact(
           <I18nContext>
             <Index
               scope={$scope}
               kbnUrl={kbnUrl}
               onBrush={this.onBrush}
+              indexUuid={this.indexName}
+              clusterUuid={$scope.cluster.cluster_uuid}
               {...data}
             />
           </I18nContext>

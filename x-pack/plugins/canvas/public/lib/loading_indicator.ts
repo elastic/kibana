@@ -9,6 +9,11 @@ import { loadingCount } from 'ui/chrome';
 
 let isActive = false;
 
+export interface LoadingIndicatorInterface {
+  show: () => void;
+  hide: () => void;
+}
+
 export const loadingIndicator = {
   show: () => {
     if (!isActive) {

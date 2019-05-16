@@ -6,6 +6,7 @@
 
 
 import { VectorLayer } from '../vector_layer';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 import { VectorStyle } from '../styles/vector_style';
 import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
@@ -82,7 +83,7 @@ export class AbstractVectorSource extends AbstractSource {
     return [];
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     return [];
   }
 
@@ -96,15 +97,14 @@ export class AbstractVectorSource extends AbstractSource {
 
   // Allow source to filter and format feature properties before displaying to user
   async filterAndFormatPropertiesToHtml(properties) {
-    //todo :this is quick hack... should revise (should model proeprties explicitly in vector_layer
-    const props = {};
+    const tooltipProperties = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {//these are system properties and should be ignored
         continue;
       }
-      props[key] = _.escape(properties[key]);
+      tooltipProperties.push(new TooltipProperty(key, properties[key]));
     }
-    return props;
+    return tooltipProperties;
   }
 
   async isTimeAware() {
@@ -113,5 +113,9 @@ export class AbstractVectorSource extends AbstractSource {
 
   isJoinable() {
     return true;
+  }
+
+  getSourceTooltipContent(/* sourceDataRequest */) {
+    return null;
   }
 }

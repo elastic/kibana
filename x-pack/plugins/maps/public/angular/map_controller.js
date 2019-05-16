@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import chrome from 'ui/chrome';
 import 'ui/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -25,12 +27,16 @@ import {
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
   getIsFullScreen,
   updateFlyout,
-  FLYOUT_STATE
+  FLYOUT_STATE,
+  setReadOnly,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
 } from '../store/ui';
-import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -122,6 +128,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    store.dispatch(setReadOnly(!capabilities.get().maps.save));
 
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {
@@ -136,6 +143,12 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         lon: mapState.center.lon,
         zoom: mapState.zoom,
       }));
+    }
+
+    if (savedMap.uiStateJSON) {
+      const uiState = JSON.parse(savedMap.uiStateJSON);
+      store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
+      store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
     const layerList = getInitialLayers(savedMap.layerListJSON);
@@ -186,7 +199,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       });
     }
 
-    const nextIndexPatternIds = getUniqueIndexPatternIds(store.getState());
+    const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
       updateIndexPatterns(nextIndexPatternIds);
@@ -286,7 +299,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
-  }, {
+  }, ...(capabilities.get().maps.save ? [{
     key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
@@ -323,5 +336,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         />);
       showSaveModal(saveModal);
     }
-  }];
+  }] : [])
+  ];
 });
+

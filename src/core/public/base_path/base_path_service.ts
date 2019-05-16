@@ -16,44 +16,69 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/* eslint-disable max-classes-per-file */
 
-import { InjectedMetadataSetup } from '../injected_metadata';
+import { InjectedMetadataSetup, InjectedMetadataStart } from '../injected_metadata';
 import { modifyUrl } from '../utils';
 
-interface Deps {
+/**
+ * Provides access to the 'server.basePath' configuration option in kibana.yml
+ *
+ * @public
+ */
+export interface BasePathSetup {
+  /**
+   * Get the basePath as defined by the server
+   *
+   * @returns The basePath as defined by the server
+   */
+  get(): string;
+
+  /**
+   * Add the current basePath to a path string.
+   *
+   * @param path - A relative url including the leading `/`, otherwise it will be returned without modification
+   */
+  addToPath(path: string): string;
+
+  /**
+   * Removes basePath from the given path if the path starts with it
+   *
+   * @param path - A relative url that starts with the basePath, which will be stripped
+   */
+  removeFromPath(path: string): string;
+}
+
+/**
+ * Provides access to the 'server.basePath' configuration option in kibana.yml
+ *
+ * @public
+ */
+export type BasePathStart = BasePathSetup;
+
+interface SetupDeps {
   injectedMetadata: InjectedMetadataSetup;
+}
+
+interface StartDeps {
+  injectedMetadata: InjectedMetadataStart;
 }
 
 /** @internal */
 export class BasePathService {
-  public setup({ injectedMetadata }: Deps) {
+  public setup({ injectedMetadata }: SetupDeps) {
     const basePath = injectedMetadata.getBasePath() || '';
 
-    return {
-      /**
-       * Get the current basePath as defined by the server
-       */
-      get() {
-        return basePath;
-      },
-
-      /**
-       * Add the current basePath to a path string.
-       * @param path A relative url including the leading `/`, otherwise it will be returned without modification
-       */
-      addToPath(path: string) {
+    const basePathSetup: BasePathSetup = {
+      get: () => basePath,
+      addToPath: path => {
         return modifyUrl(path, parts => {
           if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
             parts.pathname = `${basePath}${parts.pathname}`;
           }
         });
       },
-
-      /**
-       * Remove the basePath from a path that starts with it
-       * @param path A relative url that starts with the basePath, which will be stripped
-       */
-      removeFromPath(path: string) {
+      removeFromPath(path: string): string {
         if (!basePath) {
           return path;
         }
@@ -69,8 +94,11 @@ export class BasePathService {
         return path;
       },
     };
+
+    return basePathSetup;
+  }
+
+  public start({ injectedMetadata }: StartDeps) {
+    return this.setup({ injectedMetadata });
   }
 }
-
-/** @public */
-export type BasePathSetup = ReturnType<BasePathService['setup']>;

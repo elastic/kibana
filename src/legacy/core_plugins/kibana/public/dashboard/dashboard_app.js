@@ -26,7 +26,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/listen';
-import 'ui/search_bar';
 import 'ui/apply_filters';
 
 import { panelActionsStore } from './store/panel_actions_store';
@@ -49,7 +48,7 @@ import { showOptionsPopover } from './top_nav/show_options_popover';
 import { showNewVisModal } from '../visualize/wizard';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import * as filterActions from 'ui/doc_table/actions/filter';
+import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
@@ -58,6 +57,9 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -122,6 +124,8 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.getDashboardState = () => dashboardStateManager;
       $scope.appState = dashboardStateManager.getAppState();
+      $scope.refreshInterval = timefilter.getRefreshInterval();
+
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -500,6 +504,7 @@ app.directive('dashboardApp', function ($injector) {
         showShareContextMenu({
           anchorElement,
           allowEmbed: true,
+          allowShortUrl: !dashboardConfig.getHideWriteControls(),
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',

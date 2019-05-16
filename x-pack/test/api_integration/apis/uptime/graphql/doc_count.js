@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getDocCountQueryString } from '../../../../../plugins/uptime/public/components/queries/empty_state/get_doc_count';
+import { docCountQueryString } from '../../../../../plugins/uptime/public/queries';
 import docCount from './fixtures/doc_count';
 
 export default function ({ getService }) {
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     it(`will fetch the index's count`, async () => {
       const getDocCountQuery = {
         operationName: null,
-        query: getDocCountQueryString,
+        query: docCountQueryString,
         variables: {},
       };
       const {

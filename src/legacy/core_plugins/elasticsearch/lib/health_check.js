@@ -22,18 +22,7 @@ import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
 export default function (plugin, server, requestDelay) {
-  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-  const NoConnections = adminCluster.errors.NoConnections;
-  const callAdminAsKibanaUser = adminCluster.callWithInternalUser;
-
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser) {
-    return callWithInternalUser('ping').catch(function (err) {
-      if (!(err instanceof NoConnections)) throw err;
-      plugin.status.red(`Unable to connect to Elasticsearch.`);
-      return Promise.delay(requestDelay).then(waitForPong.bind(null, callWithInternalUser));
-    });
-  }
 
   function waitUntilReady() {
     return new Promise((resolve) => {
@@ -41,24 +30,9 @@ export default function (plugin, server, requestDelay) {
     });
   }
 
-  function waitForEsVersion() {
-    return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
-      plugin.status.red(err);
-      return Promise.delay(requestDelay).then(waitForEsVersion);
-    });
-  }
-
-  function setGreenStatus() {
-    return plugin.status.green('Ready');
-  }
-
   function check() {
-    const healthCheck =
-      waitForPong(callAdminAsKibanaUser)
-        .then(waitForEsVersion);
-
-    return healthCheck
-      .then(setGreenStatus)
+    return ensureEsVersion(server, kibanaVersion.get())
+      .then(() => plugin.status.green('Ready'))
       .catch(err => plugin.status.red(err));
   }
 

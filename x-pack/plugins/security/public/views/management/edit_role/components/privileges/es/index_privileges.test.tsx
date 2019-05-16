@@ -19,16 +19,14 @@ test('it renders without crashing', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: [],
-        space: {},
-      },
+      kibana: [],
     },
     httpClient: jest.fn(),
     onChange: jest.fn(),
     indexPatterns: [],
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
+    editable: true,
     validator: new RoleValidator(),
   };
   const wrapper = shallowWithIntl(<IndexPrivileges {...props} />);
@@ -39,10 +37,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
   const props = {
     role: {
       name: '',
-      kibana: {
-        global: [],
-        space: {},
-      },
+      kibana: [],
       elasticsearch: {
         cluster: [],
         indices: [
@@ -61,6 +56,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
     httpClient: jest.fn(),
     onChange: jest.fn(),
     indexPatterns: [],
+    editable: true,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),

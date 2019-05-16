@@ -40,6 +40,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: 'marketing',
       description: 'a description',
       color: '#5c5959',
+      disabledFeatures: [],
     });
   };
 
@@ -57,6 +58,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: 'reserved',
       description: 'a description',
       color: '#5c5959',
+      disabledFeatures: [],
     });
   };
 
@@ -77,6 +79,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
             id: 'marketing',
             description: 'a description',
             color: '#5c5959',
+            disabledFeatures: [],
           })
           .expect(tests.newSpace.statusCode)
           .then(tests.newSpace.response);
@@ -92,6 +95,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               id: 'space_1',
               color: '#ffffff',
               description: 'a description',
+              disabledFeatures: [],
             })
             .expect(tests.alreadyExists.statusCode)
             .then(tests.alreadyExists.response);
@@ -109,6 +113,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               description: 'a description',
               color: '#5c5959',
               _reserved: true,
+              disabledFeatures: [],
             })
             .expect(tests.reservedSpecified.statusCode)
             .then(tests.reservedSpecified.response);

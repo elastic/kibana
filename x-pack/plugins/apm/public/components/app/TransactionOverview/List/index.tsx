@@ -13,11 +13,11 @@ import { ITransactionGroup } from '../../../../../server/lib/transaction_groups/
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { APMLink } from '../../../shared/Links/APMLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
-const TransactionNameLink = styled(KibanaLink)`
+const TransactionNameLink = styled(APMLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
@@ -48,7 +48,7 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
             id="transaction-name-link-tooltip"
             content={transactionName || NOT_AVAILABLE_LABEL}
           >
-            <TransactionNameLink hash={transactionPath}>
+            <TransactionNameLink path={transactionPath}>
               {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
           </EuiToolTip>

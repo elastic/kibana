@@ -22,14 +22,14 @@ export class LinkToPage extends React.Component<LinkToPageProps> {
     return (
       <Switch>
         <Route
-          path={`${match.url}/:nodeType(host|container|pod)-logs/:nodeId`}
+          path={`${match.url}/:sourceId?/:nodeType(host|container|pod)-logs/:nodeId`}
           component={RedirectToNodeLogs}
         />
         <Route
           path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
           component={RedirectToNodeDetail}
         />
-        <Route path={`${match.url}/logs`} component={RedirectToLogs} />
+        <Route path={`${match.url}/:sourceId?/logs`} component={RedirectToLogs} />
         <Redirect to="/infrastructure" />
       </Switch>
     );

@@ -42,6 +42,7 @@ import { shortenUrl } from '../lib/url_shortener';
 const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
 
 interface Props {
+  allowShortUrl: boolean;
   isEmbedded?: boolean;
   objectId?: string;
   objectType: string;
@@ -354,7 +355,10 @@ class UrlPanelContentUI extends Component<Props, State> {
   };
 
   private renderShortUrlSwitch = () => {
-    if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
+    if (
+      this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT ||
+      !this.props.allowShortUrl
+    ) {
       return;
     }
     const shortUrlLabel = (
@@ -386,7 +390,7 @@ class UrlPanelContentUI extends Component<Props, State> {
     );
 
     return (
-      <EuiFormRow helpText={this.state.shortUrlErrorMsg}>
+      <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
     );

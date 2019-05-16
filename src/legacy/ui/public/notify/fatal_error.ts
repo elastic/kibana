@@ -26,7 +26,7 @@ import {
 
 let newPlatformFatalErrors: FatalErrorsSetup;
 
-export function __newPlatformInit__(instance: FatalErrorsSetup) {
+export function __newPlatformSetup__(instance: FatalErrorsSetup) {
   if (newPlatformFatalErrors) {
     throw new Error('ui/notify/fatal_error already initialized with new platform apis');
   }

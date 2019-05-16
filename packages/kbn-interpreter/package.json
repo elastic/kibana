@@ -26,7 +26,7 @@
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "1.0.0",
     "del": "^3.0.0",
-    "getopts": "^2.2.3",
+    "getopts": "^2.2.4",
     "pegjs": "0.9.0",
     "sass-loader": "^7.1.0",
     "style-loader": "0.23.1",

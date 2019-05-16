@@ -34,13 +34,30 @@ export class ConfigService {
    * then list all unhandled config paths when the startup process is completed.
    */
   private readonly handledPaths: ConfigPath[] = [];
+  private readonly schemas = new Map<string, Type<unknown>>();
 
   constructor(
     private readonly config$: Observable<Config>,
-    readonly env: Env,
+    private readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
+  }
+
+  /**
+   * Set config schema for a path and performs its validation
+   */
+  public async setSchema(path: ConfigPath, schema: Type<unknown>) {
+    const namespace = pathToString(path);
+    if (this.schemas.has(namespace)) {
+      throw new Error(`Validation schema for ${path} was already registered.`);
+    }
+
+    this.schemas.set(namespace, schema);
+
+    await this.validateConfig(path)
+      .pipe(first())
+      .toPromise();
   }
 
   /**
@@ -55,33 +72,33 @@ export class ConfigService {
    * Reads the subset of the config at the specified `path` and validates it
    * against the static `schema` on the given `ConfigClass`.
    *
-   * @param path The path to the desired subset of the config.
-   * @param ConfigClass A class (not an instance of a class) that contains a
+   * @param path - The path to the desired subset of the config.
+   * @param ConfigClass - A class (not an instance of a class) that contains a
    * static `schema` that we validate the config at the given `path` against.
    */
-  public atPath<TSchema extends Type<any>, TConfig>(
+  public atPath<TSchema extends Type<unknown>, TConfig>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
-    return this.getDistinctConfig(path).pipe(
-      map(config => this.createConfig(path, config, ConfigClass))
-    );
+    return this.validateConfig(path).pipe(map(config => this.createConfig(config, ConfigClass)));
   }
 
   /**
    * Same as `atPath`, but returns `undefined` if there is no config at the
    * specified path.
    *
-   * @see atPath
+   * {@link ConfigService.atPath}
    */
   public optionalAtPath<TSchema extends Type<any>, TConfig>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     return this.getDistinctConfig(path).pipe(
-      map(config =>
-        config === undefined ? undefined : this.createConfig(path, config, ConfigClass)
-      )
+      map(config => {
+        if (config === undefined) return undefined;
+        const validatedConfig = this.validate(path, config);
+        return this.createConfig(validatedConfig, ConfigClass);
+      })
     );
   }
 
@@ -122,24 +139,13 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
-  private createConfig<TSchema extends Type<any>, TConfig>(
-    path: ConfigPath,
-    config: Record<string, any>,
-    ConfigClass: ConfigWithSchema<TSchema, TConfig>
-  ) {
-    const namespace = Array.isArray(path) ? path.join('.') : path;
-
-    const configSchema = ConfigClass.schema;
-
-    if (configSchema === undefined || typeof configSchema.validate !== 'function') {
-      throw new Error(
-        `The config class [${
-          ConfigClass.name
-        }] did not contain a static 'schema' field, which is required when creating a config instance`
-      );
+  private validate(path: ConfigPath, config: Record<string, unknown>) {
+    const namespace = pathToString(path);
+    const schema = this.schemas.get(namespace);
+    if (!schema) {
+      throw new Error(`No validation schema has been defined for ${namespace}`);
     }
-
-    const validatedConfig = ConfigClass.schema.validate(
+    return schema.validate(
       config,
       {
         dev: this.env.mode.dev,
@@ -148,7 +154,17 @@ export class ConfigService {
       },
       namespace
     );
+  }
+
+  private createConfig<TSchema extends Type<unknown>, TConfig>(
+    validatedConfig: unknown,
+    ConfigClass: ConfigWithSchema<TSchema, TConfig>
+  ) {
     return new ConfigClass(validatedConfig, this.env);
+  }
+
+  private validateConfig(path: ConfigPath) {
+    return this.getDistinctConfig(path).pipe(map(config => this.validate(path, config)));
   }
 
   private getDistinctConfig(path: ConfigPath) {

@@ -1,4 +1,4 @@
-<kbn-management-app section="kibana/objects" class="kuiView">
+<kbn-management-app section="kibana/objects" class="kuiView" data-test-subj="savedObjectsEdit">
   <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
     <!-- Header -->
     <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
@@ -8,6 +8,15 @@
           i18n-id="kbn.management.objects.view.editItemTitle"
           i18n-default-message="Edit {title}"
           i18n-values="{ title }"
+          ng-if="canEdit"
+        ></h1>
+
+        <h1
+          class="kuiTitle"
+          i18n-id="kbn.management.objects.view.viewItemTitle"
+          i18n-default-message="View {title}"
+          i18n-values="{ title }"
+          ng-if="!canEdit"
         ></h1>
       </div>
 
@@ -15,6 +24,7 @@
         <a
           class="kuiButton kuiButton--basic kuiButton--iconText"
           href="{{ link }}"
+          ng-if="canViewInApp"
         >
           <span class="kuiButton__inner">
             <span class="kuiButton__icon kuiIcon fa-eye"></span>
@@ -29,6 +39,8 @@
         <button
           class="kuiButton kuiButton--danger kuiButton--iconText"
           ng-click="delete()"
+          ng-if="canDelete"
+          data-test-subj="savedObjectEditDelete"
         >
           <span class="kuiButton__inner">
             <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
@@ -90,7 +102,7 @@
 
     <!-- Intro -->
     <div class="kuiViewContentItem kuiVerticalRhythm">
-      <div class="kuiInfoPanel kuiInfoPanel--warning">
+      <div class="kuiInfoPanel kuiInfoPanel--warning" ng-if="canEdit">
         <div class="kuiInfoPanelHeader">
           <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
           <span
@@ -117,6 +129,7 @@
         role="form"
         name="objectForm"
         ng-submit="submit()"
+        data-test-subj="savedObjectEditForm"
       >
         <div class="kuiFormSection" ng-repeat="field in fields">
           <label for="{{ field.name }}" class="kuiFormLabel">
@@ -129,6 +142,7 @@
             class="kuiTextInput"
             type="number"
             ng-model="field.value"
+            ng-disabled="{{ !canEdit }}"
           >
 
           <textarea
@@ -138,6 +152,7 @@
             rows="1"
             msd-elastic=" "
             ng-model="field.value"
+            ng-disabled="{{ !canEdit }}"
           ></textarea>
 
           <input
@@ -146,11 +161,13 @@
             type="checkbox"
             ng-model="field.value"
             ng-checked="field.value"
+            ng-disabled="{{ !canEdit }}"
           >
 
           <div
             ng-if="field.type === 'json' || field.type === 'array'"
-            kbn-ui-ace-keyboard-mode
+            kbn-ui-ace-keyboard-mod
+            ng-attr-readonly="{{ canEdit ? undefined : true }}"
             ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
             id="{{field.name}}"
             ng-model="field.value"
@@ -169,6 +186,8 @@
           i18n-id="kbn.management.objects.view.saveButtonLabel"
           i18n-default-message="Save { title } Object"
           i18n-values="{ title }"
+          ng-if="canEdit"
+          data-test-subj="savedObjectEditSave"
         ></button>
 
         <button

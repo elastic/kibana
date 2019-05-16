@@ -6,9 +6,10 @@
 
 import { OperationVariables } from 'apollo-client';
 import { GraphQLError } from 'graphql';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withApollo, WithApolloClient } from 'react-apollo';
 import { formatUptimeGraphQLErrorList } from '../../lib/helper/format_error_list';
+import { UptimeRefreshContext } from '../../contexts';
 
 export interface UptimeGraphQLQueryProps<T> {
   loading: boolean;
@@ -18,7 +19,6 @@ export interface UptimeGraphQLQueryProps<T> {
 
 interface UptimeGraphQLProps {
   implementsCustomErrorState?: boolean;
-  lastRefresh?: number;
   variables: OperationVariables;
 }
 
@@ -35,21 +35,42 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
   type Props = UptimeGraphQLProps & WithApolloClient<T> & P;
 
   return withApollo((props: Props) => {
-    const [loading, setLoading] = useState(true);
+    const { lastRefresh } = useContext(UptimeRefreshContext);
+    const [loading, setLoading] = useState<boolean>(true);
     const [data, setData] = useState<T | undefined>(undefined);
     const [errors, setErrors] = useState<GraphQLError[] | undefined>(undefined);
-    const { client, implementsCustomErrorState, variables, lastRefresh } = props;
+    let updateState = (
+      loadingVal: boolean,
+      dataVal: T | undefined,
+      errorsVal: GraphQLError[] | undefined
+    ) => {
+      setLoading(loadingVal);
+      setData(dataVal);
+      setErrors(errorsVal);
+    };
+    const { client, implementsCustomErrorState, variables } = props;
     const fetch = () => {
       setLoading(true);
       client.query<T>({ fetchPolicy: 'network-only', query, variables }).then((result: any) => {
-        setData(result.data);
-        setLoading(result.loading);
-        setErrors(result.errors);
+        updateState(result.loading, result.data, result.errors);
       });
     };
     useEffect(
       () => {
         fetch();
+
+        /**
+         * If the `then` handler in `fetch`'s promise is fired after
+         * this component has unmounted, it will try to set state on an
+         * unmounted component, which indicates a memory leak and will trigger
+         * React warnings.
+         *
+         * We counteract this side effect by providing a cleanup function that will
+         * reassign the update function to do nothing with the returned values.
+         */
+        return () => {
+          updateState = () => {};
+        };
       },
       [variables, lastRefresh]
     );

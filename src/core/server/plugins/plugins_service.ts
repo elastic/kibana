@@ -22,13 +22,14 @@ import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
+import { HttpServiceSetup } from '../http/http_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
-/** @internal */
+/** @public */
 export interface PluginsServiceSetup {
   contracts: Map<PluginName, unknown>;
   uiPlugins: {
@@ -37,13 +38,22 @@ export interface PluginsServiceSetup {
   };
 }
 
-/** @internal */
-export interface PluginsServiceSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
+/** @public */
+export interface PluginsServiceStart {
+  contracts: Map<PluginName, unknown>;
 }
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceSetup> {
+export interface PluginsServiceSetupDeps {
+  elasticsearch: ElasticsearchServiceSetup;
+  http: HttpServiceSetup;
+}
+
+/** @internal */
+export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+/** @internal */
+export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
@@ -78,6 +88,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     };
   }
 
+  public async start(deps: PluginsServiceStartDeps) {
+    this.log.debug('Plugins service starts plugins');
+    const contracts = await this.pluginsSystem.startPlugins(deps);
+    return { contracts };
+  }
+
   public async stop() {
     this.log.debug('Stopping plugins service');
     await this.pluginsSystem.stopPlugins();
@@ -106,11 +122,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     }
   }
 
-  private async handleDiscoveredPlugins(plugin$: Observable<Plugin>) {
-    const pluginEnableStatuses = new Map<PluginName, { plugin: Plugin; isEnabled: boolean }>();
+  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
+    const pluginEnableStatuses = new Map<
+      PluginName,
+      { plugin: PluginWrapper; isEnabled: boolean }
+    >();
     await plugin$
       .pipe(
         mergeMap(async plugin => {
+          const schema = plugin.getConfigSchema();
+          if (schema) {
+            await this.coreContext.configService.setSchema(plugin.configPath, schema);
+          }
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
           if (pluginEnableStatuses.has(plugin.name)) {
@@ -139,13 +162,13 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
 
   private shouldEnablePlugin(
     pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: Plugin; isEnabled: boolean }>
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
   ): boolean {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
     return (
       pluginInfo !== undefined &&
       pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredDependencies.every(dependencyName =>
+      pluginInfo.plugin.requiredPlugins.every(dependencyName =>
         this.shouldEnablePlugin(dependencyName, pluginEnableStatuses)
       )
     );

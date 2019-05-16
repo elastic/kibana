@@ -17,11 +17,16 @@
  * under the License.
  */
 
-export function ComboBoxProvider({ getService }) {
+export function ComboBoxProvider({ getService, getPageObjects }) {
+  const config = getService('config');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common']);
+
+  const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
   // wrapper around EuiComboBox interactions
   class ComboBox {
@@ -38,7 +43,10 @@ export function ComboBoxProvider({ getService }) {
       await this.openOptionsList(comboBoxElement);
 
       if (value !== undefined) {
-        const options = await find.allByCssSelector(`.euiFilterSelectItem[title^="${value.toString().trim()}"]`);
+        const options = await find.allByCssSelector(
+          `.euiFilterSelectItem[title^="${value.toString().trim()}"]`,
+          WAIT_FOR_EXISTS_TIME
+        );
 
         if (options.length > 0) {
           await options[0].click();
@@ -50,6 +58,21 @@ export function ComboBoxProvider({ getService }) {
         await find.clickByCssSelector('.euiFilterSelectItem');
       }
 
+      await this.closeOptionsList(comboBoxElement);
+    }
+
+    /**
+     * This method set custom value to comboBox.
+     * It applies changes by pressing Enter key. Sometimes it may lead to auto-submitting a form.
+     *
+     * @param {string} comboBoxSelector
+     * @param {string} value
+     */
+    async setCustom(comboBoxSelector, value) {
+      log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
+      const comboBoxElement = await testSubjects.find(comboBoxSelector);
+      await this._filterOptionsList(comboBoxElement, value);
+      await PageObjects.common.pressEnterKey();
       await this.closeOptionsList(comboBoxElement);
     }
 
@@ -92,15 +115,15 @@ export function ComboBoxProvider({ getService }) {
     async doesComboBoxHaveSelectedOptions(comboBoxSelector) {
       log.debug(`comboBox.doesComboBoxHaveSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-      return selectedOptions > 0;
+      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill', WAIT_FOR_EXISTS_TIME);
+      return selectedOptions.length > 0;
     }
 
     async getComboBoxSelectedOptions(comboBoxSelector) {
       log.debug(`comboBox.getComboBoxSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
       return await retry.try(async () => {
         const comboBox = await testSubjects.find(comboBoxSelector);
-        const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
+        const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill', WAIT_FOR_EXISTS_TIME);
         if (selectedOptions.length === 0) {
           return [];
         }
@@ -132,15 +155,18 @@ export function ComboBoxProvider({ getService }) {
     }
 
     async doesClearButtonExist(comboBoxElement) {
-      return await find.exists(
-        async () => await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxClearButton"]'));
+      const found = await comboBoxElement.findAllByCssSelector(
+        '[data-test-subj="comboBoxClearButton"]',
+        WAIT_FOR_EXISTS_TIME
+      );
+      return found.length > 0;
     }
 
     async closeOptionsList(comboBoxElement) {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
-        const toggleBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
-        await toggleBtn.click();
+        const input = await comboBoxElement.findByTagName('input');
+        await input.pressKeys(browser.keys.ESCAPE);
       }
     }
 

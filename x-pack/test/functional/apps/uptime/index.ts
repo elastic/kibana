@@ -21,6 +21,7 @@ export default ({ loadTestFile, getService }: KibanaFunctionalTestDefaultProvide
     after(async () => await esArchiver.unload(ARCHIVE));
     this.tags('ciGroup6');
 
+    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./monitor'));
   });

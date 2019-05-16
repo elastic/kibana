@@ -17,14 +17,12 @@
  * under the License.
  */
 
-export function FilterBarLibMapMatchAllProvider(Promise) {
-  return function (filter) {
-    if (filter.match_all) {
-      const type = 'match_all';
-      const key = filter.meta.field;
-      const value = filter.meta.formattedValue || 'all';
-      return Promise.resolve({ type, key, value });
-    }
-    return Promise.reject(filter);
-  };
+export async function mapMatchAll(filter) {
+  if (filter.match_all) {
+    const type = 'match_all';
+    const key = filter.meta.field;
+    const value = filter.meta.formattedValue || 'all';
+    return { type, key, value };
+  }
+  throw filter;
 }

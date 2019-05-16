@@ -15,8 +15,11 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
+import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
+
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../../store/util';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -99,35 +102,24 @@ export class AbstractESSource extends AbstractVectorSource {
       return properties;
     }
 
-    function formatMetricValue(metricField, propertyValue) {
-      if (metricField.type === 'count') {
-        return propertyValue;
-      }
-
-      const indexPatternField = indexPattern.fields.byName[metricField.field];
-      if (!indexPatternField) {
-        return propertyValue;
-      }
-
-      const htmlConverter = indexPatternField.format.getConverterFor('html');
-      return (htmlConverter)
-        ? htmlConverter(propertyValue)
-        : indexPatternField.format.convert(propertyValue);
-    }
 
     const metricFields = this.getMetricFields();
-    const tooltipProps = {};
+    const tooltipProperties = [];
     metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
         if (properties.hasOwnProperty(key) && metricField.propertyKey === key) {
-          value = formatMetricValue(metricField, properties[key]);
+          value = properties[key];
           break;
         }
       }
-      tooltipProps[metricField.propertyLabel] = (typeof value === 'undefined') ? '-' : value;
+
+      const tooltipProperty  = new ESAggMetricTooltipProperty(metricField.propertyLabel, value, indexPattern, metricField);
+      tooltipProperties.push(tooltipProperty);
     });
-    return tooltipProps;
+
+    return tooltipProperties;
+
   }
 
 
@@ -141,17 +133,19 @@ export class AbstractESSource extends AbstractVectorSource {
         requestDesc: requestDescription
       });
     } catch(error) {
-      throw new Error('xpack.maps.source.esSource.requestFailedErrorMessage', {
+      throw new Error(i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
         defaultMessage: `Elasticsearch search request failed, error: {message}`,
         values: { message: error.message }
-      });
+      }));
     }
   }
 
   async _makeSearchSource(searchFilters, limit) {
     const indexPattern = await this._getIndexPattern();
     const isTimeAware = await this.isTimeAware();
-    const allFilters = [...searchFilters.filters];
+    const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
+    const globalFilters = applyGlobalQuery ? searchFilters.filters : [];
+    const allFilters = [...globalFilters];
     if (this.isFilterByMapBounds() && searchFilters.buffer) {//buffer can be empty
       const geoField = await this._getGeoField();
       allFilters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
@@ -164,7 +158,9 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    searchSource.setField('query', searchFilters.query);
+    if (applyGlobalQuery) {
+      searchSource.setField('query', searchFilters.query);
+    }
 
     if (searchFilters.layerQuery) {
       const layerSearchSource = new SearchSource();
@@ -176,9 +172,9 @@ export class AbstractESSource extends AbstractVectorSource {
     return searchSource;
   }
 
-  async getBoundsForFilters({ layerQuery, query, timeFilters, filters }) {
+  async getBoundsForFilters({ layerQuery, query, timeFilters, filters, applyGlobalQuery }) {
 
-    const searchSource = await this._makeSearchSource({ layerQuery, query, timeFilters, filters }, 0);
+    const searchSource = await this._makeSearchSource({ layerQuery, query, timeFilters, filters, applyGlobalQuery }, 0);
     const geoField = await this._getGeoField();
     const indexPattern = await this._getIndexPattern();
 
@@ -250,7 +246,7 @@ export class AbstractESSource extends AbstractVectorSource {
       const geoField = await this._getGeoField();
       // geo_bounds aggregation only supports geo_point
       // there is currently no backend support for getting bounding box of geo_shape field
-      return geoField.type !== 'geo_shape';
+      return geoField.type !== ES_GEO_FIELD_TYPE.GEO_SHAPE;
     } catch (error) {
       return false;
     }

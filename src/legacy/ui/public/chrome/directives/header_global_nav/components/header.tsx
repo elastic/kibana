@@ -52,25 +52,27 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import chrome, { NavLink } from 'ui/chrome';
+import chrome from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 
+import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { NavControlSide } from '../';
-import { ChromeBreadcrumb } from '../../../../../../../core/public';
+import { ChromeBadge, ChromeBreadcrumb, ChromeNavLink } from '../../../../../../../core/public';
 
 interface Props {
   appTitle?: string;
+  badge$: Rx.Observable<ChromeBadge | undefined>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
-  navLinks$: Rx.Observable<NavLink[]>;
+  navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
   helpExtension$: Rx.Observable<HelpExtension>;
@@ -84,11 +86,11 @@ const TRUNCATE_LIMIT: number = 64;
 const TRUNCATE_AT: number = 58;
 
 function extendRecentlyAccessedHistoryItem(
-  navLinks: NavLink[],
+  navLinks: ChromeNavLink[],
   recentlyAccessed: RecentlyAccessedHistoryItem
 ) {
   const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
-  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
+  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase || nl.baseUrl));
 
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {
@@ -110,10 +112,10 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: NavLink) {
+function extendNavLink(navLink: ChromeNavLink) {
   return {
     ...navLink,
-    href: navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
+    href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
   };
 }
 
@@ -212,7 +214,15 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$, intl } = this.props;
+    const {
+      appTitle,
+      badge$,
+      breadcrumbs$,
+      isVisible,
+      navControls,
+      helpExtension$,
+      intl,
+    } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
@@ -222,31 +232,28 @@ class HeaderUI extends Component<Props, State> {
     const leftNavControls = navControls.bySide[NavControlSide.Left];
     const rightNavControls = navControls.bySide[NavControlSide.Right];
 
-    let navLinksArray = navLinks.map(navLink =>
-      navLink.hidden
-        ? null
-        : {
-            key: navLink.id,
-            label: navLink.title,
-            href: navLink.href,
-            iconType: navLink.euiIconType,
-            icon:
-              !navLink.euiIconType && navLink.icon ? (
-                <EuiImage
-                  size="s"
-                  alt=""
-                  aria-hidden={true}
-                  url={chrome.addBasePath(`/${navLink.icon}`)}
-                />
-              ) : (
-                undefined
-              ),
-            isActive: navLink.active,
-            'data-test-subj': 'navDrawerAppsMenuLink',
-          }
-    );
-    // filter out the null items
-    navLinksArray = navLinksArray.filter(item => item !== null);
+    const navLinksArray = navLinks
+      .filter(navLink => !navLink.hidden)
+      .map(navLink => ({
+        key: navLink.id,
+        label: navLink.title,
+        href: navLink.href,
+        isDisabled: navLink.disabled,
+        isActive: navLink.active,
+        iconType: navLink.euiIconType,
+        icon:
+          !navLink.euiIconType && navLink.icon ? (
+            <EuiImage
+              size="s"
+              alt=""
+              aria-hidden={true}
+              url={chrome.addBasePath(`/${navLink.icon}`)}
+            />
+          ) : (
+            undefined
+          ),
+        'data-test-subj': 'navDrawerAppsMenuLink',
+      }));
 
     const recentLinksArray = [
       {
@@ -287,6 +294,8 @@ class HeaderUI extends Component<Props, State> {
 
           <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
 
+          <HeaderBadge badge$={badge$} />
+
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
               <HeaderHelpMenu helpExtension$={helpExtension$} />
@@ -305,7 +314,7 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  private onNavClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  private onNavClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     const anchor = findClosestAnchor((event as any).nativeEvent.target);
     if (!anchor) {
       return;

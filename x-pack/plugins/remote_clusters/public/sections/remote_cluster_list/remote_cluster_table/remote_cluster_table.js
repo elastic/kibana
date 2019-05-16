@@ -20,8 +20,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../../constants';
-import { getRouterLinkProps } from '../../../services';
+import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
+import { getRouterLinkProps, trackUiMetric } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 export const RemoteClusterTable = injectI18n(
@@ -93,7 +93,10 @@ export const RemoteClusterTable = injectI18n(
           const link = (
             <EuiLink
               data-test-subj="remoteClustersTableListClusterLink"
-              onClick={() => openDetailPanel(name)}
+              onClick={() => {
+                trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+                openDetailPanel(name);
+              }}
             >
               {name}
             </EuiLink>

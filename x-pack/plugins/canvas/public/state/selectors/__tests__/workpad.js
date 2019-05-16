@@ -70,7 +70,7 @@ describe('workpad selectors', () => {
 
     state = {
       transient: {
-        selectedElement: 'element-1',
+        selectedToplevelNodes: ['element-1'],
         resolvedArgs: {
           'element-0': 'test resolved arg, el 0',
           'element-1': 'test resolved arg, el 1',
@@ -128,7 +128,6 @@ describe('workpad selectors', () => {
       expect(selector.getSelectedPage({})).to.be(undefined);
       expect(selector.getPageById({}, 'page-1')).to.be(undefined);
       expect(selector.getSelectedElement({})).to.be(undefined);
-      expect(selector.getSelectedElementId({})).to.be(undefined);
       expect(selector.getElementById({}, 'element-1')).to.be(undefined);
       expect(selector.getResolvedArgs({}, 'element-1')).to.be(undefined);
       expect(selector.getSelectedResolvedArgs({})).to.be(undefined);
@@ -165,12 +164,6 @@ describe('workpad selectors', () => {
         ...elements[1],
         ast: asts['element-1'],
       });
-    });
-  });
-
-  describe('getSelectedElementId', () => {
-    it('returns selected element id', () => {
-      expect(selector.getSelectedElementId(state)).to.equal('element-1');
     });
   });
 
@@ -225,7 +218,7 @@ describe('workpad selectors', () => {
         ...state,
         transient: {
           ...state.transient,
-          selectedElement: 'element-2',
+          selectedToplevelNodes: ['element-2'],
         },
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, 'example2');
@@ -237,7 +230,7 @@ describe('workpad selectors', () => {
         ...state,
         transient: {
           ...state.transient,
-          selectedElement: 'element-2',
+          selectedToplevelNodes: ['element-2'],
         },
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, ['example3', 'deeper', 'object']);

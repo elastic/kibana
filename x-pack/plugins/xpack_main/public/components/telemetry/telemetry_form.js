@@ -30,6 +30,7 @@ export class TelemetryForm extends Component {
     onQueryMatchChange: PropTypes.func.isRequired,
     spacesEnabled: PropTypes.bool.isRequired,
     activeSpace: PropTypes.object,
+    enableSaving: PropTypes.bool.isRequired,
   };
 
   state = {
@@ -100,6 +101,7 @@ export class TelemetryForm extends Component {
               }}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
+              enableSaving={this.props.enableSaving}
             />
           </EuiForm>
         </EuiPanel>

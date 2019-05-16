@@ -26,12 +26,14 @@ import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
 
+/** @internal */
 interface CoreClusterClients {
   config: ElasticsearchConfig;
   adminClient: ClusterClient;
   dataClient: ClusterClient;
 }
 
+/** @public */
 export interface ElasticsearchServiceSetup {
   // Required for the BWC with the legacy Kibana only.
   readonly legacy: {
@@ -103,6 +105,8 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
       },
     };
   }
+
+  public async start() {}
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');

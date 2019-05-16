@@ -23,7 +23,8 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/search_bar';
+
+import { capabilities } from 'ui/capabilities';
 import 'ui/apply_filters';
 import 'ui/listen';
 import chrome from 'ui/chrome';
@@ -52,6 +53,10 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+import { getNewPlatform } from 'ui/new_platform';
+
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -148,7 +153,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [{
+  $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
     key: i18n('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
@@ -201,7 +206,7 @@ function VisEditor(
         />);
       showSaveModal(saveModal);
     }
-  }, {
+  }] : []), {
     key: i18n('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
     description: i18n('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
       defaultMessage: 'Share Visualization',
@@ -213,6 +218,7 @@ function VisEditor(
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
+        allowShortUrl: capabilities.get().visualize.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
@@ -233,7 +239,11 @@ function VisEditor(
       return !vis.hasInspector || !vis.hasInspector();
     },
     run() {
-      vis.openInspector().bindToAngularScope($scope);
+      const inspectorSession = vis.openInspector();
+      // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+      const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
+      // Remove that watch in case the user closes the inspector session herself.
+      inspectorSession.onClose.finally(removeWatch);
     },
     tooltip() {
       if (!vis.hasInspector || !vis.hasInspector()) {
@@ -334,6 +344,7 @@ function VisEditor(
 
     $scope.searchSource = searchSource;
     $scope.state = $state;
+    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
@@ -495,7 +506,7 @@ function VisEditor(
               // url, not the unsaved one.
               chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-              const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
+              const lastDashboardAbsoluteUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);

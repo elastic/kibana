@@ -5,7 +5,7 @@
  */
 
 import { first, last } from 'lodash';
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
 import { ESBucket, ESResponse } from './fetcher';
 

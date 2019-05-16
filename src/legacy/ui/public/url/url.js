@@ -18,8 +18,6 @@
  */
 
 import _ from 'lodash';
-import '../filters/uriescape';
-import '../filters/rison';
 import { uiModules } from '../modules';
 import { AppStateProvider } from '../state_management/app_state';
 
@@ -121,12 +119,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
           }));
       }
 
-      // append uriescape filter if not included
-      if (expr.indexOf('uriescape') === -1) {
-        expr += '|uriescape';
-      }
-
-      return $parse(expr)(paramObj);
+      return encodeURIComponent($parse(expr)(paramObj));
     });
   };
 

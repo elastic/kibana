@@ -72,15 +72,15 @@ export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
 };
 
 export function getFilterDisplayText(filter: Filter) {
-  if (filter.meta.alias !== null) {
-    return filter.meta.alias;
-  }
-
   const prefix = filter.meta.negate
     ? ` ${i18n.translate('common.ui.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
       })}`
     : '';
+
+  if (filter.meta.alias !== null) {
+    return `${prefix}${filter.meta.alias}`;
+  }
 
   switch (filter.meta.type) {
     case 'exists':

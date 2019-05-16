@@ -64,7 +64,10 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     return Promise.all(requests)
       .then(results => {
         return results.map(result => {
-          const metricIds = Object.keys(result).filter(k => k !== 'type');
+          const metricIds = Object.keys(result).filter(
+            k => !['type', 'uiRestrictions'].includes(k)
+          );
+
           return metricIds.map((id: string) => {
             const infraMetricId: InfraMetric = (InfraMetric as any)[id];
             if (!infraMetricId) {

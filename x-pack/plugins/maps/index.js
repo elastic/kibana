@@ -16,7 +16,7 @@ import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
 import { i18n } from '@kbn/i18n';
-import {  APP_ID, APP_ICON, createMapPath } from './common/constants';
+import { APP_ID, APP_ICON, createMapPath } from './common/constants';
 import { getAppTitle } from './common/i18n_getters';
 
 export function maps(kibana) {
@@ -61,6 +61,22 @@ export function maps(kibana) {
           isNamespaceAgnostic: true
         }
       },
+      savedObjectsManagement: {
+        'map': {
+          icon: APP_ICON,
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: createMapPath(obj.id),
+              uiCapabilitiesPath: 'maps.show',
+            };
+          },
+        },
+      },
       mappings,
       migrations,
     },
@@ -82,6 +98,33 @@ export function maps(kibana) {
 
       const xpackMainPlugin = server.plugins.xpack_main;
       let routesInitialized = false;
+
+      xpackMainPlugin.registerFeature({
+        id: 'maps',
+        name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
+          defaultMessage: 'Maps',
+        }),
+        icon: APP_ICON,
+        navLinkId: 'maps',
+        app: [APP_ID, 'kibana'],
+        catalogue: ['maps'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['map'],
+              read: ['index-pattern']
+            },
+            ui: ['save', 'show'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['map', 'index-pattern']
+            },
+            ui: ['show'],
+          },
+        }
+      });
 
       watchStatusAndLicenseToInitialize(xpackMainPlugin, this,
         async license => {

@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiComboBoxOptionProps,
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
   // @ts-ignore No typings for EuiSuperSelect
@@ -13,115 +12,84 @@ import {
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import {
-  MonitorChartsQuery,
-  MonitorPageTitleQuery,
-  MonitorStatusBarQuery,
-  PingListQuery,
-} from '../components/queries';
-import { UptimeCommonProps } from '../uptime_app';
+  MonitorCharts,
+  MonitorPageTitle,
+  MonitorStatusBar,
+  PingList,
+} from '../components/functional';
+import { UMUpdateBreadcrumbs } from '../lib/lib';
+import { UptimeSettingsContext } from '../contexts';
+import { useUrlParams } from '../hooks';
+import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface MonitorPageProps {
   history: { push: any };
-  location: { pathname: string };
+  location: { pathname: string; search: string };
   match: { params: { id: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
     options: QueryOptions<TVariables>
   ) => Promise<ApolloQueryResult<T>>;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-type Props = MonitorPageProps & UptimeCommonProps;
+export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
+  const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
+  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const [params, updateUrlParams] = useUrlParams(history, location);
+  const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
-interface MonitorPageState {
-  monitorId: string;
-  selectedPingListOption?: EuiComboBoxOptionProps;
-}
-
-export class MonitorPage extends React.Component<Props, MonitorPageState> {
-  constructor(props: Props) {
-    super(props);
-
-    // TODO: this is a hack because the id field's characters mess up react router's
-    // inner params parsing, when we add a synthetic ID for monitors this problem should go away
-    this.state = {
-      monitorId: this.props.location.pathname.replace(/^(\/monitor\/)/, ''),
-    };
-  }
-
-  public componentDidMount() {
-    const { query, setBreadcrumbs, setHeadingText } = this.props;
-    const { monitorId } = this.state;
-
-    query({
-      query: gql`
-        query MonitorPageTitle($monitorId: String!) {
-          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-            id
-            url
-            name
+  useEffect(
+    () => {
+      query({
+        query: gql`
+          query MonitorPageTitle($monitorId: String!) {
+            monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+              id
+              url
+              name
+            }
           }
+        `,
+        variables: { monitorId },
+      }).then((result: any) => {
+        const { name, url, id } = result.data.monitorPageTitle;
+        const heading: string = name || url || id;
+        setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+        if (setHeadingText) {
+          setHeadingText(heading);
         }
-      `,
-      variables: { monitorId },
-    }).then((result: any) => {
-      const { name, url, id } = result.data.monitorPageTitle;
-      const heading: string = name || url || id;
-      setBreadcrumbs(getMonitorPageBreadcrumb(heading));
-      setHeadingText(heading);
-    });
-  }
-
-  public render() {
-    const { dateRangeStart, dateRangeEnd } = this.props;
-    const { monitorId } = this.state;
-
-    return (
-      <Fragment>
-        <MonitorPageTitleQuery
-          {...this.props}
-          {...this.state}
-          monitorId={monitorId}
-          variables={{ monitorId }}
-        />
-        <EuiSpacer size="s" />
-        <MonitorStatusBarQuery
-          {...this.props}
-          {...this.state}
-          monitorId={monitorId}
-          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-        />
-        <EuiSpacer size="s" />
-        <MonitorChartsQuery
-          {...this.props}
-          {...this.state}
-          monitorId={monitorId}
-          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-        />
-        <EuiSpacer size="s" />
-        <PingListQuery
-          variables={{
-            dateRangeStart,
-            dateRangeEnd,
-            monitorId,
-            status: this.state.selectedPingListOption
-              ? this.state.selectedPingListOption.value
-              : 'down',
-          }}
-          {...this.props}
-          {...this.state}
-          onStatusSelectionChange={this.onPingListStatusSelectionChange}
-          selectedOption={this.state.selectedPingListOption}
-        />
-      </Fragment>
-    );
-  }
-
-  private onPingListStatusSelectionChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
-    if (selectedOptions[0]) {
-      this.setState({ selectedPingListOption: selectedOptions[0] }, () => this.props.refreshApp());
-    }
-  };
-}
+      });
+    },
+    [params]
+  );
+  return (
+    <Fragment>
+      <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
+      <EuiSpacer size="s" />
+      <MonitorStatusBar
+        monitorId={monitorId}
+        variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+      />
+      <EuiSpacer size="s" />
+      <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
+      <EuiSpacer size="s" />
+      <PingList
+        onSelectedStatusUpdate={(selectedStatus: string | null) =>
+          updateUrlParams({ selectedPingStatus: selectedStatus || '' })
+        }
+        onUpdateApp={refreshApp}
+        selectedOption={selectedPingStatus}
+        variables={{
+          dateRangeStart,
+          dateRangeEnd,
+          monitorId,
+          status: selectedPingStatus,
+        }}
+      />
+    </Fragment>
+  );
+};

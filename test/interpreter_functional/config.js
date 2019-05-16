@@ -39,7 +39,6 @@ export default async function ({ readConfigFile }) {
     esArchiver: {
       directory: path.resolve(__dirname, '../es_archives')
     },
-    screenshots: functionalConfig.get('screenshots'),
     snapshots: {
       directory: path.resolve(__dirname, 'snapshots'),
     },
