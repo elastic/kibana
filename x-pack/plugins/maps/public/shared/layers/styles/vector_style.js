@@ -249,7 +249,7 @@ export class VectorStyle extends AbstractStyle {
     return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  addScaledPropertiesBasedOnStyle(featureCollection) {
+      addScaledPropertiesBasedOnStyle(featureCollection) {
     if (!featureCollection || featureCollection.length === 0) {
       return false;
     }

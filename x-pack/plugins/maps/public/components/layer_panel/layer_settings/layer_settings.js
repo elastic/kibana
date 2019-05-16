@@ -145,6 +145,46 @@ export function LayerSettings(props) {
     );
   };
 
+
+
+  const renderApplyShowUnjoinedFeatures = () => {
+
+    const supportsJoins = props.layer.getValidJoins().length;
+
+    const applyGlobalQueryCheckbox = (
+      <EuiFormRow>
+        <EuiSwitch
+          label={
+            i18n.translate('xpack.maps.layerPanel.applyShowUnjoinedFeaturesLabel', {
+              defaultMessage: `Show features without corresponding joins`
+            })
+          }
+          checked={supportsJoins ? props.applyShowUnjoinedFeatures : false}
+          onChange={() => {console.log('todo')}}
+          disabled={!supportsJoins}
+          data-test-subj="mapLayerPanelApplyShowHideJoins"
+        />
+      </EuiFormRow>
+    );
+
+    if (supportsJoins) {
+      return applyGlobalQueryCheckbox;
+    }
+
+    return (
+      <EuiToolTip
+        position="top"
+        content={
+          i18n.translate('xpack.maps.layerPanel.applyShowUnjoinedFeaturesLabel.disableTooltip', {
+            defaultMessage: `Layer has no joins`
+          })
+        }
+      >
+        {applyGlobalQueryCheckbox}
+      </EuiToolTip>
+    );
+  };
+
   return (
     <Fragment>
       <EuiPanel>
@@ -162,14 +202,11 @@ export function LayerSettings(props) {
         </EuiFlexGroup>
 
         <EuiSpacer size="m"/>
-
         {renderLabel()}
-
         {renderZoomSliders()}
-
         {renderAlphaSlider()}
-
         {renderApplyGlobalQueryCheckbox()}
+        {renderApplyShowUnjoinedFeatures()}
       </EuiPanel>
 
       <EuiSpacer size="s" />
