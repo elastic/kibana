@@ -311,10 +311,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async checkTableTabIsPresent(): Promise<void> {
       await testSubjects.existOrFail('visualizationLoader');
-
-      const noDataExists = await testSubjects.exists('noTSVBDataMessage');
-      if (!noDataExists) {
-        await testSubjects.existOrFail('tableView');
+      const isDataExists = await testSubjects.exists('tableView');
+      log.debug(`data is already rendered: ${isDataExists}`);
+      if (!isDataExists) {
+        await testSubjects.existOrFail('noTSVBDataMessage');
       }
     }
 
@@ -339,7 +339,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
-      const labels = await find.allByCssSelector('.tvbSeriesEditor__container .tvbSeriesEditor');
+      const labels = await testSubjects.findAll('aggRow');
       const label = labels[aggNth];
       const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
       await comboBox.setElement(fieldEl, field);
