@@ -25,14 +25,14 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
 
-const setupFakeBasePath: SetupTap = ({ injectedMetadata }) => {
+const setupFakeBasePath: SetupTap = injectedMetadata => {
   injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
 };
 
 describe('getBasePath', () => {
   it('returns an empty string if no basePath is injected', () => {
-    const { http } = setup(({ injectedMetadata }) => {
-      injectedMetadata.getBasePath.mockReturnValue(null);
+    const { http } = setup(injectedMetadata => {
+      injectedMetadata.getBasePath.mockReturnValue('');
     });
 
     expect(http.getBasePath()).toBe('');

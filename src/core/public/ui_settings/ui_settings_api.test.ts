@@ -26,7 +26,7 @@ import { setup as httpSetup } from '../../../test_utils/public/http_test_setup';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const { http } = httpSetup(({ injectedMetadata }) => {
+  const { http } = httpSetup(injectedMetadata => {
     injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
   });
 
