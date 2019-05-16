@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDatePicker, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import { EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
@@ -30,8 +30,8 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
 
     if (isLiveStreaming) {
       return (
-        <EuiFilterGroup>
-          <InlineWrapper>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
             <EuiDatePicker
               disabled
               onChange={noop}
@@ -40,24 +40,26 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
                 defaultMessage: 'streaming…',
               })}
             />
-          </InlineWrapper>
-          <EuiFilterButton
-            color="primary"
-            iconType="pause"
-            iconSide="left"
-            onClick={this.stopLiveStreaming}
-          >
-            <FormattedMessage
-              id="xpack.infra.logs.stopStreamingButtonLabel"
-              defaultMessage="Stop streaming"
-            />
-          </EuiFilterButton>
-        </EuiFilterGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              iconType="pause"
+              iconSide="left"
+              onClick={this.stopLiveStreaming}
+            >
+              <FormattedMessage
+                id="xpack.infra.logs.stopStreamingButtonLabel"
+                defaultMessage="Stop streaming"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     } else {
       return (
-        <EuiFilterGroup>
-          <InlineWrapper>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
             <EuiDatePicker
               dateFormat="L LTS"
               onChange={this.handleChangeDate}
@@ -68,14 +70,16 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
               timeFormat="LTS"
               injectTimes={currentMoment ? [currentMoment] : []}
             />
-          </InlineWrapper>
-          <EuiFilterButton iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
-            <FormattedMessage
-              id="xpack.infra.logs.startStreamingButtonLabel"
-              defaultMessage="Stream live"
-            />
-          </EuiFilterButton>
-        </EuiFilterGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
+              <FormattedMessage
+                id="xpack.infra.logs.startStreamingButtonLabel"
+                defaultMessage="Stream live"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
   }
@@ -96,7 +100,3 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
 }
 
 export const LogTimeControls = injectI18n(LogTimeControlsUI);
-
-const InlineWrapper = euiStyled.div`
-  display: inline-block;
-`;
