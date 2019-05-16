@@ -137,6 +137,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                   value={selectedScheme}
                   onChange={e => selectScheme(e.target.value)}
                   aria-controls="readonlyRepositoryUrlHelp"
+                  data-test-subj="schemeSelect"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -162,6 +163,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                       url: `${selectedScheme}://${e.target.value}`,
                     });
                   }}
+                  data-test-subj="urlInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>

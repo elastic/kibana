@@ -41,10 +41,22 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     );
   };
 
+  const setSaveRepositoryResponse = (response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+
+    server.respondWith('PUT', `${API_BASE_PATH}repositories`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
     setGetRepositoryResponse,
+    setSaveRepositoryResponse,
   };
 };
 

@@ -59,6 +59,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
           />
         }
         error={saveError}
+        data-test-subj="saveRepositoryApiError"
       />
     ) : null;
   };

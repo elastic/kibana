@@ -69,7 +69,7 @@ describe('<RepositoryAdd />', () => {
     });
   });
 
-  describe('form validation (step 2)', () => {
+  describe('step 2 form', () => {
     const repository = getRepository();
 
     beforeEach(async () => {
@@ -77,13 +77,13 @@ describe('<RepositoryAdd />', () => {
 
       testBed = await setup();
 
-      // Fill step 1 required value and go to step 2
+      // Fill step 1 required fields and go to step 2
       testBed.form.setInputValue('nameInput', repository.name);
       testBed.actions.selectRepositoryType(repository.type);
       testBed.actions.clickNextButton();
     });
 
-    it('should send the correct payload', async () => {
+    test('should send the correct payload', async () => {
       const { form, actions } = testBed;
 
       form.setInputValue('locationInput', repository.settings.location);
@@ -103,6 +103,30 @@ describe('<RepositoryAdd />', () => {
           settings: { location: repository.settings.location, compress: true },
         })
       );
+    });
+
+    test('should display API errors if any while saving', async () => {
+      const { component, form, actions, find, exists } = testBed;
+
+      form.setInputValue('locationInput', repository.settings.location);
+      form.selectCheckBox('compressToggle');
+
+      const error = {
+        statusCode: 400,
+        error: 'Bad request',
+        message: 'Repository payload is invalid',
+      };
+
+      httpRequestsMockHelpers.setSaveRepositoryResponse(undefined, { body: error });
+
+      await act(async () => {
+        actions.clickSubmitButton();
+        await nextTick();
+        component.update();
+      });
+
+      expect(exists('saveRepositoryApiError')).toBe(true);
+      expect(find('saveRepositoryApiError').text()).toContain(error.message);
     });
   });
 });
