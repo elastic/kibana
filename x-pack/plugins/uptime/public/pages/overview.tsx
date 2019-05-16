@@ -79,7 +79,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
         <EuiSpacer size="s" />
         <Snapshot colors={colors} variables={sharedProps} />
         <EuiSpacer size="s" />
-        <MonitorList
+        <MonitorTable
           basePath={basePath}
           currentPage={monitorListPage}
           currentSize={monitorListSize}
