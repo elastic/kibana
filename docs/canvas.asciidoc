@@ -24,17 +24,25 @@ You can install a <<add-sample-data, Kibana sample data set>> to play around.
 Each sample data set includes a Canvas workpad to go along with the data. Once you've 
 added the data, open *Canvas* and click the name of the workpad to test things out.
 
-[role="screenshot"]
-image::canvas/images/canvas-ecommerce.png[eCommerce sample workpad]
-
 
 [float]
 ==== Explore the sample workpad
 
+The eCommerce sample workpad shows revenue data using a variety of styled elements. 
+Each circular gauge is a styled pie chart element, with a number element placed in the center.
+These elements are connected to sample eCommerce data, and configured to show values for
+particular revenue categories. 
+
+[role="screenshot"]
+image::canvas/images/canvas-ecommerce.png[eCommerce sample workpad]
+
+You can play around with the elements in this sample workpad to test things out. 
 
 . Click on any element in the sample workpad.
 + 
 When you select an element, an editor opens in the side bar where you can make changes to the element.
+From *Display* you can make stylistic changes, and edit the values for what data the element will show. 
+From *Data* you can change the data source that is connected to this element.  
 +
 [role="screenshot"]
 image::images/canvas_workpad_edit_style.png[]
@@ -42,8 +50,8 @@ image::images/canvas_workpad_edit_style.png[]
 . Try changing the color palette. Click the Back button in your 
 browser to undo your change.
 
-. Try dragging the chart around the page. Grab the resize handles to make 
-the chart bigger and smaller.
+. Try dragging the element around the page. Grab the resize handles to make 
+the element bigger and smaller.
 
 . Click somewhere off of the element (just not on another element) 
 to deselect it. 
