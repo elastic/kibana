@@ -177,13 +177,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async setMarkdownDataVariable(variableName: string, type: 'variable' | 'label') {
       const SELECTOR = type === 'label' ? '[placeholder="Label"]' : '[placeholder="Variable name"]';
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       if (variableName) {
         await find.setValue(SELECTOR, variableName);
       } else {
         const input = await find.byCssSelector(SELECTOR);
-        input.clearValueWithKeyboard({ charByChar: true });
-        await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+        await input.clearValueWithKeyboard({ charByChar: true });
       }
     }
 
