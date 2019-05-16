@@ -18,6 +18,7 @@ export interface PluginStartContext
 |  --- | --- | --- |
 |  [application](./kibana-plugin-public.pluginstartcontext.application.md) | <code>Pick&lt;ApplicationStart, 'capabilities'&gt;</code> |  |
 |  [basePath](./kibana-plugin-public.pluginstartcontext.basepath.md) | <code>BasePathStart</code> |  |
+|  [chrome](./kibana-plugin-public.pluginstartcontext.chrome.md) | <code>ChromeStart</code> |  |
 |  [http](./kibana-plugin-public.pluginstartcontext.http.md) | <code>HttpStart</code> |  |
 |  [i18n](./kibana-plugin-public.pluginstartcontext.i18n.md) | <code>I18nStart</code> |  |
 |  [notifications](./kibana-plugin-public.pluginstartcontext.notifications.md) | <code>NotificationsStart</code> |  |
