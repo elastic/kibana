@@ -21,14 +21,18 @@ import { Link } from 'react-router-dom';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { LatestMonitor } from '../../../common/graphql/types';
+import { LatestMonitor, Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorTableQuery } from '../../queries/monitor_table_query';
+import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 
 interface MonTableProps {
+  basePath: string;
   currentPage: string;
   currentSize: number;
   dangerColor: string;
+  dateRangeStart: string;
+  dateRangeEnd: string;
   linkParameters?: string;
   updateSelectedPage: (index: string, size: number) => void;
 }
@@ -44,10 +48,13 @@ interface MonTableQueryResult {
 type Props = MonTableProps & UptimeGraphQLQueryProps<MonTableQueryResult>;
 
 const MonTable = ({
+  basePath,
   currentPage,
   currentSize,
   dangerColor,
   data,
+  dateRangeStart,
+  dateRangeEnd,
   errors,
   linkParameters,
   loading,
@@ -139,17 +146,26 @@ const MonTable = ({
                 </div>
               ),
             },
-            // {
-            //   field: 'upSeries',
-            //   width: '180px',
-            //   align: 'right',
-            //   name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-            //     defaultMessage: 'Downtime history',
-            //   }),
-            //   render: (downSeries: MonitorSeriesPoint, monitor: LatestMonitor) => (
-            //     <MonitorSparkline dangerColor={dangerColor} monitor={monitor} />
-            //   ),
-            // },
+            {
+              align: 'right',
+              field: 'ping',
+              name: i18n.translate(
+                'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
+                {
+                  defaultMessage: 'Integrations',
+                  description:
+                    'The heading column of some action buttons that will take users to other Obsevability apps',
+                }
+              ),
+              render: (ping: Ping, monitor: LatestMonitor) => (
+                <MonitorListActionsPopover
+                  basePath={basePath}
+                  dateRangeStart={dateRangeStart}
+                  dateRangeEnd={dateRangeEnd}
+                  monitor={monitor}
+                />
+              ),
+            },
           ]}
           items={items || []}
           loading={loading}
