@@ -17,39 +17,29 @@
  * under the License.
  */
 
-export const MODEL_OPTIONS = {
-  UNWEIGHTED: {
-    NAME: 'Simple',
-    TYPE: 'simple',
-  },
-  WEIGHTED_EXPONENTIAL: {
-    NAME: 'Exponentially Weighted',
-    TYPE: 'ewma',
-  },
-  WEIGHTED_EXPONENTIAL_DOUBLE: {
-    NAME: 'Holt-Linear',
-    TYPE: 'holt',
-  },
-  WEIGHTED_EXPONENTIAL_TRIPLE: {
-    NAME: 'Holt-Winters',
-    TYPE: 'holt_winters',
-  },
-  WEIGHTED_LINEAR: {
-    NAME: 'Linear',
-    TYPE: 'linear',
-  },
+export const MODEL_TYPES = {
+  UNWEIGHTED: 'simple',
+  WEIGHTED_EXPONENTIAL: 'ewma',
+  WEIGHTED_EXPONENTIAL_DOUBLE: 'holt',
+  WEIGHTED_EXPONENTIAL_TRIPLE: 'holt_winters',
+  WEIGHTED_LINEAR: 'linear',
 };
 
-const MODEL_SCRIPTS = new Map();
-
-MODEL_SCRIPTS.set(MODEL_OPTIONS.UNWEIGHTED.TYPE, 'MovingFunctions.unweightedAvg(values)');
-MODEL_SCRIPTS.set(MODEL_OPTIONS.WEIGHTED_EXPONENTIAL.TYPE, 'MovingFunctions.ewma(values)');
-MODEL_SCRIPTS.set(MODEL_OPTIONS.WEIGHTED_EXPONENTIAL_DOUBLE.TYPE, 'MovingFunctions.holt(values)');
-MODEL_SCRIPTS.set(MODEL_OPTIONS.WEIGHTED_EXPONENTIAL_TRIPLE.TYPE, 'MovingFunctions.holtWinters(values)');
-MODEL_SCRIPTS.set(MODEL_OPTIONS.WEIGHTED_LINEAR.TYPE, 'MovingFunctions.linearWeightedAvg(values)');
-
-export function getModuleScript(type) {
-  return MODEL_SCRIPTS.get(type);
-}
-
-export { MODEL_SCRIPTS };
+export const MODEL_SCRIPTS = {
+  [MODEL_TYPES.UNWEIGHTED]: () => 'MovingFunctions.unweightedAvg(values)',
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL]: ({
+    alpha
+  }) => `MovingFunctions.ewma(values, ${alpha})`,
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE]: ({
+    alpha,
+    beta
+  }) => `MovingFunctions.holt(values, ${alpha}, ${beta})`,
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE]: ({
+    alpha,
+    beta,
+    gamma,
+    period,
+    multiplicative
+  }) => `if (values.length > ${period}*2) {MovingFunctions.holtWinters(values, ${alpha}, ${beta}, ${gamma}, ${period}, ${multiplicative})}`,
+  [MODEL_TYPES.WEIGHTED_LINEAR]: () => 'MovingFunctions.linearWeightedAvg(values)',
+};

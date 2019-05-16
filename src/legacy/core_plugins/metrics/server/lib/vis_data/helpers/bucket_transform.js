@@ -21,7 +21,7 @@ import getBucketsPath from './get_buckets_path';
 import { parseInterval } from './parse_interval';
 import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getModuleScript, MODEL_SCRIPTS, MODEL_OPTIONS } from '../../../../common/model_options';
+import { MODEL_SCRIPTS } from '../../../../common/model_options';
 
 function checkMetric(metric, fields) {
   fields.forEach(field => {
@@ -206,19 +206,13 @@ export default {
   moving_average: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
 
-    const body = {
+    return {
       moving_fn: {
         buckets_path: getBucketsPath(bucket.field, metrics),
-        window: 10,
-        script: getModuleScript(bucket.model_type) || MODEL_SCRIPTS.get(MODEL_OPTIONS.UNWEIGHTED.TYPE),
+        window: bucket.window,
+        script: MODEL_SCRIPTS[bucket.model_type](bucket),
       },
     };
-
-    if (bucket.window) {
-      body.moving_fn.window = bucket.window;
-    }
-
-    return body;
   },
 
   calculation: (bucket, metrics, bucketSize) => {
