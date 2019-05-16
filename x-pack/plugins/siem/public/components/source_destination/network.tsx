@@ -15,13 +15,13 @@ import { DirectionBadge } from '../direction';
 import { DefaultDraggable, DraggableBadge } from '../draggables';
 
 import * as i18n from './translations';
-
-export const NETWORK_BYTES_FIELD_NAME = 'network.bytes';
-export const NETWORK_COMMUNITY_ID_FIELD_NAME = 'network.community_id';
-export const NETWORK_DIRECTION_FIELD_NAME = 'network.direction';
-export const NETWORK_PACKETS_FIELD_NAME = 'network.packets';
-export const NETWORK_PROTOCOL_FIELD_NAME = 'network.protocol';
-export const NETWORK_TRANSPORT_FIELD_NAME = 'network.transport';
+import {
+  NETWORK_PROTOCOL_FIELD_NAME,
+  NETWORK_BYTES_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_TRANSPORT_FIELD_NAME,
+} from './field_names';
 
 const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 3px;

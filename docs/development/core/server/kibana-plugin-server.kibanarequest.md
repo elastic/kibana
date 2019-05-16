@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class KibanaRequest<Params, Query, Body> 
+export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> 
 ```
 
 ## Properties
@@ -27,4 +27,5 @@ export declare class KibanaRequest<Params, Query, Body>
 |  --- | --- | --- |
 |  [from(req, routeSchemas)](./kibana-plugin-server.kibanarequest.from.md) | <code>static</code> | Factory for creating requests. Validates the request before creating an instance of a KibanaRequest. |
 |  [getFilteredHeaders(headersToKeep)](./kibana-plugin-server.kibanarequest.getfilteredheaders.md) |  |  |
+|  [unstable\_getIncomingMessage()](./kibana-plugin-server.kibanarequest.unstable_getincomingmessage.md) |  |  |
 

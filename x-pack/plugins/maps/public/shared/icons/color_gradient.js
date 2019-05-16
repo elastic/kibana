@@ -7,23 +7,25 @@
 import React from 'react';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { getLegendColors } from 'ui/vis/map/color_util';
+import classNames from 'classnames';
 
 const GRADIENT_INTERVALS = 7;
 const COLOR_KEYS = Object.keys(vislibColorMaps);
 
-export const ColorGradient = ({ color }) => {
+export const ColorGradient = ({ color, className }) => {
   if (!color || !COLOR_KEYS.includes(color)) {
     return null;
-  } else {
-    const rgbColorStrings = getLegendColors(vislibColorMaps[color].value, GRADIENT_INTERVALS);
-    const background = getLinearGradient(rgbColorStrings, GRADIENT_INTERVALS);
-    return (
-      <div
-        className="mapColorGradient"
-        style={{ background }}
-      />
-    );
   }
+
+  const classes = classNames('mapColorGradient', className);
+  const rgbColorStrings = getLegendColors(vislibColorMaps[color].value, GRADIENT_INTERVALS);
+  const background = getLinearGradient(rgbColorStrings, GRADIENT_INTERVALS);
+  return (
+    <div
+      className={classes}
+      style={{ background }}
+    />
+  );
 };
 
 function getLinearGradient(colorStrings, intervals) {

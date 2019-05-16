@@ -6,8 +6,9 @@
 
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
+import { Server } from 'hapi';
 
-import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
+import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 
 const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
@@ -43,7 +44,7 @@ export function siem(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    init(server: KbnServer) {
+    init(server: Server) {
       initServerWithKibana(server);
     },
   });

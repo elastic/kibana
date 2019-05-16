@@ -11,6 +11,11 @@ export default function (kibana) {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     name: 'namespace_agnostic_type_plugin',
     uiExports: {
+      savedObjectsManagement: {
+        globaltype: {
+          isImportableAndExportable: true,
+        },
+      },
       savedObjectSchemas: {
         globaltype: {
           isNamespaceAgnostic: true

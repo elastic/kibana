@@ -4,6 +4,8 @@
 
 ## CoreStart interface
 
+Core services exposed to the start lifecycle
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,7 +16,10 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [capabilities](./kibana-plugin-public.corestart.capabilities.md) | <code>CapabilitiesStart</code> | [CapabilitiesStart](./kibana-plugin-public.capabilitiesstart.md) |
+|  [application](./kibana-plugin-public.corestart.application.md) | <code>ApplicationStart</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
+|  [basePath](./kibana-plugin-public.corestart.basepath.md) | <code>BasePathStart</code> | [BasePathStart](./kibana-plugin-public.basepathstart.md) |
+|  [chrome](./kibana-plugin-public.corestart.chrome.md) | <code>ChromeStart</code> | [ChromeStart](./kibana-plugin-public.chromestart.md) |
+|  [http](./kibana-plugin-public.corestart.http.md) | <code>HttpStart</code> | [HttpStart](./kibana-plugin-public.httpstart.md) |
 |  [i18n](./kibana-plugin-public.corestart.i18n.md) | <code>I18nStart</code> | [I18nStart](./kibana-plugin-public.i18nstart.md) |
 |  [injectedMetadata](./kibana-plugin-public.corestart.injectedmetadata.md) | <code>InjectedMetadataStart</code> | [InjectedMetadataStart](./kibana-plugin-public.injectedmetadatastart.md) |
 |  [notifications](./kibana-plugin-public.corestart.notifications.md) | <code>NotificationsStart</code> | [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |

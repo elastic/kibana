@@ -14,8 +14,10 @@ import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { RowRenderer } from '../row_renderer';
-
-import { createGenericFileRowRenderer, createGenericSystemRowRenderer } from '.';
+import {
+  createGenericSystemRowRenderer,
+  createGenericFileRowRenderer,
+} from './generic_row_renderer';
 
 describe('GenericRowRenderer', () => {
   describe('#createGenericSystemRowRenderer', () => {

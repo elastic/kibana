@@ -186,7 +186,7 @@ export function ErrorGroupDetails() {
           )}
         />
       </EuiPanel>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {showDetails && (
         <DetailView
           errorGroup={errorGroupData}

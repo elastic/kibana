@@ -47,7 +47,7 @@ export const getRowItemDraggable = ({
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <>{render ? render(rowItem) : rowItem}</>
+            <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
           )
         }
       />
@@ -95,7 +95,7 @@ export const getRowItemDraggables = ({
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <>{render ? render(rowItem) : rowItem}</>
+                <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
               )
             }
           />

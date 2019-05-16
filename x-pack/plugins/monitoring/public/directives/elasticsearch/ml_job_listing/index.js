@@ -7,7 +7,7 @@
 import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
@@ -123,6 +123,7 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
       status: '=',
     },
     link(scope, $el) {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
       const columns = getColumns(kbnUrl, scope);
 
       const filterJobsPlaceholder = i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.filterJobsPlaceholder', {

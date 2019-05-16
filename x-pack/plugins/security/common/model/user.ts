@@ -10,6 +10,14 @@ export interface User {
   full_name: string;
   roles: string[];
   enabled: boolean;
+  metadata?: {
+    _reserved: boolean;
+  };
+}
+
+export interface EditUser extends User {
+  password: string;
+  confirmPassword: string;
 }
 
 export function getUserDisplayName(user: User) {

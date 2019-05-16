@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 
@@ -21,10 +20,10 @@ import {
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
-} from './field_renderers';
+} from '../../../field_renderers/field_renderers';
 import * as i18n from './translations';
-
-export const IpOverviewId = 'ip-overview';
+import { LoadingOverlay, OverviewWrapper } from '../../index';
+import { LoadingPanel } from '../../../loading';
 
 interface DescriptionList {
   title: string;
@@ -50,11 +49,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 };
 
 export const IpOverview = pure<IpOverviewProps>(({ ip, data, loading, flowTarget }) => {
-  if (isEmpty(data)) {
-    return null;
-  }
   const typeData: Overview = data[flowTarget]!;
-
   const descriptionLists: Readonly<DescriptionList[][]> = [
     [
       {
@@ -91,8 +86,21 @@ export const IpOverview = pure<IpOverviewProps>(({ ip, data, loading, flowTarget
     ],
   ];
   return (
-    <EuiFlexGroup>
+    <OverviewWrapper>
+      {loading && (
+        <>
+          <LoadingOverlay />
+          <LoadingPanel
+            height="100%"
+            width="100%"
+            text=""
+            position="absolute"
+            zIndex={3}
+            data-test-subj="LoadingPanelLoadMoreTable"
+          />
+        </>
+      )}
       {descriptionLists.map((descriptionList, index) => getDescriptionList(descriptionList, index))}
-    </EuiFlexGroup>
+    </OverviewWrapper>
   );
 });

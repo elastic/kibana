@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+  EuiPopoverProps,
+} from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { UICapabilities } from 'ui/capabilities';
@@ -12,6 +17,7 @@ import { injectUICapabilities } from 'ui/capabilities/react';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
+import { createUptimeLink } from './lib/create_uptime_link';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -23,6 +29,7 @@ interface Props {
   closePopover: () => void;
   intl: InjectedIntl;
   uiCapabilities: UICapabilities;
+  popoverPosition: EuiPopoverProps['anchorPosition'];
 }
 
 export const NodeContextMenu = injectUICapabilities(
@@ -37,6 +44,7 @@ export const NodeContextMenu = injectUICapabilities(
       nodeType,
       intl,
       uiCapabilities,
+      popoverPosition,
     }: Props) => {
       // Due to the changing nature of the fields between APM and this UI,
       // We need to have some exceptions until 7.0 & ECS is finalized. Reference
@@ -82,6 +90,19 @@ export const NodeContextMenu = injectUICapabilities(
             }
           : undefined;
 
+      const uptimeUrl = node.ip
+        ? {
+            name: intl.formatMessage(
+              {
+                id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
+                defaultMessage: 'View {nodeType} in Uptime',
+              },
+              { nodeType }
+            ),
+            href: createUptimeLink(options, nodeType, node),
+          }
+        : undefined;
+
       const panels: EuiContextMenuPanelDescriptor[] = [
         {
           id: 0,
@@ -111,6 +132,7 @@ export const NodeContextMenu = injectUICapabilities(
                 ]
               : []),
             ...(apmTracesUrl ? [apmTracesUrl] : []),
+            ...(uptimeUrl ? [uptimeUrl] : []),
           ],
         },
       ];
@@ -122,8 +144,9 @@ export const NodeContextMenu = injectUICapabilities(
           isOpen={isPopoverOpen}
           button={children}
           panelPaddingSize="none"
+          anchorPosition={popoverPosition}
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
+          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="nodeContextMenu" />
         </EuiPopover>
       );
     }

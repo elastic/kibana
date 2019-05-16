@@ -20,21 +20,18 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-export function FilterBarLibMapDefaultProvider(Promise) {
-
+export async function mapDefault(filter) {
   const metaProperty = /(^\$|meta)/;
 
-  return function (filter) {
-    const key = _.find(_.keys(filter), function (key) {
-      return !key.match(metaProperty);
-    });
+  const key = _.find(_.keys(filter), function (key) {
+    return !key.match(metaProperty);
+  });
 
-    if (key) {
-      const type = 'custom';
-      const value = angular.toJson(filter[key]);
-      return Promise.resolve({ type, key, value });
-    }
+  if (key) {
+    const type = 'custom';
+    const value = angular.toJson(filter[key]);
+    return { type, key, value };
+  }
 
-    return Promise.reject(filter);
-  };
+  throw filter;
 }

@@ -10,8 +10,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { mockTimelineData, TestProviders } from '../../../../mock';
-
-import { HostWorkingDir } from '.';
+import { HostWorkingDir } from './host_working_dir';
 
 describe('HostWorkingDir', () => {
   test('renders correctly against snapshot', () => {

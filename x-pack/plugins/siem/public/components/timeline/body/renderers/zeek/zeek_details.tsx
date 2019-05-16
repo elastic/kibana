@@ -9,11 +9,11 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { NetflowRenderer } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 
-import { ZeekSignature } from '.';
+import { NetflowRenderer } from '../netflow';
+import { ZeekSignature } from './zeek_signature';
 
 const Details = styled.div`
   margin: 10px 0;

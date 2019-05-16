@@ -43,10 +43,12 @@ export function registerRelationships(server) {
       const size = req.query.size;
       const savedObjectTypes = req.query.savedObjectTypes;
       const savedObjectsClient = req.getSavedObjectsClient();
+      const savedObjectsManagement = req.server.getSavedObjectsManagement();
 
       return await findRelationships(type, id, {
         size,
         savedObjectsClient,
+        savedObjectsManagement,
         savedObjectTypes,
       });
     },
