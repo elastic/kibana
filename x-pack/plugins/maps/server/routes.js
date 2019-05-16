@@ -5,7 +5,7 @@
  */
 
 
-import { GIS_API_PATH } from '../common/constants';
+import { EMS_DATA_PATH, GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/data/ems`,
+    path: `${ROOT}/${EMS_DATA_PATH}`,
     handler: async (request) => {
 
       if (!request.query.id) {
@@ -35,15 +35,28 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
+      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
+
+
 
       const layer = ems.fileLayers.find(layer => layer.id === request.query.id);
       if (!layer) {
         return null;
       }
 
+
       const file = await fetch(layer.url);
       return await file.json();
+
+    }
+  });
+
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/data/ems_tile`,
+    handler: async () => {
+
 
     }
   });
@@ -63,7 +76,7 @@ export function initRoutes(server, licenseUid) {
         ems = emptyResponse;
       } else {
         try {
-          ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
+          ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
         } catch (e) {
           server.log('warning', `Cannot connect to EMS, error: ${e}`);
           ems = emptyResponse;

@@ -33,3 +33,6 @@ export const ES_GEO_FIELD_TYPE = {
   GEO_POINT: 'geo_point',
   GEO_SHAPE: 'geo_shape'
 };
+
+
+export const EMS_DATA_PATH = 'data/ems';

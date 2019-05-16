@@ -5,9 +5,9 @@
  */
 
 
-import { GIS_API_PATH } from './constants';
+import { EMS_DATA_PATH, GIS_API_PATH } from './constants';
 
-export  async function getEMSResources(emsClient, includeElasticMapsService, licenseUid, useCors) {
+export  async function getEMSResources(emsClient, includeElasticMapsService, licenseUid, useAbsoluteEMSPAth) {
 
   if (!includeElasticMapsService) {
     return {
@@ -33,7 +33,8 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
       attribution: fileLayer.getHTMLAttribution(),
       attributions: fileLayer.getAttributions(),
       fields: fileLayer.getFieldsInLanguage(),
-      url: useCors ? fileLayer.getDefaultFormatUrl() : `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(fileLayer.getId())}`,
+      // eslint-disable-next-line max-len
+      url: useAbsoluteEMSPAth ? fileLayer.getDefaultFormatUrl() : `../${GIS_API_PATH}/${EMS_DATA_PATH}?id=${encodeURIComponent(fileLayer.getId())}`,
       format: format, //legacy: format and meta are split up
       meta: meta, //legacy, format and meta are split up,
       emsLink: fileLayer.getEMSHotLink()
