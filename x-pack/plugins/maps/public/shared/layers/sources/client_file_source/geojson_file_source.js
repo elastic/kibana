@@ -6,7 +6,7 @@
 
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import { GEOJSON_FILE } from '../../../../../common/constants';
+import { ES_GEO_FIELD_TYPE, GEOJSON_FILE } from '../../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';
@@ -35,7 +35,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
         return;
       }
       const geoFieldArr = fields.filter(
-        field => ['geo_point', 'geo_shape'].includes(field.type)
+        field => Object.values(ES_GEO_FIELD_TYPE).includes(field.type)
       );
       const geoField = _.get(geoFieldArr, '[0].name');
       const indexPatternId = id;

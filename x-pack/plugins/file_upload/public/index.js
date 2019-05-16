@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './kibana_services';
-
 export { JsonUploadAndParse } from './components/json_upload_and_parse';

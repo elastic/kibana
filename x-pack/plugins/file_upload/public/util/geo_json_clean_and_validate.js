@@ -9,17 +9,17 @@ import rewind from 'geojson-rewind';
 
 export function geoJsonCleanAndValidate(parsedFile) {
   const reader = new jsts.io.GeoJSONReader();
-  const gj = reader.read(parsedFile);
+  const geoJson = reader.read(parsedFile);
 
-  const features = gj.features.map(({ id, geometry, properties }) => {
+  const features = geoJson.features.map(({ id, geometry, properties }) => {
     const writer = new jsts.io.GeoJSONWriter();
-    (!geometry.isSimple() || !geometry.isValid())
-      ? geometry = writer.write(geometry.buffer(0))
-      : geometry = writer.write(geometry);
+    const geojsonGeometry = (!geometry.isSimple() || !geometry.isValid())
+      ? writer.write(geometry.buffer(0))
+      : writer.write(geometry);
     return ({
       type: 'Feature',
       ...(id ? { id } : {}),
-      geometry,
+      geometry: geojsonGeometry,
       properties,
     });
   });

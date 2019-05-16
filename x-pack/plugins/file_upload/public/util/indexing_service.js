@@ -86,7 +86,7 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
     };
 }
 
-function writeToIndex(indexingDetails) {
+async function writeToIndex(indexingDetails) {
   const paramString = (indexingDetails.id !== undefined) ? `?id=${indexingDetails.id}` : '';
   const {
     appName,
@@ -97,7 +97,7 @@ function writeToIndex(indexingDetails) {
     ingestPipeline
   } = indexingDetails;
 
-  return http({
+  return await http({
     url: `${basePath}/import${paramString}`,
     method: 'POST',
     data: {
