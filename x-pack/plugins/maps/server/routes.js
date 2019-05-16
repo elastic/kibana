@@ -5,7 +5,7 @@
  */
 
 
-import { EMS_DATA_PATH, GIS_API_PATH } from '../common/constants';
+import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/${EMS_DATA_PATH}`,
+    path: `${ROOT}/${EMS_DATA_FILE_PATH}`,
     handler: async (request) => {
 
       if (!request.query.id) {
@@ -36,14 +36,10 @@ export function initRoutes(server, licenseUid) {
       }
 
       const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
-
-
-
       const layer = ems.fileLayers.find(layer => layer.id === request.query.id);
       if (!layer) {
         return null;
       }
-
 
       const file = await fetch(layer.url);
       return await file.json();
@@ -54,10 +50,35 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/data/ems_tile`,
-    handler: async () => {
+    path: `${ROOT}/${EMS_DATA_TMS_PATH}`,
+    handler: async (request) => {
+      if (!request.query.id ||
+        typeof request.query.x !== 'number' ||
+        typeof request.query.y !== 'number' ||
+        typeof request.query.z !== 'number'
+      ) {
+        server.log('warning', 'Must supply id/x/y/z parameters to retrieve EMS tile');
+        return null;
+      }
+
+      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
+      const tmsService = ems.tmsServices.find(layer => layer.id === request.query.id);
+      if (!tmsService) {
+        return null;
+      }
+
+      console.log('tms service', tmsService);
+
+      //replace the template
+      const url = tmsService.url
+        .replace('{x}', request.query.x)
+        .replace('{y}', request.query.y)
+        .replace('{z}', request.query.z);
 
 
+      console.log('new url', url);
+      const tile = await fetch(url);
+      return tile.blob();
     }
   });
 

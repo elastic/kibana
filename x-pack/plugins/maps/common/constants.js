@@ -5,6 +5,8 @@
  */
 
 export const GIS_API_PATH = 'api/maps';
+export const EMS_DATA_FILE_PATH = 'ems/file';
+export const EMS_DATA_TMS_PATH = 'ems/tms';
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export function createMapPath(id) {
@@ -35,4 +37,3 @@ export const ES_GEO_FIELD_TYPE = {
 };
 
 
-export const EMS_DATA_PATH = 'data/ems';
