@@ -16,8 +16,6 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
     };
   }
 
-  console.log('get ems resources', useAbsoluteEMSPath);
-
   emsClient.addQueryParams({ license: licenseUid });
   const fileLayerObjs = await emsClient.getFileLayers();
   const tmsServicesObjs = await emsClient.getTMSServices();

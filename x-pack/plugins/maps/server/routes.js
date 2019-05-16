@@ -51,14 +51,12 @@ export function initRoutes(server, licenseUid) {
   server.route({
     method: 'GET',
     path: `${ROOT}/${EMS_DATA_TMS_PATH}`,
-    handler: async (request) => {
-
-      console.log('do request', request.query);
+    handler: async (request, h) => {
 
       if (!request.query.id ||
-        typeof request.query.x !== 'number' ||
-        typeof request.query.y !== 'number' ||
-        typeof request.query.z !== 'number'
+        typeof parseInt(request.query.x, 10) !== 'number' ||
+        typeof parseInt(request.query.y, 10) !== 'number' ||
+        typeof parseInt(request.query.z, 10) !== 'number'
       ) {
         server.log('warning', 'Must supply id/x/y/z parameters to retrieve EMS tile');
         return null;
@@ -66,22 +64,27 @@ export function initRoutes(server, licenseUid) {
 
       const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
       const tmsService = ems.tmsServices.find(layer => layer.id === request.query.id);
-      console.log(tmsService);
       if (!tmsService) {
-        console.log('not found');
         return null;
       }
 
-      console.log('tms service', tmsService);
       const url = tmsService.url
         .replace('{x}', request.query.x)
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
 
-      console.log('new url', url);
       const tile = await fetch(url);
-      return tile.blob();
+      const arrayBuffer = await tile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      let  response =  h.response(buffer);
+      response = response.bytes(buffer.length);
+      response = response.header('Content-Disposition', 'inline');
+      response = response.header('Content-type', 'image/png');
+      response = response.encoding('binary');
+
+
+      return response;
     }
   });
 

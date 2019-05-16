@@ -34,8 +34,6 @@ export async function getDataSources() {
 
       const useCorsForElasticMapsService = chrome.getInjected('useCORSForElasticMapsService', true);
 
-      console.log('use cors', useCorsForElasticMapsService);
-
       if (useCorsForElasticMapsService) {
         const emsClient = new EMSClient({
           language: i18n.getLocale(),
