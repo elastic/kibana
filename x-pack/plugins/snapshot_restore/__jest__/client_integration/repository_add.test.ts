@@ -37,12 +37,9 @@ describe('<RepositoryAdd />', () => {
     test('should not let the user go to the next step if some fields are missing', () => {
       const { form, actions } = testBed;
 
-      actions.clickNextButton();
+      // click next button
 
-      expect(form.getErrorsMessages()).toEqual([
-        'Repository name is required.',
-        'Type is required.',
-      ]);
+      // check errors are ['Repository name is required.', 'Type is required.',]
     });
   });
 
@@ -52,7 +49,8 @@ describe('<RepositoryAdd />', () => {
         const { form, actions } = testBed;
 
         const expectErrorForChar = (char: string) => {
-          form.setInputValue('nameInput', `with${char}`);
+          // Set input value with char
+
           actions.clickNextButton();
 
           try {
@@ -86,30 +84,23 @@ describe('<RepositoryAdd />', () => {
     test('should send the correct payload', async () => {
       const { form, actions } = testBed;
 
-      form.setInputValue('locationInput', repository.settings.location);
-      form.selectCheckBox('compressToggle');
+      // set "locationInput" to repository.settings.location
+      // select checkbox "compressToggle"
 
       await act(async () => {
-        actions.clickSubmitButton();
+        // click submit button
         await nextTick();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
+      // get latest server request
 
-      expect(latestRequest.requestBody).toEqual(
-        JSON.stringify({
-          name: repository.name,
-          type: repository.type,
-          settings: { location: repository.settings.location, compress: true },
-        })
-      );
+      // check requestBody has correct (stringify) name, type, settings
     });
 
     test('should display API errors if any while saving', async () => {
       const { component, form, actions, find, exists } = testBed;
 
       form.setInputValue('locationInput', repository.settings.location);
-      form.selectCheckBox('compressToggle');
 
       const error = {
         statusCode: 400,
@@ -117,16 +108,15 @@ describe('<RepositoryAdd />', () => {
         message: 'Repository payload is invalid',
       };
 
-      httpRequestsMockHelpers.setSaveRepositoryResponse(undefined, { body: error });
+      // mock save repository request (with error.body)
 
       await act(async () => {
-        actions.clickSubmitButton();
+        // click submit button
         await nextTick();
         component.update();
       });
 
-      expect(exists('saveRepositoryApiError')).toBe(true);
-      expect(find('saveRepositoryApiError').text()).toContain(error.message);
+      // check "saveRepositoryApiError" and its content
     });
   });
 });
