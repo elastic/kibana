@@ -100,7 +100,7 @@ export function initRoutes(server, licenseUid) {
         ems = emptyResponse;
       } else {
         try {
-          ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
+          ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, mapConfig.useCORSForElasticMapsService);
         } catch (e) {
           server.log('warning', `Cannot connect to EMS, error: ${e}`);
           ems = emptyResponse;

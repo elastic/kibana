@@ -52,7 +52,7 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
       attribution: tmsService.getHTMLAttribution(),
       attributionMarkdown: tmsService.getMarkdownAttribution(),
       // eslint-disable-next-line max-len
-      url: useAbsoluteEMSPath ?  tmsService.getUrlTemplate() : `./${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}`
+      url: useAbsoluteEMSPath ?  tmsService.getUrlTemplate() : `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}`
     };
   });
 
