@@ -11,6 +11,7 @@ import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../com
 import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -176,9 +177,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         size: 0,
         aggs: {
           timeseries: {
-            auto_date_histogram: {
+            date_histogram: {
               field: '@timestamp',
-              buckets: 25,
+              interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
               down: {

@@ -12,7 +12,7 @@ export const kpiHostsSchema = gql`
     doc_count: Float
   }
 
-  type HistogramData {
+  type KpiHostHistogramData {
     key: Float
     key_as_string: String
     count: Count
@@ -20,15 +20,15 @@ export const kpiHostsSchema = gql`
 
   type KpiHostsData {
     hosts: Float
-    hostsHistogram: [HistogramData]
+    hostsHistogram: [KpiHostHistogramData!]
     authSuccess: Float
-    authSuccessHistogram: [HistogramData]
+    authSuccessHistogram: [KpiHostHistogramData!]
     authFailure: Float
-    authFailureHistogram: [HistogramData]
+    authFailureHistogram: [KpiHostHistogramData!]
     uniqueSourceIps: Float
-    uniqueSourceIpsHistogram: [HistogramData]
+    uniqueSourceIpsHistogram: [KpiHostHistogramData!]
     uniqueDestinationIps: Float
-    uniqueDestinationIpsHistogram: [HistogramData]
+    uniqueDestinationIpsHistogram: [KpiHostHistogramData!]
   }
 
   extend type Source {

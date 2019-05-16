@@ -15,6 +15,8 @@ export const sourcesSchema = gql`
     version: String
     "The timestamp the source configuration was last persisted at"
     updatedAt: Float
+    "The origin of the source (one of 'fallback', 'internal', 'stored')"
+    origin: String!
     "The raw configuration of the source"
     configuration: InfraSourceConfiguration!
     "The status of the source"
