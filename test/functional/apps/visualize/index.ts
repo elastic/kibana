@@ -65,6 +65,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_region_map'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
+      loadTestFile(require.resolve('./_metric_chart'));
       loadTestFile(require.resolve('./_shared_item'));
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
