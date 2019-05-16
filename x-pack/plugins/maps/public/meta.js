@@ -17,6 +17,7 @@ const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 let meta = null;
 let loadingMetaPromise = null;
 let isLoaded = false;
+
 export async function getDataSources() {
   if (meta) {
     return meta;
@@ -28,25 +29,28 @@ export async function getDataSources() {
 
   loadingMetaPromise = new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch(`${GIS_API_RELATIVE}/meta`);
-      const metaJson = await response.json();
-      const useCors = chrome.getInjected('useCORSForElasticMapsService', true);
-      const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
-      if (useCors) {
+      const fullResponse = await fetch(`${GIS_API_RELATIVE}/meta`);
+      const fullMetaJson = await fullResponse.json();
+
+      const useCorsForElasticMapsService = chrome.getInjected('useCORSForElasticMapsService', true);
+      if (useCorsForElasticMapsService) {
         const emsClient = new EMSClient({
           language: i18n.getLocale(),
           kbnVersion: chrome.getInjected('kbnPkgVersion'),
           manifestServiceUrl: chrome.getInjected('emsManifestServiceUrl'),
           landingPageUrl: chrome.getInjected('emsLandingPageUrl')
         });
-        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, 'todo_use_licenseuid', true);
-        metaJson.data_sources.ems = {
+        const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
+        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, 'todo_use_licenseuid', useCorsForElasticMapsService);
+
+        //override EMS cors config
+        fullMetaJson.data_sources.ems = {
           file: emsResponse.fileLayers,
           tms: emsResponse.tmsServices
         };
       }
       isLoaded = true;
-      meta = metaJson.data_sources;
+      meta = fullMetaJson.data_sources;
       resolve(meta);
     } catch (e) {
       reject(e);

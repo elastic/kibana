@@ -52,6 +52,9 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_DATA_TMS_PATH}`,
     handler: async (request) => {
+
+      console.log('do request', request.query);
+
       if (!request.query.id ||
         typeof request.query.x !== 'number' ||
         typeof request.query.y !== 'number' ||
@@ -63,13 +66,13 @@ export function initRoutes(server, licenseUid) {
 
       const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
       const tmsService = ems.tmsServices.find(layer => layer.id === request.query.id);
+      console.log(tmsService);
       if (!tmsService) {
+        console.log('not found');
         return null;
       }
 
       console.log('tms service', tmsService);
-
-      //replace the template
       const url = tmsService.url
         .replace('{x}', request.query.x)
         .replace('{y}', request.query.y)
