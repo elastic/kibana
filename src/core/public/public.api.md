@@ -37,16 +37,6 @@ export interface ApplicationStart {
 }
 
 // @public
-export interface BasePathSetup {
-    addToPath(path: string): string;
-    get(): string;
-    removeFromPath(path: string): string;
-}
-
-// @public
-export type BasePathStart = BasePathSetup;
-
-// @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
     catalogue: Record<string, boolean>;
@@ -119,13 +109,11 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    basePath: BasePathSetup;
-    // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
-    http: HttpSetup;
+    http: IHttpService;
     // (undocumented)
     i18n: I18nSetup;
     // (undocumented)
@@ -139,11 +127,9 @@ export interface CoreStart {
     // (undocumented)
     application: Pick<ApplicationStart, 'capabilities'>;
     // (undocumented)
-    basePath: BasePathStart;
-    // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
-    http: HttpStart;
+    http: IHttpService;
     // (undocumented)
     i18n: I18nStart;
     // (undocumented)
@@ -180,14 +166,6 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export type HttpSetup = ReturnType<HttpService['setup']>;
-
-// @public (undocumented)
-export type HttpStart = ReturnType<HttpService['start']>;
-
 // @public
 export interface I18nSetup {
     Context: ({ children }: {
@@ -197,6 +175,42 @@ export interface I18nSetup {
 
 // @public (undocumented)
 export type I18nStart = I18nSetup;
+
+// Warning: (ae-missing-release-tag) "IHttpService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface IHttpService {
+    // (undocumented)
+    addLoadingCount(count$: Observable<number>): void;
+    // (undocumented)
+    addToPath(path: string): string;
+    // (undocumented)
+    delete: HttpHandler;
+    // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    fetch: HttpHandler;
+    // (undocumented)
+    get: HttpHandler;
+    // (undocumented)
+    getBasePath(): string;
+    // (undocumented)
+    getLoadingCount$(): Observable<number>;
+    // (undocumented)
+    head: HttpHandler;
+    // (undocumented)
+    options: HttpHandler;
+    // (undocumented)
+    patch: HttpHandler;
+    // (undocumented)
+    post: HttpHandler;
+    // (undocumented)
+    put: HttpHandler;
+    // (undocumented)
+    removeFromPath(path: string): string;
+    // (undocumented)
+    stop(): void;
+}
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {

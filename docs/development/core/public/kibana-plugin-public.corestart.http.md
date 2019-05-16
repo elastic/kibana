@@ -4,10 +4,10 @@
 
 ## CoreStart.http property
 
-[HttpStart](./kibana-plugin-public.httpstart.md)
+[IHttpService](./kibana-plugin-public.ihttpservice.md)
 
 <b>Signature:</b>
 
 ```typescript
-http: HttpStart;
+http: IHttpService;
 ```
