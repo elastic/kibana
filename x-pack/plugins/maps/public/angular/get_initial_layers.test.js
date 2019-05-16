@@ -8,6 +8,19 @@ jest.mock('../meta', () => {
   return {};
 });
 
+jest.mock('ui/chrome', () => ({
+  getInjected: (key) => {
+    if (key === 'emsTileLayerId') {
+      return {
+        bright: 'road_map',
+        desaturated: 'road_map_desaturated',
+        dark: 'dark_map',
+      };
+    }
+    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+  }
+}));
+
 import { getInitialLayers } from './get_initial_layers';
 
 const mockKibanaDataSource = {
