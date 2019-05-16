@@ -21,7 +21,8 @@ import { difference, get, set } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
 import { getTransform } from '../../deprecation';
-import { isSubtree } from '../../../core/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { hasConfigPathIntersection } from '../../../core/server/config/';
 
 const getFlattenedKeys = object => Object.keys(getFlattenedObject(object));
 
@@ -69,7 +70,7 @@ async function getUnusedConfigKeys(
   return difference(inputKeys, appliedKeys).filter(
     unusedConfigKey =>
       !coreHandledConfigPaths.some(usedInCoreConfigKey =>
-        isSubtree(unusedConfigKey, usedInCoreConfigKey)
+        hasConfigPathIntersection(unusedConfigKey, usedInCoreConfigKey)
       )
   );
 }

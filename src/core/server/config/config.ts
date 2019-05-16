@@ -75,3 +75,13 @@ export interface Config {
    */
   toRaw(): Record<string, any>;
 }
+
+const pathDelimiter = '.';
+export function hasConfigPathIntersection(leafPath: string, rootPath: string) {
+  if (!leafPath || !rootPath) {
+    throw new Error(`Paths were expected, but given leaf: ${leafPath} and root: ${rootPath}`);
+  }
+  const leafSegments = leafPath.split(pathDelimiter);
+  const rootSegments = rootPath.split(pathDelimiter);
+  return rootSegments.every((rootSegment, index) => leafSegments[index] === rootSegment);
+}

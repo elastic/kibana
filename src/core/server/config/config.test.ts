@@ -16,24 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isSubtree } from './tree';
+import { hasConfigPathIntersection } from './config';
 
-describe('isSubtree()', () => {
+describe('hasConfigPathIntersection()', () => {
   test('Should return true if leaf is descendent to the root', () => {
-    expect(isSubtree('a.b', 'a.b')).toBe(true);
-    expect(isSubtree('a.b.c', 'a')).toBe(true);
-    expect(isSubtree('a.b.c.d', 'a.b')).toBe(true);
+    expect(hasConfigPathIntersection('a.b', 'a.b')).toBe(true);
+    expect(hasConfigPathIntersection('a.b.c', 'a')).toBe(true);
+    expect(hasConfigPathIntersection('a.b.c.d', 'a.b')).toBe(true);
   });
   test('Should return false if leaf is not descendent to the root', () => {
-    expect(isSubtree('a.bc', 'a.b')).toBe(false);
-    expect(isSubtree('a', 'a.b')).toBe(false);
+    expect(hasConfigPathIntersection('a.bc', 'a.b')).toBe(false);
+    expect(hasConfigPathIntersection('a', 'a.b')).toBe(false);
   });
-  test('Should return false if either path is empty', () => {
-    expect(isSubtree('a', '')).toBe(false);
-    expect(isSubtree('', 'a')).toBe(false);
-    expect(isSubtree('', '')).toBe(false);
-  });
-  test('Should handle configurable delimiter symbol', () => {
-    expect(isSubtree('a;b;c;d', 'a;b', ';')).toBe(true);
+  test('Should throw if either path is empty', () => {
+    expect(() => hasConfigPathIntersection('a', '')).toThrow();
+    expect(() => hasConfigPathIntersection('', 'a')).toThrow();
+    expect(() => hasConfigPathIntersection('', '')).toThrow();
   });
 });

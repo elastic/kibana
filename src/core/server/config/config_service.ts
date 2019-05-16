@@ -24,7 +24,7 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
-import { isSubtree } from '../../utils/tree';
+import { hasConfigPathIntersection } from './config';
 
 /** @internal */
 export class ConfigService {
@@ -197,4 +197,4 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  * handled paths.
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
-  handledPaths.some(handledPath => isSubtree(path, handledPath));
+  handledPaths.some(handledPath => hasConfigPathIntersection(path, handledPath));
