@@ -100,6 +100,9 @@ export class EditorComponent extends React.Component<IProps> {
     ) {
       this.revealPosition(this.props.revealPosition);
     }
+    if (this.monaco && qs !== prevProps.location.search) {
+      this.monaco.updateUrlQuery(qs);
+    }
     if (this.monaco && this.monaco.editor) {
       if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {
         this.loadBlame(this.props.blames);

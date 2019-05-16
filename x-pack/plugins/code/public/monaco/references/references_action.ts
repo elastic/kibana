@@ -9,7 +9,10 @@ import url from 'url';
 import { parseSchema } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 
-export function registerReferencesAction(e: editor.IStandaloneCodeEditor, search: string) {
+export function registerReferencesAction(
+  e: editor.IStandaloneCodeEditor,
+  getUrlQuery: () => string
+) {
   e.addAction({
     id: 'editor.action.referenceSearch.trigger',
     label: 'Find All References',
@@ -19,7 +22,7 @@ export function registerReferencesAction(e: editor.IStandaloneCodeEditor, search
       const position = ed.getPosition();
       const { uri } = parseSchema(ed.getModel().uri.toString());
       const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;
-      const queries = url.parse(search, true).query;
+      const queries = url.parse(getUrlQuery(), true).query;
       const query = queryString.stringify({
         ...queries,
         tab: 'references',

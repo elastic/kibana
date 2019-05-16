@@ -64,7 +64,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
     ) {
       bg = <div className="code-full-width-node" />;
     }
-    const queryObject = url.parse(this.props.location.search, true);
+    const queries = url.parse(this.props.location.search, true).query;
     return (
       <div className="code-symbol-container">
         {bg}
@@ -90,7 +90,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
           <Link
             to={url.format({
               pathname: RepositoryUtils.locationToUrl(location),
-              query: { sideTab: 'structure', ...queryObject },
+              query: { sideTab: 'structure', ...queries },
             })}
             className="code-symbol-link"
             onClick={this.getClickHandler({ name, location })}
