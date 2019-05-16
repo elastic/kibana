@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Range } from '../../utils/range';
 
@@ -63,7 +62,7 @@ function NumberRow({
 
   const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) =>
     onChange({
-      value: get(event, 'target.value'),
+      value: event.target.value,
       id: model.id,
     });
 
@@ -86,15 +85,13 @@ function NumberRow({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={deleteBtnAriaLabel}>
-          <EuiButtonIcon
-            aria-label={deleteBtnAriaLabel}
-            color="danger"
-            iconType="trash"
-            onClick={() => onDelete(model.id)}
-            disabled={disableDelete}
-          />
-        </EuiToolTip>
+        <EuiButtonIcon
+          aria-label={deleteBtnAriaLabel}
+          color="danger"
+          iconType="trash"
+          onClick={() => onDelete(model.id)}
+          disabled={disableDelete}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
