@@ -47,7 +47,7 @@ From *Data* you can change the data source that is connected to this element.
 [role="screenshot"]
 image::images/canvas_workpad_edit_style.png[]
 
-. Try changing the color palette. Click the Back button in your 
+. From *Display*, try changing the color palette. Click the Back button in your 
 browser to undo your change.
 
 . Try dragging the element around the page. Grab the resize handles to make 
