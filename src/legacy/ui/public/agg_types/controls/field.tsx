@@ -30,16 +30,21 @@ import { FieldParamType } from '../param_types';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
+interface FieldParamEditorProps extends AggParamEditorProps<FieldParamType> {
+  customLabel?: string;
+}
+
 function FieldParamEditor({
   agg,
   aggParam,
+  customLabel,
   indexedFields = [],
   showValidation,
   value,
   setTouched,
   setValidity,
   setValue,
-}: AggParamEditorProps<FieldParamType>) {
+}: FieldParamEditorProps) {
   const selectedOptions: ComboBoxGroupedOption[] = value
     ? [{ label: value.displayName, value }]
     : [];
@@ -81,7 +86,7 @@ function FieldParamEditor({
 
   return (
     <EuiFormRow
-      label={label}
+      label={customLabel || label}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}
