@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, Component } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -13,124 +12,138 @@ import {
   EuiSelect,
   EuiCallOut
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getExistingIndices, getExistingIndexPatterns }
   from '../util/indexing_service';
 
-export const IndexSettings = injectI18n(function IndexSettings({
-  disabled,
-  indexName,
-  setIndexName,
-  setSelectedIndexType,
-  indexTypes,
-  intl,
-  setHasIndexErrors
-}) {
-  const [indexNames, setIndexNames] = useState(null);
-  const [indexNameError, setIndexNameError] = useState('');
-  const [indexPatterns, setIndexPatterns] = useState(null);
+export class IndexSettings extends Component {
 
-  useEffect(() => {
-    setHasIndexErrors(!!indexNameError);
-  });
+  state = {
+    indexNameError: '',
+    indexDisabled: true,
+    indexPatterns: null,
+    indexNames: null,
+    indexName: '',
+  };
 
-  if (!indexNames) {
-    getExistingIndices().then(indices => {
-      const indexNames = indices
-        ? indices.map(({ name }) => name)
-        : [];
-      setIndexNames(indexNames);
-    });
+  componentDidUpdate(prevProps, prevState) {
+    const { indexNameError } = this.state;
+    if (prevState.indexNameError !== indexNameError) {
+      this.props.setHasIndexErrors(!!indexNameError);
+    }
+    const { disabled, indexTypes } = this.props;
+    const indexDisabled = disabled || !indexTypes || !indexTypes.length;
+    if (indexDisabled !== this.state.indexDisabled) {
+      this.setState({ indexDisabled });
+    }
+    if (this.props.indexName !== this.state.indexName) {
+      this.setState({ indexName: this.props.indexName });
+    }
+    this._getIndexNames();
+    this._getIndexPatterns();
   }
 
-  if (!indexPatterns) {
-    getExistingIndexPatterns().then(
-      indexPatterns => setIndexPatterns(indexPatterns)
+  _getIndexNames() {
+    if (!this.state.indexNames) {
+      getExistingIndices().then(indices => {
+        const indexNames = indices
+          ? indices.map(({ name }) => name)
+          : [];
+        this.setState({ indexNames });
+      });
+    }
+  }
+
+  _getIndexPatterns() {
+    if (!this.state.indexPatterns) {
+      getExistingIndexPatterns().then(patterns => {
+        const indexPatterns = patterns
+          ? patterns.map(({ name }) => name)
+          : [];
+        this.setState({ indexPatterns });
+      });
+    }
+  }
+
+  render() {
+    const { setIndexName, setSelectedIndexType, indexTypes } = this.props;
+    const { indexNameError, indexDisabled, indexName, indexNames } = this.state;
+
+    return (
+      <Fragment>
+        <EuiSpacer size="m"/>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.file_upload.indexNameLabel"
+              defaultMessage="Index type"
+            />
+          }
+        >
+          <EuiSelect
+            disabled={indexDisabled}
+            options={indexTypes.map(indexType => ({
+              text: indexType,
+              value: indexType,
+            }))}
+            onChange={({ target }) => setSelectedIndexType(target.value)}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m"/>
+        {indexDisabled
+          ? null
+          : (
+            <EuiCallOut
+              title="Index name guidelines"
+              iconType="pin"
+            >
+              <div>
+                <ul>
+                  <li>Must be a new index</li>
+                  <li>Lowercase only</li>
+                  <li>{`Cannot include \\, /, *, ?, ", <, >, |, \` \` \
+                      (space character), , (comma), #`
+                  }
+                  </li>
+                  <li>{`Cannot start with -, _, +`}</li>
+                  <li>{`Cannot be . or ..`}</li>
+                  <li>{
+                    `Cannot be longer than 255 bytes (note it is bytes, \
+                      so multi-byte characters will count towards the 255 \
+                      limit faster)`
+                  }
+                  </li>
+                </ul>
+              </div>
+            </EuiCallOut>
+          )}
+        <EuiSpacer size="s"/>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.file_upload.indexNameLabel"
+              defaultMessage="Index name"
+            />
+          }
+          isInvalid={indexNameError !== ''}
+          error={[indexNameError]}
+        >
+          <EuiFieldText
+            disabled={indexDisabled}
+            placeholder={'Enter Index Name'}
+            value={indexName}
+            onChange={onIndexChange(setIndexName, err => this.setState({ indexNameError: err }), indexNames)}
+            isInvalid={indexNameError !== ''}
+            aria-label={'Index name, required field'}
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="s"/>
+
+      </Fragment>
     );
   }
-
-  const indexDisabled = disabled || !indexTypes || !indexTypes.length;
-
-  return (
-    <Fragment>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.file_upload.indexNameLabel"
-            defaultMessage="Index type"
-          />
-        }
-      >
-        <EuiSelect
-          disabled={indexDisabled}
-          options={indexTypes.map(indexType =>({
-            text: indexType,
-            value: indexType,
-          }))}
-          onChange={({ target }) => setSelectedIndexType(target.value)}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      {indexDisabled
-        ? null
-        : (
-          <EuiCallOut
-            title="Index name guidelines"
-            iconType="pin"
-          >
-            <div>
-              <ul>
-                <li>Must be a new index</li>
-                <li>Lowercase only</li>
-                <li>{`Cannot include \\, /, *, ?, ", <, >, |, \` \` \
-                  (space character), , (comma), #`
-                }
-                </li>
-                <li>{`Cannot start with -, _, +`}</li>
-                <li>{`Cannot be . or ..`}</li>
-                <li>{
-                  `Cannot be longer than 255 bytes (note it is bytes, \
-                  so multi-byte characters will count towards the 255 \
-                  limit faster)`
-                }
-                </li>
-              </ul>
-            </div>
-          </EuiCallOut>
-        )}
-      <EuiSpacer size="s" />
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.file_upload.indexNameLabel"
-            defaultMessage="Index name"
-          />
-        }
-        isInvalid={indexNameError !== ''}
-        error={[indexNameError]}
-      >
-        <EuiFieldText
-          disabled={indexDisabled}
-          placeholder={intl.formatMessage({
-            id: 'xpack.file_upload.indexNamePlaceholder',
-            defaultMessage: 'Enter Index Name'
-          })}
-          value={indexName}
-          onChange={onIndexChange(setIndexName, setIndexNameError, indexNames)}
-          isInvalid={indexNameError !== ''}
-          aria-label={intl.formatMessage({
-            id: 'xpack.file_upload.indexNameAriaLabel',
-            defaultMessage: 'Index name, required field'
-          })}
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="s" />
-
-    </Fragment>
-  );
-});
+}
 
 function onIndexChange(setIndex, setIndexNameError, indexNames) {
   return ({ target }) => {
