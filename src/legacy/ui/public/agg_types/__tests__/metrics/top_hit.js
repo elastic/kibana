@@ -42,7 +42,7 @@ describe('Top hit metric', function () {
         val: sortOrder
       };
       params.aggregate = {
-        val: aggregate
+        value: aggregate
       };
       params.size = size;
       const vis = new Vis(indexPattern, {
