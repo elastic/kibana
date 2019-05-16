@@ -47,10 +47,6 @@ class IndexPatternCreation {
   }
 }
 
-export const IndexPatternCreationFactory = (Private, $http) => {
-  return (type = 'default') => {
-    const indexPatternCreationRegistry = Private(IndexPatternCreationConfigRegistry);
-    const indexPatternCreationProvider = new IndexPatternCreation(indexPatternCreationRegistry, $http, type);
-    return indexPatternCreationProvider;
-  };
-};
+export const IndexPatternCreationFactory = $http =>
+  (type = 'default') =>
+    new IndexPatternCreation(IndexPatternCreationConfigRegistry, $http, type);
