@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, flatten } from 'lodash';
 import { getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
@@ -291,8 +291,16 @@ export class SavedObjectsRepository {
 
     const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
 
+    const indexes = flatten(
+      Object.values(this._schema).map(schema =>
+        Object.values(schema).map(props => props.indexPattern)
+      )
+    )
+      .filter(pattern => pattern !== undefined)
+      .concat([this._index]);
+
     const esOptions = {
-      index: this._index,
+      index: indexes,
       ignore: [404],
       refresh: 'wait_for',
       body: {

@@ -1106,7 +1106,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith('deleteByQuery', {
         body: { conflicts: 'proceed' },
         ignore: [404],
-        index: '.kibana-test',
+        index: ['beats', '.kibana-test'],
         refresh: 'wait_for',
       });
     });
