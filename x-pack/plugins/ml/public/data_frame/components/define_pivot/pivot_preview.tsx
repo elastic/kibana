@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { SFC, useContext, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButtonIcon,
   EuiCallOut,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
+  EuiInMemoryTableProps,
   EuiPanel,
   EuiProgress,
   EuiTitle,
@@ -20,14 +25,24 @@ import {
 import { dictionaryToArray } from '../../../../common/types/common';
 
 import {
-  IndexPatternContext,
+  DataFramePreviewRequest,
+  isKibanaContext,
+  KibanaContext,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   SimpleQuery,
 } from '../../common';
 
+import { getPivotPreviewDevConsoleStatement } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
+
+// TODO EUI's types for EuiInMemoryTable is missing these props
+interface CompressedTableProps extends EuiInMemoryTableProps {
+  compressed: boolean;
+}
+
+const CompressedTable = (EuiInMemoryTable as any) as SFC<CompressedTableProps>;
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -53,32 +68,57 @@ function usePrevious(value: any) {
   return ref.current;
 }
 
-const PreviewTitle = () => (
-  <EuiTitle size="xs">
-    <span>
-      {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
-        defaultMessage: 'Data frame pivot preview',
-      })}
-    </span>
-  </EuiTitle>
-);
+interface PreviewTitleProps {
+  previewRequest: DataFramePreviewRequest;
+}
 
-interface Props {
+const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.pivotPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+  });
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <span>
+            {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
+              defaultMessage: 'Data frame pivot preview',
+            })}
+          </span>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiCopy
+          beforeMessage={euiCopyText}
+          textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}
+        >
+          {(copy: () => void) => (
+            <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+          )}
+        </EuiCopy>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+interface PivotPreviewProps {
   aggs: PivotAggsConfigDict;
   groupBy: PivotGroupByConfigDict;
   query: SimpleQuery;
 }
 
-export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query }) => {
+export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 
-  const { dataFramePreviewData, errorMessage, status } = usePivotPreviewData(
+  const indexPattern = kibanaContext.currentIndexPattern;
+  const { dataFramePreviewData, errorMessage, previewRequest, status } = usePivotPreviewData(
     indexPattern,
     query,
     aggs,
@@ -117,14 +157,11 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
       <EuiPanel grow={false}>
-        <PreviewTitle />
+        <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewError',
-            {
-              defaultMessage: 'An error occurred loading the pivot preview.',
-            }
-          )}
+          title={i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewError', {
+            defaultMessage: 'An error occurred loading the pivot preview.',
+          })}
           color="danger"
           iconType="cross"
         >
@@ -137,10 +174,10 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
   if (dataFramePreviewData.length === 0) {
     return (
       <EuiPanel grow={false}>
-        <PreviewTitle />
+        <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate(
-            'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutTitle',
+            'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutTitle',
             {
               defaultMessage: 'Pivot preview not available',
             }
@@ -149,7 +186,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
         >
           <p>
             {i18n.translate(
-              'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutBody',
+              'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutBody',
               {
                 defaultMessage: 'Please choose at least one group-by field and aggregation.',
               }
@@ -181,16 +218,20 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
 
   return (
     <EuiPanel>
-      <PreviewTitle />
+      <PreviewTitle previewRequest={previewRequest} />
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {dataFramePreviewData.length > 0 && clearTable === false && (
-        <EuiInMemoryTable
+        <CompressedTable
+          compressed
           items={dataFramePreviewData}
           columns={columns}
-          pagination={true}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
           sorting={sorting}
         />
       )}

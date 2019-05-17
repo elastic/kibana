@@ -9,6 +9,7 @@ import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
+  DataFramePreviewRequest,
   DropDownLabel,
   DropDownOption,
   PivotAggsConfigDict,
@@ -94,3 +95,7 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
     aggOptionsData,
   };
 }
+
+export const getPivotPreviewDevConsoleStatement = (request: DataFramePreviewRequest) => {
+  return `POST _data_frame/transforms/_preview\n${JSON.stringify(request, null, 2)}\n`;
+};

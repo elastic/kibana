@@ -13,3 +13,4 @@ export { GrokDebuggerProvider } from './grok_debugger';
 export { UserMenuProvider } from './user_menu';
 export { UptimeProvider } from './uptime';
 export { InfraSourceConfigurationFlyoutProvider } from './infra_source_configuration_flyout';
+export { InfraLogStreamProvider } from './infra_log_stream';

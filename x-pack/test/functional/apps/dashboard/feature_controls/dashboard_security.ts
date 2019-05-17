@@ -22,7 +22,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
 
-  describe('security', () => {
+  describe('dashboard security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -38,7 +38,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       await PageObjects.security.forceLogout();
     });
 
-    describe('global dashboard all privileges', () => {
+    describe('global dashboard all privileges, no embeddable application privileges', () => {
       before(async () => {
         await security.role.create('global_dashboard_all_role', {
           elasticsearch: {
@@ -129,9 +129,15 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
       });
+
+      it(`does not allow a map to be edited`, async () => {
+        await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
+        await panelActions.openContextMenu();
+        await panelActions.expectMissingEditPanelAction();
+      });
     });
 
-    describe('global dashboard & visualize all privileges', () => {
+    describe('global dashboard & embeddable all privileges', () => {
       before(async () => {
         await security.role.create('global_dashboard_visualize_all_role', {
           elasticsearch: {
@@ -142,6 +148,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
               feature: {
                 dashboard: ['all'],
                 visualize: ['all'],
+                maps: ['all'],
               },
               spaces: ['*'],
             },
@@ -171,6 +178,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`allows a visualization to be edited`, async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await panelActions.openContextMenu();
+        await panelActions.expectExistsEditPanelAction();
+      });
+
+      it(`allows a map to be edited`, async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
         await panelActions.openContextMenu();
         await panelActions.expectExistsEditPanelAction();
       });

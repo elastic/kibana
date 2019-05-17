@@ -5,11 +5,13 @@
  */
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import * as React from 'react';
+import React from 'react';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
+import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { InfraLoadingPanel } from '../../loading';
 import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
@@ -19,8 +21,6 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 
 interface ScrollableLogTextStreamViewProps {
-  height: number;
-  width: number;
   items: StreamItem[];
   scale: TextScale;
   wrap: boolean;
@@ -92,8 +92,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
   public render() {
     const {
       items,
-      height,
-      width,
       scale,
       wrap,
       isReloading,
@@ -107,90 +105,95 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
     } = this.props;
     const { targetId } = this.state;
     const hasItems = items.length > 0;
-    if (isReloading && !hasItems) {
-      return (
-        <InfraLoadingPanel
-          height={height}
-          width={width}
-          text={
-            <FormattedMessage
-              id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
-              defaultMessage="Loading entries"
-            />
-          }
-        />
-      );
-    } else if (!hasItems) {
-      return (
-        <NoData
-          titleText={intl.formatMessage({
-            id: 'xpack.infra.logs.emptyView.noLogMessageTitle',
-            defaultMessage: 'There are no log messages to display.',
-          })}
-          bodyText={intl.formatMessage({
-            id: 'xpack.infra.logs.emptyView.noLogMessageDescription',
-            defaultMessage: 'Try adjusting your filter.',
-          })}
-          refetchText={intl.formatMessage({
-            id: 'xpack.infra.logs.emptyView.checkForNewDataButtonLabel',
-            defaultMessage: 'Check for new data',
-          })}
-          onRefetch={this.handleReload}
-          testString="logsNoDataPrompt"
-        />
-      );
-    } else {
-      return (
-        <VerticalScrollPanel
-          height={height}
-          width={width}
-          onVisibleChildrenChange={this.handleVisibleChildrenChange}
-          target={targetId}
-          hideScrollbar={true}
-          data-test-subj={'logStream'}
-        >
-          {registerChild => (
-            <>
-              <LogTextStreamLoadingItemView
-                alignment="bottom"
-                isLoading={isLoadingMore}
-                hasMore={hasMoreBeforeStart}
-                isStreaming={false}
-                lastStreamingUpdate={null}
+
+    return (
+      <ScrollableLogTextStreamViewWrapper>
+        {isReloading && !hasItems ? (
+          <InfraLoadingPanel
+            width="100%"
+            height="100%"
+            text={
+              <FormattedMessage
+                id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
+                defaultMessage="Loading entries"
               />
-              {items.map(item => (
-                <MeasurableItemView
-                  register={registerChild}
-                  registrationKey={getStreamItemId(item)}
-                  key={getStreamItemId(item)}
+            }
+          />
+        ) : !hasItems ? (
+          <NoData
+            titleText={intl.formatMessage({
+              id: 'xpack.infra.logs.emptyView.noLogMessageTitle',
+              defaultMessage: 'There are no log messages to display.',
+            })}
+            bodyText={intl.formatMessage({
+              id: 'xpack.infra.logs.emptyView.noLogMessageDescription',
+              defaultMessage: 'Try adjusting your filter.',
+            })}
+            refetchText={intl.formatMessage({
+              id: 'xpack.infra.logs.emptyView.checkForNewDataButtonLabel',
+              defaultMessage: 'Check for new data',
+            })}
+            onRefetch={this.handleReload}
+            testString="logsNoDataPrompt"
+          />
+        ) : (
+          <AutoSizer content>
+            {({ measureRef, content: { width = 0, height = 0 } }) => (
+              <ScrollPanelSizeProbe innerRef={measureRef}>
+                <VerticalScrollPanel
+                  height={height}
+                  width={width}
+                  onVisibleChildrenChange={this.handleVisibleChildrenChange}
+                  target={targetId}
+                  hideScrollbar={true}
+                  data-test-subj={'logStream'}
                 >
-                  {measureRef => (
-                    <LogTextStreamItemView
-                      openFlyoutWithItem={this.handleOpenFlyout}
-                      ref={measureRef}
-                      item={item}
-                      scale={scale}
-                      wrap={wrap}
-                      isHighlighted={
-                        highlightedItem ? item.logEntry.gid === highlightedItem : false
-                      }
-                    />
+                  {registerChild => (
+                    <>
+                      <LogTextStreamLoadingItemView
+                        alignment="bottom"
+                        isLoading={isLoadingMore}
+                        hasMore={hasMoreBeforeStart}
+                        isStreaming={false}
+                        lastStreamingUpdate={null}
+                      />
+                      {items.map(item => (
+                        <MeasurableItemView
+                          register={registerChild}
+                          registrationKey={getStreamItemId(item)}
+                          key={getStreamItemId(item)}
+                        >
+                          {itemMeasureRef => (
+                            <LogTextStreamItemView
+                              openFlyoutWithItem={this.handleOpenFlyout}
+                              ref={itemMeasureRef}
+                              item={item}
+                              scale={scale}
+                              wrap={wrap}
+                              isHighlighted={
+                                highlightedItem ? item.logEntry.gid === highlightedItem : false
+                              }
+                            />
+                          )}
+                        </MeasurableItemView>
+                      ))}
+                      <LogTextStreamLoadingItemView
+                        alignment="top"
+                        isLoading={isStreaming || isLoadingMore}
+                        hasMore={hasMoreAfterEnd}
+                        isStreaming={isStreaming}
+                        lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
+                        onLoadMore={this.handleLoadNewerItems}
+                      />
+                    </>
                   )}
-                </MeasurableItemView>
-              ))}
-              <LogTextStreamLoadingItemView
-                alignment="top"
-                isLoading={isStreaming || isLoadingMore}
-                hasMore={hasMoreAfterEnd}
-                isStreaming={isStreaming}
-                lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
-                onLoadMore={this.handleLoadNewerItems}
-              />
-            </>
-          )}
-        </VerticalScrollPanel>
-      );
-    }
+                </VerticalScrollPanel>
+              </ScrollPanelSizeProbe>
+            )}
+          </AutoSizer>
+        )}
+      </ScrollableLogTextStreamViewWrapper>
+    );
   }
 
   private handleOpenFlyout = (id: string) => {
@@ -242,3 +245,16 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
 }
 
 export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamViewClass);
+
+const ScrollableLogTextStreamViewWrapper = euiStyled.div`
+  overflow: hidden;
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  align-items: stretch;
+`;
+
+const ScrollPanelSizeProbe = euiStyled.div`
+  overflow: hidden;
+  flex: 1 1 0%;
+`;

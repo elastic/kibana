@@ -19,9 +19,14 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
+
+import { Type } from '@kbn/config-schema';
+
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
 import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
+
+export type PluginConfigSchema = Type<unknown> | null;
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -85,7 +90,7 @@ export interface PluginManifest {
 /**
  * Small container object used to expose information about discovered plugins that may
  * or may not have been started.
- * @internal
+ * @public
  */
 export interface DiscoveredPlugin {
   /**
@@ -235,6 +240,25 @@ export class PluginWrapper<
     }
 
     this.instance = undefined;
+  }
+
+  public getConfigSchema(): PluginConfigSchema {
+    if (!this.manifest.server) {
+      return null;
+    }
+    const pluginPathServer = join(this.path, 'server');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pluginDefinition = require(pluginPathServer);
+
+    if (!('config' in pluginDefinition)) {
+      this.log.debug(`"${pluginPathServer}" does not export "config".`);
+      return null;
+    }
+
+    if (!(pluginDefinition.config.schema instanceof Type)) {
+      throw new Error('Configuration schema expected to be an instance of Type');
+    }
+    return pluginDefinition.config.schema;
   }
 
   private createPluginInstance() {

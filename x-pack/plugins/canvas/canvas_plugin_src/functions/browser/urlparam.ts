@@ -6,6 +6,7 @@
 
 import { parse } from 'url';
 import { NullContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   param: string;
@@ -13,12 +14,13 @@ interface Arguments {
 }
 
 export function urlparam(): NullContextFunction<'urlparam', Arguments, string | string[]> {
+  const { help, args: argHelp } = getFunctionHelp().urlparam;
+
   return {
     name: 'urlparam',
     aliases: [],
     type: 'string',
-    help:
-      'Access URL parameters and use them in expressions. Eg https://localhost:5601/app/canvas?myVar=20. This will always return a string',
+    help,
     context: {
       types: ['null'],
     },
@@ -26,13 +28,13 @@ export function urlparam(): NullContextFunction<'urlparam', Arguments, string | 
       param: {
         types: ['string'],
         aliases: ['_', 'var', 'variable'],
-        help: 'The URL hash parameter to access',
+        help: argHelp.param,
         multi: false,
       },
       default: {
         types: ['string'],
         default: '""',
-        help: 'Return this string if the url parameter is not defined',
+        help: argHelp.default,
       },
     },
     fn: (_context, args) => {

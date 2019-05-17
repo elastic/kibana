@@ -21,6 +21,7 @@ import { OverlayService, OverlayStart } from './overlay_service';
 const createStartContractMock = () => {
   const startContract: jest.Mocked<PublicMethodsOf<OverlayStart>> = {
     openFlyout: jest.fn(),
+    openModal: jest.fn(),
   };
   return startContract;
 };

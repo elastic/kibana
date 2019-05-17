@@ -764,6 +764,7 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
         defaultMessage: 'The timefilter selection to use when Kibana is started without one',
       }),
+      requiresPageReload: true,
     },
     'timepicker:refreshIntervalDefaults': {
       name: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
@@ -778,6 +779,7 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsText', {
         defaultMessage: `The timefilter's default refresh interval`,
       }),
+      requiresPageReload: true,
     },
     'timepicker:quickRanges': {
       name: i18n.translate('kbn.advancedSettings.timepicker.quickRangesTitle', {

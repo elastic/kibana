@@ -19,24 +19,20 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapAndFlattenFiltersProvider } from '../map_and_flatten_filters';
+import { mapAndFlattenFilters } from '../map_and_flatten_filters';
+import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
   describe('mapAndFlattenFilters()', function () {
-    let mapAndFlattenFilters;
-    let $rootScope;
+    let mockIndexPatterns;
 
     beforeEach(ngMock.module(
       'kibana',
-      'kibana/courier',
-      function ($provide) {
-        $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
-      }
+      'kibana/courier'
     ));
 
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
-      $rootScope = _$rootScope_;
+    beforeEach(ngMock.inject(function (Private) {
+      mockIndexPatterns = Private(IndexPatternMock);
     }));
 
     const filters = [
@@ -51,7 +47,7 @@ describe('Filter Bar Directive', function () {
     ];
 
     it('should map and flatten the filters', function (done) {
-      mapAndFlattenFilters(filters).then(function (results) {
+      mapAndFlattenFilters(mockIndexPatterns, filters).then(function (results) {
         expect(results).to.have.length(5);
         expect(results[0]).to.have.property('meta');
         expect(results[1]).to.have.property('meta');
@@ -70,7 +66,6 @@ describe('Filter Bar Directive', function () {
         expect(results[4].meta).to.have.property('value', 'apache');
         done();
       });
-      $rootScope.$apply();
     });
 
   });

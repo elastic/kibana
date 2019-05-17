@@ -24,13 +24,13 @@ import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
 import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithLogTextviewUrlState } from '../../containers/logs/with_log_textview';
-import { WithStreamItems } from '../../containers/logs/with_stream_items';
+import { ReduxSourceIdBridge, WithStreamItems } from '../../containers/logs/with_stream_items';
 import { Source } from '../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { derivedIndexPattern } = useContext(Source.Context);
+  const { derivedIndexPattern, sourceId, version } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -44,16 +44,17 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   return (
     <>
+      <ReduxSourceIdBridge sourceId={sourceId} />
       <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
       <WithLogMinimapUrlState />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
-      <WithLogPosition>
-        {({ jumpToTargetPosition, stopLiveStreaming }) => (
-          <WithLogFilter indexPattern={derivedIndexPattern}>
-            {({ applyFilterQueryFromKueryExpression }) =>
+      <WithLogFilter indexPattern={derivedIndexPattern}>
+        {({ applyFilterQueryFromKueryExpression }) => (
+          <WithLogPosition>
+            {({ jumpToTargetPosition, stopLiveStreaming }) =>
               flyoutVisible ? (
                 <LogFlyout
                   setFilter={applyFilterQueryFromKueryExpression}
@@ -68,97 +69,73 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 />
               ) : null
             }
-          </WithLogFilter>
-        )}
-      </WithLogPosition>
-      <WithLogFilter indexPattern={derivedIndexPattern}>
-        {({ filterQuery }) => (
-          <PageContent>
-            <AutoSizer content>
-              {({ measureRef, content: { width = 0, height = 0 } }) => (
-                <LogPageEventStreamColumn innerRef={measureRef}>
-                  <WithLogPosition>
-                    {({
-                      isAutoReloading,
-                      jumpToTargetPosition,
-                      reportVisiblePositions,
-                      targetPosition,
-                    }) => (
-                      <WithStreamItems initializeOnMount={!isAutoReloading}>
-                        {({
-                          hasMoreAfterEnd,
-                          hasMoreBeforeStart,
-                          isLoadingMore,
-                          isReloading,
-                          items,
-                          lastLoadedTime,
-                          loadNewerEntries,
-                        }) => (
-                          <ScrollableLogTextStreamView
-                            hasMoreAfterEnd={hasMoreAfterEnd}
-                            hasMoreBeforeStart={hasMoreBeforeStart}
-                            height={height}
-                            isLoadingMore={isLoadingMore}
-                            isReloading={isReloading}
-                            isStreaming={isAutoReloading}
-                            items={items}
-                            jumpToTarget={jumpToTargetPosition}
-                            lastLoadedTime={lastLoadedTime}
-                            loadNewerItems={loadNewerEntries}
-                            reportVisibleInterval={reportVisiblePositions}
-                            scale={textScale}
-                            target={targetPosition}
-                            width={width}
-                            wrap={textWrap}
-                            setFlyoutItem={setFlyoutId}
-                            setFlyoutVisibility={setFlyoutVisibility}
-                            highlightedItem={surroundingLogsId ? surroundingLogsId : null}
-                          />
-                        )}
-                      </WithStreamItems>
-                    )}
-                  </WithLogPosition>
-                </LogPageEventStreamColumn>
-              )}
-            </AutoSizer>
-            <AutoSizer content>
-              {({ measureRef, content: { width = 0, height = 0 } }) => {
-                return (
-                  <LogPageMinimapColumn innerRef={measureRef}>
-                    <WithSummary>
-                      {({ buckets }) => (
-                        <WithLogPosition>
-                          {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
-                            <LogMinimap
-                              height={height}
-                              width={width}
-                              highlightedInterval={visibleTimeInterval}
-                              intervalSize={intervalSize}
-                              jumpToTarget={jumpToTargetPosition}
-                              summaryBuckets={buckets}
-                              target={visibleMidpointTime}
-                            />
-                          )}
-                        </WithLogPosition>
-                      )}
-                    </WithSummary>
-                  </LogPageMinimapColumn>
-                );
-              }}
-            </AutoSizer>
-          </PageContent>
+          </WithLogPosition>
         )}
       </WithLogFilter>
+      <PageContent key={`${sourceId}-${version}`}>
+        <WithLogPosition>
+          {({ isAutoReloading, jumpToTargetPosition, reportVisiblePositions, targetPosition }) => (
+            <WithStreamItems initializeOnMount={!isAutoReloading}>
+              {({
+                hasMoreAfterEnd,
+                hasMoreBeforeStart,
+                isLoadingMore,
+                isReloading,
+                items,
+                lastLoadedTime,
+                loadNewerEntries,
+              }) => (
+                <ScrollableLogTextStreamView
+                  hasMoreAfterEnd={hasMoreAfterEnd}
+                  hasMoreBeforeStart={hasMoreBeforeStart}
+                  isLoadingMore={isLoadingMore}
+                  isReloading={isReloading}
+                  isStreaming={isAutoReloading}
+                  items={items}
+                  jumpToTarget={jumpToTargetPosition}
+                  lastLoadedTime={lastLoadedTime}
+                  loadNewerItems={loadNewerEntries}
+                  reportVisibleInterval={reportVisiblePositions}
+                  scale={textScale}
+                  target={targetPosition}
+                  wrap={textWrap}
+                  setFlyoutItem={setFlyoutId}
+                  setFlyoutVisibility={setFlyoutVisibility}
+                  highlightedItem={surroundingLogsId ? surroundingLogsId : null}
+                />
+              )}
+            </WithStreamItems>
+          )}
+        </WithLogPosition>
+        <AutoSizer content>
+          {({ measureRef, content: { width = 0, height = 0 } }) => {
+            return (
+              <LogPageMinimapColumn innerRef={measureRef}>
+                <WithSummary>
+                  {({ buckets }) => (
+                    <WithLogPosition>
+                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
+                        <LogMinimap
+                          height={height}
+                          width={width}
+                          highlightedInterval={visibleTimeInterval}
+                          intervalSize={intervalSize}
+                          jumpToTarget={jumpToTargetPosition}
+                          summaryBuckets={buckets}
+                          target={visibleMidpointTime}
+                        />
+                      )}
+                    </WithLogPosition>
+                  )}
+                </WithSummary>
+              </LogPageMinimapColumn>
+            );
+          }}
+        </AutoSizer>
+      </PageContent>
     </>
   );
 };
-
-const LogPageEventStreamColumn = euiStyled.div`
-  flex: 1 0 0%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-`;
 
 const LogPageMinimapColumn = euiStyled.div`
   flex: 1 0 0%;

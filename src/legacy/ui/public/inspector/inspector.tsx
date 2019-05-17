@@ -19,7 +19,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutRef } from '../../../../core/public';
+import { OverlayRef } from '../../../../core/public';
 import { getNewPlatform } from '../new_platform';
 import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
@@ -50,7 +50,7 @@ interface InspectorOptions {
   title?: string;
 }
 
-export type InspectorSession = FlyoutRef;
+export type InspectorSession = OverlayRef;
 
 /**
  * Opens the inspector panel for the given adapters and close any previously opened

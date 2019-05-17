@@ -122,7 +122,7 @@ describe('Saved Objects Mixin', () => {
         'kibanaMigrator',
         expect.any(Object)
       );
-      expect(mockServer.decorate).toHaveBeenCalledTimes(1);
+      expect(mockServer.decorate).toHaveBeenCalledTimes(2);
       expect(mockServer.route).not.toHaveBeenCalled();
     });
   });

@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import {
-  IndexPatternContext,
+  KibanaContext,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
@@ -26,7 +26,7 @@ jest.mock('react', () => {
 
 describe('Data Frame: <DefinePivotSummary />', () => {
   test('Minimal initialization', () => {
-    const indexPattern = {
+    const currentIndexPattern = {
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -52,9 +52,11 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <IndexPatternContext.Provider value={indexPattern}>
+        <KibanaContext.Provider
+          value={{ currentIndexPattern, indexPatterns: {}, kibanaConfig: {} }}
+        >
           <DefinePivotSummary {...props} />
-        </IndexPatternContext.Provider>
+        </KibanaContext.Provider>
       </div>
     );
 

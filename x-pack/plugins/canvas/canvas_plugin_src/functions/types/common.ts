@@ -87,13 +87,44 @@ export interface Datatable {
   type: 'datatable';
 }
 
-export type Legend = 'nw' | 'sw' | 'ne' | 'se';
+export enum Legend {
+  NORTH_WEST = 'nw',
+  SOUTH_WEST = 'sw',
+  NORTH_EAST = 'ne',
+  SOUTH_EAST = 'se',
+}
+
+export enum Position {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+  RIGHT = 'right',
+}
+
+/**
+ * Allowed column names in a PointSeries
+ */
+export type PointSeriesColumnName = 'x' | 'y' | 'color' | 'size' | 'text';
+
+/**
+ * Column in a PointSeries
+ */
+export interface PointSeriesColumn {
+  type: 'number' | 'string';
+  role: 'measure' | 'dimension';
+  expression: string;
+}
+
+/**
+ * Represents a collection of valid Columns in a PointSeries
+ */
+export type PointSeriesColumns = { [key in PointSeriesColumnName]: PointSeriesColumn };
 
 /**
  * A `PointSeries` in Canvas is a unique structure that represents dots on a chart.
  */
 export interface PointSeries {
-  columns: DatatableColumn[];
+  columns: PointSeriesColumns;
   rows: Array<Record<string, any>>;
   type: 'pointseries';
 }
@@ -130,7 +161,7 @@ export interface Ticks {
 export interface AxisConfig {
   type: 'axisConfig';
   show: boolean;
-  position: 'bottom' | 'top' | 'left' | 'right';
+  position: Position;
   min: number;
   max: number;
   tickSize: number;

@@ -716,6 +716,133 @@ Object {
       expect(() => migrate(doc)).toThrowError(/My Vis/);
     });
   });
+
+  describe('date histogram custom interval removal', () => {
+    const migrate = doc => migrations.visualization['7.1.0'](doc);
+    let doc;
+    beforeEach(() => {
+      doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                'enabled': true,
+                'id': '1',
+                'params': {
+                  'customInterval': '1h'
+                },
+                'schema': 'metric',
+                'type': 'count'
+              },
+              {
+                'enabled': true,
+                'id': '2',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '4',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'custom',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '3',
+                'params': {
+                  'customBucket': {
+                    'enabled': true,
+                    'id': '1-bucket',
+                    'params': {
+                      'customInterval': '2h',
+                      'drop_partials': false,
+                      'extended_bounds': {},
+                      'field': 'timestamp',
+                      'interval': 'custom',
+                      'min_doc_count': 1,
+                      'useNormalizedEsInterval': true
+                    },
+                    'type': 'date_histogram'
+                  },
+                  'customMetric': {
+                    'enabled': true,
+                    'id': '1-metric',
+                    'params': {},
+                    'type': 'count'
+                  }
+                },
+                'schema': 'metric',
+                'type': 'max_bucket'
+              },
+            ]
+          }),
+        }
+      };
+    });
+
+    it('should remove customInterval from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.customInterval');
+    });
+
+    it('should not change interval from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1].params.interval).toBe(JSON.parse(doc.attributes.visState).aggs[1].params.interval);
+    });
+
+    it('should not remove customInterval from non date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[0]).toHaveProperty('params.customInterval');
+    });
+
+    it('should set interval with customInterval value and remove customInterval when interval equals "custom"', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2].params.interval).toBe(JSON.parse(doc.attributes.visState).aggs[2].params.customInterval);
+      expect(aggs[2]).not.toHaveProperty('params.customInterval');
+    });
+
+    it('should remove customInterval from nested aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.customInterval');
+    });
+
+    it('should remove customInterval from nested aggregations and set interval with customInterval value', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3].params.customBucket.params.interval)
+        .toBe(JSON.parse(doc.attributes.visState).aggs[3].params.customBucket.params.customInterval);
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.customInterval');
+    });
+
+    it('should not fail on date histograms without a customInterval', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customInterval');
+    });
+  });
 });
 
 describe('dashboard', () => {

@@ -218,6 +218,7 @@ function discoverController(
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
+  $scope.refreshInterval = timefilter.getRefreshInterval();
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';

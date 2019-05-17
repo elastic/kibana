@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 type Context = boolean | number | string | null;
 
@@ -12,16 +13,18 @@ interface Arguments {
 }
 
 export function lt(): ContextFunction<'lt', Context, Arguments, boolean> {
+  const { help, args: argHelp } = getFunctionHelp().lt;
+
   return {
     name: 'lt',
     type: 'boolean',
-    help: 'Return if the context is less than the argument',
+    help,
     args: {
       value: {
         aliases: ['_'],
         types: ['boolean', 'number', 'string', 'null'],
         required: true,
-        help: 'The value to compare the context to',
+        help: argHelp.value,
       },
     },
     fn: (context, args) => {
