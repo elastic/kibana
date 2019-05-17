@@ -106,7 +106,6 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
     async _makeKibanaMap() {
       const options = {};
       const uiState = this.vis.getUiState();
-      await this._updateBaseLayer();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
       const centerFromUIState = uiState.get('mapCenter');
       options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
@@ -126,6 +125,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       this._kibanaMap.on('baseLayer:loading', () => {
         this._baseLayerDirty = true;
       });
+      await this._updateBaseLayer();
     }
 
 
