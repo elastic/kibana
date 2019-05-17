@@ -40,6 +40,27 @@ function TopAggregateParamEditor({
   setTouched,
   wrappedWithInlineComp,
 }: AggParamEditorProps<AggregateValueProp> & SelectParamEditorProps<AggregateValueProp>) {
+  const isValid = !!value;
+  const isFirstRun = useRef(true);
+  const fieldType = agg.params.field && agg.params.field.type;
+  const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
+  const filteredOptions = aggParam.options.raw
+    .filter(
+      option => fieldType && option.isCompatibleType(fieldType) && option.isCompatibleVis(visName)
+    )
+    .map(({ text, value: val }) => ({ text, value: val }))
+    .sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
+  const options = [emptyValue, ...filteredOptions];
+
+  const iconTipContent = filteredOptions.length
+    ? i18n.translate('common.ui.aggTypes.aggregateWithTooltip', {
+        defaultMessage:
+          'Choose a strategy for combining multiple hits or a multi-valued field into a single metric',
+      })
+    : i18n.translate('common.ui.aggTypes.aggregateWith.error', {
+        defaultMessage: 'Chosen field has no compatible aggregations',
+      });
+
   const label = (
     <>
       <FormattedMessage
@@ -48,37 +69,11 @@ function TopAggregateParamEditor({
       />{' '}
       <EuiIconTip
         position="right"
-        content={i18n.translate('common.ui.aggTypes.aggregateWithTooltip', {
-          defaultMessage:
-            'Choose a strategy for combining multiple hits or a multi-valued field into a single metric',
-        })}
-        type="questionInCircle"
+        content={iconTipContent}
+        type={filteredOptions.length ? 'questionInCircle' : 'alert'}
       />
     </>
   );
-
-  const fieldType = agg.params.field && agg.params.field.type;
-  const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
-  const filteredOptions = aggParam.options.raw
-    .filter(
-      option =>
-        agg.params.field && option.isCompatibleType(fieldType) && option.isCompatibleVis(visName)
-    )
-    .map(({ text, value: val }) => ({ text, value: val }))
-    .sort((a, b) => {
-      if (a.text < b.text) {
-        return -1;
-      }
-      if (a.text > b.text) {
-        return 1;
-      }
-
-      return 0;
-    });
-  const isValid = !!value;
-  const isFirstRun = useRef(true);
-
-  const options = [emptyValue, ...filteredOptions];
 
   useEffect(
     () => {
@@ -94,7 +89,7 @@ function TopAggregateParamEditor({
         return;
       }
 
-      if (options.length === 2) {
+      if (filteredOptions.length === 1) {
         setValue(aggParam.options.byValue[filteredOptions[0].value]);
       } else if (value) {
         setValue(undefined);
@@ -124,6 +119,7 @@ function TopAggregateParamEditor({
         onChange={handleChange}
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}
+        disabled={!filteredOptions.length}
         onBlur={setTouched}
       />
     </EuiFormRow>

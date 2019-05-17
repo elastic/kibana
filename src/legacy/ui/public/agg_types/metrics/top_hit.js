@@ -26,7 +26,7 @@ import topSortEditor from '../controls/top_sort.html';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { i18n } from '@kbn/i18n';
 import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
-import { SizeParamEditor } from '../controls/size';
+import { TopSizeParamEditor } from '../controls/top_size';
 import { TopAggregateParamEditor } from '../controls/top_aggregate';
 
 const isNumber = function (type) {
@@ -154,7 +154,7 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'size',
-      editorComponent: wrapWithInlineComp(SizeParamEditor),
+      editorComponent: wrapWithInlineComp(TopSizeParamEditor),
       default: 1
     },
     {
