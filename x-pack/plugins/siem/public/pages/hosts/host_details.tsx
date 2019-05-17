@@ -8,12 +8,16 @@ import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import chrome, { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
+import { FiltersGlobal } from '../../components/filters_global';
+import { HeaderPage } from '../../components/header_page';
+import { LastEventTime } from '../../components/last_event_time';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
@@ -25,7 +29,7 @@ import { GlobalTime } from '../../containers/global_time';
 import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType } from '../../graphql/types';
+import { IndexType, LastEventIndexKey } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
@@ -58,8 +62,17 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
     <WithSource sourceId="default" indexTypes={indexTypes}>
       {({ auditbeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
-          <>
-            <HostsKql indexPattern={indexPattern} type={type} />
+          <StickyContainer>
+            <FiltersGlobal>
+              <HostsKql indexPattern={indexPattern} type={type} />
+            </FiltersGlobal>
+
+            <HeaderPage
+              subtitle={
+                <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={hostName} />
+              }
+              title={hostName}
+            />
 
             <GlobalTime>
               {({ to, from, setQuery }) => (
@@ -81,9 +94,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     )}
                   </HostOverviewByNameQuery>
 
-                  <EuiSpacer size="s" />
-                  <EuiHorizontalRule margin="xs" />
-                  <EuiSpacer />
+                  <EuiHorizontalRule />
 
                   <AuthenticationsQuery
                     sourceId="default"
@@ -177,7 +188,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                 </>
               )}
             </GlobalTime>
-          </>
+          </StickyContainer>
         ) : (
           <EmptyPage
             title={i18n.NO_AUDITBEAT_INDICES}
