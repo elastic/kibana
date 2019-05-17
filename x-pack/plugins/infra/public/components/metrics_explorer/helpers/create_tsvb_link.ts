@@ -90,7 +90,7 @@ export const createFilterFromOptions = (
   if (options.groupBy) {
     filters.push(`${options.groupBy}: ${series.id}`);
   }
-  return filters.join(' and ');
+  return filters.join(' AND ');
 };
 
 export const createTSVBLink = (
