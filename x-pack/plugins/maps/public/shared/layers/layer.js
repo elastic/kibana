@@ -105,7 +105,11 @@ export class AbstractLayer {
     console.warn('Icon not available for this layer type');
   }
 
-  getTOCDetails() {
+  hasLegendDetails() {
+    return false;
+  }
+
+  getLegendDetails() {
     return null;
   }
 

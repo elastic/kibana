@@ -290,6 +290,8 @@ export interface InfraSnapshotNodePath {
   value: string;
 
   label: string;
+
+  ip?: string | null;
 }
 
 export interface InfraSnapshotNodeMetric {
@@ -1455,6 +1457,8 @@ export namespace InfraSnapshotNodePathResolvers {
     value?: ValueResolver<string, TypeParent, Context>;
 
     label?: LabelResolver<string, TypeParent, Context>;
+
+    ip?: IpResolver<string | null, TypeParent, Context>;
   }
 
   export type ValueResolver<
@@ -1464,6 +1468,11 @@ export namespace InfraSnapshotNodePathResolvers {
   > = Resolver<R, Parent, Context>;
   export type LabelResolver<
     R = string,
+    Parent = InfraSnapshotNodePath,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type IpResolver<
+    R = string | null,
     Parent = InfraSnapshotNodePath,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;

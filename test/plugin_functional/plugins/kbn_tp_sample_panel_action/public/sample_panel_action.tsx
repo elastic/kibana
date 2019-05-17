@@ -28,11 +28,17 @@ import {
 
 class SamplePanelAction extends ContextMenuAction {
   constructor() {
-    super({
-      displayName: 'Sample Panel Action',
-      id: 'samplePanelAction',
-      parentPanelId: 'mainMenu',
-    });
+    super(
+      {
+        id: 'samplePanelAction',
+        parentPanelId: 'mainMenu',
+      },
+      {
+        getDisplayName: () => {
+          return 'Sample Panel Action';
+        },
+      }
+    );
   }
   public onClick = ({ embeddable }: PanelActionAPI) => {
     if (!embeddable) {

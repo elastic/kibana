@@ -22,11 +22,10 @@ import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
+const indexTypes = [IndexType.FILEBEAT, IndexType.AUDITBEAT, IndexType.PACKETBEAT];
+
 export const OverviewComponent = pure(() => (
-  <WithSource
-    sourceId="default"
-    indexTypes={[IndexType.FILEBEAT, IndexType.AUDITBEAT, IndexType.PACKETBEAT]}
-  >
+  <WithSource sourceId="default" indexTypes={indexTypes}>
     {({ auditbeatIndicesExist, filebeatIndicesExist }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) &&
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (

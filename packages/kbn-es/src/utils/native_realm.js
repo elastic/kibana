@@ -32,19 +32,13 @@ exports.NativeRealm = class NativeRealm {
   async setPassword(username, password = this._elasticPassword) {
     this._log.info(`setting ${chalk.bold(username)} password to ${chalk.bold(password)}`);
 
-    try {
-      await this._client.security.changePassword({
-        username,
-        refresh: 'wait_for',
-        body: {
-          password,
-        },
-      });
-    } catch (e) {
-      this._log.error(
-        chalk.red(`unable to set password for ${chalk.bold(username)}: ${e.message}`)
-      );
-    }
+    await this._client.security.changePassword({
+      username,
+      refresh: 'wait_for',
+      body: {
+        password,
+      },
+    });
   }
 
   async setPasswords(options) {
@@ -53,9 +47,12 @@ exports.NativeRealm = class NativeRealm {
       return;
     }
 
-    (await this.getReservedUsers()).forEach(user => {
-      this.setPassword(user, options[`password.${user}`]);
-    });
+    const reservedUsers = await this.getReservedUsers();
+    await Promise.all(
+      reservedUsers.map(async user => {
+        await this.setPassword(user, options[`password.${user}`]);
+      })
+    );
   }
 
   async getReservedUsers() {
@@ -75,8 +72,12 @@ exports.NativeRealm = class NativeRealm {
         body: { features },
       } = await this._client.xpack.info({ categories: 'features' });
       return features.security && features.security.enabled && features.security.available;
-    } catch (e) {
-      return false;
+    } catch (error) {
+      if (error.meta && error.meta.statusCode === 400) {
+        return false;
+      }
+
+      throw error;
     }
   }
 };

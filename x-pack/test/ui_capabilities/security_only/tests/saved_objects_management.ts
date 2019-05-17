@@ -33,66 +33,30 @@ export default function savedObjectsManagementTests({
         expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
         switch (scenario.username) {
           case 'superuser':
+          case 'all':
+          case 'dual_privileges_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
               savedObjectsManagementBuilder.uiCapabilities('all')
             );
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
             break;
-          case 'all':
-          case 'dual_privileges_all':
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                all: [
-                  'config',
-                  'graph-workspace',
-                  'map',
-                  'canvas-workpad',
-                  'canvas-element',
-                  'index-pattern',
-                  'visualization',
-                  'search',
-                  'dashboard',
-                  'telemetry',
-                  'timelion-sheet',
-                  'url',
-                  'infrastructure-ui-source',
-                ],
-              })
-            );
-            break;
           case 'read':
           case 'dual_privileges_read':
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                read: [
-                  'config',
-                  'graph-workspace',
-                  'map',
-                  'canvas-workpad',
-                  'canvas-element',
-                  'index-pattern',
-                  'visualization',
-                  'search',
-                  'dashboard',
-                  'timelion-sheet',
-                  'url',
-                  'infrastructure-ui-source',
-                ],
-              })
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
+            const expectedRead = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+              savedObjectsManagementBuilder.uiCapabilities('read')
             );
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expectedRead);
             break;
           case 'foo_all':
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                all: ['foo', 'telemetry'],
-                read: ['index-pattern', 'config'],
-              })
-            );
-            break;
           case 'foo_read':
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.build({
-                read: ['foo', 'index-pattern', 'config'],
+                all: [],
+                read: [],
               })
             );
             break;

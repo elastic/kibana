@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { networkActions } from '../../../../store/actions';
 import {
   Direction,
   DomainsEdges,
@@ -18,7 +19,7 @@ import {
   FlowDirection,
   FlowTarget,
 } from '../../../../graphql/types';
-import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
 

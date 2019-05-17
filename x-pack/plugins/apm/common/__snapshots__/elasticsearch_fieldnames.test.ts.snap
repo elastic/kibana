@@ -12,6 +12,20 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Error METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
 exports[`Error METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
@@ -74,6 +88,20 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Span METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
 exports[`Span METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
@@ -135,6 +163,20 @@ exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
+
+exports[`Transaction METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
 
 exports[`Transaction METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 

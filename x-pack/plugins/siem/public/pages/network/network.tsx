@@ -35,9 +35,11 @@ interface NetworkComponentReduxProps {
   filterQuery: string;
 }
 
+const indexTypes = [IndexType.FILEBEAT, IndexType.PACKETBEAT];
+
 type NetworkComponentProps = NetworkComponentReduxProps;
 const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
+  <WithSource sourceId="default" indexTypes={indexTypes}>
     {({ filebeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
         <>

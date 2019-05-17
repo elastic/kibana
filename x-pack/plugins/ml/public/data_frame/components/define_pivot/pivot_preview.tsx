@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiInMemoryTableProps,
   EuiPanel,
   EuiProgress,
   EuiTitle,
@@ -25,7 +26,8 @@ import { dictionaryToArray } from '../../../../common/types/common';
 
 import {
   DataFramePreviewRequest,
-  IndexPatternContext,
+  isKibanaContext,
+  KibanaContext,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
@@ -34,6 +36,13 @@ import {
 
 import { getPivotPreviewDevConsoleStatement } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
+
+// TODO EUI's types for EuiInMemoryTable is missing these props
+interface CompressedTableProps extends EuiInMemoryTableProps {
+  compressed: boolean;
+}
+
+const CompressedTable = (EuiInMemoryTable as any) as SFC<CompressedTableProps>;
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -102,12 +111,13 @@ interface PivotPreviewProps {
 export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 
+  const indexPattern = kibanaContext.currentIndexPattern;
   const { dataFramePreviewData, errorMessage, previewRequest, status } = usePivotPreviewData(
     indexPattern,
     query,
@@ -214,10 +224,14 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {dataFramePreviewData.length > 0 && clearTable === false && (
-        <EuiInMemoryTable
+        <CompressedTable
+          compressed
           items={dataFramePreviewData}
           columns={columns}
-          pagination={true}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
           sorting={sorting}
         />
       )}

@@ -22,22 +22,12 @@ import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
 import _ from 'lodash';
-import { compact, debounce, get, isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import React, { Component } from 'react';
-import { kfetch } from 'ui/kfetch';
-import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
 import { timeHistory } from 'ui/timefilter/time_history';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiOutsideClickDetector,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 
 // @ts-ignore
 import { EuiSuperUpdateButton } from '@elastic/eui';
@@ -45,31 +35,13 @@ import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
-import {
-  AutocompleteSuggestion,
-  AutocompleteSuggestionType,
-  getAutocompleteProvider,
-} from 'ui/autocomplete_providers';
 import chrome from 'ui/chrome';
+import { PersistedLog } from 'ui/persisted_log';
+import { QueryBarInput } from './query_bar_input';
 
-import { fromUser, matchPairs, toUser } from '../lib';
-import { QueryLanguageSwitcher } from './language_switcher';
-import { SuggestionsComponent } from './typeahead/suggestions_component';
-
-const KEY_CODES = {
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  ENTER: 13,
-  ESC: 27,
-  TAB: 9,
-  HOME: 36,
-  END: 35,
-};
+import { getQueryLog } from '../lib/get_query_log';
 
 const config = chrome.getUiSettingsClient();
-const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
 
 interface Query {
   query: string;
@@ -104,10 +76,6 @@ interface Props {
 interface State {
   query: Query;
   inputIsPristine: boolean;
-  isSuggestionsVisible: boolean;
-  index: number | null;
-  suggestions: AutocompleteSuggestion[];
-  suggestionLimit: number;
   currentProps?: Props;
   dateRangeFrom: string;
   dateRangeTo: string;
@@ -123,7 +91,7 @@ export class QueryBarUI extends Component<Props, State> {
     let nextQuery = null;
     if (nextProps.query.query !== prevState.query.query) {
       nextQuery = {
-        query: toUser(nextProps.query.query),
+        query: nextProps.query.query,
         language: nextProps.query.language,
       };
     } else if (nextProps.query.language !== prevState.query.language) {
@@ -171,31 +139,19 @@ export class QueryBarUI extends Component<Props, State> {
   */
   public state = {
     query: {
-      query: toUser(this.props.query.query),
+      query: this.props.query.query,
       language: this.props.query.language,
     },
     inputIsPristine: true,
-    isSuggestionsVisible: false,
     currentProps: this.props,
-    index: null,
-    suggestions: [],
-    suggestionLimit: 50,
     dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
     isDateRangeInvalid: false,
   };
 
-  public updateSuggestions = debounce(async () => {
-    const suggestions = (await this.getSuggestions()) || [];
-    if (!this.componentIsUnmounting) {
-      this.setState({ suggestions });
-    }
-  }, 100);
-
   public inputRef: HTMLInputElement | null = null;
 
-  private componentIsUnmounting = false;
-  private persistedLog: PersistedLog | null = null;
+  private persistedLog: PersistedLog | undefined;
 
   public isDirty = () => {
     if (!this.props.showDatePicker) {
@@ -209,174 +165,18 @@ export class QueryBarUI extends Component<Props, State> {
     );
   };
 
-  public increaseLimit = () => {
-    this.setState({
-      suggestionLimit: this.state.suggestionLimit + 50,
-    });
-  };
-
-  public incrementIndex = (currentIndex: number) => {
-    let nextIndex = currentIndex + 1;
-    if (currentIndex === null || nextIndex >= this.state.suggestions.length) {
-      nextIndex = 0;
-    }
-    this.setState({ index: nextIndex });
-  };
-
-  public decrementIndex = (currentIndex: number) => {
-    const previousIndex = currentIndex - 1;
-    if (previousIndex < 0) {
-      this.setState({ index: this.state.suggestions.length - 1 });
-    } else {
-      this.setState({ index: previousIndex });
-    }
-  };
-
-  public getSuggestions = async () => {
-    if (!this.inputRef) {
-      return;
-    }
-
-    const {
-      query: { query, language },
-    } = this.state;
-    const recentSearchSuggestions = this.getRecentSearchSuggestions(query);
-
-    const autocompleteProvider = getAutocompleteProvider(language);
-    if (
-      !autocompleteProvider ||
-      !Array.isArray(this.props.indexPatterns) ||
-      compact(this.props.indexPatterns).length === 0
-    ) {
-      return recentSearchSuggestions;
-    }
-
-    const indexPatterns = this.props.indexPatterns;
-    const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
-
-    const { selectionStart, selectionEnd } = this.inputRef;
-    if (selectionStart === null || selectionEnd === null) {
-      return;
-    }
-
-    const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
-      query,
-      selectionStart,
-      selectionEnd,
-    });
-    return [...suggestions, ...recentSearchSuggestions];
-  };
-
-  public selectSuggestion = ({
-    type,
-    text,
-    start,
-    end,
-  }: {
-    type: AutocompleteSuggestionType;
-    text: string;
-    start: number;
-    end: number;
-  }) => {
-    if (!this.inputRef) {
-      return;
-    }
-
-    const query = this.state.query.query;
-    const { selectionStart, selectionEnd } = this.inputRef;
-    if (selectionStart === null || selectionEnd === null) {
-      return;
-    }
-
-    const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
-
-    this.setState(
-      {
-        query: {
-          ...this.state.query,
-          query: value.substr(0, start) + text + value.substr(end),
-        },
-        index: null,
-      },
-      () => {
-        if (!this.inputRef) {
-          return;
-        }
-
-        this.inputRef.setSelectionRange(start + text.length, start + text.length);
-
-        if (type === recentSearchType) {
-          this.onSubmit();
-        } else {
-          this.updateSuggestions();
-        }
-      }
-    );
-  };
-
-  public getRecentSearchSuggestions = (query: string) => {
-    if (!this.persistedLog) {
-      return [];
-    }
-    const recentSearches = this.persistedLog.get();
-    const matchingRecentSearches = recentSearches.filter(recentQuery => {
-      const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
-      return recentQueryString.includes(query);
-    });
-    return matchingRecentSearches.map(recentSearch => {
-      const text = recentSearch;
-      const start = 0;
-      const end = query.length;
-      return { type: recentSearchType, text, start, end };
-    });
-  };
-
-  public onOutsideClick = () => {
-    if (this.state.isSuggestionsVisible) {
-      this.setState({ isSuggestionsVisible: false, index: null });
-    }
-  };
-
-  public onClickInput = (event: React.MouseEvent<HTMLInputElement>) => {
-    if (event.target instanceof HTMLInputElement) {
-      this.onInputChange(event.target.value);
-    }
-  };
-
   public onClickSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (this.persistedLog) {
+      this.persistedLog.add(this.state.query.query);
+    }
     this.onSubmit(() => event.preventDefault());
   };
 
-  public onClickSuggestion = (suggestion: AutocompleteSuggestion) => {
-    if (!this.inputRef) {
-      return;
-    }
-    this.selectSuggestion(suggestion);
-    this.inputRef.focus();
-  };
-
-  public onMouseEnterSuggestion = (index: number) => {
-    this.setState({ index });
-  };
-
-  public onInputChange = (value: string) => {
-    const hasValue = Boolean(value.trim());
-
+  public onChange = (query: Query) => {
     this.setState({
-      query: {
-        query: value,
-        language: this.state.query.language,
-      },
+      query,
       inputIsPristine: false,
-      isSuggestionsVisible: hasValue,
-      index: null,
-      suggestionLimit: 50,
     });
-  };
-
-  public onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.updateSuggestions();
-    this.onInputChange(event.target.value);
   };
 
   public onTimeChange = ({
@@ -400,93 +200,12 @@ export class QueryBarUI extends Component<Props, State> {
     );
   };
 
-  public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
-      this.setState({ isSuggestionsVisible: true });
-      if (event.target instanceof HTMLInputElement) {
-        this.onInputChange(event.target.value);
-      }
-    }
-  };
-
-  public onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.target instanceof HTMLInputElement) {
-      const { isSuggestionsVisible, index } = this.state;
-      const preventDefault = event.preventDefault.bind(event);
-      const { target, key, metaKey } = event;
-      const { value, selectionStart, selectionEnd } = target;
-      const updateQuery = (query: string, newSelectionStart: number, newSelectionEnd: number) => {
-        this.setState(
-          {
-            query: {
-              ...this.state.query,
-              query,
-            },
-          },
-          () => {
-            target.setSelectionRange(newSelectionStart, newSelectionEnd);
-          }
-        );
-      };
-
-      switch (event.keyCode) {
-        case KEY_CODES.DOWN:
-          event.preventDefault();
-          if (isSuggestionsVisible && index !== null) {
-            this.incrementIndex(index);
-          } else {
-            this.setState({ isSuggestionsVisible: true, index: 0 });
-          }
-          break;
-        case KEY_CODES.UP:
-          event.preventDefault();
-          if (isSuggestionsVisible && index !== null) {
-            this.decrementIndex(index);
-          }
-          break;
-        case KEY_CODES.ENTER:
-          event.preventDefault();
-          if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
-            this.selectSuggestion(this.state.suggestions[index]);
-          } else {
-            this.onSubmit(() => event.preventDefault());
-          }
-          break;
-        case KEY_CODES.ESC:
-          event.preventDefault();
-          this.setState({ isSuggestionsVisible: false, index: null });
-          break;
-        case KEY_CODES.TAB:
-          this.setState({ isSuggestionsVisible: false, index: null });
-          break;
-        default:
-          if (selectionStart !== null && selectionEnd !== null) {
-            matchPairs({
-              value,
-              selectionStart,
-              selectionEnd,
-              key,
-              metaKey,
-              updateQuery,
-              preventDefault,
-            });
-          }
-
-          break;
-      }
-    }
-  };
-
   public onSubmit = (preventDefault?: () => void) => {
     if (preventDefault) {
       preventDefault();
     }
 
     this.handleLuceneSyntaxWarning();
-
-    if (this.persistedLog) {
-      this.persistedLog.add(this.state.query.query);
-    }
 
     timeHistory.add({
       from: this.state.dateRangeFrom,
@@ -495,7 +214,7 @@ export class QueryBarUI extends Component<Props, State> {
 
     this.props.onSubmit({
       query: {
-        query: fromUser(this.state.query.query),
+        query: this.state.query.query,
         language: this.state.query.language,
       },
       dateRange: {
@@ -503,59 +222,22 @@ export class QueryBarUI extends Component<Props, State> {
         to: this.state.dateRangeTo,
       },
     });
-    this.setState({ isSuggestionsVisible: false });
   };
 
-  public onSelectLanguage = (language: string) => {
-    // Send telemetry info every time the user opts in or out of kuery
-    // As a result it is important this function only ever gets called in the
-    // UI component's change handler.
-    kfetch({
-      pathname: '/api/kibana/kql_opt_in_telemetry',
-      method: 'POST',
-      body: JSON.stringify({ opt_in: language === 'kuery' }),
-    });
-
-    this.props.store.set('kibana.userQueryLanguage', language);
-    this.props.onSubmit({
-      query: {
-        query: '',
-        language,
-      },
-      dateRange: {
-        from: this.state.dateRangeFrom,
-        to: this.state.dateRangeTo,
-      },
+  private onInputSubmit = (query: Query) => {
+    this.setState({ query }, () => {
+      this.onSubmit();
     });
   };
 
   public componentDidMount() {
-    this.persistedLog = new PersistedLog(
-      `typeahead:${this.props.appName}-${this.state.query.language}`,
-      {
-        maxLength: config.get('history:limit'),
-        filterDuplicates: true,
-      }
-    );
-    this.updateSuggestions();
+    this.persistedLog = getQueryLog(this.props.appName, this.props.query.language);
   }
 
   public componentDidUpdate(prevProps: Props) {
     if (prevProps.query.language !== this.props.query.language) {
-      this.persistedLog = new PersistedLog(
-        `typeahead:${this.props.appName}-${this.state.query.language}`,
-        {
-          maxLength: config.get('history:limit'),
-          filterDuplicates: true,
-        }
-      );
-      this.updateSuggestions();
+      this.persistedLog = getQueryLog(this.props.appName, this.props.query.language);
     }
-  }
-
-  public componentWillUnmount() {
-    this.updateSuggestions.cancel();
-    this.componentIsUnmounting = true;
   }
 
   public render() {
@@ -564,85 +246,20 @@ export class QueryBarUI extends Component<Props, State> {
     });
 
     return (
-      <EuiFlexGroup
-        className={classes}
-        responsive={this.props.showDatePicker ? true : false}
-        gutterSize="s"
-      >
+      <EuiFlexGroup className={classes} responsive={!!this.props.showDatePicker} gutterSize="s">
         <EuiFlexItem>
-          <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
-            {/* position:relative required on container so the suggestions appear under the query bar*/}
-            <div
-              style={{ position: 'relative' }}
-              role="combobox"
-              aria-haspopup="true"
-              aria-expanded={this.state.isSuggestionsVisible}
-              aria-owns="kbnTypeahead__items"
-              aria-controls="kbnTypeahead__items"
-            >
-              <form name="queryBarForm">
-                <div role="search">
-                  <div className="kuiLocalSearchAssistedInput">
-                    <EuiFieldText
-                      placeholder={this.props.intl.formatMessage({
-                        id: 'data.query.queryBar.searchInputPlaceholder',
-                        defaultMessage: 'Search',
-                      })}
-                      value={this.state.query.query}
-                      onKeyDown={this.onKeyDown}
-                      onKeyUp={this.onKeyUp}
-                      onChange={this.onChange}
-                      onClick={this.onClickInput}
-                      fullWidth
-                      autoFocus={!this.props.disableAutoFocus}
-                      inputRef={node => {
-                        if (node) {
-                          this.inputRef = node;
-                        }
-                      }}
-                      autoComplete="off"
-                      spellCheck={false}
-                      aria-label={this.props.intl.formatMessage(
-                        {
-                          id: 'data.query.queryBar.searchInputAriaLabel',
-                          defaultMessage:
-                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                        },
-                        {
-                          previouslyTranslatedPageTitle: this.props.screenTitle,
-                          pageType: this.props.appName,
-                        }
-                      )}
-                      type="text"
-                      data-test-subj="queryInput"
-                      aria-autocomplete="list"
-                      aria-controls="kbnTypeahead__items"
-                      aria-activedescendant={
-                        this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
-                      }
-                      role="textbox"
-                      prepend={this.props.prepend}
-                      append={
-                        <QueryLanguageSwitcher
-                          language={this.state.query.language}
-                          onSelectLanguage={this.onSelectLanguage}
-                        />
-                      }
-                    />
-                  </div>
-                </div>
-              </form>
-
-              <SuggestionsComponent
-                show={this.state.isSuggestionsVisible}
-                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-                index={this.state.index}
-                onClick={this.onClickSuggestion}
-                onMouseEnter={this.onMouseEnterSuggestion}
-                loadMore={this.increaseLimit}
-              />
-            </div>
-          </EuiOutsideClickDetector>
+          <QueryBarInput
+            appName={this.props.appName}
+            disableAutoFocus={this.props.disableAutoFocus}
+            indexPatterns={this.props.indexPatterns}
+            prepend={this.props.prepend}
+            query={this.state.query}
+            screenTitle={this.props.screenTitle}
+            store={this.props.store}
+            onChange={this.onChange}
+            onSubmit={this.onInputSubmit}
+            persistedLog={this.persistedLog}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
       </EuiFlexGroup>

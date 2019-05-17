@@ -8,9 +8,9 @@ import { onError } from 'apollo-link-error';
 import uuid from 'uuid';
 
 import { store } from '../../store';
-import { appActions } from '../../store';
 
 import * as i18n from './translations';
+import { appActions } from '../../store/actions';
 
 export const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors != null) {

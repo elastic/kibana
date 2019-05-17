@@ -19,6 +19,11 @@
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
 
+# Operations
+/src/dev/ @elastic/kibana-operations
+/src/setup_node_env/ @elastic/kibana-operations
+/src/optimize/ @elastic/kibana-operations
+
 # Platform
 /src/core/  @elastic/kibana-platform
 

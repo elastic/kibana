@@ -262,6 +262,8 @@ export interface InfraSnapshotNodePath {
   value: string;
 
   label: string;
+
+  ip?: string | null;
 }
 
 export interface InfraSnapshotNodeMetric {
@@ -597,13 +599,7 @@ export namespace FlyoutItemQuery {
     fields: Fields[];
   };
 
-  export type Key = {
-    __typename?: 'InfraTimeKey';
-
-    time: number;
-
-    tiebreaker: number;
-  };
+  export type Key = InfraTimeKeyFields.Fragment;
 
   export type Fields = {
     __typename?: 'InfraLogItemField';
@@ -874,6 +870,8 @@ export namespace WaffleNodesQuery {
     value: string;
 
     label: string;
+
+    ip?: string | null;
   };
 
   export type Metric = {

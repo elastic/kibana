@@ -5,12 +5,12 @@
  */
 
 import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { hostFieldsMap } from '../ecs_fields';
+import { cloudFieldsMap, hostFieldsMap } from '../ecs_fields';
 
 import { buildFieldsTermAggregation } from './helpers';
-import { HostDetailsRequestOptions } from './types';
+import { HostOverviewRequestOptions } from './types';
 
-export const buildHostDetailsQuery = ({
+export const buildHostOverviewQuery = ({
   fields,
   hostName,
   sourceConfiguration: {
@@ -21,8 +21,8 @@ export const buildHostDetailsQuery = ({
     winlogbeatAlias,
   },
   timerange: { from, to },
-}: HostDetailsRequestOptions) => {
-  const esFields = reduceFields(fields, hostFieldsMap);
+}: HostOverviewRequestOptions) => {
+  const esFields = reduceFields(fields, { ...hostFieldsMap, ...cloudFieldsMap });
 
   const filter = [
     { term: { 'host.name': hostName } },

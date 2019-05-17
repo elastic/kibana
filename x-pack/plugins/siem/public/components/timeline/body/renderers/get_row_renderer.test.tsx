@@ -14,7 +14,8 @@ import { Ecs } from '../../../../graphql/types';
 import { mockTimelineData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
 
-import { getRowRenderer, rowRenderers } from '.';
+import { rowRenderers } from '.';
+import { getRowRenderer } from './get_row_renderer';
 
 describe('get_column_renderer', () => {
   let nonSuricata: Ecs;

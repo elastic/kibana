@@ -29,6 +29,8 @@ declare interface Ml {
     startDataFrameTransformsJob(jobId: string): Promise<any>;
     stopDataFrameTransformsJob(jobId: string): Promise<any>;
   };
+
+  checkPrivilege(obj: object): Promise<any>;
   esSearch: any;
   getIndices(): Promise<EsIndex[]>;
 
