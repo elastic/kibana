@@ -178,9 +178,11 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const featuresMeta = {
-      hasPoints,
-      hasLines,
-      hasPolygons
+      hasFeatureType: {
+        [VECTOR_SHAPE_TYPES.POINT]: hasPoints,
+        [VECTOR_SHAPE_TYPES.LINE]: hasLines,
+        [VECTOR_SHAPE_TYPES.POLYGON]: hasPolygons
+      }
     };
 
     scaledFields.forEach(({ min, max, name }) => {
@@ -238,49 +240,36 @@ export class VectorStyle extends AbstractStyle {
     return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
   }
 
-  _getIsPointsOnly = async () => {
+  _checkIfOnlyFeatureType = async (featureType) => {
     const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === VECTOR_SHAPE_TYPES.POINT;
+      return supportedFeatures[0] === featureType;
     }
 
-    if (!this._descriptor.__styleMeta) {
+    if (!this._descriptor.__styleMeta || !this._descriptor.__styleMeta.hasFeatureType) {
       return false;
     }
 
-    const { hasPoints, hasLines, hasPolygons } = this._descriptor.__styleMeta;
-    return hasPoints && !hasLines && !hasPolygons;
+    const featureTypes = Object.keys(this._descriptor.__styleMeta.hasFeatureType);
+    return featureTypes.reduce((isOnlySingleFeatureType, featureTypeKey) => {
+      const hasFeature = this._descriptor.__styleMeta.hasFeatureType[featureTypeKey];
+      return featureTypeKey === featureType
+        ? isOnlySingleFeatureType && hasFeature
+        : isOnlySingleFeatureType && !hasFeature;
+    }, true);
+  }
+
+  _getIsPointsOnly = async () => {
+    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POINT);
   }
 
   _getIsLinesOnly = async () => {
-    const supportedFeatures = await this._source.getSupportedShapeTypes();
-
-    if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === VECTOR_SHAPE_TYPES.LINE;
-    }
-
-    if (!this._descriptor.__styleMeta) {
-      return false;
-    }
-
-    const { hasPoints, hasLines, hasPolygons } = this._descriptor.__styleMeta;
-    return hasLines && !hasPoints && !hasPolygons;
+    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
   }
 
   _getIsPolygonsOnly = async () => {
-    const supportedFeatures = await this._source.getSupportedShapeTypes();
-
-    if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === VECTOR_SHAPE_TYPES.POLYGON;
-    }
-
-    if (!this._descriptor.__styleMeta) {
-      return false;
-    }
-
-    const { hasPoints, hasLines, hasPolygons } = this._descriptor.__styleMeta;
-    return hasPolygons && !hasPoints && !hasLines;
+    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
   }
 
   _getFieldRange = (fieldName) => {

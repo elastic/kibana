@@ -101,9 +101,11 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({}, sourceMock);
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.hasPoints).toBe(true);
-      expect(featuresMeta.hasLines).toBe(false);
-      expect(featuresMeta.hasPolygons).toBe(false);
+      expect(featuresMeta.hasFeatureType).toEqual({
+        LINE: false,
+        POINT: true,
+        POLYGON: false
+      });
     });
 
     it('Should identify when feature collection only contains lines', async () => {
@@ -129,9 +131,11 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({}, sourceMock);
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.hasPoints).toBe(false);
-      expect(featuresMeta.hasLines).toBe(true);
-      expect(featuresMeta.hasPolygons).toBe(false);
+      expect(featuresMeta.hasFeatureType).toEqual({
+        LINE: true,
+        POINT: false,
+        POLYGON: false
+      });
     });
   });
 
@@ -160,7 +164,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       }
     });
 
-    it('Should not extract scaled field range when scaled field has not values', async () => {
+    it('Should not extract scaled field range when scaled field has no values', async () => {
       const vectorStyle = new VectorStyle({
         properties: {
           fillColor: {
@@ -175,7 +179,11 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       }, sourceMock);
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta).toEqual({ hasLines: false, hasPoints: true, hasPolygons: false, });
+      expect(featuresMeta.hasFeatureType).toEqual({
+        LINE: false,
+        POINT: true,
+        POLYGON: false
+      });
     });
 
     it('Should extract scaled field range', async () => {
