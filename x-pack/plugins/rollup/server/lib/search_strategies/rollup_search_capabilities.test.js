@@ -6,7 +6,7 @@
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 
 class DefaultSearchCapabilities {
-  constructor(request, batchRequestsSupport, fieldsCapabilities = {}) {
+  constructor(request, fieldsCapabilities = {}) {
     this.fieldsCapabilities = fieldsCapabilities;
     this.parseInterval = jest.fn((interval) => interval);
   }
@@ -16,7 +16,6 @@ describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';
   const testInterval = '10s';
   const rollupIndex = 'rollupIndex';
-  const batchRequestsSupport = true;
   const request = {};
 
   let RollupSearchCapabilities;
@@ -38,7 +37,7 @@ describe('Rollup Search Capabilities', () => {
       },
     };
 
-    rollupSearchCaps = new RollupSearchCapabilities(request, batchRequestsSupport, fieldsCapabilities, rollupIndex);
+    rollupSearchCaps = new RollupSearchCapabilities(request, fieldsCapabilities, rollupIndex);
   });
 
   test('should create instance of RollupSearchRequest', () => {
