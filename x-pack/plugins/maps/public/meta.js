@@ -42,7 +42,8 @@ export async function getDataSources() {
           landingPageUrl: chrome.getInjected('emsLandingPageUrl')
         });
         const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
-        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, 'todo_use_licenseuid', useCorsForElasticMapsService);
+        const xpackLicenseId = chrome.getInjected('xpackLicenseId');
+        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, xpackLicenseId, useCorsForElasticMapsService);
 
         //override EMS cors config
         fullMetaJson.data_sources.ems = {
