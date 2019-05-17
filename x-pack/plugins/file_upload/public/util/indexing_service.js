@@ -36,8 +36,10 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
     data: [],
     index: indexName,
   });
-  const { id } = createdIndex;
-  if (!id) {
+  let id;
+  if (createdIndex && createdIndex.id) {
+    id = createdIndex.id;
+  } else {
     throw `Error creating index`;
   }
 
