@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALL_SOURCES } from '../../../shared/layers/sources/all_sources';
+import { GeojsonFileSource } from '../../../shared/layers/sources/client_file_source';
 import {
   EuiSpacer,
   EuiPanel,
@@ -13,20 +13,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SourceEditor = ({
-  clearSource, sourceType, indexingTriggered, inspectorAdapters, previewLayer
+export const ImportEditor = ({
+  clearSource, indexingTriggered, ...props
 }) => {
-  const editorProperties = {
-    onPreviewSource: previewLayer,
-    inspectorAdapters,
-  };
-  const Source = ALL_SOURCES.find(Source => {
-    return Source.type === sourceType;
-  });
-  if (!Source) {
-    throw new Error(`Unexpected source type: ${sourceType}`);
-  }
-  const editor = Source.renderEditor(editorProperties);
+  const editorProperties = getEditorProperties({ indexingTriggered, ...props });
+  const editor = GeojsonFileSource.renderEditor(editorProperties);
   return (
     <Fragment>
       {
@@ -56,3 +47,18 @@ export const SourceEditor = ({
   );
 };
 
+function getEditorProperties({
+  inspectorAdapters, onRemove, previewLayer, addImportLayer,
+  indexingTriggered, onIndexReady, onIndexSuccess, onIndexError
+}) {
+  return {
+    onPreviewSource: previewLayer,
+    inspectorAdapters,
+    onRemove,
+    boolIndexData: indexingTriggered,
+    addAndViewSource: source => addImportLayer(source),
+    onIndexReadyStatusChange: onIndexReady,
+    onIndexSuccess,
+    onIndexError,
+  };
+}

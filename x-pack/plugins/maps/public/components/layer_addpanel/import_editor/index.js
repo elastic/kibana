@@ -7,7 +7,7 @@
 
 
 import { connect } from 'react-redux';
-import { SourceEditor } from './view';
+import { ImportEditor } from './view';
 import { getInspectorAdapters } from '../../../store/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
@@ -16,6 +16,6 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedFlyOut = connect(mapStateToProps)(SourceEditor);
-export { connectedFlyOut as SourceEditor };
+const connectedFlyOut = connect(mapStateToProps)(ImportEditor);
+export { connectedFlyOut as ImportEditor };
 

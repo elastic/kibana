@@ -7,7 +7,8 @@
 import React, { Component } from 'react';
 import { SourceSelect } from './source_select/source_select';
 import { FlyoutFooter } from './flyout_footer';
-import { SourceEditor } from './source_editor/view';
+import { SourceEditor } from './source_editor';
+import { ImportEditor } from './import_editor';
 import {
   EuiFlexGroup,
   EuiTitle,
@@ -83,12 +84,10 @@ export class AddLayerPanel extends Component {
       return (
         <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />
       );
-    } else {
+    } else if (this.state.importView) {
       return (
-        <SourceEditor
-          isImport={this.state.importView}
+        <ImportEditor
           clearSource={this._clearLayerData}
-          sourceType={this.state.sourceType}
           previewLayer={source => this._viewLayer(source, this.state.importView)}
           addImportLayer={source => this._addImportedLayer(source)}
           indexingTriggered={this.state.indexingTriggered}
@@ -96,7 +95,16 @@ export class AddLayerPanel extends Component {
             importIndexingReady => this.setState({ importIndexingReady })
           }
           onIndexSuccess={() => this.setState({ indexingComplete: true })}
+          onIndexError={() => this.setState({ indexingComplete: true })}
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
+        />
+      );
+    } else {
+      return (
+        <SourceEditor
+          clearSource={this._clearLayerData}
+          sourceType={this.state.sourceType}
+          previewLayer={source => this._viewLayer(source, this.state.importView)}
         />
       );
     }
