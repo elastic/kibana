@@ -21,7 +21,6 @@ import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/store_actions';
 import { filterBarQueryFilter } from '../../../kibana_services';
 import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
-import { i18n } from '@kbn/i18n';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
@@ -383,21 +382,11 @@ export class MBMapContainer extends React.Component {
       return layer.getId() === layerId;
     });
     if (!tooltipLayer) {
-      throw new Error(
-        i18n.translate('xpack.maps.mb.unableToFindLayerMsg', {
-          defaultMessage: 'Unable to find layer {layerId}',
-          values: { layerId }
-        })
-      );
+      return [];
     }
-    const targetFeature = tooltipLayer.getFeatureById(this.props.tooltipState.featureId);
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
-      throw new Error(
-        i18n.translate('xpack.maps.mb.unableToFindFeatureMsg', {
-          defaultMessage: 'Unable to find feature {featureId}',
-          values: { featureId }
-        })
-      );
+      return [];
     }
     return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
   }
