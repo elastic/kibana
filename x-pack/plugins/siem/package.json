@@ -12,14 +12,16 @@
     "@types/color": "^3.0.0",
     "@types/lodash": "^4.14.110",
     "@types/memoize-one": "^4.1.0",
-    "@types/react-beautiful-dnd": "^10.0.1"
+    "@types/react-beautiful-dnd": "^10.0.1",
+    "@types/react-sticky": "^6.0.3"
   },
   "dependencies": {
-    "react-beautiful-dnd": "^10.0.1",
-    "react-markdown": "^4.0.6",
+    "apollo-link-error": "^1.1.7",
     "lodash": "^4.17.10",
     "memoize-one": "^5.0.0",
-    "apollo-link-error": "^1.1.7",
+    "react-beautiful-dnd": "^10.0.1",
+    "react-markdown": "^4.0.6",
+    "react-sticky": "^6.0.3",
     "suricata-sid-db": "^1.0.2"
   }
 }

@@ -139,7 +139,8 @@ describe('ServerStatus class', function () {
       expect(out(service)).toHaveProperty('state', 'green');
       expect(out(p1)).toHaveProperty('state', 'yellow');
       expect(out(p2)).toHaveProperty('state', 'red');
-      expect(out(p3)).toHaveProperty('id', 'plugin:three@8.0.0');
+      expect(out(p3)).toHaveProperty('id');
+      expect(out(p3).id).not.toContain('undefined');
     });
   });
 

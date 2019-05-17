@@ -6,8 +6,6 @@
 
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
-import React from 'react';
-import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
@@ -105,15 +103,7 @@ export class TileLayer extends AbstractLayer {
     return 'grid';
   }
 
-  getIcon() {
-    return (
-      <EuiIcon
-        type={this.getLayerTypeIconName()}
-      />
-    );
-  }
   isLayerLoading() {
     return false;
   }
-
 }

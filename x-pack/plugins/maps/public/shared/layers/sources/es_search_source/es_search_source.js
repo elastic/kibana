@@ -229,4 +229,21 @@ export class ESSearchSource extends AbstractESSource {
         return { name: field.name, label: field.name };
       });
   }
+
+  getSourceTooltipContent(sourceDataRequest) {
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
+
+    if (meta.areResultsTrimmed) {
+      return i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
+        defaultMessage: `Results limited to first {count} matching documents.`,
+        values: { count: featureCollection.features.length }
+      });
+    }
+
+    return i18n.translate('xpack.maps.esSearch.featureCountMsg', {
+      defaultMessage: `Found {count} documents.`,
+      values: { count: featureCollection.features.length }
+    });
+  }
 }

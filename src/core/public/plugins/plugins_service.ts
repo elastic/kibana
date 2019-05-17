@@ -37,6 +37,7 @@ export type PluginsServiceStartDeps = CoreStart;
 export interface PluginsServiceSetup {
   contracts: Map<string, unknown>;
 }
+/** @internal */
 export interface PluginsServiceStart {
   contracts: Map<string, unknown>;
 }

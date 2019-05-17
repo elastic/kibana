@@ -5,4 +5,5 @@
  */
 
 export type JobId = string;
-export type TargetIndex = string;
+export type EsIndexName = string;
+export type IndexPatternTitle = string;

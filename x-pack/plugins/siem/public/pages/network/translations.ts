@@ -15,7 +15,7 @@ export const NO_FILEBEAT_INDICES = i18n.translate('xpack.siem.network.noFilebeat
 });
 
 export const KQL_PLACE_HOLDER = i18n.translate('xpack.siem.network.kqlPlaceHolder', {
-  defaultMessage: 'Search… (e.g. network.name:"foo" AND process.name:"bar")',
+  defaultMessage: 'e.g. source.ip: "foo"',
 });
 
 export const LETS_ADD_SOME = i18n.translate('xpack.siem.network.letsAddSome.description', {
