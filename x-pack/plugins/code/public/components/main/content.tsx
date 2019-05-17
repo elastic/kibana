@@ -17,12 +17,12 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import {
   FileTree,
   FileTreeItemType,
+  SearchOptions,
   SearchScope,
   WorkerReservedProgress,
-  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, SearchOptions } from '../../actions';
+import { changeSearchScope, FetchFileResponse } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
 import {
@@ -53,8 +53,8 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
   searchOptions: SearchOptions;
-  currentRepository?: Repository;
   fileTreeLoading: boolean;
+  query: string;
 }
 const LANG_MD = 'markdown';
 
@@ -224,12 +224,12 @@ class CodeContent extends React.PureComponent<Props> {
     return (
       <div className="codeContainer__main">
         <TopBar
-          defaultSearchScope={this.props.currentRepository}
           routeParams={this.props.match.params}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          query={this.props.query}
         />
         {this.renderContent()}
       </div>
@@ -395,7 +395,7 @@ const mapStateToProps = (state: RootState) => ({
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
-  currentRepository: state.repository.currentRepository,
+  query: state.search.query,
 });
 
 const mapDispatchToProps = {
