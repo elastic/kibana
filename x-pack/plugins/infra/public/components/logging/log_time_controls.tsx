@@ -9,8 +9,6 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
 
-import euiStyled from '../../../../../common/eui_styled_components';
-
 const noop = () => undefined;
 
 interface LogTimeControlsProps {
