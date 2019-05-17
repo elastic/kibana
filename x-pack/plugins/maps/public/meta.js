@@ -11,6 +11,7 @@ import { getEMSResources } from '../common/ems_util';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from 'ui/vis/map/ems_client';
+import { xpackInfo } from './kibana_services';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -27,6 +28,8 @@ export async function getDataSources() {
     return loadingMetaPromise;
   }
 
+  window._xpackInfo = xpackInfo;
+
   loadingMetaPromise = new Promise(async (resolve, reject) => {
     try {
       const fullResponse = await fetch(`${GIS_API_RELATIVE}/meta`);
@@ -42,8 +45,10 @@ export async function getDataSources() {
           landingPageUrl: chrome.getInjected('emsLandingPageUrl')
         });
         const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
-        const xpackLicenseId = chrome.getInjected('xpackLicenseId');
-        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, xpackLicenseId, useCorsForElasticMapsService);
+        const xpackMapsFeature = xpackInfo.get('features.maps');
+        const licenseId = xpackMapsFeature && xpackMapsFeature.maps && xpackMapsFeature.uid ? xpackMapsFeature.uid :  '';
+
+        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, licenseId, useCorsForElasticMapsService);
 
         //override EMS cors config
         fullMetaJson.data_sources.ems = {

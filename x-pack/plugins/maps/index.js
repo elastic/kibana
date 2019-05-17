@@ -38,8 +38,6 @@ export function maps(kibana) {
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
-
-        const licenseId = server.plugins.xpack_main.info.license.getUid();
         const mapConfig = serverConfig.get('map');
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
@@ -47,8 +45,7 @@ export function maps(kibana) {
           useCORSForElasticMapsService: mapConfig.useCORSForElasticMapsService,
           emsManifestServiceUrl: mapConfig.manifestServiceUrl,
           emsLandingPageUrl: mapConfig.manifestServiceUrl,
-          kbnPkgVersion: serverConfig.get('pkg.version'),
-          xpackLicenseId: licenseId
+          kbnPkgVersion: serverConfig.get('pkg.version')
         };
       },
       embeddableFactories: [
