@@ -27,7 +27,7 @@ export interface SavedObjectsRepositoryOptions {
   serializer: unknown;
   migrator: unknown;
   onBeforeWrite?: (
-    action: 'update' | 'bulk' | 'delete' | 'deleteByQuery',
+    action: 'create' | 'index' | 'update' | 'bulk' | 'delete' | 'deleteByQuery',
     params: {
       index: string;
       id?: string;
