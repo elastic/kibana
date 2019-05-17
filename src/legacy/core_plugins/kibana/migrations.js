@@ -163,6 +163,51 @@ function removeDateHistogramTimeZones(doc) {
   return doc;
 }
 
+function replaceMovAvgToMovFn(doc) {
+  const visState = get(doc, 'attributes.visState');
+  let newVisState;
+
+  if (visState) {
+    try {
+      newVisState = JSON.parse(visState);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (newVisState.type === 'metrics') {
+      const series = get(newVisState, 'params.series', []);
+
+      series.forEach(part => {
+        (part.metrics || []).forEach(metric => {
+          if (metric.type === 'moving_average') {
+            metric.model_type = metric.model;
+            metric.alpha = 0.3;
+            metric.beta = 0.1;
+            metric.gamma = 0.1;
+            metric.period = 1;
+            metric.multiplicative = true;
+
+            delete metric.minimize;
+            delete metric.model;
+            delete metric.settings;
+            delete metric.predict;
+          }
+        });
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(newVisState),
+        },
+      };
+    }
+  }
+
+  return doc;
+}
+
 export const migrations = {
   'index-pattern': {
     '6.5.0': (doc) => {
@@ -264,7 +309,8 @@ export const migrations = {
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
-    '7.1.0': doc => executeMigrations710(doc)
+    '7.1.0': doc => executeMigrations710(doc),
+    '7.2.0': replaceMovAvgToMovFn,
   },
   dashboard: {
     '7.0.0': (doc) => {
