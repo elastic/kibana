@@ -84,6 +84,21 @@ function FieldParamEditor({
     [isValid]
   );
 
+  useEffect(() => {
+    // set field if only one available
+    if (indexedFields.length !== 1) {
+      return;
+    }
+
+    if (indexedFields[0].length === 1) {
+      setValue(indexedFields[0].value);
+    }
+
+    if (indexedFields[0].options.length === 1) {
+      setValue(indexedFields[0].options[0].value);
+    }
+  }, []);
+
   return (
     <EuiFormRow
       label={customLabel || label}

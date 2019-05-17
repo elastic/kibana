@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
-import '../filters/sort_prefix_first';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
 import { SortFieldParamEditor } from '../controls/sort_field';
 import { OrderParamEditor } from '../controls/order';
