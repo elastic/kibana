@@ -21,6 +21,7 @@ export const SourceConfigurationButton: React.FunctionComponent = () => {
       data-test-subj="configureSourceButton"
       iconType="gear"
       onClick={toggleIsVisible}
+      size="xs"
     >
       {source && source.configuration && source.configuration.name}
     </EuiButtonEmpty>
