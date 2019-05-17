@@ -25,6 +25,29 @@ export class AddLayerPanel extends Component {
     indexingComplete: false,
     importIndexingReady: false,
     importView: false,
+    panelDescription: 'Select source',
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    this._updatePanelDescription(prevState.sourceType, prevState.indexingComplete);
+  }
+
+  _updatePanelDescription(prevSourceType, prevIndexingComplete) {
+    const { sourceType, importView, indexingComplete } = this.state;
+    if (
+      prevSourceType !== sourceType
+      || indexingComplete !== prevIndexingComplete
+    ) {
+      let panelDescription;
+      if (!sourceType) {
+        panelDescription = 'Select source';
+      } else if (importView && !indexingComplete) {
+        panelDescription = 'Import file';
+      } else {
+        panelDescription = 'Add layer';
+      }
+      this.setState({ panelDescription });
+    }
   }
 
   _viewLayer = (source, fitToExtent = false) => {
@@ -65,7 +88,8 @@ export class AddLayerPanel extends Component {
   }
 
   _onSourceSelectionChange = ({ type, indexReadyFile }) => {
-    this.setState({ sourceType: type, importView: indexReadyFile });
+    this.setState({ sourceType: type, importView: indexReadyFile },
+      () => console.log(this.state));
   }
 
   _layerAddHandler = () => {
@@ -117,26 +141,28 @@ export class AddLayerPanel extends Component {
 
     const {
       indexingTriggered, indexingComplete, importView, layer,
-      importIndexingReady
+      importIndexingReady, panelDescription
     } = this.state;
-    const isLayerAddReady = !importView && !!layer;
-    const isImportPreviewReady = importView && importIndexingReady;
-    const isImportCompleted = importView && indexingTriggered && indexingComplete;
 
-    const buttonEnabled = isLayerAddReady || isImportPreviewReady || isImportCompleted;
-    const buttonText = importView && !indexingTriggered && 'Import file'
-      || 'Add layer';
+    let buttonEnabled;
+    if (importView) {
+      const isImportPreviewReady = importView && importIndexingReady;
+      const isImportCompleted = importView && indexingTriggered && indexingComplete;
+      buttonEnabled = isImportPreviewReady || isImportCompleted;
+    } else {
+      buttonEnabled = !!layer;
+    }
+
     return (
       <FlyoutFooter
         onClick={this._layerAddHandler}
         disableButton={!buttonEnabled}
-        buttonText={buttonText}
+        buttonText={panelDescription}
       />
     );
   }
 
   _renderFlyout() {
-    const panelTitle = this.state.importView ? 'Import file' : 'Add layer';
     return (
       <EuiFlexGroup
         direction="column"
@@ -147,7 +173,7 @@ export class AddLayerPanel extends Component {
             <h2>
               <FormattedMessage
                 id="xpack.maps.addLayerPanel.panelTitle"
-                defaultMessage={panelTitle}
+                defaultMessage={this.state.panelDescription}
               />
             </h2>
           </EuiTitle>
