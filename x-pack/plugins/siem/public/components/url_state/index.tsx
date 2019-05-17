@@ -15,7 +15,7 @@ import { decode, encode, RisonValue } from 'rison-node';
 import { QueryString } from 'ui/utils/query_string';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { inputsActions, hostsActions, networkActions } from '../../store/actions';
+import { hostsActions, inputsActions, networkActions } from '../../store/actions';
 import {
   hostsModel,
   hostsSelectors,
@@ -36,22 +36,22 @@ import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 
 interface KqlQueryHosts {
   filterQuery: KueryFilterQuery;
-  type: hostsModel.HostsType;
   model: 'hosts';
+  type: hostsModel.HostsType;
 }
 
 interface KqlQueryNetwork {
   filterQuery: KueryFilterQuery;
-  type: networkModel.NetworkType;
   model: 'network';
+  type: networkModel.NetworkType;
 }
 
 type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
 
 interface UrlState {
-  timerange: UrlInputsModel;
-  kqlQuery: KqlQuery[];
   [key: string]: any;
+  kqlQuery: KqlQuery[];
+  timerange: UrlInputsModel;
 }
 
 interface UrlStateProps {
@@ -193,13 +193,13 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecy
   );
 
   private urlStateMappedToActions = {
-    timerange: {
-      absolute: this.props.setAbsoluteTimerange,
-      relative: this.props.setRelativeTimerange,
-    },
     kqlQuery: {
       hosts: this.props.setHostsKql,
       network: this.props.setNetworkKql,
+    },
+    timerange: {
+      absolute: this.props.setAbsoluteTimerange,
+      relative: this.props.setRelativeTimerange,
     },
   };
 
@@ -296,7 +296,12 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecy
 export const UrlStateComponents = pure<UrlStateContainerProps>(props => (
   <Route<RouteProps>>
     {({ history, location }) => (
-      <UrlStateContainerLifecycle history={history} location={location} {...props} />
+      <UrlStateContainerLifecycle
+        data-test-subj={'urlStateComponents'}
+        history={history}
+        location={location}
+        {...props}
+      />
     )}
   </Route>
 ));
@@ -354,9 +359,9 @@ export const UrlStateContainer = connect(
   makeMapStateToProps,
   {
     setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
-    setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
-    setNetworkKql: networkActions.applyNetworkFilterQuery,
     setHostsKql: hostsActions.applyHostsFilterQuery,
+    setNetworkKql: networkActions.applyNetworkFilterQuery,
+    setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
     toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
   }
   // @ts-ignore
