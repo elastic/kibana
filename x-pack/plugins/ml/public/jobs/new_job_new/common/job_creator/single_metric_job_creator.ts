@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
-// import { IndexPatternWithType } from '../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 
 export class SingleMetricJobCreator extends JobCreator {
-  // constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
-  //   super(indexPattern, savedSearch, query);
-  // }
-
-  configureDetector(agg: Aggregation, field: Field) {
+  public setDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = {
       function: agg.id,
       field_name: field.id,

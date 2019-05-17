@@ -62,7 +62,7 @@ export class JobCreator {
     }
   }
 
-  public removeDetector(index: number) {
+  protected _removeDetector(index: number) {
     this._detectors.splice(index, 1);
   }
 

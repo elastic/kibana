@@ -23,6 +23,7 @@ export class JobRunner {
   private _start: number = 0;
   private _end: number = 0;
   private _datafeedState: DATAFEED_STATE = DATAFEED_STATE.STOPPED;
+  private _refreshInterval = REFRESH_INTERVAL_MS;
   // private _bucketSpan: BucketSpan;
   // private _chartSettings: ChartSettings;
 
@@ -47,6 +48,14 @@ export class JobRunner {
     return this._datafeedState;
   }
 
+  public set refreshInterval(v: number) {
+    this._refreshInterval = v;
+  }
+
+  public resetInterval() {
+    this._refreshInterval = REFRESH_INTERVAL_MS;
+  }
+
   // public get isRunning(): boolean {
   //   return this._datafeedState === DATAFEED_STATE.STARTED;
   // }
@@ -62,7 +71,7 @@ export class JobRunner {
     return success;
   }
 
-  async start() {
+  public async start() {
     const openSuccess = await this.openJob();
     if (openSuccess) {
       await mlJobService.startDatafeed(this._datafeedId, this._jobId, this._start, this._end);
@@ -79,7 +88,7 @@ export class JobRunner {
         if (isRunning) {
           setTimeout(() => {
             check();
-          }, REFRESH_INTERVAL_MS);
+          }, this._refreshInterval);
         }
       };
 
@@ -89,7 +98,7 @@ export class JobRunner {
     }
   }
 
-  async getProgress(): Promise<Progress> {
+  public async getProgress(): Promise<Progress> {
     const lrts = await this.getLatestRecordTimeStamp();
     const progress = (lrts - this._start) / (this._end - this._start);
     return Math.round(progress * 100);
@@ -108,7 +117,7 @@ export class JobRunner {
     this._progress$.subscribe(func);
   }
 
-  async isRunning(): Promise<boolean> {
+  public async isRunning(): Promise<boolean> {
     const state = await this.getDatafeedState();
     this._datafeedState = state;
     return (
@@ -118,7 +127,7 @@ export class JobRunner {
     );
   }
 
-  async getDatafeedState(): Promise<DATAFEED_STATE> {
+  public async getDatafeedState(): Promise<DATAFEED_STATE> {
     const stats = await ml.getDatafeedStats({ datafeedId: this._datafeedId });
     if (stats.datafeeds.length) {
       return stats.datafeeds[0].state;
@@ -128,7 +137,7 @@ export class JobRunner {
     return DATAFEED_STATE.STOPPED;
   }
 
-  async getLatestRecordTimeStamp(): Promise<number> {
+  public async getLatestRecordTimeStamp(): Promise<number> {
     const stats = await ml.getJobStats({ jobId: this._jobId });
 
     if (stats.jobs.length) {

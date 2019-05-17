@@ -6,3 +6,4 @@
 
 export * from './index_pattern_context';
 export * from './job_creator';
+export * from './job_runner';
