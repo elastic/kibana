@@ -23,7 +23,7 @@ import { AggParamEditorProps } from '../../vis/editors/default';
 import { FieldParamType } from '../param_types';
 import { FieldParamEditor } from './field';
 
-function SortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
+function TopSortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
   const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {
     defaultMessage: 'Sort On',
   });
@@ -31,4 +31,4 @@ function SortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
   return <FieldParamEditor {...props} customLabel={customLabel} />;
 }
 
-export { SortFieldParamEditor };
+export { TopSortFieldParamEditor };

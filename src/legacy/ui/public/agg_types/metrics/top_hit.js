@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
-import { SortFieldParamEditor } from '../controls/sort_field';
+import { TopSortFieldParamEditor } from '../controls/top_sort_field';
 import { OrderParamEditor } from '../controls/order';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { i18n } from '@kbn/i18n';
@@ -169,7 +169,7 @@ export const topHitMetricAgg = new MetricAggType({
     {
       name: 'sortField',
       type: 'field',
-      editorComponent: SortFieldParamEditor,
+      editorComponent: TopSortFieldParamEditor,
       filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
       default: function (agg) {
         return agg.getIndexPattern().timeFieldName;
