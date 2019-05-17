@@ -63,7 +63,7 @@ function extendStatsBucket(bucket, metrics) {
   return body;
 }
 
-export default {
+export const bucketTransform = {
   count: () => {
     return {
       bucket_script: {

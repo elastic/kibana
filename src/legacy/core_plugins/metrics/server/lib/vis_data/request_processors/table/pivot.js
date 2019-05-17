@@ -21,7 +21,7 @@ import { get, set, last } from 'lodash';
 
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketsPath from '../../helpers/get_buckets_path';
-import bucketTransform from '../../helpers/bucket_transform';
+import { bucketTransform } from '../../helpers/bucket_transform';
 
 export default function pivot(req, panel) {
   return next => doc => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import bucketTransform from './bucket_transform';
+import { bucketTransform } from './bucket_transform';
 import getAggValue from './get_agg_value';
 import getBucketSize from './get_bucket_size';
 import getBucketPath from './get_buckets_path';

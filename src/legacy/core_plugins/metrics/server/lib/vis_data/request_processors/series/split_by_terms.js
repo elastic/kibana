@@ -20,7 +20,7 @@
 import { set } from 'lodash';
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketsPath from '../../helpers/get_buckets_path';
-import bucketTransform from '../../helpers/bucket_transform';
+import { bucketTransform } from '../../helpers/bucket_transform';
 
 export default function splitByTerm(req, panel, series) {
   return next => doc => {
