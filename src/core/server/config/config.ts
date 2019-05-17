@@ -78,8 +78,11 @@ export interface Config {
 
 const pathDelimiter = '.';
 export function hasConfigPathIntersection(leafPath: string, rootPath: string) {
-  if (!leafPath || !rootPath) {
-    throw new Error(`Paths were expected, but given leaf: ${leafPath} and root: ${rootPath}`);
+  if (!leafPath) {
+    throw new Error('leafPath cannot be empty');
+  }
+  if (!rootPath) {
+    throw new Error('rootPath cannot be empty');
   }
   const leafSegments = leafPath.split(pathDelimiter);
   const rootSegments = rootPath.split(pathDelimiter);
