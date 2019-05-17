@@ -8,6 +8,7 @@ import { ES_FIELD_TYPES } from '../../common/constants/field_types';
 
 export type FieldId = string;
 export type AggId = string;
+export type SplitField = Field | null;
 
 export interface Field {
   id: FieldId;

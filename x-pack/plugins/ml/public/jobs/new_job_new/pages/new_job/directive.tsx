@@ -18,7 +18,7 @@ import { ES_FIELD_TYPES } from '../../../../../common/constants/field_types';
 
 // @ts-ignore
 import { SearchItemsProvider } from '../../../new_job/utils/new_job_utils';
-import { SingleMetricJobCreator } from '../../common/job_creator';
+import { SingleMetricJobCreator, MultiMetricJobCreator } from '../../common/job_creator';
 // import { ChartSettings } from '../../common/chart_settings';
 import { IndexPatternContext } from '../../common';
 import { Page } from './page';
@@ -33,19 +33,48 @@ module.directive('mlNewJobPage', ($route: any, Private: any) => {
       const createSearchItems = Private(SearchItemsProvider);
       const { indexPattern, savedSearch, combinedQuery } = createSearchItems();
       // const chartSettings = new ChartSettings();
-      const jobCreator = new SingleMetricJobCreator(
+      const jobCreator = new MultiMetricJobCreator(
         indexPattern,
         savedSearch,
         combinedQuery
         // chartSettings
       );
       // debugger;
-      const responseTime: Field = {
-        id: 'responsetime',
-        name: 'responsetime',
-        type: ES_FIELD_TYPES.FLOAT,
+      // const responseTime: Field = {
+      //   id: 'responsetime',
+      //   name: 'responsetime',
+      //   type: ES_FIELD_TYPES.FLOAT,
+      //   aggregatable: true,
+      // };
+      const field: Field = {
+        id: 'NetworkIn',
+        name: 'NetworkIn',
+        type: ES_FIELD_TYPES.DOUBLE,
         aggregatable: true,
+        aggIds: [
+          'mean',
+          'high_mean',
+          'low_mean',
+          'sum',
+          'high_sum',
+          'low_sum',
+          'median',
+          'high_median',
+          'low_median',
+          'min',
+          'max',
+          'distinct_count',
+        ],
       };
+
+      const splitField: Field = {
+        id: 'region',
+        name: 'region',
+        type: ES_FIELD_TYPES.KEYWORD,
+        aggregatable: true,
+        aggIds: ['distinct_count'],
+      };
+
       const mean: Aggregation = {
         id: 'mean',
         title: 'Mean',
@@ -58,16 +87,20 @@ module.directive('mlNewJobPage', ($route: any, Private: any) => {
         },
       };
 
-      jobCreator.configureDetector(mean, responseTime);
-      jobCreator.jobId = 'new_job-' + Date.now();
+      jobCreator.addDetector(mean, field);
+      jobCreator.setSplitField(splitField);
+      // jobCreator.setSplitField(null);
       jobCreator.bucketSpan = '15m';
-      jobCreator.setDuration(1549497600000, 1549929594001);
-      jobCreator.subscribeToProgress((progress: number) => {
-        // console.log('prog ', progress);
+      // jobCreator.setDuration(1549497600000, 1549929594001);
+      jobCreator.setDuration(1540684800000, 1541943060000);
+      jobCreator.jobId = `new_job-${Date.now()}`;
+
+      jobCreator.subscribeToProgress((p: number) => {
+        // console.log('progress ', p);
       });
-      jobCreator.subscribeToProgress((progress: number) => {
-        // console.log('prog2 ', progress);
-      });
+      // jobCreator.subscribeToProgress((progress: number) => {
+      //   console.log('prog2 ', progress);
+      // });
       await jobCreator.createAndStartJob();
 
       ReactDOM.render(
