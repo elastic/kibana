@@ -29,6 +29,7 @@ import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
+import { UrlStateContainer } from '../../components/url_state';
 
 const basePath = chrome.getBasePath();
 
@@ -49,6 +50,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
         <StickyContainer>
           <FiltersGlobal>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+            <UrlStateContainer indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <HeaderPage
