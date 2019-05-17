@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Fragment } from 'react';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
@@ -189,86 +189,121 @@ const MovingAverageAggUi = props => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      {
+        (
+          model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL ||
+          model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE ||
+          model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE
+        ) && (
+          <Fragment>
+            <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('alpha')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.alpha"
-              defaultMessage="Alpha"
-            />)}
-          >
-            <EuiFieldNumber
-              step={0.1}
-              onChange={handleNumberChange('alpha')}
-              value={model.alpha}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('beta')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.beta"
-              defaultMessage="Beta"
-            />)}
-          >
-            <EuiFieldNumber
-              step={0.1}
-              onChange={handleNumberChange('beta')}
-              value={model.beta}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('gamma')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.gamma"
-              defaultMessage="Gamma"
-            />)}
-          >
-            <EuiFieldNumber
-              step={0.1}
-              onChange={handleNumberChange('gamma')}
-              value={model.gamma}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('period')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.period"
-              defaultMessage="Period"
-            />)}
-          >
-            <EuiFieldNumber
-              step={1}
-              onChange={handleNumberChange('period')}
-              value={model.period}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('multiplicative')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.multiplicative"
-              defaultMessage="Multiplicative"
-            />)}
-          >
-            <EuiComboBox
-              options={multiplicativeOptions}
-              selectedOptions={selectedMultiplicative ? [selectedMultiplicative] : []}
-              onChange={handleSelectChange('multiplicative')}
-              singleSelection={{ asPlainText: true }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiFlexGroup gutterSize="s">
+              {
+                (
+                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL ||
+                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE ||
+                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE
+                ) && (
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      id={htmlId('alpha')}
+                      label={(<FormattedMessage
+                        id="tsvb.movingAverage.alpha"
+                        defaultMessage="Alpha"
+                      />)}
+                    >
+                      <EuiFieldNumber
+                        step={0.1}
+                        onChange={handleNumberChange('alpha')}
+                        value={model.alpha}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )
+              }
+              {
+                (
+                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE ||
+                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE
+                ) && (
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      id={htmlId('beta')}
+                      label={(<FormattedMessage
+                        id="tsvb.movingAverage.beta"
+                        defaultMessage="Beta"
+                      />)}
+                    >
+                      <EuiFieldNumber
+                        step={0.1}
+                        onChange={handleNumberChange('beta')}
+                        value={model.beta}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )
+              }
+              {
+                model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE && (
+                  <Fragment>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        id={htmlId('gamma')}
+                        label={(<FormattedMessage
+                          id="tsvb.movingAverage.gamma"
+                          defaultMessage="Gamma"
+                        />)}
+                      >
+                        <EuiFieldNumber
+                          step={0.1}
+                          onChange={handleNumberChange('gamma')}
+                          value={model.gamma}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        id={htmlId('period')}
+                        label={(<FormattedMessage
+                          id="tsvb.movingAverage.period"
+                          defaultMessage="Period (days)"
+                        />)}
+                      >
+                        <EuiFieldNumber
+                          step={1}
+                          onChange={handleNumberChange('period')}
+                          value={model.period}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        id={htmlId('multiplicative')}
+                        label={(<FormattedMessage
+                          id="tsvb.movingAverage.multiplicative"
+                          defaultMessage="Multiplicative"
+                        />)}
+                      >
+                        <EuiComboBox
+                          placeholder={intl.formatMessage({
+                            id: 'tsvb.movingAverage.multiplicative.selectPlaceholder',
+                            defaultMessage: 'Select'
+                          })}
+                          options={multiplicativeOptions}
+                          selectedOptions={selectedMultiplicative ? [selectedMultiplicative] : []}
+                          onChange={handleSelectChange('multiplicative')}
+                          singleSelection={{ asPlainText: true }}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </Fragment>
+                )
+              }
+            </EuiFlexGroup>
+          </Fragment>
+        )
+      }
     </AggRow>
   );
 };
