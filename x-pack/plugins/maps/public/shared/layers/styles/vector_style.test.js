@@ -210,3 +210,77 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
   });
 
 });
+
+describe('checkIfOnlyFeatureType', () => {
+
+  describe('source supports single feature type', () => {
+    const sourceMock = {
+      getSupportedShapeTypes: () => {
+        return [VECTOR_SHAPE_TYPES.POINT];
+      }
+    };
+
+    it('isPointsOnly should be true when source feature type only supports points', async () => {
+      const vectorStyle = new VectorStyle({}, sourceMock);
+      const isPointsOnly = await vectorStyle._getIsPointsOnly();
+      expect(isPointsOnly).toBe(true);
+    });
+
+    it('isLineOnly should be false when source feature type only supports points', async () => {
+      const vectorStyle = new VectorStyle({}, sourceMock);
+      const isLineOnly = await vectorStyle._getIsLinesOnly();
+      expect(isLineOnly).toBe(false);
+    });
+  });
+
+  describe('source supports multiple feature types', () => {
+    const sourceMock = {
+      getSupportedShapeTypes: () => {
+        return Object.values(VECTOR_SHAPE_TYPES);
+      }
+    };
+
+    it('isPointsOnly should be true when data contains just points', async () => {
+      const vectorStyle = new VectorStyle({
+        __styleMeta: {
+          hasFeatureType: {
+            POINT: true,
+            LINE: false,
+            POLYGON: false
+          }
+        }
+      }, sourceMock);
+      const isPointsOnly = await vectorStyle._getIsPointsOnly();
+      expect(isPointsOnly).toBe(true);
+    });
+
+    it('isPointsOnly should be false when data contains just lines', async () => {
+      const vectorStyle = new VectorStyle({
+        __styleMeta: {
+          hasFeatureType: {
+            POINT: false,
+            LINE: true,
+            POLYGON: false
+          }
+        }
+      }, sourceMock);
+      const isPointsOnly = await vectorStyle._getIsPointsOnly();
+      expect(isPointsOnly).toBe(false);
+    });
+
+    it('isPointsOnly should be false when data contains points, lines, and polygons', async () => {
+      const vectorStyle = new VectorStyle({
+        __styleMeta: {
+          hasFeatureType: {
+            POINT: true,
+            LINE: true,
+            POLYGON: true
+          }
+        }
+      }, sourceMock);
+      const isPointsOnly = await vectorStyle._getIsPointsOnly();
+      expect(isPointsOnly).toBe(false);
+    });
+  });
+
+});
