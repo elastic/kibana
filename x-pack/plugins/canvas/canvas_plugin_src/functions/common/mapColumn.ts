@@ -7,6 +7,7 @@
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
 import { ContextFunction, Datatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   name: string;
@@ -19,11 +20,13 @@ export function mapColumn(): ContextFunction<
   Arguments,
   Promise<Datatable>
 > {
+  const { help, args: argHelp } = getFunctionHelp().mapColumn;
+
   return {
     name: 'mapColumn',
     aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
     type: 'datatable',
-    help: 'Add a column calculated as the result of other columns, or not',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -31,14 +34,14 @@ export function mapColumn(): ContextFunction<
       name: {
         types: ['string'],
         aliases: ['_', 'column'],
-        help: 'The name of the resulting column',
+        help: argHelp.name,
         required: true,
       },
       expression: {
         types: ['boolean', 'number', 'string', 'null'],
         resolve: false,
         aliases: ['exp', 'fn'],
-        help: 'A canvas expression which will be passed each row as a single row datatable',
+        help: argHelp.expression,
       },
     },
     fn: (context, args) => {
