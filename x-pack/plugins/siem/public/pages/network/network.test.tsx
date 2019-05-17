@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { Router } from 'react-router-dom';
 
 import '../../mock/match_media';
 import { Network } from './network';
@@ -38,6 +39,28 @@ let localSource: Array<{
   };
 }>;
 
+type Action = 'PUSH' | 'POP' | 'REPLACE';
+const pop: Action = 'POP';
+const location = {
+  pathname: '/network',
+  search: '',
+  state: '',
+  hash: '',
+};
+const mockHistory = {
+  length: 2,
+  location,
+  action: pop,
+  push: jest.fn(),
+  replace: jest.fn(),
+  go: jest.fn(),
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  block: jest.fn(),
+  createHref: jest.fn(),
+  listen: jest.fn(),
+};
+
 describe('Network', () => {
   describe('rendering', () => {
     beforeEach(() => {
@@ -51,7 +74,9 @@ describe('Network', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
-            <Network />
+            <Router history={mockHistory}>
+              <Network />
+            </Router>
           </MockedProvider>
         </TestProviders>
       );
@@ -68,7 +93,9 @@ describe('Network', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
-            <Network />
+            <Router history={mockHistory}>
+              <Network />
+            </Router>
           </MockedProvider>
         </TestProviders>
       );
@@ -85,7 +112,9 @@ describe('Network', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
-            <Network />
+            <Router history={mockHistory}>
+              <Network />
+            </Router>
           </MockedProvider>
         </TestProviders>
       );
