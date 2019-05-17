@@ -538,7 +538,6 @@ export class KibanaMap extends EventEmitter {
     return this._leafletBaseLayer;
   }
 
-  // TODO make this async
   setBaseLayer(settings) {
 
     if (_.isEqual(settings, this._baseLayerSettings)) {
