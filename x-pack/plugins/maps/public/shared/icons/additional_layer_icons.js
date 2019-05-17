@@ -57,6 +57,6 @@ export const FillableRectangle = ({ style }) => (
 
 export const ColorableLine = ({ style }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-    <rect width="16" height="4" y="6" style={style}/>
+    <line x1="0" y1="6" x2="16" y2="6" style={style} />
   </svg>
 );

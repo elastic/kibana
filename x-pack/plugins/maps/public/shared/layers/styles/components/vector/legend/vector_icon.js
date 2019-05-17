@@ -46,7 +46,8 @@ export class VectorIcon extends Component {
 
     if (this.state.isLinesOnly) {
       const style = {
-        fill: extractColorFromStyleProperty(this.props.lineColor, 'grey')
+        stroke: extractColorFromStyleProperty(this.props.lineColor, 'grey'),
+        strokeWidth: '4px',
       };
       return (
         <ColorableLine style={style}/>
