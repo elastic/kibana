@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
+import chrome from 'ui/chrome';
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
 import { SplitByFilters } from './splits/filters';
@@ -28,6 +29,8 @@ import { SplitByEverything } from './splits/everything';
 import { SplitUnsupported } from './splits/unsupported_split';
 import { isGroupByFieldsEnabled } from '../lib/check_ui_restrictions';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+
+const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 const SPLIT_MODES = {
   FILTERS: 'filters',
@@ -55,6 +58,10 @@ class Split extends Component {
           {
             color: model.color,
             id: uuid.v1(),
+            filter: {
+              query: '',
+              language: uiSettingsQueryLanguage
+            }
           },
         ],
       });
