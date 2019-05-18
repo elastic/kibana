@@ -28,7 +28,7 @@ import {
   RequestHandlerDescription,
   RequestHandlerParams,
   ResponseHandler,
-  ResponseHandlerDescription,
+  // ResponseHandlerDescription,
   Vis,
 } from '../../vis';
 
