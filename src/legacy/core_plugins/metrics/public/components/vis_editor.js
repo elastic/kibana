@@ -85,8 +85,7 @@ class VisEditor extends Component {
     }
 
     if (this.props.isEditorMode) {
-      const { params } = this.props.vis;
-      const extractedIndexPatterns = extractIndexPatterns(params);
+      const extractedIndexPatterns = extractIndexPatterns(nextModel);
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
         fetchFields(extractedIndexPatterns).then(visFields =>
           this.setState({
