@@ -92,10 +92,10 @@ export function initAuthenticateApi(server) {
     async handler(request, h) {
       try {
         // We handle the fact that the user might get redirected to Kibana while already having an session
-        // in the same exact manner as with saml. Return an error notifying the user they are already logged in.
+        // Return an error notifying the user they are already logged in.
         const authenticationResult = await server.plugins.security.authenticate(request);
         if (authenticationResult.succeeded()) {
-          throw Boom.forbidden(
+          return Boom.forbidden(
             'Sorry, you already have an active Kibana session. ' +
             'If you want to start a new one, please logout from the existing session first.'
           );
@@ -132,7 +132,7 @@ export function initAuthenticateApi(server) {
         // in the same exact manner as with saml. Return an error notifying the user they are already logged in.
         const authenticationResult = await server.plugins.security.authenticate(request);
         if (authenticationResult.succeeded()) {
-          throw Boom.forbidden(
+          return Boom.forbidden(
             'Sorry, you already have an active Kibana session. ' +
             'If you want to start a new one, please logout from the existing session first.'
           );

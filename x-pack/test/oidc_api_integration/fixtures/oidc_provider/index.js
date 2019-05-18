@@ -12,13 +12,6 @@ export default function (kibana) {
     id: 'oidcProvider',
     require: ['elasticsearch'],
 
-    config(Joi) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        nonce: Joi.string()
-      }).default();
-    },
-
     init(server) {
       initRoutes(server);
     },

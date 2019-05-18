@@ -8,7 +8,6 @@
 import url from 'url';
 
 export function getStateAndNonce(urlWithStateAndNonce) {
-  const stateValue = url.parse(urlWithStateAndNonce, true).query.state;
-  const nonceValue = url.parse(urlWithStateAndNonce, true).query.nonce;
-  return { state: stateValue, nonce: nonceValue };
+  const parsedQuery = url.parse(urlWithStateAndNonce, true).query;
+  return { state: parsedQuery.state, nonce: parsedQuery.nonce };
 }

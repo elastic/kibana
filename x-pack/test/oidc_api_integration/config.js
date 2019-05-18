@@ -17,7 +17,6 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
-      chance: kibanaAPITestsConfig.get('services.chance'),
       es: kibanaAPITestsConfig.get('services.es'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
@@ -50,7 +49,6 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
-        '--optimize.enabled=false',
         '--xpack.security.authProviders=[\"oidc\"]',
         '--xpack.security.authc.oidc.realm=\"oidc1\"',
         '--server.xsrf.whitelist', JSON.stringify(['/api/security/v1/oidc',

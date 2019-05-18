@@ -346,7 +346,7 @@
 
     /**
      * Asks Elasticsearch to prepare an OpenID Connect authentication request to be sent to
-     * the 3rd-party OpenID Connnect provider.
+     * the 3rd-party OpenID Connect provider.
      *
      * @param {string} realm The OpenID Connect realm name in Elasticsearch
      *
@@ -371,7 +371,7 @@
      * preparation response.
      * @param {string} redirect_uri The URL to where the UA was redirected by the OpenID Connect provider.
      *
-     * @returns {{username: string, access_token: string, expires_in: number}} Object that
+     * @returns {{username: string, access_token: string, refresh_token; string, expires_in: number}} Object that
      * includes name of the user, access token to use for any consequent requests that
      * need to be authenticated and a number of seconds after which access token will expire.
      */
@@ -384,13 +384,15 @@
     });
 
     /**
-     * Invalidates OpenID Connect access token.
+     * Invalidates an access token and refresh token pair that was generated after an OpenID Connect authentication.
      *
      * @param {string} token An access token that was created by authenticating to an OpenID Connect realm and
      * that needs to be invalidated.
+     * @param {string} refres_token A refresh token that was created by authenticating to an OpenID Connect realm and
+     * that needs to be invalidated.
      *
      * @returns {{redirect?: string}} If the Elasticsearch OpenID Connect realm configuration and the
-     * OpenID Connect provider supports it, a URL to redirect the UA
+     * OpenID Connect provider supports RP-initiated SLO, a URL to redirect the UA
      */
     shield.oidcLogout = ca({
       method: 'POST',

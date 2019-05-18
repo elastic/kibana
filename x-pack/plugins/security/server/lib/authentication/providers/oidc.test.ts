@@ -39,18 +39,16 @@ describe('OIDCAuthenticationProvider', () => {
     it('redirects non-AJAX request that can not be authenticated to the OpenId Connect Provider.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
-      callWithInternalUser.withArgs('shield.oidcPrepare').returns(
-        Promise.resolve({
-          state: 'statevalue',
-          nonce: 'noncevalue',
-          redirect:
-            'https://op-host/path/login?response_type=code' +
-            '&scope=openid%20profile%20email' +
-            '&client_id=s6BhdRkqt3' +
-            '&state=statevalue' +
-            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
-        })
-      );
+      callWithInternalUser.withArgs('shield.oidcPrepare').resolves({
+        state: 'statevalue',
+        nonce: 'noncevalue',
+        redirect:
+          'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
+      });
 
       const authenticationResult = await provider.authenticate(request, null);
 
@@ -76,27 +74,26 @@ describe('OIDCAuthenticationProvider', () => {
     it('redirects third party initiated authentications to the OpenId Connect Provider.', async () => {
       const request = requestFixture({
         path: '/api/security/v1/oidc',
-        search: '?iss=theissuer',
+        search: '?iss=theissuer&login_hint=loginhint',
         basePath: '/s/foo',
       });
 
-      callWithInternalUser.withArgs('shield.oidcPrepare').returns(
-        Promise.resolve({
-          state: 'statevalue',
-          nonce: 'noncevalue',
-          redirect:
-            'https://op-host/path/login?response_type=code' +
-            '&scope=openid%20profile%20email' +
-            '&client_id=s6BhdRkqt3' +
-            '&state=statevalue' +
-            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
-        })
-      );
+      callWithInternalUser.withArgs('shield.oidcPrepare').resolves({
+        state: 'statevalue',
+        nonce: 'noncevalue',
+        redirect:
+          'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+          '&login_hint=loginhint',
+      });
 
       const authenticationResult = await provider.authenticate(request, null);
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.oidcPrepare', {
-        body: { iss: `theissuer` },
+        body: { iss: `theissuer`, login_hint: `loginhint` },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -105,12 +102,13 @@ describe('OIDCAuthenticationProvider', () => {
           '&scope=openid%20profile%20email' +
           '&client_id=s6BhdRkqt3' +
           '&state=statevalue' +
-          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc'
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+          '&login_hint=loginhint'
       );
       expect(authenticationResult.state).toEqual({
         state: 'statevalue',
         nonce: 'noncevalue',
-        nextURL: `/s/foo`,
+        nextURL: `/s/foo/`,
       });
     });
 
@@ -138,9 +136,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs('shield.oidcAuthenticate')
-        .returns(
-          Promise.resolve({ access_token: 'some-token', refresh_token: 'some-refresh-token' })
-        );
+        .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
 
       const authenticationResult = await provider.authenticate(request, {
         state: 'statevalue',
@@ -253,7 +249,7 @@ describe('OIDCAuthenticationProvider', () => {
       const user = { username: 'user' };
       const request = requestFixture();
 
-      callWithRequest.withArgs(request, 'shield.authenticate').returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-valid-token',
@@ -314,15 +310,13 @@ describe('OIDCAuthenticationProvider', () => {
           sinon.match({ headers: { authorization: 'Bearer new-access-token' } }),
           'shield.authenticate'
         )
-        .returns(Promise.resolve(user));
+        .resolves(user);
 
       callWithInternalUser
         .withArgs('shield.getAccessToken', {
           body: { grant_type: 'refresh_token', refresh_token: 'valid-refresh-token' },
         })
-        .returns(
-          Promise.resolve({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' })
-        );
+        .resolves({ access_token: 'new-access-token', refresh_token: 'new-refresh-token' });
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
@@ -371,18 +365,16 @@ describe('OIDCAuthenticationProvider', () => {
     it('redirects to OpenID Connect Provider for non-AJAX requests if refresh token is expired or already refreshed.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
-      callWithInternalUser.withArgs('shield.oidcPrepare').returns(
-        Promise.resolve({
-          state: 'statevalue',
-          nonce: 'noncevalue',
-          redirect:
-            'https://op-host/path/login?response_type=code' +
-            '&scope=openid%20profile%20email' +
-            '&client_id=s6BhdRkqt3' +
-            '&state=statevalue' +
-            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
-        })
-      );
+      callWithInternalUser.withArgs('shield.oidcPrepare').resolves({
+        state: 'statevalue',
+        nonce: 'noncevalue',
+        redirect:
+          'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
+      });
 
       callWithRequest
         .withArgs(
@@ -453,7 +445,7 @@ describe('OIDCAuthenticationProvider', () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'Bearer some-valid-token' } });
 
-      callWithRequest.withArgs(request, 'shield.authenticate').returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
 
@@ -488,7 +480,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer some-valid-token' } }))
-        .returns(Promise.resolve(user));
+        .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-valid-token',
@@ -543,9 +535,7 @@ describe('OIDCAuthenticationProvider', () => {
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 
-      callWithInternalUser
-        .withArgs('shield.oidcLogout')
-        .returns(Promise.resolve({ redirect: null }));
+      callWithInternalUser.withArgs('shield.oidcLogout').resolves({ redirect: null });
 
       const authenticationResult = await provider.deauthenticate(request, {
         accessToken,
@@ -568,7 +558,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       callWithInternalUser
         .withArgs('shield.oidcLogout')
-        .returns(Promise.resolve({ redirect: 'http://fake-idp/logout&id_token_hint=thehint' }));
+        .resolves({ redirect: 'http://fake-idp/logout&id_token_hint=thehint' });
 
       const authenticationResult = await provider.deauthenticate(request, {
         accessToken,

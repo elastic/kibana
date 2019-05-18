@@ -24,7 +24,7 @@ export function initRoutes(server) {
     },
     handler: (request) => {
       nonce = request.payload.nonce;
-      return '{}';
+      return {};
     },
   });
 
@@ -47,22 +47,21 @@ export function initRoutes(server) {
       try {
         const signingKey = fs.readFileSync(require.resolve('../../../oidc_api_integration/fixtures/jwks_private.pem'));
         const userId = request.payload.code.substring(4);
-        const user = 'user' + userId;
         const iat = Math.floor(Date.now() / 1000);
-        const exp = iat + 3600;
-        const idToken = '{' +
-          '"iss": "https://test-op.elastic.co",' +
-          '"sub": "' + user + '",' +
-          '"aud": "0oa8sqpov3TxMWJOt356",' +
-          '"nonce": "' + nonce + '",' +
-          '"exp": ' + exp + ',' +
-          '"iat": ' + iat +
-          '}';
-        return { 'access_token': 'valid-access-token' + userId,
-          'token_type': 'Bearer',
-          'refresh_token': 'valid-refresh-token' + userId,
-          'expires_in': 3600,
-          'id_token': jwt.sign(idToken, signingKey, { algorithm: 'RS256' }),
+        const idToken = JSON.stringify({
+          iss: 'https://test-op.elastic.co',
+          sub: `user${userId}`,
+          aud: '0oa8sqpov3TxMWJOt356',
+          nonce,
+          exp: iat + 3600,
+          iat,
+        });
+        return {
+          access_token: `valid-access-token${userId}`,
+          token_type: 'Bearer',
+          refresh_token: `valid-refresh-token${userId}`,
+          expires_in: 3600,
+          id_token: jwt.sign(idToken, signingKey, { algorithm: 'RS256' }),
         };
       } catch (err) {
         return err;
@@ -86,7 +85,8 @@ export function initRoutes(server) {
           'preferred_username': 'ironman',
           'email': 'ironman@avengers.com'
         };
-      } else if (accessToken === 'valid-access-token2') {
+      }
+      if (accessToken === 'valid-access-token2') {
         return { 'sub': 'user2',
           'name': 'Peter Parker',
           'given_name': 'Peter',
@@ -94,7 +94,8 @@ export function initRoutes(server) {
           'preferred_username': 'spiderman',
           'email': 'spiderman@avengers.com'
         };
-      } else if (accessToken === 'valid-access-token3') {
+      }
+      if (accessToken === 'valid-access-token3') {
         return { 'sub': 'user3',
           'name': 'Bruce Banner',
           'given_name': 'Bruce',
@@ -103,7 +104,7 @@ export function initRoutes(server) {
           'email': 'hulk@avengers.com'
         };
       }
-      return '{}';
+      return {};
     },
   });
 }

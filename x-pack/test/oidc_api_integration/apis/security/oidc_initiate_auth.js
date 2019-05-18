@@ -68,7 +68,7 @@ export default function ({ getService }) {
         expect(redirectURL.query.nonce).to.not.be.empty();
       });
 
-      it('should not allow access to the API', async () => {
+      it('should not allow access to the API with the handshake cookie', async () => {
         const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
@@ -90,8 +90,7 @@ export default function ({ getService }) {
     });
 
     describe('finishing handshake', () => {
-      let stateValue;
-      let nonceValue;
+      let stateAndNonce;
       let handshakeCookie;
 
       beforeEach(async () => {
@@ -99,18 +98,17 @@ export default function ({ getService }) {
           .expect(302);
 
         handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        stateValue = getStateAndNonce(handshakeResponse.headers.location).state;
-        nonceValue = getStateAndNonce(handshakeResponse.headers.location).nonce;
+        stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
           .set('kbn-xsrf', 'xxx')
-          .send({ nonce: nonceValue })
+          .send({ nonce: stateAndNonce.nonce })
           .expect(200);
       });
 
       it('should fail if OpenID Connect response is not complemented with handshake cookie', async () => {
-        await supertest.get(`/api/security/v1/oidc?code=thisisthecode&state=${stateValue}`)
+        await supertest.get(`/api/security/v1/oidc?code=thisisthecode&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .expect(401);
       });
@@ -118,11 +116,12 @@ export default function ({ getService }) {
       it('should fail if state is not matching', async () => {
         await supertest.get(`/api/security/v1/oidc?code=thisisthecode&state=someothervalue`)
           .set('kbn-xsrf', 'xxx')
+          .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateValue}`)
+        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -165,20 +164,19 @@ export default function ({ getService }) {
         const handshakeResponse = await supertest.get('/api/security/v1/oidc?iss=https://test-op.elastic.co')
           .expect(302);
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        const stateValue = getStateAndNonce(handshakeResponse.headers.location).state;
-        const nonceValue = getStateAndNonce(handshakeResponse.headers.location).nonce;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
 
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
           .set('kbn-xsrf', 'xxx')
-          .send({ nonce: nonceValue })
+          .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code2&state=${stateValue}`)
+        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code2&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString());
-          //.expect(302);
+          .set('Cookie', handshakeCookie.cookieString())
+          .expect(302);
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
@@ -210,8 +208,7 @@ export default function ({ getService }) {
     });
 
     describe('API access with active session', () => {
-      let stateValue;
-      let nonceValue;
+      let stateAndNonce;
       let sessionCookie;
 
       beforeEach(async () => {
@@ -219,16 +216,15 @@ export default function ({ getService }) {
           .expect(302);
 
         sessionCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        stateValue = getStateAndNonce(handshakeResponse.headers.location).state;
-        nonceValue = getStateAndNonce(handshakeResponse.headers.location).nonce;
+        stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
           .set('kbn-xsrf', 'xxx')
-          .send({ nonce: nonceValue })
+          .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateValue}`)
+        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
@@ -293,16 +289,15 @@ export default function ({ getService }) {
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        const stateValue = getStateAndNonce(handshakeResponse.headers.location).state;
-        const nonceValue = getStateAndNonce(handshakeResponse.headers.location).nonce;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
           .set('kbn-xsrf', 'xxx')
-          .send({ nonce: nonceValue })
+          .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateValue}`)
+        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -378,16 +373,15 @@ export default function ({ getService }) {
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        const stateValue = getStateAndNonce(handshakeResponse.headers.location).state;
-        const nonceValue = getStateAndNonce(handshakeResponse.headers.location).nonce;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
           .set('kbn-xsrf', 'xxx')
-          .send({ nonce: nonceValue })
+          .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateValue}`)
+        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -467,16 +461,15 @@ export default function ({ getService }) {
           .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        const stateValue = getStateAndNonce(handshakeResponse.headers.location).state;
-        const nonceValue = getStateAndNonce(handshakeResponse.headers.location).nonce;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
           .set('kbn-xsrf', 'xxx')
-          .send({ nonce: nonceValue })
+          .send({ nonce: stateAndNonce.nonce })
           .expect(200);
 
-        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateValue}`)
+        const oidcAuthenticationResponse = await supertest.get(`/api/security/v1/oidc?code=code1&state=${stateAndNonce.state}`)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
@@ -488,7 +481,7 @@ export default function ({ getService }) {
       });
 
       it('should properly set cookie and start new OIDC handshake', async function () {
-        // Let's delete tokens from `.security` index directly to simulate the case when
+        // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({

@@ -9,7 +9,7 @@ import { AuthenticationProviderOptions } from './base';
 
 export function mockAuthenticationProviderOptions(
   providerOptions: Partial<AuthenticationProviderOptions> = {},
-  providerSpecificOptions?: {}
+  providerSpecificOptions: Record<string, unknown> = {}
 ) {
   return {
     hostname: 'test-hostname',
