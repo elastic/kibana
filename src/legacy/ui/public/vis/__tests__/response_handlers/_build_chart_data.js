@@ -21,10 +21,10 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { aggResponseIndex } from '../../../agg_response';
-import { VislibSeriesResponseHandlerProvider as vislibReponseHandler } from '../../response_handlers/vislib';
+import { VislibSeriesResponseHandler as vislibReponseHandler } from '../../response_handlers/vislib';
 
 describe('renderbot#buildChartData', function () {
-  const buildChartData = vislibReponseHandler().handler;
+  const buildChartData = vislibReponseHandler.handler;
 
   describe('for hierarchical vis', function () {
     it('defers to hierarchical aggResponse converter', function () {

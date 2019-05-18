@@ -78,23 +78,17 @@ const handlerFunction =  function (convertTable) {
   };
 };
 
-const VislibSeriesResponseHandlerProvider = function () {
-  return {
-    name: 'vislib_series',
-    handler: handlerFunction(buildPointSeriesData)
-  };
+const VislibSeriesResponseHandler = {
+  name: 'vislib_series',
+  handler: handlerFunction(buildPointSeriesData)
 };
 
-const VislibSlicesResponseHandlerProvider = function () {
-  return {
-    name: 'vislib_slices',
-    handler: handlerFunction(buildHierarchicalData)
-  };
+const VislibSlicesResponseHandler = {
+  name: 'vislib_slices',
+  handler: handlerFunction(buildHierarchicalData)
 };
 
+VisResponseHandlersRegistryProvider.register(VislibSeriesResponseHandler);
+VisResponseHandlersRegistryProvider.register(VislibSlicesResponseHandler);
 
-
-VisResponseHandlersRegistryProvider.register(VislibSeriesResponseHandlerProvider);
-VisResponseHandlersRegistryProvider.register(VislibSlicesResponseHandlerProvider);
-
-export { VislibSeriesResponseHandlerProvider, VislibSlicesResponseHandlerProvider };
+export { VislibSeriesResponseHandler, VislibSlicesResponseHandler };

@@ -18,7 +18,7 @@
  */
 
 import { functionsRegistry } from 'plugins/interpreter/registries';
-import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
+import { VislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaPie = () => ({
@@ -41,8 +41,7 @@ export const kibanaPie = () => ({
   async fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
 
-    const responseHandler = vislibSlicesResponseHandler().handler;
-    const convertedData = await responseHandler(context, visConfig.dimensions);
+    const convertedData = await VislibSlicesResponseHandler.handler(context, visConfig.dimensions);
 
     return {
       type: 'render',

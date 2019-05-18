@@ -60,9 +60,10 @@ export class VisualizeDataLoader {
     const { requestHandler, responseHandler } = vis.type;
 
     const requestHandlers: RequestHandlerDescription[] = Private(RequestHandlersProvider);
-    const responseHandlers: ResponseHandlerDescription[] = Private(ResponseHandlerProvider);
+    // const responseHandlers: any[] = ResponseHandlerProvider;
+    // TODO
     this.requestHandler = getHandler(requestHandlers, requestHandler);
-    this.responseHandler = getHandler(responseHandlers, responseHandler);
+    this.responseHandler = getHandler(ResponseHandlerProvider, responseHandler);
   }
 
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {

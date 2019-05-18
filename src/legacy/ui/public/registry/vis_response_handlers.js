@@ -17,9 +17,17 @@
  * under the License.
  */
 
+/*
 import { uiRegistry } from './_registry';
 export const VisResponseHandlersRegistryProvider = uiRegistry({
   name: 'visResponseHandlers',
   index: ['name'],
   order: ['title']
 });
+*/
+
+const visResponseHandlers = [];
+export const VisResponseHandlersRegistryProvider = {
+  register: visResponseHandlers.push,
+  get: () => visResponseHandlers,
+};

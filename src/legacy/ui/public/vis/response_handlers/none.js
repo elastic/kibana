@@ -24,15 +24,13 @@
 
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
-const noneResponseHandler = function () {
-  return {
-    name: 'none',
-    handler: function (response) {
-      return new Promise((resolve) => {
-        resolve(response);
-      });
-    }
-  };
+const noneResponseHandler = {
+  name: 'none',
+  handler: function (response) {
+    return new Promise((resolve) => {
+      resolve(response);
+    });
+  }
 };
 
 VisResponseHandlersRegistryProvider.register(noneResponseHandler);
