@@ -14,35 +14,16 @@ import {
   Position,
   getAxisId,
   getSpecId,
+  PartialTheme,
+  Settings,
+  LIGHT_THEME,
+  mergeWithDefaultTheme,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
-import { AreaChartData, WrappedByAutoSizer, ChartHolder } from './common';
+import { AreaChartData, WrappedByAutoSizer, ChartHolder, numberFormatter } from './common';
 import { AutoSizer } from '../auto_sizer';
 
-const seriesAreaStyle = (color: string) => ({
-  area: {
-    fill: color,
-    visible: true,
-    opacity: 0.4,
-  },
-  line: {
-    stroke: color,
-    strokeWidth: 1,
-    visible: true,
-  },
-  border: {
-    visible: false,
-    strokeWidth: 1,
-    stroke: color,
-  },
-  point: {
-    visible: false,
-    radius: 0.2,
-    stroke: color,
-    strokeWidth: 1,
-    opacity: 1,
-  },
-});
+const seriesAreaStyle = () => (mergeWithDefaultTheme({}), LIGHT_THEME);
 
 const dateFormatter = (d: string) => {
   return d.toLocaleString().split('T')[0];
@@ -56,6 +37,7 @@ export const AreaChartBaseComponent = pure<{
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
+        <Settings theme={seriesAreaStyle()} />
         {data.map((series, idx) =>
           series.value != null ? (
             <AreaSeries
@@ -67,7 +49,6 @@ export const AreaChartBaseComponent = pure<{
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
-              areaSeriesStyle={series.color ? seriesAreaStyle(series.color) : undefined}
             />
           ) : null
         )}
@@ -79,7 +60,12 @@ export const AreaChartBaseComponent = pure<{
           tickFormat={dateFormatter}
           tickSize={0}
         />
-        <Axis id={getAxisId(`group-${data[0].key}-y`)} position={Position.Left} tickSize={0} />
+        <Axis
+          id={getAxisId(`group-${data[0].key}-y`)}
+          position={Position.Left}
+          tickSize={0}
+          tickFormat={numberFormatter}
+        />
       </Chart>
     </div>
   ) : null;

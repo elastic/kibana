@@ -47,3 +47,7 @@ export const WrappedByAutoSizer = styled.div`
     z-index: 100;
   }
 `;
+
+export const numberFormatter = (value: string | number) => {
+  return value.toLocaleString && value.toLocaleString();
+};
