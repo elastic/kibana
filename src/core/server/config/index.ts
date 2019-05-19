@@ -24,4 +24,3 @@ export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs } from './env';
 
 export { Env, EnvironmentMode, PackageInfo } from './env';
-export { ConfigWithSchema } from './config_with_schema';
