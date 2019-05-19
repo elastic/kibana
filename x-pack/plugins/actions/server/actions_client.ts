@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { ActionTypeService } from './action_type_service';
@@ -76,7 +77,14 @@ export class ActionsClient {
   public async create({ data, options }: CreateOptions) {
     const { actionTypeId } = data;
     if (!this.actionTypeService.has(actionTypeId)) {
-      throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.actionsClient.create.missingActionTypeError', {
+          defaultMessage: 'Action type "{actionTypeId}" is not registered.',
+          values: {
+            actionTypeId,
+          },
+        })
+      );
     }
     this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
     const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);

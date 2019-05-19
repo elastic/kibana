@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 
 interface ExecutorOptions {
   actionTypeConfig: Record<string, any>;
@@ -43,7 +44,14 @@ export class ActionTypeService {
    */
   public register(actionType: ActionType) {
     if (this.has(actionType.id)) {
-      throw Boom.badRequest(`Action type "${actionType.id}" is already registered.`);
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.actionTypeService.register.duplicateActionTypeError', {
+          defaultMessage: 'Action type "{id}" is already registered.',
+          values: {
+            id: actionType.id,
+          },
+        })
+      );
     }
     this.actionTypes[actionType.id] = actionType;
   }
@@ -53,7 +61,14 @@ export class ActionTypeService {
    */
   public get(id: string) {
     if (!this.actionTypes[id]) {
-      throw Boom.badRequest(`Action type "${id}" is not registered.`);
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.actionTypeService.get.missingActionTypeError', {
+          defaultMessage: 'Action type "{id}" is not registered.',
+          values: {
+            id,
+          },
+        })
+      );
     }
     return this.actionTypes[id];
   }

@@ -16,6 +16,7 @@ describe('register()', () => {
       name: 'My action type',
       executor,
     });
+    expect(actionTypeService.has('my-action-type')).toEqual(true);
   });
 
   test('throws error if action type already registered', () => {
