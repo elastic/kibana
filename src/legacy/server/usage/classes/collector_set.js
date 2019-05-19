@@ -23,15 +23,14 @@ import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
 import { UsageCollector } from './usage_collector';
 
+let _waitingForAllCollectorsTimestamp = null;
+
 /*
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
  * and optionally, how to combine it into a unified payload for bulk upload.
  */
 export class CollectorSet {
-
-  static _waitingForAllCollectorsTimestamp = null;
-
   /*
    * @param {Object} server - server object
    * @param {Array} collectors to initialize, usually as a result of filtering another CollectorSet instance
@@ -93,19 +92,19 @@ export class CollectorSet {
 
     if (!allReady && this._maximumWaitTimeForAllCollectorsInS >= 0) {
       const nowTimestamp = +new Date();
-      CollectorSet._waitingForAllCollectorsTimestamp = CollectorSet._waitingForAllCollectorsTimestamp || nowTimestamp;
-      const timeWaitedInMS = nowTimestamp - CollectorSet._waitingForAllCollectorsTimestamp;
+      _waitingForAllCollectorsTimestamp = _waitingForAllCollectorsTimestamp || nowTimestamp;
+      const timeWaitedInMS = nowTimestamp - _waitingForAllCollectorsTimestamp;
       const timeLeftInMS = (this._maximumWaitTimeForAllCollectorsInS * 1000) - timeWaitedInMS;
       if (timeLeftInMS <= 0) {
-        console.log(`All collectors are not ready (waiting for ${collectorTypesNotReady.join(',')}) `
+        this._log.debug(`All collectors are not ready (waiting for ${collectorTypesNotReady.join(',')}) `
         + `but we have waited the required `
         + `${this._maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`);
         return true;
       } else {
-        console.log(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
+        this._log.debug(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
       }
     } else {
-      CollectorSet._waitingForAllCollectorsTimestamp = null;
+      _waitingForAllCollectorsTimestamp = null;
     }
 
     return allReady;
