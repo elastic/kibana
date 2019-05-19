@@ -6,6 +6,7 @@
 
 import { omit } from 'lodash';
 import { ContextFunction, Datatable, DatatableColumn, DatatableColumnType } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -14,10 +15,12 @@ interface Arguments {
 }
 
 export function alterColumn(): ContextFunction<'alterColumn', Datatable, Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().alterColumn;
+
   return {
     name: 'alterColumn',
     type: 'datatable',
-    help: 'Converts between core types, eg string, number, null, boolean, date and rename columns',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -25,17 +28,17 @@ export function alterColumn(): ContextFunction<'alterColumn', Datatable, Argumen
       column: {
         aliases: ['_'],
         types: ['string'],
-        help: 'The name of the column to alter',
+        help: argHelp.column,
       },
       type: {
         types: ['string'],
-        help: 'The type to convert the column to. Leave blank to not change type',
+        help: argHelp.type,
         default: null,
         options: ['null', 'boolean', 'number', 'string'],
       },
       name: {
         types: ['string', 'null'],
-        help: 'The resultant column name. Leave blank to not rename',
+        help: argHelp.name,
         default: null,
       },
     },

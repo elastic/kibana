@@ -11,17 +11,32 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
 
+jest.mock('../../containers/source/source', () => ({
+  useSource: ({ sourceId }: { sourceId: string }) => ({
+    sourceId,
+    source: {
+      configuration: {
+        fields: {
+          container: 'CONTAINER_FIELD',
+          host: 'HOST_FIELD',
+          pod: 'POD_FIELD',
+        },
+      },
+    },
+    isLoading: sourceId === 'perpetuallyLoading',
+  }),
+}));
+
 describe('RedirectToNodeLogs component', () => {
   it('renders a redirect with the correct host filter', () => {
     const component = shallowWithIntl(
       <RedirectToNodeLogs {...createRouteComponentProps('/host-logs/HOST_NAME')} />
     ).dive();
-    const withSourceChildFunction = component.prop('children') as any;
 
-    expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
+    expect(component).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
+  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=default"
 />
 `);
   });
@@ -30,12 +45,11 @@ describe('RedirectToNodeLogs component', () => {
     const component = shallowWithIntl(
       <RedirectToNodeLogs {...createRouteComponentProps('/container-logs/CONTAINER_ID')} />
     ).dive();
-    const withSourceChildFunction = component.prop('children') as any;
 
-    expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
+    expect(component).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)"
+  to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)&sourceId=default"
 />
 `);
   });
@@ -44,12 +58,11 @@ describe('RedirectToNodeLogs component', () => {
     const component = shallowWithIntl(
       <RedirectToNodeLogs {...createRouteComponentProps('/pod-logs/POD_ID')} />
     ).dive();
-    const withSourceChildFunction = component.prop('children') as any;
 
-    expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
+    expect(component).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)"
+  to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)&sourceId=default"
 />
 `);
   });
@@ -60,12 +73,11 @@ describe('RedirectToNodeLogs component', () => {
         {...createRouteComponentProps('/host-logs/HOST_NAME?time=1550671089404')}
       />
     ).dive();
-    const withSourceChildFunction = component.prop('children') as any;
 
-    expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
+    expect(component).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
 />
 `);
   });
@@ -78,32 +90,35 @@ describe('RedirectToNodeLogs component', () => {
         )}
       />
     ).dive();
-    const withSourceChildFunction = component.prop('children') as any;
 
-    expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
+    expect(component).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+/>
+`);
+  });
+
+  it('renders a redirect with the correct custom source id', () => {
+    const component = shallowWithIntl(
+      <RedirectToNodeLogs
+        {...createRouteComponentProps('/SOME-OTHER-SOURCE/host-logs/HOST_NAME')}
+      />
+    ).dive();
+
+    expect(component).toMatchInlineSnapshot(`
+<Redirect
+  push={false}
+  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
 />
 `);
   });
 });
 
-const testSourceChildArgs = {
-  configuration: {
-    fields: {
-      container: 'CONTAINER_FIELD',
-      host: 'HOST_FIELD',
-      pod: 'POD_FIELD',
-    },
-  },
-  isLoading: false,
-};
-
 const createRouteComponentProps = (path: string) => {
   const location = createLocation(path);
   return {
-    match: matchPath(location.pathname, { path: '/:nodeType-logs/:nodeId' }) as any,
+    match: matchPath(location.pathname, { path: '/:sourceId?/:nodeType-logs/:nodeId' }) as any,
     history: null as any,
     location,
   };

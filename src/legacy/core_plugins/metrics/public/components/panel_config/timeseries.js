@@ -229,12 +229,6 @@ class TimeseriesPanelConfigUi extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

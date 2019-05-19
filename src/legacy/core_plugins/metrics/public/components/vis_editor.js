@@ -62,6 +62,7 @@ class VisEditor extends Component {
   };
 
   updateVisState = debounce(() => {
+    this.props.vis.params = this.state.model;
     this.props.vis.updateState();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
@@ -75,8 +76,6 @@ class VisEditor extends Component {
       ...partialModel,
     };
     let dirty = true;
-
-    this.props.vis.params = nextModel;
 
     if (this.state.autoApply || hasTypeChanged) {
       this.updateVisState();
