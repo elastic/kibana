@@ -31,11 +31,10 @@ export default function actionsPlugin(kibana: any) {
           },
         },
         async handler(request: any) {
-          const savedObjectsClient = request.getSavedObjectsClient();
-          return await request.server.plugins.actions.fire({
+          const actionsClient = request.getActionsClient();
+          return await actionsClient.fire({
             id: request.params.id,
             params: request.payload.params,
-            savedObjectsClient,
           });
         },
       });
