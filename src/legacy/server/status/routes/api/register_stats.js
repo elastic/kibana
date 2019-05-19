@@ -19,10 +19,13 @@
 
 import Joi from 'joi';
 import boom from 'boom';
+import { i18n }  from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
 
-const STATS_NOT_READY_MESSAGE = 'Stats are not ready yet. Please try again later.';
+const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
+  defaultMessage: 'Stats are not ready yet. Please try again later.',
+});
 
 /*
  * API for Kibana meta info and accumulated operations stats
