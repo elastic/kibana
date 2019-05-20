@@ -7,7 +7,7 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 
-const IM_ROOT = '/api/integrations-manager';
+const IM_ROOT = '/api/integrations_manager';
 
 class Plugin {
   public setup(core: CoreSetup) {
