@@ -207,6 +207,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
+      delete options.subdomains;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
         options: { ...options, showZoomMessage, ...meta, }

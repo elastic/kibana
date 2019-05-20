@@ -175,8 +175,8 @@ uiModules.get('kibana')
         });
         return {
           url: await tmsService.getUrlTemplate(),
-          minzoom: await tmsService.getMinZoom(),
-          maxzoom: await tmsService.getMaxZoom(),
+          minZoom: await tmsService.getMinZoom(),
+          maxZoom: await tmsService.getMaxZoom(),
           attribution: await tmsService.getHTMLAttribution(),
           origin: ORIGIN.EMS,
         };
