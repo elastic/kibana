@@ -5,6 +5,7 @@
  */
 
 import { NullContextFunction, ContainerStyle } from '../types';
+import { getFunctionHelp } from '../../strings';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
@@ -13,6 +14,8 @@ interface Return extends ContainerStyle {
 }
 
 export function containerStyle(): NullContextFunction<'containerStyle', ContainerStyle, Return> {
+  const { help, args: argHelp } = getFunctionHelp().containerStyle;
+
   return {
     name: 'containerStyle',
     aliases: [],
@@ -20,49 +23,47 @@ export function containerStyle(): NullContextFunction<'containerStyle', Containe
       types: ['null'],
     },
     type: 'containerStyle',
-    help:
-      'Creates an object used for describing the properties of a series on a chart.' +
-      ' You would usually use this inside of a charting function',
+    help,
     args: {
       border: {
         types: ['string', 'null'],
-        help: 'Valid CSS border string',
+        help: argHelp.border,
       },
       borderRadius: {
         types: ['string', 'null'],
-        help: 'Number of pixels to use when rounding the border',
+        help: argHelp.borderRadius,
       },
       padding: {
         types: ['string', 'null'],
-        help: 'Content distance in pixels from border',
+        help: argHelp.padding,
       },
       backgroundColor: {
         types: ['string', 'null'],
-        help: 'Valid CSS background color string',
+        help: argHelp.backgroundColor,
       },
       backgroundImage: {
         types: ['string', 'null'],
-        help: 'Valid CSS background image string',
+        help: argHelp.backgroundImage,
       },
       backgroundSize: {
         types: ['string'],
-        help: 'Valid CSS background size string',
+        help: argHelp.backgroundSize,
         default: 'contain',
         options: ['contain', 'cover', 'auto'],
       },
       backgroundRepeat: {
         types: ['string'],
-        help: 'Valid CSS background repeat string',
+        help: argHelp.backgroundRepeat,
         default: 'no-repeat',
         options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
       },
       opacity: {
         types: ['number', 'null'],
-        help: 'A number between 0 and 1 representing the degree of transparency of the element',
+        help: argHelp.opacity,
       },
       overflow: {
         types: ['string'],
-        help: 'Sets overflow of the container',
+        help: argHelp.overflow,
         options: ['visible', 'hidden', 'scroll', 'auto'],
       },
     },
