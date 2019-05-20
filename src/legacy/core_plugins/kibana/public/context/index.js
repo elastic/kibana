@@ -78,10 +78,14 @@ function ContextAppRouteController(
     'contextAppRoute.state.successorCount',
   ], () => this.state.save(true));
 
-  queryFilter.getUpdates$().subscribe({
+  const updateSubsciption = queryFilter.getUpdates$().subscribe({
     next: () => {
       this.filters = _.cloneDeep(queryFilter.getFilters());
     }
+  });
+
+  $scope.$on('$destroy', function () {
+    updateSubsciption.unsubscribe();
   });
 
   this.anchorType = $routeParams.type;

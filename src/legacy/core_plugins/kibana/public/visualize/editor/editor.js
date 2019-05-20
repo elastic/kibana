@@ -419,12 +419,12 @@ function VisEditor(
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
-    queryFilter.getUpdates$().subscribe({
-      next: () => {
+    const filterUpdateSubscription = queryFilter.getUpdates$().subscribe(
+      () => {
         $scope.filters = queryFilter.getFilters();
         $scope.fetch();
       },
-    });
+    );
 
     // update the searchSource when query updates
     $scope.fetch = function () {
@@ -441,6 +441,7 @@ function VisEditor(
       }
       savedVis.destroy();
       stateMonitor.destroy();
+      filterUpdateSubscription.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {

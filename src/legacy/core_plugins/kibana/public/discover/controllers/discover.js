@@ -210,6 +210,9 @@ function discoverController(
     requests: new RequestAdapter()
   };
 
+  let filterUpdateSubscription;
+  let filterFetchSubscription;
+
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 
@@ -226,7 +229,11 @@ function discoverController(
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
-  $scope.$on('$destroy', savedSearch.destroy);
+  $scope.$on('$destroy', () => {
+    savedSearch.destroy();
+    if (filterFetchSubscription) filterFetchSubscription.unsubscribe();
+    if (filterUpdateSubscription) filterUpdateSubscription.unsubscribe();
+  });
 
   const $appStatus = $scope.appStatus = this.appStatus = {
     dirty: !savedSearch.id
@@ -561,25 +568,21 @@ function discoverController(
         });
 
         // update data source when filters update
-        queryFilter.getUpdates$().subscribe({
-          next: () => {
+        filterUpdateSubscription = queryFilter.getUpdates$().subscribe(
+          () => {
             $scope.filters = queryFilter.getFilters();
             $scope.updateDataSource().then(function () {
               $state.save();
             });
           }
-        });
+        );
+
+        // fetch data when filters fire fetch event
+        filterFetchSubscription = queryFilter.getFetches$().subscribe($scope.fetch);
 
         // update data source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {
           if (diff.indexOf('query') >= 0) $scope.fetch();
-        });
-
-        // fetch data when filters fire fetch event
-        queryFilter.getFetches$().subscribe({
-          next: () => {
-            $scope.fetch();
-          }
         });
 
         $scope.$watch('opts.timefield', function (timefield) {
