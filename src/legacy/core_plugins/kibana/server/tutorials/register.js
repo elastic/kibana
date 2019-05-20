@@ -57,6 +57,7 @@ import { memcachedMetricsSpecProvider } from './memcached_metrics';
 import { muninMetricsSpecProvider } from './munin_metrics';
 import { vSphereMetricsSpecProvider } from './vsphere_metrics';
 import { windowsMetricsSpecProvider } from './windows_metrics';
+import { windowsEventLogsSpecProvider } from './windows_event_logs';
 import { golangMetricsSpecProvider } from './golang_metrics';
 import { logstashMetricsSpecProvider } from './logstash_metrics';
 import { prometheusMetricsSpecProvider } from './prometheus_metrics';
@@ -111,6 +112,7 @@ export function registerTutorials(server) {
   server.registerTutorial(muninMetricsSpecProvider);
   server.registerTutorial(vSphereMetricsSpecProvider);
   server.registerTutorial(windowsMetricsSpecProvider);
+  server.registerTutorial(windowsEventLogsSpecProvider);
   server.registerTutorial(golangMetricsSpecProvider);
   server.registerTutorial(logstashMetricsSpecProvider);
   server.registerTutorial(prometheusMetricsSpecProvider);
