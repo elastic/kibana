@@ -4,7 +4,6 @@
 <titleabbrev>7.1.0</titleabbrev>
 ++++
 
-coming[7.1.0]
 
 Each release of {kib} brings new features and product improvements. Here are the 
 highlights of the feature and user experience changes in 7.1.0.
