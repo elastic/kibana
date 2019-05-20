@@ -28,16 +28,14 @@ export async function getDataSources() {
     return loadingMetaPromise;
   }
 
-  window._xpackInfo = xpackInfo;
-
   loadingMetaPromise = new Promise(async (resolve, reject) => {
     try {
       const fullResponse = await fetch(`${GIS_API_RELATIVE}/meta`);
       const fullMetaJson = await fullResponse.json();
 
-      const useCorsForElasticMapsService = chrome.getInjected('useCORSForElasticMapsService', true);
+      const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
 
-      if (useCorsForElasticMapsService) {
+      if (!proxyElasticMapsServiceInMaps) {
         const emsClient = new EMSClient({
           language: i18n.getLocale(),
           kbnVersion: chrome.getInjected('kbnPkgVersion'),
@@ -48,7 +46,7 @@ export async function getDataSources() {
         const xpackMapsFeature = xpackInfo.get('features.maps');
         const licenseId = xpackMapsFeature && xpackMapsFeature.maps && xpackMapsFeature.uid ? xpackMapsFeature.uid :  '';
 
-        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, licenseId, useCorsForElasticMapsService);
+        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, licenseId, !proxyElasticMapsServiceInMaps);
 
         //override EMS cors config
         fullMetaJson.data_sources.ems = {

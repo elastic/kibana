@@ -205,7 +205,7 @@ export default () => Joi.object({
   }).default(),
   map: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
-    useCORSForElasticMapsService: Joi.boolean().default(true),
+    proxyElasticMapsServiceInMaps: Joi.boolean().default(false),
     tilemap: Joi.object({
       url: Joi.string(),
       options: Joi.object({

@@ -42,7 +42,7 @@ export function maps(kibana) {
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
-          useCORSForElasticMapsService: mapConfig.useCORSForElasticMapsService,
+          proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
           emsManifestServiceUrl: mapConfig.manifestServiceUrl,
           emsLandingPageUrl: mapConfig.manifestServiceUrl,
           kbnPkgVersion: serverConfig.get('pkg.version')

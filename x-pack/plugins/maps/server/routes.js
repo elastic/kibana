@@ -99,11 +99,11 @@ export function initRoutes(server, licenseUid) {
         tmsServices: []
       };
 
-      if (mapConfig.useCORSForElasticMapsService) {
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
         ems = emptyResponse;
       } else {
         try {
-          ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, mapConfig.useCORSForElasticMapsService);
+          ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, !mapConfig.proxyElasticMapsServiceInMaps);
         } catch (e) {
           server.log('warning', `Cannot connect to EMS, error: ${e}`);
           ems = emptyResponse;
