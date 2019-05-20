@@ -30,7 +30,7 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
       const indexPatterns = $injector.get('indexPatterns');
-      const kbnBaseUrl = $injector.get('kbnBaseUrl');
+      const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
       const kibanaConfig = $injector.get('config');
       const Private: IPrivate = $injector.get('Private');
 
