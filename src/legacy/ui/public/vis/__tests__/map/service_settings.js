@@ -221,13 +221,13 @@ describe('service_settings (FKA tilemaptest)', function () {
         const darkThemeDesaturationTrue = await serviceSettings.getAttributesForTMSLayer(roadMapService, true, true);
 
         expect(desaturationFalse.url).to.equal('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
-        expect(desaturationFalse.maxzoom).to.equal(10);
+        expect(desaturationFalse.maxZoom).to.equal(10);
         expect(desaturationTrue.url).to.equal('https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
-        expect(desaturationTrue.maxzoom).to.equal(18);
+        expect(desaturationTrue.maxZoom).to.equal(18);
         expect(darkThemeDesaturationFalse.url).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
-        expect(darkThemeDesaturationFalse.maxzoom).to.equal(22);
+        expect(darkThemeDesaturationFalse.maxZoom).to.equal(22);
         expect(darkThemeDesaturationTrue.url).to.equal('https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3');
-        expect(darkThemeDesaturationTrue.maxzoom).to.equal(22);
+        expect(darkThemeDesaturationTrue.maxZoom).to.equal(22);
 
       });
 
