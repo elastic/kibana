@@ -9,15 +9,15 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
 
 const getRefreshInterval = (val = '') => {
-  // if it's a number, just use it directly
+  // if it's a number, there is no interval, return undefined
   if (!isNaN(Number(val))) {
-    return val;
+    return;
   }
 
   // if it's a string, try to parse out the shorthand duration value
   const match = String(val).match(/^([0-9]{1,})([hmsd])$/);
 
-  // TODO: do something better with improper input, like show an error...
+  // if it's invalid, there is no interval, return undefined
   if (!match) {
     return;
   }
@@ -36,6 +36,8 @@ const getRefreshInterval = (val = '') => {
 
 export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue }) => {
   const [customInterval, setCustomInterval] = useState(defaultValue);
+  const refreshInterval = getRefreshInterval(customInterval);
+  const isInvalid = Boolean(customInterval.length && !refreshInterval);
 
   const handleChange = ev => setCustomInterval(ev.target.value);
 
@@ -43,7 +45,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
     <form
       onSubmit={ev => {
         ev.preventDefault();
-        onSubmit(getRefreshInterval(customInterval));
+        onSubmit(refreshInterval);
       }}
     >
       <EuiFlexGroup gutterSize={gutterSize}>
@@ -53,13 +55,18 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
             helpText="Use shorthand notation, like 30s, 10m, or 1h"
             compressed
           >
-            <EuiFieldText value={customInterval} onChange={handleChange} />
+            <EuiFieldText isInvalid={isInvalid} value={customInterval} onChange={handleChange} />
           </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiFormRow label="&nbsp;">
-            <EuiButton size={buttonSize} type="submit" style={{ minWidth: 'auto' }}>
+            <EuiButton
+              disabled={isInvalid}
+              size={buttonSize}
+              type="submit"
+              style={{ minWidth: 'auto' }}
+            >
               Set
             </EuiButton>
           </EuiFormRow>
