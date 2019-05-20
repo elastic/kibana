@@ -8,11 +8,16 @@ import { getRandomString } from '../../../../test_utils';
 
 const defaultSettings: any = { chunkSize: '10mb', location: '/tmp/es-backups' };
 
+interface Repository {
+  name: string;
+  type: 'fs' | 'url';
+  settings: any;
+}
 export const getRepository = ({
   name = getRandomString(),
-  type = 'fs',
+  type = 'fs' as 'fs',
   settings = defaultSettings,
-} = {}) => ({
+} = {}): Repository => ({
   name,
   type,
   settings,

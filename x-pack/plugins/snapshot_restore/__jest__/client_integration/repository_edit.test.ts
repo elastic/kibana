@@ -19,8 +19,10 @@ describe('<RepositoryEdit />', () => {
   });
 
   beforeEach(async () => {
-    // mock get repository ({ repository: REPOSITORY_EDIT, snapshots: { count: 0 } })
-
+    httpRequestsMockHelpers.setGetRepositoryResponse({
+      repository: REPOSITORY_EDIT,
+      snapshots: { count: 0 },
+    });
     testBed = await setup();
 
     await act(async () => {
@@ -31,8 +33,8 @@ describe('<RepositoryEdit />', () => {
 
   test('should populate the form fields with the values from the auto-follow pattern loaded', () => {
     const { find } = testBed;
-    // stepTwo title === name
-    // location === settings -> location
-    // chunk size === settings -> chunkSize
+    expect(find('repositoryForm.stepTwo.title').text()).toBe(`'${REPOSITORY_EDIT.name}' settings`);
+    expect(find('locationInput').props().defaultValue).toBe(REPOSITORY_EDIT.settings.location);
+    expect(find('chunkSizeInput').props().defaultValue).toBe(REPOSITORY_EDIT.settings.chunkSize);
   });
 });

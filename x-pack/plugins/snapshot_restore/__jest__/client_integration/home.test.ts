@@ -25,17 +25,21 @@ describe('<SnapshotRestoreHome />', () => {
     });
 
     it('should set the correct app title', () => {
-      //
+      const { exists, find } = testBed;
+      expect(exists('appTitle')).toBe(true);
+      expect(find('appTitle').text()).toEqual('Snapshot Repositories');
     });
 
     it('should display a loading while fetching the repositories', () => {
-      //
+      const { exists, find } = testBed;
+      expect(exists('sectionLoading')).toBe(true);
+      expect(find('sectionLoading').text()).toEqual('Loading repositories…');
     });
   });
 
   describe('when there are no repositories', () => {
     beforeEach(() => {
-      // Mock HTTP request to load repositories
+      httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
     });
 
     it('should display an empty prompt', async () => {
@@ -46,9 +50,9 @@ describe('<SnapshotRestoreHome />', () => {
         component.update();
       });
 
-      // check no more "sectionLoading"
-      // check "emptyPrompt"
-      // check empty prompt "registerRepositoryButton"
+      expect(exists('sectionLoading')).toBe(false);
+      expect(exists('emptyPrompt')).toBe(true);
+      expect(exists('emptyPrompt.registerRepositoryButton')).toBe(true);
     });
   });
 
@@ -61,23 +65,40 @@ describe('<SnapshotRestoreHome />', () => {
     });
 
     beforeEach(async () => {
-      // Mock repositories list
-      // Create testBed
-      // Act async
+      httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repo1, repo2] });
+
+      testBed = await setup();
+
+      await act(async () => {
+        await nextTick();
+        testBed.component.update();
+      });
     });
 
     it('should list them in the table', async () => {
-      //
+      const { table } = testBed;
+
+      const { tableCellsValues } = table.getMetaData('repositoryTable');
+      const [row1, row2] = tableCellsValues;
+
+      expect(row1).toEqual(['', repo1.name, 'Shared file system', '']);
+      expect(row2).toEqual(['', repo2.name, 'Read-only URL', '']);
     });
 
     it('should show the detail when clicking on a repository', async () => {
       const { component, exists, find, actions } = testBed;
 
+      expect(exists('repositoryDetail')).toBe(false);
+
       await act(async () => {
-        // click on repo in table
+        actions.clickRepositoryAt(0);
+
+        await nextTick();
+        component.update();
       });
 
-      // check that "repositoryDetail" and its "title" exists
+      expect(exists('repositoryDetail')).toBe(true);
+      expect(find('repositoryDetail.title').text()).toEqual(repo1.name);
     });
   });
 
@@ -92,17 +113,24 @@ describe('<SnapshotRestoreHome />', () => {
     });
 
     test('should have 2 tabs', () => {
-      //
+      const { find } = testBed;
+
+      expect(find('tab').length).toBe(2);
+      expect(find('tab').map(t => t.text())).toEqual(['Snapshots', 'Repositories']);
     });
 
     test('should navigate to snapshot list tab', () => {
       const { find, exists } = testBed;
 
-      // make sure "repositoryList" is there but not "snapshotList"
+      expect(exists('repositoryList')).toBe(true);
+      expect(exists('snapshotList')).toBe(false);
 
-      // Click on first tab
+      find('tab')
+        .at(0)
+        .simulate('click');
 
-      // make sure "snapshotList" is there but not "repositoryList"
+      expect(exists('repositoryList')).toBe(false);
+      expect(exists('snapshotList')).toBe(true);
     });
   });
 });

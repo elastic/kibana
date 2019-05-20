@@ -10,11 +10,11 @@ import { WithProviders } from './providers';
 
 const initTestBed = registerTestBed(WithProviders(RepositoryAdd));
 
-export interface RepositoryAddTestBed extends TestBed {
+export interface RepositoryAddTestBed extends TestBed<TestSubjects> {
   actions: {
     clickNextButton: () => void;
     clickSubmitButton: () => void;
-    selectRepositoryType: (type: string) => void;
+    selectRepositoryType: (type: 'fs' | 'url') => void;
   };
 }
 
@@ -30,7 +30,7 @@ export const setup = async (): Promise<RepositoryAddTestBed> => {
     testBed.find('submitButton').simulate('click');
   };
 
-  const selectRepositoryType = (type: string) => {
+  const selectRepositoryType = (type: 'fs' | 'url') => {
     testBed
       .find(`${type}RepositoryType`)
       .find('button')

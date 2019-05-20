@@ -18,7 +18,7 @@ const testBedConfig = {
 
 const initTestBed = registerTestBed(WithProviders(SnapshotRestoreHome), testBedConfig);
 
-export interface HomeTestBed extends TestBed {
+export interface HomeTestBed extends TestBed<TestSubjects> {
   actions: {
     selectRepositoryAt: (index: number) => void;
     clickRepositoryAt: (index: number) => void;
@@ -54,3 +54,33 @@ export const setup = async (): Promise<HomeTestBed> => {
     },
   };
 };
+
+export type TestSubjects =
+  | 'appTitle'
+  | 'cell'
+  | 'checkboxSelectAll'
+  | 'checkboxSelectRow-aa'
+  | 'repositoryLink'
+  | 'repositoryList'
+  | 'repositoryTable'
+  | 'row'
+  | 'snapshotRestoreApp'
+  | 'snapshotRestoreApp.appTitle'
+  | 'snapshotRestoreApp.repositoryList'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.checkboxSelectAll'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.row'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.row.cell'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.row.cell.repositoryLink'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.row.checkboxSelectRow-aa'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.row.srRepositoryListDeleteActionButton'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.tableHeaderCell_name_0.tableHeaderSortButton'
+  | 'snapshotRestoreApp.repositoryList.repositoryTable.tableHeaderCell_type_1.tableHeaderSortButton'
+  | 'snapshotRestoreApp.repositoryList.srRepositoriesAddButton'
+  | 'snapshotRestoreApp.tab'
+  | 'srRepositoriesAddButton'
+  | 'srRepositoryListDeleteActionButton'
+  | 'tab'
+  | 'tableHeaderCell_name_0'
+  | 'tableHeaderCell_type_1'
+  | 'tableHeaderSortButton';
