@@ -7,6 +7,8 @@
 import {
   EuiBasicTable,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -16,10 +18,12 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeKey } from '../../../../common/time';
 import { InfraLogItem, InfraLogItemField } from '../../../graphql/types';
 import { InfraLoadingPanel } from '../../loading';
+import { LogEntryActionsMenu } from './log_entry_actions_menu';
 
 interface Props {
   flyoutItem: InfraLogItem | null;
@@ -101,14 +105,21 @@ export const LogEntryFlyout = injectI18n(
     return (
       <EuiFlyout onClose={closeFlyout} size="m">
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h3 id="flyoutTitle">
-              <FormattedMessage
-                defaultMessage="Log event document details"
-                id="xpack.infra.logFlyout.flyoutTitle"
-              />
-            </h3>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3 id="flyoutTitle">
+                  <FormattedMessage
+                    defaultMessage="Log event document details"
+                    id="xpack.infra.logFlyout.flyoutTitle"
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {flyoutItem !== null ? <LogEntryActionsMenu logItem={flyoutItem} /> : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {loading || flyoutItem === null ? (
