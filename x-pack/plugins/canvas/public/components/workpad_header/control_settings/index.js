@@ -14,12 +14,12 @@ import { getRefreshInterval, getAutoplay } from '../../../state/selectors/workpa
 import { ControlSettings as Component } from './control_settings';
 
 const mapStateToProps = state => {
-  const autoplay = getAutoplay(state);
+  const { enabled, interval } = getAutoplay(state);
 
   return {
     refreshInterval: getRefreshInterval(state),
-    autoplayEnabled: autoplay.enabled,
-    autoplayInterval: autoplay.interval,
+    autoplayEnabled: enabled,
+    autoplayInterval: interval,
   };
 };
 
