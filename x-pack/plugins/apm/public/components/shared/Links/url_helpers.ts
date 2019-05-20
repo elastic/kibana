@@ -12,7 +12,11 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 }
 
 export function fromQuery(query: StringMap<any>) {
-  return qs.stringify(query);
+  return qs.stringify(query, undefined, undefined, {
+    encodeURIComponent: (value: string) => {
+      return encodeURIComponent(value).replace(/%3A/g, ':');
+    }
+  });
 }
 
 export interface APMQueryParams {
