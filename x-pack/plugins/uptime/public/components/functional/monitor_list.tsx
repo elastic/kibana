@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { get } from 'lodash';
 import moment from 'moment';
 import { LatestMonitor, MonitorSeriesPoint, Ping } from '../../../common/graphql/types';
