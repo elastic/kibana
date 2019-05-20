@@ -1,7 +1,7 @@
 
 {
   "groups": ["kibana_sample_logs", "kibana_sample_data"],
-  "description": "Kibana sample web logs data : find anomalies in the visitor count",
+  "description": "Kibana sample web logs data: find anomalies in the visitor count",
   "analysis_config" : {
     "bucket_span": "1h",
     "detectors": [
