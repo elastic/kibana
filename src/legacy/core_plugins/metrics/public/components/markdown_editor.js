@@ -158,7 +158,7 @@ class MarkdownEditor extends Component {
                 {handlebarLink} on the available expressions."
                 values={{
                   handlebarLink: (
-                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK" rel="noreferrer noopener">
                       <FormattedMessage
                         id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.documentationLinkText"
                         defaultMessage="Click here for documentation"
