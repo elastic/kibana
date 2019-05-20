@@ -437,15 +437,21 @@ object in parentheses rather than using an explicit return:
 
 ## Object / Array creation
 
-Use trailing commas and put *short* declarations on a single line. Only quote
-keys when your interpreter complains:
+- Put *short* declarations on a single line;
+- Use trailing commas when an array or object spans multiple lines; 
+- Quote keys when your interpreter complains.
 
 ```js
 // good
 const a = ['hello', 'world'];
-const b = {
-  good: 'code',
-  'is generally': 'pretty'
+const b = { bar: 'baz', qux: 'quux' };
+const c = [
+    'hello',
+    'world',
+];
+const d = { 
+  bar: 'baz', 
+  qux: 'quux', 
 };
 
 // bad
