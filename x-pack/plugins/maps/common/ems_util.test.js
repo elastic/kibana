@@ -43,5 +43,18 @@ describe('ems util test', () => {
     expect(resources.fileLayers[1].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
   });
 
+  it('Should get empty response when ems is disabled', async () => {
+
+    const emsClient = getEMSClient({});
+    const isEmsEnabled = false;
+    const licenseId = 'foobar';
+    const useProxy = true;
+    const resources = await getEMSResources(emsClient, isEmsEnabled, licenseId, !useProxy);
+
+    expect(resources.tmsServices.length).toBe(0);
+    expect(resources.fileLayers.length).toBe(0);
+
+  });
+
 
 });
