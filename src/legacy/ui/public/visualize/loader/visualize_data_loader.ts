@@ -28,7 +28,6 @@ import {
   RequestHandlerDescription,
   RequestHandlerParams,
   ResponseHandler,
-  // ResponseHandlerDescription,
   Vis,
 } from '../../vis';
 
@@ -61,11 +60,9 @@ export class VisualizeDataLoader {
 
     const requestHandlers: RequestHandlerDescription[] = Private(RequestHandlersProvider);
     this.requestHandler = getHandler(requestHandlers, requestHandler);
-    this.responseHandler = ResponseHandlerProvider
-      // @ts-ignore
-      .getItems()
-      // @ts-ignore
-      .filter(handler => handler.name === responseHandler)[0].handler;
+    this.responseHandler = ResponseHandlerProvider.getItems().filter(
+      handler => handler.name === responseHandler
+    )[0].handler;
   }
 
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
