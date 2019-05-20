@@ -13,13 +13,13 @@ import { AbstractESSource } from '../es_source';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE } from '../../../../../common/constants';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE, DEFAULT_ES_DOC_LIMIT } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
 import { getTermsFields } from '../../../utils/get_terms_fields';
 
-import { DEFAULT_ES_DOC_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 export class ESSearchSource extends AbstractESSource {
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE, DEFAULT_ES_DOC_LIMIT } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
@@ -20,7 +20,6 @@ const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: []
 };
-
 
 const CLOSED_SHAPE_MB_FILTER = [
   'any',
@@ -35,6 +34,8 @@ const ALL_SHAPE_MB_FILTER = [
   ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
   ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
 ];
+
+const ID_ROTATION = 4;
 
 export class VectorLayer extends AbstractLayer {
 
@@ -332,6 +333,12 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
+
+  _getIdOffsetForCurrentRequest() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    return (sourceDataRequest) ? sourceDataRequest.getIdOffsetFromMeta() : 0;
+  }
+
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
@@ -350,8 +357,13 @@ export class VectorLayer extends AbstractLayer {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data: featureCollection, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
-      this._assignIdsToFeatures(featureCollection);
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
+      const idOffset = (this._getIdOffsetForCurrentRequest() + 1) % ID_ROTATION;
+      this._assignIdsToFeatures(featureCollection, idOffset);
+      const newMeta = {
+        ...meta,
+        idOffset: idOffset
+      };
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, newMeta);
       return {
         refreshed: true,
         featureCollection: featureCollection
@@ -364,25 +376,16 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
+  _assignIdsToFeatures(featureCollection, idOffset) {
 
-  static idOffsetCounter = 0;
-  _assignIdsToFeatures(featureCollection) {
-    VectorLayer.idOffsetCounter++;
+    console.log('idOffset', idOffset);
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
       let id;
       if(typeof feature.id === 'number') {
         id = feature.id;
       } else {
-        VectorLayer.idOffsetCounter++;
-        // just POC to illustrate mapbox issue
-        // using feature-state causes a "washing" effect i
-        // this is because ids are reusted across different source-results
-        // e.g. source-data is replaced based on new results, and when using index-in-array as the id, that source feature will have a different id across result-sets
-        // this messes up mapbox, still briefly applying the style based ont the feature-ss state with the old ids. this is likely becaues setData and setFeatureState are handled asynchronously and/or batched differently
-        //for some reason, ids that cannot be parsed to a number value cannot be used with feature-state
-        //this is the proposed work-around (should be polished). just offset the id based on the maximum number of features in a layer. rotate this number this to avoid unbounded growth with some large number (more or less number of vector layers on screen). this way the same ids will not be used across resultsets.
-        id = ((VectorLayer.idOffsetCounter % 64) * 2048) +  i;
+        id = (idOffset * DEFAULT_ES_DOC_LIMIT) +  i;
       }
       feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
       feature.id = id;
