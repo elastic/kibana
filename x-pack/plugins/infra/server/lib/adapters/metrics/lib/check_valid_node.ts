@@ -14,7 +14,6 @@ export const checkValidNode = async (
 ): Promise<boolean> => {
   const params = {
     index: indexPattern,
-    rest_total_hits_as_int: true,
     terminateAfter: 1,
     body: {
       size: 0,
@@ -25,5 +24,6 @@ export const checkValidNode = async (
       },
     },
   };
-  return (await search(params)).hits.total.value > 0;
+  const response = await search(params);
+  return response.hits.total.value > 0;
 };
