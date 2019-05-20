@@ -100,7 +100,7 @@ const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
       <FormattedMessage
         tagName="span"
         id="xpack.infra.sourceConfiguration.timestampLogColumnDescription"
-        defaultMessage="This built-in field shows the log entry's time as determined by the {timestampSetting} field setting."
+        defaultMessage="This system field shows the log entry's time as determined by the {timestampSetting} field setting."
         values={{
           timestampSetting: <code>timestamp</code>,
         }}
@@ -119,7 +119,7 @@ const MessageLogColumnConfigurationPanel: React.FunctionComponent<
       <FormattedMessage
         tagName="span"
         id="xpack.infra.sourceConfiguration.messageLogColumnDescription"
-        defaultMessage="This built-in field shows the log entry message as derived from the document fields."
+        defaultMessage="This system field shows the log entry message as derived from the document fields."
       />
     }
     removeColumn={logColumnConfigurationProps.remove}
@@ -158,7 +158,7 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   removeColumn: () => void;
 }> = ({ fieldName, helpText, removeColumn }) => (
   <EuiPanel
-    data-test-subj={`logColumnPanel builtInLogColumnPanel builtInLogColumnPanel:${fieldName}`}
+    data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
   >
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>{fieldName}</EuiFlexItem>
