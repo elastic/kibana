@@ -33,9 +33,9 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
   // wrapper around EuiComboBox interactions
   class ComboBox {
     /**
-     * set value for combobox
+     * set value inside combobox
      *
-     * @param {string} comboBoxSelector data-test-subj selector
+     * @param {string} comboBoxSelector test subject selector
      * @param {string} value
      * @memberof ComboBox
      */
@@ -46,7 +46,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     /**
-     * set value inside combobox
+     * set value inside combobox element
      *
      * @param {WebElementWrapper} comboBoxElement
      * @param {string} value
