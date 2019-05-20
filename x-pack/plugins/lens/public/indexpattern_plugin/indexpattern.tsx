@@ -36,13 +36,6 @@ export interface Field {
   searchable: boolean;
 }
 
-export interface Field {
-  name: string;
-  type: string;
-  aggregatable: boolean;
-  searchable: boolean;
-}
-
 export interface IndexPatternPersistedState {
   currentIndexPattern: string;
 
@@ -56,16 +49,12 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: { [id: string]: IndexPattern };
 };
 
-type PersistedKeys = 'currentIndexPattern' | 'columns' | 'columnOrder';
-
-export type PersistableIndexPatternPrivateState = Pick<IndexPatternPrivateState, PersistedKeys>;
-
 // Not stateful. State is persisted to the frame
 export const indexPatternDatasource: Datasource<
   IndexPatternPrivateState,
-  PersistableIndexPatternPrivateState
+  IndexPatternPersistedState
 > = {
-  async initialize(state?: PersistableIndexPatternPrivateState) {
+  async initialize(state?: IndexPatternPersistedState) {
     // TODO: Make fetch request to load indexPatterns from saved objects
     if (state) {
       return {
