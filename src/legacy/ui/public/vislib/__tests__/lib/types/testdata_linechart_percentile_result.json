@@ -4,7 +4,7 @@
   "addTooltip": true,
   "categoryAxes": [
     {
-      "id": "CategoryAxis-1-1",
+      "id": "CategoryAxis-1",
       "labels": {
         "show": true,
         "truncate": 100

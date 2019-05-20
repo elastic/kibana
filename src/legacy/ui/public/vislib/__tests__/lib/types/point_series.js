@@ -21,8 +21,8 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import { VislibTypesPointSeries } from '../../../lib/types/point_series';
-import percentileTestdata from './percentile_testdata.json';
-import percentileTestdataResult from './percentile_testdata_result.json';
+import percentileTestdata from './testdata_linechart_percentile.json';
+import percentileTestdataResult from './testdata_linechart_percentile_result.json';
 
 describe('Point Series Config Type Class Test Suite', function () {
   let pointSeriesConfig;
