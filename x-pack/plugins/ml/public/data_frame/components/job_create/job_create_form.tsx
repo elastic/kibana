@@ -65,7 +65,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
     const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
-    const [progressPercentComplete, setprogressPercentComplete] = useState<undefined | number>(
+    const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
     );
 
@@ -187,7 +187,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
           try {
             const stats = await ml.dataFrame.getDataFrameTransformsStats(jobId);
             const percent = Math.round(stats.transforms[0].state.progress.percent_complete);
-            setprogressPercentComplete(percent);
+            setProgressPercentComplete(percent);
             if (percent >= 100) {
               clearInterval(interval);
             }
@@ -201,7 +201,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
             clearInterval(interval);
           }
         }, PROGRESS_JOBS_REFRESH_INTERVAL_MS);
-        setprogressPercentComplete(0);
+        setProgressPercentComplete(0);
       }
 
       startProgressBar();
