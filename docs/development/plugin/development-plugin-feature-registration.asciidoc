@@ -116,7 +116,7 @@ This shows how the Canvas application might register itself as a Kibana feature.
 Note that it specifies different `savedObject` access levels for each privilege: 
 
 - Users with read/write access (`all` privilege) need to be able to read/write `canvas-workpad` saved objects, and they need read-only access to `index-pattern` saved objects.
-- Users with read-only access (`read` privilege) do not need to have read/write access to any saved objects, but instead get read-only access to `index-pattern`s and `canvas-workpad`s.
+- Users with read-only access (`read` privilege) do not need to have read/write access to any saved objects, but instead get read-only access to `index-pattern` and `canvas-workpad` saved objects.
 
 Additionally, Canvas registers the `canvas` UI app and `canvas` catalogue entry. This tells Kibana that these entities are available for users with either the `read` or `all` privilege.
 
