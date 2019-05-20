@@ -5,3 +5,4 @@
  */
 
 export { getApmHref } from './get_apm_href';
+export { getInfraContainerHref, getInfraIpHref, getInfraKubernetesHref } from './get_infra_href';

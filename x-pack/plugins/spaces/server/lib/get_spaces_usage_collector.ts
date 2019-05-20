@@ -109,6 +109,7 @@ export function getSpacesUsageCollector(deps: CollectorDeps) {
   const { collectorSet } = deps.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_SPACES_STATS_TYPE,
+    isReady: () => true,
     fetch: async (callCluster: any) => {
       const xpackInfo = deps.xpackMain.info;
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses

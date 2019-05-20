@@ -159,7 +159,7 @@ data (as that is typically done by the server models already).
 
 They do, however, serve as a consistent place in the data path for translating wire representations of certain types of data into
 more suitable in-memory representations, for example: converting an [ISO8601-formatted timestamp](https://en.wikipedia.org/wiki/ISO_8601)
-into a [moment instance](http://momentjs.com/).
+into a [moment instance](https://momentjs.com/).
 
 They are also the right place for establishing relationships between models — for example, a watch contains many actions — and for
 encapsulating operations around such relationships — for example, updating the status of a watch's action.
