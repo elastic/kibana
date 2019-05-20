@@ -15,6 +15,7 @@ export function ClientFileCreateSourceEditor({
   onRemove,
   onIndexReadyStatusChange,
   onIndexAddSuccess,
+  onIndexAddError,
 }) {
   return (
     <JsonUploadAndParse
@@ -26,6 +27,7 @@ export function ClientFileCreateSourceEditor({
       transformDetails={'geo'}
       onIndexPatternCreateSuccess={viewIndexedData}
       onIndexAddSuccess={onIndexAddSuccess}
+      onIndexAddError={onIndexAddError}
     />
   );
 }

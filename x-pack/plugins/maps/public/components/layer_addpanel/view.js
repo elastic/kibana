@@ -35,8 +35,7 @@ export class AddLayerPanel extends Component {
   _updatePanelDescription(prevSourceType, prevIndexingComplete) {
     const { sourceType, importView, indexingComplete } = this.state;
     if (
-      prevSourceType !== sourceType
-      || indexingComplete !== prevIndexingComplete
+      prevSourceType !== sourceType || indexingComplete !== prevIndexingComplete
     ) {
       let panelDescription;
       if (!sourceType) {
@@ -121,8 +120,9 @@ export class AddLayerPanel extends Component {
           onIndexReady={
             importIndexingReady => this.setState({ importIndexingReady })
           }
-          onIndexSuccess={() => this.setState({ indexingComplete: true })}
-          onIndexError={() => this.setState({ indexingComplete: true })}
+          indexingComplete={
+            () => this.setState({ indexingComplete: true })
+          }
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
         />
       );

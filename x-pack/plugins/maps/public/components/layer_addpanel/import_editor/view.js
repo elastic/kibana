@@ -49,7 +49,7 @@ export const ImportEditor = ({
 
 function getEditorProperties({
   inspectorAdapters, onRemove, previewLayer, addImportLayer,
-  indexingTriggered, onIndexReady, onIndexSuccess, onIndexError
+  indexingTriggered, onIndexReady, indexingComplete
 }) {
   return {
     onPreviewSource: previewLayer,
@@ -58,7 +58,7 @@ function getEditorProperties({
     boolIndexData: indexingTriggered,
     addAndViewSource: source => addImportLayer(source),
     onIndexReadyStatusChange: onIndexReady,
-    onIndexSuccess,
-    onIndexError,
+    importSuccessHandler: indexingComplete,
+    importErrorHandler: indexingComplete,
   };
 }
