@@ -46,7 +46,7 @@ Use the <<features-api, Features API>> to retrieve a list of available features.
 To grant access to all spaces, set this to `["*"]`, or omit the value.
 
 ===== Example 1
-Granting access to various features in all spaces
+Granting access to various features in all spaces.
 
 [source,js]
 --------------------------------------------------
