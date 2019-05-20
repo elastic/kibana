@@ -1,13 +1,13 @@
 [[spaces-api-put]]
 === Update Space
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
 
 Updates an existing {kib} space. To create a new space, use the POST command.
 
 ==== Request
 
-To update a space, issue a PUT request to the 
+To update a space, issue a PUT request to the
 `/api/spaces/space/<space_id>` endpoint.
 
 [source,js]
