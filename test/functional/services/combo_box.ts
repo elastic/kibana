@@ -35,9 +35,8 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * set value inside combobox
      *
-     * @param {string} comboBoxSelector test subject selector
-     * @param {string} value
-     * @memberof ComboBox
+     * @param comboBoxSelector test subject selector
+     * @param value
      */
     public async set(comboBoxSelector: string, value: string): Promise<void> {
       log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
@@ -48,9 +47,8 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * set value inside combobox element
      *
-     * @param {WebElementWrapper} comboBoxElement
-     * @param {string} value
-     * @memberof ComboBox
+     * @param comboBoxElement
+     * @param value
      */
     public async setElement(comboBoxElement: WebElementWrapper, value: string): Promise<void> {
       log.debug(`comboBox.setElement, value: ${value}`);
@@ -80,8 +78,8 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * This method set custom value to comboBox.
      * It applies changes by pressing Enter key. Sometimes it may lead to auto-submitting a form.
      *
-     * @param {string} comboBoxSelector test subject selector
-     * @param {string} value
+     * @param comboBoxSelector test subject selector
+     * @param value
      */
     async setCustom(comboBoxSelector: string, value: string) {
       log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
@@ -164,8 +162,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * clearing value from combobox
      *
-     * @param {string} comboBoxSelector data-test-subj selector
-     * @memberof ComboBox
+     * @param comboBoxSelector data-test-subj selector
      */
     public async clear(comboBoxSelector: string): Promise<void> {
       log.debug(`comboBox.clear, comboBoxSelector:${comboBoxSelector}`);
@@ -199,8 +196,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * closing option list for combobox
      *
-     * @param {WebElementWrapper} comboBoxElement
-     * @memberof ComboBox
+     * @param comboBoxElement
      */
     public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
@@ -213,8 +209,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * opened list of options for combobox
      *
-     * @param {WebElementWrapper} comboBoxElement
-     * @memberof ComboBox
+     * @param comboBoxElement
      */
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
