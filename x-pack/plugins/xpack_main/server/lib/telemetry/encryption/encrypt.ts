@@ -11,8 +11,9 @@ export function getKID(isProd = false): string {
   return isProd ? 'kibana' : 'kibana_dev';
 }
 
-export async function encryptTelemetry(payload: any, isProd = false): Promise<string> {
+export async function encryptTelemetry(payload: any, isProd = false): Promise<string[]> {
   const kid = getKID(isProd);
   const encryptor = await createRequestEncryptor(telemetryJWKS);
-  return encryptor.encrypt(kid, payload);
+  const clusters = [].concat(payload);
+  return Promise.all(clusters.map((cluster: any) => encryptor.encrypt(kid, cluster)));
 }

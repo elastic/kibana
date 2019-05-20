@@ -57,8 +57,8 @@ export const xpackMain = (kibana) => {
           enabled: Joi.boolean().default(true),
           url: Joi.when('$dev', {
             is: true,
-            then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v1/send'),
-            otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v1/send')
+            then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v2/send'),
+            otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v2/send')
           }),
         }).default(),
         xpack_api_polling_frequency_millis: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
