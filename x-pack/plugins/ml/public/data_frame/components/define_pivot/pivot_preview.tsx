@@ -34,6 +34,8 @@ import {
   SimpleQuery,
 } from '../../common';
 
+import { getFlattenedFields } from '../source_index_preview/common';
+
 import { getPivotPreviewDevConsoleStatement } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
@@ -197,7 +199,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
     );
   }
 
-  const columnKeys = Object.keys(dataFramePreviewData[0]);
+  const columnKeys = getFlattenedFields(dataFramePreviewData[0]);
   columnKeys.sort(sortColumns(groupByArr));
 
   const columns = columnKeys.map(k => {
