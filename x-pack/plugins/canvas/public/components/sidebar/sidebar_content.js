@@ -20,17 +20,17 @@ const mapStateToProps = state => ({
   selectedElementId: getSelectedElementId(state),
 });
 
-const MultiElementSidebar = () => (
+const MultiElementSidebar = ({ commit }) => (
   <Fragment>
-    <SidebarHeader title="Multiple elements" />
+    <SidebarHeader title="Multiple elements" commit={commit} />
     <EuiSpacer />
     <MultiElementSettings />
   </Fragment>
 );
 
-const GroupedElementSidebar = () => (
+const GroupedElementSidebar = ({ commit }) => (
   <Fragment>
-    <SidebarHeader title="Grouped element" groupIsSelected />
+    <SidebarHeader title="Grouped element" commit={commit} groupIsSelected />
     <EuiSpacer />
     <GroupSettings />
   </Fragment>

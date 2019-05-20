@@ -59,6 +59,7 @@ const componentLayoutState = ({
   height,
   width,
   registerLayout,
+  updateGlobalState,
 }) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
@@ -84,7 +85,12 @@ const componentLayoutState = ({
     aeroStore.setCurrentState(newState);
   } else {
     setAeroStore((aeroStore = createStore(newState, updater)));
-    registerLayout(aeroStore);
+    registerLayout((type, payload) => {
+      const newLayoutState = aeroStore.commit(type, payload);
+      if (newLayoutState.currentScene.gestureEnd) {
+        updateGlobalState(newLayoutState);
+      }
+    });
   }
   return { aeroStore };
 };

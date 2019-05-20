@@ -8,8 +8,10 @@ import React, { FunctionComponent } from 'react';
 // @ts-ignore unconverted component
 import { SidebarContent } from './sidebar_content';
 
-export const Sidebar: FunctionComponent = () => (
-  <div className="canvasSidebar">
-    <SidebarContent />
-  </div>
-);
+export const Sidebar: FunctionComponent = ({ commit }: { commit: Function }) => {
+  return (
+    <div className="canvasSidebar">
+      <SidebarContent commit={commit} />
+    </div>
+  );
+};

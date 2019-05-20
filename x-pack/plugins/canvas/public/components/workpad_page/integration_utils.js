@@ -196,7 +196,7 @@ export const globalStateUpdater = (dispatch, getState) => state => {
       selectToplevelNodes(
         flatten(
           selectedPrimaryShapes.map(n =>
-            n.startsWith('group') && shapes.find(s => s.id === n).subtype === 'adHocGroup'
+            n.startsWith('group') && (shapes.find(s => s.id === n) || {}).subtype === 'adHocGroup'
               ? shapes.filter(s => s.type !== 'annotation' && s.parent === n).map(s => s.id)
               : [n]
           )
