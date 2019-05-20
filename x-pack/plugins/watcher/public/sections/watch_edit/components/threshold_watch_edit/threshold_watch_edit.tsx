@@ -27,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
+import { TIME_UNITS } from '../../../../../common/constants';
 import { ConfirmWatchesModal, ErrableFormRow } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
@@ -38,12 +39,24 @@ import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
 import { LicenseServiceContext } from '../../../../license_service_context';
+
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
     defaultMessage: 'Select a field',
   }),
   value: '',
 };
+
+const getTimeOptions = (unitSize: string) =>
+  Object.entries(timeUnits)
+    .filter(([key]) => key !== TIME_UNITS.MILLISECOND)
+    .map(([key, value]) => {
+      return {
+        text: unitSize && parseInt(unitSize, 10) === 1 ? value.labelSingular : value.labelPlural,
+        value: key,
+      };
+    });
+
 const getFields = async (indices: string[]) => {
   return await fetchFields(indices);
 };
@@ -104,7 +117,7 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
   }
   options.push({
     label: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.chooseLabel', {
-      defaultMessage: 'Choose...',
+      defaultMessage: 'Choose…',
     }),
     options: [
       {
@@ -361,36 +374,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                     onChange={e => {
                       setWatchProperty('triggerIntervalUnit', e.target.value);
                     }}
-                    options={[
-                      {
-                        value: 's',
-                        text: intl.formatMessage({
-                          id: 'xpack.watcher.sections.watchEdit.titlePanel.secondsLabel',
-                          defaultMessage: 'seconds',
-                        }),
-                      },
-                      {
-                        value: 'm',
-                        text: intl.formatMessage({
-                          id: 'xpack.watcher.sections.watchEdit.titlePanel.minutesLabel',
-                          defaultMessage: 'minutes',
-                        }),
-                      },
-                      {
-                        value: 'd',
-                        text: intl.formatMessage({
-                          id: 'xpack.watcher.sections.watchEdit.titlePanel.daysLabel',
-                          defaultMessage: 'days',
-                        }),
-                      },
-                      {
-                        value: 'h',
-                        text: intl.formatMessage({
-                          id: 'xpack.watcher.sections.watchEdit.titlePanel.hoursLabel',
-                          defaultMessage: 'hours',
-                        }),
-                      },
-                    ]}
+                    options={getTimeOptions(watch.triggerIntervalSize)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -704,7 +688,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 >
                   <div>
                     <EuiPopoverTitle>{comparators[watch.thresholdComparator].text}</EuiPopoverTitle>
-                    <EuiFlexGroup alignItems="center">
+                    <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.thresholdComparator}
@@ -721,7 +705,10 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                           return (
                             <Fragment key={`threshold${i}`}>
                               {i > 0 ? (
-                                <EuiFlexItem grow={false}>
+                                <EuiFlexItem
+                                  grow={false}
+                                  className="watcherThresholdWatchInBetweenComparatorText"
+                                >
                                   <EuiText>{andThresholdText}</EuiText>
                                 </EuiFlexItem>
                               ) : null}
@@ -784,7 +771,12 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                   anchorPosition="downLeft"
                 >
                   <div>
-                    <EuiPopoverTitle>For the last</EuiPopoverTitle>
+                    <EuiPopoverTitle>
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchEdit.threshold.forTheLastButtonLabel"
+                        defaultMessage="For the last"
+                      />
+                    </EuiPopoverTitle>
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <ErrableFormRow
@@ -809,15 +801,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                           onChange={e => {
                             setWatchProperty('timeWindowUnit', e.target.value);
                           }}
-                          options={Object.entries(timeUnits).map(([key, value]) => {
-                            return {
-                              text:
-                                watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
-                                  ? value.labelSingular
-                                  : value.labelPlural,
-                              value: key,
-                            };
-                          })}
+                          options={getTimeOptions(watch.timeWindowSize)}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
