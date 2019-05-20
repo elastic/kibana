@@ -116,9 +116,7 @@ class VisEditorVisualization extends Component {
 
   hasShowPanelIntervalValue() {
     const type = get(this.props, 'model.type', '');
-    const interval = get(this.props, 'model.interval') || AUTO_INTERVAL;
-    const isAutoOrGteInterval = interval === AUTO_INTERVAL
-      || isGteInterval(interval) || !isIntervalValid(interval);
+    const interval = get(this.props, 'model.interval', AUTO_INTERVAL);
 
     return [
       PANEL_TYPES.METRIC,
@@ -126,7 +124,8 @@ class VisEditorVisualization extends Component {
       PANEL_TYPES.GAUGE,
       PANEL_TYPES.MARKDOWN,
       PANEL_TYPES.TABLE,
-    ].includes(type) && isAutoOrGteInterval;
+    ].includes(type) && (interval === AUTO_INTERVAL
+      || isGteInterval(interval) || !isIntervalValid(interval));
   }
 
   getFormattedPanelInterval() {

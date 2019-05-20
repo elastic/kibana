@@ -65,7 +65,7 @@ export default function MetricsVisProvider(Private, i18n) {
           }],
         time_field: '@timestamp',
         index_pattern: '',
-        interval: 'auto',
+        interval: '',
         axis_position: 'left',
         axis_formatter: 'number',
         axis_scale: 'normal',

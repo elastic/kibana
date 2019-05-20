@@ -69,7 +69,5 @@ export const getSuitableUnit = intervalInSeconds => sortedUnits.find((key, index
   return isValidInput && (intervalInSeconds >= units[key] && intervalInSeconds < units[nextUnit] || isLastItem);
 });
 
-export default (unit) => {
-  return units[unit];
-};
+export const getUnitValue  = unit => units[unit];
 
