@@ -37,13 +37,6 @@ declare module 'plugins/watcher/models/settings' {
 declare module 'plugins/watcher/models/action' {
   export const Action: any;
 }
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiCodeEditor: React.SFC<any>;
-  export const EuiDescribedFormGroup: React.SFC<any>;
-  export const EuiSuperSelect: React.SFC<any>;
-}
-
 declare module 'ui/time_buckets' {
   export const TimeBuckets: any;
 }
