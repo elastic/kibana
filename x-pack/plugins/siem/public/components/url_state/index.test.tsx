@@ -24,6 +24,7 @@ import {
   State,
   KueryFilterQuery,
   SerializedFilterQuery,
+  KueryFilterModel,
 } from '../../store';
 import { ActionCreator } from 'typescript-fsa';
 import { InputsModelId } from '../../store/inputs/model';
@@ -92,7 +93,7 @@ const mockProps: UrlStateContainerLifecycleProps = {
       {
         filterQuery,
         type: networkModel.NetworkType.page,
-        model: 'network',
+        model: KueryFilterModel.network,
       },
     ],
   },
@@ -183,7 +184,7 @@ describe('UrlStateComponents', () => {
           {
             filterQuery,
             type: networkModel.NetworkType.details,
-            model: 'network',
+            model: KueryFilterModel.network,
           },
         ],
       };
@@ -206,7 +207,7 @@ describe('UrlStateComponents', () => {
           expression: 'host.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'hosts',
+        model: KueryFilterModel.hosts,
         type: hostsModel.HostsType.page,
       });
       expect(result).toBeTruthy();
@@ -217,7 +218,7 @@ describe('UrlStateComponents', () => {
           expression: 'host.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'hosts',
+        model: KueryFilterModel.hosts,
         type: hostsModel.HostsType.details,
       });
       expect(result).toBeFalsy();
@@ -228,7 +229,7 @@ describe('UrlStateComponents', () => {
           expression: 'host.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'hosts',
+        model: KueryFilterModel.hosts,
         type: hostsModel.HostsType.details,
       });
       expect(result).toBeTruthy();
@@ -239,7 +240,7 @@ describe('UrlStateComponents', () => {
           expression: 'host.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'hosts',
+        model: KueryFilterModel.hosts,
         type: hostsModel.HostsType.page,
       });
       expect(result).toBeFalsy();
@@ -250,7 +251,7 @@ describe('UrlStateComponents', () => {
           expression: 'network.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'network',
+        model: KueryFilterModel.network,
         type: networkModel.NetworkType.page,
       });
       expect(result).toBeTruthy();
@@ -261,7 +262,7 @@ describe('UrlStateComponents', () => {
           expression: 'network.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'network',
+        model: KueryFilterModel.network,
         type: networkModel.NetworkType.details,
       });
       expect(result).toBeFalsy();
@@ -272,7 +273,7 @@ describe('UrlStateComponents', () => {
           expression: 'network.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'network',
+        model: KueryFilterModel.network,
         type: networkModel.NetworkType.details,
       });
       expect(result).toBeTruthy();
@@ -283,7 +284,7 @@ describe('UrlStateComponents', () => {
           expression: 'network.name:"siem-kibana"',
           kind: 'kuery',
         },
-        model: 'network',
+        model: KueryFilterModel.network,
         type: networkModel.NetworkType.page,
       });
       expect(result).toBeFalsy();

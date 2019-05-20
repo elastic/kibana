@@ -20,6 +20,7 @@ import {
   hostsModel,
   hostsSelectors,
   inputsSelectors,
+  KueryFilterModel,
   KueryFilterQuery,
   networkModel,
   networkSelectors,
@@ -36,13 +37,13 @@ import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 
 interface KqlQueryHosts {
   filterQuery: KueryFilterQuery;
-  model: 'hosts';
+  model: KueryFilterModel.hosts;
   type: hostsModel.HostsType;
 }
 
 interface KqlQueryNetwork {
   filterQuery: KueryFilterQuery;
-  model: 'network';
+  model: KueryFilterModel.network;
   type: networkModel.NetworkType;
 }
 
@@ -102,30 +103,18 @@ export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
   const trailingPath = pathname.match(/([^\/]+$)/);
   if (trailingPath !== null) {
     if (
-      trailingPath[0] === 'hosts' &&
-      kql.model === 'hosts' &&
-      kql.type === hostsModel.HostsType.page
-    ) {
-      return true;
-    }
-    if (
-      trailingPath[0] === 'network' &&
-      kql.model === 'network' &&
-      kql.type === networkModel.NetworkType.page
-    ) {
-      return true;
-    }
-    if (
-      pathname.match(/hosts\/.*?/) &&
-      kql.model === 'hosts' &&
-      kql.type === hostsModel.HostsType.details
-    ) {
-      return true;
-    }
-    if (
-      pathname.match(/network\/ip\/.*?/) &&
-      kql.model === 'network' &&
-      kql.type === networkModel.NetworkType.details
+      (trailingPath[0] === 'hosts' &&
+        kql.model === 'hosts' &&
+        kql.type === hostsModel.HostsType.page) ||
+      (trailingPath[0] === 'network' &&
+        kql.model === 'network' &&
+        kql.type === networkModel.NetworkType.page) ||
+      (pathname.match(/hosts\/.*?/) &&
+        kql.model === 'hosts' &&
+        kql.type === hostsModel.HostsType.details) ||
+      (pathname.match(/network\/ip\/.*?/) &&
+        kql.model === 'network' &&
+        kql.type === networkModel.NetworkType.details)
     ) {
       return true;
     }
@@ -199,64 +188,62 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
   };
 
   private handleInitialize = (location: Location) => {
-    Object.keys(this.urlStateMappedToActions).map(key => {
+    Object.keys(this.urlStateMappedToActions).forEach(key => {
       const newUrlStateString = getParamFromQueryString(getQueryStringFromLocation(location), key);
       if (newUrlStateString) {
-        switch (key) {
-          case 'timerange':
-            const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
-            const globalId: InputsModelId = 'global';
-            const globalRange: UrlTimeRange = timerangeStateData.global;
-            const globalType: TimeRangeKinds = get('global.kind', timerangeStateData);
-            if (globalType) {
-              if (globalRange.linkTo.length === 0) {
-                this.props.toggleTimelineLinkTo({ linkToId: 'global' });
-              }
-              // @ts-ignore
-              this.urlStateMappedToActions.timerange[globalType]({
-                ...globalRange,
-                id: globalId,
-              });
+        if (key === 'timerange') {
+          const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
+          const globalId: InputsModelId = 'global';
+          const globalRange: UrlTimeRange = timerangeStateData.global;
+          const globalType: TimeRangeKinds = get('global.kind', timerangeStateData);
+          if (globalType) {
+            if (globalRange.linkTo.length === 0) {
+              this.props.toggleTimelineLinkTo({ linkToId: 'global' });
             }
-            const timelineId: InputsModelId = 'timeline';
-            const timelineRange: UrlTimeRange = timerangeStateData.timeline;
-            const timelineType: TimeRangeKinds = get('timeline.kind', timerangeStateData);
-            if (timelineType) {
-              if (timelineRange.linkTo.length === 0) {
-                this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
-              }
-              // @ts-ignore
-              this.urlStateMappedToActions.timerange[timelineType]({
-                ...timelineRange,
-                id: timelineId,
-              });
+            // @ts-ignore
+            this.urlStateMappedToActions.timerange[globalType]({
+              ...globalRange,
+              id: globalId,
+            });
+          }
+          const timelineId: InputsModelId = 'timeline';
+          const timelineRange: UrlTimeRange = timerangeStateData.timeline;
+          const timelineType: TimeRangeKinds = get('timeline.kind', timerangeStateData);
+          if (timelineType) {
+            if (timelineRange.linkTo.length === 0) {
+              this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
             }
-            return;
-          case 'kqlQuery':
-            const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
-            if (isKqlForRoute(location.pathname, kqlQueryStateData)) {
-              const filterQuery = {
-                query: kqlQueryStateData.filterQuery,
-                serializedQuery: convertKueryToElasticSearchQuery(
-                  kqlQueryStateData.filterQuery.expression,
-                  this.props.indexPattern
-                ),
-              };
-              if (kqlQueryStateData.model === 'hosts') {
-                this.urlStateMappedToActions.kqlQuery.hosts({
-                  filterQuery,
-                  hostsType: kqlQueryStateData.type,
-                });
-              }
-              if (kqlQueryStateData.model === 'network') {
-                this.urlStateMappedToActions.kqlQuery.network({
-                  filterQuery,
-                  networkType: kqlQueryStateData.type,
-                });
-              }
-            }
+            // @ts-ignore
+            this.urlStateMappedToActions.timerange[timelineType]({
+              ...timelineRange,
+              id: timelineId,
+            });
+          }
         }
-        return;
+        if (key === 'kqlQuery') {
+          const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
+          if (isKqlForRoute(location.pathname, kqlQueryStateData)) {
+            const filterQuery = {
+              query: kqlQueryStateData.filterQuery,
+              serializedQuery: convertKueryToElasticSearchQuery(
+                kqlQueryStateData.filterQuery.expression,
+                this.props.indexPattern
+              ),
+            };
+            if (kqlQueryStateData.model === 'hosts') {
+              this.urlStateMappedToActions.kqlQuery.hosts({
+                filterQuery,
+                hostsType: kqlQueryStateData.type,
+              });
+            }
+            if (kqlQueryStateData.model === 'network') {
+              this.urlStateMappedToActions.kqlQuery.network({
+                filterQuery,
+                networkType: kqlQueryStateData.type,
+              });
+            }
+          }
+        }
       }
     });
   };
