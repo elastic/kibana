@@ -5,13 +5,16 @@
  */
 
 import turf from 'turf';
+import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -21,16 +24,16 @@ const EMPTY_FEATURE_COLLECTION = {
 
 const CLOSED_SHAPE_MB_FILTER = [
   'any',
-  ['==', ['geometry-type'], 'Polygon'],
-  ['==', ['geometry-type'], 'MultiPolygon']
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
 ];
 
 const ALL_SHAPE_MB_FILTER = [
   'any',
-  ['==', ['geometry-type'], 'Polygon'],
-  ['==', ['geometry-type'], 'MultiPolygon'],
-  ['==', ['geometry-type'], 'LineString'],
-  ['==', ['geometry-type'], 'MultiLineString']
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
 ];
 
 export class VectorLayer extends AbstractLayer {
@@ -78,8 +81,28 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  getIcon() {
-    return this._style.getIcon();
+  getCustomIconAndTooltipContent() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    if (!featureCollection || featureCollection.features.length === 0) {
+      return {
+        icon: (
+          <EuiIcon
+            size="m"
+            color="subdued"
+            type="minusInCircle"
+          />
+        ),
+        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
+          defaultMessage: `No results found.`
+        })
+      };
+    }
+
+    return {
+      icon: this._style.getIcon(),
+      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
+    };
   }
 
   getLayerTypeIconName() {
