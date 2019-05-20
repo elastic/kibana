@@ -61,6 +61,8 @@ function getDefaultGroupByConfig(
   }
 }
 
+const illegalEsAggNameChars = /[[\]>]/g;
+
 export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
@@ -79,8 +81,8 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
     // Group by
     const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
     availableGroupByAggs.forEach(groupByAgg => {
-      // Aggregation name for the group-by is the plain field name.
-      const aggName = field.name;
+      // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
+      const aggName = field.name.replace(illegalEsAggNameChars, '');
       // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
       const dropDownName = `${groupByAgg}(${field.name})`;
       const groupByOption: DropDownLabel = { label: dropDownName };
@@ -97,8 +99,8 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
     const aggOption: DropDownOption = { label: field.name, options: [] };
     const availableAggs = pivotAggsFieldSupport[field.type];
     availableAggs.forEach(agg => {
-      // Aggregation name is formatted like `fieldname.sum`.
-      const aggName = `${field.name}.${agg}`;
+      // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
+      const aggName = `${field.name.replace(illegalEsAggNameChars, '')}.${agg}`;
       // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
       const dropDownName = `${agg}(${field.name})`;
       aggOption.options.push({ label: dropDownName });
