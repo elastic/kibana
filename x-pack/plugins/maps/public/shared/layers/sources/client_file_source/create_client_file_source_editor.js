@@ -11,11 +11,9 @@ import { JsonUploadAndParse } from '../../../../../../file_upload/public';
 export function ClientFileCreateSourceEditor({
   previewGeojsonFile,
   boolIndexData = false,
-  viewIndexedData,
+  onIndexingComplete,
   onRemove,
   onIndexReadyStatusChange,
-  onIndexAddSuccess,
-  onIndexAddError,
 }) {
   return (
     <JsonUploadAndParse
@@ -25,9 +23,7 @@ export function ClientFileCreateSourceEditor({
       onFileRemove={onRemove}
       onIndexReadyStatusChange={onIndexReadyStatusChange}
       transformDetails={'geo'}
-      onIndexPatternCreateSuccess={viewIndexedData}
-      onIndexAddSuccess={onIndexAddSuccess}
-      onIndexAddError={onIndexAddError}
+      onIndexingComplete={onIndexingComplete}
     />
   );
 }

@@ -22,25 +22,25 @@ export class AddLayerPanel extends Component {
     sourceType: null,
     layer: null,
     indexingTriggered: false,
-    indexingComplete: false,
+    indexingSuccess: false,
     importIndexingReady: false,
     importView: false,
     panelDescription: 'Select source',
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this._updatePanelDescription(prevState.sourceType, prevState.indexingComplete);
+    this._updatePanelDescription(prevState.sourceType, prevState.indexingSuccess);
   }
 
-  _updatePanelDescription(prevSourceType, prevIndexingComplete) {
-    const { sourceType, importView, indexingComplete } = this.state;
+  _updatePanelDescription(prevSourceType, previndexingSuccess) {
+    const { sourceType, importView, indexingSuccess } = this.state;
     if (
-      prevSourceType !== sourceType || indexingComplete !== prevIndexingComplete
+      prevSourceType !== sourceType || indexingSuccess !== previndexingSuccess
     ) {
       let panelDescription;
       if (!sourceType) {
         panelDescription = 'Select source';
-      } else if (importView && !indexingComplete) {
+      } else if (importView && !indexingSuccess) {
         panelDescription = 'Import file';
       } else {
         panelDescription = 'Add layer';
@@ -120,8 +120,11 @@ export class AddLayerPanel extends Component {
           onIndexReady={
             importIndexingReady => this.setState({ importIndexingReady })
           }
-          indexingComplete={
-            () => this.setState({ indexingComplete: true })
+          importSuccessHandler={
+            () => this.setState({ indexingSuccess: true })
+          }
+          importErrorHandler={
+            () => this.setState({ indexingSuccess: false })
           }
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
         />
@@ -143,14 +146,14 @@ export class AddLayerPanel extends Component {
     }
 
     const {
-      indexingTriggered, indexingComplete, importView, layer,
+      indexingTriggered, indexingSuccess, importView, layer,
       importIndexingReady, panelDescription
     } = this.state;
 
     let buttonEnabled;
     if (importView) {
       const isImportPreviewReady = importView && importIndexingReady;
-      const isImportCompleted = importView && indexingTriggered && indexingComplete;
+      const isImportCompleted = importView && indexingTriggered && indexingSuccess;
       buttonEnabled = isImportPreviewReady || isImportCompleted;
     } else {
       buttonEnabled = !!layer;

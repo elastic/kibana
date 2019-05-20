@@ -89,8 +89,8 @@ export class JsonUploadAndParse extends Component {
 
   _indexData = async ({
     indexedFile, parsedFile, indexRequestInFlight, transformDetails,
-    indexName, appName, selectedIndexType, onIndexAddSuccess, onIndexAddError,
-    boolIndexData, isIndexReady
+    indexName, appName, selectedIndexType, boolIndexData, isIndexReady,
+    onIndexingComplete, boolCreateIndexPattern
   }) => {
     // Check index ready
     const filesAreEqual = _.isEqual(indexedFile, parsedFile);
@@ -108,38 +108,37 @@ export class JsonUploadAndParse extends Component {
     );
 
     // Index error
-    if (!indexDataResp) {
+    if (!indexDataResp.success) {
       this.setState({
         indexedFile: null,
         indexDataResp: INDEXING_STAGE.DATA_INDEXING_ERROR, // Reformat response
         indexRequestInFlight: false,
       });
-
-      onIndexAddError && onIndexAddError(indexDataResp);
       this._resetFileAndIndexSettings();
       return;
     }
 
-    // Index success. Create index pattern
+    // Index data success. Update state & create index pattern
     this.setState({
       indexDataResp,
       indexedFile: parsedFile,
     });
-    onIndexAddSuccess && onIndexAddSuccess(indexDataResp);
-    await this._createIndexPattern({ ...this.state, ...this.props });
-    this.setState({ currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE });
-  }
-
-  _createIndexPattern = async ({
-    boolCreateIndexPattern, indexedFile, indexPatternRequestInFlight,
-    indexName, onIndexPatternCreateSuccess, onIndexPatternCreateError
-  }) => {
-    const indexPatternReady = boolCreateIndexPattern && !!indexedFile &&
-      indexName && !indexPatternRequestInFlight;
-    if (!indexPatternReady) {
-      return;
+    let indexPatternResp;
+    if (boolCreateIndexPattern) {
+      indexPatternResp = await this._createIndexPattern(this.state);
     }
 
+    // Indexing complete, update state & callback (if any)
+    this.setState({ currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE });
+    if (onIndexingComplete) {
+      onIndexingComplete({
+        indexDataResp,
+        ...(boolCreateIndexPattern ? { indexPatternResp } : {})
+      });
+    }
+  }
+
+  _createIndexPattern = async ({ indexName }) => {
     this.setState({
       indexPatternRequestInFlight: true,
       currentIndexingStage: INDEXING_STAGE.CREATING_INDEX_PATTERN
@@ -152,13 +151,7 @@ export class JsonUploadAndParse extends Component {
     });
     this._resetFileAndIndexSettings();
 
-    if (!indexPatternResp.success) {
-      onIndexPatternCreateError && onIndexPatternCreateError(indexPatternResp);
-      this.setState({ currentIndexingStage: INDEXING_STAGE.INDEX_PATTERN_ERROR });
-    }
-
-    onIndexPatternCreateSuccess && onIndexPatternCreateSuccess(indexPatternResp);
-    this.setState({ currentIndexingStage: INDEXING_STAGE.INDEX_PATTERN_COMPLETE });
+    return indexPatternResp;
   }
 
   // This is mostly for geo. Some data have multiple valid index types that can
@@ -252,8 +245,5 @@ JsonUploadAndParse.propTypes = {
     PropTypes.object,
   ]),
   onIndexReadyStatusChange: PropTypes.func,
-  onIndexAddSuccess: PropTypes.func,
-  onIndexAddError: PropTypes.func,
-  onIndexPatternCreateSuccess: PropTypes.func,
-  onIndexPatternCreateError: PropTypes.func,
+  onIndexingComplete: PropTypes.func,
 };

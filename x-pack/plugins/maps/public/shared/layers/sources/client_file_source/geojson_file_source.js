@@ -28,12 +28,19 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   }
 
-  static viewIndexedData = (addAndViewSource, inspectorAdapters) => {
-    return ({ fields, id, success }) => {
-      if (!success) {
-        console.error('Unable to view indexed data');
+  static viewIndexedData = (addAndViewSource, inspectorAdapters,
+    importSuccessHandler, importErrorHandler) => {
+    return indexResponses => {
+      const { indexDataResp, indexPatternResp } = indexResponses;
+      if (!(indexDataResp && indexDataResp.success)) {
+        importErrorHandler(indexResponses);
         return;
       }
+      if (!(indexPatternResp && indexPatternResp.success)) {
+        importErrorHandler(indexResponses);
+        return;
+      }
+      const{ fields, id } = indexPatternResp;
       const geoFieldArr = fields.filter(
         field => Object.values(ES_GEO_FIELD_TYPE).includes(field.type)
       );
@@ -48,6 +55,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
           geoField,
         }, inspectorAdapters);
         addAndViewSource(source);
+        importSuccessHandler(indexResponses);
       }
     };
   };
@@ -67,7 +75,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   static renderEditor({
     onPreviewSource, inspectorAdapters, addAndViewSource,
     boolIndexData, onRemove, onIndexReadyStatusChange,
-    importSuccessHandler,  importErrorHandler
+    importSuccessHandler, importErrorHandler
   }) {
     return (
       <ClientFileCreateSourceEditor
@@ -77,17 +85,17 @@ export class GeojsonFileSource extends AbstractVectorSource {
             inspectorAdapters
           )
         }
-        viewIndexedData={
+        boolIndexData={boolIndexData}
+        onIndexingComplete={
           GeojsonFileSource.viewIndexedData(
             addAndViewSource,
-            inspectorAdapters
+            inspectorAdapters,
+            importSuccessHandler,
+            importErrorHandler,
           )
         }
-        boolIndexData={boolIndexData}
         onRemove={onRemove}
         onIndexReadyStatusChange={onIndexReadyStatusChange}
-        onIndexAddSuccess={importSuccessHandler}
-        onIndexAddError={importErrorHandler}
       />
     );
   }
