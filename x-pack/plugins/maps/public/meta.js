@@ -15,13 +15,13 @@ import { xpackInfo } from './kibana_services';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
-let meta = null;
+let emsSources = null;
 let loadingMetaPromise = null;
 let isLoaded = false;
 
-export async function getDataSources() {
-  if (meta) {
-    return meta;
+export async function getEMSDataSources() {
+  if (emsSources) {
+    return emsSources;
   }
 
   if (loadingMetaPromise) {
@@ -33,7 +33,7 @@ export async function getDataSources() {
       const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
       if (proxyElasticMapsServiceInMaps) {
         const fullResponse = await fetch(`${GIS_API_RELATIVE}/${EMS_META_PATH}`);
-        meta = await fullResponse.json();
+        emsSources = await fullResponse.json();
       } else {
         const emsClient = new EMSClient({
           language: i18n.getLocale(),
@@ -48,7 +48,7 @@ export async function getDataSources() {
         const emsResponse = await getEMSResources(emsClient, isEmsEnabled, licenseId, !proxyElasticMapsServiceInMaps);
 
         //override EMS cors config
-        meta = {
+        emsSources = {
           ems: {
             file: emsResponse.fileLayers,
             tms: emsResponse.tmsServices
@@ -56,7 +56,7 @@ export async function getDataSources() {
         };
       }
       isLoaded = true;
-      resolve(meta);
+      resolve(emsSources);
     } catch (e) {
       reject(e);
     }
@@ -67,8 +67,8 @@ export async function getDataSources() {
 /**
  * Should only call this after verifying `isMetadataLoaded` equals true
  */
-export function getDataSourcesSync() {
-  return meta;
+export function getEMSDataSourcesSync() {
+  return emsSources;
 }
 
 export function isMetaDataLoaded() {
@@ -76,12 +76,12 @@ export function isMetaDataLoaded() {
 }
 
 export async function getEmsVectorFilesMeta() {
-  const dataSource = await getDataSources();
+  const dataSource = await getEMSDataSources();
   return _.get(dataSource, 'ems.file', []);
 }
 
 export async function getEmsTMSServices() {
-  const dataSource = await getDataSources();
+  const dataSource = await getEMSDataSources();
   return _.get(dataSource, 'ems.tms', []);
 }
 
