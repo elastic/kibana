@@ -89,7 +89,7 @@ class RangeValueInputUI extends Component<Props> {
           </EuiFlexItem>
         </EuiFlexGroup>
         {type === 'date' ? (
-          <EuiLink target="_window" href={getDocLink('date.dateMath')}>
+          <EuiLink target="_blank" href={getDocLink('date.dateMath')}>
             <FormattedMessage
               id="common.ui.filterEditor.dateFormatHelpLinkLabel"
               defaultMessage="Accepted date formats"
