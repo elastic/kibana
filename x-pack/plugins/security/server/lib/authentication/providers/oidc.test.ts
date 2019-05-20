@@ -17,14 +17,12 @@ describe('OIDCAuthenticationProvider', () => {
   let callWithRequest: sinon.SinonStub;
   let callWithInternalUser: sinon.SinonStub;
   beforeEach(() => {
-    const providerOptions = mockAuthenticationProviderOptions(
-      { basePath: '/test-base-path' },
-      { realm: 'oidc1' }
-    );
+    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+    const providerSpecificOptions = { realm: 'oidc1' };
     callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
     callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
 
-    provider = new OIDCAuthenticationProvider(providerOptions);
+    provider = new OIDCAuthenticationProvider(providerOptions, providerSpecificOptions);
   });
 
   describe('`authenticate` method', () => {

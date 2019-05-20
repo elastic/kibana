@@ -21,6 +21,11 @@ export interface AuthenticationProviderOptions {
 }
 
 /**
+ * Represents available provider specific options.
+ */
+export type AuthenticationProviderSpecificOptions = Record<string, unknown>;
+
+/**
  * Base class that all authentication providers should extend.
  */
 export abstract class BaseAuthenticationProvider<
