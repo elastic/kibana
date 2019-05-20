@@ -17,24 +17,37 @@
  * under the License.
  */
 
-import { AggParam } from '../../../agg_types';
-import { AggConfig } from '../../agg_config';
-import { FieldParamType } from '../../../agg_types/param_types';
-import { EditorConfig } from '../config/types';
+import { AggConfig } from 'ui/vis';
+import { i18n } from '@kbn/i18n';
 
-// NOTE: we cannot export the interface with export { InterfaceName }
-// as there is currently a bug on babel typescript transform plugin for it
-// https://github.com/babel/babel/issues/7641
-//
-export interface AggParamEditorProps<T> {
-  agg: AggConfig;
-  aggParam: AggParam;
-  editorConfig: EditorConfig;
-  indexedFields?: FieldParamType[];
-  showValidation: boolean;
-  value: T;
-  responseValueAggs: any[] | null;
-  setValidity(isValid: boolean): void;
-  setValue(value?: T): void;
-  setTouched(): void;
+const aggFilter = [
+  '!top_hits',
+  '!percentiles',
+  '!median',
+  '!std_dev',
+  '!derivative',
+  '!moving_avg',
+  '!serial_diff',
+  '!cumulative_sum',
+  '!avg_bucket',
+  '!max_bucket',
+  '!min_bucket',
+  '!sum_bucket',
+];
+
+// Returns true if the agg is not compatible with the terms bucket
+function isCompatibleAgg(agg: AggConfig) {
+  return !aggFilter.includes(`!${agg.type.name}`);
 }
+
+function safeMakeLabel(agg: AggConfig) {
+  try {
+    return agg.makeLabel();
+  } catch (e) {
+    return i18n.translate('common.ui.aggTypes.buckets.terms.aggNotValidLabel', {
+      defaultMessage: '- agg not valid -',
+    });
+  }
+}
+
+export { aggFilter, isCompatibleAgg, safeMakeLabel };
