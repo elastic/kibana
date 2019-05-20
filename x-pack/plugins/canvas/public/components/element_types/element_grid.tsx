@@ -18,9 +18,13 @@ export interface Props {
    */
   elements: Array<ElementSpec | CustomElement>;
   /**
-   * text filter to filter out cards
+   * text to filter out cards
    */
-  filter: string;
+  filterText: string;
+  /**
+   * tags to filter out cards
+   */
+  filterTags: string[];
   /**
    * indicate whether or not edit/delete controls should be displayed
    */
@@ -41,31 +45,37 @@ export interface Props {
 
 export const ElementGrid = ({
   elements,
-  filter,
+  filterText,
+  filterTags,
   handleClick,
   onEdit,
   onDelete,
   showControls,
 }: Props) => {
-  filter = filter.toLowerCase();
+  filterText = filterText.toLowerCase();
 
   return (
     <EuiFlexGrid gutterSize="l" columns={4}>
       {map(elements, (element: ElementSpec | CustomElement, index) => {
-        const { help = '', name, displayName = '', image } = element;
+        const { name, displayName = '', help = '', image, tags = [] } = element;
         const whenClicked = () => handleClick(element);
         let textMatch = false;
+        let tagsMatch = false;
 
         if (
-          !filter.length ||
-          name.toLowerCase().includes(filter) ||
-          displayName.toLowerCase().includes(filter) ||
-          help.toLowerCase().includes(filter)
+          !filterText.length ||
+          name.toLowerCase().includes(filterText) ||
+          displayName.toLowerCase().includes(filterText) ||
+          help.toLowerCase().includes(filterText)
         ) {
           textMatch = true;
         }
 
-        if (!textMatch) {
+        if (!filterTags.length || filterTags.every(tag => tags.includes(tag))) {
+          tagsMatch = true;
+        }
+
+        if (!textMatch || !tagsMatch) {
           return null;
         }
 
@@ -75,6 +85,7 @@ export const ElementGrid = ({
               title={displayName || name}
               description={help}
               image={image}
+              tags={tags}
               onClick={whenClicked}
             />
             {showControls && onEdit && onDelete && (
@@ -95,5 +106,6 @@ ElementGrid.propTypes = {
 
 ElementGrid.defaultProps = {
   showControls: false,
-  filter: '',
+  filterTags: [],
+  filterText: '',
 };

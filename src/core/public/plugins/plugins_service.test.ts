@@ -91,6 +91,7 @@ beforeEach(() => {
     application: applicationServiceMock.createStartContract(),
     basePath: basePathServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),

@@ -17,6 +17,7 @@ import { injectUICapabilities } from 'ui/capabilities/react';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
+import { createUptimeLink } from './lib/create_uptime_link';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -89,6 +90,19 @@ export const NodeContextMenu = injectUICapabilities(
             }
           : undefined;
 
+      const uptimeUrl = node.ip
+        ? {
+            name: intl.formatMessage(
+              {
+                id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
+                defaultMessage: 'View {nodeType} in Uptime',
+              },
+              { nodeType }
+            ),
+            href: createUptimeLink(options, nodeType, node),
+          }
+        : undefined;
+
       const panels: EuiContextMenuPanelDescriptor[] = [
         {
           id: 0,
@@ -118,6 +132,7 @@ export const NodeContextMenu = injectUICapabilities(
                 ]
               : []),
             ...(apmTracesUrl ? [apmTracesUrl] : []),
+            ...(uptimeUrl ? [uptimeUrl] : []),
           ],
         },
       ];

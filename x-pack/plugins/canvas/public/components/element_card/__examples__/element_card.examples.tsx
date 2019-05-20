@@ -33,6 +33,14 @@ storiesOf('components/ElementCard', module)
       image={elasticLogo}
     />
   ))
+  .add('with tags', () => (
+    <ElementCard
+      title="Element 1"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+      tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']}
+      onClick={action('onClick')}
+    />
+  ))
   .add('with click handler', () => (
     <ElementCard
       title="Element 1"

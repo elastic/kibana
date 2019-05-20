@@ -29,7 +29,7 @@ import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName }
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
-/** @internal */
+/** @public */
 export interface PluginsServiceSetup {
   contracts: Map<PluginName, unknown>;
   uiPlugins: {
@@ -38,7 +38,7 @@ export interface PluginsServiceSetup {
   };
 }
 
-/** @internal */
+/** @public */
 export interface PluginsServiceStart {
   contracts: Map<PluginName, unknown>;
 }

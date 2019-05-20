@@ -10,6 +10,7 @@ import {
   EuiCard,
   EuiIcon,
 } from '@elastic/eui';
+import { TagList } from '../tag_list/';
 
 export interface Props {
   /**
@@ -25,17 +26,24 @@ export interface Props {
    */
   image?: string;
   /**
+   * tags associated with the element
+   */
+  tags?: string[];
+  /**
    * handler when clicking the card
    */
   onClick?: () => void;
 }
 
-export const ElementCard = ({ title, description, image, onClick, ...rest }: Props) => (
+const tagType = 'badge';
+
+export const ElementCard = ({ title, description, image, tags = [], onClick, ...rest }: Props) => (
   <EuiCard
     className={image ? 'canvasElementCard' : 'canvasElementCard canvasElementCard--hasIcon'}
     textAlign="left"
     title={title}
     description={description}
+    footer={<TagList tags={tags} tagType={tagType} />}
     image={image}
     icon={image ? null : <EuiIcon type="canvasApp" size="xxl" />}
     onClick={onClick}

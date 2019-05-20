@@ -4,7 +4,7 @@
 
 ## CoreSetup interface
 
-Core services exposed to the start lifecycle
+Core services exposed to the setup lifecycle
 
 <b>Signature:</b>
 

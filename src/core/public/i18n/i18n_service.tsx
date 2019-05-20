@@ -304,4 +304,7 @@ export interface I18nSetup {
   Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
 }
 
+/**
+ * @public
+ */
 export type I18nStart = I18nSetup;

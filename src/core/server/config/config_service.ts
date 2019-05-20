@@ -25,7 +25,7 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
 
-/** @public */
+/** @internal */
 export class ConfigService {
   private readonly log: Logger;
 

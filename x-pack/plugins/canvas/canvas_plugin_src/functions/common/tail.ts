@@ -6,17 +6,20 @@
 
 import { takeRight } from 'lodash';
 import { ContextFunction, Datatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   count: number;
 }
 
 export function tail(): ContextFunction<'tail', Datatable, Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().tail;
+
   return {
     name: 'tail',
     aliases: [],
     type: 'datatable',
-    help: 'Get the last N rows from the end of a datatable. Also see `head`',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -24,7 +27,7 @@ export function tail(): ContextFunction<'tail', Datatable, Arguments, Datatable>
       count: {
         aliases: ['_'],
         types: ['number'],
-        help: 'Return this many rows from the end of the datatable',
+        help: argHelp.count,
       },
     },
     fn: (context, args) => ({

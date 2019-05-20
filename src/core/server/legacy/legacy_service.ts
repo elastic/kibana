@@ -148,6 +148,7 @@ export class LegacyService implements CoreService {
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
       setupDeps,
       startDeps,
+      logger: this.coreContext.logger,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl

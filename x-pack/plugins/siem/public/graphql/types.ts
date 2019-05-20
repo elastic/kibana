@@ -1037,26 +1037,26 @@ export interface KpiNetworkData {
 export interface KpiHostsData {
   hosts?: number | null;
 
-  hostsHistogram?: (HistogramData | null)[] | null;
+  hostsHistogram?: KpiHostHistogramData[] | null;
 
   authSuccess?: number | null;
 
-  authSuccessHistogram?: (HistogramData | null)[] | null;
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
 
   authFailure?: number | null;
 
-  authFailureHistogram?: (HistogramData | null)[] | null;
+  authFailureHistogram?: KpiHostHistogramData[] | null;
 
   uniqueSourceIps?: number | null;
 
-  uniqueSourceIpsHistogram?: (HistogramData | null)[] | null;
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
 
   uniqueDestinationIps?: number | null;
 
-  uniqueDestinationIpsHistogram?: (HistogramData | null)[] | null;
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
 }
 
-export interface HistogramData {
+export interface KpiHostHistogramData {
   key?: number | null;
 
   key_as_string?: string | null;
@@ -2476,23 +2476,23 @@ export namespace GetKpiHostsQuery {
 
     hosts?: number | null;
 
-    hostsHistogram?: (HostsHistogram | null)[] | null;
+    hostsHistogram?: HostsHistogram[] | null;
 
     authSuccess?: number | null;
 
-    authSuccessHistogram?: (AuthSuccessHistogram | null)[] | null;
+    authSuccessHistogram?: AuthSuccessHistogram[] | null;
 
     authFailure?: number | null;
 
-    authFailureHistogram?: (AuthFailureHistogram | null)[] | null;
+    authFailureHistogram?: AuthFailureHistogram[] | null;
 
     uniqueSourceIps?: number | null;
 
-    uniqueSourceIpsHistogram?: (UniqueSourceIpsHistogram | null)[] | null;
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
 
     uniqueDestinationIps?: number | null;
 
-    uniqueDestinationIpsHistogram?: (UniqueDestinationIpsHistogram | null)[] | null;
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
   };
 
   export type HostsHistogram = ChartFields.Fragment;
@@ -3891,7 +3891,7 @@ export namespace GetUsersQuery {
 
 export namespace ChartFields {
   export type Fragment = {
-    __typename?: 'HistogramData';
+    __typename?: 'KpiHostHistogramData';
 
     x?: string | null;
 

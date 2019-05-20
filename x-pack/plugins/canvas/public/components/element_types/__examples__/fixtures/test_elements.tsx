@@ -11,6 +11,7 @@ export const testElements = [
     name: 'areaChart',
     displayName: 'Area chart',
     help: 'A line chart with a filled body',
+    tags: ['chart'],
     image: elasticLogo,
     expression: `filters
     | demodata
@@ -22,6 +23,7 @@ export const testElements = [
     name: 'image',
     displayName: 'Image',
     help: 'A static image',
+    tags: ['graphic'],
     image: elasticLogo,
     expression: `image dataurl=null mode="contain"
   | render`,
@@ -29,6 +31,7 @@ export const testElements = [
   {
     name: 'table',
     displayName: 'Data table',
+    tags: ['text'],
     help: 'A scrollable grid for displaying data in a tabular format',
     image: elasticLogo,
     expression: `filters
@@ -37,6 +40,7 @@ export const testElements = [
   | render`,
   },
 ];
+
 export const testCustomElements = [
   {
     id: 'custom-element-10d625f5-1342-47c9-8f19-d174ea6b65d5',

@@ -124,7 +124,8 @@ export default function ({ getService }) {
           expect(job.config.rollup_index).to.eql(payload.job.rollup_index);
         });
 
-        it('should create the underlying rollup index with the correct aggregations', async () => {
+        // broken after snapshot update: https://github.com/elastic/kibana/issues/36269
+        it.skip('should create the underlying rollup index with the correct aggregations', async () => {
           await createJob(getJobPayload(indexName));
 
           const { body } = await supertest.get(`${API_BASE_PATH}/indices`);

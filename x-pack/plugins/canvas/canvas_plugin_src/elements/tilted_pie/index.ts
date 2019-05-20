@@ -10,6 +10,7 @@ import header from './header.png';
 export const tiltedPie: ElementFactory = () => ({
   name: 'tiltedPie',
   displayName: 'Tilted pie chart',
+  tags: ['chart', 'proportion'],
   width: 500,
   height: 250,
   help: 'A customizable tilted pie chart',
