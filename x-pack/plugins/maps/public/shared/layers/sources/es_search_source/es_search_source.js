@@ -8,11 +8,12 @@ import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH } from '../../../../../common/constants';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
@@ -195,6 +196,26 @@ export class ESSearchSource extends AbstractESSource {
       .map(field => {
         return { name: field.name, label: field.name };
       });
+  }
+
+  async getSupportedShapeTypes() {
+    let geoFieldType;
+    try {
+      const geoField = this._getGeoField();
+      geoFieldType = geoField.type;
+    } catch(error) {
+      // ignore exeception
+    }
+
+    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      return [VECTOR_SHAPE_TYPES.POINT];
+    }
+
+    return [
+      VECTOR_SHAPE_TYPES.POINT,
+      VECTOR_SHAPE_TYPES.LINE,
+      VECTOR_SHAPE_TYPES.POLYGON
+    ];
   }
 
   getSourceTooltipContent(sourceDataRequest) {
