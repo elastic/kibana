@@ -37,7 +37,8 @@ export function makeApmUsageCollector(core: CoreSetupWithUsageCollector) {
       } catch (err) {
         return createApmTelementry();
       }
-    }
+    },
+    isReady: () => true
   });
   server.usage.collectorSet.register(apmUsageCollector);
 }

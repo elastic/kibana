@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import { set, values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
+import * as t from 'io-ts';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { MetricsExplorerColor } from '../../../common/color_palette';
-import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
   MetricsExplorerOptions,
@@ -64,39 +64,55 @@ export const WithMetricsExplorerOptionsUrlState = () => {
 };
 
 function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOptions {
-  const schema = Joi.object({
-    limit: Joi.number()
-      .min(1)
-      .default(9),
-    groupBy: Joi.string(),
-    filterQuery: Joi.string().allow(''),
-    aggregation: Joi.string().required(),
-    metrics: Joi.array()
-      .items(
-        Joi.object().keys({
-          aggregation: Joi.string()
-            .valid(values(MetricsExplorerAggregation))
-            .required(),
-          field: Joi.string(),
-          rate: Joi.bool().default(false),
-          color: Joi.string().valid(values(MetricsExplorerColor)),
-          label: Joi.string(),
-        })
-      )
-      .required(),
+  const MetricRequired = t.type({
+    aggregation: t.string,
   });
-  const validation = Joi.validate(subject, schema);
-  return validation.error == null;
+
+  const MetricOptional = t.partial({
+    field: t.string,
+    rate: t.boolean,
+    color: t.union(values(MetricsExplorerColor).map(c => t.literal(c as string))),
+    label: t.string,
+  });
+
+  const Metric = t.intersection([MetricRequired, MetricOptional]);
+
+  const OptionsRequired = t.type({
+    aggregation: t.string,
+    metrics: t.array(Metric),
+  });
+
+  const OptionsOptional = t.partial({
+    limit: t.number,
+    groupBy: t.string,
+    filterQuery: t.string,
+  });
+
+  const Options = t.intersection([OptionsRequired, OptionsOptional]);
+
+  const result = Options.decode(subject);
+
+  try {
+    ThrowReporter.report(result);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 function isMetricExplorerTimeOption(subject: any): subject is MetricsExplorerTimeOptions {
-  const schema = Joi.object({
-    from: Joi.string().required(),
-    to: Joi.string().required(),
-    interval: Joi.string().required(),
+  const TimeRange = t.type({
+    from: t.string,
+    to: t.string,
+    interval: t.string,
   });
-  const validation = Joi.validate(subject, schema);
-  return validation.error == null;
+  const result = TimeRange.decode(subject);
+  try {
+    ThrowReporter.report(result);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
