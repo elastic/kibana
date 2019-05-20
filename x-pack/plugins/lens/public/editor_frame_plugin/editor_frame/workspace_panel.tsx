@@ -14,8 +14,9 @@ import {
   DimensionRole,
   TableColumn,
 } from '../../types';
+import { DragDrop } from '../../drag_drop';
 
-interface SuggestionPanelProps {
+interface WorkspacePanelProps {
   activeDatasource: Datasource;
   datasourceState: unknown;
   activeVisualizationId: string | null;
@@ -25,41 +26,57 @@ interface SuggestionPanelProps {
   dispatch: (action: Action) => void;
 }
 
-export function SuggestionPanel(props: SuggestionPanelProps) {
+interface ExpressionRendererProps {
+  expression: string;
+}
+
+function ExpressionRenderer(props: ExpressionRendererProps) {
+  // TODO: actually render the expression and move this to a generic folder as it can be re-used for
+  // suggestion rendering
+  return <span>{props.expression}</span>;
+}
+
+export function WorkspacePanel(props: WorkspacePanelProps) {
   const currentDatasource = props.activeDatasource;
-  const datasourceSuggestions = currentDatasource.getDatasourceSuggestionsFromCurrentState(
-    props.datasourceState
-  );
-  const roleMapping = props.activeVisualizationId
-    ? props.visualizations[props.activeVisualizationId].getMappingOfTableToRoles(
-        props.visualizationState,
-        props.datasourcePublicAPI
-      )
-    : [];
-  const suggestions = getSuggestions(datasourceSuggestions, props.visualizations, roleMapping);
+  const expression = props.activeVisualizationId
+    ? `${props.activeDatasource.toExpression(props.datasourceState)} | ${props.visualizations[
+        props.activeVisualizationId
+      ].toExpression(props.visualizationState, props.datasourcePublicAPI)}`
+    : null;
   return (
-    <>
-      {/* TODO: I18N */}
-      <h2>Suggestions</h2>
-      {suggestions.map((suggestion, index) => {
-        return (
-          <button
-            key={index}
-            data-test-subj="suggestion"
-            onClick={() => {
-              props.dispatch({
-                type: 'SWITCH_VISUALIZATION',
-                newVisulizationId: suggestion.visualizationId,
-                initialState: suggestion.state,
-                datasourceState: suggestion.datasourceState,
-              });
-            }}
-          >
-            {suggestion.title}
-          </button>
+    <DragDrop
+      draggable={false}
+      droppable={true}
+      onDrop={() => {
+        const datasourceSuggestions = currentDatasource.getDatasourceSuggestionsForField(
+          props.datasourceState
         );
-      })}
-    </>
+        const roleMapping = props.activeVisualizationId
+          ? props.visualizations[props.activeVisualizationId].getMappingOfTableToRoles(
+              props.visualizationState,
+              props.datasourcePublicAPI
+            )
+          : [];
+        const suggestion = getSuggestions(
+          datasourceSuggestions,
+          props.visualizations,
+          roleMapping
+        )[0];
+        // TODO heuristically present the suggestions in a modal instead of just picking the first one
+        props.dispatch({
+          type: 'SWITCH_VISUALIZATION',
+          newVisulizationId: suggestion.visualizationId,
+          initialState: suggestion.state,
+          datasourceState: suggestion.datasourceState,
+        });
+      }}
+    >
+      {expression !== null ? (
+        <ExpressionRenderer expression={expression} />
+      ) : (
+        <p>{/* TODO: I18N */}This is the workspace panel. Drop fields here</p>
+      )}
+    </DragDrop>
   );
 }
 
