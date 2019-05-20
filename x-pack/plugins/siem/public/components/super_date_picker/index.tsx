@@ -33,7 +33,7 @@ type MyEuiSuperDatePickerProps = Pick<
   | 'refreshInterval'
   | 'showUpdateButton'
   | 'start'
-  > & {
+> & {
   isLoading?: boolean;
 };
 const MyEuiSuperDatePicker: React.SFC<MyEuiSuperDatePickerProps> = EuiSuperDatePicker;
@@ -90,7 +90,7 @@ export interface SuperDatePickerState {
 export const SuperDatePickerComponent = class extends Component<
   SuperDatePickerProps,
   SuperDatePickerState
-  > {
+> {
   constructor(props: SuperDatePickerProps) {
     super(props);
 
