@@ -64,6 +64,7 @@ export class VisualizeDataLoader {
     this.responseHandler = ResponseHandlerProvider
       // @ts-ignore
       .getItems()
+      // @ts-ignore
       .filter(handler => handler.name === responseHandler)[0].handler;
   }
 
