@@ -20,6 +20,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
 import { Logger } from '../logging';
 import { CoreContext } from '../core_context';
@@ -38,13 +39,16 @@ export interface HttpServiceStart {
 /** @internal */
 export class HttpService implements CoreService<HttpServiceSetup, HttpServiceStart> {
   private readonly httpServer: HttpServer;
+  private readonly secondaryServers: Map<number, HttpServer> = new Map();
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
 
+  private readonly logger: LoggerFactory;
   private readonly log: Logger;
 
   constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger;
     this.log = coreContext.logger.get('http');
     this.config$ = coreContext.configService
       .atPath<HttpConfigType>('server')
@@ -94,6 +98,23 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     };
   }
 
+  public async createServer(config: HttpConfig) {
+    const port = config.port;
+
+    if (!port || this.secondaryServers.has(port)) {
+      throw new Error(`port ${port} is already in use`);
+    }
+
+    const baseConfig = await this.config$.pipe(first()).toPromise();
+    const cfg = Object.assign({}, baseConfig, config);
+    const log = this.logger.get('http', `server:${port}`);
+
+    const httpServer = new HttpServer(log);
+    const httpSetup = await httpServer.setup(cfg);
+    this.secondaryServers.set(port, httpServer);
+    return httpSetup;
+  }
+
   public async stop() {
     if (this.configSubscription === undefined) {
       return;
@@ -104,5 +125,9 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
+    for (const [port, server] of this.secondaryServers.entries()) {
+      await server.stop();
+      this.secondaryServers.delete(port);
+    }
   }
 }

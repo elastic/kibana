@@ -21,8 +21,9 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { HttpService, Router } from '.';
-import { HttpConfigType, config } from './http_config';
+import { HttpConfigType, config, HttpConfig } from './http_config';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -74,6 +75,42 @@ test('creates and sets up http server', async () => {
 
   await service.start();
   expect(httpServer.start).toHaveBeenCalledTimes(1);
+});
+
+test('creates and sets up second http server', async () => {
+  const configService = createConfigService({
+    host: 'example.org',
+    port: 1234,
+  });
+
+  const httpServer = {
+    isListening: () => false,
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: noop,
+  };
+  mockHttpServer.mockImplementation(() => httpServer);
+
+  const service = new HttpService({ configService, env, logger });
+  await service.setup();
+  await service.start();
+
+  const configService2 = createConfigService({
+    host: 'example.org',
+    port: 2345,
+  });
+
+  const config2 = configService2.atPath('server', HttpConfig);
+  const cfg = await config2.pipe(first()).toPromise();
+  await service.createServer(cfg);
+
+  expect(mockHttpServer.mock.instances.length).toBe(2);
+
+  try {
+    await service.createServer(cfg);
+  } catch (err) {
+    expect(err.message).toBe('port 2345 is already in use');
+  }
 });
 
 test('logs error if already set up', async () => {
