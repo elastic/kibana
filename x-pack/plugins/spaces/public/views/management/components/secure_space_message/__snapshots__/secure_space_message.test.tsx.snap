@@ -15,6 +15,7 @@ exports[`SecureSpaceMessage renders if user profile allows security to be manage
         values={
           Object {
             "rolesLink": <EuiLink
+              aria-label="Roles management page"
               color="primary"
               href="#/management/security/roles"
               type="button"

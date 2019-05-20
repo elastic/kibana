@@ -6,6 +6,7 @@
 
 import Papa from 'papaparse';
 import { Datatable, NullContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   data: string;
@@ -14,9 +15,12 @@ interface Arguments {
 }
 
 export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().csv;
+
   return {
     name: 'csv',
     type: 'datatable',
+    help,
     context: {
       types: ['null'],
     },
@@ -24,18 +28,17 @@ export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
       data: {
         aliases: ['_'],
         types: ['string'],
-        help: 'CSV data to use',
+        help: argHelp.data,
       },
       delimiter: {
         types: ['string'],
-        help: 'Data separation character',
+        help: argHelp.delimiter,
       },
       newline: {
         types: ['string'],
-        help: 'Row separation character',
+        help: argHelp.newline,
       },
     },
-    help: 'Create datatable from csv input',
     fn(_context, args) {
       const { data: csvString, delimiter, newline } = args;
 

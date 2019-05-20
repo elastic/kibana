@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Function } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 export function server(): Function<'server', {}, any> {
+  const { help } = getFunctionHelp().server;
+
   return {
     name: 'server',
-    help: 'Force the interpreter to return to the server',
+    help,
     args: {},
     fn: context => context,
   };
