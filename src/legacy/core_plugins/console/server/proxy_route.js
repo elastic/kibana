@@ -19,7 +19,7 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 import { trimLeft, trimRight } from 'lodash';
 
 function resolveUri(base, path) {
@@ -70,17 +70,19 @@ export const createProxyRoute = ({
     tags: ['access:console'],
     payload: {
       output: 'stream',
-      parse: false
+      parse: false,
     },
 
     validate: {
-      query: Joi.object().keys({
-        method: Joi.string()
-          .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
-          .insensitive()
-          .required(),
-        path: Joi.string().required()
-      }).unknown(true),
+      query: Joi.object()
+        .keys({
+          method: Joi.string()
+            .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
+            .insensitive()
+            .required(),
+          path: Joi.string().required(),
+        })
+        .unknown(true),
     },
 
     pre: [
@@ -103,13 +105,8 @@ export const createProxyRoute = ({
       const { path, method } = query;
       const uri = resolveUri(baseUrl, path);
 
-      const {
-        timeout,
-        rejectUnauthorized,
-        agent,
-        headers,
-      } = getConfigForReq(req, uri);
-      const makeRequest = async (payloadToSend) => {
+      const { timeout, rejectUnauthorized, agent, headers } = getConfigForReq(req, uri);
+      const makeRequest = async payloadToSend => {
         const wreckOptions = {
           payload: payloadToSend,
           timeout,
@@ -117,19 +114,21 @@ export const createProxyRoute = ({
           agent,
           headers: {
             ...headers,
-            ...getProxyHeaders(req)
+            ...getProxyHeaders(req),
           },
         };
 
         const esResponse = await Wreck.request(method, uri, wreckOptions);
 
         if (method.toUpperCase() !== 'HEAD') {
-          return h.response(esResponse)
+          return h
+            .response(esResponse)
             .code(esResponse.statusCode)
             .header('warning', esResponse.headers.warning);
         }
 
-        return h.response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+        return h
+          .response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
           .code(esResponse.statusCode)
           .type('text/plain')
           .header('warning', esResponse.headers.warning);
@@ -142,6 +141,6 @@ export const createProxyRoute = ({
       } else {
         return await makeRequest(payload);
       }
-    }
-  }
+    },
+  },
 });
