@@ -98,6 +98,7 @@ export function getSpacesUsageCollector(server: any) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_SPACES_STATS_TYPE,
+    isReady: () => true,
     fetch: async (callCluster: any) => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
