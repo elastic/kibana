@@ -152,6 +152,7 @@ const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartDat
           {
             x,
             y,
+            g: key,
           },
         ],
       },

@@ -26,39 +26,34 @@ import { getAxisId } from '@elastic/charts';
 import { BarChartData, WrappedByAutoSizer, ChartHolder, numberFormatter } from './common';
 import { AutoSizer } from '../auto_sizer';
 
-const getYaxis = (value: string | number) => {
+const getYTicks = (value: string | number) => {
   const label = value.toString();
   const labelLength = 4;
   return label.length > labelLength ? `${label.slice(0, labelLength)}.` : label;
 };
 
-const euiColorVis0 = '#00B3A4';
-const euiColorVis1 = '#3185FC';
-const euiColorVis2 = '#DB1374';
-const euiColorVis3 = '#490092';
-const euiColorVis9 = '#920000';
-
-const seriesBarStyle = () => {
+const getTheme = () => {
   const theme: PartialTheme = {
-    sharedStyle: {
-      default: {
-        opacity: 0.4,
-      },
-    },
     scales: {
-      barsPadding: 0.55,
+      barsPadding: 0.5,
     },
   };
-  return mergeWithDefaultTheme(theme, LIGHT_THEME);
+  return mergeWithDefaultTheme(theme);
 };
 
-const barCustomSeriesColors: CustomSeriesColorsMap = new Map();
-const barDataSeriesColorValues: DataSeriesColorsValues = {
-  colorValues: ['stat-items-barchart-authSuccess'],
-  specId: getSpecId('stat-items-barchart-authSuccess'),
+const getBarSeriesStyle = (barSeriesKey: string, color: string | undefined) => {
+  if (!color) return undefined;
+  const barCustomSeriesColors: CustomSeriesColorsMap = new Map();
+  const barDataSeriesColorValues: DataSeriesColorsValues = {
+    colorValues: [barSeriesKey],
+    specId: getSpecId(barSeriesKey),
+  };
+
+  barCustomSeriesColors.set(barDataSeriesColorValues, color);
+
+  return barCustomSeriesColors;
 };
 
-barCustomSeriesColors.set(barDataSeriesColorValues, '#000');
 export const BarChartBaseComponent = pure<{
   data: BarChartData[];
   width: number | null | undefined;
@@ -66,19 +61,22 @@ export const BarChartBaseComponent = pure<{
 }>(({ data, ...chartConfigs }) => {
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings rotation={90} theme={seriesBarStyle()} />
+      <Settings rotation={90} theme={getTheme()} />
       {data.map(series => {
+        const barSeriesKey = series.key;
+        const barSeriesSpecId = getSpecId(barSeriesKey);
         return (
           <BarSeries
-            id={getSpecId(`stat-items-barchart-${series.key}`)}
-            key={`stat-items-barchart-${series.key}`}
+            id={barSeriesSpecId}
+            key={barSeriesKey}
             name={series.key}
             xScaleType={ScaleType.Ordinal}
             yScaleType={ScaleType.Linear}
             xAccessor="y"
             yAccessors={['x']}
+            splitSeriesAccessors={['g']}
             data={series.value!}
-            customSeriesColors={barCustomSeriesColors}
+            customSeriesColors={getBarSeriesStyle(barSeriesKey, series.color)}
           />
         );
       })}
@@ -93,7 +91,7 @@ export const BarChartBaseComponent = pure<{
         id={getAxisId(`stat-items-barchart-${data[0].key}-y`)}
         position={Position.Left}
         tickSize={0}
-        tickFormat={getYaxis}
+        tickFormat={getYTicks}
       />
     </Chart>
   ) : null;
