@@ -335,6 +335,7 @@
     "vscode-jsonrpc": "^3.6.2",
     "vscode-languageserver": "^4.2.1",
     "vscode-languageserver-types": "^3.10.0",
+    "wellknown": "^0.5.0",
     "xml2js": "^0.4.19",
     "xregexp": "3.2.0"
   },
