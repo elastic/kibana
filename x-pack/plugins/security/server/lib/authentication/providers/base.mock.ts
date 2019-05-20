@@ -8,8 +8,7 @@ import { stub } from 'sinon';
 import { AuthenticationProviderOptions } from './base';
 
 export function mockAuthenticationProviderOptions(
-  providerOptions: Partial<AuthenticationProviderOptions> = {},
-  providerSpecificOptions: Record<string, unknown> = {}
+  providerOptions: Partial<AuthenticationProviderOptions> = {}
 ) {
   return {
     hostname: 'test-hostname',
@@ -19,6 +18,5 @@ export function mockAuthenticationProviderOptions(
     log: stub(),
     basePath: '/base-path',
     ...providerOptions,
-    ...providerSpecificOptions,
   };
 }
