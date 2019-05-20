@@ -52,6 +52,7 @@ export function registerUiMetricUsageCollector(server: any) {
 
       return uiMetricsByAppName;
     },
+    isReady: () => true,
   });
 
   server.usage.collectorSet.register(collector);
