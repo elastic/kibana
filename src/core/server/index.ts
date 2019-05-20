@@ -34,8 +34,10 @@ export {
   AuthenticationHandler,
   AuthToolkit,
   KibanaRequest,
-  OnRequestHandler,
-  OnRequestToolkit,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
   Router,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';

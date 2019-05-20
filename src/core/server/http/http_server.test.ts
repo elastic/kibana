@@ -505,7 +505,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       res.ok({ key: 'value:/foo' })
     );
 
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
     registerRouter(router);
 
     await server.start(configWithBasePath);
@@ -602,8 +602,8 @@ test('registers auth request interceptor only once', async () => {
 });
 
 test('registers onRequest interceptor several times', async () => {
-  const { registerOnRequest } = await server.setup(config);
-  const doRegister = () => registerOnRequest(() => null as any);
+  const { registerOnPostAuth } = await server.setup(config);
+  const doRegister = () => registerOnPostAuth(() => null as any);
 
   doRegister();
   expect(doRegister).not.toThrowError();
@@ -621,11 +621,11 @@ test('#getBasePathFor() returns base path associated with an incoming request', 
     setBasePathFor,
     registerRouter,
     server: innerServer,
-    registerOnRequest,
+    registerOnPostAuth,
   } = await server.setup(config);
 
   const path = '/base-path';
-  registerOnRequest((req, t) => {
+  registerOnPostAuth((req, t) => {
     setBasePathFor(req, path);
     return t.next();
   });
@@ -653,11 +653,11 @@ test('#getBasePathFor() is based on server base path', async () => {
     setBasePathFor,
     registerRouter,
     server: innerServer,
-    registerOnRequest,
+    registerOnPostAuth,
   } = await server.setup(configWithBasePath);
 
   const path = '/base-path';
-  registerOnRequest((req, t) => {
+  registerOnPostAuth((req, t) => {
     setBasePathFor(req, path);
     return t.next();
   });

@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { parse } from 'url';
-
 import request from 'request';
 import Boom from 'boom';
 
@@ -174,7 +171,7 @@ describe('http service', () => {
       });
     });
 
-    describe('#registerOnRequest()', () => {
+    describe('#registerOnPostAuth()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
@@ -259,7 +256,7 @@ describe('http service', () => {
       });
     });
 
-    describe('#registerOnRequest() toolkit', () => {
+    describe('#registerOnPostAuth() toolkit', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
@@ -268,9 +265,8 @@ describe('http service', () => {
       afterEach(async () => await root.shutdown());
       it('supports Url change on the flight', async () => {
         const { http } = await root.setup();
-        http.registerOnRequest((req, t) => {
-          t.setUrl(parse('/new-url'));
-          return t.next();
+        http.registerOnPreAuth((req, t) => {
+          return t.redirected('/new-url', { forward: true });
         });
 
         const router = new Router('/');
@@ -287,9 +283,8 @@ describe('http service', () => {
       it('url re-write works for legacy server as well', async () => {
         const { http } = await root.setup();
         const newUrl = '/new-url';
-        http.registerOnRequest((req, t) => {
-          t.setUrl(newUrl);
-          return t.next();
+        http.registerOnPreAuth((req, t) => {
+          return t.redirected(newUrl, { forward: true });
         });
 
         await root.start();
@@ -314,7 +309,7 @@ describe('http service', () => {
       it('basePath information for an incoming request is available in legacy server', async () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
-        http.registerOnRequest((req, t) => {
+        http.registerOnPreAuth((req, t) => {
           http.setBasePathFor(req, reqBasePath);
           return t.next();
         });

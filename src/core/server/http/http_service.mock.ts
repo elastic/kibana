@@ -23,8 +23,9 @@ import { HttpService } from './http_service';
 const createSetupContractMock = () => {
   const setupContract = {
     options: {} as ServerOptions,
+    registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
-    registerOnRequest: jest.fn(),
+    registerOnPostAuth: jest.fn(),
     registerRouter: jest.fn(),
     getBasePathFor: jest.fn(),
     setBasePathFor: jest.fn(),

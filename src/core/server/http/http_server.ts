@@ -24,7 +24,8 @@ import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
-import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
+import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
+import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { Router, KibanaRequest } from './router';
 import {
   SessionStorageCookieOptions,
@@ -48,7 +49,8 @@ export interface HttpServerSetup {
    * Applied to all resources by default.
    * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
    */
-  registerOnRequest: (requestHandler: OnRequestHandler) => void;
+  registerOnPreAuth: (requestHandler: OnPreAuthHandler) => void;
+  registerOnPostAuth: (requestHandler: OnPostAuthHandler) => void;
   getBasePathFor: (request: KibanaRequest | Request) => string;
   setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
 }
@@ -103,10 +105,13 @@ export class HttpServer {
     const serverOptions = getServerOptions(config);
     this.server = createServer(serverOptions);
 
+    this.setupBasePathRewrite(config);
+
     return {
       options: serverOptions,
       registerRouter: this.registerRouter.bind(this),
-      registerOnRequest: this.registerOnRequest.bind(this),
+      registerOnPreAuth: this.registerOnPreAuth.bind(this),
+      registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerAuth: <T>(
         fn: AuthenticationHandler<T>,
         cookieOptions: SessionStorageCookieOptions<T>
@@ -125,8 +130,6 @@ export class HttpServer {
       throw new Error('Http server is not setup up yet');
     }
     this.log.debug('starting http server');
-
-    this.setupBasePathRewrite(this.server, config);
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
@@ -157,13 +160,13 @@ export class HttpServer {
     this.server = undefined;
   }
 
-  private setupBasePathRewrite(server: Server, config: HttpConfig) {
+  private setupBasePathRewrite(config: HttpConfig) {
     if (config.basePath === undefined || !config.rewriteBasePath) {
       return;
     }
 
     const basePath = config.basePath;
-    server.ext('onRequest', (request, responseToolkit) => {
+    this.registerOnPreAuth((request, toolkit) => {
       const newURL = modifyUrl(request.url.href!, urlParts => {
         if (urlParts.pathname != null && urlParts.pathname.startsWith(basePath)) {
           urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
@@ -173,18 +176,10 @@ export class HttpServer {
       });
 
       if (!newURL) {
-        return responseToolkit
-          .response('Not Found')
-          .code(404)
-          .takeover();
+        return toolkit.rejected(new Error('not found'), { statusCode: 404 });
       }
 
-      request.setUrl(newURL);
-      // We should update raw request as well since it can be proxied to the old platform
-      // where base path isn't expected.
-      request.raw.req.url = request.url.href;
-
-      return responseToolkit.continue;
+      return toolkit.redirected(newURL, { forward: true });
     });
   }
 
@@ -195,12 +190,20 @@ export class HttpServer {
     return `${routerPath}${routePath.slice(routePathStartIndex)}`;
   }
 
-  private registerOnRequest(fn: OnRequestHandler) {
+  private registerOnPostAuth(fn: OnPostAuthHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
 
-    this.server.ext('onRequest', adoptToHapiOnRequestFormat(fn));
+    this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn));
+  }
+
+  private registerOnPreAuth(fn: OnPreAuthHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn));
   }
 
   private async registerAuth<T>(
