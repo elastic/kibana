@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { convertMicrosecondsToMilliseconds } from './convert_measurements';
-export * from './observability_integration';
-export { UptimeUrlParams, getSupportedUrlParams } from './url_params';
+export const addBasePath = (basePath: string, url: string) =>
+  `${basePath.length > 0 ? `/${basePath}` : ''}${url}`;

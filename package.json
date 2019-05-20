@@ -56,7 +56,6 @@
     "start": "node --trace-warnings --trace-deprecation scripts/kibana --dev ",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
     "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
-    "precommit": "node scripts/precommit_hook",
     "karma": "karma start",
     "lint": "yarn run lint:es && yarn run lint:sass",
     "lint:es": "node scripts/eslint",
