@@ -9,6 +9,7 @@ import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, EMS_META_PATH, GIS_API_PATH } fr
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 import { getEMSResources } from '../common/ems_util';
+import Boom from 'boom';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -40,8 +41,13 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      const file = await fetch(layer.url);
-      return await file.json();
+      try {
+        const file = await fetch(layer.url);
+        return await file.json();
+      } catch(e) {
+        server.log('warning', `Cannot connect to EMS for file, error: ${e.message}`);
+        throw Boom.badRequest(`Cannot connect to EMS`);
+      }
 
     }
   });
@@ -72,15 +78,20 @@ export function initRoutes(server, licenseUid) {
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
-      const tile = await fetch(url);
-      const arrayBuffer = await tile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      let  response =  h.response(buffer);
-      response = response.bytes(buffer.length);
-      response = response.header('Content-Disposition', 'inline');
-      response = response.header('Content-type', 'image/png');
-      response = response.encoding('binary');
-      return response;
+      try {
+        const tile = await fetch(url);
+        const arrayBuffer = await tile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        let response = h.response(buffer);
+        response = response.bytes(buffer.length);
+        response = response.header('Content-Disposition', 'inline');
+        response = response.header('Content-type', 'image/png');
+        response = response.encoding('binary');
+        return response;
+      } catch(e) {
+        server.log('warning', `Cannot connect to EMS for tile, error: ${e.message}`);
+        throw Boom.badRequest(`Cannot connect to EMS`);
+      }
     }
   });
 
@@ -90,20 +101,14 @@ export function initRoutes(server, licenseUid) {
     handler: async () => {
 
       let ems;
-      const emptyResponse = {
-        fileLayers: [],
-        tmsServices: []
-      };
-
-      if (!mapConfig.proxyElasticMapsServiceInMaps) {
-        ems = emptyResponse;
-      } else {
-        try {
-          ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, !mapConfig.proxyElasticMapsServiceInMaps);
-        } catch (e) {
-          server.log('warning', `Cannot connect to EMS, error: ${e}`);
-          ems = emptyResponse;
-        }
+      try {
+        ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, !mapConfig.proxyElasticMapsServiceInMaps);
+      } catch (e) {
+        server.log('warning', `Cannot connect to EMS, error: ${e.message}`);
+        ems = {
+          fileLayers: [],
+          tmsServices: []
+        };
       }
 
       return ({
@@ -130,7 +135,7 @@ export function initRoutes(server, licenseUid) {
       try {
         const { count } = await callWithRequest(request, 'count', { index: query.index });
         return { count };
-      } catch(error) {
+      } catch (error) {
         return h.response().code(400);
       }
     }
