@@ -37,7 +37,6 @@ export function checkViewOrCreateJobs(Private, $route, kbnBaseUrl, kbnUrl, i18n)
 
       })
       .catch((err) => {
-        // TODO - redirect to appropriate page.
         console.log(`Error checking whether jobs in module ${moduleId} exists`, err);
         toastNotifications.addWarning({
           title: i18n('xpack.ml.newJob.simple.recognize.moduleCheckJobsExistWarningTitle', {
