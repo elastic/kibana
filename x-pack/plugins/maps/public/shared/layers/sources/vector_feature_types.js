@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type AggName = string;
-
-export function isAggName(arg: any): arg is AggName {
-  // allow all characters except `[]>` and must not start or end with a space.
-  return /^[^\s^\[\]>][^\[\]>]+[^\s^\[\]>]$/.test(arg);
-}
+export const VECTOR_SHAPE_TYPES = {
+  POINT: 'POINT',
+  LINE: 'LINE',
+  POLYGON: 'POLYGON'
+};
