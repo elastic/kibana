@@ -18,7 +18,7 @@ import { ES_FIELD_TYPES } from '../../../../../common/constants/field_types';
 
 // @ts-ignore
 import { SearchItemsProvider } from '../../../new_job/utils/new_job_utils';
-import { SingleMetricJobCreator, MultiMetricJobCreator } from '../../common/job_creator';
+import { /* SingleMetricJobCreator, */ MultiMetricJobCreator } from '../../common/job_creator';
 // import { ChartSettings } from '../../common/chart_settings';
 import { IndexPatternContext } from '../../common';
 import { Page } from './page';
