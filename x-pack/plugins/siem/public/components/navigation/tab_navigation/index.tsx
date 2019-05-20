@@ -7,6 +7,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
+import { trackUiAction } from '../../../lib/track_usage';
 
 import * as i18n from '../translations';
 
@@ -89,6 +90,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       ...this.state,
       selectedTabId: id,
     });
+    trackUiAction('tab_' + id);
     window.location.assign(href);
   };
 
