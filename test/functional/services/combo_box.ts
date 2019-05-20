@@ -26,7 +26,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
-  const { common } = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common']);
 
   const WAIT_FOR_EXISTS_TIME: number = config.get('timeouts.waitForExists');
 
@@ -87,7 +87,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
       const comboBoxElement = await testSubjects.find(comboBoxSelector);
       await this._filterOptionsList(comboBoxElement, value);
-      await common.pressEnterKey();
+      await PageObjects.common.pressEnterKey();
       await this.closeOptionsList(comboBoxElement);
     }
 
@@ -106,12 +106,12 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     ): Promise<void> {
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
-      await this._waitForOptionsListLoading(comboBoxElement);
+      await this.waitForOptionsListLoading(comboBoxElement);
       await input.type(filterValue);
-      await this._waitForOptionsListLoading(comboBoxElement);
+      await this.waitForOptionsListLoading(comboBoxElement);
     }
 
-    private async _waitForOptionsListLoading(comboBoxElement: WebElementWrapper): Promise<void> {
+    private async waitForOptionsListLoading(comboBoxElement: WebElementWrapper): Promise<void> {
       await comboBoxElement.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 
@@ -120,7 +120,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const comboBox = await testSubjects.find(comboBoxSelector);
       const menu = await retry.try(async () => {
         await testSubjects.click(comboBoxSelector);
-        await this._waitForOptionsListLoading(comboBox);
+        await this.waitForOptionsListLoading(comboBox);
         const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
         if (!isOptionsListOpen) {
           throw new Error('Combo box options list did not open on click');
