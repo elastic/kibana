@@ -110,7 +110,7 @@ describe('onRequestInterceptor', () => {
         path,
         basePath: '', // no base path set for route within the default space
       });
-    }, 10000);
+    }, 30000);
 
     it('strips the Space URL Context from the request', async () => {
       const { http } = await root.setup();
@@ -132,7 +132,7 @@ describe('onRequestInterceptor', () => {
         path: '/foo',
         basePath: '/s/foo-space',
       });
-    }, 10000);
+    }, 30000);
 
     it('ignores space identifiers in the middle of the path', async () => {
       const { http } = await root.setup();
@@ -154,7 +154,7 @@ describe('onRequestInterceptor', () => {
         path: '/some/path/s/foo/bar',
         basePath: '', // no base path set for route within the default space
       });
-    }, 10000);
+    }, 30000);
 
     it('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
       const { http } = await root.setup();
@@ -179,7 +179,7 @@ describe('onRequestInterceptor', () => {
           queryParam: 'queryValue',
         },
       });
-    }, 10000);
+    }, 30000);
   });
 
   describe('requests handled completely in the new platform', () => {
@@ -203,7 +203,7 @@ describe('onRequestInterceptor', () => {
         path,
         basePath: '', // no base path set for route within the default space
       });
-    }, 10000);
+    }, 30000);
 
     it('strips the Space URL Context from the request', async () => {
       const { http } = await root.setup();
@@ -225,7 +225,7 @@ describe('onRequestInterceptor', () => {
         path: '/foo',
         basePath: '/s/foo-space',
       });
-    }, 10000);
+    }, 30000);
 
     it('ignores space identifiers in the middle of the path', async () => {
       const { http } = await root.setup();
@@ -247,7 +247,7 @@ describe('onRequestInterceptor', () => {
         path: '/some/path/s/foo/bar',
         basePath: '', // no base path set for route within the default space
       });
-    }, 10000);
+    }, 30000);
 
     it('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
       const { http } = await root.setup();
@@ -272,6 +272,6 @@ describe('onRequestInterceptor', () => {
           queryParam: 'queryValue',
         },
       });
-    }, 10000);
+    }, 30000);
   });
 });

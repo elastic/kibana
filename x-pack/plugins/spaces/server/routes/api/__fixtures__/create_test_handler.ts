@@ -8,7 +8,10 @@ import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import {
+  httpServiceMock,
+  elasticsearchServiceMock,
+} from '../../../../../../../src/core/server/mocks';
 import { SecurityPlugin } from '../../../../../security';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
