@@ -376,13 +376,15 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
 
         // check for actions, bail if we're done
         getActions();
-        if (!doUpdate) return;
+        if (doUpdate) {
+          // save states and emit the required events
+          saveState();
+          update$.next();
 
-        // save states and emit the required events
-        saveState();
-        update$.next();
-        if (!doFetch) return;
-        fetch$.next();
+          if (doFetch) {
+            fetch$.next();
+          }
+        }
 
         // iterate over each state type, checking for changes
         function getActions() {

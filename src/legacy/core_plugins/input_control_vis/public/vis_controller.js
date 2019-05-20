@@ -33,11 +33,7 @@ class VisController {
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
 
     this.updateSubsciption = this.vis.API.queryFilter.getUpdates$()
-      .subscribe({
-        next: () => {
-          this.queryBarUpdateHandler();
-        },
-      });
+      .subscribe(this.queryBarUpdateHandler);
   }
 
   async render(visData, visParams, status) {
