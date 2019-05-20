@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Function } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   when: () => any;
@@ -18,25 +19,25 @@ interface Case {
 }
 
 export function caseFn(): Function<'case', Arguments, Promise<Case>> {
+  const { help, args: argHelp } = getFunctionHelp().case;
+
   return {
     name: 'case',
     type: 'case',
-    help: 'Build a case (including a condition/result) to pass to the switch function',
+    help,
     args: {
       when: {
         aliases: ['_'],
         resolve: false,
-        help:
-          'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
+        help: argHelp.when,
       },
       if: {
         types: ['boolean'],
-        help:
-          'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
+        help: argHelp.if,
       },
       then: {
         resolve: false,
-        help: 'The value to return if the condition is met',
+        help: argHelp.then,
       },
     },
     fn: async (context, args) => {

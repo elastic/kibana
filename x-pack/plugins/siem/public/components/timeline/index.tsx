@@ -111,35 +111,39 @@ type Props = OwnProps & StateReduxProps & DispatchProps;
 
 class StatefulTimelineComponent extends React.Component<Props> {
   public shouldComponentUpdate = ({
+    id,
+    flyoutHeaderHeight,
+    flyoutHeight,
+    activePage,
     columns,
     dataProviders,
     end,
-    flyoutHeight,
-    flyoutHeaderHeight,
-    id,
     isLive,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
     kqlQueryExpression,
-    show,
-    start,
+    pageCount,
     sort,
+    start,
+    show,
   }: Props) =>
+    id !== this.props.id ||
+    flyoutHeaderHeight !== this.props.flyoutHeaderHeight ||
+    flyoutHeight !== this.props.flyoutHeight ||
+    activePage !== this.props.activePage ||
     !isEqual(columns, this.props.columns) ||
     !isEqual(dataProviders, this.props.dataProviders) ||
     end !== this.props.end ||
-    flyoutHeight !== this.props.flyoutHeight ||
-    flyoutHeaderHeight !== this.props.flyoutHeaderHeight ||
-    id !== this.props.id ||
     isLive !== this.props.isLive ||
     itemsPerPage !== this.props.itemsPerPage ||
     !isEqual(itemsPerPageOptions, this.props.itemsPerPageOptions) ||
     kqlMode !== this.props.kqlMode ||
     kqlQueryExpression !== this.props.kqlQueryExpression ||
-    show !== this.props.show ||
+    pageCount !== this.props.pageCount ||
+    !isEqual(sort, this.props.sort) ||
     start !== this.props.start ||
-    sort !== this.props.sort;
+    show !== this.props.show;
 
   public componentDidMount() {
     const { createTimeline, id } = this.props;

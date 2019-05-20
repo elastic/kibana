@@ -33,3 +33,13 @@ export const ES_GEO_FIELD_TYPE = {
   GEO_POINT: 'geo_point',
   GEO_SHAPE: 'geo_shape'
 };
+
+export const GEO_JSON_TYPE = {
+  POINT: 'Point',
+  MULTI_POINT: 'MultiPoint',
+  LINE_STRING: 'LineString',
+  MULTI_LINE_STRING: 'MultiLineString',
+  POLYGON: 'Polygon',
+  MULTI_POLYGON: 'MultiPolygon',
+  GEOMETRY_COLLECTION: 'GeometryCollection',
+};

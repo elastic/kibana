@@ -32,9 +32,6 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
 export function getEditPanelAction() {
   return new ContextMenuAction(
     {
-      displayName: i18n.translate('kbn.dashboard.panel.editPanel.displayName', {
-        defaultMessage: 'Edit visualization',
-      }),
       id: 'editPanel',
       parentPanelId: 'mainMenu',
     },
@@ -53,6 +50,15 @@ export function getEditPanelAction() {
         if (embeddable && embeddable.metadata.editUrl) {
           return embeddable.metadata.editUrl;
         }
+      },
+      getDisplayName: ({ embeddable }) => {
+        if (embeddable && embeddable.metadata.editLabel) {
+          return embeddable.metadata.editLabel;
+        }
+
+        return i18n.translate('kbn.dashboard.panel.editPanel.defaultDisplayName', {
+          defaultMessage: 'Edit',
+        });
       },
     }
   );

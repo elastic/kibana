@@ -25,6 +25,9 @@ import { map, takeUntil } from 'rxjs/operators';
 import { IconType } from '@elastic/eui';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { NotificationsSetup } from '../notifications';
+import { NavLinksService } from './nav_links/nav_links_service';
+import { ApplicationStart } from '../application';
+import { BasePathStart } from '../base_path';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -65,10 +68,16 @@ interface SetupDeps {
   notifications: NotificationsSetup;
 }
 
+interface StartDeps {
+  application: ApplicationStart;
+  basePath: BasePathStart;
+}
+
 /** @internal */
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
+  private readonly navLinks = new NavLinksService();
 
   public constructor({ browserSupportsCsp }: ConstructorParams) {
     this.browserSupportsCsp = browserSupportsCsp;
@@ -183,7 +192,6 @@ export class ChromeService {
           map(set => [...set]),
           takeUntil(this.stop$)
         ),
-
       /**
        * Get an observable of the current badge
        */
@@ -222,10 +230,20 @@ export class ChromeService {
     };
   }
 
+  public start({ application, basePath }: StartDeps) {
+    return {
+      navLinks: this.navLinks.start({ application, basePath }),
+    };
+  }
+
   public stop() {
+    this.navLinks.stop();
     this.stop$.next();
   }
 }
 
 /** @public */
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
+
+/** @public */
+export type ChromeStart = ReturnType<ChromeService['start']>;

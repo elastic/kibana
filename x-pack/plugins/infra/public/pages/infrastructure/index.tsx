@@ -46,18 +46,24 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
         <RoutedTabs
           tabs={[
             {
-              title: 'Snapshot',
-              path: `${match.path}/snapshot`,
+              title: intl.formatMessage({
+                id: 'xpack.infra.homePage.inventoryTabTitle',
+                defaultMessage: 'Inventory',
+              }),
+              path: `${match.path}/inventory`,
             },
             {
-              title: 'Metrics explorer',
+              title: intl.formatMessage({
+                id: 'xpack.infra.homePage.metricsExplorerTabTitle',
+                defaultMessage: 'Metrics explorer',
+              }),
               path: `${match.path}/metrics-explorer`,
             },
           ]}
         />
 
         <Switch>
-          <Route path={`${match.path}/snapshot`} component={SnapshotPage} />
+          <Route path={`${match.path}/inventory`} component={SnapshotPage} />
           <Route
             path={`${match.path}/metrics-explorer`}
             render={props => (

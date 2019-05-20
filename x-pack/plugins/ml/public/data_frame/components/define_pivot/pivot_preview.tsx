@@ -26,7 +26,8 @@ import { dictionaryToArray } from '../../../../common/types/common';
 
 import {
   DataFramePreviewRequest,
-  IndexPatternContext,
+  isKibanaContext,
+  KibanaContext,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
@@ -110,12 +111,13 @@ interface PivotPreviewProps {
 export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 
+  const indexPattern = kibanaContext.currentIndexPattern;
   const { dataFramePreviewData, errorMessage, previewRequest, status } = usePivotPreviewData(
     indexPattern,
     query,

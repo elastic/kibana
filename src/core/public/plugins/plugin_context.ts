@@ -19,7 +19,7 @@
 
 import { DiscoveredPlugin } from '../../server';
 import { BasePathSetup, BasePathStart } from '../base_path';
-import { ChromeSetup } from '../chrome';
+import { ChromeSetup, ChromeStart } from '../chrome';
 import { CoreContext } from '../core_system';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { I18nSetup, I18nStart } from '../i18n';
@@ -29,7 +29,7 @@ import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { OverlayStart } from '../overlays';
 import { ApplicationStart } from '../application';
-import { HttpSetup } from '../http';
+import { HttpSetup, HttpStart } from '../http';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -61,7 +61,9 @@ export interface PluginSetupContext {
  */
 export interface PluginStartContext {
   application: Pick<ApplicationStart, 'capabilities'>;
+  chrome: ChromeStart;
   basePath: BasePathStart;
+  http: HttpStart;
   i18n: I18nStart;
   notifications: NotificationsStart;
   overlays: OverlayStart;
@@ -127,7 +129,9 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
     application: {
       capabilities: deps.application.capabilities,
     },
+    chrome: deps.chrome,
     basePath: deps.basePath,
+    http: deps.http,
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

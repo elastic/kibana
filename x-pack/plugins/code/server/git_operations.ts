@@ -10,7 +10,7 @@ import {
   Blame,
   Commit,
   Diff as NodeGitDiff,
-  Error,
+  Error as NodeGitError,
   Object,
   Oid,
   Reference,
@@ -20,6 +20,7 @@ import {
 } from '@elastic/nodegit';
 import Boom from 'boom';
 import * as Path from 'path';
+import * as fs from 'fs';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
 import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../model';
@@ -41,7 +42,7 @@ async function checkExists<R>(func: () => Promise<R>, message: string): Promise<
   try {
     result = await func();
   } catch (e) {
-    if (e.errno === Error.CODE.ENOTFOUND) {
+    if (e.errno === NodeGitError.CODE.ENOTFOUND) {
       throw Boom.notFound(message);
     } else {
       throw e;
@@ -150,9 +151,15 @@ export class GitOperations {
 
   public async openRepo(uri: RepositoryUri): Promise<Repository> {
     const repoDir = Path.join(this.repoRoot, uri);
+    this.checkPath(repoDir);
     return checkExists<Repository>(() => Repository.open(repoDir), `repo ${uri} not found`);
   }
 
+  private checkPath(path: string) {
+    if (!fs.realpathSync(path).startsWith(fs.realpathSync(this.repoRoot))) {
+      throw new Error('invalid path');
+    }
+  }
   public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
@@ -505,7 +512,7 @@ export class GitOperations {
     try {
       return await repo.getReferenceCommit(ref);
     } catch (e) {
-      if (e.errno === Error.CODE.ENOTFOUND) {
+      if (e.errno === NodeGitError.CODE.ENOTFOUND) {
         return await this.findCommitByRefs(repo, rest);
       } else {
         throw e;

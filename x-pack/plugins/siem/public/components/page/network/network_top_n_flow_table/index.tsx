@@ -148,7 +148,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
 
             <EuiFlexItem grow={false}>
               <FlowDirectionSelect
-                id={NetworkTopNFlowTableId}
                 selectedDirection={flowDirection}
                 onChangeDirection={this.onChangeTopNFlowDirection}
               />
@@ -189,7 +188,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     }
   };
 
-  private onChangeTopNFlowDirection = (_: string, flowDirection: FlowDirection) =>
+  private onChangeTopNFlowDirection = (flowDirection: FlowDirection) =>
     this.props.updateTopNFlowDirection({ flowDirection, networkType: this.props.type });
 }
 

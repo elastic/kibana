@@ -7,6 +7,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
+import '../../mock/match_media';
 import { Hosts } from './hosts';
 
 import { mocksSource } from '../../containers/source/mock';

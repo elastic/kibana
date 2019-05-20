@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should display script error when script is invalid', async function () {
-      const scriptResults = await PageObjects.settings.executeScriptedField(`doc['iHaveNoClosingTick].value`);
+      const scriptResults = await PageObjects.settings.executeScriptedField(`i n v a l i d  s c r i p t`);
       expect(scriptResults).to.contain('search_phase_execution_exception');
     });
 

@@ -5,7 +5,7 @@ experimental[This API is experimental and may be changed or removed completely i
 
 Retrieves all {kib} roles, or a specific role.
 
-Note: You cannot access this endpoint via the Console in Kibana.
+NOTE: You cannot access this endpoint via the Console in Kibana.
 
 ==== Authorization
 

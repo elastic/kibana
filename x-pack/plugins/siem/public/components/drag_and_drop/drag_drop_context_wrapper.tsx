@@ -19,6 +19,7 @@ import {
 } from './helpers';
 
 interface Props {
+  children: React.ReactNode;
   dataProviders?: dragAndDropModel.IdToDataProvider;
   dispatch: Dispatch;
 }
@@ -41,8 +42,10 @@ const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerP
  * DragDropContextWrapperComponent handles all drag end events
  */
 export class DragDropContextWrapperComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({ dataProviders }: Props) =>
-    dataProviders !== this.props.dataProviders ? false : true; // prevent re-renders when data providers are added or removed
+  public shouldComponentUpdate = ({ children, dataProviders }: Props) =>
+    children === this.props.children && dataProviders !== this.props.dataProviders // prevent re-renders when data providers are added or removed, but all other props are the same
+      ? false
+      : true;
 
   public render() {
     const { children } = this.props;
