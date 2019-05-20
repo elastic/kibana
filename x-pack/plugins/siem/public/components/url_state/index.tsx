@@ -46,7 +46,7 @@ interface KqlQueryNetwork {
   type: networkModel.NetworkType;
 }
 
-type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
+export type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
 
 interface UrlState {
   [key: string]: any;
@@ -96,7 +96,7 @@ interface UrlStateContainerLifecycles {
   history: History;
   location: Location;
 }
-type UrlStateContainerLifecycleProps = UrlStateContainerLifecycles & UrlStateContainerProps;
+export type UrlStateContainerLifecycleProps = UrlStateContainerLifecycles & UrlStateContainerProps;
 
 export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
   const trailingPath = pathname.match(/([^\/]+$)/);
@@ -133,11 +133,7 @@ export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
   return false;
 };
 
-class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecycleProps> {
-  public readonly state = {
-    kqlQuery: '',
-  };
-
+export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecycleProps> {
   public render() {
     return null;
   }
@@ -176,7 +172,6 @@ class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecy
     this.handleInitialize(location);
   }
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering this is really a method despite what eslint thinks
   private replaceStateInLocation = throttle(
     1000,
     (urlState: UrlInputsModel | KqlQuery, urlStateKey: string) => {
