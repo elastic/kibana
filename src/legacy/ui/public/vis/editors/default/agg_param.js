@@ -63,7 +63,7 @@ uiModules
             indexed-fields="indexedFields"
             show-validation="showValidation"
             value="paramValue"
-            visName="vis.type.name"
+            vis-name="vis.type.name"
             on-change="onChange"
             set-touched="setTouched"
             set-validity="setValidity"

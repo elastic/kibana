@@ -57,7 +57,7 @@ function TopAggregateParamEditor({
         defaultMessage:
           'Choose a strategy for combining multiple hits or a multi-valued field into a single metric',
       })
-    : i18n.translate('common.ui.aggTypes.aggregateWith.error', {
+    : i18n.translate('common.ui.aggTypes.aggregateWith.noAggsErrorTooltip', {
         defaultMessage: 'Chosen field has no compatible aggregations',
       });
 
@@ -92,7 +92,7 @@ function TopAggregateParamEditor({
       if (filteredOptions.length === 1) {
         setValue(aggParam.options.byValue[filteredOptions[0].value]);
       } else if (value) {
-        setValue(undefined);
+        setValue();
       }
     },
     [fieldType, visName]
@@ -100,7 +100,7 @@ function TopAggregateParamEditor({
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (event.target.value === emptyValue.value) {
-      setValue(undefined);
+      setValue();
     } else {
       setValue(aggParam.options.byValue[event.target.value]);
     }
