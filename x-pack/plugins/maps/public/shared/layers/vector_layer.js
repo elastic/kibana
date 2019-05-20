@@ -35,7 +35,7 @@ const ALL_SHAPE_MB_FILTER = [
   ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
 ];
 
-const ID_ROTATION = 4;
+const ID_ROTATION = 2;
 
 export class VectorLayer extends AbstractLayer {
 
@@ -377,8 +377,6 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _assignIdsToFeatures(featureCollection, idOffset) {
-
-    console.log('idOffset', idOffset);
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
       let id;
@@ -428,7 +426,6 @@ export class VectorLayer extends AbstractLayer {
   _syncFeatureCollectionWithMb(mbMap) {
 
     const mbGeoJSONSource = mbMap.getSource(this.getId());
-
     const featureCollection = this._getSourceFeatureCollection();
     const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
 

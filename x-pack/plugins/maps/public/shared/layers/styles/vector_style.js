@@ -330,7 +330,6 @@ export class VectorStyle extends AbstractStyle {
       tmpFeatureIdentifier.id = feature.id;
       mbMap.removeFeatureState(tmpFeatureIdentifier);
     }
-
   }
 
   setFeatureState(featureCollection, mbMap, sourceId) {
