@@ -18,6 +18,7 @@ import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
+import { getFunctionHelp } from '../../../strings';
 import {
   ContextFunction,
   Datatable,
@@ -39,36 +40,35 @@ function keysOf<T, K extends keyof T>(obj: T): K[] {
 type Arguments = { [key in PointSeriesColumnName]: string | null };
 
 export function pointseries(): ContextFunction<'pointseries', Datatable, Arguments, PointSeries> {
+  const { help, args: argHelp } = getFunctionHelp().pointseries;
+
   return {
     name: 'pointseries',
     type: 'pointseries',
-    help:
-      'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html). ' +
-      'If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
-      'keys. Measures are then deduplicated by those keys using the specified TinyMath function',
+    help,
     context: {
       types: ['datatable'],
     },
     args: {
       x: {
         types: ['string', 'null'],
-        help: 'The values along the X-axis',
+        help: argHelp.x,
       },
       y: {
         types: ['string', 'null'],
-        help: 'The values along the y-axis',
+        help: argHelp.y,
       },
       color: {
         types: ['string', 'null'],
-        help: "An expression to use in determining the mark's color", // If you need categorization, transform the field.
+        help: argHelp.color, // If you need categorization, transform the field.
       },
       size: {
         types: ['string', 'null'],
-        help: 'For elements that support it, the size of the marks',
+        help: argHelp.size,
       },
       text: {
         types: ['string', 'null'],
-        help: 'For use in charts that support it, the text to show in the mark',
+        help: argHelp.text,
       },
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
       // The way the function below is written you can add as many arbitrary named args as you want.
