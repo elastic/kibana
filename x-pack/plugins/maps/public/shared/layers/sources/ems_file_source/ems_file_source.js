@@ -5,6 +5,7 @@
  */
 
 import { AbstractVectorSource } from '../vector_source';
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import React from 'react';
 import { GIS_API_PATH, EMS_FILE } from '../../../../../common/constants';
 import { getEmsVectorFilesMeta } from '../../../../meta';
@@ -114,6 +115,10 @@ export class EMSFileSource extends AbstractVectorSource {
 
   canFormatFeatureProperties() {
     return true;
+  }
+
+  async getSupportedShapeTypes() {
+    return [VECTOR_SHAPE_TYPES.POLYGON];
   }
 
 }
