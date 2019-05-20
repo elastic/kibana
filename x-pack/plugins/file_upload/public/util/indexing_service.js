@@ -37,10 +37,17 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
     index: indexName,
   });
   let id;
-  if (createdIndex && createdIndex.id) {
-    id = createdIndex.id;
-  } else {
-    throw `Error creating index`;
+  try {
+    if (createdIndex && createdIndex.id) {
+      id = createdIndex.id;
+    } else {
+      throw `Error creating index`;
+    }
+  } catch (error) {
+    return {
+      error,
+      success: false
+    };
   }
 
   // Write to index

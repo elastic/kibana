@@ -111,10 +111,14 @@ export class JsonUploadAndParse extends Component {
     if (!indexDataResp.success) {
       this.setState({
         indexedFile: null,
-        indexDataResp: INDEXING_STAGE.DATA_INDEXING_ERROR, // Reformat response
+        indexDataResp,
         indexRequestInFlight: false,
+        currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE,
       });
       this._resetFileAndIndexSettings();
+      if (onIndexingComplete) {
+        onIndexingComplete();
+      }
       return;
     }
 

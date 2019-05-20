@@ -28,19 +28,17 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   }
 
-  static viewIndexedData = (addAndViewSource, inspectorAdapters,
-    importSuccessHandler, importErrorHandler) => {
-    return indexResponses => {
+  static viewIndexedData = (
+    addAndViewSource, inspectorAdapters, importSuccessHandler, importErrorHandler
+  ) => {
+    return (indexResponses = {}) => {
       const { indexDataResp, indexPatternResp } = indexResponses;
-      if (!(indexDataResp && indexDataResp.success)) {
+      if (!(indexDataResp && indexDataResp.success) ||
+        !(indexPatternResp && indexPatternResp.success)) {
         importErrorHandler(indexResponses);
         return;
       }
-      if (!(indexPatternResp && indexPatternResp.success)) {
-        importErrorHandler(indexResponses);
-        return;
-      }
-      const{ fields, id } = indexPatternResp;
+      const { fields, id } = indexPatternResp;
       const geoFieldArr = fields.filter(
         field => Object.values(ES_GEO_FIELD_TYPE).includes(field.type)
       );
