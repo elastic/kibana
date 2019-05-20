@@ -41,7 +41,6 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { jobId } = request.params;
-      console.warn('route', jobId);
       return callWithRequest('ml.getDataFrameTransformsStats', { jobId })
         .catch(resp => wrapError(resp));
     },
