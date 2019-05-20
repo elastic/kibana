@@ -230,7 +230,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
                   'xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameDescription',
                   {
                     defaultMessage:
-                      'Create and starts the data frame job. After the job is started, you will be offered options to continue exploring the data frame job.',
+                      'Create and start the data frame job. After the job is started, you will be offered options to continue exploring the data frame job.',
                   }
                 )}
               </EuiText>
