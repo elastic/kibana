@@ -79,9 +79,15 @@ function getProviderSpecificOptions(
   providerType: string
 ): AuthenticationProviderSpecificOptions {
   const config = server.config();
-  if (config.has(`xpack.security.authc.${providerType}`)) {
-    return config.get(`xpack.security.authc.${providerType}`);
+  // we can't use `config.has` here as it doesn't currently work with Joi's "alternatives" syntax which we
+  // are using to make the provider specific configuration required when the auth provider is specified
+  const authc = config.get<Record<string, AuthenticationProviderSpecificOptions | undefined>>(
+    `xpack.security.authc`
+  );
+  if (authc[providerType] !== undefined) {
+    return authc[providerType] as AuthenticationProviderSpecificOptions;
   }
+
   return {};
 }
 
