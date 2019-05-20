@@ -17,16 +17,16 @@
  * under the License.
  */
 
-const importDeclaration = {
+ const importDeclaration = {
   type: 'ImportDeclaration',
   source: { type: 'Literal', value: '@kbn/i18n' },
   specifiers: [{ type: 'ImportSpecifier', imported: { type: 'Identifier', name: 'i18n' } }] };
 
-const findParamByName = (func, paramName) =>
+ const findParamByName = (func, paramName) =>
   func.value.params.filter(param =>
     param.loc.identifierName === paramName);
 
-const removeI18nFnParams = (source, jscodeshift) => {
+ const removeI18nFnParams = (source, jscodeshift) => {
   let didChange = false;
   const newSource = jscodeshift(source)
     .find(jscodeshift.Function)
@@ -41,7 +41,7 @@ const removeI18nFnParams = (source, jscodeshift) => {
   return [didChange, newSource];
 };
 
-const addI18nImport = (ast, jscodeshift) => {
+ const addI18nImport = (ast, jscodeshift) => {
   const addImport = ast => {
     const tree = jscodeshift(ast);
     tree.find(jscodeshift.Program)
@@ -52,15 +52,15 @@ const addI18nImport = (ast, jscodeshift) => {
     return tree;
   };
 
-  const hasI18nImport = !!jscodeshift(ast)
+   const hasI18nImport = !!jscodeshift(ast)
     .find(jscodeshift.ImportDeclaration)
     .filter(imp => imp.value.source.value === '@kbn/i18n').length;
 
-  console.log('  adding \'i18n\' import');
+   console.log('  adding \'i18n\' import');
   return hasI18nImport ? jscodeshift(ast) : addImport(ast);
 };
 
-const fixI18nCalls = (ast, jscodeshift) => {
+ const fixI18nCalls = (ast, jscodeshift) => {
   return jscodeshift(ast)
     .find(jscodeshift.CallExpression)
     .filter(call => call.value.callee.name === 'i18n')
@@ -72,7 +72,7 @@ const fixI18nCalls = (ast, jscodeshift) => {
     .toSource();
 };
 
-module.exports = function ({ source }, { jscodeshift }) {
+ module.exports = function ({ source }, { jscodeshift }) {
   const [didChange, newSourceParams] = removeI18nFnParams(source, jscodeshift);
   if(didChange) {
     const newSourceCalls = fixI18nCalls(newSourceParams, jscodeshift);
