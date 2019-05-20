@@ -24,12 +24,13 @@ type CreateSearchItems = () => { indexPattern: StaticIndexPattern };
 import { KibanaContext } from '../../common';
 import { Page } from './page';
 
-module.directive('mlNewDataFrame', ($injector: InjectorService, kbnBaseUrl: string) => {
+module.directive('mlNewDataFrame', ($injector: InjectorService) => {
   return {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
       const indexPatterns = $injector.get('indexPatterns');
+      const kbnBaseUrl = $injector.get('kbnBaseUrl');
       const kibanaConfig = $injector.get('config');
       const Private: IPrivate = $injector.get('Private');
 
