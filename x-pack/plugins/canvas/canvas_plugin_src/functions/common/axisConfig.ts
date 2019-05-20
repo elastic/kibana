@@ -5,11 +5,12 @@
  */
 
 import moment from 'moment';
-import { ContextFunction, Datatable } from '../types';
+import { ContextFunction, Datatable, Position } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   show: boolean;
-  position: 'top' | 'bottom' | 'left' | 'right';
+  position: Position;
   min: number | string | null;
   max: number | string | null;
   tickSize: number | null;
@@ -19,9 +20,9 @@ interface AxisConfig extends Arguments {
   type: 'axisConfig';
 }
 
-const VALID_POSITIONS = ['top', 'bottom', 'left', 'right', ''];
-
 export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
+  const { help, args: argHelp } = getFunctionHelp().axisConfig;
+
   return {
     name: 'axisConfig',
     aliases: [],
@@ -29,38 +30,36 @@ export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments
     context: {
       types: ['datatable'],
     },
-    help: 'Configure axis of a visualization',
+    help,
     args: {
       show: {
         types: ['boolean'],
-        help: 'Show the axis labels?',
+        help: argHelp.show,
         default: true,
       },
       position: {
         types: ['string'],
-        help: 'Position of the axis labels - top, bottom, left, and right',
-        options: ['top', 'bottom', 'left', 'right'],
+        help: argHelp.position,
+        options: Object.values(Position),
         default: 'left',
       },
       min: {
         types: ['number', 'date', 'string', 'null'],
-        help:
-          'Minimum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
+        help: argHelp.min,
       },
       max: {
         types: ['number', 'date', 'string', 'null'],
-        help:
-          'Maximum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
+        help: argHelp.max,
       },
       tickSize: {
         types: ['number', 'null'],
-        help: 'Increment size between each tick. Use for number axes only',
+        help: argHelp.tickSize,
       },
     },
     fn: (_context, args) => {
       const { position, min, max, ...rest } = args;
 
-      if (!VALID_POSITIONS.includes(position)) {
+      if (!Object.values(Position).includes(position)) {
         throw new Error(`Invalid position: '${args.position}'`);
       }
 

@@ -41,6 +41,7 @@ import { uptime } from './plugins/uptime';
 import { ossTelemetry } from './plugins/oss_telemetry';
 import { encryptedSavedObjects } from './plugins/encrypted_saved_objects';
 import { lens } from './plugins/lens';
+import { snapshotRestore } from './plugins/snapshot_restore';
 
 module.exports = function (kibana) {
   return [
@@ -81,5 +82,6 @@ module.exports = function (kibana) {
     ossTelemetry(kibana),
     encryptedSavedObjects(kibana),
     lens(kibana),
+    snapshotRestore(kibana),
   ];
 };

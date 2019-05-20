@@ -7,12 +7,13 @@
 import React, { useCallback } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle } from '@elastic/eui';
-import { Chart, Axis, Position, timeFormatter, getAxisId } from '@elastic/charts';
+import { Chart, Axis, Position, timeFormatter, getAxisId, Settings } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
 import { first } from 'lodash';
 import { niceTimeFormatByDay } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
+import moment from 'moment';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -36,6 +37,7 @@ interface Props {
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
+  onTimeChange: (start: string, end: string) => void;
 }
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
@@ -50,8 +52,12 @@ export const MetricsExplorerChart = injectI18n(
     height = 200,
     width = '100%',
     timeRange,
+    onTimeChange,
   }: Props) => {
     const { metrics } = options;
+    const handleTimeChange = (from: number, to: number) => {
+      onTimeChange(moment(from).toISOString(), moment(to).toISOString());
+    };
     const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
     return (
       <React.Fragment>
@@ -97,6 +103,7 @@ export const MetricsExplorerChart = injectI18n(
                 tickFormat={dateFormatter}
               />
               <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
+              <Settings onBrushEnd={handleTimeChange} />
             </Chart>
           ) : options.metrics.length > 0 ? (
             <MetricsExplorerEmptyChart />
