@@ -61,67 +61,76 @@ const mockHistory = {
   listen: jest.fn(),
 };
 
-describe('Hosts', () => {
-  describe('rendering', () => {
-    beforeEach(() => {
-      localSource = cloneDeep(mocksSource);
-    });
+// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
+/* eslint-disable no-console */
+const originalError = console.error;
 
-    test('it renders the Setup Instructions text when no index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-      localSource[0].result.data.source.status.filebeatIndicesExist = false;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <Router history={mockHistory}>
-              <Hosts />
-            </Router>
-          </MockedProvider>
-        </TestProviders>
-      );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise(resolve => setTimeout(resolve));
-      wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
-    });
+describe('Hosts - rendering', () => {
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
 
-    test('it renders the Setup Instructions text when auditbeat index is not available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-      localSource[0].result.data.source.status.filebeatIndicesExist = true;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = true;
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <Router history={mockHistory}>
-              <Hosts />
-            </Router>
-          </MockedProvider>
-        </TestProviders>
-      );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise(resolve => setTimeout(resolve));
-      wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
-    });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  beforeEach(() => {
+    localSource = cloneDeep(mocksSource);
+  });
 
-    test('it DOES NOT render the Setup Instructions text when auditbeat index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = true;
-      localSource[0].result.data.source.status.filebeatIndicesExist = false;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <Router history={mockHistory}>
-              <Hosts />
-            </Router>
-          </MockedProvider>
-        </TestProviders>
-      );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise(resolve => setTimeout(resolve));
-      wrapper.update();
-      expect(wrapper.text()).not.toContain(i18n.SETUP_INSTRUCTIONS);
-    });
+  test('it renders the Setup Instructions text when no index is available', async () => {
+    localSource[0].result.data.source.status.auditbeatIndicesExist = false;
+    localSource[0].result.data.source.status.filebeatIndicesExist = false;
+    localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Hosts />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    // Why => https://github.com/apollographql/react-apollo/issues/1711
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
+    expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
+  });
+
+  test('it renders the Setup Instructions text when auditbeat index is not available', async () => {
+    localSource[0].result.data.source.status.auditbeatIndicesExist = false;
+    localSource[0].result.data.source.status.filebeatIndicesExist = true;
+    localSource[0].result.data.source.status.winlogbeatIndicesExist = true;
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Hosts />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    // Why => https://github.com/apollographql/react-apollo/issues/1711
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
+    expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
+  });
+
+  test('it DOES NOT render the Setup Instructions text when auditbeat index is available', async () => {
+    localSource[0].result.data.source.status.auditbeatIndicesExist = true;
+    localSource[0].result.data.source.status.filebeatIndicesExist = false;
+    localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Hosts />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    // Why => https://github.com/apollographql/react-apollo/issues/1711
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
+    expect(wrapper.text()).not.toContain(i18n.SETUP_INSTRUCTIONS);
   });
 });
