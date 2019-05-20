@@ -294,7 +294,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
                 'xpack.ml.dataframe.jobCreateForm.copyJobConfigToClipBoardDescription',
                 {
                   defaultMessage:
-                    'Copies a Kibana Dev Console statement to create the job to the clipboard.',
+                    'Copies to the clipboard the Kibana Dev Console command for creating the job.',
                 }
               )}
             </EuiText>
