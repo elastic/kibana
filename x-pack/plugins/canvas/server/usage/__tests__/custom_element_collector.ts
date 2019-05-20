@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { handleResponse } from '../custom_element_collector';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 
-const getMockResponse = (mocks = []) => ({
+const getMockResponse = (mocks: any[] = []): any => ({
   hits: {
     hits: mocks.map(customElement => ({
       _source: {
@@ -18,7 +18,7 @@ const getMockResponse = (mocks = []) => ({
   },
 });
 
-function mockCustomElement(...nodeExpressions) {
+function mockCustomElement(...nodeExpressions: string[]) {
   return {
     content: JSON.stringify({
       selectedNodes: nodeExpressions.map(expression => ({
@@ -51,7 +51,12 @@ describe('custom_element_collector.handleResponse', () => {
 
     const response = getMockResponse(elements);
 
-    expect(handleResponse(response).custom_elements.count).to.equal(elements.length);
+    const data = handleResponse(response);
+    expect(data.custom_elements).to.not.be(null);
+
+    if (data.custom_elements) {
+      expect(data.custom_elements.count).to.equal(elements.length);
+    }
   });
 
   it('reports all the functions used in custom elements', () => {
@@ -62,7 +67,12 @@ describe('custom_element_collector.handleResponse', () => {
     const elements = [mockCustomElement(functions1.join('|')), mockCustomElement(...functions2)];
     const response = getMockResponse(elements);
 
-    expect(handleResponse(response).custom_elements.functions_in_use).to.eql(expectedFunctions);
+    const data = handleResponse(response);
+    expect(data.custom_elements).to.not.be(null);
+
+    if (data.custom_elements) {
+      expect(data.custom_elements.functions_in_use).to.eql(expectedFunctions);
+    }
   });
 
   it('reports minimum, maximum, and avg elements in a custom element', () => {
@@ -80,9 +90,12 @@ describe('custom_element_collector.handleResponse', () => {
     const response = getMockResponse(elements);
 
     const result = handleResponse(response);
+    expect(result.custom_elements).to.not.be(null);
 
-    expect(result.custom_elements.elements.max).to.equal(functionsMax.length);
-    expect(result.custom_elements.elements.min).to.equal(functionsMin.length);
-    expect(result.custom_elements.elements.avg).to.equal(avgFunctions);
+    if (result.custom_elements) {
+      expect(result.custom_elements.elements.max).to.equal(functionsMax.length);
+      expect(result.custom_elements.elements.min).to.equal(functionsMin.length);
+      expect(result.custom_elements.elements.avg).to.equal(avgFunctions);
+    }
   });
 });

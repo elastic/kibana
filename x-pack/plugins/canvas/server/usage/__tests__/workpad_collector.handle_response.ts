@@ -6,11 +6,12 @@
 
 import expect from '@kbn/expect';
 import { handleResponse } from '../workpad_collector';
+// @ts-ignore Missing local definition
 import { workpads } from '../../../__tests__/fixtures/workpads';
 
-const getMockResponse = (mocks = workpads) => ({
+const getMockResponse = (mocks = workpads): any => ({
   hits: {
-    hits: mocks.map(workpad => ({
+    hits: mocks.map((workpad: any) => ({
       _source: {
         'canvas-workpad': workpad,
       },
@@ -117,7 +118,7 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should fail gracefully in general', () => {
-    const usage = handleResponse({ hits: { total: 0 } });
-    expect(usage).to.eql(undefined);
+    const usage = handleResponse({ hits: { total: 0 } } as any);
+    expect(usage).to.eql({});
   });
 });

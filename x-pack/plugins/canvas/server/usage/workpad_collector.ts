@@ -4,15 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchParams, SearchResponse } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
+// @ts-ignore Library missing definitions
 import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
-import { collectFns } from './collector_helpers';
+import { AST, collectFns } from './collector_helpers';
+import { TelemetryCollector } from './collector';
 
-export function handleResponse({ hits }) {
-  const workpadDocs = get(hits, 'hits', null);
+interface Element {
+  expression: string;
+}
+
+interface Page {
+  elements: Element[];
+}
+
+export interface Workpad {
+  pages: Page[];
+}
+
+interface WorkpadSearch {
+  [CANVAS_TYPE]: Workpad;
+}
+
+interface WorkpadTelemetry {
+  workpads?: {
+    total: number;
+  };
+  pages?: {
+    total: number;
+    per_workpad: {
+      avg: number;
+      min: number;
+      max: number;
+    };
+  };
+  elements?: {
+    total: number;
+    per_page: {
+      avg: number;
+      min: number;
+      max: number;
+    };
+  };
+  functions?: {
+    total: number;
+    in_use: string[];
+    per_element: {
+      avg: number;
+      min: number;
+      max: number;
+    };
+  };
+}
+
+/**
+  Transform a WorkpadSearch into WorkpadTelemetry
+*/
+export function handleResponse(response: SearchResponse<WorkpadSearch>): WorkpadTelemetry {
+  const workpadDocs = response.hits.hits;
   if (workpadDocs == null) {
-    return;
+    return {};
   }
 
   const functionSet = new Set();
@@ -21,25 +74,30 @@ export function handleResponse({ hits }) {
   const workpadsInfo = workpadDocs.map(hit => {
     const workpad = hit._source[CANVAS_TYPE];
 
-    let pages;
+    let pages = { count: 0 };
     try {
       pages = { count: workpad.pages.length };
     } catch (err) {
+      // eslint-disable-next-line
       console.warn(err, workpad);
     }
     const elementCounts = workpad.pages.reduce(
       (accum, page) => accum.concat(page.elements.length),
-      []
+      [] as number[]
     );
-    const functionCounts = workpad.pages.reduce((accum, page) => {
-      return page.elements.map(element => {
-        const ast = fromExpression(element.expression);
-        collectFns(ast, cFunction => {
-          functionSet.add(cFunction);
+    const functionCounts = workpad.pages.reduce(
+      (accum, page) => {
+        return page.elements.map(element => {
+          const ast = fromExpression(element.expression) as AST;
+          collectFns(ast, cFunction => {
+            functionSet.add(cFunction);
+          });
+          return ast.chain.length; // get the number of parts in the expression
         });
-        return ast.chain.length; // get the number of parts in the expression
-      });
-    }, []);
+      },
+      [] as number[]
+    );
+
     return { pages, elementCounts, functionCounts };
   });
 
@@ -59,9 +117,9 @@ export function handleResponse({ hits }) {
     {
       pageMin: Infinity,
       pageMax: -Infinity,
-      pageCounts: [],
-      elementCounts: [],
-      functionCounts: [],
+      pageCounts: [] as number[],
+      elementCounts: [] as number[],
+      functionCounts: [] as number[],
     }
   );
   const { pageCounts, pageMin, pageMax, elementCounts, functionCounts } = combinedWorkpadsInfo;
@@ -112,9 +170,12 @@ export function handleResponse({ hits }) {
   };
 }
 
-export async function workpadCollector(server, callCluster) {
-  const index = server.config().get('kibana.index');
-  const searchParams = {
+const workpadCollector: TelemetryCollector = async function customElementCollector(
+  server,
+  callCluster
+) {
+  const index = server.config().get<string>('kibana.index');
+  const searchParams: SearchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index,
     ignoreUnavailable: true,
@@ -122,10 +183,12 @@ export async function workpadCollector(server, callCluster) {
     body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
   };
 
-  const esResponse = await callCluster('search', searchParams);
+  const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
   if (get(esResponse, 'hits.hits.length') > 0) {
     return handleResponse(esResponse);
   }
 
   return {};
-}
+};
+
+export { workpadCollector };

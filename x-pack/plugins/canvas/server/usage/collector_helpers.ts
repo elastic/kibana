@@ -8,7 +8,18 @@
  * @param ast: an ast that includes functions to track
  * @param cb: callback to do something with a function that has been found
  */
-export function collectFns(ast, cb) {
+
+export interface AST {
+  type: string;
+  chain: Array<{
+    function: string;
+    arguments: {
+      [s: string]: AST[];
+    };
+  }>;
+}
+
+export function collectFns(ast: AST, cb: (functionName: string) => void) {
   if (ast.type === 'expression') {
     ast.chain.forEach(({ function: cFunction, arguments: cArguments }) => {
       cb(cFunction);
