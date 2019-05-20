@@ -7,16 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import {
-  getPivotQuery,
-  KibanaContext,
-  PivotAggsConfig,
-  PivotGroupByConfig,
-  PIVOT_SUPPORTED_AGGS,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../common';
+import { KibanaContext } from '../../common';
 
-import { PivotPreview } from './pivot_preview';
+import { JobCreateForm } from './job_create_form';
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
@@ -24,27 +17,19 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-describe('Data Frame: <PivotPreview />', () => {
+describe('Data Frame: <JobCreateForm />', () => {
   test('Minimal initialization', () => {
+    const props = {
+      createIndexPattern: false,
+      jobId: 'the-job-id',
+      jobConfig: {},
+      overrides: { created: false, started: false, indexPatternId: undefined },
+      onChange() {},
+    };
+
     const currentIndexPattern = {
       title: 'the-index-pattern-title',
       fields: [],
-    };
-
-    const groupBy: PivotGroupByConfig = {
-      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-      field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
-    };
-    const agg: PivotAggsConfig = {
-      agg: PIVOT_SUPPORTED_AGGS.AVG,
-      field: 'the-agg-field',
-      aggName: 'the-agg-label',
-    };
-    const props = {
-      aggs: { 'the-agg-name': agg },
-      groupBy: { 'the-group-by-name': groupBy },
-      query: getPivotQuery('the-query'),
     };
 
     // Using a wrapping <div> element because shallow() would fail
@@ -54,7 +39,7 @@ describe('Data Frame: <PivotPreview />', () => {
         <KibanaContext.Provider
           value={{ currentIndexPattern, indexPatterns: {}, kbnBaseUrl: 'url', kibanaConfig: {} }}
         >
-          <PivotPreview {...props} />
+          <JobCreateForm {...props} />
         </KibanaContext.Provider>
       </div>
     );
