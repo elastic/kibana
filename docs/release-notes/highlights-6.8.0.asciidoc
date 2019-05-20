@@ -1,0 +1,19 @@
+[[release-highlights-6.8.0]]
+== 6.8.0 release highlights
+++++
+<titleabbrev>6.8.0</titleabbrev>
+++++
+
+
+Each release of {kib} brings new features and product improvements. Here are the 
+highlights of the feature and user experience changes in 6.8.0.
+
+Some Elastic Stack security features, such as encrypted communications, 
+file and native authentication, and role-based access control, are now available 
+in more subscription levels. For details, see https://www.elastic.co/subscriptions.
+
+Refer to the <<release-notes-6.8.0, {kib} 6.8.0 Release Notes>> for a list of
+bug fixes and other changes.
+
+
+
