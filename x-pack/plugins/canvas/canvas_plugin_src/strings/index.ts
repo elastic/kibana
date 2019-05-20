@@ -6,4 +6,4 @@
 
 export * from './apply_strings';
 export * from './element_strings';
-export * from './i18n_provider';
+export * from './functions';

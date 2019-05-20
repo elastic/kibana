@@ -6,3 +6,4 @@
 
 export { getAllStats } from './monitoring';
 export { getLocalStats } from './local';
+export { createTelemetryUsageCollector } from './usage';
