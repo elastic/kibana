@@ -13,9 +13,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
-  const find = getService('find');
-
-  const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
 
   describe('spaces feature controls', () => {
     before(async () => {
@@ -90,7 +87,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

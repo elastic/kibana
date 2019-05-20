@@ -18,7 +18,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { InjectedMetadataSetup } from '../injected_metadata';
+import { InjectedMetadataSetup, InjectedMetadataStart } from '../injected_metadata';
 import { modifyUrl } from '../utils';
 
 /**
@@ -49,13 +49,24 @@ export interface BasePathSetup {
   removeFromPath(path: string): string;
 }
 
-interface BasePathDeps {
+/**
+ * Provides access to the 'server.basePath' configuration option in kibana.yml
+ *
+ * @public
+ */
+export type BasePathStart = BasePathSetup;
+
+interface SetupDeps {
   injectedMetadata: InjectedMetadataSetup;
+}
+
+interface StartDeps {
+  injectedMetadata: InjectedMetadataStart;
 }
 
 /** @internal */
 export class BasePathService {
-  public setup({ injectedMetadata }: BasePathDeps) {
+  public setup({ injectedMetadata }: SetupDeps) {
     const basePath = injectedMetadata.getBasePath() || '';
 
     const basePathSetup: BasePathSetup = {
@@ -85,5 +96,9 @@ export class BasePathService {
     };
 
     return basePathSetup;
+  }
+
+  public start({ injectedMetadata }: StartDeps) {
+    return this.setup({ injectedMetadata });
   }
 }

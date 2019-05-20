@@ -22,15 +22,16 @@ import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
 import { ConfigService } from './config_service';
 
-type ConfigSericeContract = PublicMethodsOf<ConfigService>;
+type ConfigServiceContract = PublicMethodsOf<ConfigService>;
 const createConfigServiceMock = () => {
-  const mocked: jest.Mocked<ConfigSericeContract> = {
+  const mocked: jest.Mocked<ConfigServiceContract> = {
     atPath: jest.fn(),
     getConfig$: jest.fn(),
     optionalAtPath: jest.fn(),
     getUsedPaths: jest.fn(),
     getUnusedPaths: jest.fn(),
     isEnabledAtPath: jest.fn(),
+    setSchema: jest.fn(),
   };
   mocked.atPath.mockReturnValue(new BehaviorSubject({}));
   mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter({})));

@@ -36,6 +36,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreSetup } from 'kibana/public';
 
 import { fatalError } from 'ui/notify';
+import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
 // @ts-ignore
@@ -65,6 +66,7 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .value('serverName', legacyMetadata.serverName)
     .value('sessionId', Date.now())
     .value('esUrl', getEsUrl(newPlatform))
+    .value('uiCapabilities', capabilities.get())
     .config(setupCompileProvider(newPlatform))
     .config(setupLocationProvider(newPlatform))
     .config($setupXsrfRequestInterceptor(newPlatform))

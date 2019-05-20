@@ -8,8 +8,9 @@ import { DropResult } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { dragAndDropActions, dragAndDropModel, timelineActions } from '../../store';
+import { dragAndDropModel } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
+import { dragAndDropActions, timelineActions } from '../../store/actions';
 
 export const draggableIdPrefix = 'draggableId';
 

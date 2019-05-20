@@ -140,6 +140,35 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
+  async function jobsWithTimerange() {
+    const fullJobsList = await createFullJobsList();
+    const jobsMap = {};
+
+    const jobs = fullJobsList.map((job) => {
+      jobsMap[job.job_id] = job.groups || [];
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
+      const timeRange = {};
+
+      if (job.data_counts !== undefined) {
+        timeRange.to = job.data_counts.latest_record_timestamp;
+        timeRange.from = job.data_counts.earliest_record_timestamp;
+      }
+
+      const tempJob = {
+        id: job.job_id,
+        job_id: job.job_id,
+        groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
+        isRunning: (hasDatafeed && job.datafeed_config.state === 'started'),
+        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        timeRange
+      };
+
+      return tempJob;
+    });
+
+    return { jobs, jobsMap };
+  }
+
   async function createFullJobsList(jobIds = []) {
     const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS ] = [0, 1, 2, 3, 4];
 
@@ -298,6 +327,7 @@ export function jobsProvider(callWithRequest) {
     deleteJobs,
     closeJobs,
     jobsSummary,
+    jobsWithTimerange,
     createFullJobsList,
     deletingJobTasks,
   };

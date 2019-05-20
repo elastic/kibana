@@ -5,8 +5,9 @@
  */
 
 import { resolve } from 'path';
+import { Server } from 'hapi';
 
-import { initServerWithKibana, KbnServer } from './server/kibana.index';
+import { initServerWithKibana } from './server/kibana.index';
 
 const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
@@ -39,7 +40,7 @@ export function siem(kibana: any) {
         },
       ],
     },
-    init(server: KbnServer) {
+    init(server: Server) {
       initServerWithKibana(server);
     },
   });

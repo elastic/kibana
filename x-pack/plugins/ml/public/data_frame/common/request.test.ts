@@ -69,6 +69,7 @@ describe('Data Frame: Common', () => {
       valid: true,
     };
     const jobDetailsState: JobDetailsExposedState = {
+      createIndexPattern: false,
       jobId: 'the-job-id',
       targetIndex: 'the-target-index',
       touched: true,

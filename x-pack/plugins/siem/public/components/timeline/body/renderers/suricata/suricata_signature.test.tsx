@@ -10,13 +10,12 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
-
 import {
-  DraggableSignatureId,
-  SURICATA_SIGNATURE_ID_FIELD_NAME,
   SuricataSignature,
   Tokens,
-} from '.';
+  DraggableSignatureId,
+  SURICATA_SIGNATURE_ID_FIELD_NAME,
+} from './suricata_signature';
 
 describe('SuricataSignature', () => {
   describe('rendering', () => {

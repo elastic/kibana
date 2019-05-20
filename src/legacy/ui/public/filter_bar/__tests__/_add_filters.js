@@ -25,6 +25,8 @@ import MockState from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from '../query_filter';
 
 describe('add filters', function () {
+  require('test_utils/no_digest_promises').activateForSuite();
+
   let filters;
   let queryFilter;
   let $rootScope;
@@ -73,44 +75,33 @@ describe('add filters', function () {
   });
 
   describe('adding filters', function () {
-    it('should add filters to appState', function () {
-      $rootScope.$digest();
-
-      queryFilter.addFilters(filters);
-      $rootScope.$digest();
-
+    it('should add filters to appState', async function () {
+      await queryFilter.addFilters(filters);
       expect(appState.filters.length).to.be(3);
       expect(globalState.filters.length).to.be(0);
     });
 
-    it('should add filters to globalState', function () {
-      $rootScope.$digest();
-
-      queryFilter.addFilters(filters, true);
-      $rootScope.$digest();
+    it('should add filters to globalState', async function () {
+      await queryFilter.addFilters(filters, true);
 
       expect(appState.filters.length).to.be(0);
       expect(globalState.filters.length).to.be(3);
     });
 
-    it('should accept a single filter', function () {
-      $rootScope.$digest();
-
-      queryFilter.addFilters(filters[0]);
-      $rootScope.$digest();
+    it('should accept a single filter', async function () {
+      await queryFilter.addFilters(filters[0]);
 
       expect(appState.filters.length).to.be(1);
       expect(globalState.filters.length).to.be(0);
     });
 
-    it('should allow overwriting a positive filter by a negated one', () => {
-      $rootScope.$digest();
+    it('should allow overwriting a positive filter by a negated one', async function () {
 
       // Add negate: false version of the filter
       const filter = _.cloneDeep(filters[0]);
       filter.meta.negate = false;
 
-      queryFilter.addFilters(filter);
+      await queryFilter.addFilters(filter);
       $rootScope.$digest();
       expect(appState.filters.length).to.be(1);
       expect(appState.filters[0]).to.eql(filter);
@@ -119,22 +110,21 @@ describe('add filters', function () {
       const negatedFilter = _.cloneDeep(filters[0]);
       negatedFilter.meta.negate = true;
 
-      queryFilter.addFilters(negatedFilter);
+      await queryFilter.addFilters(negatedFilter);
       $rootScope.$digest();
       // The negated filter should overwrite the positive one
       expect(appState.filters.length).to.be(1);
       expect(appState.filters[0]).to.eql(negatedFilter);
     });
 
-    it('should allow overwriting a negated filter by a positive one', () => {
-      $rootScope.$digest();
-
+    it('should allow overwriting a negated filter by a positive one', async function () {
       // Add negate: true version of the same filter
       const negatedFilter = _.cloneDeep(filters[0]);
       negatedFilter.meta.negate = true;
 
-      queryFilter.addFilters(negatedFilter);
+      await queryFilter.addFilters(negatedFilter);
       $rootScope.$digest();
+
       // The negated filter should overwrite the positive one
       expect(appState.filters.length).to.be(1);
       expect(appState.filters[0]).to.eql(negatedFilter);
@@ -143,18 +133,24 @@ describe('add filters', function () {
       const filter = _.cloneDeep(filters[0]);
       filter.meta.negate = false;
 
-      queryFilter.addFilters(filter);
+      await queryFilter.addFilters(filter);
       $rootScope.$digest();
       expect(appState.filters.length).to.be(1);
       expect(appState.filters[0]).to.eql(filter);
     });
 
-    it('should fire the update and fetch events', function () {
+    it('should fire the update and fetch events', async function () {
       const emitSpy = sinon.spy(queryFilter, 'emit');
+
+      const awaitFetch = new Promise(resolve => {
+        queryFilter.on('fetch', () => {
+          resolve();
+        });
+      });
 
       // set up the watchers, add new filters, and crank the digest loop
       $rootScope.$digest();
-      queryFilter.addFilters(filters);
+      await queryFilter.addFilters(filters);
       $rootScope.$digest();
 
       // updates should trigger state saves
@@ -162,44 +158,44 @@ describe('add filters', function () {
       expect(globalState.save.callCount).to.be(1);
 
       // this time, events should be emitted
+      await awaitFetch;
       expect(emitSpy.callCount).to.be(2);
       expect(emitSpy.firstCall.args[0]).to.be('update');
       expect(emitSpy.secondCall.args[0]).to.be('fetch');
-
     });
   });
 
   describe('filter reconciliation', function () {
-    it('should de-dupe appState filters being added', function () {
+    it('should de-dupe appState filters being added', async function () {
       const newFilter = _.cloneDeep(filters[1]);
       appState.filters = filters;
       $rootScope.$digest();
       expect(appState.filters.length).to.be(3);
 
-      queryFilter.addFilters(newFilter);
+      await queryFilter.addFilters(newFilter);
       $rootScope.$digest();
       expect(appState.filters.length).to.be(3);
     });
 
-    it('should de-dupe globalState filters being added', function () {
+    it('should de-dupe globalState filters being added', async function () {
       const newFilter = _.cloneDeep(filters[1]);
       globalState.filters = filters;
       $rootScope.$digest();
       expect(globalState.filters.length).to.be(3);
 
-      queryFilter.addFilters(newFilter, true);
+      await queryFilter.addFilters(newFilter, true);
       $rootScope.$digest();
       expect(globalState.filters.length).to.be(3);
     });
 
-    it('should mutate global filters on appState filter changes', function () {
+    it('should mutate global filters on appState filter changes', async function () {
       const idx = 1;
       globalState.filters = filters;
       $rootScope.$digest();
 
       const appFilter = _.cloneDeep(filters[idx]);
       appFilter.meta.negate = true;
-      queryFilter.addFilters(appFilter);
+      await queryFilter.addFilters(appFilter);
       $rootScope.$digest();
 
       const res = queryFilter.getFilters();

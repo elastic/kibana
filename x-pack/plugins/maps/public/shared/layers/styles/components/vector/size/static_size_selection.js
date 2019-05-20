@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { staticSizeShape } from '../style_option_shapes';
 import { ValidatedRange } from '../../../../../components/validated_range';
 
 export function StaticSizeSelection({ onChange, styleOptions }) {
@@ -27,8 +28,6 @@ export function StaticSizeSelection({ onChange, styleOptions }) {
 }
 
 StaticSizeSelection.propTypes = {
-  styleOptions: PropTypes.shape({
-    size: PropTypes.number.isRequired,
-  }).isRequired,
+  styleOptions: staticSizeShape.isRequired,
   onChange: PropTypes.func.isRequired
 };

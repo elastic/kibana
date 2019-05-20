@@ -67,6 +67,14 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       return wrap(await driver.wait(until.elementLocated(By.css(selector)), timeout));
     }
 
+    public async byXPath(
+      selector: string,
+      timeout: number = defaultFindTimeout
+    ): Promise<WebElementWrapper> {
+      log.debug(`Find.byXPath('${selector}') with timeout=${timeout}`);
+      return wrap(await driver.wait(until.elementLocated(By.xpath(selector)), timeout));
+    }
+
     public async byClassName(
       selector: string,
       timeout: number = defaultFindTimeout

@@ -17,6 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
+
 import { AggListSummary } from '../../components/aggregation_list';
 import { GroupByListSummary } from '../../components/group_by_list';
 import { PivotPreview } from './pivot_preview';
@@ -24,12 +26,12 @@ import { PivotPreview } from './pivot_preview';
 import {
   DropDownOption,
   getPivotQuery,
-  IndexPatternContext,
+  isKibanaContext,
+  KibanaContext,
   PivotAggsConfigDict,
-  PIVOT_SUPPORTED_AGGS,
-  pivotSupportedAggs,
+  pivotAggsFieldSupport,
 } from '../../common';
-import { FIELD_TYPE } from './common';
+import { Field } from './common';
 import { DefinePivotExposedState } from './define_pivot_form';
 
 const defaultSearch = '*';
@@ -40,34 +42,31 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
   groupByList,
   aggList,
 }) => {
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 
+  const indexPattern = kibanaContext.currentIndexPattern;
+
+  const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
-    .filter(field => field.aggregatable === true)
-    .map(field => ({ name: field.name, type: field.type }));
+    .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
+    .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
   const aggOptionsData: PivotAggsConfigDict = {};
 
   fields.forEach(field => {
-    // aggregations
+    // Aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
-    pivotSupportedAggs.forEach(agg => {
-      if (
-        (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
-          (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
-        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
-      ) {
-        const label = `${agg}(${field.name})`;
-        aggOption.options.push({ label });
-        const aggName = `${agg}_${field.name}`;
-        aggOptionsData[label] = { agg, field: field.name, aggName };
-      }
+    const availableAggs = pivotAggsFieldSupport[field.type];
+    availableAggs.forEach(agg => {
+      const aggName = `${agg}(${field.name})`;
+      aggOption.options.push({ label: aggName });
+      aggOptionsData[aggName] = { agg, field: field.name, aggName };
     });
     aggOptions.push(aggOption);
   });

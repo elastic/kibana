@@ -127,11 +127,11 @@ export class StartTrial extends React.PureComponent {
                   <p>
                     <FormattedMessage
                       id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityFeaturesConfigurationDescription"
-                      defaultMessage="Security features, such as authentication ({authenticationTypeList}),
-                      role-based access control, and auditing, require configuration.
+                      defaultMessage="Advanced security features, such as authentication ({authenticationTypeList}),
+                      field- and document-level security, and auditing, require configuration.
                       See the {securityDocumentationLinkText} for instructions."
                       values={{
-                        authenticationTypeList: 'native, AD/LDAP, SAML, PKI',
+                        authenticationTypeList: 'AD/LDAP, SAML, PKI, SAML/SSO',
                         securityDocumentationLinkText: (
                           <EuiLink
                             href={securityDocumentationLink}
@@ -223,7 +223,8 @@ export class StartTrial extends React.PureComponent {
       <span>
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumFeaturesExperienceDescription"
-          defaultMessage="Experience what security, machine learning, and all our other {platinumLicenseFeaturesLinkText} have to offer."
+          defaultMessage="Experience what machine learning, advanced security,
+          and all our other {platinumLicenseFeaturesLinkText} have to offer."
           values={{
             platinumLicenseFeaturesLinkText: (
               <EuiLink

@@ -7,6 +7,7 @@
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
 import { ContextFunction, Datatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   name: string;
@@ -14,10 +15,12 @@ interface Arguments {
 }
 
 export function staticColumn(): ContextFunction<'staticColumn', Datatable, Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().staticColumn;
+
   return {
     name: 'staticColumn',
     type: 'datatable',
-    help: 'Add a column with a static value',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -25,13 +28,12 @@ export function staticColumn(): ContextFunction<'staticColumn', Datatable, Argum
       name: {
         types: ['string'],
         aliases: ['_', 'column'],
-        help: 'The name of the new column column',
+        help: argHelp.name,
         required: true,
       },
       value: {
         types: ['string', 'number', 'boolean', 'null'],
-        help:
-          'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
+        help: argHelp.value,
         default: null,
       },
     },
