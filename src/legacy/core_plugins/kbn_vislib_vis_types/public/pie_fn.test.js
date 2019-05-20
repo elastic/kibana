@@ -19,24 +19,28 @@
 
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaPie } from './pie_fn';
+import { VislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 
-const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
-  hits: 1,
-  names: ['Count'],
-  raw: {
-    columns: [],
-    rows: [],
-  },
-  slices: {
-    children: [],
-  },
-  tooltipFormatter: {
-    id: 'number',
-  },
-}));
-jest.mock('ui/vis/response_handlers/vislib', () => ({
-  VislibSlicesResponseHandler: { handler: mockResponseHandler },
-}));
+jest.mock('ui/vis/response_handlers/vislib', () => {
+  const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
+    hits: 1,
+    names: ['Count'],
+    raw: {
+      columns: [],
+      rows: [],
+    },
+    slices: {
+      children: [],
+    },
+    tooltipFormatter: {
+      id: 'number',
+    },
+  }));
+
+  return {
+    VislibSlicesResponseHandler: { handler: mockResponseHandler },
+  };
+});
 
 describe('interpreter/functions#pie', () => {
   const fn = functionWrapper(kibanaPie);
@@ -82,7 +86,7 @@ describe('interpreter/functions#pie', () => {
 
   it('calls response handler with correct values', async () => {
     await fn(context, { visConfig: JSON.stringify(visConfig) });
-    expect(mockResponseHandler).toHaveBeenCalledTimes(1);
-    expect(mockResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
+    expect(VislibSlicesResponseHandler.handler).toHaveBeenCalledTimes(1);
+    expect(VislibSlicesResponseHandler.handler).toHaveBeenCalledWith(context, visConfig.dimensions);
   });
 });

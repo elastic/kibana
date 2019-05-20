@@ -60,15 +60,10 @@ export class VisualizeDataLoader {
     const { requestHandler, responseHandler } = vis.type;
 
     const requestHandlers: RequestHandlerDescription[] = Private(RequestHandlersProvider);
-    // const responseHandlers: ResponseHandlerDescription[] = ResponseHandlerProvider;
-    // TODO
     this.requestHandler = getHandler(requestHandlers, requestHandler);
-    // this.responseHandler = getHandler(responseHandlers, responseHandler);
-
     this.responseHandler = ResponseHandlerProvider
       // @ts-ignore
-      .get()
-      // @ts-ignore
+      .getItems()
       .filter(handler => handler.name === responseHandler)[0].handler;
   }
 

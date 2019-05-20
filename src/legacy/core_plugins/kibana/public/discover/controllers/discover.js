@@ -199,7 +199,6 @@ function discoverController(
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = VislibSeriesResponseHandler.handler;
   const filterManager = Private(FilterManagerProvider);
   const notify = new Notifier({
     location: 'Discover'
@@ -728,7 +727,7 @@ function discoverController(
       $scope.searchSource.rawResponse = resp;
       Promise
         .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
-        .then(resp => responseHandler(tabifiedData, resp))
+        .then(resp => VislibSeriesResponseHandler.handler(tabifiedData, resp))
         .then(resp => {
           visualizeHandler.render({
             as: 'visualization',

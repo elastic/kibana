@@ -116,7 +116,6 @@ describe('No global chart settings', function () {
   let Vis;
   let persistedState;
   let indexPattern;
-  let responseHandler;
   let data1;
   let stubVis1;
 
@@ -126,7 +125,6 @@ describe('No global chart settings', function () {
     Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    responseHandler = VislibSlicesResponseHandler.handler;
 
     let id1 = 1;
     stubVis1 = new Vis(indexPattern, {
@@ -144,7 +142,7 @@ describe('No global chart settings', function () {
 
   beforeEach(async () => {
     const table1 = tabifyAggResponse(stubVis1.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
-    data1 = await responseHandler(table1, rowAggDimensions);
+    data1 = await VislibSlicesResponseHandler.handler(table1, rowAggDimensions);
 
     chart1.render(data1, persistedState);
   });
@@ -208,7 +206,6 @@ describe('Vislib PieChart Class Test Suite', function () {
       let indexPattern;
       let data;
       let stubVis;
-      let responseHandler;
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private, $injector) {
@@ -216,7 +213,6 @@ describe('Vislib PieChart Class Test Suite', function () {
         Vis = Private(VisProvider);
         persistedState = new ($injector.get('PersistedState'))();
         indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-        responseHandler = VislibSlicesResponseHandler.handler;
 
         let id = 1;
         stubVis = new Vis(indexPattern, {
@@ -231,7 +227,7 @@ describe('Vislib PieChart Class Test Suite', function () {
 
       beforeEach(async () => {
         const table = tabifyAggResponse(stubVis.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
-        data = await responseHandler(table, dataDimensions);
+        data = await VislibSlicesResponseHandler.handler(table, dataDimensions);
         vis.render(data, persistedState);
       });
 

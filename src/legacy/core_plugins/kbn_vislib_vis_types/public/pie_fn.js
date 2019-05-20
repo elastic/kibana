@@ -40,7 +40,6 @@ export const kibanaPie = () => ({
   },
   async fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
-
     const convertedData = await VislibSlicesResponseHandler.handler(context, visConfig.dimensions);
 
     return {
