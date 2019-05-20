@@ -6,7 +6,7 @@ experimental[This API is experimental and may be changed or removed completely i
 Creates a new {kib} role or updates the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
 
-Note: You cannot access this endpoint via the Console in Kibana.
+NOTE: You cannot access this endpoint via the Console in Kibana.
 
 ==== Authorization
 
@@ -68,8 +68,6 @@ A successful call returns a response code of `204` and no response body.
 
 ==== Granting access to specific spaces
 To grant access to individual spaces within {kib}, specify the space identifier within the `kibana` object.
-
-Note: granting access 
 
 [source,js]
 --------------------------------------------------

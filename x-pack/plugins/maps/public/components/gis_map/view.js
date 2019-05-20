@@ -10,8 +10,9 @@ import { WidgetOverlay } from '../widget_overlay/index';
 import { ToolbarOverlay } from '../toolbar_overlay/index';
 import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
+import { i18n } from '@kbn/i18n';
 
 export class GisMap extends Component {
 
@@ -63,11 +64,29 @@ export class GisMap extends Component {
       noFlyoutVisible,
       isFullScreen,
       exitFullScreen,
+      mapInitError,
     } = this.props;
+
+    if (mapInitError) {
+      return (
+        <div data-render-complete data-shared-item>
+          <EuiCallOut
+            title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
+              defaultMessage: 'Unable to initialize map'
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <p>
+              {mapInitError}
+            </p>
+          </EuiCallOut>
+        </div>
+      );
+    }
 
     let currentPanel;
     let currentPanelClassName;
-
     if (noFlyoutVisible) {
       currentPanel = null;
     } else if (addLayerVisible) {

@@ -34,10 +34,12 @@ const formatHistogramData = (
     y: { value: number; doc_count: number };
   }>
 ): ChartData[] => {
-  return data.map(({ x, y }) => ({
-    x,
-    y: y.value || y.doc_count,
-  }));
+  return data.length > 0
+    ? data.map(({ x, y }) => ({
+        x,
+        y: y.value || y.doc_count,
+      }))
+    : [];
 };
 
 export const KpiHostsQuery = pure<KpiHostsProps>(

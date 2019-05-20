@@ -7,16 +7,18 @@
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
 import { ContextFunction, Render, Style } from '../types';
+import { getFunctionHelp } from '../../strings';
 
-type Shape =
-  | 'gauge'
-  | 'horizontalBar'
-  | 'horizontalPill'
-  | 'semicircle'
-  | 'unicorn'
-  | 'verticalBar'
-  | 'verticalPill'
-  | 'wheel';
+export enum Shape {
+  GAUGE = 'gauge',
+  HORIZONTAL_BAR = 'horizontalBar',
+  HORIZONTAL_PILL = 'horizontalPill',
+  SEMICIRCLE = 'semicircle',
+  UNICORN = 'unicorn',
+  VERTICAL_BAR = 'verticalBar',
+  VERTICAL_PILL = 'verticalPill',
+  WHEEL = 'wheel',
+}
 
 interface Arguments {
   barColor: string;
@@ -29,67 +31,58 @@ interface Arguments {
   valueWeight: number;
 }
 
-const shapes: Shape[] = [
-  'gauge',
-  'horizontalBar',
-  'horizontalPill',
-  'semicircle',
-  'unicorn',
-  'verticalBar',
-  'verticalPill',
-  'wheel',
-];
-
 export function progress(): ContextFunction<'progress', number, Arguments, Render<Arguments>> {
+  const { help, args: argHelp } = getFunctionHelp().progress;
+
   return {
     name: 'progress',
     aliases: [],
     type: 'render',
-    help: 'Configure a progress element',
+    help,
     context: {
       types: ['number'],
     },
     args: {
       barColor: {
         default: `#f0f0f0`,
-        help: 'Color of the background bar',
+        help: argHelp.barColor,
         types: ['string'],
       },
       barWeight: {
         default: 20,
-        help: 'Thickness of the background bar',
+        help: argHelp.barWeight,
         types: ['number'],
       },
       font: {
         default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
-        help: 'Font settings for the label. Technically you can stick other styles in here too!',
+        help: argHelp.font,
         types: ['style'],
       },
       label: {
         default: true,
-        help: `Set true/false to show/hide label or provide a string to display as the label`,
+        help: argHelp.label,
         types: ['boolean', 'string'],
       },
       max: {
         default: 1,
-        help: 'Maximum value of the progress element',
+        help: argHelp.max,
         types: ['number'],
       },
       shape: {
         aliases: ['_'],
         default: 'gauge',
-        help: `Select ${shapes.slice(0, -1).join(', ')}, or ${shapes.slice(-1)[0]}`,
-        options: shapes,
+        help: argHelp.shape,
+        options: Object.values(Shape),
         types: ['string'],
       },
       valueColor: {
         default: `#1785b0`,
-        help: 'Color of the progress bar',
+        help: argHelp.valueColor,
         types: ['string'],
       },
       valueWeight: {
         default: 20,
-        help: 'Thickness of the progress bar',
+        help: argHelp.valueWeight,
         types: ['number'],
       },
     },

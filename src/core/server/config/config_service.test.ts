@@ -34,9 +34,16 @@ const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
 const logger = loggingServiceMock.create();
 
+class ExampleClassWithStringSchema {
+  public static schema = schema.string();
+
+  constructor(readonly value: string) {}
+}
+
 test('returns config at path as observable', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'foo' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
+  await configService.setSchema('key', schema.string());
 
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
   const exampleConfig = await configs.pipe(first()).toPromise();
@@ -45,22 +52,45 @@ test('returns config at path as observable', async () => {
 });
 
 test('throws if config at path does not match schema', async () => {
-  expect.assertions(1);
-
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 123 }));
 
   const configService = new ConfigService(config$, defaultEnv, logger);
-  const configs = configService.atPath('key', ExampleClassWithStringSchema);
 
-  try {
-    await configs.pipe(first()).toPromise();
-  } catch (e) {
-    expect(e.message).toMatchSnapshot();
-  }
+  await expect(
+    configService.setSchema('key', schema.string())
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"[key]: expected value of type [string] but got [number]"`
+  );
+});
+
+test('re-validate config when updated', async () => {
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
+
+  const configService = new ConfigService(config$, defaultEnv, logger);
+  configService.setSchema('key', schema.string());
+
+  const valuesReceived: any[] = [];
+  await configService.atPath('key', ExampleClassWithStringSchema).subscribe(
+    config => {
+      valuesReceived.push(config.value);
+    },
+    error => {
+      valuesReceived.push(error);
+    }
+  );
+
+  config$.next(new ObjectToConfigAdapter({ key: 123 }));
+
+  await expect(valuesReceived).toMatchInlineSnapshot(`
+Array [
+  "value",
+  [Error: [key]: expected value of type [string] but got [number]],
+]
+`);
 });
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
-  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ foo: 'bar' }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({}));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.optionalAtPath('unique-name', ExampleClassWithStringSchema);
@@ -72,6 +102,7 @@ test("returns undefined if fetching optional config at a path that doesn't exist
 test('returns observable config at optional path if it exists', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ value: 'bar' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
+  await configService.setSchema('value', schema.string());
 
   const configs = configService.optionalAtPath('value', ExampleClassWithStringSchema);
   const exampleConfig: any = await configs.pipe(first()).toPromise();
@@ -83,6 +114,7 @@ test('returns observable config at optional path if it exists', async () => {
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
+  await configService.setSchema('key', schema.string());
 
   const valuesReceived: any[] = [];
   configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
@@ -97,6 +129,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
 test('pushes new config when reloading and config at path has changed', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
+  await configService.setSchema('key', schema.string());
 
   const valuesReceived: any[] = [];
   configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
@@ -108,9 +141,7 @@ test('pushes new config when reloading and config at path has changed', async ()
   expect(valuesReceived).toEqual(['value', 'new value']);
 });
 
-test("throws error if config class does not implement 'schema'", async () => {
-  expect.assertions(1);
-
+test("throws error if 'schema' is not defined for a key", async () => {
   class ExampleClass {}
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
@@ -118,11 +149,19 @@ test("throws error if config class does not implement 'schema'", async () => {
 
   const configs = configService.atPath('key', ExampleClass as any);
 
-  try {
-    await configs.pipe(first()).toPromise();
-  } catch (e) {
-    expect(e).toMatchSnapshot();
-  }
+  await expect(configs.pipe(first()).toPromise()).rejects.toMatchInlineSnapshot(
+    `[Error: No validation schema has been defined for key]`
+  );
+});
+
+test("throws error if 'setSchema' called several times for the same key", async () => {
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
+  const configService = new ConfigService(config$, defaultEnv, logger);
+  const addSchema = async () => await configService.setSchema('key', schema.string());
+  await addSchema();
+  await expect(addSchema()).rejects.toMatchInlineSnapshot(
+    `[Error: Validation schema for key was already registered.]`
+  );
 });
 
 test('tracks unhandled paths', async () => {
@@ -178,28 +217,25 @@ test('correctly passes context', async () => {
   const env = new Env('/kibana', getEnvOptions());
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ foo: {} }));
+  const schemaDefinition = schema.object({
+    branchRef: schema.string({
+      defaultValue: schema.contextRef('branch'),
+    }),
+    buildNumRef: schema.number({
+      defaultValue: schema.contextRef('buildNum'),
+    }),
+    buildShaRef: schema.string({
+      defaultValue: schema.contextRef('buildSha'),
+    }),
+    devRef: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+    prodRef: schema.boolean({ defaultValue: schema.contextRef('prod') }),
+    versionRef: schema.string({
+      defaultValue: schema.contextRef('version'),
+    }),
+  });
   const configService = new ConfigService(config$, env, logger);
-  const configs = configService.atPath(
-    'foo',
-    createClassWithSchema(
-      schema.object({
-        branchRef: schema.string({
-          defaultValue: schema.contextRef('branch'),
-        }),
-        buildNumRef: schema.number({
-          defaultValue: schema.contextRef('buildNum'),
-        }),
-        buildShaRef: schema.string({
-          defaultValue: schema.contextRef('buildSha'),
-        }),
-        devRef: schema.boolean({ defaultValue: schema.contextRef('dev') }),
-        prodRef: schema.boolean({ defaultValue: schema.contextRef('prod') }),
-        versionRef: schema.string({
-          defaultValue: schema.contextRef('version'),
-        }),
-      })
-    )
-  );
+  await configService.setSchema('foo', schemaDefinition);
+  const configs = configService.atPath('foo', createClassWithSchema(schemaDefinition));
 
   expect(await configs.pipe(first()).toPromise()).toMatchSnapshot();
 });
@@ -277,10 +313,4 @@ function createClassWithSchema(s: Type<any>) {
 
     constructor(readonly value: TypeOf<typeof s>) {}
   };
-}
-
-class ExampleClassWithStringSchema {
-  public static schema = schema.string();
-
-  constructor(readonly value: string) {}
 }
