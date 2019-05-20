@@ -8,6 +8,7 @@ Object {
   "authProviders": Array [
     "basic",
   ],
+  "authc": Object {},
   "authorization": Object {
     "legacyFallback": Object {
       "enabled": true,
@@ -30,6 +31,7 @@ Object {
   "authProviders": Array [
     "basic",
   ],
+  "authc": Object {},
   "authorization": Object {
     "legacyFallback": Object {
       "enabled": true,
