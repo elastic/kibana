@@ -69,8 +69,7 @@ function getProviderOptions(server: Legacy.Server) {
 }
 
 /**
- * Prepares options object that is specific only to an authentication provider. This will be merged
- * with the general options
+ * Prepares options object that is specific only to an authentication provider.
  * @param server Server instance.
  * @param providerType the type of the provider to get the options for.
  */
