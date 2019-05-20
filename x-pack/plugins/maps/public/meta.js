@@ -86,13 +86,9 @@ export async function getEmsTMSServices() {
 }
 
 export async function getKibanaRegionList() {
-  // const dataSource = await getDataSources();
-  // return _.get(dataSource, 'kibana.regionmap', []);
   return chrome.getInjected('regionmapLayers');
 }
 
 export async function getKibanaTileMap() {
-  // const dataSource = await getDataSources();
-  // return _.get(dataSource, 'kibana.tilemap', {});
   return chrome.getInjected('tilemap');
 }

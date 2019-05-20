@@ -7,7 +7,6 @@
 
 import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, EMS_META_PATH, GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
-// import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { getEMSResources } from '../common/ems_util';
 
