@@ -79,7 +79,7 @@ const mapMetricToSeries = (metric: MetricsExplorerOptionsMetric) => {
   };
 };
 
-export const createFilterFromOptions = (
+const createFilterFromOptions = (
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries
 ) => {
