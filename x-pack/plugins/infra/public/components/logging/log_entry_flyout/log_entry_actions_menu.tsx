@@ -24,6 +24,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   const menuItems = useMemo(
     () => [
       <EuiContextMenuItem
+        data-test-subj="logEntryActionsMenuItem uptimeLogEntryActionsMenuItem"
         disabled={!uptimeLink}
         href={uptimeLink}
         icon="uptimeApp"
@@ -45,6 +46,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
       anchorPosition="downRight"
       button={
         <EuiButtonEmpty
+          data-test-subj="logEntryActionsMenuButton"
           disabled={!hasMenuItems}
           iconSide="right"
           iconType="arrowDown"
