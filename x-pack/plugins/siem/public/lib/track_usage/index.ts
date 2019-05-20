@@ -9,6 +9,4 @@ import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metr
 
 const APP_NAME = 'siem';
 
-export function trackUiAction(metricType: string) {
-  trackUiMetric(APP_NAME, metricType);
-}
+export const trackUiAction = (metricType: string) => trackUiMetric(APP_NAME, metricType);
