@@ -53,7 +53,6 @@ export class ESSearchSource extends AbstractESSource {
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
-      limit: _.get(descriptor, 'limit', DEFAULT_ES_DOC_LIMIT),
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     }, inspectorAdapters);
@@ -131,7 +130,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
-    const searchSource = await this._makeSearchSource(searchFilters, this._descriptor.limit);
+    const searchSource = await this._makeSearchSource(searchFilters, DEFAULT_ES_DOC_LIMIT);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
     // 1) all scripted fields
