@@ -7,7 +7,7 @@
 
 import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, GIS_API_PATH } from './constants';
 
-export  async function getEMSResources(emsClient, includeElasticMapsService, licenseUid, useAbsoluteEMSPath) {
+export  async function getEMSResources(emsClient, includeElasticMapsService, licenseUid, useProxy) {
 
   if (!includeElasticMapsService) {
     return {
@@ -34,7 +34,7 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
       attributions: fileLayer.getAttributions(),
       fields: fileLayer.getFieldsInLanguage(),
       // eslint-disable-next-line max-len
-      url: useAbsoluteEMSPath ? fileLayer.getDefaultFormatUrl() : `../${GIS_API_PATH}/${EMS_DATA_FILE_PATH}?id=${encodeURIComponent(fileLayer.getId())}`,
+      url: useProxy ?   `../${GIS_API_PATH}/${EMS_DATA_FILE_PATH}?id=${encodeURIComponent(fileLayer.getId())}` : fileLayer.getDefaultFormatUrl(),
       format: format, //legacy: format and meta are split up
       meta: meta, //legacy, format and meta are split up,
       emsLink: fileLayer.getEMSHotLink()
@@ -50,7 +50,7 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
       attribution: tmsService.getHTMLAttribution(),
       attributionMarkdown: tmsService.getMarkdownAttribution(),
       // eslint-disable-next-line max-len
-      url: useAbsoluteEMSPath ?  tmsService.getUrlTemplate() : `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}`
+      url: useProxy ?   `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : tmsService.getUrlTemplate()
     };
   });
 

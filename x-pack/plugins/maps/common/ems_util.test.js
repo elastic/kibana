@@ -21,7 +21,7 @@ describe('ems util test', () => {
     const isEmsEnabled = true;
     const licenseId = 'foobar';
     const useProxy = true;
-    const resources = await getEMSResources(emsClient, isEmsEnabled, licenseId, !useProxy);
+    const resources = await getEMSResources(emsClient, isEmsEnabled, licenseId, useProxy);
 
     expect(resources.tmsServices[0].url.startsWith('../api/maps/ems/tms')).toBe(true);
     expect(resources.fileLayers[0].url.startsWith('../api/maps/ems/file')).toBe(true);
@@ -36,7 +36,7 @@ describe('ems util test', () => {
     const isEmsEnabled = true;
     const licenseId = 'foobar';
     const useProxy = false;
-    const resources = await getEMSResources(emsClient, isEmsEnabled, licenseId, !useProxy);
+    const resources = await getEMSResources(emsClient, isEmsEnabled, licenseId, useProxy);
 
     expect(resources.tmsServices[0].url.startsWith('https://tiles-stage.elastic.co/')).toBe(true);
     expect(resources.fileLayers[0].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
