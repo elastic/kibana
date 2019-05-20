@@ -11,7 +11,8 @@ import { registerRouter } from '../../../public/services/routing';
 
 import { REMOTE_CLUSTER_EDIT_NAME } from './constants';
 
-const testBedOptions = {
+const testBedConfig = {
+  store: createRemoteClustersStore,
   memoryRouter: {
     onRouter: (router) => registerRouter(router),
     // The remote cluster name to edit is read from the router ":id" param
@@ -22,4 +23,4 @@ const testBedOptions = {
   }
 };
 
-export const setup = registerTestBed(RemoteClusterEdit, { options: testBedOptions, store: createRemoteClustersStore });
+export const setup = registerTestBed(RemoteClusterEdit, testBedConfig);

@@ -121,4 +121,8 @@ export const keymap = {
     ),
     REFRESH: refreshShortcut,
   },
+  EXPRESSION: {
+    displayName: 'Expression controls',
+    RUN: { ...getShortcuts('enter', ['ctrl']), help: 'Run whole expression' },
+  },
 };

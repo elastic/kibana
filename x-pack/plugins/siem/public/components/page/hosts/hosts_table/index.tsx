@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
   HostsEdges,
@@ -20,7 +21,7 @@ import {
   OsFields,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
-import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
+import { hostsModel, hostsSelectors, State } from '../../../../store';
 import {
   Criteria,
   ItemsPerRow,

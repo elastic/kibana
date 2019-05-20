@@ -36,6 +36,22 @@ describe('Table Helpers', () => {
       expect(wrapper.html()).toBe(getEmptyValue());
     });
 
+    test('it returns empty string value when rowItem is empty', () => {
+      const rowItem = getRowItemDraggable({
+        rowItem: '',
+        attrName: 'attrName',
+        idPrefix: 'idPrefix',
+        displayCount: 0,
+      });
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+      expect(
+        wrapper
+          .find('[data-test-subj="draggable-content"]')
+          .first()
+          .text()
+      ).toBe('(Empty String)');
+    });
+
     test('it returns empty value when rowItem is null', () => {
       const rowItem = getRowItemDraggable({
         rowItem: null,
@@ -85,6 +101,21 @@ describe('Table Helpers', () => {
       });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
       expect(wrapper.html()).toBe(getEmptyValue());
+    });
+
+    test('it returns empty string value when rowItem is empty', () => {
+      const rowItems = getRowItemDraggables({
+        rowItems: [''],
+        attrName: 'attrName',
+        idPrefix: 'idPrefix',
+      });
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(
+        wrapper
+          .find('[data-test-subj="draggable-content"]')
+          .first()
+          .text()
+      ).toBe('(Empty String)');
     });
 
     test('it returns empty value when rowItems is null', () => {

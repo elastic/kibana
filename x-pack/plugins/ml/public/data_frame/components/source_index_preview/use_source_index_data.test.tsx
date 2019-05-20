@@ -46,19 +46,6 @@ const query: SimpleQuery = {
 let sourceIndexObj: UseSourceIndexDataReturnType;
 
 describe('useSourceIndexData', () => {
-  test('indexPattern not defined', () => {
-    testHook(() => {
-      act(() => {
-        sourceIndexObj = useSourceIndexData(null, query, [], () => {});
-      });
-    });
-
-    expect(sourceIndexObj.errorMessage).toBe('');
-    expect(sourceIndexObj.status).toBe(SOURCE_INDEX_STATUS.UNUSED);
-    expect(sourceIndexObj.tableItems).toEqual([]);
-    expect(ml.esSearch).not.toHaveBeenCalled();
-  });
-
   test('indexPattern set triggers loading', () => {
     testHook(() => {
       act(() => {

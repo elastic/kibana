@@ -14,11 +14,11 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
-import { NOTES_PANEL_HEIGHT, NOTES_PANEL_WIDTH } from '../timeline/properties/helpers';
 
 import { AddNote } from './add_note';
 import { columns } from './columns';
 import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';
+import { NOTES_PANEL_WIDTH, NOTES_PANEL_HEIGHT } from '../timeline/properties/notes_size';
 
 interface Props {
   associateNote: AssociateNote;

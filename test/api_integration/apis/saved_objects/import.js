@@ -112,6 +112,30 @@ export default function ({ getService }) {
             });
         });
 
+        it('should return 200 when trying to import unsupported types', async () => {
+          const fileBuffer = Buffer.from('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}', 'utf8');
+          await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', fileBuffer, 'export.ndjson')
+            .expect(200)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                success: false,
+                successCount: 0,
+                errors: [
+                  {
+                    id: '1',
+                    type: 'wigwags',
+                    title: 'my title',
+                    error: {
+                      type: 'unsupported_type',
+                    },
+                  },
+                ],
+              });
+            });
+        });
+
         it('should return 400 when trying to import more than 10,000 objects', async () => {
           const fileChunks = [];
           for (let i = 0; i < 10001; i++) {

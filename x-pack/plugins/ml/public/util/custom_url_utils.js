@@ -61,6 +61,23 @@ export function getUrlForRecord(urlConfig, record) {
   }
 }
 
+// Opens the specified URL in a new window. The behaviour (for example whether
+// it opens in a new tab or window) is determined from the original configuration
+// object which indicates whether it is opening a Kibana page running on the same server.
+// fullUrl is the complete URL, including the base path, with any dollar delimited tokens
+// from the urlConfig having been substituted with values from an anomaly record.
+export function openCustomUrlWindow(fullUrl, urlConfig) {
+  if (isKibanaUrl(urlConfig) === true) {
+    window.open(fullUrl, '_blank');
+  } else {
+    const newWindow = window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    // Expect newWindow to be null, but just in case if not, reset the opener link.
+    if (newWindow !== undefined && newWindow !== null) {
+      newWindow.opener = null;
+    }
+  }
+}
+
 // Returns whether the url_value of the supplied config is for
 // a Kibana page running on the same server as this ML plugin.
 function isKibanaUrl(urlConfig) {

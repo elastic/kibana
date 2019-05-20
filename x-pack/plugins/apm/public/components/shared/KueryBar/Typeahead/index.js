@@ -174,7 +174,7 @@ export class Typeahead extends Component {
                   'Search transactions and errors… (E.g. {queryExample})',
                 values: {
                   queryExample:
-                    'transaction.duration.us > 300000 AND context.response.status_code >= 400'
+                    'transaction.duration.us > 300000 AND http.response.status_code >= 400'
                 }
               }
             )}

@@ -31,6 +31,7 @@ interface ResolveImportErrorsOptions {
   objectLimit: number;
   savedObjectsClient: SavedObjectsClient;
   retries: Retry[];
+  supportedTypes: string[];
 }
 
 interface ImportResponse {
@@ -44,13 +45,22 @@ export async function resolveImportErrors({
   objectLimit,
   retries,
   savedObjectsClient,
+  supportedTypes,
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
   let successCount = 0;
-  let errors: ImportError[] = [];
+  let errorAccumulator: ImportError[] = [];
   const filter = createObjectsFilter(retries);
 
   // Get the objects to resolve errors
-  const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
+  const { errors: collectorErrors, collectedObjects: objectsToResolve } = await collectSavedObjects(
+    {
+      readStream,
+      objectLimit,
+      filter,
+      supportedTypes,
+    }
+  );
+  errorAccumulator = [...errorAccumulator, ...collectorErrors];
 
   // Create a map of references to replace for each object to avoid iterating through
   // retries for every object to resolve
@@ -81,7 +91,7 @@ export async function resolveImportErrors({
     objectsToResolve,
     savedObjectsClient
   );
-  errors = errors.concat(validationErrors);
+  errorAccumulator = [...errorAccumulator, ...validationErrors];
 
   // Bulk create in two batches, overwrites and non-overwrites
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(filteredObjects, retries);
@@ -89,18 +99,24 @@ export async function resolveImportErrors({
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
       overwrite: true,
     });
-    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite));
+    errorAccumulator = [
+      ...errorAccumulator,
+      ...extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite),
+    ];
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
-    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite));
+    errorAccumulator = [
+      ...errorAccumulator,
+      ...extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite),
+    ];
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
 
   return {
     successCount,
-    success: errors.length === 0,
-    ...(errors.length ? { errors } : {}),
+    success: errorAccumulator.length === 0,
+    ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
   };
 }

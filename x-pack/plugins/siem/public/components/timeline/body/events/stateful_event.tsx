@@ -18,9 +18,11 @@ import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { ColumnHeader } from '../column_headers/column_header';
 import { stringifyEvent } from '../helpers';
-import { ColumnRenderer, getRowRenderer, RowRenderer } from '../renderers';
 
 import { EventColumnView } from './event_column_view';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { RowRenderer } from '../renderers/row_renderer';
+import { getRowRenderer } from '../renderers/get_row_renderer';
 
 interface Props {
   actionsColumnWidth: number;

@@ -7,7 +7,6 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import { get } from 'lodash';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
@@ -20,6 +19,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { downloadReport } from '../lib/download_report';
+import { getNewPlatform } from 'ui/new_platform';
 
 /**
  * Poll for changes to reports. Inform the user of changes when the license is active.
@@ -59,10 +59,13 @@ uiModules.get('kibana')
 
       let seeReportLink;
 
+      const core = getNewPlatform().start.core;
+
       // In-case the license expired/changed between the time they queued the job and the time that
       // the job completes, that way we don't give the user a toast to download their report if they can't.
-      if (chrome.navLinkExists('kibana:management')) {
-        const managementUrl = chrome.getNavLinkById('kibana:management').url;
+      // NOTE: this should be looking at configuration rather than the existence of a navLink
+      if (core.chrome.navLinks.has('kibana:management')) {
+        const managementUrl = core.chrome.navLinks.get('kibana:management').url;
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
           <p>

@@ -9,7 +9,7 @@ import { pure } from 'recompose';
 
 import { NetworkDirectionEcs } from '../../graphql/types';
 import { DraggableBadge } from '../draggables';
-import { NETWORK_DIRECTION_FIELD_NAME } from '../source_destination/network';
+import { NETWORK_DIRECTION_FIELD_NAME } from '../source_destination/field_names';
 
 export const INBOUND = 'inbound';
 export const OUTBOUND = 'outbound';

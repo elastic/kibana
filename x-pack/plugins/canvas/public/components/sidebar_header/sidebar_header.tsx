@@ -15,10 +15,11 @@ import {
   EuiToolTip,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanelDescriptor,
+  EuiOverlayMask,
 } from '@elastic/eui';
 // @ts-ignore unconverted component
 import { Popover } from '../popover';
-import { CustomElementModal } from './custom_element_modal';
+import { CustomElementModal } from '../custom_element_modal';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
@@ -70,7 +71,7 @@ interface Props {
   /**
    * saves the selected elements as an custom-element saved object
    */
-  createCustomElement: () => void;
+  createCustomElement: (name: string, description: string, image: string) => void;
   // TODO: restore when group and ungroup can be triggered outside of workpad_page
   // /**
   //  * indicated whether the selected element is a group or not
@@ -125,7 +126,7 @@ export class SidebarHeader extends Component<Props, State> {
   public static defaultProps = {
     // TODO: restore when group and ungroup can be triggered outside of workpad_page
     // groupIsSelected: false,
-    showLayerControls: true,
+    showLayerControls: false,
   };
 
   public state = {
@@ -330,8 +331,14 @@ export class SidebarHeader extends Component<Props, State> {
     </Popover>
   );
 
+  private _handleSave = (name: string, description: string, image: string) => {
+    const { createCustomElement } = this.props;
+    createCustomElement(name, description, image);
+    this._hideModal();
+  };
+
   render() {
-    const { title, showLayerControls, createCustomElement } = this.props;
+    const { title, showLayerControls } = this.props;
     const { isModalVisible } = this.state;
 
     return (
@@ -365,11 +372,13 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiFlexItem>
         </EuiFlexGroup>
         {isModalVisible ? (
-          <CustomElementModal
-            title="Create new element"
-            onSave={createCustomElement}
-            onCancel={this._hideModal}
-          />
+          <EuiOverlayMask>
+            <CustomElementModal
+              title="Create new element"
+              onSave={this._handleSave}
+              onCancel={this._hideModal}
+            />
+          </EuiOverlayMask>
         ) : null}
       </Fragment>
     );

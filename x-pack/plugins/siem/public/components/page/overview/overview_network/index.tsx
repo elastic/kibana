@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { manageQuery } from '../../../../components/page/manage_query';
+import { HeaderPanel } from '../../../header_panel';
+import { manageQuery } from '../../../page/manage_query';
 import { OverviewNetworkQuery } from '../../../../containers/overview/overview_network';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewNetworkStats } from '../overview_network_stats';
@@ -34,29 +28,25 @@ const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery }) => (
   <EuiFlexItem>
     <EuiPanel>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle>
-            <h2>
-              <FormattedMessage
-                id="xpack.siem.overview.networkTitle"
-                defaultMessage="Network Ingest Indices"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButton href="#/link-to/network/">
-            <FormattedMessage
-              id="xpack.siem.overview.networkAction"
-              defaultMessage="View Network"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule />
+      <HeaderPanel
+        border
+        subtitle={
+          <FormattedMessage
+            id="xpack.siem.overview.networkSubtitle"
+            defaultMessage="Showing: Last 24 Hours"
+          />
+        }
+        title={
+          <FormattedMessage
+            id="xpack.siem.overview.networkTitle"
+            defaultMessage="Network Beats Events"
+          />
+        }
+      >
+        <EuiButton href="#/link-to/network/">
+          <FormattedMessage id="xpack.siem.overview.networkAction" defaultMessage="View Network" />
+        </EuiButton>
+      </HeaderPanel>
 
       <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
         {({ overviewNetwork, loading, id, refetch }) => (

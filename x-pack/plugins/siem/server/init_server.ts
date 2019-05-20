@@ -11,6 +11,7 @@ import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
 import { createEsValueResolvers, createEventsResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
 import { createIpDetailsResolvers } from './graphql/ip_details';
+import { createKpiHostsResolvers } from './graphql/kpi_hosts';
 import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
 import { createOverviewResolvers } from './graphql/overview';
@@ -52,6 +53,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createUncommonProcessesResolvers(libs) as IResolvers,
       createWhoAmIResolvers() as IResolvers,
       createKpiNetworkResolvers(libs) as IResolvers,
+      createKpiHostsResolvers(libs) as IResolvers,
     ],
     typeDefs: schemas,
   });

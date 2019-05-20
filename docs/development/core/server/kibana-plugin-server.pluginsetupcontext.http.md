@@ -10,5 +10,7 @@
 http: {
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnRequest: HttpServiceSetup['registerOnRequest'];
+        getBasePathFor: HttpServiceSetup['getBasePathFor'];
+        setBasePathFor: HttpServiceSetup['setBasePathFor'];
     };
 ```
