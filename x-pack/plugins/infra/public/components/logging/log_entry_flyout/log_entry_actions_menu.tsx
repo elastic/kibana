@@ -19,7 +19,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
 }> = ({ logItem }) => {
   const [hide, isVisible, show] = useVisibility();
 
-  const uptimeLink = useMemo(() => getUptimeLink(logItem), [getUptimeLink, logItem]);
+  const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
 
   const menuItems = useMemo(
     () => [
