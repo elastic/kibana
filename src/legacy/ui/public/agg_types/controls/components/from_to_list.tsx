@@ -17,46 +17,65 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import {
   EuiButtonIcon,
+  EuiFormLabel,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import Ipv4Address from '../../../utils/ipv4_address';
 
 export interface FromToObject {
   from: string;
   to: string;
 }
 
-interface FromToModel extends FromToObject {
+interface FromToItem {
+  value: string;
+  isInvalid: boolean;
+}
+
+interface FromToModel {
   id: string;
+  from: FromToItem;
+  to: FromToItem;
 }
 
 interface FromToListProps {
   labelledbyId: string;
   list: FromToObject[];
+  showValidation: boolean;
+  onBlur(): void;
   onChange(list: FromToObject[]): void;
 }
 
 const generateId = htmlIdGenerator();
 
-function FromToList({ labelledbyId, list, onChange }: FromToListProps) {
-  const [models, setModels] = useState(list.map(item => ({ ...item, id: generateId() })));
+function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: FromToListProps) {
+  const [models, setModels] = useState(
+    list.map(item => ({
+      id: generateId(),
+      from: { value: item.from, isInvalid: false },
+      to: { value: item.to, isInvalid: false },
+    }))
+  );
   const deleteBtnAriaLabel = i18n.translate('common.ui.aggTypes.ipRanges.removeRangeAriaLabel', {
     defaultMessage: 'Remove this range',
   });
 
   const onUpdate = (modelList: FromToModel[]) => {
     setModels(modelList);
-    onChange(modelList.map(({ from, to }) => ({ from, to })));
+    onChange(modelList.map(({ from, to }) => ({ from: from.value, to: to.value })));
   };
 
   const onChangeValue = (modelName: 'from' | 'to', index: number, value: string) => {
-    models[index][modelName] = value;
+    models[index][modelName].value = value;
     onUpdate(models);
   };
   const onDelete = (id: string) => {
@@ -66,12 +85,38 @@ function FromToList({ labelledbyId, list, onChange }: FromToListProps) {
 
   const getUpdatedModels = (objList: FromToObject[], modelList: FromToModel[]) => {
     return objList.map((item, index) => {
-      const model = modelList[index] || { id: generateId() };
+      const model = modelList[index] || {
+        id: generateId(),
+        from: { value: '', isInvalid: false },
+        to: { value: '', isInvalid: false },
+      };
+      const from = validateValue(model.from.value);
+      const to = validateValue(model.to.value);
       return {
-        ...model,
-        ...item,
+        id: model.id,
+        from,
+        to,
       };
     });
+  };
+
+  const validateValue = (ipAddress: string) => {
+    const result = {
+      value: ipAddress,
+      isInvalid: false,
+    };
+    if (!ipAddress) {
+      result.isInvalid = true;
+      return result;
+    }
+    try {
+      new Ipv4Address(ipAddress);
+      result.isInvalid = false;
+      return result;
+    } catch (e) {
+      result.isInvalid = true;
+      return result;
+    }
   };
 
   useEffect(
@@ -81,42 +126,62 @@ function FromToList({ labelledbyId, list, onChange }: FromToListProps) {
     [list]
   );
 
+  if (!list || !list.length) {
+    return null;
+  }
+
   return (
     <>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={`visEditorIpRangeFromLabel${labelledbyId}`}>
+            <FormattedMessage id="common.ui.aggTypes.ipRanges.fromLabel" defaultMessage="From" />
+          </EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={`visEditorIpRangeToLabel${labelledbyId}`}>
+            <FormattedMessage id="common.ui.aggTypes.ipRanges.toLabel" defaultMessage="To" />
+          </EuiFormLabel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       {models.map((item, index) => (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" key={item.id}>
-          <EuiFlexItem>
-            <EuiFieldText
-              aria-labelledby={labelledbyId}
-              // isInvalid={isInvalid}
-              onChange={ev => {
-                onChangeValue('from', index, ev.target.value);
-              }}
-              value={item.from}
-              // onBlur={onBlur}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFieldText
-              aria-labelledby={labelledbyId}
-              // isInvalid={isInvalid}
-              onChange={ev => {
-                onChangeValue('to', index, ev.target.value);
-              }}
-              value={item.to}
-              // onBlur={onBlur}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={deleteBtnAriaLabel}
-              disabled={models.length === 1}
-              color="danger"
-              iconType="trash"
-              onClick={() => onDelete(item.id)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <Fragment key={item.id}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem>
+              <EuiFieldText
+                aria-labelledby={`visEditorIpRangeFromLabel${labelledbyId}`}
+                isInvalid={showValidation ? item.from.isInvalid : false}
+                onChange={ev => {
+                  onChangeValue('from', index, ev.target.value);
+                }}
+                value={item.from.value}
+                onBlur={onBlur}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFieldText
+                aria-labelledby={`visEditorIpRangeToLabel${labelledbyId}`}
+                isInvalid={showValidation ? item.to.isInvalid : false}
+                onChange={ev => {
+                  onChangeValue('to', index, ev.target.value);
+                }}
+                value={item.to.value}
+                onBlur={onBlur}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={deleteBtnAriaLabel}
+                disabled={models.length === 1}
+                color="danger"
+                iconType="trash"
+                onClick={() => onDelete(item.id)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+        </Fragment>
       ))}
     </>
   );

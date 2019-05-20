@@ -18,29 +18,27 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiFlexItem, EuiFormRow, EuiSpacer, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FromToList, FromToObject } from './components/from_to_list';
+import { MaskList, MaskObject } from './components/mask_list';
 import { IpRangeTypes } from './ip_range_type';
 interface IpRange {
   fromTo: FromToObject[];
-  mask: Array<{ mask: string }>;
+  mask: MaskObject[];
 }
 
-function IpRangesParamEditor({ agg, value, setValue, setValidity }: AggParamEditorProps<IpRange>) {
+function IpRangesParamEditor({
+  agg,
+  value,
+  setTouched,
+  setValue,
+  setValidity,
+  showValidation,
+}: AggParamEditorProps<IpRange>) {
   const isValid = true;
-  const labels = (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem className="euiFormLabel">
-        <FormattedMessage id="common.ui.aggTypes.ipRanges.fromLabel" defaultMessage="From" />
-      </EuiFlexItem>
-      <EuiFlexItem className="euiFormLabel">
-        <FormattedMessage id="common.ui.aggTypes.ipRanges.toLabel" defaultMessage="To" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 
   useEffect(
     () => {
@@ -51,7 +49,7 @@ function IpRangesParamEditor({ agg, value, setValue, setValidity }: AggParamEdit
     [isValid]
   );
 
-  const handleChange = (modelName: IpRangeTypes, items: FromToObject[]) => {
+  const handleChange = (modelName: IpRangeTypes, items: Array<FromToObject | MaskObject>) => {
     setValue({
       ...value,
       [modelName]: items,
@@ -59,21 +57,30 @@ function IpRangesParamEditor({ agg, value, setValue, setValidity }: AggParamEdit
   };
 
   const onAdd = () => {
-    const type = agg.params.ipRangeType;
+    const type = agg.params.ipRangeType as IpRangeTypes;
     setValue({ ...value, [type]: [...value[type], {}] });
   };
 
   return (
     <EuiFormRow fullWidth={true}>
       <>
-        {labels}
-        {agg.params.ipRangeType === IpRangeTypes.FROM_TO ? (
+        {agg.params.ipRangeType === IpRangeTypes.MASK ? (
+          <MaskList
+            labelledbyId={agg.id}
+            list={value.mask}
+            showValidation={showValidation}
+            onBlur={setTouched}
+            onChange={items => handleChange(IpRangeTypes.MASK, items)}
+          />
+        ) : (
           <FromToList
-            labelledbyId={`visEditorIpRangeFromLabel${agg.id}`}
+            labelledbyId={agg.id}
             list={value.fromTo}
+            showValidation={showValidation}
+            onBlur={setTouched}
             onChange={items => handleChange(IpRangeTypes.FROM_TO, items)}
           />
-        ) : null}
+        )}
         <EuiSpacer size="s" />
         <EuiFlexItem>
           <EuiButton fill={true} fullWidth={true} onClick={onAdd} size="s">
