@@ -54,7 +54,7 @@ export const initIpToHostName = ({ framework }: InfraBackendLibs) => {
           },
         };
         const response = await callWithRequest<HostDoc>(req, 'search', params);
-        if (response.hits.total === 0) {
+        if (response.hits.total.value === 0) {
           throw notFound('Host with matching IP address not found.');
         }
         const hostDoc = first(response.hits.hits);

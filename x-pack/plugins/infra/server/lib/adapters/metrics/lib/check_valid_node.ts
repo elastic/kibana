@@ -25,5 +25,5 @@ export const checkValidNode = async (
       },
     },
   };
-  return (await search(params)).hits.total > 0;
+  return (await search(params)).hits.total.value > 0;
 };
