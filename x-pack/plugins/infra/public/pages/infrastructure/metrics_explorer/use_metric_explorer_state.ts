@@ -42,11 +42,10 @@ export const useMetricsExplorerState = (
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
-      setOptions({ ...options });
       setAfterKey(null);
       setTimeRange({ ...currentTimerange, from: start, to: end });
     },
-    [options, currentTimerange]
+    [currentTimerange]
   );
 
   const handleGroupByChange = useCallback(

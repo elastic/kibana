@@ -24,7 +24,7 @@ import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
 import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithLogTextviewUrlState } from '../../containers/logs/with_log_textview';
-import { WithStreamItems } from '../../containers/logs/with_stream_items';
+import { ReduxSourceIdBridge, WithStreamItems } from '../../containers/logs/with_stream_items';
 import { Source } from '../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
@@ -44,6 +44,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   return (
     <>
+      <ReduxSourceIdBridge sourceId={sourceId} />
       <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
       <WithLogMinimapUrlState />

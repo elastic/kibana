@@ -22,6 +22,7 @@
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
+|  [ChromeNavLink](./kibana-plugin-public.chromenavlink.md) |  |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the setup lifecycle |
 |  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the start lifecycle |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
@@ -45,6 +46,7 @@
 |  [BasePathStart](./kibana-plugin-public.basepathstart.md) | Provides access to the 'server.basePath' configuration option in kibana.yml |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
+|  [ChromeStart](./kibana-plugin-public.chromestart.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) |  |
