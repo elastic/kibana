@@ -59,6 +59,7 @@ describe('hitsToGeoJson', () => {
     });
   });
 
+
   it('Should handle documents where geoField is not populated', () => {
     const hits = [
       {
@@ -244,6 +245,15 @@ describe('geoPointToGeometry', () => {
     expect(points[0].coordinates).toEqual([lon, lat]);
     expect(points[1].coordinates).toEqual([lon2, lat2]);
   });
+
+  it('Should handle point as geohash string', () => {
+    const geohashValue = 'drm3btev3e86';
+    const points = [];
+    geoPointToGeometry(geohashValue, points);
+    expect(points.length).toBe(1);
+    expect(points[0].coordinates).toEqual([-71.34000012651086, 41.12000000663102]);
+  });
+
 });
 
 describe('geoShapeToGeometry', () => {
@@ -281,6 +291,30 @@ describe('geoShapeToGeometry', () => {
     expect(shapes[1].type).toBe('Point');
     expect(shapes[1].coordinates).toEqual(pointCoordinates);
   });
+
+
+  it('Should convert wkt shapes to geojson', () => {
+
+    const pointWkt = 'POINT (32 40)';
+    const linestringWkt = 'LINESTRING (50 60, 70 80)';
+
+
+    const shapes = [];
+    geoShapeToGeometry(pointWkt, shapes);
+    geoShapeToGeometry(linestringWkt, shapes);
+
+    expect(shapes.length).toBe(2);
+    expect(shapes[0]).toEqual({
+      coordinates: [32, 40],
+      type: 'Point',
+    });
+    expect(shapes[1]).toEqual({
+      coordinates: [[50, 60], [70, 80]],
+      type: 'LineString',
+    });
+  });
+
+
 });
 
 describe('createExtentFilter', () => {
