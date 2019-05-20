@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Server } from 'hapi';
 import { AnyObject, EsClient } from '../lib/esqueue';
 import { EsIndexClient } from './es_index_client';
-import { WithRequest } from './with_request';
+import { WithInternalRequest } from './with_internal_request';
 
-export class EsClientWithRequest extends WithRequest implements EsClient {
+export class EsClientWithInternalRequest extends WithInternalRequest implements EsClient {
   public readonly indices = new EsIndexClient(this);
 
-  constructor(readonly req: Request) {
-    super(req);
+  constructor(server: Server) {
+    super(server);
   }
 
   public bulk(params: AnyObject): Promise<any> {
