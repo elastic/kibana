@@ -100,6 +100,7 @@ export function makeUpgradeAssistantUsageCollector(server: UpgradeAssistantTelem
   const kbnServer = server as UpgradeAssistantTelemetryServer;
   const upgradeAssistantUsageCollector = kbnServer.usage.collectorSet.makeUsageCollector({
     type: UPGRADE_ASSISTANT_TYPE,
+    isReady: () => true,
     fetch: async (callCluster: any) => fetchUpgradeAssistantMetrics(callCluster, server),
   });
 

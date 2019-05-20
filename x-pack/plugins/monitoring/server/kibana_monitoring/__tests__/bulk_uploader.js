@@ -20,6 +20,9 @@ class MockCollectorSet {
   isUsageCollector(x) {
     return !!x.isUsageCollector;
   }
+  areAllCollectorsReady() {
+    return this.mockCollectors.every(collector => collector.isReady());
+  }
   getCollectorByType(type) {
     return this.mockCollectors.find(collector => collector.type === type) || this.mockCollectors[0];
   }
@@ -28,6 +31,9 @@ class MockCollectorSet {
   }
   async bulkFetch() {
     return this.mockCollectors.map(({ fetch }) => fetch());
+  }
+  some(someFn) {
+    return this.mockCollectors.some(someFn);
   }
 }
 
@@ -63,6 +69,7 @@ describe('BulkUploader', () => {
         {
           type: 'type_collector_test',
           fetch: noop, // empty payloads,
+          isReady: () => true,
           formatForBulkUpload: result => result,
         }
       ]);
@@ -96,10 +103,56 @@ describe('BulkUploader', () => {
       }, CHECK_DELAY);
     });
 
+    it('should not upload if some collectors are not ready', done => {
+      const collectors = new MockCollectorSet(server, [
+        {
+          type: 'type_collector_test',
+          fetch: noop, // empty payloads,
+          isReady: () => false,
+          formatForBulkUpload: result => result,
+        },
+        {
+          type: 'type_collector_test2',
+          fetch: noop, // empty payloads,
+          isReady: () => true,
+          formatForBulkUpload: result => result,
+        }
+      ]);
+
+      const uploader = new BulkUploader(server, {
+        interval: FETCH_INTERVAL
+      });
+
+      uploader.start(collectors);
+
+      // allow interval to tick a few times
+      setTimeout(() => {
+        uploader.stop();
+
+        const loggingCalls = server.log.getCalls();
+        expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
+        expect(loggingCalls[0].args).to.eql([
+          ['info', 'monitoring', 'kibana-monitoring'],
+          'Starting monitoring stats collection',
+        ]);
+        expect(loggingCalls[1].args).to.eql([
+          ['debug', 'monitoring', 'kibana-monitoring'],
+          'Skipping bulk uploading because not all collectors are ready',
+        ]);
+        expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
+          ['info', 'monitoring', 'kibana-monitoring'],
+          'Monitoring stats collection is stopped',
+        ]);
+
+        done();
+      }, CHECK_DELAY);
+    });
+
     it('should run the bulk upload handler', done => {
       const collectors = new MockCollectorSet(server, [
         {
           fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }),
+          isReady: () => true,
           formatForBulkUpload: result => result
         }
       ]);
@@ -137,11 +190,13 @@ describe('BulkUploader', () => {
       const collectors = new MockCollectorSet(server, [
         {
           fetch: usageCollectorFetch,
+          isReady: () => true,
           formatForBulkUpload: result => result,
           isUsageCollector: true,
         },
         {
           fetch: collectorFetch,
+          isReady: () => true,
           formatForBulkUpload: result => result,
           isUsageCollector: false,
         }
@@ -168,11 +223,13 @@ describe('BulkUploader', () => {
       const collectors = new MockCollectorSet(server, [
         {
           fetch: usageCollectorFetch,
+          isReady: () => true,
           formatForBulkUpload: result => result,
           isUsageCollector: true,
         },
         {
           fetch: collectorFetch,
+          isReady: () => true,
           formatForBulkUpload: result => result,
           isUsageCollector: false,
         }

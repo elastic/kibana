@@ -146,6 +146,11 @@ export const reporting = (kibana) => {
     },
 
     init: async function (server) {
+      let isCollectorReady = false;
+      const isReady = () => isCollectorReady;
+      // Register a function with server to manage the collection of usage stats
+      server.usage.collectorSet.register(getReportingUsageCollector(server, isReady));
+
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
       const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
@@ -168,8 +173,8 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(getReportingUsageCollector(server));
+      // Post initialization of the above code, the collector is now ready to fetch its data
+      isCollectorReady = true;
 
       server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));
