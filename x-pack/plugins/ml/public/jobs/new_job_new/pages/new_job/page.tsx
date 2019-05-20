@@ -28,7 +28,7 @@ export const Page: SFC = () => (
           <EuiTitle>
             <h1>
               <FormattedMessage
-                id="xpack.ml.dataframe.transformsWizard.newDataFrameTitle"
+                id="xpack.ml.newJob.wizard.jobType.newJob"
                 defaultMessage="New job"
               />
             </h1>
