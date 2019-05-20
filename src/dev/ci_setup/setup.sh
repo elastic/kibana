@@ -150,6 +150,11 @@ else
 fi
 
 ###
+### skip chomium download, use the system chrome install
+###
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+
+###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
