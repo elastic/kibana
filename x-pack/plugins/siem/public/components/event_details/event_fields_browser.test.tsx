@@ -18,7 +18,7 @@ describe('EventFieldsBrowser', () => {
       test(`it renders the ${header} column header`, () => {
         const wrapper = mountWithIntl(
           <TestProviders>
-            <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
+            <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
           </TestProviders>
         );
 
@@ -31,7 +31,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders a filter input with the expected placeholder', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
+          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
         </TestProviders>
       );
 
@@ -45,7 +45,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected icon type for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
+          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
         </TestProviders>
       );
 
@@ -64,7 +64,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders the field name for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
+          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
         </TestProviders>
       );
       expect(
@@ -81,7 +81,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected value for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
+          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
         </TestProviders>
       );
       expect(
@@ -97,7 +97,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected field description the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
+          <EventFieldsBrowser data={mockDetailItemData} eventId={mockDetailItemDataId} />
         </TestProviders>
       );
 

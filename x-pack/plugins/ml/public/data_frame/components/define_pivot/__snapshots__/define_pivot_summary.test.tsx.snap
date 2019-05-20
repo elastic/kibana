@@ -5,8 +5,12 @@ exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
   <ContextProvider
     value={
       Object {
-        "fields": Array [],
-        "title": "the-index-pattern-title",
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "title": "the-index-pattern-title",
+        },
+        "indexPatterns": Object {},
+        "kibanaConfig": Object {},
       }
     }
   >

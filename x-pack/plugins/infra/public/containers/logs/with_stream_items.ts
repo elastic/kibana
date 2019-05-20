@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
@@ -24,6 +25,7 @@ export const withStreamItems = connect(
   bindPlainActionCreators({
     loadNewerEntries: logEntriesActions.loadNewerEntries,
     reloadEntries: logEntriesActions.reloadEntries,
+    setSourceId: logEntriesActions.setSourceId,
   })
 );
 
@@ -52,3 +54,26 @@ const createLogEntryStreamItem = (logEntry: LogEntry) => ({
   kind: 'logEntry' as 'logEntry',
   logEntry,
 });
+
+/**
+ * This component serves as connection between the state and side-effects
+ * managed by redux and the state and effects managed by hooks. In particular,
+ * it forwards changes of the source id to redux via the action creator
+ * `setSourceId`.
+ *
+ * It will be mounted beneath the hierachy level where the redux store and the
+ * source state are initialized. Once the log entry state and loading
+ * side-effects have been migrated from redux to hooks it can be removed.
+ */
+export const ReduxSourceIdBridge = withStreamItems(
+  ({ setSourceId, sourceId }: { setSourceId: (sourceId: string) => void; sourceId: string }) => {
+    useEffect(
+      () => {
+        setSourceId(sourceId);
+      },
+      [setSourceId, sourceId]
+    );
+
+    return null;
+  }
+);

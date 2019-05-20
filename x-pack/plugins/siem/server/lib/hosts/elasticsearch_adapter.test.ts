@@ -9,10 +9,10 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchHostsAdapter, formatHostEdgesData } from './elasticsearch_adapter';
 import {
-  mockGetHostDetailsOptions,
-  mockGetHostDetailsRequest,
-  mockGetHostDetailsResponse,
-  mockGetHostDetailsResult,
+  mockGetHostOverviewOptions,
+  mockGetHostOverviewRequest,
+  mockGetHostOverviewResponse,
+  mockGetHostOverviewResult,
   mockGetHostLastFirstSeenOptions,
   mockGetHostLastFirstSeenRequest,
   mockGetHostLastFirstSeenResponse,
@@ -163,9 +163,9 @@ describe('hosts elasticsearch_adapter', () => {
     });
   });
 
-  describe('#getHostDetails', () => {
+  describe('#getHostOverview', () => {
     const mockCallWithRequest = jest.fn();
-    mockCallWithRequest.mockResolvedValue(mockGetHostDetailsResponse);
+    mockCallWithRequest.mockResolvedValue(mockGetHostOverviewResponse);
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
@@ -177,11 +177,11 @@ describe('hosts elasticsearch_adapter', () => {
 
     test('Happy Path', async () => {
       const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
-      const data: HostItem = await EsHosts.getHostDetails(
-        mockGetHostDetailsRequest as FrameworkRequest,
-        mockGetHostDetailsOptions
+      const data: HostItem = await EsHosts.getHostOverview(
+        mockGetHostOverviewRequest as FrameworkRequest,
+        mockGetHostOverviewOptions
       );
-      expect(data).toEqual(mockGetHostDetailsResult);
+      expect(data).toEqual(mockGetHostOverviewResult);
     });
   });
 

@@ -6,8 +6,7 @@
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { getEmptyValue } from '../../../empty_value';
-
-import { ColumnRenderer } from '.';
+import { ColumnRenderer } from './column_renderer';
 
 export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) === -1;

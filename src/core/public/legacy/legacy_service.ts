@@ -70,6 +70,7 @@ export class LegacyPlatformService {
     require('ui/metadata').__newPlatformSetup__(injectedMetadata.getLegacyMetadata());
     require('ui/i18n').__newPlatformSetup__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformSetup__(fatalErrors);
+    require('ui/kfetch').__newPlatformSetup__(http);
     require('ui/notify/toasts').__newPlatformSetup__(notifications.toasts);
     require('ui/chrome/api/loading_count').__newPlatformSetup__(http);
     require('ui/chrome/api/base_path').__newPlatformSetup__(basePath);
@@ -90,6 +91,8 @@ export class LegacyPlatformService {
         euiIconType: navLink.euiIconType,
         icon: navLink.icon,
         appUrl: navLink.url,
+        subUrlBase: navLink.subUrlBase,
+        linkToLastSubUrl: navLink.linkToLastSubUrl,
       })
     );
 

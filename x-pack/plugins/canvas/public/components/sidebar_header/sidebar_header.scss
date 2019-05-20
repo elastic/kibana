@@ -5,20 +5,3 @@
 .canvasContextMenu--topBorder {
   border-top: $euiBorderThin;
 }
-
-.canvasCustomElementForm {
-  min-width: 400px;
-}
-
-.canvasCustomElementForm__preview {
-  max-width: $canvasElementCardWidth;
-  min-height: $canvasElementCardWidth;
-}
-
-.canvasCustomElementForm__thumbnail {
-  padding-bottom: 0;
-}
-
-.canvasCustomElementForm__thumbnailHelp {
-  color: $euiColorDarkShade;
-}

@@ -6,17 +6,20 @@
 
 import { take } from 'lodash';
 import { ContextFunction, Datatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   count: number;
 }
 
 export function head(): ContextFunction<'head', Datatable, Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().head;
+
   return {
     name: 'head',
     aliases: [],
     type: 'datatable',
-    help: 'Get the first N rows from the datatable. Also see `tail`',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -24,7 +27,7 @@ export function head(): ContextFunction<'head', Datatable, Arguments, Datatable>
       count: {
         aliases: ['_'],
         types: ['number'],
-        help: 'Return this many rows from the beginning of the datatable',
+        help: argHelp.count,
         default: 1,
       },
     },

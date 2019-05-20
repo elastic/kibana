@@ -32,7 +32,7 @@ import {
   JobDetailsSummary,
 } from '../../components/job_details';
 
-import { IndexPatternContext } from '../../common';
+import { isKibanaContext, KibanaContext } from '../../common';
 
 enum WIZARD_STEPS {
   DEFINE_PIVOT,
@@ -73,12 +73,13 @@ const DefinePivotStep: SFC<DefinePivotStepProps> = ({
 };
 
 export const Wizard: SFC = React.memo(() => {
-  // indexPattern from context
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
@@ -102,6 +103,7 @@ export const Wizard: SFC = React.memo(() => {
   const jobCreate =
     currentStep === WIZARD_STEPS.JOB_CREATE ? (
       <JobCreateForm
+        createIndexPattern={jobDetailsState.createIndexPattern}
         jobId={jobDetailsState.jobId}
         jobConfig={getDataFrameRequest(indexPattern.title, pivotState, jobDetailsState)}
         onChange={setJobCreate}

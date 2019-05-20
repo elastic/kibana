@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, find } from 'lodash'; // TODO: find a way to not rely on this anymore
+import { difference } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
@@ -29,16 +29,9 @@ function warnAboutInvalidJobIds(invalidIds) {
 // jobs loaded via mlJobsService.
 function getInvalidJobIds(ids) {
   return ids.filter(id => {
-    const job = find(mlJobService.jobs, { 'job_id': id });
-    return (job === undefined && id !== '*');
+    const jobExists = mlJobService.jobs.some(job => job.job_id === id);
+    return (jobExists === false && id !== '*');
   });
-}
-
-function checkGlobalState(globalState) {
-  if (globalState.ml === undefined) {
-    globalState.ml = {};
-    globalState.save();
-  }
 }
 
 function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
@@ -81,14 +74,15 @@ function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
 }
 
 export function setGlobalState(globalState, { selectedIds, selectedGroups }) {
-  checkGlobalState(globalState);
+  if (globalState.ml === undefined) {
+    globalState.ml = {};
+  }
   globalState.ml.jobIds = selectedIds;
-  globalState.ml.groups = selectedGroups;
+  globalState.ml.groups = selectedGroups || [];
   globalState.save();
 }
 
-// called externally to retrieve the selected jobs ids.
-// passing in `true` will load the jobs ids from the URL first
+// called externally to retrieve the selected jobs ids
 export function getSelectedJobIds(globalState) {
   return loadJobIdsFromGlobalState(globalState);
 }
@@ -170,6 +164,10 @@ export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
       job.timeRange.fromPx = ganttScale(job.timeRange.from);
       job.timeRange.toPx = ganttScale(job.timeRange.to);
       job.timeRange.widthPx = job.timeRange.toPx - job.timeRange.fromPx;
+      // Ensure at least 1 px in width so it's always visible
+      if (job.timeRange.widthPx < 1) {
+        job.timeRange.widthPx = 1;
+      }
 
       job.timeRange.toMoment = moment(job.timeRange.to).tz(dateFormatTz);
       job.timeRange.fromMoment = moment(job.timeRange.from).tz(dateFormatTz);

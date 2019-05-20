@@ -87,7 +87,8 @@ function destroyObjectsTable() {
 uiRoutes
   .when('/management/kibana/objects', {
     template: objectIndexHTML,
-    k7Breadcrumbs: getIndexBreadcrumbs
+    k7Breadcrumbs: getIndexBreadcrumbs,
+    requireUICapability: 'management.kibana.objects',
   })
   .when('/management/kibana/objects/:service', {
     redirectTo: '/management/kibana/objects'

@@ -12,8 +12,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
-
-import { AuditdGenericDetails, AuditdGenericLine } from '.';
+import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
 
 describe('GenericDetails', () => {
   describe('rendering', () => {

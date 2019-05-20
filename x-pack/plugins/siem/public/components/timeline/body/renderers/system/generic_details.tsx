@@ -10,13 +10,17 @@ import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { Details, NetflowRenderer, ProcessDraggable, TokensFlexItem, UserHostWorkingDir } from '..';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
 
-import { AuthSsh, Package } from '.';
 import * as i18n from './translations';
+import { NetflowRenderer } from '../netflow';
+import { UserHostWorkingDir } from '../user_host_working_dir';
+import { TokensFlexItem, Details } from '../helpers';
+import { ProcessDraggable } from '../process_draggable';
+import { Package } from './package';
+import { AuthSsh } from './auth_ssh';
 
 interface Props {
   contextId: string;

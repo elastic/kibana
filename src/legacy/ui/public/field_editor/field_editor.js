@@ -45,6 +45,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCode,
+  EuiCodeEditor,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFieldText,
@@ -58,7 +59,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
@@ -79,6 +79,9 @@ import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+// This loads Ace editor's "groovy" mode, used below to highlight the script.
+import 'brace/mode/groovy';
 
 export class FieldEditorComponent extends PureComponent {
   static propTypes = {
@@ -459,11 +462,11 @@ export class FieldEditorComponent extends PureComponent {
     );
   }
 
-  onScriptChange = (e) => {
+  onScriptChange = (value) => {
     this.setState({
       hasScriptError: false
     });
-    this.onFieldChange('script', e.target.value);
+    this.onFieldChange('script', value);
   }
 
   renderScript() {
@@ -481,15 +484,18 @@ export class FieldEditorComponent extends PureComponent {
     return field.scripted ? (
       <Fragment>
         <EuiFormRow
+          fullWidth
           label={intl.formatMessage({ id: 'common.ui.fieldEditor.scriptLabel', defaultMessage: 'Script' })}
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
-          <EuiTextArea
+          <EuiCodeEditor
             value={field.script}
             data-test-subj="editorFieldScript"
             onChange={this.onScriptChange}
-            isInvalid={isInvalid}
+            mode="groovy"
+            width="100%"
+            height="300px"
           />
         </EuiFormRow>
 

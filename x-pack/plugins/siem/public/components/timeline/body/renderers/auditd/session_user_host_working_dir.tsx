@@ -7,11 +7,12 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { HostWorkingDir, TokensFlexItem } from '..';
 import { DraggableBadge } from '../../../../draggables';
 
-import { PrimarySecondaryUserInfo } from '.';
 import * as i18n from './translations';
+import { TokensFlexItem } from '../helpers';
+import { HostWorkingDir } from '../host_working_dir';
+import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 
 interface Props {
   eventId: string;

@@ -57,7 +57,7 @@ export interface Source {
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
-  HostDetails: HostItem;
+  HostOverview: HostItem;
 
   HostFirstLastSeen: FirstLastSeenHost;
 
@@ -72,6 +72,8 @@ export interface Source {
   Users: UsersData;
 
   KpiNetwork?: KpiNetworkData | null;
+
+  KpiHosts: KpiHostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -837,37 +839,27 @@ export interface HostItem {
 
   lastSeen?: Date | null;
 
-  host?: HostFields | null;
+  host?: HostEcsFields | null;
+
+  cloud?: CloudFields | null;
 }
 
-export interface HostFields {
-  architecture?: string | null;
+export interface CloudFields {
+  instance?: CloudInstance | null;
 
-  id?: string | null;
+  machine?: CloudMachine | null;
 
-  ip?: (string | null)[] | null;
+  provider?: (string | null)[] | null;
 
-  mac?: (string | null)[] | null;
-
-  name?: string | null;
-
-  os?: OsFields | null;
-
-  type?: string | null;
+  region?: (string | null)[] | null;
 }
 
-export interface OsFields {
-  platform?: string | null;
+export interface CloudInstance {
+  id?: (string | null)[] | null;
+}
 
-  name?: string | null;
-
-  full?: string | null;
-
-  family?: string | null;
-
-  version?: string | null;
-
-  kernel?: string | null;
+export interface CloudMachine {
+  type?: (string | null)[] | null;
 }
 
 export interface FirstLastSeenHost {
@@ -1042,6 +1034,42 @@ export interface KpiNetworkData {
   tlsHandshakes?: number | null;
 }
 
+export interface KpiHostsData {
+  hosts?: number | null;
+
+  hostsHistogram?: KpiHostHistogramData[] | null;
+
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+}
+
+export interface KpiHostHistogramData {
+  key?: number | null;
+
+  key_as_string?: string | null;
+
+  count?: Count | null;
+}
+
+export interface Count {
+  value?: number | null;
+
+  doc_count?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1177,6 +1205,36 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface OsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
+}
+
+export interface HostFields {
+  architecture?: string | null;
+
+  id?: string | null;
+
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
+
+  name?: string | null;
+
+  os?: OsFields | null;
+
+  type?: string | null;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -1305,7 +1363,7 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface HostDetailsSourceArgs {
+export interface HostOverviewSourceArgs {
   id?: string | null;
 
   hostName: string;
@@ -1381,6 +1439,13 @@ export interface UsersSourceArgs {
   timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
+export interface KpiHostsSourceArgs {
   id?: string | null;
 
   timerange: TimerangeInput;
@@ -1870,13 +1935,15 @@ export namespace GetEventsQuery {
 
     host?: Host | null;
 
+    message?: ToStringArray | null;
+
     source?: _Source | null;
 
     destination?: Destination | null;
 
-    geo?: Geo | null;
-
     suricata?: Suricata | null;
+
+    user?: User | null;
 
     zeek?: Zeek | null;
   };
@@ -1886,13 +1953,15 @@ export namespace GetEventsQuery {
 
     action?: ToStringArray | null;
 
-    severity?: ToNumberArray | null;
+    category?: ToStringArray | null;
+
+    dataset?: ToStringArray | null;
+
+    id?: ToStringArray | null;
 
     module?: ToStringArray | null;
 
-    category?: ToStringArray | null;
-
-    id?: ToStringArray | null;
+    severity?: ToNumberArray | null;
   };
 
   export type Host = {
@@ -1921,14 +1990,6 @@ export namespace GetEventsQuery {
     port?: ToNumberArray | null;
   };
 
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    region_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-  };
-
   export type Suricata = {
     __typename?: 'SuricataEcsFields';
 
@@ -1951,6 +2012,12 @@ export namespace GetEventsQuery {
     signature?: ToStringArray | null;
 
     signature_id?: ToNumberArray | null;
+  };
+
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    name?: ToStringArray | null;
   };
 
   export type Zeek = {
@@ -1985,66 +2052,6 @@ export namespace GetLastEventTimeQuery {
     __typename?: 'LastEventTimeData';
 
     lastSeen?: Date | null;
-  };
-}
-
-export namespace GetHostDetailsQuery {
-  export type Variables = {
-    sourceId: string;
-    hostName: string;
-    timerange: TimerangeInput;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    HostDetails: HostDetails;
-  };
-
-  export type HostDetails = {
-    __typename?: 'HostItem';
-
-    _id?: string | null;
-
-    host?: Host | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostFields';
-
-    architecture?: string | null;
-
-    id?: string | null;
-
-    ip?: (string | null)[] | null;
-
-    mac?: (string | null)[] | null;
-
-    name?: string | null;
-
-    os?: Os | null;
-
-    type?: string | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsFields';
-
-    family?: string | null;
-
-    name?: string | null;
-
-    platform?: string | null;
-
-    version?: string | null;
   };
 }
 
@@ -2129,21 +2136,21 @@ export namespace GetHostsTableQuery {
   };
 
   export type Host = {
-    __typename?: 'HostFields';
+    __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
   };
 
   export type Os = {
-    __typename?: 'OsFields';
+    __typename?: 'OsEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Cursor = {
@@ -2164,6 +2171,92 @@ export namespace GetHostsTableQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace GetHostOverviewQuery {
+  export type Variables = {
+    sourceId: string;
+    hostName: string;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    HostOverview: HostOverview;
+  };
+
+  export type HostOverview = {
+    __typename?: 'HostItem';
+
+    _id?: string | null;
+
+    host?: Host | null;
+
+    cloud?: Cloud | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    architecture?: ToStringArray | null;
+
+    id?: ToStringArray | null;
+
+    ip?: ToStringArray | null;
+
+    mac?: ToStringArray | null;
+
+    name?: ToStringArray | null;
+
+    os?: Os | null;
+
+    type?: ToStringArray | null;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    family?: ToStringArray | null;
+
+    name?: ToStringArray | null;
+
+    platform?: ToStringArray | null;
+
+    version?: ToStringArray | null;
+  };
+
+  export type Cloud = {
+    __typename?: 'CloudFields';
+
+    instance?: Instance | null;
+
+    machine?: Machine | null;
+
+    provider?: (string | null)[] | null;
+
+    region?: (string | null)[] | null;
+  };
+
+  export type Instance = {
+    __typename?: 'CloudInstance';
+
+    id?: (string | null)[] | null;
+  };
+
+  export type Machine = {
+    __typename?: 'CloudMachine';
+
+    type?: (string | null)[] | null;
   };
 }
 
@@ -2355,6 +2448,62 @@ export namespace GetIpOverviewQuery {
 
     version?: ToStringArray | null;
   };
+}
+
+export namespace GetKpiHostsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHosts: KpiHosts;
+  };
+
+  export type KpiHosts = {
+    __typename?: 'KpiHostsData';
+
+    hosts?: number | null;
+
+    hostsHistogram?: HostsHistogram[] | null;
+
+    authSuccess?: number | null;
+
+    authSuccessHistogram?: AuthSuccessHistogram[] | null;
+
+    authFailure?: number | null;
+
+    authFailureHistogram?: AuthFailureHistogram[] | null;
+
+    uniqueSourceIps?: number | null;
+
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
+
+    uniqueDestinationIps?: number | null;
+
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+  };
+
+  export type HostsHistogram = ChartFields.Fragment;
+
+  export type AuthSuccessHistogram = ChartFields.Fragment;
+
+  export type AuthFailureHistogram = ChartFields.Fragment;
+
+  export type UniqueSourceIpsHistogram = ChartFields.Fragment;
+
+  export type UniqueDestinationIpsHistogram = ChartFields.Fragment;
 }
 
 export namespace GetKpiNetworkQuery {
@@ -3737,5 +3886,23 @@ export namespace GetUsersQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace ChartFields {
+  export type Fragment = {
+    __typename?: 'KpiHostHistogramData';
+
+    x?: string | null;
+
+    y?: Y | null;
+  };
+
+  export type Y = {
+    __typename?: 'Count';
+
+    value?: number | null;
+
+    doc_count?: number | null;
   };
 }

@@ -11,14 +11,14 @@ import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
-import { buildHostDetailsQuery } from './query.detail_host.dsl';
+import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
 import { buildLastFirstSeenHostQuery } from './query.last_first_seen_host.dsl';
 import {
   HostAggEsData,
   HostAggEsItem,
   HostBuckets,
-  HostDetailsRequestOptions,
+  HostOverviewRequestOptions,
   HostEsData,
   HostLastFirstSeenRequestOptions,
   HostsAdapter,
@@ -49,14 +49,14 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     return { edges, totalCount, pageInfo: { hasNextPage, endCursor: { value: String(limit) } } };
   }
 
-  public async getHostDetails(
+  public async getHostOverview(
     request: FrameworkRequest,
-    options: HostDetailsRequestOptions
+    options: HostOverviewRequestOptions
   ): Promise<HostItem> {
     const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
       request,
       'search',
-      buildHostDetailsQuery(options)
+      buildHostOverviewQuery(options)
     );
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
     return { _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
@@ -117,7 +117,17 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
   const aggField = hostFieldsMap[fieldName]
     ? hostFieldsMap[fieldName].replace(/\./g, '_')
     : fieldName.replace(/\./g, '_');
-  if (['host.ip', 'host.mac'].includes(fieldName) && has(aggField, bucket)) {
+  if (
+    [
+      'host.ip',
+      'host.mac',
+      'cloud.instance.id',
+      'cloud.machine.type',
+      'cloud.provider',
+      'cloud.region',
+    ].includes(fieldName) &&
+    has(aggField, bucket)
+  ) {
     const data: HostBuckets = get(aggField, bucket);
     return data.buckets.map(obj => obj.key);
   } else if (has(`${aggField}.buckets`, bucket)) {

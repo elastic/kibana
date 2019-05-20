@@ -11,33 +11,7 @@ import { AxiosPromise } from 'axios';
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib/constants';
 // @ts-ignore unconverted local file
 import { fetch } from '../../common/lib/fetch';
-
-interface CustomElement {
-  /**
-   * unique ID for the custom element
-   */
-  id: string;
-  /**
-   * name of the custom element
-   */
-  name: string;
-  /**
-   * name to be displayed from element picker
-   */
-  displayName: string;
-  /**
-   * description of the custom element
-   */
-  help?: string;
-  /**
-   * base 64 data URL string of the preview image
-   */
-  image?: string;
-  /**
-   * the element object stringified
-   */
-  content: string;
-}
+import { CustomElement } from './custom_element';
 
 const basePath = chrome.getBasePath();
 const apiPath = `${basePath}${API_ROUTE_CUSTOM_ELEMENT}`;

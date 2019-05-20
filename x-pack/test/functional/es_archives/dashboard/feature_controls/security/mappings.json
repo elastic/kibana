@@ -279,8 +279,36 @@
               }
             }
           },
+          "migrationVersion": {
+            "dynamic": "true",
+            "properties": {
+              "index-pattern": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          },
           "namespace": {
             "type": "keyword"
+          },
+          "references": {
+            "type": "nested",
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              }
+            }
           },
           "search": {
             "properties": {

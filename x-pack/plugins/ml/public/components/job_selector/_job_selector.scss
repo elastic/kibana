@@ -1,6 +1,5 @@
 .mlJobSelectorBar {
-  padding: 10px;
-  background-color: $euiColorLightShade
+  padding: $euiSize;
 }
 
 .mlJobSelectorFlyoutBody > .euiFlyoutBody__overflow {
@@ -9,16 +8,16 @@
 
 .mlJobSelector__ganttBar {
   background-color: #79adda;
-  height: 14px;
+  height: $euiSizeM;
   border-radius: 2px;
 }
 
 .mlJobSelector__ganttBarBackEdge {
-  height: 18px;
+  height: $euiSize;
   border-left: 1px solid #d6d6d6;
   border-right: 1px solid #d6d6d6;
-  margin-bottom: -16px;
-  padding-top: 9px;
+  margin-bottom: -14px;
+  padding-top: $euiSizeS;
 }
 
 .mlJobSelector__ganttBarDashed {

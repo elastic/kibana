@@ -83,6 +83,10 @@ export class InjectedMetadataService {
 
   constructor(private readonly params: InjectedMetadataParams) {}
 
+  public start(): InjectedMetadataStart {
+    return this.setup();
+  }
+
   public setup(): InjectedMetadataSetup {
     return {
       getBasePath: () => {
@@ -90,7 +94,7 @@ export class InjectedMetadataService {
       },
 
       getKibanaVersion: () => {
-        return this.getKibanaVersion();
+        return this.state.version;
       },
 
       getCspConfig: () => {
@@ -112,19 +116,11 @@ export class InjectedMetadataService {
       getInjectedVars: () => {
         return this.state.vars;
       },
+
+      getKibanaBuildNumber: () => {
+        return this.state.buildNumber;
+      },
     };
-  }
-
-  public start(): InjectedMetadataStart {
-    return this.setup();
-  }
-
-  public getKibanaVersion() {
-    return this.state.version;
-  }
-
-  public getKibanaBuildNumber() {
-    return this.state.buildNumber;
   }
 }
 
@@ -135,6 +131,7 @@ export class InjectedMetadataService {
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getKibanaBuildNumber: () => number;
   getKibanaVersion: () => string;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;

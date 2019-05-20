@@ -12,29 +12,34 @@ import { Direction } from '../../graphql/types';
 
 import { LoadMoreTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { ThemeProvider } from 'styled-components';
 
 describe('Load More Table Component', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const loadMore = jest.fn();
   const updateLimitPagination = jest.fn();
   describe('rendering', () => {
     test('it renders the default load more table', () => {
       const wrapper = shallow(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={1}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={1}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -42,22 +47,24 @@ describe('Load More Table Component', () => {
 
     test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={1}
-          loading={true}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={[]}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={1}
+            loading={true}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={[]}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -67,47 +74,49 @@ describe('Load More Table Component', () => {
 
     test('it renders the over loading panel after data has been in the table ', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={1}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={1}
+            loading={true}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
-      wrapper.setState({ isEmptyTable: false });
-      wrapper.setProps({ loading: true });
 
       expect(wrapper.find('[data-test-subj="LoadingPanelLoadMoreTable"]').exists()).toBeTruthy();
     });
 
     test('it renders the loadMore button if need to fetch more', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={1}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={1}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -120,25 +129,25 @@ describe('Load More Table Component', () => {
 
     test('it renders the Loading... in the more load button when fetching new data', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={1}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={1}
+            loading={true}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
-
-      wrapper.setProps({ loading: true });
 
       expect(
         wrapper.find('[data-test-subj="InitialLoadingPanelLoadMoreTable"]').exists()
@@ -148,27 +157,29 @@ describe('Load More Table Component', () => {
           .find('[data-test-subj="loadingMoreButton"]')
           .first()
           .text()
-      ).toContain('Loading...');
+      ).toContain('Loading…');
     });
 
     test('it does NOT render the loadMore button because there is nothing else to fetch', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={false}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={2}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={false}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={2}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="loadingMoreButton"]').exists()).toBeFalsy();
@@ -176,22 +187,24 @@ describe('Load More Table Component', () => {
 
     test('it render popover to select new limit in table', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={true}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={2}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={true}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={2}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -203,22 +216,24 @@ describe('Load More Table Component', () => {
 
     test('it will NOT render popover to select new limit in table if props itemsPerRow is empty', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={true}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={[]}
-          limit={2}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={true}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={[]}
+            limit={2}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeFalsy();
@@ -227,24 +242,26 @@ describe('Load More Table Component', () => {
     test('It should render a sort icon if sorting is defined', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
-        <LoadMoreTable
-          columns={sortedHosts}
-          hasNextPage={true}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={2}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={jest.fn()}
-          onChange={mockOnChange}
-          pageOfItems={mockData.Hosts.edges}
-          sorting={{ direction: Direction.asc, field: 'node.host.name' }}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={sortedHosts}
+            hasNextPage={true}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={2}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={jest.fn()}
+            onChange={mockOnChange}
+            pageOfItems={mockData.Hosts.edges}
+            sorting={{ direction: Direction.asc, field: 'node.host.name' }}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('.euiTable thead tr th button svg')).toBeTruthy();
@@ -254,22 +271,24 @@ describe('Load More Table Component', () => {
   describe('Events', () => {
     test('should call loadmore when clicking on the button load more', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={1}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={1}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -282,22 +301,24 @@ describe('Load More Table Component', () => {
 
     test('Should call updateLimitPagination when you pick a new limit', () => {
       const wrapper = mount(
-        <LoadMoreTable
-          columns={getHostsColumns()}
-          hasNextPage={true}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={2}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          pageOfItems={mockData.Hosts.edges}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={getHostsColumns()}
+            hasNextPage={true}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={2}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+            pageOfItems={mockData.Hosts.edges}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -315,24 +336,26 @@ describe('Load More Table Component', () => {
     test('Should call onChange when you choose a new sort in the table', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
-        <LoadMoreTable
-          columns={sortedHosts}
-          hasNextPage={true}
-          headerCount={1}
-          headerSupplement={<p>My test supplement.</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={2}
-          loading={false}
-          loadingTitle="Hosts"
-          loadMore={jest.fn()}
-          onChange={mockOnChange}
-          pageOfItems={mockData.Hosts.edges}
-          sorting={{ direction: Direction.asc, field: 'node.host.name' }}
-          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-        />
+        <ThemeProvider theme={theme}>
+          <LoadMoreTable
+            columns={sortedHosts}
+            hasNextPage={true}
+            headerCount={1}
+            headerSupplement={<p>My test supplement.</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={2}
+            loading={false}
+            loadingTitle="Hosts"
+            loadMore={jest.fn()}
+            onChange={mockOnChange}
+            pageOfItems={mockData.Hosts.edges}
+            sorting={{ direction: Direction.asc, field: 'node.host.name' }}
+            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          />
+        </ThemeProvider>
       );
 
       wrapper

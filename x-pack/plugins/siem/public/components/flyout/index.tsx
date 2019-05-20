@@ -12,12 +12,13 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { State, timelineActions, timelineSelectors } from '../../store';
-import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body';
+import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 
 import { FlyoutButton } from './button';
 import { Pane } from './pane';
+import { timelineActions } from '../../store/actions';
+import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 48;

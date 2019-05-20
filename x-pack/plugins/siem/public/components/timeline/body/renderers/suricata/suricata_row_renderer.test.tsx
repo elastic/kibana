@@ -13,8 +13,7 @@ import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData } from '../../../../../mock';
 import { TestProviders } from '../../../../../mock/test_providers';
-
-import { suricataRowRenderer } from '.';
+import { suricataRowRenderer } from './suricata_row_renderer';
 
 describe('suricata_row_renderer', () => {
   let nonSuricata: Ecs;

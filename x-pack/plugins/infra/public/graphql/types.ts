@@ -22,6 +22,8 @@ export interface InfraSource {
   version?: string | null;
   /** The timestamp the source configuration was last persisted at */
   updatedAt?: number | null;
+  /** The origin of the source (one of 'fallback', 'internal', 'stored') */
+  origin: string;
   /** The raw configuration of the source */
   configuration: InfraSourceConfiguration;
   /** The status of the source */
@@ -262,6 +264,8 @@ export interface InfraSnapshotNodePath {
   value: string;
 
   label: string;
+
+  ip?: string | null;
 }
 
 export interface InfraSnapshotNodeMetric {
@@ -597,13 +601,7 @@ export namespace FlyoutItemQuery {
     fields: Fields[];
   };
 
-  export type Key = {
-    __typename?: 'InfraTimeKey';
-
-    time: number;
-
-    tiebreaker: number;
-  };
+  export type Key = InfraTimeKeyFields.Fragment;
 
   export type Fields = {
     __typename?: 'InfraLogItemField';
@@ -874,6 +872,8 @@ export namespace WaffleNodesQuery {
     value: string;
 
     label: string;
+
+    ip?: string | null;
   };
 
   export type Metric = {
@@ -1053,6 +1053,8 @@ export namespace InfraSourceFields {
     version?: string | null;
 
     updatedAt?: number | null;
+
+    origin: string;
   };
 }
 
