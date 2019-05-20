@@ -85,10 +85,10 @@ export async function getEmsTMSServices() {
   return _.get(dataSource, 'ems.tms', []);
 }
 
-export async function getKibanaRegionList() {
+export function getKibanaRegionList() {
   return chrome.getInjected('regionmapLayers');
 }
 
-export async function getKibanaTileMap() {
+export function getKibanaTileMap() {
   return chrome.getInjected('tilemap');
 }

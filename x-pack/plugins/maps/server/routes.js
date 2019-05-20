@@ -72,7 +72,6 @@ export function initRoutes(server, licenseUid) {
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
-
       const tile = await fetch(url);
       const arrayBuffer = await tile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
