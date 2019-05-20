@@ -19,7 +19,14 @@ export const dataFrame = {
       method: 'GET'
     });
   },
-  getDataFrameTransformsStats() {
+  getDataFrameTransformsStats(jobId) {
+    if (jobId !== undefined) {
+      return http({
+        url: `${basePath}/_data_frame/transforms/${jobId}/_stats`,
+        method: 'GET'
+      });
+    }
+
     return http({
       url: `${basePath}/_data_frame/transforms/_stats`,
       method: 'GET'
