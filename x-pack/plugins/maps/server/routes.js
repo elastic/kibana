@@ -5,9 +5,9 @@
  */
 
 
-import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, GIS_API_PATH } from '../common/constants';
+import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, EMS_META_PATH, GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
-import _ from 'lodash';
+// import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { getEMSResources } from '../common/ems_util';
 
@@ -82,15 +82,13 @@ export function initRoutes(server, licenseUid) {
       response = response.header('Content-Disposition', 'inline');
       response = response.header('Content-type', 'image/png');
       response = response.encoding('binary');
-
-
       return response;
     }
   });
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/meta`,
+    path: `${ROOT}/${EMS_META_PATH}`,
     handler: async () => {
 
       let ems;
@@ -111,15 +109,9 @@ export function initRoutes(server, licenseUid) {
       }
 
       return ({
-        data_sources: {
-          ems: {
-            file: ems.fileLayers,
-            tms: ems.tmsServices
-          },
-          kibana: {
-            regionmap: _.get(mapConfig, 'regionmap.layers', []),
-            tilemap: _.get(mapConfig, 'tilemap', [])
-          }
+        ems: {
+          file: ems.fileLayers,
+          tms: ems.tmsServices
         }
       });
     }

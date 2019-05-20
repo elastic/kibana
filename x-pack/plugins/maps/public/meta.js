@@ -5,7 +5,7 @@
  */
 
 
-import { GIS_API_PATH } from '../common/constants';
+import { GIS_API_PATH, EMS_META_PATH } from '../common/constants';
 import _ from 'lodash';
 import { getEMSResources } from '../common/ems_util';
 import chrome from 'ui/chrome';
@@ -30,12 +30,11 @@ export async function getDataSources() {
 
   loadingMetaPromise = new Promise(async (resolve, reject) => {
     try {
-      const fullResponse = await fetch(`${GIS_API_RELATIVE}/meta`);
-      const fullMetaJson = await fullResponse.json();
-
       const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
-
-      if (!proxyElasticMapsServiceInMaps) {
+      if (proxyElasticMapsServiceInMaps) {
+        const fullResponse = await fetch(`${GIS_API_RELATIVE}/${EMS_META_PATH}`);
+        meta = await fullResponse.json();
+      } else {
         const emsClient = new EMSClient({
           language: i18n.getLocale(),
           kbnVersion: chrome.getInjected('kbnPkgVersion'),
@@ -49,13 +48,14 @@ export async function getDataSources() {
         const emsResponse = await getEMSResources(emsClient, isEmsEnabled, licenseId, !proxyElasticMapsServiceInMaps);
 
         //override EMS cors config
-        fullMetaJson.data_sources.ems = {
-          file: emsResponse.fileLayers,
-          tms: emsResponse.tmsServices
+        meta = {
+          ems: {
+            file: emsResponse.fileLayers,
+            tms: emsResponse.tmsServices
+          }
         };
       }
       isLoaded = true;
-      meta = fullMetaJson.data_sources;
       resolve(meta);
     } catch (e) {
       reject(e);
@@ -86,11 +86,13 @@ export async function getEmsTMSServices() {
 }
 
 export async function getKibanaRegionList() {
-  const dataSource = await getDataSources();
-  return _.get(dataSource, 'kibana.regionmap', []);
+  // const dataSource = await getDataSources();
+  // return _.get(dataSource, 'kibana.regionmap', []);
+  return chrome.getInjected('regionmapLayers');
 }
 
 export async function getKibanaTileMap() {
-  const dataSource = await getDataSources();
-  return _.get(dataSource, 'kibana.tilemap', {});
+  // const dataSource = await getDataSources();
+  // return _.get(dataSource, 'kibana.tilemap', {});
+  return chrome.getInjected('tilemap');
 }

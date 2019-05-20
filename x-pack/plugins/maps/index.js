@@ -18,6 +18,7 @@ import { initTelemetryCollection } from './server/maps_telemetry';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, createMapPath } from './common/constants';
 import { getAppTitle } from './common/i18n_getters';
+import _ from 'lodash';
 
 export function maps(kibana) {
 
@@ -39,13 +40,16 @@ export function maps(kibana) {
       injectDefaultVars(server) {
         const serverConfig = server.config();
         const mapConfig = serverConfig.get('map');
+
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
           proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
           emsManifestServiceUrl: mapConfig.manifestServiceUrl,
           emsLandingPageUrl: mapConfig.manifestServiceUrl,
-          kbnPkgVersion: serverConfig.get('pkg.version')
+          kbnPkgVersion: serverConfig.get('pkg.version'),
+          regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
+          tilemap: _.get(mapConfig, 'tilemap', [])
         };
       },
       embeddableFactories: [
