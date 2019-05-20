@@ -15,19 +15,19 @@ export function getInitialLayers(savedMapLayerListJSON) {
     return JSON.parse(savedMapLayerListJSON);
   }
 
-  if (!isMetaDataLoaded()) {
-    const descriptor = EMSTMSSource.createDescriptor(DEFAULT_EMS_TILE_LAYER);
-    const source = new EMSTMSSource(descriptor);
+  const tilemapSourceFromKibana = getKibanaTileMap();
+  if (_.get(tilemapSourceFromKibana, 'url')) {
+    const sourceDescriptor = KibanaTilemapSource.createDescriptor();
+    const source = new KibanaTilemapSource(sourceDescriptor);
     const layer = source.createDefaultLayer();
     return [
       layer.toLayerDescriptor()
     ];
   }
 
-  const tilemapSourceFromKibana = getKibanaTileMap();
-  if (_.get(tilemapSourceFromKibana, 'url')) {
-    const sourceDescriptor = KibanaTilemapSource.createDescriptor();
-    const source = new KibanaTilemapSource(sourceDescriptor);
+  if (!isMetaDataLoaded()) {
+    const descriptor = EMSTMSSource.createDescriptor(DEFAULT_EMS_TILE_LAYER);
+    const source = new EMSTMSSource(descriptor);
     const layer = source.createDefaultLayer();
     return [
       layer.toLayerDescriptor()
