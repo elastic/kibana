@@ -11,6 +11,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 interface KibanaContextValue {
   currentIndexPattern: StaticIndexPattern;
   indexPatterns: any;
+  kbnBaseUrl: string;
   kibanaConfig: any;
 }
 
@@ -25,6 +26,7 @@ export function isKibanaContext(arg: any): arg is KibanaContextValue {
   return (
     arg.currentIndexPattern !== undefined &&
     arg.indexPatterns !== undefined &&
+    typeof arg.kbnBaseUrl === 'string' &&
     arg.kibanaConfig !== undefined
   );
 }

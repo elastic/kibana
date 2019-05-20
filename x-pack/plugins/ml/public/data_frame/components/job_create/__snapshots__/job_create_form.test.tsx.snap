@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <DefinePivotForm /> Minimal initialization 1`] = `
+exports[`Data Frame: <JobCreateForm /> Minimal initialization 1`] = `
 <div>
   <ContextProvider
     value={
@@ -16,7 +16,17 @@ exports[`Data Frame: <DefinePivotForm /> Minimal initialization 1`] = `
     }
   >
     <Component
+      createIndexPattern={false}
+      jobConfig={Object {}}
+      jobId="the-job-id"
       onChange={[Function]}
+      overrides={
+        Object {
+          "created": false,
+          "indexPatternId": undefined,
+          "started": false,
+        }
+      }
     />
   </ContextProvider>
 </div>
