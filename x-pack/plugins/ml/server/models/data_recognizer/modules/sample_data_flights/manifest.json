@@ -1,7 +1,7 @@
 {
   "id": "sample_data_flights",
   "title": "Kibana sample data flights",
-  "description": "Find anomalies in mean flight delays",
+  "description": "Find anomalies in mean flight delay",
   "type": "Sample Dataset",
   "logoFile": "logo.json",
   "defaultIndexPattern": "kibana_sample_data_flights",
