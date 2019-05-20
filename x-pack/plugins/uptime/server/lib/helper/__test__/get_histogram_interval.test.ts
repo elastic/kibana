@@ -8,12 +8,28 @@ import { getHistogramInterval } from '../get_histogram_interval';
 
 describe('getHistogramInterval', () => {
   it('specifies the interval necessary to divide a given timespan into equal buckets, rounded to the nearest integer, expressed in ms', () => {
+    expect.assertions(3);
     const result = getHistogramInterval('now-15m', 'now', 10);
-    expect(result).toEqual('90000ms');
+    /**
+     * These assertions were verbatim comparisons but that introduced
+     * some flakiness at the ms resolution, sometimes values like "9001ms"
+     * are returned.
+     */
+    expect(result.startsWith('9000')).toBeTruthy();
+    expect(result.endsWith('ms')).toBeTruthy();
+    expect(result).toHaveLength(7);
   });
 
   it('will supply a default constant value for bucketCount when none is provided', () => {
+    expect.assertions(3);
     const result = getHistogramInterval('now-15m', 'now');
-    expect(result).toEqual('36000ms');
+    /**
+     * These assertions were verbatim comparisons but that introduced
+     * some flakiness at the ms resolution, sometimes values like "9001ms"
+     * are returned.
+     */
+    expect(result.startsWith('3600')).toBeTruthy();
+    expect(result.endsWith('ms')).toBeTruthy();
+    expect(result).toHaveLength(7);
   });
 });
