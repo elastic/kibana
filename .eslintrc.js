@@ -160,17 +160,6 @@ module.exports = {
     },
 
     /**
-     * Allow default exports
-     */
-    {
-      files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
-      rules: {
-        'import/no-default-export': 'off',
-        'import/no-named-as-default': 'off',
-      },
-    },
-
-    /**
      * Files that are allowed to import webpack-specific stuff
      */
     {
