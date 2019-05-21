@@ -79,10 +79,13 @@ export const addTimeline = actionCreator<{
   timeline: TimelineModel;
 }>('ADD_TIMELINE');
 
-export const updateIsSaving = actionCreator<{
+export const startTimelineSaving = actionCreator<{
   id: string;
-  isSaving: boolean;
-}>('UPDATE_SAVING');
+}>('START_TIMELINE_SAVING');
+
+export const endTimelineSaving = actionCreator<{
+  id: string;
+}>('END_TIMELINE_SAVING');
 
 export const updateIsLoading = actionCreator<{
   id: string;

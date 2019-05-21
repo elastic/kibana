@@ -7,7 +7,7 @@
 import gql from 'graphql-tag';
 
 export const persistTimelinePinnedEventMutation = gql`
-  mutation PersistTimelinePinnedEventMutation($pinnedEventId: ID, $eventId: ID!, $timelineId: ID!) {
+  mutation PersistTimelinePinnedEventMutation($pinnedEventId: ID, $eventId: ID!, $timelineId: ID) {
     persistPinnedEventOnTimeline(
       pinnedEventId: $pinnedEventId
       eventId: $eventId
@@ -16,6 +16,7 @@ export const persistTimelinePinnedEventMutation = gql`
       pinnedEventId
       eventId
       timelineId
+      timelineVersion
       created
       createdBy
       updated

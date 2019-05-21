@@ -51,7 +51,7 @@ export const createPinnedEventResolvers = (
         req,
         args.pinnedEventId || null,
         args.eventId,
-        args.timelineId
+        args.timelineId || null
       );
     },
     async deletePinnedEventOnTimeline(root, args, { req }) {

@@ -20,6 +20,11 @@ import {
 } from './types';
 import { pinnedEventSavedObjectType } from '.';
 import { PageInfoNote, SortNote } from '../../graphql/types';
+import {
+  convertSavedObjectToSavedTimeline,
+  timelineSavedObjectType,
+  pickSavedTimeline,
+} from '../timeline';
 
 export class PinnedEvent {
   constructor(
@@ -93,9 +98,22 @@ export class PinnedEvent {
     request: FrameworkRequest,
     pinnedEventId: string | null,
     eventId: string,
-    timelineId: string
+    timelineId: string | null
   ): Promise<PinnedEventSavedObject | null> {
+    let timelineVersionSavedObject = null;
     try {
+      if (timelineId == null) {
+        const timelineResult = convertSavedObjectToSavedTimeline(
+          await this.libs.savedObjects
+            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+            .create(
+              timelineSavedObjectType,
+              pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+            )
+        );
+        timelineId = timelineResult.savedObjectId;
+        timelineVersionSavedObject = timelineResult.version;
+      }
       if (pinnedEventId == null) {
         const allPinnedEventId = await this.getAllPinnedEventsByTimelineId(request, timelineId);
         const isPinnedAlreadyExisting = allPinnedEventId.filter(
@@ -117,7 +135,8 @@ export class PinnedEvent {
                   savedPinnedEvent,
                   request[internalFrameworkRequest].auth || null
                 )
-              )
+              ),
+            timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
           );
         }
         return isPinnedAlreadyExisting[0];
@@ -150,15 +169,21 @@ export class PinnedEvent {
       ...options,
     });
 
-    return savedObjects.saved_objects.map(convertSavedObjectToSavedPinnedEvent);
+    return savedObjects.saved_objects.map(savedObject =>
+      convertSavedObjectToSavedPinnedEvent(savedObject)
+    );
   }
 }
 
-const convertSavedObjectToSavedPinnedEvent = (savedObject: unknown): PinnedEventSavedObject =>
+const convertSavedObjectToSavedPinnedEvent = (
+  savedObject: unknown,
+  timelineVersion?: string | undefined | null
+): PinnedEventSavedObject =>
   PinnedEventSavedObjectRuntimeType.decode(savedObject)
     .map(savedPinnedEvent => ({
       pinnedEventId: savedPinnedEvent.id,
       version: savedPinnedEvent.version,
+      timelineVersion,
       ...savedPinnedEvent.attributes,
     }))
     .getOrElseL(errors => {

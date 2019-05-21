@@ -10,16 +10,22 @@ import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, empty, Observable } from 'rxjs';
-import { filter, mergeMap, switchMap, withLatestFrom, startWith } from 'rxjs/operators';
+import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
 import { persistTimelineNoteMutation } from '../../containers/timeline/notes/persist.gql_query';
 import { PersistTimelineNoteMutation, ResponseNote } from '../../graphql/types';
 import { updateNote } from '../app/actions';
 import { NotesById } from '../app/model';
 
-import { addNote, addNoteToEvent, updateTimeline, updateIsSaving } from './actions';
+import {
+  addNote,
+  addNoteToEvent,
+  endTimelineSaving,
+  updateTimeline,
+  startTimelineSaving,
+} from './actions';
 import { TimelineById } from './reducer';
-import { dispatcherTimelinePersistQueue, refetchQueries } from './epic';
+import { dispatcherTimelinePersistQueue, refetchQueries, myEpicTimelineId } from './epic';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 
@@ -28,6 +34,7 @@ export const epicPersistNote = (
   action: Action,
   timeline: TimelineById,
   notes: NotesById,
+  action$: Observable<Action>,
   timeline$: Observable<TimelineById>,
   notes$: Observable<NotesById>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,7 +52,7 @@ export const epicPersistNote = (
         note: {
           eventId: get('payload.eventId', action),
           note: getNote(get('payload.noteId', action), notes),
-          timelineId: timeline[get('payload.id', action)].savedObjectId,
+          timelineId: myEpicTimelineId.getTimelineId(),
         },
       },
       refetchQueries,
@@ -82,13 +89,32 @@ export const epicPersistNote = (
             version: response.note.version,
           },
         }),
-        updateIsSaving({
+        endTimelineSaving({
           id: get('payload.id', action),
-          isSaving: false,
         }),
       ].filter(item => item != null);
     }),
-    startWith(updateIsSaving({ id: get('payload.id', action), isSaving: true }))
+    startWith(startTimelineSaving({ id: get('payload.id', action) })),
+    takeUntil(
+      action$.pipe(
+        withLatestFrom(timeline$),
+        filter(([checkAction, updatedTimeline]) => {
+          if (
+            checkAction.type === endTimelineSaving.type &&
+            updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
+          ) {
+            myEpicTimelineId.setTimelineId(
+              updatedTimeline[get('payload.id', checkAction)].savedObjectId
+            );
+            myEpicTimelineId.setTimelineVersion(
+              updatedTimeline[get('payload.id', checkAction)].version
+            );
+            return true;
+          }
+          return false;
+        })
+      )
+    )
   );
 
 export const createTimelineNoteEpic = <State>(): Epic<Action, Action, State> => action$ =>

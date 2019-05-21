@@ -326,9 +326,11 @@ describe('StatefulOpenTimeline', () => {
 
       await wait();
 
+      wrapper.update();
+
       wrapper
         .find('thead tr th button')
-        .at(1)
+        .at(0)
         .simulate('click');
 
       wrapper.update();
@@ -341,7 +343,7 @@ describe('StatefulOpenTimeline', () => {
         search: '',
         selectedItems: [],
         sortDirection: 'asc',
-        sortField: 'description',
+        sortField: 'updated',
       });
     });
   });

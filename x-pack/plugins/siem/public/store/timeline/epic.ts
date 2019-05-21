@@ -17,6 +17,7 @@ import {
   mergeMap,
   concatMap,
   delay,
+  takeUntil,
 } from 'rxjs/operators';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
@@ -44,7 +45,6 @@ import {
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDescription,
-  updateIsSaving,
   updateKqlMode,
   updateProviders,
   updateRange,
@@ -52,12 +52,17 @@ import {
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
+  startTimelineSaving,
+  endTimelineSaving,
+  createTimeline,
+  addTimeline,
 } from './actions';
 import { TimelineModel } from './model';
 import { TimelineById } from './reducer';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
+import { ManageEpicTimelineId } from './manage_timeline_id';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -93,6 +98,8 @@ const timelineActionsType = [
 ];
 
 export const dispatcherTimelinePersistQueue = new Subject();
+
+export const myEpicTimelineId = new ManageEpicTimelineId();
 
 export const refetchQueries = [
   {
@@ -140,7 +147,14 @@ export const createTimelineEpic = <State>(): Epic<
       filter(([action, timeline]) => {
         const timelineId: TimelineModel = timeline[get('payload.id', action)];
         const columns: ColumnHeader[] = getOr([], 'columns', timelineId);
-        if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
+        if (action.type === createTimeline.type) {
+          myEpicTimelineId.setTimelineId(null);
+          myEpicTimelineId.setTimelineVersion(null);
+        } else if (action.type === addTimeline.type) {
+          const addNewTimeline: TimelineModel = get('payload.timeline', action);
+          myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
+          myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
+        } else if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
           if (
             action.type === addProvider.type &&
             columns.filter(col => col.type != null).length === 0
@@ -162,12 +176,15 @@ export const createTimelineEpic = <State>(): Epic<
       withLatestFrom(timeline$, apolloClient$, notes$, timelineTimeRange$),
       concatMap(([objAction, timeline, apolloClient, notes, timelineTimeRange]) => {
         const action: Action = get('action', objAction);
+        const timelineId = myEpicTimelineId.getTimelineId();
+        const version = myEpicTimelineId.getTimelineVersion();
+
         if (timelineNoteActionsType.includes(action.type)) {
-          return epicPersistNote(apolloClient, action, timeline, notes, timeline$, notes$);
+          return epicPersistNote(apolloClient, action, timeline, notes, action$, timeline$, notes$);
         } else if (timelinePinnedEventActionsType.includes(action.type)) {
-          return epicPersistPinnedEvent(apolloClient, action, timeline, timeline$);
+          return epicPersistPinnedEvent(apolloClient, action, timeline, action$, timeline$);
         } else if (timelineFavoriteActionsType.includes(action.type)) {
-          return epicPersistTimelineFavorite(apolloClient, action, timeline, timeline$);
+          return epicPersistTimelineFavorite(apolloClient, action, timeline, action$, timeline$);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             apolloClient.mutate<
@@ -177,8 +194,8 @@ export const createTimelineEpic = <State>(): Epic<
               mutation: persistTimelineMutation,
               fetchPolicy: 'no-cache',
               variables: {
-                timelineId: timeline[get('payload.id', action)].savedObjectId,
-                version: timeline[get('payload.id', action)].version,
+                timelineId,
+                version,
                 timeline: convertTimelineAsInput(
                   timeline[get('payload.id', action)],
                   timelineTimeRange
@@ -207,13 +224,32 @@ export const createTimelineEpic = <State>(): Epic<
                         isSaving: false,
                       },
                     }),
-                updateIsSaving({
+                endTimelineSaving({
                   id: get('payload.id', action),
-                  isSaving: false,
                 }),
               ];
             }),
-            startWith(updateIsSaving({ id: get('payload.id', action), isSaving: true }))
+            startWith(startTimelineSaving({ id: get('payload.id', action) })),
+            takeUntil(
+              action$.pipe(
+                withLatestFrom(timeline$),
+                filter(([checkAction, updatedTimeline]) => {
+                  if (
+                    checkAction.type === endTimelineSaving.type &&
+                    updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
+                  ) {
+                    myEpicTimelineId.setTimelineId(
+                      updatedTimeline[get('payload.id', checkAction)].savedObjectId
+                    );
+                    myEpicTimelineId.setTimelineVersion(
+                      updatedTimeline[get('payload.id', checkAction)].version
+                    );
+                    return true;
+                  }
+                  return false;
+                })
+              )
+            )
           );
         }
         return empty();

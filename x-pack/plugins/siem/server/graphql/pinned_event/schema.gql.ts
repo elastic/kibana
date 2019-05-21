@@ -15,6 +15,7 @@ export const pinnedEventSchema = gql`
     pinnedEventId: ID!
     eventId: ID
     timelineId: ID
+    timelineVersion: String
     created: Float
     createdBy: String
     updated: Float
@@ -28,7 +29,7 @@ export const pinnedEventSchema = gql`
 
   extend type Mutation {
     "Persists a pinned event in a timeline"
-    persistPinnedEventOnTimeline(pinnedEventId: ID, eventId: ID!, timelineId: ID!): PinnedEvent
+    persistPinnedEventOnTimeline(pinnedEventId: ID, eventId: ID!, timelineId: ID): PinnedEvent
     "Remove a pinned events in a timeline"
     deletePinnedEventOnTimeline(id: [ID!]!): Boolean!
     "Remove all pinned events in a timeline"

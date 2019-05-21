@@ -85,6 +85,8 @@ export interface PinnedEvent {
 
   timelineId?: string | null;
 
+  timelineVersion?: string | null;
+
   created?: number | null;
 
   createdBy?: string | null;
@@ -1944,7 +1946,7 @@ export interface PersistPinnedEventOnTimelineMutationArgs {
 
   eventId: string;
 
-  timelineId: string;
+  timelineId?: string | null;
 }
 export interface DeletePinnedEventOnTimelineMutationArgs {
   id: string[];
@@ -4724,7 +4726,7 @@ export namespace PersistTimelinePinnedEventMutation {
   export type Variables = {
     pinnedEventId?: string | null;
     eventId: string;
-    timelineId: string;
+    timelineId?: string | null;
   };
 
   export type Mutation = {
@@ -4741,6 +4743,8 @@ export namespace PersistTimelinePinnedEventMutation {
     eventId?: string | null;
 
     timelineId?: string | null;
+
+    timelineVersion?: string | null;
 
     created?: number | null;
 

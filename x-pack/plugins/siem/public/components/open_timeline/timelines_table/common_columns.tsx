@@ -89,7 +89,7 @@ export const getCommonColumns = ({
           {isUntitled(timelineResult) ? i18n.UNTITLED_TIMELINE : title}
         </div>
       ),
-    sortable: true,
+    sortable: false,
   },
   {
     dataType: 'string',
@@ -100,7 +100,7 @@ export const getCommonColumns = ({
         {description != null && description.trim().length > 0 ? description : getEmptyTagValue()}
       </span>
     ),
-    sortable: true,
+    sortable: false,
     width: showExtendedColumnsAndActions ? EXTENDED_COLUMNS_DESCRIPTION_WIDTH : DESCRIPTION_WIDTH,
   },
   {

@@ -10,14 +10,19 @@ import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, empty } from 'rxjs';
-import { filter, mergeMap, startWith, withLatestFrom } from 'rxjs/operators';
+import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
 import { persistTimelineFavoriteMutation } from '../../containers/timeline/favorite/persist.gql_query';
 import { PersistTimelineFavoriteMutation, ResponseFavoriteTimeline } from '../../graphql/types';
 
-import { updateIsFavorite, updateIsSaving, updateTimeline } from './actions';
+import {
+  endTimelineSaving,
+  updateIsFavorite,
+  updateTimeline,
+  startTimelineSaving,
+} from './actions';
 import { TimelineById } from './reducer';
-import { dispatcherTimelinePersistQueue, refetchQueries } from './epic';
+import { dispatcherTimelinePersistQueue, refetchQueries, myEpicTimelineId } from './epic';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
@@ -25,6 +30,7 @@ export const epicPersistTimelineFavorite = (
   apolloClient: ApolloClient<NormalizedCacheObject>,
   action: Action,
   timeline: TimelineById,
+  action$: Observable<Action>,
   timeline$: Observable<TimelineById>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
@@ -36,7 +42,7 @@ export const epicPersistTimelineFavorite = (
       mutation: persistTimelineFavoriteMutation,
       fetchPolicy: 'no-cache',
       variables: {
-        timelineId: timeline[get('payload.id', action)].savedObjectId,
+        timelineId: myEpicTimelineId.getTimelineId(),
       },
       refetchQueries,
     })
@@ -55,13 +61,32 @@ export const epicPersistTimelineFavorite = (
             version: response.version || null,
           },
         }),
-        updateIsSaving({
+        endTimelineSaving({
           id: get('payload.id', action),
-          isSaving: false,
         }),
       ];
     }),
-    startWith(updateIsSaving({ id: get('payload.id', action), isSaving: true }))
+    startWith(startTimelineSaving({ id: get('payload.id', action) })),
+    takeUntil(
+      action$.pipe(
+        withLatestFrom(timeline$),
+        filter(([checkAction, updatedTimeline]) => {
+          if (
+            checkAction.type === endTimelineSaving.type &&
+            updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
+          ) {
+            myEpicTimelineId.setTimelineId(
+              updatedTimeline[get('payload.id', checkAction)].savedObjectId
+            );
+            myEpicTimelineId.setTimelineVersion(
+              updatedTimeline[get('payload.id', checkAction)].version
+            );
+            return true;
+          }
+          return false;
+        })
+      )
+    )
   );
 
 export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => action$ => {

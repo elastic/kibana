@@ -350,52 +350,63 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
           id: 'timeline-1',
           timeline: {
             ...assign(this.props.timeline, timelineModel),
-            eventIdToNoteIds:
-              timelineModel.eventIdToNoteIds != null
-                ? timelineModel.eventIdToNoteIds.reduce((acc, note) => {
-                    if (note.eventId != null) {
-                      const eventNotes = getOr([], note.eventId, acc);
-                      return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
-                    }
-                    return acc;
-                  }, {})
-                : {},
-            isFavorite: timelineModel.favorite != null ? timelineModel.favorite.length > 0 : false,
+            eventIdToNoteIds: duplicate
+              ? {}
+              : timelineModel.eventIdToNoteIds != null
+              ? timelineModel.eventIdToNoteIds.reduce((acc, note) => {
+                  if (note.eventId != null) {
+                    const eventNotes = getOr([], note.eventId, acc);
+                    return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
+                  }
+                  return acc;
+                }, {})
+              : {},
+            isFavorite: duplicate
+              ? false
+              : timelineModel.favorite != null
+              ? timelineModel.favorite.length > 0
+              : false,
             isLive: false,
             isSaving: false,
             itemsPerPage: 25,
-            pinnedEventIds:
-              timelineModel.pinnedEventIds != null
-                ? timelineModel.pinnedEventIds.reduce(
-                    (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-                    {}
-                  )
-                : {},
-            pinnedEventsSaveObject:
-              timelineModel.pinnedEventsSaveObject != null
-                ? timelineModel.pinnedEventsSaveObject.reduce(
-                    (acc, pinnedEvent) => ({ ...acc, [pinnedEvent.pinnedEventId]: pinnedEvent }),
-                    {}
-                  )
-                : {},
+            noteIds: duplicate ? [] : timelineModel.noteIds != null ? timelineModel.noteIds : [],
+            pinnedEventIds: duplicate
+              ? {}
+              : timelineModel.pinnedEventIds != null
+              ? timelineModel.pinnedEventIds.reduce(
+                  (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
+                  {}
+                )
+              : {},
+            pinnedEventsSaveObject: duplicate
+              ? {}
+              : timelineModel.pinnedEventsSaveObject != null
+              ? timelineModel.pinnedEventsSaveObject.reduce(
+                  (acc, pinnedEvent) => ({ ...acc, [pinnedEvent.pinnedEventId]: pinnedEvent }),
+                  {}
+                )
+              : {},
             savedObjectId: duplicate ? null : timelineModel.savedObjectId,
+            version: duplicate ? null : timelineModel.version,
             title: duplicate ? '' : timelineModel.title || '',
           },
         });
-        addNotes({
-          notes:
-            notes != null
-              ? notes.map<Note>(note => ({
-                  created: note.created != null ? new Date(note.created) : new Date(),
-                  id: note.noteId,
-                  lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
-                  note: note.note || '',
-                  user: note.updatedBy || 'unknown',
-                  saveObjectId: note.noteId,
-                  version: note.version,
-                }))
-              : [],
-        });
+        if (!duplicate) {
+          addNotes({
+            notes:
+              notes != null
+                ? notes.map<Note>(note => ({
+                    created: note.created != null ? new Date(note.created) : new Date(),
+                    id: note.noteId,
+                    lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
+                    note: note.note || '',
+                    user: note.updatedBy || 'unknown',
+                    saveObjectId: note.noteId,
+                    version: note.version,
+                  }))
+                : [],
+          });
+        }
       })
       .finally(() => {
         updateIsLoading({ id: 'timeline-1', isLoading: false });

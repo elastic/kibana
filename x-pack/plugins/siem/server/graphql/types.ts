@@ -114,6 +114,8 @@ export interface PinnedEvent {
 
   timelineId?: string | null;
 
+  timelineVersion?: string | null;
+
   created?: number | null;
 
   createdBy?: string | null;
@@ -1973,7 +1975,7 @@ export interface PersistPinnedEventOnTimelineMutationArgs {
 
   eventId: string;
 
-  timelineId: string;
+  timelineId?: string | null;
 }
 export interface DeletePinnedEventOnTimelineMutationArgs {
   id: string[];
@@ -2303,6 +2305,8 @@ export namespace PinnedEventResolvers {
 
     timelineId?: TimelineIdResolver<string | null, TypeParent, Context>;
 
+    timelineVersion?: TimelineVersionResolver<string | null, TypeParent, Context>;
+
     created?: CreatedResolver<number | null, TypeParent, Context>;
 
     createdBy?: CreatedByResolver<string | null, TypeParent, Context>;
@@ -2325,6 +2329,11 @@ export namespace PinnedEventResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TimelineIdResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TimelineVersionResolver<
     R = string | null,
     Parent = PinnedEvent,
     Context = SiemContext
@@ -6931,7 +6940,7 @@ export namespace MutationResolvers {
 
     eventId: string;
 
-    timelineId: string;
+    timelineId?: string | null;
   }
 
   export type DeletePinnedEventOnTimelineResolver<

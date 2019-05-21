@@ -23,6 +23,6 @@ export const getExtendedColumns = () => [
     render: (updatedBy: OpenTimelineResult['updatedBy']) => (
       <div data-test-subj="username">{defaultToEmptyTag(updatedBy)}</div>
     ),
-    sortable: true,
+    sortable: false,
   },
 ];

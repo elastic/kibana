@@ -148,27 +148,23 @@ export class Timeline {
         ),
       };
     }
-    // Update Timeline
+
     try {
+      // Update Timeline
+      await this.libs.savedObjects
+        .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+        .update(
+          timelineSavedObjectType,
+          timelineId,
+          pickSavedTimeline(timelineId, timeline, request[internalFrameworkRequest].auth || null),
+          {
+            version: version || undefined,
+          }
+        );
       return {
         code: 200,
         message: 'success',
-        timeline: convertSavedObjectToSavedTimeline(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .update(
-              timelineSavedObjectType,
-              timelineId,
-              pickSavedTimeline(
-                timelineId,
-                timeline,
-                request[internalFrameworkRequest].auth || null
-              ),
-              {
-                version: version || undefined,
-              }
-            )
-        ),
+        timeline: await this.getSavedTimeline(request, timelineId),
       };
     } catch (err) {
       if (this.libs.savedObjects.SavedObjectsClient.errors.isConflictError(err)) {

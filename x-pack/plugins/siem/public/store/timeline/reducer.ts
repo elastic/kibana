@@ -18,11 +18,13 @@ import {
   applyKqlFilterQuery,
   createTimeline,
   dataProviderEdited,
+  endTimelineSaving,
   pinEvent,
   removeColumn,
   removeProvider,
   setKqlFilterQueryDraft,
   showTimeline,
+  startTimelineSaving,
   unPinEvent,
   updateAutoSaveMsg,
   updateColumns,
@@ -33,7 +35,6 @@ import {
   updateHighlightedDropAndProviderId,
   updateIsFavorite,
   updateIsLive,
-  updateIsSaving,
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateKqlMode,
@@ -219,13 +220,23 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       andProviderId,
     }),
   }))
-  .case(updateIsSaving, (state, { id, isSaving }) => ({
+  .case(startTimelineSaving, (state, { id }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
       [id]: {
         ...state.timelineById[id],
-        isSaving,
+        isSaving: true,
+      },
+    },
+  }))
+  .case(endTimelineSaving, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isSaving: false,
       },
     },
   }))
