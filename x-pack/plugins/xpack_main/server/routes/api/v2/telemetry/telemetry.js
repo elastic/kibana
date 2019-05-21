@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
-import { getAllStats, getLocalStats } from '../../../../lib/telemetry';
+import { getAllStats, getLocalStats, encryptTelemetry } from '../../../../lib/telemetry';
 
 /**
  * Get the telemetry data.
@@ -15,15 +15,18 @@ import { getAllStats, getLocalStats } from '../../../../lib/telemetry';
  * @param {Object} config Kibana config.
  * @param {String} start The start time of the request (likely 20m ago).
  * @param {String} end The end time of the request.
+ * @param {Boolean} unencrypted Is the request payload going to be unencrypted.
  * @return {Promise} An array of telemetry objects.
  */
-export async function getTelemetry(req, config, start, end, { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = {}) {
+export async function getTelemetry(req, config, start, end, unencrypted, statsGetters = {}) {
+  const { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = statsGetters;
   let response = [];
+  const useInternalUser = !unencrypted;
 
   if (config.get('xpack.monitoring.enabled')) {
     try {
       // attempt to collect stats from multiple clusters in monitoring data
-      response = await _getAllStats(req, start, end);
+      response = await _getAllStats(req, start, end, { useInternalUser });
     } catch (err) {
       // no-op
     }
@@ -31,7 +34,7 @@ export async function getTelemetry(req, config, start, end, { _getAllStats = get
 
   if (!Array.isArray(response) || response.length === 0) {
     // return it as an array for a consistent API response
-    response = [await _getLocalStats(req)];
+    response = [await _getLocalStats(req, { useInternalUser })];
   }
 
   return response;
@@ -43,7 +46,7 @@ export function telemetryRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/telemetry/v1/optIn',
+    path: '/api/telemetry/v2/optIn',
     config: {
       validate: {
         payload: Joi.object({
@@ -76,10 +79,11 @@ export function telemetryRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/telemetry/v1/clusters/_stats',
+    path: '/api/telemetry/v2/clusters/_stats',
     config: {
       validate: {
         payload: Joi.object({
+          unencrypted: Joi.bool(),
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required()
@@ -91,16 +95,21 @@ export function telemetryRoute(server) {
       const config = req.server.config();
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
+      const unencrypted = req.payload.unencrypted;
+      const isDev = config.get('env.dev');
 
       try {
-        return await getTelemetry(req, config, start, end);
+        const usageData = await getTelemetry(req, config, start, end, unencrypted);
+        if (unencrypted) return usageData;
+        return encryptTelemetry(usageData, isDev);
       } catch (err) {
-        if (config.get('env.dev')) {
-        // don't ignore errors when running in dev mode
+        if (isDev) {
+          // don't ignore errors when running in dev mode
           return boomify(err, { statusCode: err.status });
         } else {
-        // ignore errors, return empty set and a 200
-          return h.response([]).code(200);
+          const statusCode = unencrypted && err.status === 403 ? 403 : 200;
+          // ignore errors and return empty set
+          return h.response([]).code(statusCode);
         }
       }
     }
