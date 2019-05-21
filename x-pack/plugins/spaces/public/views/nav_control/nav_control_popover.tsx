@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
 import React, { Component, ComponentClass } from 'react';
+import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -159,6 +161,18 @@ export class NavControlPopover extends Component<Props, State> {
   };
 
   private onSelectSpace = (space: Space) => {
-    this.props.spacesManager.changeSelectedSpace(space);
+    toastNotifications.add({
+      title: i18n.translate(
+        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
+        {
+          defaultMessage: 'Switching to {spaceName} space',
+          values: {
+            spaceName: space.name,
+          },
+        }
+      ),
+    });
+    console.log(space);
+    // this.props.spacesManager.changeSelectedSpace(space);
   };
 }

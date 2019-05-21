@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFieldSearch,
+  EuiText,
+  EuiGlobalToastList,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
@@ -163,6 +170,12 @@ class SpacesMenuUI extends Component<Props, State> {
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
     const icon = <SpaceAvatar space={space} size={'s'} />;
+    const itemAriaLabel = i18n.translate('xpack.spaces.headerNavigationSwitchAriaLabel', {
+      defaultMessage: '; Switch to {spaceName} space',
+      values: {
+        spaceName: space.name,
+      },
+    });
     return (
       <EuiContextMenuItem
         key={space.id}
@@ -170,6 +183,7 @@ class SpacesMenuUI extends Component<Props, State> {
         onClick={this.props.onSelectSpace.bind(this, space)}
         toolTipTitle={space.description && space.name}
         toolTipContent={space.description}
+        aria-label={itemAriaLabel}
       >
         {space.name}
       </EuiContextMenuItem>

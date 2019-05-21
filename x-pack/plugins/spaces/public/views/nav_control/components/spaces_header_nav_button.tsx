@@ -13,16 +13,17 @@ import { ButtonProps } from '../types';
 
 export class SpacesHeaderNavButton extends Component<ButtonProps> {
   public render() {
+    const { spaceSelectorShown, linkTitle, linkIcon, toggleSpaceSelector } = this.props;
     return (
       <EuiHeaderSectionItemButton
         aria-controls="headerSpacesMenuList"
-        aria-expanded={this.props.spaceSelectorShown}
+        aria-expanded={spaceSelectorShown}
         aria-haspopup="true"
-        aria-label={this.props.linkTitle}
-        title={this.props.linkTitle}
-        onClick={this.props.toggleSpaceSelector}
+        aria-label={linkTitle}
+        title={linkTitle}
+        onClick={toggleSpaceSelector}
       >
-        {this.props.linkIcon}
+        {linkIcon}
       </EuiHeaderSectionItemButton>
     );
   }
