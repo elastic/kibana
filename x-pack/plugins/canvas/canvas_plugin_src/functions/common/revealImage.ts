@@ -9,11 +9,19 @@ import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
 import { ContextFunction, Render } from '../types';
+import { getFunctionHelp } from '../../strings';
+
+export enum Origin {
+  TOP = 'top',
+  LEFT = 'left',
+  BOTTOM = 'bottom',
+  RIGHT = 'right',
+}
 
 interface Arguments {
   image: string | null;
   emptyImage: string | null;
-  origin: 'top' | 'left' | 'bottom' | 'right';
+  origin: Origin;
 }
 
 export function revealImage(): ContextFunction<
@@ -22,30 +30,32 @@ export function revealImage(): ContextFunction<
   Arguments,
   Render<Arguments>
 > {
+  const { help, args: argHelp } = getFunctionHelp().revealImage;
+
   return {
     name: 'revealImage',
     aliases: [],
     type: 'render',
-    help: 'Configure a image reveal element',
+    help,
     context: {
       types: ['number'],
     },
     args: {
       image: {
         types: ['string', 'null'],
-        help: 'The image to reveal',
+        help: argHelp.image,
         default: elasticOutline,
       },
       emptyImage: {
         types: ['string', 'null'],
-        help: 'An optional background image to reveal over',
+        help: argHelp.emptyImage,
         default: null,
       },
       origin: {
         types: ['string'],
-        help: 'Where to start from. Eg, top, left, bottom or right',
+        help: argHelp.origin,
         default: 'bottom',
-        options: ['top', 'left', 'bottom', 'right'],
+        options: Object.values(Origin),
       },
     },
     fn: (percent, args) => {

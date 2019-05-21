@@ -34,6 +34,7 @@ const collectors: TelemetryCollector[] = [workpadCollector, customElementCollect
 export function registerCanvasUsageCollector(server: Legacy.Server) {
   const canvasCollector = server.usage.collectorSet.makeUsageCollector({
     type: CANVAS_USAGE_TYPE,
+    isReady: () => true,
     fetch: async (callCluster: CallCluster) => {
       const collectorResults = await Promise.all(
         collectors.map(collector => collector(server, callCluster))

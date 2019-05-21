@@ -23,13 +23,25 @@ interface Props {
   onLoadMore: (afterKey: string | null) => void;
   onRefetch: () => void;
   onFilter: (filter: string) => void;
+  onTimeChange: (start: string, end: string) => void;
   data: MetricsExplorerResponse | null;
   intl: InjectedIntl;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = injectI18n(
-  ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter, source, timeRange }: Props) => {
+  ({
+    loading,
+    data,
+    onLoadMore,
+    options,
+    onRefetch,
+    intl,
+    onFilter,
+    source,
+    timeRange,
+    onTimeChange,
+  }: Props) => {
     if (!data && loading) {
       return (
         <InfraLoadingPanel
@@ -78,6 +90,7 @@ export const MetricsExplorerCharts = injectI18n(
                 series={series}
                 source={source}
                 timeRange={timeRange}
+                onTimeChange={onTimeChange}
               />
             </EuiFlexItem>
           ))}
