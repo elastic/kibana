@@ -3652,6 +3652,13 @@
     "@types/history" "*"
     "@types/react" "*"
 
+"@types/react-sticky@^6.0.3":
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/@types/react-sticky/-/react-sticky-6.0.3.tgz#94d16a951467b29ad44c224081d9503e7e590434"
+  integrity sha512-tW0Y1hTr2Tao4yX58iKl0i7BaqrdObGXAzsyzd8VGVrWVEgbQuV6P6QKVd/kFC7FroXyelftiVNJ09pnfkcjww==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-test-renderer@^16.8.0":
   version "16.8.1"
   resolved "https://registry.yarnpkg.com/@types/react-test-renderer/-/react-test-renderer-16.8.1.tgz#96f3ce45a3a41c94eca532a99103dd3042c9d055"
