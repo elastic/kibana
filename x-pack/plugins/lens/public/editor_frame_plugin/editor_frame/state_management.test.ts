@@ -33,14 +33,14 @@ describe('editor_frame state management', () => {
 
       const initialState = getInitialState(props);
 
-      expect(initialState.visualization.stateMap.testVis).toBe(initialVisState);
+      expect(initialState.visualization.state).toBe(initialVisState);
       expect(props.visualizationMap.testVis.initialize).toHaveBeenCalled();
     });
 
     it('should not initialize visualization if no initial visualization is passed in', () => {
       const initialState = getInitialState({ ...props, initialVisualizationId: null });
 
-      expect(initialState.visualization.stateMap).toEqual({});
+      expect(initialState.visualization.state).toEqual(null);
       expect(props.visualizationMap.testVis.initialize).not.toHaveBeenCalled();
     });
   });
@@ -57,9 +57,7 @@ describe('editor_frame state management', () => {
           },
           visualization: {
             activeId: 'testVis',
-            stateMap: {
-              testVis: {},
-            },
+            state: {},
           },
         },
         {
@@ -68,9 +66,7 @@ describe('editor_frame state management', () => {
         }
       );
 
-      expect(newState.visualization.stateMap).toEqual({
-        testVis: newVisState,
-      });
+      expect(newState.visualization.state).toBe(newVisState);
     });
 
     it('should update the datasource state on update', () => {
@@ -84,9 +80,7 @@ describe('editor_frame state management', () => {
           },
           visualization: {
             activeId: 'testVis',
-            stateMap: {
-              testVis: {},
-            },
+            state: {},
           },
         },
         {
@@ -98,7 +92,7 @@ describe('editor_frame state management', () => {
       expect(newState.datasource.state).toBe(newDatasourceState);
     });
 
-    it('should should switch active visualization but dont loose old state', () => {
+    it('should should switch active visualization', () => {
       const testVisState = {};
       const newVisState = {};
       const newState = reducer(
@@ -110,9 +104,7 @@ describe('editor_frame state management', () => {
           },
           visualization: {
             activeId: 'testVis',
-            stateMap: {
-              testVis: testVisState,
-            },
+            state: testVisState,
           },
         },
         {
@@ -122,8 +114,7 @@ describe('editor_frame state management', () => {
         }
       );
 
-      expect(newState.visualization.stateMap.testVis).toBe(testVisState);
-      expect(newState.visualization.stateMap.testVis2).toBe(newVisState);
+      expect(newState.visualization.state).toBe(newVisState);
     });
 
     it('should should switch active visualization and update datasource state', () => {
@@ -139,9 +130,7 @@ describe('editor_frame state management', () => {
           },
           visualization: {
             activeId: 'testVis',
-            stateMap: {
-              testVis: testVisState,
-            },
+            state: testVisState,
           },
         },
         {
@@ -152,8 +141,7 @@ describe('editor_frame state management', () => {
         }
       );
 
-      expect(newState.visualization.stateMap.testVis).toBe(testVisState);
-      expect(newState.visualization.stateMap.testVis2).toBe(newVisState);
+      expect(newState.visualization.state).toBe(newVisState);
       expect(newState.datasource.state).toBe(newDatasourceState);
     });
 
@@ -167,9 +155,7 @@ describe('editor_frame state management', () => {
           },
           visualization: {
             activeId: 'testVis',
-            stateMap: {
-              testVis: {},
-            },
+            state: {},
           },
         },
         {
@@ -178,7 +164,7 @@ describe('editor_frame state management', () => {
         }
       );
 
-      expect(newState.visualization.stateMap).toEqual({});
+      expect(newState.visualization.state).toEqual(null);
       expect(newState.visualization.activeId).toBe(null);
       expect(newState.datasource.activeId).toBe('testDatasource2');
       expect(newState.datasource.state).toBe(null);

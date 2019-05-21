@@ -14,7 +14,7 @@ interface SuggestionPanelProps {
   datasourceState: unknown;
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
-  activeVisualizationState: unknown;
+  visualizationState: unknown;
   datasourcePublicAPI: DatasourcePublicAPI;
   dispatch: (action: Action) => void;
 }
@@ -24,7 +24,7 @@ export function SuggestionPanel({
   datasourceState,
   activeVisualizationId,
   visualizationMap,
-  activeVisualizationState,
+  visualizationState,
   datasourcePublicAPI,
   dispatch,
 }: SuggestionPanelProps) {
@@ -36,7 +36,7 @@ export function SuggestionPanel({
     datasourceSuggestions,
     visualizationMap,
     activeVisualizationId,
-    activeVisualizationState,
+    visualizationState,
     datasourcePublicAPI
   );
 

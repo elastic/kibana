@@ -15,7 +15,7 @@ interface WorkspacePanelProps {
   datasourceState: unknown;
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
-  activeVisualizationState: unknown;
+  visualizationState: unknown;
   datasourcePublicAPI: DatasourcePublicAPI;
   dispatch: (action: Action) => void;
 }
@@ -35,7 +35,7 @@ export function WorkspacePanel({
   activeVisualizationId,
   datasourceState,
   visualizationMap,
-  activeVisualizationState,
+  visualizationState,
   datasourcePublicAPI,
   dispatch,
 }: WorkspacePanelProps) {
@@ -48,7 +48,7 @@ export function WorkspacePanel({
       datasourceSuggestions,
       visualizationMap,
       activeVisualizationId,
-      activeVisualizationState,
+      visualizationState,
       datasourcePublicAPI
     );
 
@@ -72,7 +72,7 @@ export function WorkspacePanel({
     const activeVisualization = visualizationMap[activeVisualizationId];
     const datasourceExpression = activeDatasource.toExpression(datasourceState);
     const visualizationExpression = activeVisualization.toExpression(
-      activeVisualizationState,
+      visualizationState,
       datasourcePublicAPI
     );
     const expression = `${datasourceExpression} | ${visualizationExpression}`;

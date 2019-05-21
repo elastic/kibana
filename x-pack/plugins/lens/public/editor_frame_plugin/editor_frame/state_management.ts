@@ -9,9 +9,7 @@ import { EditorFrameProps } from '.';
 export interface EditorFrameState {
   visualization: {
     activeId: string | null;
-    stateMap: {
-      [visualizationId: string]: unknown;
-    };
+    state: unknown;
   };
   datasource: {
     activeId: string | null;
@@ -48,13 +46,9 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       activeId: props.initialDatasourceId,
     },
     visualization: {
-      stateMap: props.initialVisualizationId
-        ? {
-            [props.initialVisualizationId]: props.visualizationMap[
-              props.initialVisualizationId
-            ].initialize(),
-          }
-        : {},
+      state: props.initialVisualizationId
+        ? props.visualizationMap[props.initialVisualizationId].initialize()
+        : null,
       activeId: props.initialVisualizationId,
     },
   };
@@ -73,8 +67,8 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         },
         visualization: {
           ...state.visualization,
-          // purge all visualizations on datasource switch
-          stateMap: {},
+          // purge visualization on datasource switch
+          state: null,
           activeId: null,
         },
       };
@@ -84,10 +78,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         visualization: {
           ...state.visualization,
           activeId: action.newVisualizationId,
-          stateMap: {
-            ...state.visualization.stateMap,
-            [action.newVisualizationId]: action.initialState,
-          },
+          state: action.initialState,
         },
         datasource: {
           ...state.datasource,
@@ -112,10 +103,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         visualization: {
           ...state.visualization,
-          stateMap: {
-            ...state.visualization.stateMap,
-            [state.visualization.activeId]: action.newState,
-          },
+          state: action.newState,
         },
       };
     default:

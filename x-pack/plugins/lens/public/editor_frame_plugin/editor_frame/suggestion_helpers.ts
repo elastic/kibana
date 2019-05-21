@@ -27,12 +27,12 @@ export function getSuggestions(
   datasourceTableSuggestions: DatasourceSuggestion[],
   visualizationMap: Record<string, Visualization>,
   activeVisualizationId: string | null,
-  activeVisualizationState: unknown,
+  visualizationState: unknown,
   datasourcePublicAPI: DatasourcePublicAPI
 ): Suggestion[] {
   const roleMapping = activeVisualizationId
     ? visualizationMap[activeVisualizationId].getMappingOfTableToRoles(
-        activeVisualizationState,
+        visualizationState,
         datasourcePublicAPI
       )
     : [];

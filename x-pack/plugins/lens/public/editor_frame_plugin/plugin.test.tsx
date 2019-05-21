@@ -7,7 +7,7 @@
 import { EditorFramePlugin } from './plugin';
 import { createMockDatasource, createMockVisualization } from './mock_extensions';
 
-const nextTick = () => new Promise(resolve => setTimeout(resolve));
+const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 describe('editor_frame plugin', () => {
   let pluginInstance: EditorFramePlugin;
@@ -58,7 +58,7 @@ describe('editor_frame plugin', () => {
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint);
 
-    await nextTick();
+    await waitForPromises();
 
     expect(mockDatasource.initialize).toHaveBeenCalled();
     expect(mockDatasource.renderDataPanel).toHaveBeenCalled();
@@ -77,7 +77,7 @@ describe('editor_frame plugin', () => {
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint);
 
-    await nextTick();
+    await waitForPromises();
 
     expect(mockVisualization.initialize).toHaveBeenCalled();
     expect(mockVisualization.renderConfigPanel).toHaveBeenCalled();

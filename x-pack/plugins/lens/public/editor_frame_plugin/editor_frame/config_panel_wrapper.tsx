@@ -11,7 +11,7 @@ import { Action } from './state_management';
 import { Visualization, DatasourcePublicAPI } from '../../types';
 
 interface ConfigPanelWrapperProps {
-  visualizationStateMap: Record<string, unknown>;
+  visualizationState: unknown;
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
@@ -52,7 +52,7 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
         <NativeRenderer
           render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
           nativeProps={{
-            state: props.visualizationStateMap[props.activeVisualizationId],
+            state: props.visualizationState,
             setState: setVisualizationState,
             datasource: props.datasourcePublicAPI,
           }}

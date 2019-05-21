@@ -85,9 +85,9 @@ export function EditorFrame(props: EditorFrameProps) {
           <ConfigPanelWrapper
             visualizationMap={props.visualizationMap}
             activeVisualizationId={state.visualization.activeId}
-            visualizationStateMap={state.visualization.stateMap}
             datasourcePublicAPI={datasourcePublicAPI!}
             dispatch={dispatch}
+            visualizationState={state.visualization.state}
           />
         }
         workspacePanel={
@@ -96,10 +96,7 @@ export function EditorFrame(props: EditorFrameProps) {
             activeVisualizationId={state.visualization.activeId}
             datasourcePublicAPI={datasourcePublicAPI!}
             datasourceState={state.datasource.state}
-            activeVisualizationState={
-              state.visualization.activeId &&
-              state.visualization.stateMap[state.visualization.activeId]
-            }
+            visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}
             dispatch={dispatch}
           />
@@ -110,10 +107,7 @@ export function EditorFrame(props: EditorFrameProps) {
             activeVisualizationId={state.visualization.activeId}
             datasourcePublicAPI={datasourcePublicAPI!}
             datasourceState={state.datasource.state}
-            activeVisualizationState={
-              state.visualization.activeId &&
-              state.visualization.stateMap[state.visualization.activeId]
-            }
+            visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}
             dispatch={dispatch}
           />

@@ -29,12 +29,16 @@ export class EditorFramePlugin {
       mount: element => {
         unmount();
         domElement = element;
+
+        const firstDatasourceId = Object.keys(this.datasources)[0];
+        const firstVisualizationId = Object.keys(this.visualizations)[0];
+
         render(
           <EditorFrame
             datasourceMap={this.datasources}
             visualizationMap={this.visualizations}
-            initialDatasourceId={Object.keys(this.datasources)[0]}
-            initialVisualizationId={Object.keys(this.visualizations)[0]}
+            initialDatasourceId={firstDatasourceId || null}
+            initialVisualizationId={firstVisualizationId || null}
           />,
           domElement
         );
