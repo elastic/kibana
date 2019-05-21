@@ -6147,7 +6147,6 @@
     "xpack.ml.jobsBreadcrumbs.singleMetricLabel": "单一指标",
     "xpack.ml.jobSelect.noJobsSelectedWarningMessage": "未选择作业，将自动选择第一个作业",
     "xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage": "已请求\n{invalidIdsLength, plural, one { 个作业 {invalidIds} 不存在} other { 个作业 {invalidIds} 不存在}}",
-    "xpack.ml.jobSelect.wholeGroupDescription": "{wholeGroup}（具有 {count, plural, zero {# 个作业} one {# 个作业} other {# 个作业}}）以及\n            {total, plural, zero {# 个其他} one {# 个其他} other {# 个其他}}",
     "xpack.ml.jobSelectList.groupTimeRangeLabel": "{fromString} 到 {toString}",
     "xpack.ml.jobSelector.applyFlyoutButton": "应用",
     "xpack.ml.jobSelector.applyTimerangeSwitchLabel": "应用时间范围",
