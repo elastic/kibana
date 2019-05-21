@@ -121,7 +121,7 @@ export class SidebarHeader extends Component<Props, State> {
     sendToBack: PropTypes.func.isRequired,
     createCustomElement: PropTypes.func.isRequired,
     groupIsSelected: PropTypes.bool,
-    selectedNodes: PropTypes.array.isRequired,
+    selectedNodes: PropTypes.array,
     groupNodes: PropTypes.func.isRequired,
     ungroupNodes: PropTypes.func.isRequired,
   };
@@ -129,6 +129,7 @@ export class SidebarHeader extends Component<Props, State> {
   public static defaultProps = {
     groupIsSelected: false,
     showLayerControls: false,
+    selectedNodes: [],
   };
 
   public state = {
