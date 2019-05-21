@@ -83,7 +83,7 @@ export class Plugin {
   private log: Logger;
 
   constructor(private readonly initializerContext: SpacesInitializerContext) {
-    this.config$ = initializerContext.config.create(SpacesConfig);
+    this.config$ = initializerContext.config.create<SpacesConfig>();
     this.log = initializerContext.logger.get('spaces');
   }
 

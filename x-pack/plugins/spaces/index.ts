@@ -111,9 +111,9 @@ export const spaces = (kibana: Record<string, any>) =>
       const initializerContext = ({
         legacyConfig: server.config(),
         config: {
-          create: (ConfigClass: typeof SpacesConfig) => {
+          create: () => {
             return Rx.of(
-              new ConfigClass({
+              new SpacesConfig({
                 maxSpaces: server.config().get('xpack.spaces.maxSpaces'),
               })
             );
