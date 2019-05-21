@@ -20,7 +20,6 @@
 import { AppsMenuProvider } from './apps_menu';
 // @ts-ignore not TS yet
 import { BrowserProvider } from './browser';
-// @ts-ignore not TS yet
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
