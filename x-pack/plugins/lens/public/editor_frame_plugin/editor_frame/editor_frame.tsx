@@ -86,7 +86,7 @@ export function EditorFrame(props: EditorFrameProps) {
             activeVisualizationId={state.visualization.activeId}
             datasourcePublicAPI={datasourcePublicAPI!}
             dispatch={dispatch}
-            visualizationStateMap={state.visualization.stateMap}
+            visualizationState={state.visualization.state}
           />
         )
       }
