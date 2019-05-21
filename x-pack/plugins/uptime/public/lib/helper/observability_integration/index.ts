@@ -6,3 +6,4 @@
 
 export { getApmHref } from './get_apm_href';
 export { getInfraContainerHref, getInfraIpHref, getInfraKubernetesHref } from './get_infra_href';
+export { getLoggingKubernetesHref, getLoggingContainerHref } from './get_logging_href';

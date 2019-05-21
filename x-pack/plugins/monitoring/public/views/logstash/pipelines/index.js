@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { render } from 'react-dom';
 import uiRoutes from 'ui/routes';
@@ -67,7 +68,7 @@ uiRoutes
       pageData: getPageData
     },
     controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
-      constructor($injector, $scope, i18n) {
+      constructor($injector, $scope) {
         super({
           title: 'Logstash Pipelines',
           storageKey: 'logstash.pipelines',
