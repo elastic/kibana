@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
 
 const DEFAULT_SETTINGS = {
   number_of_shards: 1
@@ -12,13 +13,13 @@ const DEFAULT_SETTINGS = {
 
 const DEFAULT_GEO_SHAPE_MAPPINGS = {
   'coordinates': {
-    'type': 'geo_shape'
+    'type': ES_GEO_FIELD_TYPE.GEO_SHAPE
   }
 };
 
 const DEFAULT_GEO_POINT_MAPPINGS = {
   'coordinates': {
-    'type': 'geo_point'
+    'type': ES_GEO_FIELD_TYPE.GEO_POINT
   }
 };
 
@@ -28,11 +29,11 @@ export function getGeoIndexTypesForFeatures(featureTypes) {
   if (!featureTypes || !featureTypes.length) {
     return [];
   } else if (!featureTypes.includes('Point')) {
-    return ['geo_shape'];
+    return [ES_GEO_FIELD_TYPE.GEO_SHAPE];
   } else if (featureTypes.includes('Point') && featureTypes.length === 1) {
-    return [ 'geo_point', 'geo_shape' ];
+    return [ ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE ];
   } else {
-    return [ 'geo_shape' ];
+    return [ ES_GEO_FIELD_TYPE.GEO_SHAPE ];
   }
 }
 
@@ -44,7 +45,7 @@ function geoJsonToEs(parsedGeojson, datatype) {
     ? [ parsedGeojson ]
     : parsedGeojson.features;
 
-  if (datatype === 'geo_shape') {
+  if (datatype === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
     return features.reduce((accu, feature) => {
       const properties = _.get(feature, 'properties');
       accu.push({
@@ -56,7 +57,7 @@ function geoJsonToEs(parsedGeojson, datatype) {
       });
       return accu;
     }, []);
-  } else if (datatype === 'geo_point') {
+  } else if (datatype === ES_GEO_FIELD_TYPE.GEO_POINT) {
     return features.reduce((accu, feature) => {
       const properties = _.get(feature, 'properties');
       accu.push({
@@ -75,7 +76,7 @@ export function getGeoJsonIndexingDetails(parsedGeojson, dataType) {
   return {
     data: geoJsonToEs(parsedGeojson, dataType),
     ingestPipeline: DEFAULT_INGEST_PIPELINE,
-    mappings: (dataType === 'geo_point')
+    mappings: (dataType === ES_GEO_FIELD_TYPE.GEO_POINT)
       ? DEFAULT_GEO_POINT_MAPPINGS
       : DEFAULT_GEO_SHAPE_MAPPINGS,
     settings: DEFAULT_SETTINGS
