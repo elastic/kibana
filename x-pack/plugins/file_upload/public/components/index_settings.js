@@ -27,7 +27,7 @@ export class IndexSettings extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { indexNameError } = this.state;
+    const { indexNameError, indexName } = this.state;
     if (prevState.indexNameError !== indexNameError) {
       this.props.setHasIndexErrors(!!indexNameError);
     }
@@ -36,8 +36,8 @@ export class IndexSettings extends Component {
     if (indexDisabled !== this.state.indexDisabled) {
       this.setState({ indexDisabled });
     }
-    if (this.props.indexName !== this.state.indexName) {
-      this.setState({ indexName: this.props.indexName });
+    if (this.props.indexName !== indexName) {
+      this._setIndexName(this.props.indexName);
     }
     this._getIndexNames();
     this._getIndexPatterns();
@@ -65,19 +65,27 @@ export class IndexSettings extends Component {
     }
   }
 
-  _onIndexChange = ({ target }) => {
+  _setIndexName = async name => {
+    const errorMessage = this._isIndexNameAndPatternValid(name);
+    return this.setState({
+      indexName: name,
+      indexNameError: errorMessage
+    });
+  }
+
+  _onIndexChange = async ({ target }) => {
     const name = target.value;
-    const errorMessage = this._isIndexNameValid(name, this.state.indexNames);
-    this.setState({ indexNameError: errorMessage });
+    await this._setIndexName(name);
     this.props.setIndexName(name);
   }
 
-  _isIndexNameValid = (name, indexNames) => {
-    if (indexNames.find(i => i === name)) {
+  _isIndexNameAndPatternValid = name => {
+    const { indexNames, indexPatterns } = this.state;
+    if (indexNames.find(i => i === name) || indexPatterns.find(i => i === name)) {
       return (
         <FormattedMessage
           id="xpack.file_upload.indexNameAlreadyExistsErrorMessage"
-          defaultMessage="Index name already exists"
+          defaultMessage="Index name or pattern already exists"
         />
       );
     }
