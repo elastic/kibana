@@ -15,6 +15,9 @@ import routes from 'ui/routes';
 
 import { HashRouter } from 'react-router-dom';
 
+// @ts-ignore: allow traversal to fail on x-pack build
+import { trackUiMetric as track } from '../../../../src/legacy/core_plugins/ui_metric/public';
+
 export interface AppCore {
   i18n: {
     [i18nPackage: string]: any;
@@ -56,6 +59,9 @@ export interface Plugins extends AppPlugins {
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
+  };
+  uiMetric: {
+    track: typeof track;
   };
 }
 
@@ -106,6 +112,9 @@ export function createShim(): { core: Core; plugins: Plugins } {
         constants: {
           BREADCRUMB: MANAGEMENT_BREADCRUMB,
         },
+      },
+      uiMetric: {
+        track,
       },
     },
   };
