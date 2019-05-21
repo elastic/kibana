@@ -35,7 +35,7 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
               onChange={noop}
               value={intl.formatMessage({
                 id: 'xpack.infra.logs.streamingDescription',
-                defaultMessage: 'streaming…',
+                defaultMessage: 'Streaming new entries…',
               })}
             />
           </EuiFlexItem>
