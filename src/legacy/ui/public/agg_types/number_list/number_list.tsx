@@ -19,7 +19,7 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 
-import { EuiSpacer, EuiButton, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { NumberRow, NumberRowModel } from './number_row';
@@ -42,6 +42,8 @@ interface NumberListProps {
   showValidation: boolean;
   unitName: string;
   validateAscendingOrder?: boolean;
+  onBlur?(): void;
+  onFocus?(): void;
   onChange(list: Array<number | undefined>): void;
   setTouched(): void;
   setValidity(isValid: boolean): void;
@@ -54,6 +56,8 @@ function NumberList({
   showValidation,
   unitName,
   validateAscendingOrder = true,
+  onBlur,
+  onFocus,
   onChange,
   setTouched,
   setValidity,
@@ -88,6 +92,11 @@ function NumberList({
     [models]
   );
 
+  // resposible for setting up an initial value ([0]) when there is no default value
+  useEffect(() => {
+    onChange(models.map(({ value }) => (value === EMPTY_STRING ? undefined : value)));
+  }, []);
+
   const onChangeValue = ({ id, value }: { id: string; value: string }) => {
     const parsedValue = parse(value);
     const { isValid, errors } = validateValue(parsedValue, numberRange);
@@ -114,11 +123,14 @@ function NumberList({
     onUpdate(newArray);
   };
 
-  const onBlur = (model: NumberRowModel) => {
+  const onBlurFn = (model: NumberRowModel) => {
     if (model.value === EMPTY_STRING) {
       model.isInvalid = true;
     }
     setTouched();
+    if (onBlur) {
+      onBlur();
+    }
   };
 
   const onUpdate = (modelList: NumberRowModel[]) => {
@@ -137,26 +149,27 @@ function NumberList({
             labelledbyId={labelledbyId}
             range={numberRange}
             onDelete={onDelete}
+            onFocus={onFocus}
             onChange={onChangeValue}
-            onBlur={() => onBlur(model)}
+            onBlur={() => onBlurFn(model)}
             autoFocus={models.length !== 1 && arrayIndex === models.length - 1}
           />
           {showValidation && model.isInvalid && model.errors && model.errors.length > 0 && (
             <EuiFormErrorText>{model.errors.join('\n')}</EuiFormErrorText>
           )}
-          <EuiSpacer size="s" />
+          {models.length - 1 !== arrayIndex && <EuiSpacer size="s" />}
         </Fragment>
       ))}
       {showValidation && ascendingError && <EuiFormErrorText>{ascendingError}</EuiFormErrorText>}
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiButton iconType="plusInCircle" fill={true} fullWidth={true} onClick={onAdd} size="s">
+        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="s">
           <FormattedMessage
             id="common.ui.aggTypes.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"
             values={{ unitName }}
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </>
   );

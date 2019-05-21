@@ -31,6 +31,7 @@ interface NumberRowProps {
   model: NumberRowModel;
   range: Range;
   onBlur(): void;
+  onFocus?(): void;
   onChange({ id, value }: { id: string; value: string }): void;
   onDelete(index: string): void;
 }
@@ -51,12 +52,14 @@ function NumberRow({
   range,
   onBlur,
   onDelete,
+  onFocus,
   onChange,
 }: NumberRowProps) {
   const deleteBtnAriaLabel = i18n.translate(
     'common.ui.aggTypes.numberList.removeUnitButtonAriaLabel',
     {
-      defaultMessage: 'Remove this rank value',
+      defaultMessage: 'Remove the rank value of {value}',
+      values: { value: model.value },
     }
   );
 
@@ -67,16 +70,18 @@ function NumberRow({
     });
 
   return (
-    <EuiFlexGroup responsive={false} alignItems="center">
+    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
       <EuiFlexItem>
         <EuiFieldNumber
           aria-labelledby={labelledbyId}
           autoFocus={autoFocus}
+          compressed={true}
           isInvalid={isInvalid}
           placeholder={i18n.translate('common.ui.aggTypes.numberList.enterValuePlaceholder', {
             defaultMessage: 'Enter a value',
           })}
           onChange={onValueChanged}
+          onFocus={onFocus}
           value={model.value}
           fullWidth={true}
           min={range.min}
@@ -87,6 +92,7 @@ function NumberRow({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           aria-label={deleteBtnAriaLabel}
+          title={deleteBtnAriaLabel}
           color="danger"
           iconType="trash"
           onClick={() => onDelete(model.id)}
