@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Action } from '../state_management';
+import { Action } from './state_management';
 import {
   Datasource,
   Visualization,
@@ -49,7 +49,7 @@ export function SuggestionPanel(props: SuggestionPanelProps) {
             onClick={() => {
               props.dispatch({
                 type: 'SWITCH_VISUALIZATION',
-                newVisulizationId: suggestion.visualizationId,
+                newVisualizationId: suggestion.visualizationId,
                 initialState: suggestion.state,
                 datasourceState: suggestion.datasourceState,
               });
