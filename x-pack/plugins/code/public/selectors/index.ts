@@ -41,6 +41,8 @@ export const statusSelector = (state: RootState, repoUri: RepositoryUri) => {
   return state.status.status[repoUri];
 };
 
+export const allStatusSelector = (state: RootState) => state.status.status;
+
 export const treeCommitsSelector = (state: RootState) => {
   const path = state.file.currentPath;
   if (path === '') {
