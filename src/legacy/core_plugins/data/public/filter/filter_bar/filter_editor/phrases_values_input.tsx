@@ -38,13 +38,13 @@ class PhrasesValuesInputUI extends PhraseSuggestor<Props> {
     return (
       <EuiFormRow
         label={intl.formatMessage({
-          id: 'common.ui.filterEditor.valuesSelectLabel',
+          id: 'data.filter.filterEditor.valuesSelectLabel',
           defaultMessage: 'Values',
         })}
       >
         <StringComboBox
           placeholder={intl.formatMessage({
-            id: 'common.ui.filterEditor.valuesSelectPlaceholder',
+            id: 'data.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
           options={options}

@@ -54,7 +54,7 @@ class RangeValueInputUI extends Component<Props> {
           <EuiFlexItem>
             <EuiFormRow
               label={this.props.intl.formatMessage({
-                id: 'common.ui.filterEditor.rangeStartInputLabel',
+                id: 'data.filter.filterEditor.rangeStartInputLabel',
                 defaultMessage: 'From',
               })}
             >
@@ -63,7 +63,7 @@ class RangeValueInputUI extends Component<Props> {
                 value={this.props.value ? this.props.value.from : undefined}
                 onChange={this.onFromChange}
                 placeholder={this.props.intl.formatMessage({
-                  id: 'common.ui.filterEditor.rangeStartInputPlaceholder',
+                  id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
                   defaultMessage: 'Start of the range',
                 })}
               />
@@ -72,7 +72,7 @@ class RangeValueInputUI extends Component<Props> {
           <EuiFlexItem>
             <EuiFormRow
               label={this.props.intl.formatMessage({
-                id: 'common.ui.filterEditor.rangeEndInputLabel',
+                id: 'data.filter.filterEditor.rangeEndInputLabel',
                 defaultMessage: 'To',
               })}
             >
@@ -81,7 +81,7 @@ class RangeValueInputUI extends Component<Props> {
                 value={this.props.value ? this.props.value.to : undefined}
                 onChange={this.onToChange}
                 placeholder={this.props.intl.formatMessage({
-                  id: 'common.ui.filterEditor.rangeEndInputPlaceholder',
+                  id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
                   defaultMessage: 'End of the range',
                 })}
               />
@@ -91,7 +91,7 @@ class RangeValueInputUI extends Component<Props> {
         {type === 'date' ? (
           <EuiLink target="_blank" href={getDocLink('date.dateMath')}>
             <FormattedMessage
-              id="common.ui.filterEditor.dateFormatHelpLinkLabel"
+              id="data.filter.filterEditor.dateFormatHelpLinkLabel"
               defaultMessage="Accepted date formats"
             />{' '}
             <EuiIcon type="link" />

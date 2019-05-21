@@ -30,19 +30,19 @@ interface Props {
 
 export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
   let title = `Filter: ${getFilterDisplayText(filter)}. ${i18n.translate(
-    'common.ui.filterBar.moreFilterActionsMessage',
+    'data.filter.filterBar.moreFilterActionsMessage',
     {
       defaultMessage: 'Select for more filter actions.',
     }
   )}`;
 
   if (isFilterPinned(filter)) {
-    title = `${i18n.translate('common.ui.filterBar.pinnedFilterPrefix', {
+    title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
     })} ${title}`;
   }
   if (filter.meta.disabled) {
-    title = `${i18n.translate('common.ui.filterBar.disabledFilterPrefix', {
+    title = `${i18n.translate('data.filter.filterBar.disabledFilterPrefix', {
       defaultMessage: 'Disabled',
     })} ${title}`;
   }
@@ -58,10 +58,10 @@ export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
         // Also, we may want to add a `DEL` keyboard press functionality
         tabIndex: '-1',
       }}
-      iconOnClickAriaLabel={i18n.translate('common.ui.filterBar.filterItemBadgeIconAriaLabel', {
+      iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeIconAriaLabel', {
         defaultMessage: 'Delete',
       })}
-      onClickAriaLabel={i18n.translate('common.ui.filterBar.filterItemBadgeAriaLabel', {
+      onClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {
         defaultMessage: 'Filter actions',
       })}
       {...rest}
@@ -73,7 +73,7 @@ export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
 
 export function getFilterDisplayText(filter: Filter) {
   const prefix = filter.meta.negate
-    ? ` ${i18n.translate('common.ui.filterBar.negatedFilterPrefix', {
+    ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
       })}`
     : '';

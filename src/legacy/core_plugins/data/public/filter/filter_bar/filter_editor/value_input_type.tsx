@@ -82,14 +82,14 @@ class ValueInputTypeUI extends Component<Props> {
               {
                 value: 'true',
                 text: this.props.intl.formatMessage({
-                  id: 'common.ui.filterEditor.trueOptionLabel',
+                  id: 'data.filter.filterEditor.trueOptionLabel',
                   defaultMessage: 'true',
                 }),
               },
               {
                 value: 'false',
                 text: this.props.intl.formatMessage({
-                  id: 'common.ui.filterEditor.falseOptionLabel',
+                  id: 'data.filter.filterEditor.falseOptionLabel',
                   defaultMessage: 'false',
                 }),
               },
