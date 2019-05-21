@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withHandlers, withProps, withState } from 'recompose';
+import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
@@ -58,6 +58,7 @@ const componentLayoutState = ({
   selectedToplevelNodes,
   height,
   width,
+  registerLayout,
 }) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
@@ -83,6 +84,7 @@ const componentLayoutState = ({
     aeroStore.setCurrentState(newState);
   } else {
     setAeroStore((aeroStore = createStore(newState, updater)));
+    registerLayout(aeroStore);
   }
   return { aeroStore };
 };
@@ -150,6 +152,11 @@ export const InteractivePage = compose(
       }
     },
   })),
+  lifecycle({
+    componentWillUnmount() {
+      this.props.unregisterLayout(this.props.aeroStore);
+    },
+  }),
   withState('canvasOrigin', 'saveCanvasOrigin'),
   withState('_forceRerender', 'forceRerender'),
   withProps(({ aeroStore }) => ({ cursor: aeroStore.getCurrentState().currentScene.cursor })),
