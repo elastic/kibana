@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { ObjectType } from '@kbn/config-schema';
