@@ -7,6 +7,7 @@
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
+import { createBasicDetector } from './util/default_configs';
 
 export class PopulationJobCreator extends JobCreator {
   private _populationField: SplitField = null;
@@ -59,29 +60,15 @@ export class PopulationJobCreator extends JobCreator {
     return this._populationField;
   }
 
-  public addDetector(agg: Aggregation, field: Field) {
-    const dtr: Detector = {
-      function: agg.id,
-      field_name: field.id,
-    };
-
-    if (this._populationField !== null) {
-      dtr.over_field_name = this._populationField.id;
-    }
+  public addDetector(agg: Aggregation, field: Field | null) {
+    const dtr: Detector = this._createDetector(agg, field);
 
     this._addDetector(dtr);
     this._splitFields.push(null);
   }
 
-  public editDetector(agg: Aggregation, field: Field, index: number) {
-    const dtr: Detector = {
-      function: agg.id,
-      field_name: field.id,
-    };
-
-    if (this._populationField !== null) {
-      dtr.over_field_name = this._populationField.id;
-    }
+  public editDetector(agg: Aggregation, field: Field | null, index: number) {
+    const dtr: Detector = this._createDetector(agg, field);
 
     const sp = this._splitFields[index];
     if (sp !== undefined && sp !== null) {
@@ -89,6 +76,19 @@ export class PopulationJobCreator extends JobCreator {
     }
 
     this._editDetector(dtr, index);
+  }
+
+  private _createDetector(agg: Aggregation, field: Field | null) {
+    const dtr: Detector = createBasicDetector(agg, field);
+
+    if (field !== null) {
+      dtr.field_name = field.id;
+    }
+
+    if (this._populationField !== null) {
+      dtr.over_field_name = this._populationField.id;
+    }
+    return dtr;
   }
 
   public removeDetector(index: number) {

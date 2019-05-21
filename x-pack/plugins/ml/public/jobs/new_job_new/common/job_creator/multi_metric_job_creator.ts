@@ -7,6 +7,7 @@
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
+import { createBasicDetector } from './util/default_configs';
 
 export class MultiMetricJobCreator extends JobCreator {
   private _splitField: SplitField = null;
@@ -33,30 +34,23 @@ export class MultiMetricJobCreator extends JobCreator {
     return this._splitField;
   }
 
-  public addDetector(agg: Aggregation, field: Field) {
-    const dtr: Detector = {
-      function: agg.id,
-      field_name: field.id,
-    };
-
-    if (this._splitField !== null) {
-      dtr.partition_field_name = this._splitField.id;
-    }
-
+  public addDetector(agg: Aggregation, field: Field | null) {
+    const dtr: Detector = this._createDetector(agg, field);
     this._addDetector(dtr);
   }
 
-  public editDetector(agg: Aggregation, field: Field, index: number) {
-    const dtr: Detector = {
-      function: agg.id,
-      field_name: field.id,
-    };
+  public editDetector(agg: Aggregation, field: Field | null, index: number) {
+    const dtr: Detector = this._createDetector(agg, field);
+    this._editDetector(dtr, index);
+  }
+
+  private _createDetector(agg: Aggregation, field: Field | null) {
+    const dtr: Detector = createBasicDetector(agg, field);
 
     if (this._splitField !== null) {
       dtr.partition_field_name = this._splitField.id;
     }
-
-    this._editDetector(dtr, index);
+    return dtr;
   }
 
   public removeDetector(index: number) {
