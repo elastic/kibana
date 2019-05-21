@@ -14,4 +14,3 @@ import './new_job/simple/population';
 import './new_job/simple/recognize';
 import './new_job/wizard';
 import 'plugins/ml/components/validate_job';
-import './new_job_new';
