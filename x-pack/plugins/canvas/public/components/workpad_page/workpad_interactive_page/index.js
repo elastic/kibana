@@ -58,8 +58,6 @@ const componentLayoutState = ({
   selectedToplevelNodes,
   height,
   width,
-  registerLayout,
-  updateGlobalState,
 }) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
@@ -85,12 +83,6 @@ const componentLayoutState = ({
     aeroStore.setCurrentState(newState);
   } else {
     setAeroStore((aeroStore = createStore(newState, updater)));
-    registerLayout((type, payload) => {
-      const newLayoutState = aeroStore.commit(type, payload);
-      if (newLayoutState.currentScene.gestureEnd) {
-        updateGlobalState(newLayoutState);
-      }
-    });
   }
   return { aeroStore };
 };
@@ -139,7 +131,7 @@ const mergeProps = (
   ...ownProps,
   ...restDispatchProps,
   ...restStateProps,
-  updateGlobalState: globalStateUpdater(dispatch, () => state),
+  updateGlobalState: globalStateUpdater(dispatch, state),
 });
 
 export const InteractivePage = compose(
@@ -165,7 +157,20 @@ export const InteractivePage = compose(
   }),
   withState('canvasOrigin', 'saveCanvasOrigin'),
   withState('_forceRerender', 'forceRerender'),
-  withProps(({ aeroStore }) => ({ cursor: aeroStore.getCurrentState().currentScene.cursor })),
+  withProps(({ registerLayout, aeroStore, updateGlobalState, forceRerender }) => {
+    registerLayout((type, payload) => {
+      const newLayoutState = aeroStore.commit(type, payload);
+      if (newLayoutState.currentScene.gestureEnd) {
+        // conditionalizing the global update so as to enable persist-free nudge series
+        updateGlobalState(newLayoutState);
+      }
+      forceRerender(newLayoutState);
+      return newLayoutState;
+    });
+    return {
+      cursor: aeroStore.getCurrentState().currentScene.cursor,
+    };
+  }),
   withProps(({ aeroStore, elements }) => {
     const elementLookup = new Map(elements.map(element => [element.id, element]));
     const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map(shape => {

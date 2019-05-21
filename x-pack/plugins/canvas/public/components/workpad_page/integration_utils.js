@@ -141,9 +141,8 @@ const updateGlobalPositionsInRedux = (setMultiplePositions, scene, unsortedEleme
   }
 };
 
-export const globalStateUpdater = (dispatch, getState) => state => {
+export const globalStateUpdater = (dispatch, globalState) => state => {
   const nextScene = state.currentScene;
-  const globalState = getState();
   const page = getSelectedPage(globalState);
   const elements = getNodes(globalState, page);
   const shapes = nextScene.shapes;
@@ -191,7 +190,7 @@ export const globalStateUpdater = (dispatch, getState) => state => {
 
   // set the selected element on the global store, if one element is selected
   const selectedPrimaryShapes = nextScene.selectedPrimaryShapes;
-  if (!shallowEqual(selectedPrimaryShapes, getState().transient.selectedToplevelNodes)) {
+  if (!shallowEqual(selectedPrimaryShapes, globalState.transient.selectedToplevelNodes)) {
     dispatch(
       selectToplevelNodes(
         flatten(

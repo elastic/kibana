@@ -10,6 +10,7 @@ import { compose, branch, renderComponent } from 'recompose';
 import { EuiSpacer } from '@elastic/eui';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
 import { SidebarHeader } from '../sidebar_header';
+import { globalStateUpdater } from '../workpad_page/integration_utils';
 import { MultiElementSettings } from './multi_element_settings';
 import { GroupSettings } from './group_settings';
 import { GlobalConfig } from './global_config';
@@ -18,19 +19,42 @@ import { ElementSettings } from './element_settings';
 const mapStateToProps = state => ({
   selectedToplevelNodes: getSelectedToplevelNodes(state),
   selectedElementId: getSelectedElementId(state),
+  state,
 });
 
-const MultiElementSidebar = ({ commit }) => (
+const mergeProps = (
+  { state, ...restStateProps },
+  { dispatch, ...restDispatchProps },
+  ownProps
+) => ({
+  ...ownProps,
+  ...restDispatchProps,
+  ...restStateProps,
+  updateGlobalState: globalStateUpdater(dispatch, state),
+});
+
+const withGlobalState = (commit, updateGlobalState) => (type, payload) => {
+  const newLayoutState = commit(type, payload);
+  if (newLayoutState.currentScene.gestureEnd) {
+    updateGlobalState(newLayoutState);
+  }
+};
+
+const MultiElementSidebar = ({ commit, updateGlobalState }) => (
   <Fragment>
-    <SidebarHeader title="Multiple elements" commit={commit} />
+    <SidebarHeader title="Multiple elements" commit={withGlobalState(commit, updateGlobalState)} />
     <EuiSpacer />
     <MultiElementSettings />
   </Fragment>
 );
 
-const GroupedElementSidebar = ({ commit }) => (
+const GroupedElementSidebar = ({ commit, updateGlobalState }) => (
   <Fragment>
-    <SidebarHeader title="Grouped element" commit={commit} groupIsSelected />
+    <SidebarHeader
+      title="Grouped element"
+      commit={withGlobalState(commit, updateGlobalState)}
+      groupIsSelected
+    />
     <EuiSpacer />
     <GroupSettings />
   </Fragment>
@@ -63,6 +87,10 @@ const branches = [
 ];
 
 export const SidebarContent = compose(
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    null,
+    mergeProps
+  ),
   ...branches
 )(GlobalConfig);
