@@ -19,6 +19,7 @@ import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
+import { trackUiAction as track } from '../../lib/track_usage';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 48;
@@ -100,7 +101,10 @@ export const FlyoutComponent = pure<Props>(
         dataProviders={dataProviders!}
         show={!show}
         timelineId={timelineId}
-        onOpen={() => showTimeline!({ id: timelineId, show: true })}
+        onOpen={() => {
+          track('open_timeline');
+          showTimeline!({ id: timelineId, show: true });
+        }}
       />
     </>
   )

@@ -29,6 +29,7 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
+  createDotNetAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
 function getIfExists(config, key) {
@@ -116,6 +117,10 @@ function getApmAgentInstructionSet(config) {
       {
         id: INSTRUCTION_VARIANT.JAVA,
         instructions: createJavaAgentInstructions(apmServerUrl, secretToken),
+      },
+      {
+        id: INSTRUCTION_VARIANT.DOTNET,
+        instructions: createDotNetAgentInstructions(apmServerUrl, secretToken),
       },
     ],
   };
