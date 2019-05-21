@@ -13,9 +13,18 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setTooltipState
+  setTooltipState,
+  setMapInitError,
+  updateDrawState
 } from '../../../actions/store_actions';
-import { getTooltipState, getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
+import {
+  getTooltipState,
+  getLayerList,
+  getMapReady,
+  getGoto,
+  getDrawState,
+  getScrollZoom
+} from '../../../selectors/map_selectors';
 import { getIsFilterable } from '../../../store/ui';
 import { getInspectorAdapters } from '../../../store/non_serializable_instances';
 
@@ -26,7 +35,9 @@ function mapStateToProps(state = {}) {
     layerList: getLayerList(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    tooltipState: getTooltipState(state)
+    tooltipState: getTooltipState(state),
+    drawState: getDrawState(state),
+    scrollZoom: getScrollZoom(state)
   };
 }
 
@@ -54,6 +65,12 @@ function mapDispatchToProps(dispatch) {
     },
     setTooltipState(tooltipState) {
       dispatch(setTooltipState(tooltipState));
+    },
+    setMapInitError(errorMessage) {
+      dispatch(setMapInitError(errorMessage));
+    },
+    disableDrawState() {
+      dispatch(updateDrawState(null));
     }
   };
 }

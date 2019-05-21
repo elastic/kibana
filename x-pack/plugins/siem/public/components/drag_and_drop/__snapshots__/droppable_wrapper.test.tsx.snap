@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DroppableWrapper rendering it renders against the snapshot 1`] = `
+<ThemeProvider
+  theme={[Function]}
+>
+  <Connect(DragDropContextWrapperComponent)>
+    <pure(Component)
+      droppableId="testing"
+    >
+      draggable wrapper content
+    </pure(Component)>
+  </Connect(DragDropContextWrapperComponent)>
+</ThemeProvider>
+`;

@@ -63,11 +63,12 @@ module.exports = function (grunt) {
   ];
 
   const NODE = 'node';
-  const scriptWithGithubChecks = ({ title, options, cmd, args }) => (process.env.CHECKS_REPORTER_ACTIVE ? {
-    options,
-    cmd: 'yarn',
-    args: ['run', 'github-checks-reporter', title, cmd, ...args],
-  } : { options, cmd, args });
+  const scriptWithGithubChecks = ({ title, options, cmd, args }) => (
+    process.env.CHECKS_REPORTER_ACTIVE === 'true' ? {
+      options,
+      cmd: 'yarn',
+      args: ['run', 'github-checks-reporter', title, cmd, ...args],
+    } : { options, cmd, args });
   const gruntTaskWithGithubChecks = (title, task) =>
     scriptWithGithubChecks({
       title,
@@ -188,6 +189,7 @@ module.exports = function (grunt) {
       flags: [
         ...browserTestServerFlags,
         '--dev',
+        '--no-dev-config',
         '--no-watch',
         '--no-base-path',
         '--optimize.watchPort=5611',

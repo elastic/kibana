@@ -18,7 +18,7 @@
  */
 
 import { DiscoveredPlugin, PluginName } from '../../server';
-import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
+import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 
 /**
@@ -26,8 +26,14 @@ import { loadPluginBundle } from './plugin_loader';
  *
  * @public
  */
-export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
+export interface Plugin<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<string, unknown> = {},
+  TPluginsStart extends Record<string, unknown> = {}
+> {
   setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+  start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
   stop?: () => void;
 }
 
@@ -37,9 +43,12 @@ export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = 
  *
  * @public
  */
-export type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unknown> = {}> = (
-  core: PluginInitializerContext
-) => Plugin<TSetup, TPluginsSetup>;
+export type PluginInitializer<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<string, unknown> = {},
+  TPluginsStart extends Record<string, unknown> = {}
+> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -49,14 +58,16 @@ export type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unkno
  */
 export class PluginWrapper<
   TSetup = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TStart = unknown,
+  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private initializer?: PluginInitializer<TSetup, TPluginsSetup>;
-  private instance?: Plugin<TSetup, TPluginsSetup>;
+  private initializer?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   constructor(
     readonly discoveredPlugin: DiscoveredPlugin,
@@ -74,7 +85,10 @@ export class PluginWrapper<
    * @param addBasePath Function that adds the base path to a string for plugin bundle path.
    */
   public async load(addBasePath: (path: string) => string) {
-    this.initializer = await loadPluginBundle<TSetup, TPluginsSetup>(addBasePath, this.name);
+    this.initializer = await loadPluginBundle<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+      addBasePath,
+      this.name
+    );
   }
 
   /**
@@ -88,6 +102,21 @@ export class PluginWrapper<
     this.instance = await this.createPluginInstance();
 
     return await this.instance.setup(setupContext, plugins);
+  }
+
+  /**
+   * Calls `setup` function exposed by the initialized plugin.
+   * @param startContext Context that consists of various core services tailored specifically
+   * for the `start` lifecycle event.
+   * @param plugins The dictionary where the key is the dependency name and the value
+   * is the contract returned by the dependency's `start` function.
+   */
+  public async start(startContext: PluginStartContext, plugins: TPluginsStart) {
+    if (this.instance === undefined) {
+      throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
+    }
+
+    return await this.instance.start(startContext, plugins);
   }
 
   /**
@@ -114,6 +143,8 @@ export class PluginWrapper<
 
     if (typeof instance.setup !== 'function') {
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
+    } else if (typeof instance.start !== 'function') {
+      throw new Error(`Instance of plugin "${this.name}" does not define "start" function.`);
     }
 
     return instance;

@@ -44,10 +44,18 @@ export async function getSeriesData(req, panel) {
   try {
     const data = await searchRequest.search({ body });
     const series = data.map(handleResponseBody(panel));
+
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {
-      annotations = await getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities);
+      annotations = await getAnnotations({
+        req,
+        esQueryConfig,
+        searchStrategy,
+        panel,
+        capabilities,
+        series
+      });
     }
 
     return {

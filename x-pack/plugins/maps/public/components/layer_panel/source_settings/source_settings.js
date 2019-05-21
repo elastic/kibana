@@ -44,7 +44,7 @@ export function SourceSettings({ layer, updateSourceProp }) {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer margin="m"/>
+        <EuiSpacer size="m"/>
 
         {sourceSettingsEditor}
       </EuiPanel>

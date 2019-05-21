@@ -17,22 +17,47 @@
  * under the License.
  */
 
-import { BasePathSetup } from './base_path';
-import { Capabilities, CapabilitiesSetup } from './capabilities';
-import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
-import { FatalErrorsSetup } from './fatal_errors';
-import { HttpSetup } from './http';
-import { I18nSetup } from './i18n';
-import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
-import { FlyoutRef, OverlaySetup } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
+import { BasePathSetup, BasePathStart } from './base_path';
+import {
+  ChromeBadge,
+  ChromeBrand,
+  ChromeBreadcrumb,
+  ChromeHelpExtension,
+  ChromeNavLink,
+  ChromeSetup,
+  ChromeStart,
+} from './chrome';
+import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
+import { HttpSetup, HttpStart } from './http';
+import { I18nSetup, I18nStart } from './i18n';
+import {
+  InjectedMetadataParams,
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+  LegacyNavLink,
+} from './injected_metadata';
+import {
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsApi,
+  NotificationsStart,
+} from './notifications';
+import { OverlayRef, OverlayStart } from './overlays';
+import {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginSetupContext,
+  PluginStartContext,
+} from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
 
 /**
- * Core services exposed to the start lifecycle
+ * Core services exposed to the setup lifecycle
  *
  * @public
  *
@@ -41,6 +66,8 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
   /** {@link I18nSetup} */
   i18n: I18nSetup;
   /** {@link InjectedMetadataSetup} */
@@ -53,39 +80,75 @@ export interface CoreSetup {
   http: HttpSetup;
   /** {@link BasePathSetup} */
   basePath: BasePathSetup;
-  /** {@link CapabilitiesSetup} */
-  capabilities: CapabilitiesSetup;
   /** {@link UiSettingsSetup} */
   uiSettings: UiSettingsSetup;
   /** {@link ChromeSetup} */
   chrome: ChromeSetup;
-  /** {@link OverlaySetup} */
-  overlays: OverlaySetup;
+}
+
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ *
+ * @internalRemarks We document the properties with \@link tags to improve
+ * navigation in the generated docs until there's a fix for
+ * https://github.com/Microsoft/web-build-tools/issues/1237
+ */
+export interface CoreStart {
+  /** {@link ApplicationStart} */
+  application: ApplicationStart;
+  /** {@link BasePathStart} */
+  basePath: BasePathStart;
+  /** {@link ChromeStart} */
+  chrome: ChromeStart;
+  /** {@link HttpStart} */
+  http: HttpStart;
+  /** {@link I18nStart} */
+  i18n: I18nStart;
+  /** {@link InjectedMetadataStart} */
+  injectedMetadata: InjectedMetadataStart;
+  /** {@link NotificationsStart} */
+  notifications: NotificationsStart;
+  /** {@link OverlayStart} */
+  overlays: OverlayStart;
 }
 
 export {
+  ApplicationSetup,
+  ApplicationStart,
   BasePathSetup,
+  BasePathStart,
   HttpSetup,
+  HttpStart,
   FatalErrorsSetup,
-  CapabilitiesSetup,
+  FatalErrorInfo,
   Capabilities,
   ChromeSetup,
+  ChromeStart,
+  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
+  ChromeNavLink,
   I18nSetup,
+  I18nStart,
   InjectedMetadataSetup,
+  InjectedMetadataStart,
   InjectedMetadataParams,
+  LegacyNavLink,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
   PluginSetupContext,
+  PluginStartContext,
   NotificationsSetup,
-  OverlaySetup,
-  FlyoutRef,
+  NotificationsStart,
+  OverlayRef,
+  OverlayStart,
   Toast,
   ToastInput,
-  ToastsSetup,
+  ToastsApi,
   UiSettingsClient,
   UiSettingsState,
   UiSettingsSetup,

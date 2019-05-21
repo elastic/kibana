@@ -7,36 +7,22 @@
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
-import { PLUGIN } from '../../../../common/constants';
+import { PLUGIN, INTEGRATED_SOLUTIONS } from '../../../../common/constants';
 import { UMBreadcrumb } from '../../../breadcrumbs';
-import { UptimePersistedState } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
+import { getIntegratedAppAvailability } from './capabilities_adapter';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
   private xsrfHeader: string;
   private uriPath: string;
-  private defaultDateRangeStart: string;
-  private defaultDateRangeEnd: string;
-  private defaultAutorefreshInterval: number;
-  private defaultAutorefreshIsPaused: boolean;
 
-  constructor(
-    uiRoutes: any,
-    dateRangeStart?: string,
-    dateRangeEnd?: string,
-    autorefreshInterval?: number,
-    autorefreshIsPaused?: boolean
-  ) {
+  constructor(uiRoutes: any) {
     this.uiRoutes = uiRoutes;
     this.xsrfHeader = chrome.getXsrfToken();
     this.uriPath = `${chrome.getBasePath()}/api/uptime/graphql`;
-    this.defaultDateRangeStart = dateRangeStart || 'now-15m';
-    this.defaultDateRangeEnd = dateRangeEnd || 'now';
-    this.defaultAutorefreshInterval = autorefreshInterval || 60 * 1000;
-    this.defaultAutorefreshIsPaused = autorefreshIsPaused || true;
   }
 
   /**
@@ -88,9 +74,6 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           // determine whether dark mode is enabled
           const darkMode = config.get('theme:darkMode', false) || false;
 
-          // get current persisted state, if any
-          const persistedState = this.initializePersistedState();
-
           /**
            * We pass this global help setup as a prop to the app, because for
            * localization it's necessary to have the provider mounted before
@@ -103,12 +86,16 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               return () => ReactDOM.unmountComponentAtNode(element);
             });
 
+          /**
+           * These values will let Uptime know if the integrated solutions
+           * are available. If any/all of them are unavaialble, we should not show
+           * links/integrations to those apps.
+           */
           const {
-            autorefreshIsPaused,
-            autorefreshInterval,
-            dateRangeStart,
-            dateRangeEnd,
-          } = persistedState;
+            apm: isApmAvailable,
+            infrastructure: isInfraAvailable,
+            logs: isLogsAvailable,
+          } = getIntegratedAppAvailability(INTEGRATED_SOLUTIONS);
 
           ReactDOM.render(
             renderComponent({
@@ -116,14 +103,13 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               darkMode,
               setBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
+              setBadge: chrome.badge.set,
               routerBasename,
               client: graphQLClient,
-              initialAutorefreshIsPaused: autorefreshIsPaused,
-              initialAutorefreshInterval: autorefreshInterval,
-              initialDateRangeStart: dateRangeStart,
-              initialDateRangeEnd: dateRangeEnd,
-              persistState: this.updatePersistedState,
               renderGlobalHelpControls,
+              isApmAvailable,
+              isInfraAvailable,
+              isLogsAvailable,
             }),
             elem
           );
@@ -151,42 +137,5 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
       deregister();
       unmountComponentAtNode(elem);
     });
-  };
-
-  private initializePersistedState = (): UptimePersistedState => {
-    const uptimeConfigurationData = window.localStorage.getItem(PLUGIN.LOCAL_STORAGE_KEY);
-    const defaultState: UptimePersistedState = {
-      autorefreshIsPaused: this.defaultAutorefreshIsPaused,
-      autorefreshInterval: this.defaultAutorefreshInterval,
-      dateRangeStart: this.defaultDateRangeStart,
-      dateRangeEnd: this.defaultDateRangeEnd,
-    };
-    try {
-      if (uptimeConfigurationData) {
-        const parsed = JSON.parse(uptimeConfigurationData) || {};
-        const { dateRangeStart, dateRangeEnd } = parsed;
-        // TODO: this is defensive code to ensure we don't encounter problems
-        // when encountering older versions of the localStorage values.
-        // The old code has never been released, so users don't need it, and this
-        // code should be removed eventually.
-        if (
-          (dateRangeEnd && typeof dateRangeEnd === 'number') ||
-          (dateRangeStart && typeof dateRangeStart === 'number')
-        ) {
-          this.updatePersistedState(defaultState);
-          return defaultState;
-        }
-        return parsed;
-      }
-    } catch (e) {
-      // TODO: this should result in a redirect to error page
-      throw e;
-    }
-    this.updatePersistedState(defaultState);
-    return defaultState;
-  };
-
-  private updatePersistedState = (state: UptimePersistedState) => {
-    window.localStorage.setItem(PLUGIN.LOCAL_STORAGE_KEY, JSON.stringify(state));
   };
 }

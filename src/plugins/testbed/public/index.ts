@@ -18,6 +18,7 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
-import { TestbedPlugin, TestbedPluginSetup } from './plugin';
+import { TestbedPlugin, TestbedPluginSetup, TestbedPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<TestbedPluginSetup> = () => new TestbedPlugin();
+export const plugin: PluginInitializer<TestbedPluginSetup, TestbedPluginStart> = () =>
+  new TestbedPlugin();

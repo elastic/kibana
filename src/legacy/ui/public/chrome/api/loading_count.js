@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 
 let newPlatformHttp;
 
-export function __newPlatformInit__(instance) {
+export function __newPlatformSetup__(instance) {
   if (newPlatformHttp) {
     throw new Error('ui/chrome/api/loading_count already initialized with new platform apis');
   }

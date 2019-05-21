@@ -143,7 +143,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
           Object {
             "dataType": "string",
             "description": "Title of the saved object",
-            "field": "title",
+            "field": "meta.title",
             "name": "Title",
             "render": [Function],
             "sortable": false,
@@ -152,9 +152,9 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
             "actions": Array [
               Object {
                 "available": [Function],
-                "description": "View this saved object within Kibana",
-                "icon": "eye",
-                "name": "In app",
+                "description": "Inspect this saved object",
+                "icon": "inspect",
+                "name": "Inspect",
                 "onClick": [Function],
                 "type": "icon",
               },
@@ -173,7 +173,19 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
       itemId="id"
       items={
         Array [
-          3,
+          Object {
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/index_patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": Object {
+                "path": "/management/kibana/index_patterns/1",
+                "uiCapabilitiesPath": "management.kibana.index_patterns",
+              },
+              "title": "MyIndexPattern*",
+            },
+            "type": "index-pattern",
+          },
         ]
       }
       loading={false}
@@ -235,9 +247,10 @@ exports[`Table should render normally 1`] = `
           fill={false}
           iconSide="left"
           iconType="trash"
-          isDisabled={false}
+          isDisabled={true}
           onClick={[Function]}
           size="m"
+          title="Unable to delete index-pattern"
           type="button"
         >
           <FormattedMessage
@@ -345,7 +358,7 @@ exports[`Table should render normally 1`] = `
           Object {
             "dataType": "string",
             "description": "Title of the saved object",
-            "field": "title",
+            "field": "meta.title",
             "name": "Title",
             "render": [Function],
             "sortable": false,
@@ -354,9 +367,9 @@ exports[`Table should render normally 1`] = `
             "actions": Array [
               Object {
                 "available": [Function],
-                "description": "View this saved object within Kibana",
-                "icon": "eye",
-                "name": "In app",
+                "description": "Inspect this saved object",
+                "icon": "inspect",
+                "name": "Inspect",
                 "onClick": [Function],
                 "type": "icon",
               },
@@ -375,7 +388,19 @@ exports[`Table should render normally 1`] = `
       itemId="id"
       items={
         Array [
-          3,
+          Object {
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/index_patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": Object {
+                "path": "/management/kibana/index_patterns/1",
+                "uiCapabilitiesPath": "management.kibana.index_patterns",
+              },
+              "title": "MyIndexPattern*",
+            },
+            "type": "index-pattern",
+          },
         ]
       }
       loading={false}

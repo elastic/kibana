@@ -30,10 +30,14 @@ export interface CorePluginBDeps {
   core_plugin_a: CorePluginAPluginSetup;
 }
 
-export class CorePluginBPlugin implements Plugin<CorePluginBPluginSetup, CorePluginBDeps> {
+export class CorePluginBPlugin
+  implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
   public setup(core: PluginSetupContext, deps: CorePluginBDeps) {
     window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
   }
+
+  public start() {}
 }
 
 export type CorePluginBPluginSetup = ReturnType<CorePluginBPlugin['setup']>;
+export type CorePluginBPluginStart = ReturnType<CorePluginBPlugin['start']>;

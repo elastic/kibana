@@ -39,10 +39,13 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
 
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
+
+const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
 
 class PercentilesUi extends Component {
 
@@ -229,6 +232,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
+        dragHandleProps={this.props.dragHandleProps}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
@@ -257,7 +261,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
               <FieldSelect
                 fields={fields}
                 type={model.type}
-                restrict="numeric"
+                restrict={RESTRICT_FIELDS}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}

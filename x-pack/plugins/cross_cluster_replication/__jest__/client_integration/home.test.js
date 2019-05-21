@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
 
-import { initTestBed, registerHttpRequestMockHelpers, nextTick } from './test_helpers';
-import { CrossClusterReplicationHome } from '../../public/app/sections/home/home';
-import { BASE_PATH } from '../../common/constants';
-import routing from '../../public/app/services/routing';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/cross_cluster_replication',
@@ -32,50 +28,48 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
-const testBedOptions = {
-  memoryRouter: {
-    initialEntries: [`${BASE_PATH}/follower_indices`],
-    componentRoutePath: `${BASE_PATH}/:section`,
-    onRouter: (router) => routing.reactRouter = router
-  }
-};
+jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+  trackUiMetric: jest.fn(),
+}));
+
+const { setup } = pageHelpers.home;
 
 describe('<CrossClusterReplicationHome />', () => {
   let server;
+  let httpRequestsMockHelpers;
   let find;
   let exists;
   let component;
 
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
+
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
-    // and we can mock them all with a 200 instead of mocking each one individually.
-    server.respondWith([200, {}, '']);
-
-    // Register helpers to mock Http Requests
-    const { setLoadFollowerIndicesResponse } = registerHttpRequestMockHelpers(server);
-
     // Set "default" mock responses by not providing any arguments
-    setLoadFollowerIndicesResponse();
+    httpRequestsMockHelpers.setLoadFollowerIndicesResponse();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      ({ exists, find, component } = initTestBed(CrossClusterReplicationHome, undefined, testBedOptions));
+      ({ exists, find, component } = setup());
     });
 
     test('should set the correct an app title', () => {
-      expect(exists('ccrAppTitle')).toBe(true);
-      expect(find('ccrAppTitle').text()).toEqual('Cross-Cluster Replication');
+      expect(exists('appTitle')).toBe(true);
+      expect(find('appTitle').text()).toEqual('Cross-Cluster Replication');
     });
 
     test('should have 2 tabs to switch between "Follower indices" & "Auto-follow patterns"', () => {
-      expect(exists('ccrFollowerIndicesTab')).toBe(true);
-      expect(find('ccrFollowerIndicesTab').text()).toEqual('Follower indices');
+      expect(exists('followerIndicesTab')).toBe(true);
+      expect(find('followerIndicesTab').text()).toEqual('Follower indices');
 
-      expect(exists('ccrAutoFollowPatternsTab')).toBe(true);
-      expect(find('ccrAutoFollowPatternsTab').text()).toEqual('Auto-follow patterns');
+      expect(exists('autoFollowPatternsTab')).toBe(true);
+      expect(find('autoFollowPatternsTab').text()).toEqual('Auto-follow patterns');
     });
 
     test('should set the default selected tab to "Follower indices"', () => {
@@ -88,7 +82,7 @@ describe('<CrossClusterReplicationHome />', () => {
 
   describe('section change', () => {
     test('should change to auto-follow pattern', async () => {
-      const autoFollowPatternsTab = find('ccrAutoFollowPatternsTab');
+      const autoFollowPatternsTab = find('autoFollowPatternsTab');
 
       autoFollowPatternsTab.simulate('click');
       await nextTick();

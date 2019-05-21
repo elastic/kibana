@@ -21,13 +21,16 @@ import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
 
 import { modifyUrl } from '../../../src/core/utils';
-// @ts-ignore no support ts yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
+import { Browsers } from './remote/browsers';
+
 export async function BrowserProvider({ getService }: FtrProviderContext) {
-  const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
+  const { driver, Key, LegacyActionSequence, browserType } = await getService(
+    '__webdriver__'
+  ).init();
 
   class BrowserService {
     /**
@@ -36,9 +39,24 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public readonly keys: IKey = Key;
 
     /**
+     * Browser name
+     */
+    public readonly browserType: string = browserType;
+
+    /**
      * Is WebDriver instance W3C compatible
      */
     isW3CEnabled = (driver as any).executor_.w3c === true;
+
+    /**
+     * Returns instance of Actions API based on driver w3c flag
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
+     */
+    public getActions(): any {
+      return this.isW3CEnabled
+        ? (driver as any).actions()
+        : (driver as any).actions({ bridge: true });
+    }
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
@@ -117,20 +135,40 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       xOffset?: number,
       yOffset?: number
     ): Promise<void> {
-      const mouse = (driver.actions() as any).mouse();
-      const actions = (driver as any).actions({ bridge: true });
-      if (element instanceof WebElementWrapper) {
-        await actions
-          .pause(mouse)
-          .move({ origin: element._webElement })
-          .perform();
-      } else if (isNaN(xOffset!) || isNaN(yOffset!) === false) {
-        await actions
-          .pause(mouse)
-          .move({ origin: { x: xOffset, y: yOffset } })
-          .perform();
-      } else {
-        throw new Error('Element or coordinates should be provided');
+      switch (this.browserType) {
+        case Browsers.Firefox: {
+          // Workaround for scrolling bug in Firefox
+          // https://github.com/mozilla/geckodriver/issues/776
+          await this.getActions()
+            .move({ x: 0, y: 0 })
+            .perform();
+          if (element instanceof WebElementWrapper) {
+            await this.getActions()
+              .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
+              .perform();
+          } else {
+            await this.getActions()
+              .move({ origin: { x: xOffset, y: yOffset } })
+              .perform();
+          }
+          break;
+        }
+        case Browsers.Chrome: {
+          if (element instanceof WebElementWrapper) {
+            await this.getActions()
+              .pause(this.getActions().mouse)
+              .move({ origin: element._webElement })
+              .perform();
+          } else {
+            await this.getActions()
+              .pause(this.getActions().mouse)
+              .move({ origin: { x: xOffset, y: yOffset } })
+              .perform();
+          }
+          break;
+        }
+        default:
+          throw new Error(`unsupported browser: ${this.browserType}`);
       }
     }
 
@@ -156,34 +194,63 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         : { x: 0, y: 0 };
       // tslint:disable-next-line:variable-name
       const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
+      // tslint:disable-next-line:variable-name
+      const _convertPointW3C = async (point: any, offset: { x: any; y: any }) => {
+        if (point.location instanceof WebElementWrapper) {
+          const position = await point.location.getPosition();
+          return {
+            x: Math.round(position.x + offset.x),
+            y: Math.round(position.y + offset.y),
+          };
+        } else {
+          return {
+            x: Math.round(point.location.x + offset.x),
+            y: Math.round(point.location.y + offset.y),
+          };
+        }
+      };
+      // tslint:disable-next-line:variable-name
+      const _convertPoint = (point: any) => {
+        return point.location instanceof WebElementWrapper
+          ? point.location._webElement
+          : point.location;
+      };
 
-      if (from.location instanceof WebElementWrapper) {
-        _from = from.location._webElement;
-      } else {
-        _from = from.location;
-      }
+      if (this.isW3CEnabled) {
+        // tslint:disable-next-line:variable-name
+        _from = await _convertPointW3C(from, _fromOffset);
+        // tslint:disable-next-line:variable-name
+        _to = await _convertPointW3C(to, _toOffset);
+        // tslint:disable-next-line:variable-name
+        const _offset = { x: _to.x - _from.x, y: _to.y - _from.y };
 
-      if (to.location instanceof WebElementWrapper) {
-        _to = to.location._webElement;
-      } else {
-        _to = to.location;
-      }
-
-      if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
-        const actions = (driver as any).actions({ bridge: true });
-        return await actions
-          .move({ origin: _from })
+        return await this.getActions()
+          .move({ x: _from.x, y: _from.y, origin: 'pointer' })
           .press()
-          .move({ x: _to.x, y: _to.y, origin: 'pointer' })
+          .move({ x: _offset.x, y: _offset.y, origin: 'pointer' })
           .release()
           .perform();
       } else {
-        return await new LegacyActionSequence(driver)
-          .mouseMove(_from, _fromOffset)
-          .mouseDown()
-          .mouseMove(_to, _toOffset)
-          .mouseUp()
-          .perform();
+        // until Chromedriver is not supporting W3C Webdriver Actions API
+        // tslint:disable-next-line:variable-name
+        _from = _convertPoint(from);
+        // tslint:disable-next-line:variable-name
+        _to = _convertPoint(to);
+        if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
+          return await this.getActions()
+            .move({ origin: _from })
+            .press()
+            .move({ x: _to.x, y: _to.y, origin: 'pointer' })
+            .release()
+            .perform();
+        } else {
+          return await new LegacyActionSequence(driver)
+            .mouseMove(_from, _fromOffset)
+            .mouseDown()
+            .mouseMove(_to, _toOffset)
+            .mouseUp()
+            .perform();
+        }
       }
     }
 
@@ -217,11 +284,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async pressKeys(keys: string | string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void> {
-      const actions = this.isW3CEnabled
-        ? driver.actions()
-        : (driver as any).actions({ bridge: true });
       const chord = this.keys.chord(...args);
-      await actions.sendKeys(chord).perform();
+      await this.getActions()
+        .sendKeys(chord)
+        .perform();
     }
 
     /**
@@ -238,17 +304,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
     public async clickMouseButton(element: WebElementWrapper): Promise<void>;
     public async clickMouseButton(...args: unknown[]): Promise<void> {
-      const mouse = (driver.actions() as any).mouse();
-      const actions = (driver as any).actions({ bridge: true });
-      if (args[0] instanceof WebElementWrapper) {
-        await actions
-          .pause(mouse)
-          .move({ origin: (args[0] as any)._webElement })
+      const arg0 = args[0];
+      if (arg0 instanceof WebElementWrapper) {
+        await this.getActions()
+          .pause(this.getActions().mouse)
+          .move({ origin: arg0._webElement })
           .click()
           .perform();
       } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
-        await actions
-          .pause(mouse)
+        await this.getActions()
+          .pause(this.getActions().mouse)
           .move({ origin: { x: args[1], y: args[2] } })
           .click()
           .perform();
@@ -297,7 +362,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<Buffer>}
      */
-    public async takeScreenshot(): Promise<string | Buffer> {
+    public async takeScreenshot(): Promise<string> {
       return await driver.takeScreenshot();
     }
 
@@ -307,12 +372,15 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(element: WebElementWrapper): Promise<void> {
-      const actions = (driver as any).actions({ bridge: true });
+    public async doubleClick(element?: WebElementWrapper): Promise<void> {
       if (element instanceof WebElementWrapper) {
-        await actions.doubleClick(element._webElement).perform();
+        await this.getActions()
+          .doubleClick(element._webElement)
+          .perform();
       } else {
-        await actions.doubleClick().perform();
+        await this.getActions()
+          .doubleClick()
+          .perform();
       }
     }
 
@@ -373,10 +441,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param  {string|function} fn
      * @param  {...any[]} args
      */
-    public async execute<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
+    public async execute<A extends any[], R>(
+      fn: string | ((...args: A) => R),
+      ...args: A
+    ): Promise<R> {
       return await driver.executeScript(
         fn,
-        ...cloneDeep(args, arg => {
+        ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
@@ -384,10 +455,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
+    public async executeAsync<A extends any[], R>(
+      fn: string | ((...args: A) => R),
+      ...args: A
+    ): Promise<R> {
       return await driver.executeAsyncScript(
         fn,
-        ...cloneDeep(args, arg => {
+        ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
@@ -395,29 +469,25 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public getScrollTop() {
-      return driver
-        .executeScript('return document.body.scrollTop')
-        .then((scrollSize: any) => parseInt(scrollSize, 10));
+    public async getScrollTop(): Promise<number> {
+      const scrollSize = await driver.executeScript<string>('return document.body.scrollTop');
+      return parseInt(scrollSize, 10);
     }
 
-    public getScrollLeft() {
-      return driver
-        .executeScript('return document.body.scrollLeft')
-        .then((scrollSize: any) => parseInt(scrollSize, 10));
+    public async getScrollLeft(): Promise<number> {
+      const scrollSize = await driver.executeScript<string>('return document.body.scrollLeft');
+      return parseInt(scrollSize, 10);
     }
 
     // return promise with REAL scroll position
-    public setScrollTop(scrollSize: number | string) {
-      return driver
-        .executeScript('document.body.scrollTop = ' + scrollSize)
-        .then(this.getScrollTop);
+    public async setScrollTop(scrollSize: number | string): Promise<number> {
+      await driver.executeScript('document.body.scrollTop = ' + scrollSize);
+      return this.getScrollTop();
     }
 
-    public setScrollLeft(scrollSize: number | string) {
-      return driver
-        .executeScript('document.body.scrollLeft = ' + scrollSize)
-        .then(this.getScrollLeft);
+    public async setScrollLeft(scrollSize: number | string) {
+      await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
+      return this.getScrollLeft();
     }
   }
 

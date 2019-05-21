@@ -5,10 +5,10 @@
  */
 
 import { EuiCode, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { InputFieldProps } from './source_configuration_form_state';
+import { InputFieldProps } from './input_fields';
 
 interface FieldsConfigurationPanelProps {
   containerFieldProps: InputFieldProps;

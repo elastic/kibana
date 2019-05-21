@@ -24,6 +24,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const retry = getService('retry');
   const inspector = getService('inspector');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -42,8 +43,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show the correct count in the legend', async () => {
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('156');
+        await retry.try(async () => {
+          const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
+          expect(actualCount).to.be('156');
+        });
       });
 
       it('should show the correct count in the legend with 2h offset', async () => {

@@ -365,22 +365,22 @@ exports[`Inspector Data View component should render loading state 1`] = `
                       <EuiLoadingChart
                         size="m"
                       >
-                        <div
+                        <span
                           className="euiLoadingChart euiLoadingChart--medium"
                         >
-                          <div
+                          <span
                             className="euiLoadingChart__bar"
                           />
-                          <div
+                          <span
                             className="euiLoadingChart__bar"
                           />
-                          <div
+                          <span
                             className="euiLoadingChart__bar"
                           />
-                          <div
+                          <span
                             className="euiLoadingChart__bar"
                           />
-                        </div>
+                        </span>
                       </EuiLoadingChart>
                       <EuiSpacer
                         size="s"

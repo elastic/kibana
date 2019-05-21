@@ -31,6 +31,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       log.debug('Starting visualize before method');
       browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });

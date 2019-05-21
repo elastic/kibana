@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import handleAnnotationResponse from './handle_annotation_response';
+import { handleAnnotationResponse } from './response_processors/annotations/';
 import { getAnnotationRequestParams } from './annorations/get_request_params';
+import { getLastSeriesTimestamp } from './helpers/timestamp';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
@@ -28,10 +29,19 @@ function validAnnotation(annotation) {
     !annotation.hidden;
 }
 
-export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities) {
+export async function getAnnotations({
+  req,
+  esQueryConfig,
+  searchStrategy,
+  panel,
+  capabilities,
+  series
+}) {
   const panelIndexPattern = panel.index_pattern;
   const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const annotations = panel.annotations.filter(validAnnotation);
+  const lastSeriesTimestamp = getLastSeriesTimestamp(series);
+  const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
 
   const bodiesPromises = annotations.map(annotation => getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities));
   const body = (await Promise.all(bodiesPromises))
@@ -44,7 +54,7 @@ export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, 
 
     return annotations
       .reduce((acc, annotation, index) => {
-        acc[annotation.id] = handleAnnotationResponse(responses[index], annotation);
+        acc[annotation.id] = handleAnnotationResponseBy(responses[index], annotation);
 
         return acc;
       }, {});

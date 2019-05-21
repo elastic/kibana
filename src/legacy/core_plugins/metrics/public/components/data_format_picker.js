@@ -117,12 +117,9 @@ class DataFormatPicker extends Component {
     let custom;
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
-      const selectedFrom = durationInputOptions.find(option => {
-        return from === option.value;
-      });
-      const selectedTo = durationOutputOptions.find(option => {
-        return to === option.value;
-      });
+      const selectedFrom = durationInputOptions.find(option => from === option.value);
+      const selectedTo = durationOutputOptions.find(option =>  to === option.value);
+
       return (
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -232,7 +229,6 @@ class DataFormatPicker extends Component {
       </EuiFlexGroup>
     );
   }
-
 }
 
 DataFormatPicker.defaultProps = {

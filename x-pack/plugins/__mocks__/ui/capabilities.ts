@@ -15,14 +15,17 @@ let internals: UICapabilities = {
   },
 };
 
-export const uiCapabilities = new Proxy(
-  {},
-  {
-    get: (target, property) => {
-      return internals[String(property)] as any;
-    },
-  }
-);
+export const capabilities = {
+  get: () =>
+    new Proxy(
+      {},
+      {
+        get: (target, property) => {
+          return internals[String(property)] as any;
+        },
+      }
+    ),
+};
 
 export function setMockCapabilities(mockCapabilities: UICapabilities) {
   internals = mockCapabilities;

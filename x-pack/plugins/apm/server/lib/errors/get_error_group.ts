@@ -5,13 +5,13 @@
  */
 
 import { ESFilter } from 'elasticsearch';
+import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
-import { idx } from '../../../common/idx';
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';

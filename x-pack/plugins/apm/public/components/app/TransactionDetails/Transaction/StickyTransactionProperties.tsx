@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { idx } from '@kbn/elastic-idx';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
@@ -13,7 +14,6 @@ import {
   USER_ID
 } from '../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { idx } from '../../../../../common/idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {

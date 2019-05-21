@@ -25,7 +25,6 @@ interface MetricsTimeControlsProps {
 export class MetricsTimeControls extends React.Component<MetricsTimeControlsProps> {
   public render() {
     const { currentTimeRange, isLiveStreaming, refreshInterval } = this.props;
-
     return (
       <MetricsTimeControlsContainer>
         <EuiSuperDatePicker
