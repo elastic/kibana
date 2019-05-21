@@ -39,5 +39,33 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
           });
         });
     });
+
+    it('should not return encrypted attributes', async () => {
+      await supertest
+        .get('/api/action/_find')
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            page: 1,
+            per_page: 20,
+            total: 1,
+            saved_objects: [
+              {
+                id: '1',
+                type: 'action',
+                version: resp.body.saved_objects[0].version,
+                references: [],
+                attributes: {
+                  description: 'My description',
+                  actionTypeId: 'test',
+                  actionTypeConfig: {
+                    unencrypted: 'unencrypted text',
+                  },
+                },
+              },
+            ],
+          });
+        });
+    });
   });
 }

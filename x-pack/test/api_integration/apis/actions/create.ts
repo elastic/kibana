@@ -41,6 +41,40 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
+    it('should not return encrypted attributes', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'My action',
+            actionTypeId: 'test',
+            actionTypeConfig: {
+              unencrypted: 'unencrypted text',
+              encrypted: 'something encrypted',
+            },
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            type: 'action',
+            id: resp.body.id,
+            attributes: {
+              description: 'My action',
+              actionTypeId: 'test',
+              actionTypeConfig: {
+                unencrypted: 'unencrypted text',
+              },
+            },
+            references: [],
+            updated_at: resp.body.updated_at,
+            version: resp.body.version,
+          });
+          expect(typeof resp.body.id).to.be('string');
+        });
+    });
+
     it(`should return 400 when action type isn't registered`, async () => {
       await supertest
         .post('/api/action')

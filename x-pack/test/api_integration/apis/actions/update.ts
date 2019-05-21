@@ -44,6 +44,39 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
+    it('should not return encrypted attributes', async () => {
+      await supertest
+        .put('/api/action/1')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            actionTypeId: 'test',
+            description: 'My description updated',
+            actionTypeConfig: {
+              unencrypted: 'unencrypted text',
+              encrypted: 'something encrypted',
+            },
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            id: '1',
+            type: 'action',
+            references: [],
+            version: resp.body.version,
+            updated_at: resp.body.updated_at,
+            attributes: {
+              actionTypeId: 'test',
+              description: 'My description updated',
+              actionTypeConfig: {
+                unencrypted: 'unencrypted text',
+              },
+            },
+          });
+        });
+    });
+
     it('should return 404 when updating a non existing document', async () => {
       await supertest
         .put('/api/action/2')
