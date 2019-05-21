@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isUndefined } from 'lodash';
-import { get, pick, set, difference } from 'lodash/fp';
-import React from 'react';
+import { difference, get, isUndefined, keyBy, pick, set } from 'lodash/fp';
 import { Query } from 'react-apollo';
+import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import memoizeOne from 'memoize-one';
@@ -28,6 +27,20 @@ export interface BrowserField {
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
+
+export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
+  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+    (acc, namespace) => [
+      ...acc,
+      ...Object.values(namespace.fields != null ? namespace.fields : {}),
+    ],
+    []
+  );
+
+export const getAllFieldsByName = (
+  browserFields: BrowserFields
+): { [fieldName: string]: Partial<BrowserField> } =>
+  keyBy('name', getAllBrowserFields(browserFields));
 
 interface WithSourceArgs {
   auditbeatIndicesExist: boolean;
