@@ -8,7 +8,7 @@ import React from 'react';
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop } from '../../drag_drop';
-import { getSuggestions } from './suggestion_helpers';
+import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 
 interface WorkspacePanelProps {
   activeDatasource: Datasource;
@@ -61,12 +61,7 @@ export function WorkspacePanel({
     const suggestion = suggestions[0];
 
     // TODO heuristically present the suggestions in a modal instead of just picking the first one
-    dispatch({
-      type: 'SWITCH_VISUALIZATION',
-      newVisualizationId: suggestion.visualizationId,
-      initialState: suggestion.state,
-      datasourceState: suggestion.datasourceState,
-    });
+    dispatch(toSwitchAction(suggestion));
   }
 
   function renderVisualization() {

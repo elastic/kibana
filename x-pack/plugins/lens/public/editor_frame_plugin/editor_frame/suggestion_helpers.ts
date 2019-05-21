@@ -5,14 +5,31 @@
  */
 
 import { DatasourcePublicAPI, TableColumn, Visualization, DatasourceSuggestion } from '../../types';
+import { Action } from './state_management';
 
+export interface Suggestion {
+  visualizationId: string;
+  datasourceState: unknown;
+  score: number;
+  title: string;
+  state: unknown;
+}
+
+/**
+ * This function takes a list of available data tables and a list of viusalization
+ * extensions and creates a ranked list of suggestions which contain a pair of a data table
+ * and a visualization.
+ *
+ * Each suggestion represents a valid state of the editor and can be applied by creating an
+ * action with `toSwitchAction` and dispatching it
+ */
 export function getSuggestions(
   datasourceTableSuggestions: DatasourceSuggestion[],
   visualizationMap: Record<string, Visualization>,
   activeVisualizationId: string | null,
   activeVisualizationState: unknown,
   datasourcePublicAPI: DatasourcePublicAPI
-) {
+): Suggestion[] {
   const roleMapping = activeVisualizationId
     ? visualizationMap[activeVisualizationId].getMappingOfTableToRoles(
         activeVisualizationState,
@@ -42,4 +59,13 @@ export function getSuggestions(
       .reduce((globalList, currentList) => [...globalList, ...currentList], [])
       .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA)
   );
+}
+
+export function toSwitchAction(suggestion: Suggestion): Action {
+  return {
+    type: 'SWITCH_VISUALIZATION',
+    newVisualizationId: suggestion.visualizationId,
+    initialState: suggestion.state,
+    datasourceState: suggestion.datasourceState,
+  };
 }

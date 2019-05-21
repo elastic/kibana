@@ -7,7 +7,7 @@
 import React from 'react';
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
-import { getSuggestions } from './suggestion_helpers';
+import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 
 interface SuggestionPanelProps {
   activeDatasource: Datasource;
@@ -50,12 +50,7 @@ export function SuggestionPanel({
             key={index}
             data-test-subj="suggestion"
             onClick={() => {
-              dispatch({
-                type: 'SWITCH_VISUALIZATION',
-                newVisualizationId: suggestion.visualizationId,
-                initialState: suggestion.state,
-                datasourceState: suggestion.datasourceState,
-              });
+              dispatch(toSwitchAction(suggestion));
             }}
           >
             {suggestion.title}
