@@ -46,8 +46,6 @@ export async function getEMSDataSources() {
         const licenseId = xpackMapsFeature && xpackMapsFeature.maps && xpackMapsFeature.uid ? xpackMapsFeature.uid :  '';
 
         const emsResponse = await getEMSResources(emsClient, isEmsEnabled, licenseId, false);
-
-        //override EMS cors config
         emsSources = {
           ems: {
             file: emsResponse.fileLayers,
