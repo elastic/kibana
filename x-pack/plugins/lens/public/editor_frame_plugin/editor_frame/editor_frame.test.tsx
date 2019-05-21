@@ -13,7 +13,7 @@ import { createMockVisualization, createMockDatasource } from '../mock_extension
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
-const waitForPromises = () => new Promise(resolve => setImmediate(resolve));
+const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 describe('editor_frame', () => {
   let mockVisualization: Visualization;
@@ -581,6 +581,122 @@ describe('editor_frame', () => {
         expect.any(Element),
         expect.objectContaining({
           state: newDatasourceState,
+        })
+      );
+    });
+
+    it('should switch to best suggested visualization on field drop', async () => {
+      const suggestionVisState = {};
+      const instance = mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.2,
+                  state: {},
+                  title: 'Suggestion1',
+                },
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.8,
+                  state: suggestionVisState,
+                  title: 'Suggestion2',
+                },
+              ],
+            },
+            testVis2: mockVisualization2,
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsForField: () => [{ state: {}, tableColumns: [] }],
+              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+        />
+      );
+
+      await waitForPromises();
+
+      // TODO why is this necessary?
+      instance.update();
+
+      act(() => {
+        instance.find('[data-test-subj="lnsDragDrop"]').simulate('drop');
+      });
+
+      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: suggestionVisState,
+        })
+      );
+    });
+
+    it('should switch to best suggested visualization regardless extension on field drop', async () => {
+      const suggestionVisState = {};
+      const instance = mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.2,
+                  state: {},
+                  title: 'Suggestion1',
+                },
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.6,
+                  state: {},
+                  title: 'Suggestion2',
+                },
+              ],
+            },
+            testVis2: {
+              ...mockVisualization2,
+              getSuggestions: () => [
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.8,
+                  state: suggestionVisState,
+                  title: 'Suggestion3',
+                },
+              ],
+            },
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsForField: () => [{ state: {}, tableColumns: [] }],
+              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+        />
+      );
+
+      await waitForPromises();
+
+      // TODO why is this necessary?
+      instance.update();
+
+      act(() => {
+        instance.find('[data-test-subj="lnsDragDrop"]').simulate('drop');
+      });
+
+      expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: suggestionVisState,
         })
       );
     });

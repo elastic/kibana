@@ -6,37 +6,40 @@
 
 import React from 'react';
 import { Action } from './state_management';
-import {
-  Datasource,
-  Visualization,
-  DatasourcePublicAPI,
-  DatasourceSuggestion,
-  DimensionRole,
-  TableColumn,
-} from '../../types';
+import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
+import { getSuggestions } from './suggestion_helpers';
 
 interface SuggestionPanelProps {
   activeDatasource: Datasource;
   datasourceState: unknown;
   activeVisualizationId: string | null;
-  visualizations: Record<string, Visualization>;
-  visualizationState: unknown;
+  visualizationMap: Record<string, Visualization>;
+  activeVisualizationState: unknown;
   datasourcePublicAPI: DatasourcePublicAPI;
   dispatch: (action: Action) => void;
 }
 
-export function SuggestionPanel(props: SuggestionPanelProps) {
-  const currentDatasource = props.activeDatasource;
-  const datasourceSuggestions = currentDatasource.getDatasourceSuggestionsFromCurrentState(
-    props.datasourceState
+export function SuggestionPanel({
+  activeDatasource,
+  datasourceState,
+  activeVisualizationId,
+  visualizationMap,
+  activeVisualizationState,
+  datasourcePublicAPI,
+  dispatch,
+}: SuggestionPanelProps) {
+  const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsFromCurrentState(
+    datasourceState
   );
-  const roleMapping = props.activeVisualizationId
-    ? props.visualizations[props.activeVisualizationId].getMappingOfTableToRoles(
-        props.visualizationState,
-        props.datasourcePublicAPI
-      )
-    : [];
-  const suggestions = getSuggestions(datasourceSuggestions, props.visualizations, roleMapping);
+
+  const suggestions = getSuggestions(
+    datasourceSuggestions,
+    visualizationMap,
+    activeVisualizationId,
+    activeVisualizationState,
+    datasourcePublicAPI
+  );
+
   return (
     <>
       {/* TODO: I18N */}
@@ -47,7 +50,7 @@ export function SuggestionPanel(props: SuggestionPanelProps) {
             key={index}
             data-test-subj="suggestion"
             onClick={() => {
-              props.dispatch({
+              dispatch({
                 type: 'SWITCH_VISUALIZATION',
                 newVisualizationId: suggestion.visualizationId,
                 initialState: suggestion.state,
@@ -60,35 +63,5 @@ export function SuggestionPanel(props: SuggestionPanelProps) {
         );
       })}
     </>
-  );
-}
-
-function getSuggestions(
-  datasourceTableSuggestions: DatasourceSuggestion[],
-  visualizations: Record<string, Visualization>,
-  currentColumnRoles: DimensionRole[]
-) {
-  const datasourceTableMetas: Record<string, TableColumn[]> = {};
-  datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
-    datasourceTableMetas[datasourceSuggestionId] = tableColumns;
-  });
-
-  return (
-    Object.entries(visualizations)
-      .map(([visualizationId, visualization]) => {
-        return visualization
-          .getSuggestions({
-            tableColumns: datasourceTableMetas,
-            roles: currentColumnRoles,
-          })
-          .map(({ datasourceSuggestionId, ...suggestion }) => ({
-            ...suggestion,
-            visualizationId,
-            datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
-          }));
-      })
-      // TODO why is flatMap not available here?
-      .reduce((globalList, currentList) => [...globalList, ...currentList], [])
-      .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA)
   );
 }

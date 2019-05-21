@@ -11,6 +11,7 @@ import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
+import { WorkspacePanel } from './workspace_panel';
 
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
@@ -89,17 +90,31 @@ export function EditorFrame(props: EditorFrameProps) {
             dispatch={dispatch}
           />
         }
+        workspacePanel={
+          <WorkspacePanel
+            activeDatasource={props.datasourceMap[state.datasource.activeId]}
+            activeVisualizationId={state.visualization.activeId}
+            datasourcePublicAPI={datasourcePublicAPI!}
+            datasourceState={state.datasource.state}
+            activeVisualizationState={
+              state.visualization.activeId &&
+              state.visualization.stateMap[state.visualization.activeId]
+            }
+            visualizationMap={props.visualizationMap}
+            dispatch={dispatch}
+          />
+        }
         suggestionsPanel={
           <SuggestionPanel
             activeDatasource={props.datasourceMap[state.datasource.activeId]}
             activeVisualizationId={state.visualization.activeId}
             datasourcePublicAPI={datasourcePublicAPI!}
             datasourceState={state.datasource.state}
-            visualizationState={
+            activeVisualizationState={
               state.visualization.activeId &&
               state.visualization.stateMap[state.visualization.activeId]
             }
-            visualizations={props.visualizationMap}
+            visualizationMap={props.visualizationMap}
             dispatch={dispatch}
           />
         }
@@ -117,8 +132,6 @@ export function EditorFrame(props: EditorFrameProps) {
             dispatch={dispatch}
           />
         }
-        configPanel={null}
-        suggestionsPanel={null}
       />
     );
   }

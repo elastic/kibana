@@ -6,22 +6,16 @@
 
 import React from 'react';
 import { Action } from './state_management';
-import {
-  Datasource,
-  Visualization,
-  DatasourcePublicAPI,
-  DatasourceSuggestion,
-  DimensionRole,
-  TableColumn,
-} from '../../types';
+import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop } from '../../drag_drop';
+import { getSuggestions } from './suggestion_helpers';
 
 interface WorkspacePanelProps {
   activeDatasource: Datasource;
   datasourceState: unknown;
   activeVisualizationId: string | null;
-  visualizations: Record<string, Visualization>;
-  visualizationState: unknown;
+  visualizationMap: Record<string, Visualization>;
+  activeVisualizationState: unknown;
   datasourcePublicAPI: DatasourcePublicAPI;
   dispatch: (action: Action) => void;
 }
@@ -36,76 +30,64 @@ function ExpressionRenderer(props: ExpressionRendererProps) {
   return <span>{props.expression}</span>;
 }
 
-export function WorkspacePanel(props: WorkspacePanelProps) {
-  const currentDatasource = props.activeDatasource;
-  const expression = props.activeVisualizationId
-    ? `${props.activeDatasource.toExpression(props.datasourceState)} | ${props.visualizations[
-        props.activeVisualizationId
-      ].toExpression(props.visualizationState, props.datasourcePublicAPI)}`
-    : null;
+export function WorkspacePanel({
+  activeDatasource,
+  activeVisualizationId,
+  datasourceState,
+  visualizationMap,
+  activeVisualizationState,
+  datasourcePublicAPI,
+  dispatch,
+}: WorkspacePanelProps) {
+  function onDrop() {
+    const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsForField(
+      datasourceState
+    );
+
+    const suggestions = getSuggestions(
+      datasourceSuggestions,
+      visualizationMap,
+      activeVisualizationId,
+      activeVisualizationState,
+      datasourcePublicAPI
+    );
+
+    if (suggestions.length === 0) {
+      // TODO specify and implement behavior in case
+      // of no valid suggestions
+      return;
+    }
+
+    const suggestion = suggestions[0];
+
+    // TODO heuristically present the suggestions in a modal instead of just picking the first one
+    dispatch({
+      type: 'SWITCH_VISUALIZATION',
+      newVisualizationId: suggestion.visualizationId,
+      initialState: suggestion.state,
+      datasourceState: suggestion.datasourceState,
+    });
+  }
+
+  function renderVisualization() {
+    if (activeVisualizationId === null) {
+      return <p>{/* TODO: I18N */}This is the workspace panel. Drop fields here</p>;
+    }
+
+    const activeVisualization = visualizationMap[activeVisualizationId];
+    const datasourceExpression = activeDatasource.toExpression(datasourceState);
+    const visualizationExpression = activeVisualization.toExpression(
+      activeVisualizationState,
+      datasourcePublicAPI
+    );
+    const expression = `${datasourceExpression} | ${visualizationExpression}`;
+
+    return <ExpressionRenderer expression={expression} />;
+  }
+
   return (
-    <DragDrop
-      draggable={false}
-      droppable={true}
-      onDrop={() => {
-        const datasourceSuggestions = currentDatasource.getDatasourceSuggestionsForField(
-          props.datasourceState
-        );
-        const roleMapping = props.activeVisualizationId
-          ? props.visualizations[props.activeVisualizationId].getMappingOfTableToRoles(
-              props.visualizationState,
-              props.datasourcePublicAPI
-            )
-          : [];
-        const suggestion = getSuggestions(
-          datasourceSuggestions,
-          props.visualizations,
-          roleMapping
-        )[0];
-        // TODO heuristically present the suggestions in a modal instead of just picking the first one
-        props.dispatch({
-          type: 'SWITCH_VISUALIZATION',
-          newVisualizationId: suggestion.visualizationId,
-          initialState: suggestion.state,
-          datasourceState: suggestion.datasourceState,
-        });
-      }}
-    >
-      {expression !== null ? (
-        <ExpressionRenderer expression={expression} />
-      ) : (
-        <p>{/* TODO: I18N */}This is the workspace panel. Drop fields here</p>
-      )}
+    <DragDrop draggable={false} droppable={true} onDrop={onDrop}>
+      {renderVisualization()}
     </DragDrop>
-  );
-}
-
-function getSuggestions(
-  datasourceTableSuggestions: DatasourceSuggestion[],
-  visualizations: Record<string, Visualization>,
-  currentColumnRoles: DimensionRole[]
-) {
-  const datasourceTableMetas: Record<string, TableColumn[]> = {};
-  datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
-    datasourceTableMetas[datasourceSuggestionId] = tableColumns;
-  });
-
-  return (
-    Object.entries(visualizations)
-      .map(([visualizationId, visualization]) => {
-        return visualization
-          .getSuggestions({
-            tableColumns: datasourceTableMetas,
-            roles: currentColumnRoles,
-          })
-          .map(({ datasourceSuggestionId, ...suggestion }) => ({
-            ...suggestion,
-            visualizationId,
-            datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
-          }));
-      })
-      // TODO why is flatMap not available here?
-      .reduce((globalList, currentList) => [...globalList, ...currentList], [])
-      .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA)
   );
 }
