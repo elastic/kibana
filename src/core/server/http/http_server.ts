@@ -69,6 +69,7 @@ export interface HttpServerSetup {
     get: AuthStateStorage['get'];
     isAuthenticated: AuthStateStorage['isAuthenticated'];
   };
+  createNewServer?: (config: HttpConfig) => Promise<HttpServerSetup>;
 }
 
 export class HttpServer {

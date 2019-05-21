@@ -27,6 +27,9 @@ import { HttpConfigType, config, HttpConfig } from './http_config';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { exec } from 'child_process';
+import { expectationFailed } from 'hapi/node_modules/@types/boom';
+import { executionAsyncId } from 'async_hooks';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
@@ -92,7 +95,7 @@ test('creates and sets up second http server', async () => {
   mockHttpServer.mockImplementation(() => httpServer);
 
   const service = new HttpService({ configService, env, logger });
-  await service.setup();
+  const serverSetup = await service.setup();
   await service.start();
 
   const configService2 = createConfigService({
@@ -100,14 +103,14 @@ test('creates and sets up second http server', async () => {
     port: 2345,
   });
 
-  const config2 = configService2.atPath('server', HttpConfig);
+  const config2 = configService2.atPath<HttpConfig>('server');
   const cfg = await config2.pipe(first()).toPromise();
-  await service.createServer(cfg);
+  await serverSetup.createNewServer(cfg);
 
   expect(mockHttpServer.mock.instances.length).toBe(2);
 
   try {
-    await service.createServer(cfg);
+    await serverSetup.createNewServer(cfg);
   } catch (err) {
     expect(err.message).toBe('port 2345 is already in use');
   }
@@ -190,8 +193,10 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ configService, env, logger });
-
-  expect(await service.setup()).toBe(httpServer);
+  const setup = await service.setup();
+  expect(setup.createNewServer).toBeDefined();
+  delete setup.createNewServer;
+  expect(setup).toEqual(httpServer);
 });
 
 test('does not start http server if process is dev cluster master', async () => {

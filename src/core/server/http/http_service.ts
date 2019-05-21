@@ -73,7 +73,8 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    return this.httpServer.setup(config);
+    const setup = this.httpServer.setup(config);
+    return { ...setup, ...{ createNewServer: (cfg: HttpConfig) => this.createServer(cfg) } };
   }
 
   public async start() {
@@ -98,7 +99,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     };
   }
 
-  public async createServer(config: HttpConfig) {
+  private async createServer(config: HttpConfig) {
     const port = config.port;
 
     if (!port || this.secondaryServers.has(port)) {
@@ -106,7 +107,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     }
 
     const baseConfig = await this.config$.pipe(first()).toPromise();
-    const cfg = Object.assign({}, baseConfig, config);
+    const cfg = { ...baseConfig, ...config };
     const log = this.logger.get('http', `server:${port}`);
 
     const httpServer = new HttpServer(log);
@@ -125,9 +126,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
-    for (const [port, server] of this.secondaryServers.entries()) {
-      await server.stop();
-      this.secondaryServers.delete(port);
-    }
+    await Promise.all([...this.secondaryServers.values()].map(s => s.stop()));
+    this.secondaryServers.clear();
   }
 }
