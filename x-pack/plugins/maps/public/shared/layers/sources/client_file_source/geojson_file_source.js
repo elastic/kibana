@@ -15,8 +15,8 @@ import _ from 'lodash';
 export class GeojsonFileSource extends AbstractVectorSource {
 
   static type = GEOJSON_FILE;
-  static title = 'Import GeoJSON Vector File';
-  static description = 'Import a GeoJSON file & Index in Elasticsearch';
+  static title = 'Upload GeoJSON vector file';
+  static description = 'Upload a GeoJSON file and index in Elasticsearch';
   static icon = 'importAction';
   static indexReadyFile = true;
 
