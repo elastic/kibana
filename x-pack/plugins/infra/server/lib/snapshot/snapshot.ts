@@ -205,7 +205,7 @@ const getAllCompositeAggregationData = async <BucketType>(
   );
 
   // Nothing available, return the previous buckets.
-  if (response.hits.total === 0) {
+  if (response.hits.total.value === 0) {
     return previousBuckets;
   }
 

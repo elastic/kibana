@@ -37,16 +37,18 @@ export const eventsQuery = gql`
             timestamp
             event {
               action
-              severity
-              module
               category
+              dataset
               id
+              module
+              severity
             }
             host {
               name
               ip
               id
             }
+            message
             source {
               ip
               port
@@ -54,10 +56,6 @@ export const eventsQuery = gql`
             destination {
               ip
               port
-            }
-            geo {
-              region_name
-              country_iso_code
             }
             suricata {
               eve {
@@ -68,6 +66,9 @@ export const eventsQuery = gql`
                   signature_id
                 }
               }
+            }
+            user {
+              name
             }
             zeek {
               session_id
