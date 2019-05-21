@@ -6,13 +6,23 @@
 import _ from 'lodash';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
-import { isMetaDataLoaded, getDataSourcesSync } from '../meta';
+import { isMetaDataLoaded, getEMSDataSourcesSync, getKibanaTileMap } from '../meta';
 import { DEFAULT_EMS_TILE_LAYER } from '../../common/constants';
 
 export function getInitialLayers(savedMapLayerListJSON) {
 
   if (savedMapLayerListJSON) {
     return JSON.parse(savedMapLayerListJSON);
+  }
+
+  const tilemapSourceFromKibana = getKibanaTileMap();
+  if (_.get(tilemapSourceFromKibana, 'url')) {
+    const sourceDescriptor = KibanaTilemapSource.createDescriptor();
+    const source = new KibanaTilemapSource(sourceDescriptor);
+    const layer = source.createDefaultLayer();
+    return [
+      layer.toLayerDescriptor()
+    ];
   }
 
   if (!isMetaDataLoaded()) {
@@ -24,17 +34,8 @@ export function getInitialLayers(savedMapLayerListJSON) {
     ];
   }
 
-  const dataSources = getDataSourcesSync();
-  if (_.get(dataSources, 'kibana.tilemap.url')) {
-    const sourceDescriptor = KibanaTilemapSource.createDescriptor();
-    const source = new KibanaTilemapSource(sourceDescriptor);
-    const layer = source.createDefaultLayer();
-    return [
-      layer.toLayerDescriptor()
-    ];
-  }
-
-  const emsTmsServices = _.get(dataSources, 'ems.tms');
+  const emsDataSources = getEMSDataSourcesSync();
+  const emsTmsServices = _.get(emsDataSources, 'ems.tms');
   if (emsTmsServices && emsTmsServices.length > 0) {
     const sourceDescriptor = EMSTMSSource.createDescriptor(emsTmsServices[0].id);
     const source = new EMSTMSSource(sourceDescriptor, { emsTmsServices });

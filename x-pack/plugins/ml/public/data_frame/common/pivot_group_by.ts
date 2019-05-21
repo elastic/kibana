@@ -49,6 +49,7 @@ export const pivotGroupByFieldSupport = {
 interface GroupByConfigBase {
   field: FieldName;
   aggName: AggName;
+  dropDownName: string;
 }
 
 // Don't allow an interval of '0', but allow a float interval of '0.1' with a leading zero.

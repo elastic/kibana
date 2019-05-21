@@ -19,83 +19,75 @@
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { Env } from '../config';
-import { SslConfig } from './ssl_config';
+import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
-const createHttpSchema = schema.object(
-  {
-    autoListen: schema.boolean({ defaultValue: true }),
-    basePath: schema.maybe(
-      schema.string({
-        validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
-      })
-    ),
-    cors: schema.conditional(
-      schema.contextRef('dev'),
-      true,
-      schema.object(
-        {
-          origin: schema.arrayOf(schema.string()),
-        },
-        {
-          defaultValue: {
-            origin: ['*://localhost:9876'], // karma test server
-          },
-        }
-      ),
-      schema.boolean({ defaultValue: false })
-    ),
-    host: schema.string({
-      defaultValue: 'localhost',
-      hostname: true,
-    }),
-    maxPayload: schema.byteSize({
-      defaultValue: '1048576b',
-    }),
-    port: schema.number({
-      defaultValue: 5601,
-    }),
-    rewriteBasePath: schema.boolean({ defaultValue: false }),
-    ssl: SslConfig.schema,
-  },
-  {
-    validate: config => {
-      if (!config.basePath && config.rewriteBasePath) {
-        return 'cannot use [rewriteBasePath] when [basePath] is not specified';
-      }
-
-      if (
-        config.ssl.enabled &&
-        config.ssl.redirectHttpFromPort !== undefined &&
-        config.ssl.redirectHttpFromPort === config.port
-      ) {
-        return (
-          'Kibana does not accept http traffic to [port] when ssl is ' +
-          'enabled (only https is allowed), so [ssl.redirectHttpFromPort] ' +
-          `cannot be configured to the same value. Both are [${config.port}].`
-        );
-      }
-    },
-  }
-);
-
-export type HttpConfigType = TypeOf<typeof createHttpSchema>;
-
 export const config = {
   path: 'server',
-  schema: createHttpSchema,
+  schema: schema.object(
+    {
+      autoListen: schema.boolean({ defaultValue: true }),
+      basePath: schema.maybe(
+        schema.string({
+          validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
+        })
+      ),
+      cors: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.object(
+          {
+            origin: schema.arrayOf(schema.string()),
+          },
+          {
+            defaultValue: {
+              origin: ['*://localhost:9876'], // karma test server
+            },
+          }
+        ),
+        schema.boolean({ defaultValue: false })
+      ),
+      host: schema.string({
+        defaultValue: 'localhost',
+        hostname: true,
+      }),
+      maxPayload: schema.byteSize({
+        defaultValue: '1048576b',
+      }),
+      port: schema.number({
+        defaultValue: 5601,
+      }),
+      rewriteBasePath: schema.boolean({ defaultValue: false }),
+      ssl: sslSchema,
+    },
+    {
+      validate: rawConfig => {
+        if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
+          return 'cannot use [rewriteBasePath] when [basePath] is not specified';
+        }
+
+        if (
+          rawConfig.ssl.enabled &&
+          rawConfig.ssl.redirectHttpFromPort !== undefined &&
+          rawConfig.ssl.redirectHttpFromPort === rawConfig.port
+        ) {
+          return (
+            'Kibana does not accept http traffic to [port] when ssl is ' +
+            'enabled (only https is allowed), so [ssl.redirectHttpFromPort] ' +
+            `cannot be configured to the same value. Both are [${rawConfig.port}].`
+          );
+        }
+      },
+    }
+  ),
 };
+export type HttpConfigType = TypeOf<typeof config.schema>;
 
 export class HttpConfig {
-  /**
-   * @internal
-   */
-  public static schema = createHttpSchema;
-
   public autoListen: boolean;
   public host: string;
   public port: number;
@@ -118,6 +110,6 @@ export class HttpConfig {
     this.basePath = rawConfig.basePath;
     this.rewriteBasePath = rawConfig.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
-    this.ssl = new SslConfig(rawConfig.ssl);
+    this.ssl = new SslConfig(rawConfig.ssl || {});
   }
 }

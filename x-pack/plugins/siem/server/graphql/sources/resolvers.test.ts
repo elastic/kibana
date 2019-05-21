@@ -22,21 +22,15 @@ export const mockSourcesAdapter: SourcesAdapter = {
   getAll: mockGetAll,
 };
 
-const mockGetIndexNames = jest.fn();
-mockGetIndexNames.mockResolvedValue([]);
-const mockHasAlias = jest.fn();
-mockHasAlias.mockResolvedValue(false);
 const mockHasIndices = jest.fn();
 mockHasIndices.mockResolvedValue(false);
 export const mockSourceStatusAdapter: SourceStatusAdapter = {
-  getIndexNames: mockGetIndexNames,
-  hasAlias: mockHasAlias,
   hasIndices: mockHasIndices,
 };
 
 const mockLibs: SourcesResolversDeps = {
   sources: new Sources(mockSourcesAdapter),
-  sourceStatus: new SourceStatus(mockSourceStatusAdapter, new Sources(mockSourcesAdapter)),
+  sourceStatus: new SourceStatus(mockSourceStatusAdapter),
 };
 
 const req: FrameworkRequest = {
@@ -60,7 +54,9 @@ describe('Test Source Resolvers', () => {
   test('Make sure that getConfiguration have been called', async () => {
     const data = await createSourcesResolvers(mockLibs).Query.source(
       {},
-      { id: 'default' },
+      {
+        id: 'default',
+      },
       context,
       {} as GraphQLResolveInfo
     );
