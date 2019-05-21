@@ -51,8 +51,9 @@ export function cloneRepo(
       error => {
         if (error) {
           reject(error);
+        } else {
+          resolve();
         }
-        resolve();
       }
     );
 
