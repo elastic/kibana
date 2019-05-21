@@ -206,6 +206,7 @@ export class JobCreator {
     }
   }
 
+  // create a jobRunner instance, start it and return it
   public async startDatafeed(): Promise<JobRunner> {
     const jobRunner = new JobRunner(this);
     jobRunner.startDatafeed();

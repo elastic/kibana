@@ -10,8 +10,11 @@ import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 
 export class MultiMetricJobCreator extends JobCreator {
+  // a multi metric jobs has one over all partition field
+  // which is the same for all detectors.
   private _splitField: SplitField = null;
 
+  // set the split field, applying it to each detector
   public setSplitField(field: SplitField) {
     this._splitField = field;
 
@@ -44,6 +47,7 @@ export class MultiMetricJobCreator extends JobCreator {
     this._editDetector(dtr, index);
   }
 
+  // create a new detector object, applying the overall split field
   private _createDetector(agg: Aggregation, field: Field | null) {
     const dtr: Detector = createBasicDetector(agg, field);
 

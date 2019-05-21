@@ -14,6 +14,9 @@ export class SingleMetricJobCreator extends JobCreator {
   private _field: Field | null = null;
   private _agg: Aggregation | null = null;
 
+  // only a single detector exists for this job type
+  // therefore _addDetector and _editDetector merge into this
+  // single setDetector function
   public setDetector(agg: Aggregation, field: Field | null) {
     const dtr: Detector = createBasicDetector(agg, field);
 
@@ -34,6 +37,7 @@ export class SingleMetricJobCreator extends JobCreator {
     this._createAggregations();
   }
 
+  // aggregations need to be recreated whenever the detector or bucket_span change
   private _createAggregations() {
     if (
       this._detectors.length &&
