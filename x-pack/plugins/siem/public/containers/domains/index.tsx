@@ -9,6 +9,8 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../..';
 import { FlowDirection, FlowTarget } from '../../../server/graphql/types';
 import { DomainsEdges, DomainsSortField, GetDomainsQuery, PageInfo } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
@@ -83,6 +85,7 @@ class DomainsComponentQuery extends QueryTemplate<
             tiebreaker: null,
           },
           filterQuery: createFilter(filterQuery),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {

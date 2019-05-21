@@ -40,7 +40,7 @@ const mockAuthenticationsLibs: AuthenticationsResolversDeps = {
 
 const mockSrcLibs: SourcesResolversDeps = {
   sources: new Sources(mockSourcesAdapter),
-  sourceStatus: new SourceStatus(mockSourceStatusAdapter, new Sources(mockSourcesAdapter)),
+  sourceStatus: new SourceStatus(mockSourceStatusAdapter),
 };
 
 const req: FrameworkRequest = {
@@ -64,7 +64,9 @@ describe('Test Source Resolvers', () => {
   test('Make sure that getAuthenticationss have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       {},
-      { id: 'default' },
+      {
+        id: 'default',
+      },
       context,
       {} as GraphQLResolveInfo
     );
@@ -78,6 +80,7 @@ describe('Test Source Resolvers', () => {
           to: 1514782800000,
           from: 1546318799999,
         },
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         pagination: {
           limit: 2,
           cursor: null,

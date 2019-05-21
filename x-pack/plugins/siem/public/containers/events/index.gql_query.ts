@@ -13,6 +13,7 @@ export const eventsQuery = gql`
     $pagination: PaginationInput!
     $sortField: SortField!
     $filterQuery: String
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
@@ -21,6 +22,7 @@ export const eventsQuery = gql`
         pagination: $pagination
         sortField: $sortField
         filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
       ) {
         totalCount
         pageInfo {
