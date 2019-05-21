@@ -163,7 +163,7 @@ function NumberList({
       {showValidation && ascendingError && <EuiFormErrorText>{ascendingError}</EuiFormErrorText>}
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="s">
+        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
           <FormattedMessage
             id="common.ui.aggTypes.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"
