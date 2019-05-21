@@ -5,19 +5,20 @@
  */
 
 import { getRandomString } from '../../../../test_utils';
-
+import { RepositoryType } from '../../common/types';
 const defaultSettings: any = { chunkSize: '10mb', location: '/tmp/es-backups' };
 
 interface Repository {
   name: string;
-  type: 'fs' | 'url';
+  type: RepositoryType;
   settings: any;
 }
+
 export const getRepository = ({
   name = getRandomString(),
   type = 'fs' as 'fs',
   settings = defaultSettings,
-} = {}): Repository => ({
+}: Partial<Repository> = {}): Repository => ({
   name,
   type,
   settings,

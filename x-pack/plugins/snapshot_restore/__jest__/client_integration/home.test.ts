@@ -24,16 +24,22 @@ describe('<SnapshotRestoreHome />', () => {
       testBed = await setup();
     });
 
-    it('should set the correct app title', () => {
+    test('should set the correct app title', () => {
       const { exists, find } = testBed;
       expect(exists('appTitle')).toBe(true);
       expect(find('appTitle').text()).toEqual('Snapshot Repositories');
     });
 
-    it('should display a loading while fetching the repositories', () => {
+    test('should display a loading while fetching the repositories', () => {
       const { exists, find } = testBed;
       expect(exists('sectionLoading')).toBe(true);
       expect(find('sectionLoading').text()).toEqual('Loading repositories…');
+    });
+
+    test('should have a link to the documentation', () => {
+      const { exists, find } = testBed;
+      expect(exists('documentationLink')).toBe(true);
+      expect(find('documentationLink').text()).toBe('Snapshot docs');
     });
   });
 
@@ -42,7 +48,7 @@ describe('<SnapshotRestoreHome />', () => {
       httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
     });
 
-    it('should display an empty prompt', async () => {
+    test('should display an empty prompt', async () => {
       const { component, exists } = await setup();
 
       await act(async () => {
@@ -57,15 +63,23 @@ describe('<SnapshotRestoreHome />', () => {
   });
 
   describe('when there are repositories', () => {
-    const repo1 = fixtures.getRepository({ name: `a${getRandomString}`, type: 'fs' });
-    const repo2 = fixtures.getRepository({
-      name: `b${getRandomString}`,
-      type: 'url',
-      settings: { url: 'file:///tmp/es-backups' },
+    const repo1 = fixtures.getRepository({ name: `a${getRandomString()}`, type: 'fs' });
+    const repo2 = fixtures.getRepository({ name: `b${getRandomString()}`, type: 'url' });
+    const repo3 = fixtures.getRepository({ name: `c${getRandomString()}`, type: 's3' });
+    const repo4 = fixtures.getRepository({ name: `d${getRandomString()}`, type: 'hdfs' });
+    const repo5 = fixtures.getRepository({ name: `e${getRandomString()}`, type: 'azure' });
+    const repo6 = fixtures.getRepository({ name: `f${getRandomString()}`, type: 'gcs' });
+    const repo7 = fixtures.getRepository({ name: `g${getRandomString()}`, type: 'source' });
+    const repo8 = fixtures.getRepository({
+      name: `h${getRandomString()}`,
+      type: 'source',
+      settings: { delegateType: 'gcs' },
     });
 
+    const repositories = [repo1, repo2, repo3, repo4, repo5, repo6, repo7, repo8];
+
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repo1, repo2] });
+      httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories });
 
       testBed = await setup();
 
@@ -75,30 +89,51 @@ describe('<SnapshotRestoreHome />', () => {
       });
     });
 
-    it('should list them in the table', async () => {
+    test('should list them in the table', async () => {
       const { table } = testBed;
+      const mapTypeToText: Record<string, string> = {
+        fs: 'Shared file system',
+        url: 'Read-only URL',
+        s3: 'AWS S3',
+        hdfs: 'Hadoop HDFS',
+        azure: 'Azure',
+        gcs: 'Google Cloud Storage',
+        source: 'Source-only',
+      };
 
       const { tableCellsValues } = table.getMetaData('repositoryTable');
-      const [row1, row2] = tableCellsValues;
-
-      expect(row1).toEqual(['', repo1.name, 'Shared file system', '']);
-      expect(row2).toEqual(['', repo2.name, 'Read-only URL', '']);
+      tableCellsValues.forEach((row, i) => {
+        const repository = repositories[i];
+        if (repository === repo8) {
+          // The "repo8" is source with a delegate type
+          expect(row).toEqual([
+            '',
+            repository.name,
+            `${mapTypeToText[repository.settings.delegateType]} (Source-only)`,
+            '',
+          ]);
+        } else {
+          expect(row).toEqual(['', repository.name, mapTypeToText[repository.type], '']);
+        }
+      });
     });
 
-    it('should show the detail when clicking on a repository', async () => {
-      const { component, exists, find, actions } = testBed;
+    describe('detail panel', () => {
+      test('should show the detail when clicking on a repository', async () => {
+        const { component, exists, find, actions } = testBed;
 
-      expect(exists('repositoryDetail')).toBe(false);
+        expect(exists('repositoryDetail')).toBe(false);
 
-      await act(async () => {
-        actions.clickRepositoryAt(0);
+        await act(async () => {
+          actions.clickRepositoryAt(0);
 
-        await nextTick();
-        component.update();
+          await nextTick();
+          component.update();
+        });
+
+        expect(exists('repositoryDetail')).toBe(true);
+        expect(find('repositoryDetail.title').text()).toEqual(repo1.name);
       });
-
-      expect(exists('repositoryDetail')).toBe(true);
-      expect(find('repositoryDetail.title').text()).toEqual(repo1.name);
     });
   });
 

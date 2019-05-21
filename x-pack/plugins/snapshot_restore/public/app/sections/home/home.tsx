@@ -92,6 +92,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
                 href={documentationLinksService.getRepositoryTypeDocUrl()}
                 target="_blank"
                 iconType="help"
+                data-test-subj="documentationLink"
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreDocsLinkText"
