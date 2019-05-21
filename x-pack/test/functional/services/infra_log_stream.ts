@@ -11,6 +11,13 @@ export function InfraLogStreamProvider({ getService }: KibanaFunctionalTestDefau
   const testSubjects = getService('testSubjects');
 
   return {
+    async getColumnHeaderLabels(): Promise<string[]> {
+      const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
+        'logColumnHeader'
+      );
+      return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
+    },
+
     async getStreamEntries(): Promise<WebElementWrapper[]> {
       return await testSubjects.findAll('streamEntry');
     },

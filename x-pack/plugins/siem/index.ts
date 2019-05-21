@@ -11,7 +11,7 @@ import { Server } from 'hapi';
 import { i18n } from '@kbn/i18n';
 import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 
-const APP_ID = 'siem';
+export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
 export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

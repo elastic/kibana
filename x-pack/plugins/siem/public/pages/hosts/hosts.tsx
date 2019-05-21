@@ -36,6 +36,7 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { UrlStateContainer } from '../../components/url_state';
 
 const basePath = chrome.getBasePath();
 
@@ -57,6 +58,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
         <StickyContainer>
           <FiltersGlobal>
             <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+            <UrlStateContainer indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <HeaderPage

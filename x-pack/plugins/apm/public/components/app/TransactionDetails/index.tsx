@@ -13,7 +13,7 @@ import { useTransactionDistribution } from '../../../hooks/useTransactionDistrib
 import { useWaterfall } from '../../../hooks/useWaterfall';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-import { FilterBar } from '../../shared/FilterBar';
+import { ApmHeader } from '../../shared/ApmHeader';
 import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
 import { useLocation } from '../../../hooks/useLocation';
@@ -31,12 +31,12 @@ export function TransactionDetails() {
 
   return (
     <div>
-      <EuiTitle size="l">
-        <h1>{urlParams.transactionName}</h1>
-      </EuiTitle>
+      <ApmHeader>
+        <EuiTitle size="l">
+          <h1>{urlParams.transactionName}</h1>
+        </EuiTitle>
+      </ApmHeader>
 
-      <EuiSpacer />
-      <FilterBar />
       <EuiSpacer size="s" />
 
       <TransactionCharts
