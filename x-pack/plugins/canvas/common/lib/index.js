@@ -6,7 +6,7 @@
 
 export * from './datatable';
 export * from './autocomplete';
-export * from './constants';
+//export * from './constants';
 export * from './dataurl';
 export * from './errors';
 export * from './expression_form_handlers';
@@ -26,3 +26,28 @@ export * from './pivot_object_array';
 export * from './resolve_dataurl';
 export * from './unquote_string';
 export * from './url';
+
+// Eslint complains about these being undefined with doing export *
+// Probably related to constants moving to typescript?
+export {
+  CANVAS_TYPE,
+  CUSTOM_ELEMENT_TYPE,
+  CANVAS_APP,
+  APP_ROUTE,
+  APP_ROUTE_WORKPAD,
+  API_ROUTE,
+  API_ROUTE_WORKPAD,
+  API_ROUTE_WORKPAD_ASSETS,
+  API_ROUTE_WORKPAD_STRUCTURES,
+  API_ROUTE_CUSTOM_ELEMENT,
+  LOCALSTORAGE_PREFIX,
+  LOCALSTORAGE_CLIPBOARD,
+  LOCALSTORAGE_AUTOCOMPLETE_ENABLED,
+  LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE,
+  LOCALSTORAGE_LASTPAGE,
+  FETCH_TIMEOUT,
+  CANVAS_USAGE_TYPE,
+  DEFAULT_WORKPAD_CSS,
+  VALID_IMAGE_TYPES,
+  ASSET_MAX_SIZE,
+} from './constants';
