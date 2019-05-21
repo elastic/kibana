@@ -7,13 +7,13 @@
 import React, { useMemo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from '../state_management';
+import { Action } from './state_management';
 import { Visualization, DatasourcePublicAPI } from '../../types';
 
 interface ConfigPanelWrapperProps {
-  visualizationState: Record<string, unknown>;
-  visualizations: Record<string, Visualization>;
-  activeVisualization: string | null;
+  visualizationStateMap: Record<string, unknown>;
+  visualizationMap: Record<string, Visualization>;
+  activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
   datasourcePublicAPI: DatasourcePublicAPI;
 }
@@ -33,26 +33,26 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
     <>
       <EuiSelect
         data-test-subj="visualization-switch"
-        options={Object.keys(props.visualizations).map(visualizationId => ({
+        options={Object.keys(props.visualizationMap).map(visualizationId => ({
           value: visualizationId,
           text: visualizationId,
         }))}
-        value={props.activeVisualization || undefined}
+        value={props.activeVisualizationId || undefined}
         onChange={e => {
           props.dispatch({
             type: 'SWITCH_VISUALIZATION',
-            newVisulizationId: e.target.value,
+            newVisualizationId: e.target.value,
             // TODO we probably want to have a separate API to "force" a visualization switch
             // which isn't a result of a picked suggestion
-            initialState: props.visualizations[e.target.value].initialize(),
+            initialState: props.visualizationMap[e.target.value].initialize(),
           });
         }}
       />
-      {props.activeVisualization && (
+      {props.activeVisualizationId && (
         <NativeRenderer
-          render={props.visualizations[props.activeVisualization].renderConfigPanel}
+          render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
           nativeProps={{
-            state: props.visualizationState[props.activeVisualization],
+            state: props.visualizationStateMap[props.activeVisualizationId],
             setState: setVisualizationState,
             datasource: props.datasourcePublicAPI,
           }}

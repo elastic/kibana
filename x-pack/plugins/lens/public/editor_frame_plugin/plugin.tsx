@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Datasource, Visualization, EditorFrameSetup } from '../types';
+import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 
 import { EditorFrame } from './editor_frame';
 
@@ -16,33 +16,36 @@ export class EditorFramePlugin {
   private datasources: Record<string, Datasource> = {};
   private visualizations: Record<string, Visualization> = {};
 
+  private createInstance(): EditorFrameInstance {
+    let domElement: Element;
+
+    function unmount() {
+      if (domElement) {
+        unmountComponentAtNode(domElement);
+      }
+    }
+
+    return {
+      mount: element => {
+        unmount();
+        domElement = element;
+        render(
+          <EditorFrame
+            datasourceMap={this.datasources}
+            visualizationMap={this.visualizations}
+            initialDatasourceId={Object.keys(this.datasources)[0]}
+            initialVisualizationId={Object.keys(this.visualizations)[0]}
+          />,
+          domElement
+        );
+      },
+      unmount,
+    };
+  }
+
   public setup(): EditorFrameSetup {
     return {
-      createInstance: () => {
-        let domElement: Element;
-        return {
-          mount: (element: Element) => {
-            if (domElement) {
-              unmountComponentAtNode(domElement);
-            }
-            domElement = element;
-            render(
-              <EditorFrame
-                datasources={this.datasources}
-                visualizations={this.visualizations}
-                initialDatasource={Object.keys(this.datasources)[0]}
-                initialVisualization={Object.keys(this.visualizations)[0]}
-              />,
-              domElement
-            );
-          },
-          unmount: () => {
-            if (domElement) {
-              unmountComponentAtNode(domElement);
-            }
-          },
-        };
-      },
+      createInstance: this.createInstance.bind(this),
       registerDatasource: (name, datasource) => {
         this.datasources[name] = datasource as Datasource<unknown, unknown>;
       },

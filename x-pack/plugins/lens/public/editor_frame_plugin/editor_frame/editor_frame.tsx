@@ -6,18 +6,18 @@
 
 import React, { useEffect, useReducer, useMemo } from 'react';
 import { Datasource, Visualization } from '../../types';
-import { reducer, getInitialState } from '../state_management';
+import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 
 export interface EditorFrameProps {
-  datasources: Record<string, Datasource>;
-  visualizations: Record<string, Visualization>;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
 
-  initialDatasource: string | null;
-  initialVisualization: string | null;
+  initialDatasourceId: string | null;
+  initialVisualizationId: string | null;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -27,8 +27,8 @@ export function EditorFrame(props: EditorFrameProps) {
   useEffect(
     () => {
       let datasourceGotSwitched = false;
-      if (state.datasourceIsLoading && state.activeDatasource) {
-        props.datasources[state.activeDatasource].initialize().then(datasourceState => {
+      if (state.datasource.isLoading && state.datasource.activeId) {
+        props.datasourceMap[state.datasource.activeId].initialize().then(datasourceState => {
           if (!datasourceGotSwitched) {
             dispatch({
               type: 'UPDATE_DATASOURCE_STATE',
@@ -42,14 +42,16 @@ export function EditorFrame(props: EditorFrameProps) {
         };
       }
     },
-    [state.activeDatasource, state.datasourceIsLoading]
+    [state.datasource.activeId, state.datasource.isLoading]
   );
 
+  // create public datasource api for current state
+  // as soon as datasource is available and memoize it
   const datasourcePublicAPI = useMemo(
     () =>
-      state.activeDatasource && !state.datasourceIsLoading
-        ? props.datasources[state.activeDatasource].getPublicAPI(
-            state.datasourceState,
+      state.datasource.activeId && !state.datasource.isLoading
+        ? props.datasourceMap[state.datasource.activeId].getPublicAPI(
+            state.datasource.state,
             (newState: unknown) => {
               dispatch({
                 type: 'UPDATE_DATASOURCE_STATE',
@@ -58,40 +60,46 @@ export function EditorFrame(props: EditorFrameProps) {
             }
           )
         : undefined,
-    [props.datasources, state.datasourceIsLoading, state.activeDatasource, state.datasourceState]
+    [
+      props.datasourceMap,
+      state.datasource.isLoading,
+      state.datasource.activeId,
+      state.datasource.state,
+    ]
   );
 
-  if (state.activeDatasource && !state.datasourceIsLoading) {
+  if (state.datasource.activeId && !state.datasource.isLoading) {
     return (
       <FrameLayout
         dataPanel={
           <DataPanelWrapper
-            datasources={props.datasources}
-            activeDatasource={state.activeDatasource}
-            datasourceState={state.datasourceState}
-            datasourceIsLoading={state.datasourceIsLoading}
+            datasourceMap={props.datasourceMap}
+            activeDatasource={state.datasource.activeId}
+            datasourceState={state.datasource.state}
+            datasourceIsLoading={state.datasource.isLoading}
             dispatch={dispatch}
           />
         }
         configPanel={
           <ConfigPanelWrapper
-            visualizations={props.visualizations}
-            activeVisualization={state.activeVisualization}
-            visualizationState={state.visualizationState}
+            visualizationMap={props.visualizationMap}
+            activeVisualizationId={state.visualization.activeId}
+            visualizationStateMap={state.visualization.stateMap}
             datasourcePublicAPI={datasourcePublicAPI!}
             dispatch={dispatch}
           />
         }
         suggestionsPanel={
           <SuggestionPanel
-            activeDatasource={props.datasources[state.activeDatasource]}
-            activeVisualizationId={state.activeVisualization}
+            activeDatasource={props.datasourceMap[state.datasource.activeId]}
+            activeVisualizationId={state.visualization.activeId}
             datasourcePublicAPI={datasourcePublicAPI!}
-            datasourceState={state.datasourceState}
+            datasourceState={state.datasource.state}
             visualizationState={
-              state.activeVisualization && state.visualizationState[state.activeVisualization]
+              state.visualization.activeId &&
+              state.visualization.stateMap[state.visualization.activeId]
             }
-            visualizations={props.visualizations}
+            visualizations={props.visualizationMap}
             dispatch={dispatch}
           />
         }
@@ -102,10 +110,10 @@ export function EditorFrame(props: EditorFrameProps) {
       <FrameLayout
         dataPanel={
           <DataPanelWrapper
-            activeDatasource={state.activeDatasource}
-            datasourceIsLoading={state.datasourceIsLoading}
-            datasourceState={state.datasourceState}
-            datasources={props.datasources}
+            activeDatasource={state.datasource.activeId}
+            datasourceIsLoading={state.datasource.isLoading}
+            datasourceState={state.datasource.state}
+            datasourceMap={props.datasourceMap}
             dispatch={dispatch}
           />
         }

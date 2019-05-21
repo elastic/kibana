@@ -11,7 +11,9 @@ import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { createMockVisualization, createMockDatasource } from '../mock_extensions';
 
-const nextTick = () => new Promise(resolve => setTimeout(resolve));
+// calling this function will wait for all pending Promises from mock
+// datasources to be processed by its callers.
+const waitForPromises = () => new Promise(resolve => setImmediate(resolve));
 
 describe('editor_frame', () => {
   let mockVisualization: Visualization;
@@ -33,14 +35,14 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            visualizations={{
+            visualizationMap={{
               testVis: mockVisualization,
             }}
-            datasources={{
+            datasourceMap={{
               testDatasource: mockDatasource,
             }}
-            initialDatasource="testDatasource"
-            initialVisualization="testVis"
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
           />
         );
       });
@@ -53,14 +55,14 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            visualizations={{
+            visualizationMap={{
               testVis: mockVisualization,
             }}
-            datasources={{
+            datasourceMap={{
               testDatasource: mockDatasource,
             }}
-            initialDatasource={null}
-            initialVisualization={null}
+            initialDatasourceId={null}
+            initialVisualizationId={null}
           />
         );
       });
@@ -73,14 +75,14 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            visualizations={{
+            visualizationMap={{
               testVis: mockVisualization,
             }}
-            datasources={{
+            datasourceMap={{
               testDatasource: mockDatasource,
             }}
-            initialDatasource="testDatasource"
-            initialVisualization="testVis"
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
           />
         );
       });
@@ -96,10 +98,10 @@ describe('editor_frame', () => {
       act(() => {
         mount(
           <EditorFrame
-            visualizations={{
+            visualizationMap={{
               testVis: mockVisualization,
             }}
-            datasources={{
+            datasourceMap={{
               testDatasource: {
                 ...mockDatasource,
                 initialize: () =>
@@ -108,16 +110,15 @@ describe('editor_frame', () => {
                   }),
               },
             }}
-            initialDatasource="testDatasource"
-            initialVisualization="testVis"
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
           />
         );
       });
 
-      await nextTick();
       databaseInitialized!(initialState);
 
-      await nextTick();
+      await waitForPromises();
       expect(mockDatasource.renderDataPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: initialState })
@@ -129,21 +130,21 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: { ...mockVisualization, initialize: () => initialState },
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: {
               ...mockDatasource,
               initialize: () => Promise.resolve(),
             },
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
@@ -156,18 +157,18 @@ describe('editor_frame', () => {
     it('should re-render config panel after state update', async () => {
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       const updatedState = {};
       const setVisualizationState = (mockVisualization.renderConfigPanel as jest.Mock).mock
@@ -191,18 +192,18 @@ describe('editor_frame', () => {
     it('should re-render data panel after state update', async () => {
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       const updatedState = {};
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
@@ -223,18 +224,18 @@ describe('editor_frame', () => {
     it('should re-render config panel with updated datasource api after datasource state update', async () => {
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       const updatedPublicAPI = {};
       mockDatasource.getPublicAPI = jest.fn(
@@ -265,18 +266,18 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
@@ -290,18 +291,18 @@ describe('editor_frame', () => {
 
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
         datasourceState,
@@ -312,18 +313,18 @@ describe('editor_frame', () => {
     it('should re-create the public api after state has been set', async () => {
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       const updatedState = {};
       const setDatasourceState = (mockDatasource.getPublicAPI as jest.Mock).mock.calls[0][1];
@@ -344,19 +345,19 @@ describe('editor_frame', () => {
     beforeEach(async () => {
       instance = mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
             testVis2: mockVisualization2,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
             testDatasource2: mockDatasource2,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
-      await nextTick();
+      await waitForPromises();
 
       // necessary to flush elements to dom synchronously
       instance.update();
@@ -387,7 +388,7 @@ describe('editor_frame', () => {
         .find('select[data-test-subj="datasource-switch"]')
         .simulate('change', { target: { value: 'testDatasource2' } });
 
-      await nextTick();
+      await waitForPromises();
 
       expect(mockDatasource2.renderDataPanel).toHaveBeenCalledWith(
         expect.any(Element),
@@ -425,19 +426,19 @@ describe('editor_frame', () => {
     it('should fetch suggestions of currently active datasource', async () => {
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
             testDatasource2: mockDatasource2,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       expect(mockDatasource.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
       expect(mockDatasource2.getDatasourceSuggestionsFromCurrentState).not.toHaveBeenCalled();
@@ -446,20 +447,20 @@ describe('editor_frame', () => {
     it('should fetch suggestions of all visualizations', async () => {
       mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: mockVisualization,
             testVis2: mockVisualization2,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: mockDatasource,
             testDatasource2: mockDatasource2,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       expect(mockVisualization.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
@@ -468,7 +469,7 @@ describe('editor_frame', () => {
     it('should display suggestions in descending order', async () => {
       const instance = mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: {
               ...mockVisualization,
               getSuggestions: () => [
@@ -504,18 +505,18 @@ describe('editor_frame', () => {
               ],
             },
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: {
               ...mockDatasource,
               getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
             },
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       // TODO why is this necessary?
       instance.update();
@@ -533,7 +534,7 @@ describe('editor_frame', () => {
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
-          visualizations={{
+          visualizationMap={{
             testVis: {
               ...mockVisualization,
               getSuggestions: () => [
@@ -547,7 +548,7 @@ describe('editor_frame', () => {
             },
             testVis2: mockVisualization2,
           }}
-          datasources={{
+          datasourceMap={{
             testDatasource: {
               ...mockDatasource,
               getDatasourceSuggestionsFromCurrentState: () => [
@@ -555,12 +556,12 @@ describe('editor_frame', () => {
               ],
             },
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis2"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis2"
         />
       );
 
-      await nextTick();
+      await waitForPromises();
 
       // TODO why is this necessary?
       instance.update();

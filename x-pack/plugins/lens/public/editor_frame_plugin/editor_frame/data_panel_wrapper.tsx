@@ -8,11 +8,11 @@ import React, { useMemo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { DatasourceDataPanelProps, Datasource } from '../..';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from '../state_management';
+import { Action } from './state_management';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
-  datasources: Record<string, Datasource>;
+  datasourceMap: Record<string, Datasource>;
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   dispatch: (action: Action) => void;
@@ -38,7 +38,7 @@ export function DataPanelWrapper(props: DataPanelWrapperProps) {
     <>
       <EuiSelect
         data-test-subj="datasource-switch"
-        options={Object.keys(props.datasources).map(datasourceId => ({
+        options={Object.keys(props.datasourceMap).map(datasourceId => ({
           value: datasourceId,
           text: datasourceId,
         }))}
@@ -49,7 +49,7 @@ export function DataPanelWrapper(props: DataPanelWrapperProps) {
       />
       {props.activeDatasource && !props.datasourceIsLoading && (
         <NativeRenderer
-          render={props.datasources[props.activeDatasource].renderDataPanel}
+          render={props.datasourceMap[props.activeDatasource].renderDataPanel}
           nativeProps={datasourceProps}
         />
       )}
