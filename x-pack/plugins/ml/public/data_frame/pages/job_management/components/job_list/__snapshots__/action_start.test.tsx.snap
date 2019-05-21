@@ -12,7 +12,7 @@ exports[`Data Frame: Job List Actions <StartAction /> Minimal initialization 1`]
       color="text"
       disabled={true}
       iconSide="left"
-      iconType="trash"
+      iconType="play"
       onClick={[Function]}
       size="xs"
       type="button"
