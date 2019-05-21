@@ -116,7 +116,7 @@ uiRoutes
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, $location, Private) {
+      ip: function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
