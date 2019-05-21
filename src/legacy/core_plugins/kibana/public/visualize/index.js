@@ -18,6 +18,7 @@
  */
 
 import './editor/editor';
+import { i18n } from '@kbn/i18n';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
 import 'ui/filter_bar';
@@ -33,6 +34,21 @@ uiRoutes
   .defaults(/visualize/, {
     requireDefaultIndex: true,
     requireUICapability: 'visualize.show',
+    badge: uiCapabilities => {
+      if (uiCapabilities.visualize.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n.translate('kbn.visualize.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n.translate('kbn.visualize.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save visualizations',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when(VisualizeConstants.LANDING_PAGE_PATH, {
     template: visualizeListingTemplate,
@@ -53,11 +69,11 @@ uiRoutes
     },
   });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'visualize',
     title: 'Visualize',
-    description: i18n(
+    description: i18n.translate(
       'kbn.visualize.visualizeDescription',
       {
         defaultMessage: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',

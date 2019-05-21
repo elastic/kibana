@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import * as collectionActions from './lib/collection_actions';
+import { ES_TYPES } from '../../common/es_types';
 import AddDeleteButtons from './add_delete_buttons';
 import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
@@ -54,6 +55,8 @@ function newAnnotation() {
     ignore_panel_filters: 1
   };
 }
+
+const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
 class AnnotationsEditor extends Component {
 
@@ -128,7 +131,7 @@ class AnnotationsEditor extends Component {
                   fullWidth
                 >
                   <FieldSelect
-                    restrict="date"
+                    restrict={RESTRICT_FIELDS}
                     value={model.time_field}
                     onChange={this.handleChange(model, 'time_field')}
                     indexPattern={model.index_pattern}

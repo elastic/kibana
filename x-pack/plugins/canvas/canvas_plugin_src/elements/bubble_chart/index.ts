@@ -10,6 +10,7 @@ import header from './header.png';
 export const bubbleChart: ElementFactory = () => ({
   name: 'bubbleChart',
   displayName: 'Bubble chart',
+  tags: ['chart'],
   help: 'A customizable bubble chart',
   width: 700,
   height: 300,

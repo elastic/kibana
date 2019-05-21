@@ -225,7 +225,7 @@ export class AutoFollowPatternForm extends PureComponent {
 
       return (
         <Fragment>
-          <SectionError title={title} error={apiError} data-test-subj="autoFollowPatternFormApiError" />
+          <SectionError title={title} error={apiError} data-test-subj="apiError" />
           <EuiSpacer size="l" />
         </Fragment>
       );
@@ -291,7 +291,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onChange={e => this.onFieldsChange({ name: e.target.value })}
               fullWidth
               disabled={!isNew}
-              data-test-subj="ccrAutoFollowPatternFormNameInput"
+              data-test-subj="nameInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -450,7 +450,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onChange={this.onLeaderIndexPatternChange}
               onSearchChange={this.onLeaderIndexPatternInputChange}
               fullWidth
-              data-test-subj="ccrAutoFollowPatternFormIndexPatternInput"
+              data-test-subj="indexPatternInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -505,7 +505,7 @@ export class AutoFollowPatternForm extends PureComponent {
                   value={followIndexPatternPrefix}
                   onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
                   fullWidth
-                  data-test-subj="ccrAutoFollowPatternFormPrefixInput"
+                  data-test-subj="prefixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -528,7 +528,7 @@ export class AutoFollowPatternForm extends PureComponent {
                   value={followIndexPatternSuffix}
                   onChange={e => this.onFieldsChange({ followIndexPatternSuffix: e.target.value })}
                   fullWidth
-                  data-test-subj="ccrAutoFollowPatternFormSuffixInput"
+                  data-test-subj="suffixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -578,7 +578,7 @@ export class AutoFollowPatternForm extends PureComponent {
             )}
             color="danger"
             iconType="cross"
-            data-test-subj="autoFollowPatternFormError"
+            data-test-subj="formError"
           />
           <EuiSpacer size="l" />
         </Fragment>
@@ -622,7 +622,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onClick={this.sendForm}
               fill
               disabled={isSaveDisabled}
-              data-test-subj="ccrAutoFollowPatternFormSubmitButton"
+              data-test-subj="submitButton"
             >
               {saveButtonLabel}
             </EuiButton>
@@ -636,7 +636,7 @@ export class AutoFollowPatternForm extends PureComponent {
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternForm.cancelButtonLabel"
                 defaultMessage="Cancel"
-                data-test-subj="ccrAutoFollowPatternFormCancelButton"
+                data-test-subj="cancelButton"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -646,7 +646,7 @@ export class AutoFollowPatternForm extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm data-test-subj="ccrAutoFollowPatternForm">
+        <EuiForm data-test-subj="autoFollowPatternForm">
           {renderAutoFollowPatternName()}
           {renderRemoteClusterField()}
           {renderLeaderIndexPatterns()}

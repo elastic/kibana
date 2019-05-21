@@ -269,12 +269,6 @@ export const getTooltips = () => {
         defaultMessage: 'A string that is a unique identifier to a list. Only applicable and required when conditionType is categorical.'
       })
     },
-    forecasting_modal_run_duration: {
-      text: i18n.translate('xpack.ml.tooltips.forecastingModalRunDurationTooltip', {
-        defaultMessage: 'Length of forecast, up to a maximum of 8 weeks. ' +
-          'Use s for seconds, m for minutes, h for hours, d for days, w for weeks.'
-      })
-    },
     forecasting_modal_view_list: {
       text: i18n.translate('xpack.ml.tooltips.forecastingModalViewListTooltip', {
         defaultMessage: 'Lists a maximum of five of the most recently run forecasts.'

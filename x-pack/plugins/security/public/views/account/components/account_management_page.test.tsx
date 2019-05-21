@@ -5,7 +5,6 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { User } from '../../../../common/model/user';
 import { AccountManagementPage } from './account_management_page';
 
 interface Options {
@@ -33,7 +32,7 @@ const createUser = ({ withFullName = true, withEmail = true, realm = 'native' }:
 
 describe('<AccountManagementPage>', () => {
   it(`displays users full name, username, and email address`, () => {
-    const user: User = createUser();
+    const user = createUser();
     const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
     expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(
       user.full_name
@@ -43,26 +42,26 @@ describe('<AccountManagementPage>', () => {
   });
 
   it(`displays username when full_name is not provided`, () => {
-    const user: User = createUser({ withFullName: false });
+    const user = createUser({ withFullName: false });
     const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
     expect(wrapper.find('EuiText[data-test-subj="userDisplayName"]').text()).toEqual(user.username);
   });
 
   it(`displays a placeholder when no email address is provided`, () => {
-    const user: User = createUser({ withEmail: false });
+    const user = createUser({ withEmail: false });
     const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
     expect(wrapper.find('[data-test-subj="email"]').text()).toEqual('no email address');
   });
 
   it(`displays change password form for users in the native realm`, () => {
-    const user: User = createUser();
+    const user = createUser();
     const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
     expect(wrapper.find('EuiFieldText[data-test-subj="currentPassword"]')).toHaveLength(1);
     expect(wrapper.find('EuiFieldText[data-test-subj="newPassword"]')).toHaveLength(1);
   });
 
   it(`does not display change password form for users in the saml realm`, () => {
-    const user: User = createUser({ realm: 'saml' });
+    const user = createUser({ realm: 'saml' });
     const wrapper = mountWithIntl(<AccountManagementPage user={user} />);
     expect(wrapper.find('EuiFieldText[data-test-subj="currentPassword"]')).toHaveLength(0);
     expect(wrapper.find('EuiFieldText[data-test-subj="newPassword"]')).toHaveLength(0);

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createHistory from 'history/createHashHistory';
 import qs from 'querystring';
 import { StringMap } from '../../../../typings/common';
 
@@ -13,7 +12,11 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 }
 
 export function fromQuery(query: StringMap<any>) {
-  return qs.stringify(query);
+  return qs.stringify(query, undefined, undefined, {
+    encodeURIComponent: (value: string) => {
+      return encodeURIComponent(value).replace(/%3A/g, ':');
+    }
+  });
 }
 
 export interface APMQueryParams {
@@ -52,9 +55,3 @@ export function legacyEncodeURIComponent(rawUrl?: string) {
 export function legacyDecodeURIComponent(encodedUrl?: string) {
   return encodedUrl && decodeURIComponent(encodedUrl.replace(/~/g, '%'));
 }
-
-// Make history singleton available across APM project.
-// This is not great. Other options are to use context or withRouter helper
-// React Context API is unstable and will change soon-ish (probably 16.3)
-// withRouter helper from react-router overrides several props (eg. `location`) which makes it less desireable
-export const history = createHistory();

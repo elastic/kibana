@@ -3,22 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  // @ts-ignore
-  EuiDescribedFormGroup,
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Component } from 'react';
-import { getUserDisplayName, User } from '../../../../common/model/user';
+import { getUserDisplayName, AuthenticatedUser } from '../../../../common/model';
 import { ChangePassword } from './change_password';
 import { PersonalInfo } from './personal_info';
 
 interface Props {
-  user: User;
+  user: AuthenticatedUser;
 }
 
 export class AccountManagementPage extends Component<Props, {}> {

@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
+<div
+  class="euiPanel euiPanel--paddingMedium"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        aria-label="Monitor status"
+        class="euiHealth"
+        style="line-height:inherit"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <svg
+              class="euiIcon euiIcon--medium euiIcon--success"
+              focusable="false"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xlink="http://www.w3.org/1999/xlink"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <circle
+                  cx="8"
+                  cy="8"
+                  id="dot-a"
+                  r="4"
+                />
+              </defs>
+              <use
+                href="#dot-a"
+              />
+            </svg>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            Up
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <a
+          aria-label="Monitor URL link"
+          class="euiLink euiLink--primary"
+          href="https://www.example.com/"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          https://www.example.com/
+        </a>
+      </div>
+    </div>
+    <div
+      aria-label="Monitor duration in milliseconds"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      1235ms
+    </div>
+    <div
+      aria-label="Time since last check"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      15 minutes ago
+    </div>
+  </div>
+</div>
+`;

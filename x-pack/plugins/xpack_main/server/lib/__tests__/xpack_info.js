@@ -67,6 +67,7 @@ describe('XPackInfo', () => {
 
     mockServer = sinon.stub({
       plugins: { elasticsearch: mockElasticsearchPlugin },
+      events: { on() {} },
       log() { }
     });
   });

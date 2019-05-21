@@ -67,6 +67,19 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
       };
     }
 
+    // if base privilege assigned with feature privileges, we won't transform these
+    if (roleKibanaApplications.some(entry =>
+      entry.privileges.some(privilege => PrivilegeSerializer.isSerializedFeaturePrivilege(privilege)) &&
+      (
+        entry.privileges.some(privilege => PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege)) ||
+        entry.privileges.some(privilege => PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege))
+      )
+    )) {
+      return {
+        success: false
+      };
+    }
+
     // if any application entry contains the '*' resource in addition to another resource, we can't transform these
     if (roleKibanaApplications.some(entry => entry.resources.includes(GLOBAL_RESOURCE) && entry.resources.length > 1)) {
       return {

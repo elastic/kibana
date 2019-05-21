@@ -6,13 +6,13 @@
 
 import React, { Fragment } from 'react';
 
-import { StyleTabs } from './style_tabs';
 import { FilterEditor } from './filter_editor';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerErrors } from './layer_errors';
 import { LayerSettings } from './layer_settings';
 import { SourceSettings } from './source_settings';
+import { StyleSettings } from './style_settings';
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -20,7 +20,6 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
   EuiAccordion,
@@ -192,21 +191,23 @@ export class LayerPanel extends React.Component {
           </div>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody className="mapLayerPanel__body">
+        <div className="mapLayerPanel__body">
+          <div className="mapLayerPanel__bodyOverflow">
 
-          <LayerErrors/>
+            <LayerErrors/>
 
-          <LayerSettings/>
+            <LayerSettings/>
 
-          <SourceSettings/>
+            <SourceSettings/>
 
-          {this._renderFilterSection()}
+            {this._renderFilterSection()}
 
-          {this._renderJoinSection()}
+            {this._renderJoinSection()}
 
-          <StyleTabs layer={selectedLayer}/>
+            <StyleSettings/>
 
-        </EuiFlyoutBody>
+          </div>
+        </div>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
           <FlyoutFooter hasStateChanged={this.props.hasStateChanged}/>

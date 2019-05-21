@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '../../../../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';

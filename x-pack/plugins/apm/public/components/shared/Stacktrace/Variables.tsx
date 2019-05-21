@@ -17,7 +17,7 @@ import {
   units
 } from '../../../style/variables';
 import { Ellipsis } from '../Icons';
-import { PropertiesTable } from '../PropertiesTable';
+import { DottedKeyValueTable } from '../DottedKeyValueTable';
 
 const VariablesContainer = styled.div`
   background: ${theme.euiColorEmptyShade};
@@ -66,7 +66,7 @@ export class Variables extends React.Component<Props> {
         </VariablesToggle>
         {this.state.isVisible && (
           <VariablesTableContainer>
-            <PropertiesTable propData={this.props.vars} />
+            <DottedKeyValueTable data={this.props.vars} maxDepth={5} />
           </VariablesTableContainer>
         )}
       </VariablesContainer>

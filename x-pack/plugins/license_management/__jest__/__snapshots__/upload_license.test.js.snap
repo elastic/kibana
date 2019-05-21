@@ -1366,7 +1366,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                             }
                           >
                             <div
-                              className="euiFilePicker euiFilePicker-hasFiles"
+                              className="euiFilePicker"
                             >
                               <div
                                 className="euiFilePicker__wrap"
@@ -1426,32 +1426,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                       Select or drag your license file
                                     </FormattedMessage>
                                   </div>
-                                  <EuiButtonEmpty
-                                    aria-label="Clear selected files"
-                                    className="euiFilePicker__clearButton"
-                                    color="primary"
-                                    iconSide="left"
-                                    onClick={[Function]}
-                                    size="xs"
-                                    type="button"
-                                  >
-                                    <button
-                                      aria-label="Clear selected files"
-                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          className="euiButtonEmpty__text"
-                                        >
-                                          Remove
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </EuiButtonEmpty>
                                 </div>
                               </div>
                             </div>
@@ -1853,7 +1827,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                             }
                           >
                             <div
-                              className="euiFilePicker euiFilePicker-hasFiles"
+                              className="euiFilePicker"
                             >
                               <div
                                 className="euiFilePicker__wrap"
@@ -1913,32 +1887,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                       Select or drag your license file
                                     </FormattedMessage>
                                   </div>
-                                  <EuiButtonEmpty
-                                    aria-label="Clear selected files"
-                                    className="euiFilePicker__clearButton"
-                                    color="primary"
-                                    iconSide="left"
-                                    onClick={[Function]}
-                                    size="xs"
-                                    type="button"
-                                  >
-                                    <button
-                                      aria-label="Clear selected files"
-                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          className="euiButtonEmpty__text"
-                                        >
-                                          Remove
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </EuiButtonEmpty>
                                 </div>
                               </div>
                             </div>
@@ -2340,7 +2288,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                             }
                           >
                             <div
-                              className="euiFilePicker euiFilePicker-hasFiles"
+                              className="euiFilePicker"
                             >
                               <div
                                 className="euiFilePicker__wrap"
@@ -2400,32 +2348,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                       Select or drag your license file
                                     </FormattedMessage>
                                   </div>
-                                  <EuiButtonEmpty
-                                    aria-label="Clear selected files"
-                                    className="euiFilePicker__clearButton"
-                                    color="primary"
-                                    iconSide="left"
-                                    onClick={[Function]}
-                                    size="xs"
-                                    type="button"
-                                  >
-                                    <button
-                                      aria-label="Clear selected files"
-                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          className="euiButtonEmpty__text"
-                                        >
-                                          Remove
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </EuiButtonEmpty>
                                 </div>
                               </div>
                             </div>
@@ -2827,7 +2749,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                             }
                           >
                             <div
-                              className="euiFilePicker euiFilePicker-hasFiles"
+                              className="euiFilePicker"
                             >
                               <div
                                 className="euiFilePicker__wrap"
@@ -2887,32 +2809,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                       Select or drag your license file
                                     </FormattedMessage>
                                   </div>
-                                  <EuiButtonEmpty
-                                    aria-label="Clear selected files"
-                                    className="euiFilePicker__clearButton"
-                                    color="primary"
-                                    iconSide="left"
-                                    onClick={[Function]}
-                                    size="xs"
-                                    type="button"
-                                  >
-                                    <button
-                                      aria-label="Clear selected files"
-                                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          className="euiButtonEmpty__text"
-                                        >
-                                          Remove
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </EuiButtonEmpty>
                                 </div>
                               </div>
                             </div>

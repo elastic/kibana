@@ -22,7 +22,7 @@ import { InjectedMetadataSetup } from '../../../../../core/public';
 
 let newPlatformInjectedVars: InjectedMetadataSetup;
 
-export function __newPlatformInit__(instance: InjectedMetadataSetup) {
+export function __newPlatformSetup__(instance: InjectedMetadataSetup) {
   if (newPlatformInjectedVars) {
     throw new Error('ui/chrome/api/injected_vars is already initialized');
   }

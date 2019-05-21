@@ -19,7 +19,7 @@
 
 import { Plugin, PluginSetupContext } from 'kibana/public';
 
-export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup> {
+export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePluginAPluginStart> {
   public setup(core: PluginSetupContext, deps: {}) {
     return {
       getGreeting() {
@@ -27,6 +27,9 @@ export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup> {
       },
     };
   }
+
+  public start() {}
 }
 
 export type CorePluginAPluginSetup = ReturnType<CorePluginAPlugin['setup']>;
+export type CorePluginAPluginStart = ReturnType<CorePluginAPlugin['start']>;

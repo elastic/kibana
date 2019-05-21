@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { BasePathService, BasePathSetup } from './base_path_service';
+export { BasePathService, BasePathSetup, BasePathStart } from './base_path_service';

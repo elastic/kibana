@@ -5,20 +5,29 @@
  */
 
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { getLegendColors } from 'ui/vis/map/color_util';
+import { getLegendColors, getColor } from 'ui/vis/map/color_util';
 import chroma from 'chroma-js';
 
-export function getRGBColorRangeStrings(colorName, numberColors) {
-  const colorKeys = Object.keys(vislibColorMaps);
-  if (!colorKeys.includes(colorName)) {
-    //This is an internal error and should never occur. If it does, then it is a bug.
-    throw new Error(`${colorName} not found. Expected one of following values: \
-      ${colorKeys}`);
+function getColorRamp(colorRampName) {
+  const colorRamp = vislibColorMaps[colorRampName];
+  if (!colorRamp) {
+    throw new Error(`${colorRampName} not found. Expected one of following values: ${Object.keys(vislibColorMaps)}`);
   }
-  return getLegendColors(vislibColorMaps[colorName].value, numberColors);
+  return colorRamp;
 }
 
-export function getHexColorRangeStrings(colorName, numberColors) {
-  return getRGBColorRangeStrings(colorName, numberColors)
+export function getRGBColorRangeStrings(colorRampName, numberColors) {
+  const colorRamp = getColorRamp(colorRampName);
+  return getLegendColors(colorRamp.value, numberColors);
+}
+
+export function getHexColorRangeStrings(colorRampName, numberColors) {
+  return getRGBColorRangeStrings(colorRampName, numberColors)
     .map(rgbColor => chroma(rgbColor).hex());
+}
+
+export function getColorRampCenterColor(colorRampName) {
+  const colorRamp = getColorRamp(colorRampName);
+  const centerIndex = Math.floor(colorRamp.value.length / 2);
+  return getColor(colorRamp.value, centerIndex);
 }

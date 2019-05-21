@@ -61,6 +61,7 @@ exports[`DetailView should render TabContent 1`] = `
 
 exports[`DetailView should render tabs 1`] = `
 <EuiTabs
+  display="default"
   expand={false}
   size="m"
 >
@@ -75,26 +76,10 @@ exports[`DetailView should render tabs 1`] = `
   <EuiTab
     disabled={false}
     isSelected={false}
-    key="service"
+    key="metadata"
     onClick={[Function]}
   >
-    Service
-  </EuiTab>
-  <EuiTab
-    disabled={false}
-    isSelected={false}
-    key="user"
-    onClick={[Function]}
-  >
-    User
-  </EuiTab>
-  <EuiTab
-    disabled={false}
-    isSelected={false}
-    key="labels"
-    onClick={[Function]}
-  >
-    Labels
+    Metadata
   </EuiTab>
 </EuiTabs>
 `;

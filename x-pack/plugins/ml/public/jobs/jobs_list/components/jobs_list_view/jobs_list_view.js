@@ -435,4 +435,3 @@ export class JobsListView extends Component {
     );
   }
 }
-

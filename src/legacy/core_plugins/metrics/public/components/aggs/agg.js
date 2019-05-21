@@ -20,7 +20,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import aggToComponent from '../lib/agg_to_component';
-import { sortable } from 'react-anything-sortable';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 
@@ -46,8 +45,6 @@ function Agg(props) {
     <div
       className={props.className}
       style={style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
     >
       <Component
         fields={props.fields}
@@ -60,6 +57,7 @@ function Agg(props) {
         series={props.series}
         siblings={props.siblings}
         uiRestrictions={props.uiRestrictions}
+        dragHandleProps={props.dragHandleProps}
       />
     </div>
   );
@@ -72,15 +70,11 @@ Agg.propTypes = {
   onAdd: PropTypes.func,
   onChange: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
-  sortData: PropTypes.string,
   uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
 
-export default sortable(Agg);
+export default Agg;

@@ -24,7 +24,6 @@ export function initIndicesApi(server) {
         .then((mappings) =>
           _(mappings)
             .map('mappings')
-            .map(_.values)
             .flatten()
             .map(_.keys)
             .flatten()

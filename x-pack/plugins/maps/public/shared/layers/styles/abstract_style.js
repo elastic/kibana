@@ -11,4 +11,16 @@ export class AbstractStyle {
       hasChanges: false,
     };
   }
+
+  async pluckStyleMetaFromSourceDataRequest(/* sourceDataRequest */) {
+    return {};
+  }
+
+  getDescriptor() {
+    return this._descriptor;
+  }
+
+  renderEditor(/* { layer, onStyleDescriptorChange } */) {
+    return null;
+  }
 }

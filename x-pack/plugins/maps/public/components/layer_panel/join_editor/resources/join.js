@@ -92,11 +92,7 @@ export class Join extends Component {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter(field => {
-        // Do not show multi fields as right join options
-        // since they do not have values in _source and exist for indexing only
-        return field.subType !== 'multi';
-      })
+      rightFields: indexPattern.fields
     });
   }
 
@@ -109,16 +105,16 @@ export class Join extends Component {
   }
 
   async _loadLeftFields() {
-    let stringFields;
+    let leftFields;
     try {
-      stringFields = await this.props.layer.getStringFields();
+      leftFields = await this.props.layer.getLeftJoinFields();
     } catch (error) {
-      stringFields = [];
+      leftFields = [];
     }
     if (!this._isMounted) {
       return;
     }
-    this.setState({ leftFields: stringFields });
+    this.setState({ leftFields });
   }
 
   _onLeftFieldChange = (leftField) => {

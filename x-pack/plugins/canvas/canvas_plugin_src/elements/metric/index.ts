@@ -11,6 +11,7 @@ import { ElementFactory } from '../types';
 export const metric: ElementFactory = () => ({
   name: 'metric',
   displayName: 'Metric',
+  tags: ['text'],
   help: 'A number with a label',
   width: 200,
   height: 100,

@@ -23,7 +23,7 @@ export type Breadcrumb = ChromeBreadcrumb;
 export type BreadcrumbsApi = ReturnType<typeof createBreadcrumbsApi>['breadcrumbs'];
 
 let newPlatformChrome: ChromeSetup;
-export function __newPlatformInit__(instance: ChromeSetup) {
+export function __newPlatformSetup__(instance: ChromeSetup) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/breadcrumbs is already initialized');
   }
@@ -71,6 +71,13 @@ function createBreadcrumbsApi(chrome: { [key: string]: any }) {
        */
       filter(fn: (breadcrumb: Breadcrumb, i: number, all: Breadcrumb[]) => boolean) {
         newPlatformChrome.setBreadcrumbs(currentBreadcrumbs.filter(fn));
+      },
+
+      /**
+       * Remove last element of the breadcrumb
+       */
+      pop() {
+        newPlatformChrome.setBreadcrumbs(currentBreadcrumbs.slice(0, -1));
       },
     },
   };

@@ -23,6 +23,7 @@ import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } fr
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval } from './lib/get_interval';
+import { PANEL_TYPES } from '../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 250;
 
@@ -117,11 +118,11 @@ class VisEditorVisualization extends Component {
     const type = get(this.props, 'model.type', '');
 
     return [
-      'metric',
-      'top_n',
-      'gauge',
-      'markdown',
-      'table',
+      PANEL_TYPES.METRIC,
+      PANEL_TYPES.TOP_N,
+      PANEL_TYPES.GAUGE,
+      PANEL_TYPES.MARKDOWN,
+      PANEL_TYPES.TABLE,
     ].includes(type);
   }
 
@@ -253,10 +254,8 @@ class VisEditorVisualization extends Component {
           style={style}
           className="tvbEditorVisualization"
           data-shared-items-container
-          data-shared-item
           data-title={title}
           data-description={description}
-          data-render-complete="disabled"
           ref={this._visEl}
         />
         <div className="tvbEditor--hideForReporting">

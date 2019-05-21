@@ -14,6 +14,27 @@ import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions'
 
 const isGroupId = id => id.startsWith('group');
 
+const headerData = id =>
+  isGroupId(id)
+    ? { id, type: 'group', subtype: 'persistentGroup' }
+    : { id, type: 'rectangleElement', subtype: '' };
+
+const transformData = ({ top, left, width, height, angle }, z) =>
+  multiply(
+    translate(left + width / 2, top + height / 2, z), // painter's algo: latest item (highest z) goes to top
+    rotateZ((-angle / 180) * Math.PI) // minus angle as transform:matrix3d uses a left-handed coordinate system
+  );
+
+const simplePosition = ({ id, position, filter }, z) => ({
+  ...headerData(id),
+  width: position.width,
+  height: position.height,
+  transformMatrix: transformData(position, z),
+  filter,
+});
+
+export const simplePositioning = ({ elements }) => ({ elements: elements.map(simplePosition) });
+
 /**
  * elementToShape
  *
@@ -34,28 +55,14 @@ const isGroupId = id => id.startsWith('group');
  * For example, `rotation_handle`, `border_resize_handle` and `border_connection` are modeled as shapes by the layout
  * library, simply for generality.
  */
-export const elementToShape = (element, i) => {
-  const position = element.position;
-  const a = position.width / 2;
-  const b = position.height / 2;
-  const cx = position.left + a;
-  const cy = position.top + b;
-  const z = i; // painter's algo: latest item goes to top
-  // multiplying the angle with -1 as `transform: matrix3d` uses a left-handed coordinate system
-  const angleRadians = (-position.angle / 180) * Math.PI;
-  const transformMatrix = multiply(translate(cx, cy, z), rotateZ(angleRadians));
-  const isGroup = isGroupId(element.id);
-  const parent = (element.position && element.position.parent) || null; // reserved for hierarchical (tree shaped) grouping
-  return {
-    id: element.id,
-    type: isGroup ? 'group' : 'rectangleElement',
-    subtype: isGroup ? 'persistentGroup' : '',
-    parent,
-    transformMatrix,
-    a, // we currently specify half-width, half-height as it leads to
-    b, // more regular math (like ellipsis radii rather than diameters)
-  };
-};
+
+export const elementToShape = ({ id, position }, z) => ({
+  ...headerData(id),
+  parent: (position && position.parent) || null,
+  transformMatrix: transformData(position, z),
+  a: position.width / 2, // we currently specify half-width, half-height as it leads to
+  b: position.height / 2, // more regular math (like ellipsis radii rather than diameters)
+});
 
 const shapeToElement = shape => ({
   left: shape.transformMatrix[12] - shape.a,

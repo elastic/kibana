@@ -31,19 +31,17 @@ export default function ({ getService, getPageObjects }) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover app', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
     before(async function () {
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace(defaultSettings);
-
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
@@ -56,6 +54,9 @@ export default function ({ getService, getPageObjects }) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
         expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
+        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
+        expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
       });
 
       it('save query should show toast message and display query name', async function () {
@@ -435,27 +436,34 @@ export default function ({ getService, getPageObjects }) {
 
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
+
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         const maxTicks = [
-          '2015-09-19 17:00',
-          '2015-09-20 05:00',
-          '2015-09-20 17:00',
-          '2015-09-21 05:00',
-          '2015-09-21 17:00',
-          '2015-09-22 05:00',
-          '2015-09-22 17:00',
-          '2015-09-23 05:00'
+          '2015-09-20 00:00',
+          '2015-09-20 12:00',
+          '2015-09-21 00:00',
+          '2015-09-21 12:00',
+          '2015-09-22 00:00',
+          '2015-09-22 12:00',
+          '2015-09-23 00:00',
+          '2015-09-23 12:00'
         ];
 
-        for (const tick of await PageObjects.discover.getBarChartXTicks()) {
-          if (!maxTicks.includes(tick)) {
-            throw new Error(`unexpected x-axis tick "${tick}"`);
+        await retry.try(async function () {
+          for (const tick of await PageObjects.discover.getBarChartXTicks()) {
+            if (!maxTicks.includes(tick)) {
+              throw new Error(`unexpected x-axis tick "${tick}"`);
+            }
           }
-        }
+        });
+        log.debug('check that the newest doc timestamp is now -7 hours from the UTC time in the first test');
+        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
       });
+
     });
   });
 }

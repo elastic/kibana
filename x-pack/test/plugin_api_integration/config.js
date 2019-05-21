@@ -18,6 +18,7 @@ export default async function ({ readConfigFile }) {
   return {
     testFiles: [
       require.resolve('./test_suites/task_manager'),
+      require.resolve('./test_suites/encrypted_saved_objects'),
     ],
     services: {
       retry: kibanaFunctionalConfig.get('services.retry'),

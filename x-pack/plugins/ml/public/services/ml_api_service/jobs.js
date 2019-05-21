@@ -22,6 +22,16 @@ export const jobs = {
     });
   },
 
+  jobsWithTimerange(dateFormatTz) {
+    return http({
+      url: `${basePath}/jobs/jobs_with_timerange`,
+      method: 'POST',
+      data: {
+        dateFormatTz
+      }
+    });
+  },
+
   jobs(jobIds) {
     return http({
       url: `${basePath}/jobs/jobs`,
@@ -104,6 +114,16 @@ export const jobs = {
     return http({
       url: `${basePath}/jobs/deleting_jobs_tasks`,
       method: 'GET',
+    });
+  },
+
+  jobsExist(jobIds) {
+    return http({
+      url: `${basePath}/jobs/jobs_exist`,
+      method: 'POST',
+      data: {
+        jobIds,
+      }
     });
   },
 

@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+import React from 'react';
+import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../store/util';
+import { i18n } from '@kbn/i18n';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -42,7 +45,9 @@ export class AbstractLayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
+    layerDescriptor.applyGlobalQuery = _.get(options, 'applyGlobalQuery', true);
     layerDescriptor.style = _.get(options, 'style',  {});
+
     return layerDescriptor;
   }
 
@@ -99,11 +104,73 @@ export class AbstractLayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getIcon() {
-    console.warn('Icon not available for this layer type');
+  getCustomIconAndTooltipContent() {
+    return {
+      icon: (
+        <EuiIcon
+          size="m"
+          type={this.getLayerTypeIconName()}
+        />
+      )
+    };
   }
 
-  getTOCDetails() {
+  getIconAndTooltipContent(zoomLevel) {
+    let icon;
+    let tooltipContent = null;
+    if (this.hasErrors()) {
+      icon = (
+        <EuiIcon
+          aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
+          size="m"
+          type="alert"
+          color="warning"
+        />
+      );
+      tooltipContent = this.getErrors();
+    } else if (this.isLayerLoading()) {
+      icon = (<EuiLoadingSpinner size="m"/>);
+    } else if (!this.isVisible()) {
+      icon = (
+        <EuiIcon
+          size="m"
+          type="eyeClosed"
+        />
+      );
+      tooltipContent = i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
+        defaultMessage: `Layer is hidden.`
+      });
+    } else if (!this.showAtZoomLevel(zoomLevel)) {
+      const { minZoom, maxZoom } = this.getZoomConfig();
+      icon = (
+        <EuiIcon
+          size="m"
+          type="expand"
+        />
+      );
+      tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
+        defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
+        values: { minZoom, maxZoom }
+      });
+    } else {
+      const customIconAndTooltipContent = this.getCustomIconAndTooltipContent();
+      if (customIconAndTooltipContent) {
+        icon = customIconAndTooltipContent.icon;
+        tooltipContent = customIconAndTooltipContent.tooltipContent;
+      }
+    }
+
+    return {
+      icon,
+      tooltipContent
+    };
+  }
+
+  hasLegendDetails() {
+    return false;
+  }
+
+  getLegendDetails() {
     return null;
   }
 
@@ -120,12 +187,7 @@ export class AbstractLayer {
   }
 
   showAtZoomLevel(zoom) {
-
-    if (zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom) {
-      return true;
-    }
-
-    return false;
+    return zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom;
   }
 
   getMinZoom() {
@@ -144,15 +206,15 @@ export class AbstractLayer {
     return this._descriptor.query;
   }
 
+  getApplyGlobalQuery() {
+    return this._descriptor.applyGlobalQuery;
+  }
+
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
       maxZoom: this._descriptor.maxZoom,
     };
-  }
-
-  getSupportedStyles() {
-    return [];
   }
 
   getCurrentStyle() {
@@ -244,7 +306,6 @@ export class AbstractLayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-
   async getBounds() {
     return {
       min_lon: -180,
@@ -254,12 +315,20 @@ export class AbstractLayer {
     };
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor(options);
+  renderStyleEditor({ onStyleDescriptorChange }) {
+    return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  getQueryableIndexPatternIds() {
+    if (this.getApplyGlobalQuery()) {
+      return this.getIndexPatternIds();
+    }
+
+    return [];
   }
 
   async getOrdinalFields() {

@@ -1,20 +1,8 @@
-.canvasPage,
-.canvasPage:focus {
+.canvasPage {
   z-index: initial;
-  box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.2);
+  @include euiBottomShadowFlat($opacity: 0.4);
   position: absolute;
   top: 0;
   transform-style: preserve-3d !important;
   background-color: $euiColorEmptyShade;
-}
-
-.canvasPage--isEditable {
-  user-select: none;
-}
-
-.canvasLayout__stage {
-  .canvasPage--isInactive {
-    visibility: hidden;
-    opacity: 0;
-  }
 }

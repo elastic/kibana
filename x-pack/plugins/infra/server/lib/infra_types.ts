@@ -11,7 +11,7 @@ import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetadataDomain } from './domains/metadata_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraNodesDomain } from './domains/nodes_domain';
+import { InfraSnapshot } from './snapshot';
 import { InfraSourceStatus } from './source_status';
 import { InfraSources } from './sources';
 
@@ -19,13 +19,13 @@ export interface InfraDomainLibs {
   metadata: InfraMetadataDomain;
   fields: InfraFieldsDomain;
   logEntries: InfraLogEntriesDomain;
-  nodes: InfraNodesDomain;
   metrics: InfraMetricsDomain;
 }
 
 export interface InfraBackendLibs extends InfraDomainLibs {
   configuration: InfraConfigurationAdapter;
   framework: InfraBackendFrameworkAdapter;
+  snapshot: InfraSnapshot;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
 }

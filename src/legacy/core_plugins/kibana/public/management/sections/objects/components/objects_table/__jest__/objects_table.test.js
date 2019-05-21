@@ -23,8 +23,13 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
+import { findObjects } from '../../../lib';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
+jest.mock('../../../lib/find_objects', () => ({
+  findObjects: jest.fn(),
+}));
 
 jest.mock('../components/header', () => ({
   Header: () => 'Header',
@@ -44,7 +49,8 @@ jest.mock('ui/errors', () => ({
 }));
 
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => ''
+  addBasePath: () => '',
+  getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
 }));
 
 jest.mock('../../../lib/fetch_export_objects', () => ({
@@ -110,29 +116,10 @@ const allSavedObjects = [
 const $http = () => {};
 $http.post = jest.fn().mockImplementation(() => ([]));
 const defaultProps = {
+  goInspectObject: () => {},
   savedObjectsClient: {
-    find: jest.fn().mockImplementation(({ type }) => {
-      // We pass in a single type when fetching counts
-      if (type && !Array.isArray(type)) {
-        return {
-          total: 1,
-          savedObjects: [
-            {
-              id: '1',
-              type,
-              attributes: {
-                title: `Title${type}`
-              }
-            },
-          ]
-        };
-      }
-
-      return {
-        total: allSavedObjects.length,
-        savedObjects: allSavedObjects,
-      };
-    }),
+    find: jest.fn(),
+    bulkGet: jest.fn(),
   },
   indexPatterns: {
     cache: {
@@ -144,9 +131,6 @@ const defaultProps = {
   newIndexPatternUrl: '',
   kbnIndex: '',
   services: [],
-  getEditUrl: () => {},
-  canGoInApp: () => {},
-  goInApp: () => {},
   uiCapabilities: {
     savedObjectsManagement: {
       'index-pattern': {
@@ -170,6 +154,66 @@ const defaultProps = {
     'search'
   ]
 };
+
+beforeEach(() => {
+  findObjects.mockImplementation(() => ({
+    total: 4,
+    savedObjects: [
+      {
+        id: '1',
+        type: 'index-pattern',
+        meta: {
+          title: `MyIndexPattern*`,
+          icon: 'indexPatternApp',
+          editUrl: '#/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/management/kibana/index_patterns/1',
+            uiCapabilitiesPath: 'management.kibana.index_patterns',
+          },
+        },
+      },
+      {
+        id: '2',
+        type: 'search',
+        meta: {
+          title: `MySearch`,
+          icon: 'search',
+          editUrl: '#/management/kibana/objects/savedSearches/2',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
+        },
+      },
+      {
+        id: '3',
+        type: 'dashboard',
+        meta: {
+          title: `MyDashboard`,
+          icon: 'dashboardApp',
+          editUrl: '#/management/kibana/objects/savedDashboards/3',
+          inAppUrl: {
+            path: '/dashboard/3',
+            uiCapabilitiesPath: 'dashboard.show',
+          },
+        },
+      },
+      {
+        id: '4',
+        type: 'visualization',
+        meta: {
+          title: `MyViz`,
+          icon: 'visualizeApp',
+          editUrl: '#/management/kibana/objects/savedVisualizations/4',
+          inAppUrl: {
+            path: '/visualize/edit/4',
+            uiCapabilitiesPath: 'visualize.show',
+          },
+        },
+      },
+    ],
+  }));
+});
 
 let addDangerMock;
 let addSuccessMock;
@@ -209,15 +253,12 @@ describe('ObjectsTable', () => {
   });
 
   it('should add danger toast when find fails', async () => {
-    const savedObjectsClientWithFindError = {
-      find: () => {
-        throw new Error('Simulated find error');
-      }
-    };
-    const customizedProps = { ...defaultProps, savedObjectsClient: savedObjectsClientWithFindError };
+    findObjects.mockImplementation(() => {
+      throw new Error('Simulated find error');
+    });
     const component = shallowWithIntl(
       <ObjectsTable.WrappedComponent
-        {...customizedProps}
+        {...defaultProps}
         perPageConfig={15}
       />
     );
@@ -260,7 +301,7 @@ describe('ObjectsTable', () => {
     // Ensure the state changes are reflected
     component.update();
 
-    expect(defaultProps.savedObjectsClient.find).toHaveBeenCalledWith(expect.objectContaining({
+    expect(findObjects).toHaveBeenCalledWith(expect.objectContaining({
       type: ['search']
     }));
   });
@@ -458,13 +499,35 @@ describe('ObjectsTable', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      component.instance().onShowRelationships('1', 'search', 'MySearch');
+      component.instance().onShowRelationships({
+        id: '2',
+        type: 'search',
+        meta: {
+          title: `MySearch`,
+          icon: 'search',
+          editUrl: '#/management/kibana/objects/savedSearches/2',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
+        },
+      });
       component.update();
 
       expect(component.find(Relationships)).toMatchSnapshot();
-      expect(component.state('relationshipId')).toBe('1');
-      expect(component.state('relationshipType')).toBe('search');
-      expect(component.state('relationshipTitle')).toBe('MySearch');
+      expect(component.state('relationshipObject')).toEqual({
+        id: '2',
+        type: 'search',
+        meta: {
+          title: 'MySearch',
+          editUrl: '#/management/kibana/objects/savedSearches/2',
+          icon: 'search',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
+        },
+      });
     });
 
     it('should hide the flyout', async () => {

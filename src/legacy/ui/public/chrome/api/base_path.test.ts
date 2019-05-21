@@ -18,7 +18,7 @@
  */
 
 import { basePathServiceMock } from '../../../../../core/public/mocks';
-import { __newPlatformInit__, initChromeBasePathApi } from './base_path';
+import { __newPlatformSetup__, initChromeBasePathApi } from './base_path';
 
 function initChrome() {
   const chrome: any = {};
@@ -27,7 +27,7 @@ function initChrome() {
 }
 
 const newPlatformBasePath = basePathServiceMock.createSetupContract();
-__newPlatformInit__(newPlatformBasePath);
+__newPlatformSetup__(newPlatformBasePath);
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -25,10 +25,6 @@ authorization using <<kibana-privileges>> are disabled. +
 Set to `true` to enable audit logging for security events. This is set to `false` by default.
 For more details see <<xpack-security-audit-logging>>.
 
-`xpack.security.authorization.legacyFallback`::
-Set to `true` (default) to enable the legacy fallback. See <<xpack-security-authorization>>
-for more details.
-
 [float]
 [[security-ui-settings]]
 ==== User interface security settings

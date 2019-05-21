@@ -116,6 +116,7 @@ export function ServiceList({ items = [], noItemsMessage }: Props) {
       items={items}
       noItemsMessage={noItemsMessage}
       initialSort={{ field: 'serviceName', direction: 'asc' }}
+      initialPageSize={50}
     />
   );
 }
