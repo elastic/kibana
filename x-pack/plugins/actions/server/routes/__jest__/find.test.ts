@@ -38,18 +38,20 @@ it('sends proper arguments to action find function', async () => {
   "calls": Array [
     Array [
       Object {
-        "defaultSearchOperator": "AND",
-        "fields": Array [
-          "description",
-        ],
-        "hasReference": undefined,
-        "page": 1,
-        "perPage": 1,
-        "search": "text*",
-        "searchFields": Array [
-          "description",
-        ],
-        "sortField": "description",
+        "options": Object {
+          "defaultSearchOperator": "AND",
+          "fields": Array [
+            "description",
+          ],
+          "hasReference": undefined,
+          "page": 1,
+          "perPage": 1,
+          "search": "text*",
+          "searchFields": Array [
+            "description",
+          ],
+          "sortField": "description",
+        },
       },
     ],
   ],
