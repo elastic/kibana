@@ -1325,10 +1325,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^4.2.5":
-  version "4.2.5"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.5.tgz#82b4bc7c4564c8c6a6500931c3ae6e7fbd6bd275"
-  integrity sha512-FY7jTHv8lO/CRt/otX7j+Zbrrzq8SyHBLvhM58yyYI5oCFYHDcF4FhaTQ6W4aVSmLKyWeTpSXBNALklWw8drrg==
+"@elastic/charts@^4.2.6":
+  version "4.2.6"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.6.tgz#19b8fa79758f58ebae6eeba750bea6a418b15659"
+  integrity sha512-ROsv3YwSCDsp09ObeVkAL9YsiNJsAY2kAtBwovRaNCcotI9ybNSQcqbTLlC9vZkduyQSsHBvRL/RAwY8btXE8g==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"

@@ -14,54 +14,31 @@ import {
   LineSeries,
   getAxisId,
   getSpecId,
-  CurveType,
   AreaSeries,
   BarSeries,
 } from '@elastic/charts';
 import { Datatable } from '../../../canvas/canvas_plugin_src/functions/types';
 
 /**
- * This file contains the xy chart expression function and renderer.
+ * This file contains TypeScript type definitions and their equivalent expression
+ * definitions, for configuring and rendering an XY chart. The XY chart serves
+ * triple duty as a bar, line, or area chart.
+ *
+ * The xy_chart expression function serves mostly as a passthrough to the xy_chart_renderer
+ * which does the heavy-lifting.
  */
 
-const chartName = 'xy_chart';
-const rendererName = `${chartName}_renderer`;
-
+/**
+ * Configuration for the chart's legend.
+ */
 export interface LegendConfig {
   isVisible: boolean;
   position: Position;
 }
 
-interface AxisConfig {
-  title: string;
-  showGridlines: boolean;
-  position: Position;
-}
-
-interface YConfig extends AxisConfig {
-  columns: string[];
-}
-
-interface XConfig extends AxisConfig {
-  column: string;
-}
-
-interface XYArgs {
-  seriesType: 'bar' | 'line' | 'area';
-  title: string;
-  legend: LegendConfig;
-  y: YConfig;
-  x: XConfig;
-  splitBy: string[];
-  stackBy: string[];
-}
-
-const axisConfig = {
-  title: { types: ['string'] },
-  showGridlines: { types: ['boolean'] },
-  position: { types: ['string'] },
-};
-
+/**
+ * LegendConfig as an expression type.
+ */
 export const legendConfig = {
   name: 'legendConfig',
   aliases: [],
@@ -82,26 +59,34 @@ export const legendConfig = {
   },
 };
 
-export const xConfig = {
-  name: 'xConfig',
-  aliases: [],
-  type: 'xConfig',
-  help: `Configure a chart's x axis`,
-  context: {
-    types: ['null'],
-  },
-  args: {
-    ...axisConfig,
-    column: { types: ['string'] },
-  },
-  fn: function fn(_context: any, args: LegendConfig) {
-    return {
-      type: 'xConfig',
-      ...args,
-    };
-  },
+/**
+ * Properties common to all axes.
+ */
+interface AxisConfig {
+  title: string;
+  showGridlines: boolean;
+  position: Position;
+}
+
+/**
+ * AxisConfig expression definition.
+ */
+const axisConfig = {
+  title: { types: ['string'] },
+  showGridlines: { types: ['boolean'] },
+  position: { types: ['string'] },
 };
 
+/**
+ * Y-axis configuration.
+ */
+export interface YConfig extends AxisConfig {
+  accessors: string[];
+}
+
+/**
+ * YConfig as an expression type.
+ */
 export const yConfig = {
   name: 'yConfig',
   aliases: [],
@@ -112,12 +97,12 @@ export const yConfig = {
   },
   args: {
     ...axisConfig,
-    columns: {
+    accessors: {
       types: ['string'],
       multi: true,
     },
   },
-  fn: function fn(_context: any, args: LegendConfig) {
+  fn: function fn(_context: any, args: YConfig) {
     return {
       type: 'yConfig',
       ...args,
@@ -125,20 +110,66 @@ export const yConfig = {
   },
 };
 
-export const xyFunction = {
-  name: chartName,
+/**
+ * X-axis configuration.
+ */
+export interface XConfig extends AxisConfig {
+  accessor: string;
+}
+
+/**
+ * XConfig as an expression type.
+ */
+export const xConfig = {
+  name: 'xConfig',
+  aliases: [],
+  type: 'xConfig',
+  help: `Configure a chart's x axis`,
+  context: {
+    types: ['null'],
+  },
+  args: {
+    ...axisConfig,
+    accessor: { types: ['string'] },
+  },
+  fn: function fn(_context: any, args: XConfig) {
+    return {
+      type: 'xConfig',
+      ...args,
+    };
+  },
+};
+
+/**
+ * The arguments to the XY chart expression function.
+ */
+export interface XYArgs {
+  seriesType: 'bar' | 'line' | 'area';
+  title: string;
+  legend: LegendConfig;
+  y: YConfig;
+  x: XConfig;
+  splitSeriesAccessors: string[];
+  stackAccessors: string[];
+}
+
+/**
+ * The XY chart expression function.
+ */
+export const xyChart = {
+  name: 'xy_chart',
   type: 'render',
   args: {
-    title: { types: ['string'] },
     seriesType: { types: ['string'] },
+    title: { types: ['string'] },
     legend: { types: ['legendConfig'] },
     y: { types: ['yConfig'] },
     x: { types: ['xConfig'] },
-    splitBy: {
+    splitSeriesAccessors: {
       types: ['string'],
       multi: true,
     },
-    stackBy: {
+    stackAccessors: {
       types: ['string'],
       multi: true,
     },
@@ -147,7 +178,7 @@ export const xyFunction = {
   fn(data: Datatable, args: XYArgs) {
     return {
       type: 'render',
-      as: rendererName,
+      as: 'xy_chart_renderer',
       value: {
         data,
         args,
@@ -156,32 +187,36 @@ export const xyFunction = {
   },
 };
 
-export function xyRenderer() {
-  return {
-    name: rendererName,
-    displayName: 'XY Chart',
-    reuseDomNode: true,
-    render: async (domNode: HTMLDivElement, config: any, _handlers: any) => {
-      ReactDOM.render(<XyChart {...config} />, domNode);
-    },
-  };
-}
+/**
+ * The XY chart expression renderer.
+ */
+export const xyChartRenderer = {
+  name: 'xy_chart_renderer',
+  displayName: 'XY Chart',
+  reuseDomNode: true,
+  render: async (domNode: HTMLDivElement, config: any, _handlers: any) => {
+    ReactDOM.render(<XYChart {...config} />, domNode);
+  },
+};
 
-export function XyChart({ data, args }: { data: Datatable; args: XYArgs }) {
-  const { legend, x, y, splitBy, stackBy, seriesType } = args;
+/**
+ * Render an XY chart as a React component.
+ *
+ * @param props - The data and args which are used to render the chart.
+ */
+function XYChart({ data, args }: { data: Datatable; args: XYArgs }) {
+  const { legend, x, y, splitSeriesAccessors, stackAccessors, seriesType } = args;
   const seriesProps = {
-    id: getSpecId(y.columns.join(',')),
-    xAccessor: x.column,
-    yAccessors: y.columns,
-    splitSeriesAccessors: splitBy,
-    stackAccessors: stackBy,
+    splitSeriesAccessors,
+    stackAccessors,
+    id: getSpecId(y.accessors.join(',')),
+    xAccessor: x.accessor,
+    yAccessors: y.accessors,
     data: data.rows,
-    yScaleToDataExtent: false,
-    curve: CurveType.CURVE_CATMULL_ROM,
   };
 
   return (
-    <Chart className="story-chart">
+    <Chart className="lnsChart">
       <Settings showLegend={legend.isVisible} legendPosition={legend.position} />
 
       <Axis
