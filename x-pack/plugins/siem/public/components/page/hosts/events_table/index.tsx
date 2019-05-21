@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import moment from 'moment';
@@ -22,6 +23,7 @@ import * as i18n from './translations';
 import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { MoreRowItems } from '../../index';
 
 interface OwnProps {
   data: Ecs[];
@@ -238,7 +240,11 @@ const getEventsColumns = (
             render: () => (
               <>
                 {message.substring(0, overflowLength)}
-                {message.length > overflowLength && '...'}
+                {message.length > overflowLength && (
+                  <EuiToolTip content={message}>
+                    <MoreRowItems type="boxesHorizontal" />
+                  </EuiToolTip>
+                )}
               </>
             ),
           })
