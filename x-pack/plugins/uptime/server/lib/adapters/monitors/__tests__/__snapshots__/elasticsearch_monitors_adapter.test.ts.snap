@@ -53,7 +53,7 @@ Array [
       },
       "size": 0,
     },
-    "index": "heartbeat-8*",
+    "index": "heartbeat*",
   },
 ]
 `;
@@ -106,7 +106,7 @@ Array [
       },
       "size": 0,
     },
-    "index": "heartbeat-8*",
+    "index": "heartbeat*",
   },
 ]
 `;
