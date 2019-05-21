@@ -658,7 +658,7 @@ export function updateLayerStyle(layerId, styleDescriptor) {
 }
 
 export function updateStyleMeta(layerId) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
@@ -668,10 +668,11 @@ export function updateStyleMeta(layerId) {
     if (!style || !sourceDataRequest) {
       return;
     }
+    const styleMeta = await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
     dispatch({
       type: SET_LAYER_STYLE_META,
       layerId,
-      styleMeta: style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest),
+      styleMeta,
     });
   };
 }

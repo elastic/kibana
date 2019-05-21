@@ -6,8 +6,8 @@
 
 export * from './types';
 
-import { IScope } from 'angular';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { IScope } from 'angular';
 import chrome from 'ui/chrome';
 import { appSetup, appStop } from './app_plugin';
 

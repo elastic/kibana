@@ -6,6 +6,7 @@
 
 import React, { useReducer, useEffect } from 'react';
 import { Datasource, Visualization } from '../types';
+import { NativeRenderer } from '../native_renderer';
 
 interface EditorFrameProps {
   datasources: { [key: string]: Datasource };
@@ -18,18 +19,18 @@ interface DatasourceState {
   datasourceName: string;
   visualizationName: string;
 
-  datasourceState: any;
-  visualizationState: any;
+  datasourceState: unknown;
+  visualizationState: unknown;
 }
 
 interface UpdateDatasourceAction {
   type: 'UPDATE_DATASOURCE';
-  payload: any;
+  payload: unknown;
 }
 
 interface UpdateVisualizationAction {
   type: 'UPDATE_VISUALIZATION';
-  payload: any;
+  payload: unknown;
 }
 
 type Action = UpdateDatasourceAction | UpdateVisualizationAction;
@@ -81,41 +82,35 @@ export function EditorFrame(props: EditorFrameProps) {
     <div>
       <h2>Editor Frame</h2>
 
-      <div
-        ref={domElement => {
-          if (domElement) {
-            props.datasources[state.datasourceName].renderDataPanel(domElement, {
-              state: state.datasourceState,
-              setState: newState =>
-                dispatch({
-                  type: 'UPDATE_DATASOURCE',
-                  payload: newState,
-                }),
-            });
-          }
+      <NativeRenderer
+        render={props.datasources[state.datasourceName].renderDataPanel}
+        nativeProps={{
+          state: state.datasourceState,
+          setState: (newState: unknown) =>
+            dispatch({
+              type: 'UPDATE_DATASOURCE',
+              payload: newState,
+            }),
         }}
       />
 
-      <div
-        ref={domElement => {
-          if (domElement) {
-            props.visualizations[state.visualizationName].renderConfigPanel(domElement, {
-              datasource: props.datasources[state.datasourceName].getPublicAPI(
-                state.datasourceState,
-                newState =>
-                  dispatch({
-                    type: 'UPDATE_DATASOURCE',
-                    payload: newState,
-                  })
-              ),
-              state: state.visualizationState,
-              setState: newState =>
-                dispatch({
-                  type: 'UPDATE_VISUALIZATION',
-                  payload: newState,
-                }),
-            });
-          }
+      <NativeRenderer
+        render={props.visualizations[state.visualizationName].renderConfigPanel}
+        nativeProps={{
+          datasource: props.datasources[state.datasourceName].getPublicAPI(
+            state.datasourceState,
+            newState =>
+              dispatch({
+                type: 'UPDATE_DATASOURCE',
+                payload: newState,
+              })
+          ),
+          state: state.visualizationState,
+          setState: (newState: unknown) =>
+            dispatch({
+              type: 'UPDATE_VISUALIZATION',
+              payload: newState,
+            }),
         }}
       />
     </div>
