@@ -9,7 +9,7 @@ import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 
-interface SuggestionPanelProps {
+export interface SuggestionPanelProps {
   activeDatasource: Datasource;
   datasourceState: unknown;
   activeVisualizationId: string | null;

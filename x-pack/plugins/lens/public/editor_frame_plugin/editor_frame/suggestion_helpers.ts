@@ -48,6 +48,7 @@ export function getSuggestions(
           .getSuggestions({
             tableColumns: datasourceTableMetas,
             roles: roleMapping,
+            state: visualizationId === activeVisualizationId ? visualizationState : undefined,
           })
           .map(({ datasourceSuggestionId, ...suggestion }) => ({
             ...suggestion,

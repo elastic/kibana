@@ -10,7 +10,7 @@ import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 
-interface WorkspacePanelProps {
+export interface WorkspacePanelProps {
   activeDatasource: Datasource;
   datasourceState: unknown;
   activeVisualizationId: string | null;
