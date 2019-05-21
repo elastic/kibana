@@ -23,6 +23,8 @@
   * [How is static code shared between plugins?](#how-is-static-code-shared-between-plugins)
   * [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
   * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
+* [How to](#how-to)
+  * [Configure plugin](#configure-plugin)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -687,3 +689,25 @@ There is essentially no code that _can't_ exist in a plugin. When in doubt, put 
 After plugins, core is where most of the rest of the code in Kibana will exist. Functionality that's critical to the reliable execution of the Kibana process belongs in core. Services that will widely be used by nearly every non-trivial plugin in any Kibana install belong in core. Functionality that is too specialized to specific use cases should not be in core, so while something like generic saved objects is a core concern, index patterns are not.
 
 The packages directory should have the least amount of code in Kibana. Just because some piece of code is not stateful doesn't mean it should go into packages. The packages directory exists to aid us in our quest to centralize as many of our owned dependencies in this single monorepo, so it's the logical place to put things like Kibana specific forks of node modules or vendor dependencies.
+
+
+## How to
+
+### Configure plugin
+Kibana provides ConfigService if a plugin developer may want to support adjustable runtime behavior for their plugins. Access to Kibana config in New platform has been subject to significant refactoring.
+In order to have access to a config, plugin *should*:
+- Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
+- Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
+```js
+import { schema } from '@kbn/config-schema';
+export const plugin = ...
+export const config = {
+  schema: schema.object(...),
+};
+```
+- Read config value exposed via initializerContext. No config path is required.
+```js
+const config$ = this.initializerContext.config.create();
+// or if config is optional:
+const config$ = this.initializerContext.config.createIfExists();
+```
