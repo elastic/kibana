@@ -91,16 +91,26 @@ describe('toggle filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      const emitSpy = sinon.spy(queryFilter, 'emit');
+      const updateStub = sinon.stub();
+      const fetchStub = sinon.stub();
+
+      queryFilter.getUpdates$().subscribe({
+        next: updateStub,
+      });
+
+      queryFilter.getFetches$().subscribe({
+        next: fetchStub,
+      });
+
       appState.filters = filters;
       $rootScope.$digest();
 
       queryFilter.toggleFilter(filters[1]);
       $rootScope.$digest();
 
-      expect(emitSpy.callCount).to.be(2);
-      expect(emitSpy.firstCall.args[0]).to.be('update');
-      expect(emitSpy.secondCall.args[0]).to.be('fetch');
+      // this time, events should be emitted
+      expect(fetchStub.called);
+      expect(updateStub.called);
     });
 
     it('should always enable the filter', function () {

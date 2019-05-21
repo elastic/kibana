@@ -19,8 +19,8 @@
 
 import { CollectorSet } from './classes';
 
-export function usageMixin(kbnServer, server) {
-  const collectorSet = new CollectorSet(server);
+export function usageMixin(kbnServer, server, config) {
+  const collectorSet = new CollectorSet(server, undefined, config);
 
   /*
    * expose the collector set object on the server
