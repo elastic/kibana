@@ -19,24 +19,18 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-const createDevSchema = schema.object({
-  basePathProxyTarget: schema.number({
-    defaultValue: 5603,
-  }),
-});
-
 export const config = {
   path: 'dev',
-  schema: createDevSchema,
+  schema: schema.object({
+    basePathProxyTarget: schema.number({
+      defaultValue: 5603,
+    }),
+  }),
 };
 
-export type DevConfigType = TypeOf<typeof createDevSchema>;
-export class DevConfig {
-  /**
-   * @internal
-   */
-  public static schema = createDevSchema;
+export type DevConfigType = TypeOf<typeof config.schema>;
 
+export class DevConfig {
   public basePathProxyTargetPort: number;
 
   /**

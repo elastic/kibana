@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
-// @ts-ignore
-import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
-// @ts-ignore
-import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
+import { EuiText, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { MarkedString } from 'vscode-languageserver-types';
-
+import ReactMarkdown from 'react-markdown';
+// @ts-ignore
+import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
 export interface HoverWidgetProps {
   state: HoverState;
   contents?: MarkedString[];
@@ -54,6 +52,17 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
   }
 
   private renderContents() {
+    const markdownRenderers = {
+      link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+        <EuiLink href={href} target="_blank">
+          {children}
+        </EuiLink>
+      ),
+      code: ({ value, language }: { value: string; language: string }) => {
+        const code = tokenizeToString(value, language);
+        return <div className="code" dangerouslySetInnerHTML={{ __html: code }} />;
+      },
+    };
     return this.props
       .contents!.filter(content => !!content)
       .map((markedString, idx) => {
@@ -65,21 +74,16 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
         } else {
           markdown = markedString.value;
         }
-        const renderedContents: string = renderMarkdown(
-          { value: markdown },
-          {
-            codeBlockRenderer: (language: string, value: string) => {
-              const code = tokenizeToString(value, language);
-              return `<span>${code}</span>`;
-            },
-          }
-        ).innerHTML;
+
         return (
-          <div
-            className="hover-row"
-            key={`hover_${idx}`}
-            dangerouslySetInnerHTML={{ __html: renderedContents }}
-          />
+          <div className="hover-row" key={`hover_${idx}`}>
+            <ReactMarkdown
+              source={markdown}
+              escapeHtml={true}
+              skipHtml={true}
+              renderers={markdownRenderers}
+            />
+          </div>
         );
       });
   }
