@@ -78,6 +78,7 @@ describe('Data Frame: Group By <PopoverForm />', () => {
     const defaultData: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
       aggName: 'the-agg-name',
+      dropDownName: 'the-drop-down-name',
       field: 'the-field',
       interval: '10m',
     };

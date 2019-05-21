@@ -20,7 +20,7 @@ export interface EsDoc extends Dictionary<any> {
 
 export const MAX_COLUMNS = 5;
 
-function getFlattenedFields(obj: EsDocSource): EsFieldName[] {
+export function getFlattenedFields(obj: EsDocSource): EsFieldName[] {
   const flatDocFields: EsFieldName[] = [];
   const newDocFields = Object.keys(obj);
   newDocFields.forEach(f => {

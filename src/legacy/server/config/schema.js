@@ -175,6 +175,10 @@ export default () => Joi.object({
     pollInterval: Joi.number().default(1500),
   }).default(),
 
+  stats: Joi.object({
+    maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)
+  }).default(),
+
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
