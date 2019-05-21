@@ -2,7 +2,7 @@
   "services": [
     {
       "id": "road_map",
-      "name": { "en": "Road Map - Bright" },
+      "name": { "en": "Road map" },
       "attribution": [
         {
           "label": { "en": "OpenStreetMap contributors" },
@@ -30,7 +30,7 @@
     },
     {
       "id": "road_map_desaturated",
-      "name": { "en": "Road Map" },
+      "name": { "en": "Road map - desaturated" },
       "attribution": [
         {
           "label": { "en": "OpenStreetMap contributors" },
@@ -58,7 +58,7 @@
     },
     {
       "id": "dark_map",
-      "name": { "en": "Dark Map" },
+      "name": { "en": "Road map - dark" },
       "attribution": [
         {
           "label": { "en": "OpenStreetMap contributors" },
