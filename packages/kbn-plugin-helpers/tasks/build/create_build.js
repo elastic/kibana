@@ -28,10 +28,13 @@ const rename = require('gulp-rename');
 const through = require('through2');
 const minimatch = require('minimatch');
 const gulpBabel = require('gulp-babel');
-const { createPromiseFromStreams } = require('@kbn/dev-utils/target/streams');
+const { promisify } = require('util');
+const { pipeline } = require('stream');
 
 const rewritePackageJson = require('./rewrite_package_json');
 const winCmd = require('../../lib/win_cmd');
+
+const asyncPipeline = promisify(pipeline);
 
 // `link:` dependencies create symlinks, but we don't want to include symlinks
 // in the built zip file. Therefore we remove all symlinked dependencies, so we
@@ -69,7 +72,7 @@ function parseTsconfig(pluginSourcePath, configPath) {
 
 // transpile with babel
 async function transpileWithBabel(srcGlobs, buildRoot, presets) {
-  await createPromiseFromStreams([
+  await asyncPipeline([
     vfs.src(
       srcGlobs.concat([
         '!**/*.d.ts',
@@ -166,24 +169,17 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
 
       // Transpile ts server code
       //
-      // Include every ts/tsx file which is not inside a public directory
-      // and then add all server and common code (there is at least one example of a public directory
-      // inside the server directory )
-      await transpileWithBabel(
-        ['**/*.{ts,tsx}', '!**/public/**', '**/server/**/*.{ts,tsx}', '**/common/**/*.{ts,tsx}'],
-        buildRoot,
-        [require.resolve('@kbn/babel-preset/node_preset')]
-      );
+      // Include everything except content from public folders
+      await transpileWithBabel(['**/*.{ts,tsx}', '!**/public/**'], buildRoot, [
+        require.resolve('@kbn/babel-preset/node_preset'),
+      ]);
 
       // Transpile ts client code
       //
-      // Include everything inside a public directory which is not
-      // inside a server or common directory.
-      await transpileWithBabel(
-        ['**/public/**/*.{ts,tsx}', '!**/server/**', '!**/common/**'],
-        buildRoot,
-        [require.resolve('@kbn/babel-preset/webpack_preset')]
-      );
+      // Include everything inside a public directory
+      await transpileWithBabel(['**/public/**/*.{ts,tsx}'], buildRoot, [
+        require.resolve('@kbn/babel-preset/webpack_preset'),
+      ]);
 
       del.sync([
         path.join(buildRoot, '**', '*.{ts,tsx,d.ts}'),
