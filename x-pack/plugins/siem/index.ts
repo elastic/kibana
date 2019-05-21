@@ -46,7 +46,7 @@ export function siem(kibana: any) {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
             defaultMessage: 'Default index',
           }),
-          value: ['auditbeat-*', 'filebeat-*', 'metricbeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage: 'Default Elasticsearch index to search',
           }),
