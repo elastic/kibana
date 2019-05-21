@@ -28,6 +28,7 @@ import {
 } from '../../store';
 import { ActionCreator } from 'typescript-fsa';
 import { InputsModelId } from '../../store/inputs/model';
+import { wait } from '../../lib/helpers';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -150,7 +151,7 @@ describe('UrlStateComponents', () => {
       urlStateComponents.exists();
       expect(toJson(wrapper)).toMatchSnapshot();
     });
-    test('componentDidUpdate - timerange redux state updates the url', () => {
+    test('componentDidUpdate - timerange redux state updates the url', async () => {
       const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
 
       const newUrlState = {
@@ -168,15 +169,16 @@ describe('UrlStateComponents', () => {
 
       wrapper.setProps({ urlState: newUrlState });
       wrapper.update();
-      expect(mockHistory.replace).toBeCalledWith({
+      await wait(1000);
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
         search:
-          '?timerange=(timeline:(from:1558048243696,fromStr:now-24h,kind:relative,linkTo:!(global),to:1558134643697,toStr:now))',
+          '?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now),timerange:!(global)))',
         state: '',
       });
     });
-    test('componentDidUpdate - kql query redux state updates the url', () => {
+    test('componentDidUpdate - kql query redux state updates the url', async () => {
       const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
 
       const newUrlState = {
@@ -191,7 +193,8 @@ describe('UrlStateComponents', () => {
 
       wrapper.setProps({ urlState: newUrlState });
       wrapper.update();
-      expect(mockHistory.replace).toBeCalledWith({
+      await wait(1000);
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
         search:

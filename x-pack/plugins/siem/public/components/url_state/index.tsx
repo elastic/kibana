@@ -242,12 +242,11 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
               if (globalRange.linkTo.length === 0) {
                 this.props.toggleTimelineLinkTo({ linkToId: 'global' });
               }
-              if (globalType === 'absolute') {
-                this.urlStateMappedToActions.timerange.absolute({
-                  ...globalRange,
-                  id: globalId,
-                });
-              }
+              // @ts-ignore
+              this.urlStateMappedToActions.timerange[timelineType]({
+                ...globalRange,
+                id: globalId,
+              });
             }
             const timelineId: InputsModelId = 'timeline';
             const timelineRange: UrlTimeRange = timerangeStateData.timeline;
@@ -340,20 +339,21 @@ const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
+    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
+    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
+
     return {
       urlState: {
-        timerange: inputState
-          ? {
-              global: {
-                ...get('global.timerange', inputState),
-                linkTo: get('global.linkTo', inputState),
-              },
-              timeline: {
-                ...get('timeline.timerange', inputState),
-                linkTo: get('timeline.linkTo', inputState),
-              },
-            }
-          : {},
+        timerange: {
+          global: {
+            timerange: globalTimerange,
+            linkTo: globalLinkTo,
+          },
+          timeline: {
+            timerange: timelineLinkTo,
+            linkTo: timelineTimerange,
+          },
+        },
         kqlQuery: [
           {
             filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
@@ -391,6 +391,7 @@ export const UrlStateContainer = connect(
     setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
     toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
   }
+  // @ts-ignore
 )(UrlStateComponents);
 
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {

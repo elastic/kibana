@@ -268,7 +268,24 @@ exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
                             "state": "",
                           },
                           "push": [MockFunction],
-                          "replace": [MockFunction],
+                          "replace": [MockFunction] {
+                            "calls": Array [
+                              Array [
+                                Object {
+                                  "hash": "",
+                                  "pathname": "/network",
+                                  "search": "?kqlQuery=!((filterQuery:!n,model:hosts,type:details),(filterQuery:!n,model:hosts,type:page),(filterQuery:!n,model:network,type:details),(filterQuery:!n,model:network,type:page))",
+                                  "state": "",
+                                },
+                              ],
+                            ],
+                            "results": Array [
+                              Object {
+                                "type": "return",
+                                "value": undefined,
+                              },
+                            ],
+                          },
                         }
                       }
                     >
@@ -283,46 +300,50 @@ exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
                             Object {
                               "kqlQuery": Array [
                                 Object {
-                                  "filterQuery": "",
+                                  "filterQuery": null,
                                   "model": "hosts",
                                   "type": "details",
                                 },
                                 Object {
-                                  "filterQuery": "",
+                                  "filterQuery": null,
                                   "model": "hosts",
                                   "type": "page",
                                 },
                                 Object {
-                                  "filterQuery": "",
+                                  "filterQuery": null,
                                   "model": "network",
                                   "type": "details",
                                 },
                                 Object {
-                                  "filterQuery": "",
+                                  "filterQuery": null,
                                   "model": "network",
                                   "type": "page",
                                 },
                               ],
                               "timerange": Object {
                                 "global": Object {
-                                  "from": 0,
-                                  "fromStr": "now-24h",
-                                  "kind": "relative",
                                   "linkTo": Array [
                                     "timeline",
                                   ],
-                                  "to": 1,
-                                  "toStr": "now",
+                                  "timerange": Object {
+                                    "from": 0,
+                                    "fromStr": "now-24h",
+                                    "kind": "relative",
+                                    "to": 1,
+                                    "toStr": "now",
+                                  },
                                 },
                                 "timeline": Object {
-                                  "from": 0,
-                                  "fromStr": "now-24h",
-                                  "kind": "relative",
-                                  "linkTo": Array [
+                                  "linkTo": Object {
+                                    "from": 0,
+                                    "fromStr": "now-24h",
+                                    "kind": "relative",
+                                    "to": 1,
+                                    "toStr": "now",
+                                  },
+                                  "timerange": Array [
                                     "global",
                                   ],
-                                  "to": 1,
-                                  "toStr": "now",
                                 },
                               },
                             }
@@ -338,46 +359,50 @@ exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
                               Object {
                                 "kqlQuery": Array [
                                   Object {
-                                    "filterQuery": "",
+                                    "filterQuery": null,
                                     "model": "hosts",
                                     "type": "details",
                                   },
                                   Object {
-                                    "filterQuery": "",
+                                    "filterQuery": null,
                                     "model": "hosts",
                                     "type": "page",
                                   },
                                   Object {
-                                    "filterQuery": "",
+                                    "filterQuery": null,
                                     "model": "network",
                                     "type": "details",
                                   },
                                   Object {
-                                    "filterQuery": "",
+                                    "filterQuery": null,
                                     "model": "network",
                                     "type": "page",
                                   },
                                 ],
                                 "timerange": Object {
                                   "global": Object {
-                                    "from": 0,
-                                    "fromStr": "now-24h",
-                                    "kind": "relative",
                                     "linkTo": Array [
                                       "timeline",
                                     ],
-                                    "to": 1,
-                                    "toStr": "now",
+                                    "timerange": Object {
+                                      "from": 0,
+                                      "fromStr": "now-24h",
+                                      "kind": "relative",
+                                      "to": 1,
+                                      "toStr": "now",
+                                    },
                                   },
                                   "timeline": Object {
-                                    "from": 0,
-                                    "fromStr": "now-24h",
-                                    "kind": "relative",
-                                    "linkTo": Array [
+                                    "linkTo": Object {
+                                      "from": 0,
+                                      "fromStr": "now-24h",
+                                      "kind": "relative",
+                                      "to": 1,
+                                      "toStr": "now",
+                                    },
+                                    "timerange": Array [
                                       "global",
                                     ],
-                                    "to": 1,
-                                    "toStr": "now",
                                   },
                                 },
                               }
@@ -415,7 +440,24 @@ exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
                                       "state": "",
                                     },
                                     "push": [MockFunction],
-                                    "replace": [MockFunction],
+                                    "replace": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          Object {
+                                            "hash": "",
+                                            "pathname": "/network",
+                                            "search": "?kqlQuery=!((filterQuery:!n,model:hosts,type:details),(filterQuery:!n,model:hosts,type:page),(filterQuery:!n,model:network,type:details),(filterQuery:!n,model:network,type:page))",
+                                            "state": "",
+                                          },
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": undefined,
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 location={
@@ -435,46 +477,50 @@ exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
                                   Object {
                                     "kqlQuery": Array [
                                       Object {
-                                        "filterQuery": "",
+                                        "filterQuery": null,
                                         "model": "hosts",
                                         "type": "details",
                                       },
                                       Object {
-                                        "filterQuery": "",
+                                        "filterQuery": null,
                                         "model": "hosts",
                                         "type": "page",
                                       },
                                       Object {
-                                        "filterQuery": "",
+                                        "filterQuery": null,
                                         "model": "network",
                                         "type": "details",
                                       },
                                       Object {
-                                        "filterQuery": "",
+                                        "filterQuery": null,
                                         "model": "network",
                                         "type": "page",
                                       },
                                     ],
                                     "timerange": Object {
                                       "global": Object {
-                                        "from": 0,
-                                        "fromStr": "now-24h",
-                                        "kind": "relative",
                                         "linkTo": Array [
                                           "timeline",
                                         ],
-                                        "to": 1,
-                                        "toStr": "now",
+                                        "timerange": Object {
+                                          "from": 0,
+                                          "fromStr": "now-24h",
+                                          "kind": "relative",
+                                          "to": 1,
+                                          "toStr": "now",
+                                        },
                                       },
                                       "timeline": Object {
-                                        "from": 0,
-                                        "fromStr": "now-24h",
-                                        "kind": "relative",
-                                        "linkTo": Array [
+                                        "linkTo": Object {
+                                          "from": 0,
+                                          "fromStr": "now-24h",
+                                          "kind": "relative",
+                                          "to": 1,
+                                          "toStr": "now",
+                                        },
+                                        "timerange": Array [
                                           "global",
                                         ],
-                                        "to": 1,
-                                        "toStr": "now",
                                       },
                                     },
                                   }
