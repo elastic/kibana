@@ -94,17 +94,13 @@ export class LspIndexer extends AbstractIndexer {
       const fileIterator = await gitOperator.iterateRepo(this.repoUri, 'head');
       for await (const file of fileIterator) {
         const filePath = file.path!;
-        const lang = detectLanguageByFilename(filePath);
-        // filter file by language
-        if (lang && this.lspService.supportLanguage(lang)) {
-          const req: LspIndexRequest = {
-            repoUri: this.repoUri,
-            localRepoPath: workspaceDir,
-            filePath,
-            revision: workspaceRevision,
-          };
-          yield req;
-        }
+        const req: LspIndexRequest = {
+          repoUri: this.repoUri,
+          localRepoPath: workspaceDir,
+          filePath,
+          revision: workspaceRevision,
+        };
+        yield req;
       }
     } catch (error) {
       this.log.error(`Prepare lsp indexing requests error.`);
@@ -190,27 +186,33 @@ export class LspIndexer extends AbstractIndexer {
     const symbolNames = new Set<string>();
 
     try {
-      const response = await this.lspService.sendRequest('textDocument/full', {
-        textDocument: {
-          uri: lspDocUri,
-        },
-        reference: this.options.enableGlobalReference,
-      });
+      const lang = detectLanguageByFilename(filePath);
+      // filter file by language
+      if (lang && this.lspService.supportLanguage(lang)) {
+        const response = await this.lspService.sendRequest('textDocument/full', {
+          textDocument: {
+            uri: lspDocUri,
+          },
+          reference: this.options.enableGlobalReference,
+        });
 
-      if (response && response.result && response.result.length > 0 && response.result[0]) {
-        const { symbols, references } = response.result[0];
-        for (const symbol of symbols) {
-          await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);
-          symbolNames.add(symbol.symbolInformation.name);
-        }
-        stats.set(IndexStatsKey.Symbol, symbols.length);
+        if (response && response.result && response.result.length > 0 && response.result[0]) {
+          const { symbols, references } = response.result[0];
+          for (const symbol of symbols) {
+            await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);
+            symbolNames.add(symbol.symbolInformation.name);
+          }
+          stats.set(IndexStatsKey.Symbol, symbols.length);
 
-        for (const ref of references) {
-          await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ref);
+          for (const ref of references) {
+            await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ref);
+          }
+          stats.set(IndexStatsKey.Reference, references.length);
+        } else {
+          this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
         }
-        stats.set(IndexStatsKey.Reference, references.length);
       } else {
-        this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
+        this.log.debug(`Unsupported language. Skip symbols and references indexing.`);
       }
     } catch (error) {
       this.log.error(`Index symbols or references error. Skip to file indexing.`);
