@@ -65,6 +65,15 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
+      authc: Joi.object({})
+        .when('authProviders', {
+          is: Joi.array().items(Joi.string().valid('oidc').required(), Joi.string()),
+          then: Joi.object({
+            oidc: Joi.object({
+              realm: Joi.string().required(),
+            }).default()
+          }).default()
+        })
     }).default();
   },
 
