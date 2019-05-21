@@ -27,6 +27,9 @@ export function updateRoute(server: Hapi.Server) {
     path: `/api/action/{id}`,
     options: {
       validate: {
+        options: {
+          abortEarly: false,
+        },
         params: Joi.object()
           .keys({
             id: Joi.string().required(),

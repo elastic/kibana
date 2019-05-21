@@ -95,5 +95,46 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           });
         });
     });
+
+    it('should return 400 when payload is empty and invalid', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({})
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'child "attributes" fails because ["attributes" is required]',
+            validation: {
+              source: 'payload',
+              keys: ['attributes'],
+            },
+          });
+        });
+    });
+
+    it('should return 400 when payload attributes are empty and invalid', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {},
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required]]',
+            validation: {
+              source: 'payload',
+              keys: ['attributes.description', 'attributes.actionTypeId'],
+            },
+          });
+        });
+    });
   });
 }
