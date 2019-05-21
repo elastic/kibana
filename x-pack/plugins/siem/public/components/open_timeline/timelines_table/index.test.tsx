@@ -400,14 +400,14 @@ describe('TimelinesTable', () => {
 
     wrapper
       .find('thead tr th button')
-      .at(1)
+      .at(0)
       .simulate('click');
 
     wrapper.update();
 
     expect(onTableChange).toHaveBeenCalledWith({
       page: { index: 0, size: 10 },
-      sort: { direction: 'asc', field: 'description' },
+      sort: { direction: 'asc', field: 'updated' },
     });
   });
 
