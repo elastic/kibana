@@ -234,7 +234,7 @@ export class ESSearchSource extends AbstractESSource {
   async getSupportedShapeTypes() {
     let geoFieldType;
     try {
-      const geoField = this._getGeoField();
+      const geoField = await this._getGeoField();
       geoFieldType = geoField.type;
     } catch(error) {
       // ignore exeception
