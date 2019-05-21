@@ -5746,8 +5746,6 @@
     "xpack.ml.dataframe.agg.popoverForm.submitButtonLabel": "应用",
     "xpack.ml.dataframe.aggLabelForm.deleteItemAriaLabel": "删除项",
     "xpack.ml.dataframe.aggLabelForm.editAggAriaLabel": "编辑聚合",
-    "xpack.ml.dataframe.definePivot.aggExistsErrorMessage": "名称为“{label}”的聚合配置已存在。",
-    "xpack.ml.dataframe.definePivot.groupByExistsErrorMessage": "名称为“{label}”的分组依据配置已存在。",
     "xpack.ml.dataframe.definePivotForm.aggregationsLabel": "数据聚合",
     "xpack.ml.dataframe.definePivotForm.aggregationsPlaceholder": "添加聚合……",
     "xpack.ml.dataframe.definePivotForm.formHelp": "数据帧转换是用于数据透视的可伸缩和自动化流程。至少选择一个分组依据和聚合，才能开始。",
