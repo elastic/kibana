@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import './job_select_list_directive';
-import './job_select_button_directive.js';
-import './job_select_service.js';
+export default function ({ loadTestFile }) {
+  describe('security', () => {
+    loadTestFile(require.resolve('./oidc_initiate_auth'));
+  });
+}

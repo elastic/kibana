@@ -1317,17 +1317,17 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^3.11.2":
-  version "3.11.4"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.11.4.tgz#174004301cf30cff495f9f10aea5dca9441d677b"
-  integrity sha512-9wwMO31M/oD50xDs+m7KIW773h0+Ydq2figtnJ9YRQ1V3S/Yr7OVwUWXYIEGKa3ZbaxEMMc8n8uMvPvPwtjOFg==
+"@elastic/charts@^4.2.6":
+  version "4.2.6"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.6.tgz#19b8fa79758f58ebae6eeba750bea6a418b15659"
+  integrity sha512-ROsv3YwSCDsp09ObeVkAL9YsiNJsAY2kAtBwovRaNCcotI9ybNSQcqbTLlC9vZkduyQSsHBvRL/RAwY8btXE8g==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
     classnames "^2.2.6"
-    d3-array "^2.0.3"
+    d3-array "^1.2.4"
     d3-collection "^1.0.7"
-    d3-scale "^2.2.2"
+    d3-scale "^1.0.7"
     d3-shape "^1.3.4"
     fp-ts "^1.14.2"
     konva "^2.6.0"
@@ -1431,10 +1431,10 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.1.23":
-  version "0.1.23"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.23.tgz#84401643e33d54570fd44a0541d6c176805fb722"
-  integrity sha512-L9P9LsKWt67hdgHJh+oTxQn6/F4fn7hpHu+jXuRaaysmddZ9IrSeg3y/1q1TPIsftgWgjQL31agD0Sm6/F/kOg==
+"@elastic/javascript-typescript-langserver@^0.1.24":
+  version "0.1.24"
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.24.tgz#afd9ed9817e42743b574579063a9ee59cb3eea34"
+  integrity sha512-WTdJnDBIEeFYHNZeEOAzbsAwwYKPYP2Gl5t2YEhClGRNcMPVNS4+WUWc0iQ0wTW4o0+9SnRNvMpCVAF7NpRWvw==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     javascript-typescript-langserver "^2.11.3"
@@ -9003,12 +9003,12 @@ cyclist@~0.2.2:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-0.2.2.tgz#1b33792e11e914a2fd6d6ed6447464444e5fa640"
   integrity sha1-GzN5LhHpFKL9bW7WRHRkRE5fpkA=
 
-d3-array@1, d3-array@^1.1.1, d3-array@^1.2.0:
+d3-array@1, d3-array@^1.1.1, d3-array@^1.2.0, d3-array@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-1.2.4.tgz#635ce4d5eea759f6f605863dbcfc30edc737f71f"
   integrity sha512-KHW6M86R+FUPYGb3R5XiYjXPq7VzwxZ22buHhAEVG5ztoEcZZMLov530mmccaqA1GghZArjQV46fuc8kUqhhHw==
 
-d3-array@^2.0.2, d3-array@^2.0.3:
+d3-array@^2.0.2:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-2.0.3.tgz#9c0531eda701e416f28a030e3d4e6179ba74f19f"
   integrity sha512-C7g4aCOoJa+/K5hPVqZLG8wjYHsTUROTk7Z1Ep9F4P5l+WVrvV0+6nAZ1wKTRLMhFWpGbozxUpyjIPZYAaLi+g==
@@ -9171,7 +9171,7 @@ d3-scale@1.0.6:
     d3-time "1"
     d3-time-format "2"
 
-d3-scale@^1.0.5:
+d3-scale@^1.0.5, d3-scale@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-1.0.7.tgz#fa90324b3ea8a776422bd0472afab0b252a0945d"
   integrity sha512-KvU92czp2/qse5tUfGms6Kjig0AhHOwkzXG0+PqIJB3ke0WUv088AHMZI0OssO9NCkXt4RP8yju9rpH8aGB7Lw==
@@ -9184,7 +9184,7 @@ d3-scale@^1.0.5:
     d3-time "1"
     d3-time-format "2"
 
-d3-scale@^2.1.2, d3-scale@^2.2.2:
+d3-scale@^2.1.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-2.2.2.tgz#4e880e0b2745acaaddd3ede26a9e908a9e17b81f"
   integrity sha512-LbeEvGgIb8UMcAa0EATLNX0lelKWGYDQiPdHj+gLblGVhGLyNbaCn3EvrJf0A3Y/uOOU5aD6MTh5ZFCdEwGiCw==
