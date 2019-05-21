@@ -52,15 +52,6 @@ function TopAggregateParamEditor({
     .sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
   const options = [emptyValue, ...filteredOptions];
 
-  const iconTipContent = filteredOptions.length
-    ? i18n.translate('common.ui.aggTypes.aggregateWithTooltip', {
-        defaultMessage:
-          'Choose a strategy for combining multiple hits or a multi-valued field into a single metric',
-      })
-    : i18n.translate('common.ui.aggTypes.aggregateWith.noAggsErrorTooltip', {
-        defaultMessage: 'Chosen field has no compatible aggregations',
-      });
-
   const label = (
     <>
       <FormattedMessage
@@ -69,11 +60,20 @@ function TopAggregateParamEditor({
       />{' '}
       <EuiIconTip
         position="right"
-        content={iconTipContent}
-        type={filteredOptions.length ? 'questionInCircle' : 'alert'}
+        type="questionInCircle"
+        content={i18n.translate('common.ui.aggTypes.aggregateWithTooltip', {
+          defaultMessage:
+            'Choose a strategy for combining multiple hits or a multi-valued field into a single metric.',
+        })}
       />
     </>
   );
+
+  const helpText = !filteredOptions.length
+    ? i18n.translate('common.ui.aggTypes.aggregateWith.noAggsErrorTooltip', {
+        defaultMessage: 'The chosen field has no compatible aggregations.',
+      })
+    : null;
 
   useEffect(
     () => {
@@ -112,6 +112,7 @@ function TopAggregateParamEditor({
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
       className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      helpText={helpText}
     >
       <EuiSelect
         options={options}
