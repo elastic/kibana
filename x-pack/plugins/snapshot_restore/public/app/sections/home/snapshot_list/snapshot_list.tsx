@@ -46,12 +46,15 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     request: reload,
   } = loadSnapshots();
 
-  const openSnapshotDetails = (repositoryNameToOpen: string, snapshotIdToOpen: string) => {
-    history.push(
-      `${BASE_PATH}/snapshots/${encodeURIComponent(repositoryNameToOpen)}/${encodeURIComponent(
-        snapshotIdToOpen
-      )}`
-    );
+  const openSnapshotDetailsUrl = (
+    repositoryNameToOpen: string,
+    snapshotIdToOpen: string
+  ): string => {
+    return history.createHref({
+      pathname: `${BASE_PATH}/snapshots/${encodeURIComponent(
+        repositoryNameToOpen
+      )}/${encodeURIComponent(snapshotIdToOpen)}`,
+    });
   };
 
   const closeSnapshotDetails = () => {
@@ -261,7 +264,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           snapshots={snapshots}
           repositories={repositories}
           reload={reload}
-          openSnapshotDetails={openSnapshotDetails}
+          openSnapshotDetailsUrl={openSnapshotDetailsUrl}
           repositoryFilter={filteredRepository}
         />
       </Fragment>

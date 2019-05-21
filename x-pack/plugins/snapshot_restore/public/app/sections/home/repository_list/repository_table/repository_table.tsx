@@ -28,14 +28,14 @@ import { uiMetricService } from '../../../../services/ui_metric';
 interface Props extends RouteComponentProps {
   repositories: Repository[];
   reload: () => Promise<void>;
-  openRepositoryDetails: (name: Repository['name']) => void;
+  openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
   reload,
-  openRepositoryDetails,
+  openRepositoryDetailsUrl,
   onRepositoryDeleted,
   history,
 }) => {
@@ -57,10 +57,8 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       render: (name: Repository['name'], repository: Repository) => {
         return (
           <EuiLink
-            onClick={() => {
-              trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK);
-              openRepositoryDetails(name);
-            }}
+            onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
+            href={openRepositoryDetailsUrl(name)}
           >
             {name}
           </EuiLink>

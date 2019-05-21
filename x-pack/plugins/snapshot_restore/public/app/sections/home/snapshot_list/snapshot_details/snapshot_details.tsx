@@ -5,10 +5,12 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLink,
   EuiSpacer,
@@ -163,6 +165,26 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     );
   }
 
+  const renderFooter = () => {
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="cross"
+            flush="left"
+            onClick={onClose}
+            data-test-subj="srSnapshotDetailsFlyoutCloseButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.closeButtonLabel"
+              defaultMessage="Close"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -200,6 +222,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">{content}</EuiFlyoutBody>
+      <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

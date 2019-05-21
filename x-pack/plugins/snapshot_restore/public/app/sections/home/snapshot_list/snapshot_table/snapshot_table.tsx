@@ -19,7 +19,7 @@ interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
   reload: () => Promise<void>;
-  openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
+  openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
 }
 
@@ -27,7 +27,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
   repositories,
   reload,
-  openSnapshotDetails,
+  openSnapshotDetailsUrl,
   repositoryFilter,
 }) => {
   const {
@@ -47,10 +47,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         <EuiLink
-          onClick={() => {
-            trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK);
-            openSnapshotDetails(snapshot.repository, snapshotId);
-          }}
+          onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
+          href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
         >
           {snapshotId}
         </EuiLink>
