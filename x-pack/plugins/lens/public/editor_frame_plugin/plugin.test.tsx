@@ -7,6 +7,8 @@
 import { EditorFramePlugin } from './plugin';
 import { createMockDatasource, createMockVisualization } from './mock_extensions';
 
+// calling this function will wait for all pending Promises from mock
+// datasources to be processed by its callers.
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 describe('editor_frame plugin', () => {
