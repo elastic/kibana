@@ -8,7 +8,12 @@ import { getOr } from 'lodash/fp';
 
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { Hosts } from '../../lib/hosts';
+import {
+  Hosts,
+  HostOverviewRequestOptions,
+  HostsRequestOptions,
+  HostLastFirstSeenRequestOptions,
+} from '../../lib/hosts';
 import { getFields } from '../../utils/build_query';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
@@ -43,15 +48,17 @@ export const createHostsResolvers = (
 } => ({
   Source: {
     async Hosts(source, args, { req }, info) {
-      const options = {
+      const options: HostsRequestOptions = {
         ...createOptions(source, args, info),
         sort: args.sort,
+        defaultIndex: args.defaultIndex,
       };
       return libs.hosts.getHosts(req, options);
     },
     async HostOverview(source, args, { req }, info) {
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
-      const options = {
+      const options: HostOverviewRequestOptions = {
+        defaultIndex: args.defaultIndex,
         sourceConfiguration: source.configuration,
         fields: fields.map(field => field.replace('edges.node.', '')),
         hostName: args.hostName,
@@ -60,7 +67,11 @@ export const createHostsResolvers = (
       return libs.hosts.getHostOverview(req, options);
     },
     async HostFirstLastSeen(source, args, { req }) {
-      const options = { sourceConfiguration: source.configuration, hostName: args.hostName };
+      const options: HostLastFirstSeenRequestOptions = {
+        sourceConfiguration: source.configuration,
+        hostName: args.hostName,
+        defaultIndex: args.defaultIndex,
+      };
       return libs.hosts.getHostFirstLastSeen(req, options);
     },
   },

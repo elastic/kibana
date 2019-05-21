@@ -31,7 +31,7 @@ import { HostsQuery } from '../../containers/hosts';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType, LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsKql } from './kql';
@@ -50,12 +50,10 @@ interface HostsComponentReduxProps {
 
 type HostsComponentProps = HostsComponentReduxProps;
 
-const indexTypes = [IndexType.AUDITBEAT];
-
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={indexTypes}>
-    {({ auditbeatIndicesExist, indexPattern }) =>
-      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+  <WithSource sourceId="default">
+    {({ indicesExist, indexPattern }) =>
+      indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
         <StickyContainer>
           <FiltersGlobal>
             <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />

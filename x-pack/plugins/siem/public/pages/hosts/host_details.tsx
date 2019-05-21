@@ -29,7 +29,7 @@ import { GlobalTime } from '../../containers/global_time';
 import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType, LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
@@ -50,8 +50,6 @@ interface HostDetailsComponentReduxProps {
 
 type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
 
-const indexTypes = [IndexType.AUDITBEAT];
-
 const HostDetailsComponent = pure<HostDetailsComponentProps>(
   ({
     match: {
@@ -59,9 +57,9 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
     },
     filterQueryExpression,
   }) => (
-    <WithSource sourceId="default" indexTypes={indexTypes}>
-      {({ auditbeatIndicesExist, indexPattern }) =>
-        indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+    <WithSource sourceId="default">
+      {({ indicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
           <StickyContainer>
             <FiltersGlobal>
               <HostsKql indexPattern={indexPattern} type={type} />

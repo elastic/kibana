@@ -8,6 +8,8 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../..';
 import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
 
 import { timelineDetailsQuery } from './index.gql_query';
@@ -33,7 +35,12 @@ export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineD
         query={timelineDetailsQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
-        variables={{ sourceId, indexName, eventId }}
+        variables={{
+          sourceId,
+          indexName,
+          eventId,
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        }}
       >
         {({ data, loading, refetch }) => {
           return children!({
