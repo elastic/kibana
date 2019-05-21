@@ -92,7 +92,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiPanel>
         <EuiTitle size="xs">

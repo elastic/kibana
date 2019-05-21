@@ -25,7 +25,6 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import 'ui/listen';
 import 'ui/apply_filters';
 
 import { panelActionsStore } from './store/panel_actions_store';
@@ -519,15 +518,20 @@ app.directive('dashboardApp', function ($injector) {
       updateViewMode(dashboardStateManager.getViewMode());
 
       // update root source when filters update
-      $scope.$listen(queryFilter, 'update', function () {
-        $scope.model.filters = queryFilter.getFilters();
-        dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
+      this.updateSubscription = queryFilter.getUpdates$().subscribe({
+        next: () => {
+          $scope.model.filters = queryFilter.getFilters();
+          dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
+        }
       });
 
       // update data when filters fire fetch event
-      $scope.$listen(queryFilter, 'fetch', $scope.refresh);
+
+      this.fetchSubscription = queryFilter.getFetches$().subscribe($scope.refresh);
 
       $scope.$on('$destroy', () => {
+        this.updateSubscription.unsubscribe();
+        this.fetchSubscription.unsubscribe();
         dashboardStateManager.destroy();
       });
 

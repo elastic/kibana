@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Tag as badge 1`] = `
+<span
+  className="euiBadge"
+  style={
+    Object {
+      "backgroundColor": "#666666",
+      "color": "#FFFFFF",
+    }
+  }
+>
+  <span
+    className="euiBadge__content"
+  >
+    <span
+      className="euiBadge__text"
+    >
+      tag
+    </span>
+  </span>
+</span>
+`;
+
+exports[`Storyshots components/Tag as badge with color 1`] = `
+<span
+  className="euiBadge"
+  style={
+    Object {
+      "backgroundColor": "#327b53",
+      "color": "#FFFFFF",
+    }
+  }
+>
+  <span
+    className="euiBadge__content"
+  >
+    <span
+      className="euiBadge__text"
+    >
+      tag
+    </span>
+  </span>
+</span>
+`;
+
+exports[`Storyshots components/Tag as health 1`] = `
+<div
+  className="euiHealth"
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <svg
+        className="euiIcon euiIcon--medium"
+        focusable="false"
+        height="16"
+        style={
+          Object {
+            "fill": "#666666",
+          }
+        }
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+      >
+        <defs>
+          <circle
+            cx="8"
+            cy="8"
+            id="dot-a"
+            r="4"
+          />
+        </defs>
+        <use
+          xlinkHref="#dot-a"
+        />
+      </svg>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      tag
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Tag as health with color 1`] = `
+<div
+  className="euiHealth"
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <svg
+        className="euiIcon euiIcon--medium"
+        focusable="false"
+        height="16"
+        style={
+          Object {
+            "fill": "#9b3067",
+          }
+        }
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+      >
+        <defs>
+          <circle
+            cx="8"
+            cy="8"
+            id="dot-a"
+            r="4"
+          />
+        </defs>
+        <use
+          xlinkHref="#dot-a"
+        />
+      </svg>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      tag
+    </div>
+  </div>
+</div>
+`;

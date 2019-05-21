@@ -57,7 +57,7 @@ export class WorkpadHeader extends React.PureComponent {
         onClose={this._hideElementModal}
         className="canvasModal--fixedSize"
         maxWidth="1000px"
-        initialFocus=".canvasElements__filter"
+        initialFocus=".canvasElements__filter input"
       >
         <ElementTypes onClose={this._hideElementModal} />
         <EuiModalFooter>

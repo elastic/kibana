@@ -6,7 +6,11 @@
 
 import { Direction, HostsFields } from '../../graphql/types';
 
-import { HostDetailsRequestOptions, HostLastFirstSeenRequestOptions, HostsRequestOptions } from '.';
+import {
+  HostOverviewRequestOptions,
+  HostLastFirstSeenRequestOptions,
+  HostsRequestOptions,
+} from '.';
 
 export const mockGetHostsOptions: HostsRequestOptions = {
   sourceConfiguration: {
@@ -269,7 +273,7 @@ export const mockGetHostsResult = {
   },
 };
 
-export const mockGetHostDetailsOptions: HostDetailsRequestOptions = {
+export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
   sourceConfiguration: {
     logAlias: 'filebeat-*',
     auditbeatAlias: 'auditbeat-*',
@@ -299,23 +303,30 @@ export const mockGetHostDetailsOptions: HostDetailsRequestOptions = {
     'host.os.__typename',
     'host.type',
     'host.__typename',
+    'cloud.instance.id',
+    'cloud.instance.__typename',
+    'cloud.machine.type',
+    'cloud.machine.__typename',
+    'cloud.provider',
+    'cloud.region',
+    'cloud.__typename',
     '__typename',
   ],
   hostName: 'siem-es',
 };
 
-export const mockGetHostDetailsRequest = {
+export const mockGetHostOverviewRequest = {
   params: {},
   payload: {
-    operationName: 'GetHostDetailsQuery',
+    operationName: 'GetHostOverviewQuery',
     variables: { sourceId: 'default', hostName: 'siem-es' },
     query:
-      'query GetHostDetailsQuery($sourceId: ID!, $hostName: String!) {\n  source(id: $sourceId) {\n    id\n    HostDetails(hostName: $hostName) {\n      _id\n      host {\n        architecture\n        id\n        ip\n        mac\n        name\n        os {\n          family\n          name\n          platform\n          version\n          __typename\n        }\n        type\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetHostOverviewQuery($sourceId: ID!, $hostName: String!, $timerange: TimerangeInput!) {\n  source(id: $sourceId) {\n    id\n    HostOverview(hostName: $hostName, timerange: $timerange) {\n      _id\n      host {\n        architecture\n        id\n        ip\n        mac\n        name\n        os {\n          family\n          name\n          platform\n          version\n          __typename\n        }\n        type\n        __typename\n      }\n      cloud {\n        instance {\n          id\n          __typename\n        }\n        machine {\n          type\n          __typename\n        }\n        provider\n        region\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
 
-export const mockGetHostDetailsResponse = {
+export const mockGetHostOverviewResponse = {
   took: 2205,
   timed_out: false,
   _shards: { total: 59, successful: 59, skipped: 0, failed: 0 },
@@ -323,19 +334,47 @@ export const mockGetHostDetailsResponse = {
   aggregations: {
     host_mac: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
     host_ip: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+    cloud_region: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'us-east-1',
+          doc_count: 4308,
+          timestamp: { value: 1556903543093, value_as_string: '2019-05-03T17:12:23.093Z' },
+        },
+      ],
+    },
+    cloud_provider: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'gce',
+          doc_count: 432808,
+          timestamp: { value: 1556903543093, value_as_string: '2019-05-03T17:12:23.093Z' },
+        },
+      ],
+    },
+    cloud_instance_id: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '5412578377715150143',
+          doc_count: 432808,
+          timestamp: { value: 1556903543093, value_as_string: '2019-05-03T17:12:23.093Z' },
+        },
+      ],
+    },
     cloud_machine_type: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [
         {
-          key: 'projects/189716325846/machineTypes/custom-4-16384',
-          doc_count: 611816,
-          timestamp: { value: 1554826117972, value_as_string: '2019-04-09T16:08:37.972Z' },
-        },
-        {
-          key: 'projects/189716325846/machineTypes/custom-4-8192',
-          doc_count: 78,
-          timestamp: { value: 1550807734650, value_as_string: '2019-02-22T03:55:34.650Z' },
+          key: 'n1-standard-1',
+          doc_count: 432808,
+          timestamp: { value: 1556903543093, value_as_string: '2019-05-03T17:12:23.093Z' },
         },
       ],
     },
@@ -419,7 +458,7 @@ export const mockGetHostDetailsResponse = {
   },
 };
 
-export const mockGetHostDetailsResult = {
+export const mockGetHostOverviewResult = {
   _id: 'siem-es',
   host: {
     architecture: 'x86_64',
@@ -433,7 +472,16 @@ export const mockGetHostDetailsResult = {
       platform: 'debian',
       version: '9 (stretch)',
     },
-    type: 'projects/189716325846/machineTypes/custom-4-16384',
+  },
+  cloud: {
+    instance: {
+      id: ['5412578377715150143'],
+    },
+    machine: {
+      type: ['n1-standard-1'],
+    },
+    provider: ['gce'],
+    region: ['us-east-1'],
   },
 };
 

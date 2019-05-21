@@ -17,21 +17,11 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { FilterBarLibMapMissingProvider } from '../map_missing';
+import { mapMissing } from '../map_missing';
 
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {
-
-    let mapMissing;
-
-    let $rootScope;
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
-      mapMissing = Private(FilterBarLibMapMissingProvider);
-    }));
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { missing: { field: '_type' } };
@@ -40,7 +30,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.have.property('value', 'missing');
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should return undefined for none matching', function (done) {
@@ -49,7 +38,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.be(filter);
         done();
       });
-      $rootScope.$apply();
     });
 
   });

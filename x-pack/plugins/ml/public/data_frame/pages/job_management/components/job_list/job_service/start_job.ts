@@ -10,7 +10,9 @@ import { ml } from '../../../../../../services/ml_api_service';
 
 import { DataFrameJobListRow } from '../common';
 
-export const startJobFactory = (getJobs: () => void) => async (d: DataFrameJobListRow) => {
+import { GetJobs } from './get_jobs';
+
+export const startJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListRow) => {
   try {
     await ml.dataFrame.startDataFrameTransformsJob(d.config.id);
     toastNotifications.addSuccess(
@@ -19,7 +21,7 @@ export const startJobFactory = (getJobs: () => void) => async (d: DataFrameJobLi
         values: { jobId: d.config.id },
       })
     );
-    getJobs();
+    getJobs(true);
   } catch (e) {
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.jobsList.startJobErrorMessage', {

@@ -37,19 +37,19 @@ import {
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from '../../../source_destination/geo_fields';
 import {
+  DESTINATION_BYTES_FIELD_NAME,
+  DESTINATION_PACKETS_FIELD_NAME,
+  SOURCE_BYTES_FIELD_NAME,
+  SOURCE_PACKETS_FIELD_NAME,
+} from '../../../source_destination/source_destination_arrows';
+import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
   NETWORK_DIRECTION_FIELD_NAME,
   NETWORK_PACKETS_FIELD_NAME,
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
-} from '../../../source_destination/network';
-import {
-  DESTINATION_BYTES_FIELD_NAME,
-  DESTINATION_PACKETS_FIELD_NAME,
-  SOURCE_BYTES_FIELD_NAME,
-  SOURCE_PACKETS_FIELD_NAME,
-} from '../../../source_destination/source_destination_arrows';
+} from '../../../source_destination/field_names';
 
 export const NetflowRenderer = pure<{ data: Ecs }>(({ data }) => (
   <Netflow

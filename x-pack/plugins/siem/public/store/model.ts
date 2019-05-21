@@ -9,7 +9,6 @@ export { inputsModel } from './inputs';
 export { hostsModel } from './hosts';
 export { dragAndDropModel } from './drag_and_drop';
 export { networkModel } from './network';
-export { timelineModel } from './timeline';
 
 export interface KueryFilterQuery {
   kind: 'kuery';

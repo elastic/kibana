@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { ConfigWithSchema, EnvironmentMode } from '../config';
+import { EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
 import { ClusterClient } from '../elasticsearch';
 import { HttpServiceSetup } from '../http';
@@ -36,12 +35,8 @@ export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
-    create: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config>;
-    createIfExists: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config | undefined>;
+    create: <Schema>() => Observable<Schema>;
+    createIfExists: <Schema>() => Observable<Schema | undefined>;
   };
 }
 
@@ -58,6 +53,8 @@ export interface PluginSetupContext {
   http: {
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnRequest: HttpServiceSetup['registerOnRequest'];
+    getBasePathFor: HttpServiceSetup['getBasePathFor'];
+    setBasePathFor: HttpServiceSetup['setBasePathFor'];
   };
 }
 
@@ -111,11 +108,11 @@ export function createPluginInitializerContext(
        * @param ConfigClass A class (not an instance of a class) that contains a
        * static `schema` that we validate the config at the given `path` against.
        */
-      create(ConfigClass) {
-        return coreContext.configService.atPath(pluginManifest.configPath, ConfigClass);
+      create() {
+        return coreContext.configService.atPath(pluginManifest.configPath);
       },
-      createIfExists(ConfigClass) {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath, ConfigClass);
+      createIfExists() {
+        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
       },
     },
   };
@@ -148,6 +145,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     http: {
       registerAuth: deps.http.registerAuth,
       registerOnRequest: deps.http.registerOnRequest,
+      getBasePathFor: deps.http.getBasePathFor,
+      setBasePathFor: deps.http.setBasePathFor,
     },
   };
 }

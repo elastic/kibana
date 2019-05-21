@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { ClusterStatus } from 'plugins/monitoring/components/elasticsearch/cluster_status';
 import { I18nContext } from 'ui/i18n';
@@ -18,6 +18,7 @@ uiModule.directive('monitoringClusterStatusElasticsearch', () => {
       status: '='
     },
     link(scope, $el) {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
       scope.$watch('status', status => {
         render(<I18nContext><ClusterStatus stats={status} /></I18nContext>, $el[0]);
       });

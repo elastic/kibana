@@ -6,17 +6,16 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   getColumnWidthFromType,
+  DEFAULT_TIMELINE_WIDTH,
 } from '../../components/timeline/body/helpers';
 import { Direction } from '../../graphql/types';
 import { defaultHeaders } from '../../mock';
 
-import { TimelineById } from '.';
 import {
   addNewTimeline,
   addTimelineColumn,
@@ -37,6 +36,7 @@ import {
   updateTimelineTitle,
 } from './helpers';
 import { timelineDefaults } from './model';
+import { TimelineById } from './reducer';
 
 const timelineByIdMock: TimelineById = {
   foo: {
@@ -96,7 +96,7 @@ describe('Timeline', () => {
     test('should add a new timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
-        columns: [],
+        columns: timelineDefaults.columns,
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual({

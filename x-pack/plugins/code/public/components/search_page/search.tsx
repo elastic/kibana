@@ -11,16 +11,15 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import url from 'url';
 
-import { DocumentSearchResult, SearchScope } from '../../../model';
-import { changeSearchScope, SearchOptions } from '../../actions';
+import { DocumentSearchResult, SearchOptions, SearchScope } from '../../../model';
+import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { ProjectItem } from '../admin_page/project_item';
-import { ShortcutsProvider } from '../shortcuts';
+import { SearchBar } from '../search_bar';
 import { CodeResult } from './code_result';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { Pagination } from './pagination';
-import { SearchBar } from './search_bar';
 import { SideBar } from './side_bar';
 
 interface Props {
@@ -198,7 +197,6 @@ class SearchPage extends React.PureComponent<Props, State> {
     return (
       <div className="codeContainer__root">
         <div className="codeContainer__rootInner">
-          <ShortcutsProvider />
           <SideBar
             query={this.props.query}
             scope={scope}
@@ -211,10 +209,11 @@ class SearchPage extends React.PureComponent<Props, State> {
           />
           <div className="codeContainer__search--main">
             <SearchBar
-              repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
+              searchOptions={this.props.searchOptions}
               query={this.props.query}
               onSearchScopeChanged={this.props.onSearchScopeChanged}
-              ref={element => (this.searchBar = element)}
+              enableSubmitWhenOptionsChanged={true}
+              ref={(element: any) => (this.searchBar = element)}
             />
             {mainComp}
           </div>

@@ -28,6 +28,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
 import { I18nContext } from 'ui/i18n';
 import { get } from 'lodash';
+import { getNewPlatform } from 'ui/new_platform';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
@@ -39,10 +40,10 @@ function updateObjectsTable($scope, $injector) {
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
-  const uiCapabilites = chrome.getInjected('uiCapabilities');
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
+  const uiCapabilites = getNewPlatform().start.core.application.capabilities;
 
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_OBJECTS_TABLE_DOM_ELEMENT_ID);
@@ -86,7 +87,8 @@ function destroyObjectsTable() {
 uiRoutes
   .when('/management/kibana/objects', {
     template: objectIndexHTML,
-    k7Breadcrumbs: getIndexBreadcrumbs
+    k7Breadcrumbs: getIndexBreadcrumbs,
+    requireUICapability: 'management.kibana.objects',
   })
   .when('/management/kibana/objects/:service', {
     redirectTo: '/management/kibana/objects'

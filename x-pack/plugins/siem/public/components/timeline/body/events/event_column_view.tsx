@@ -16,7 +16,7 @@ import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, eventIsPinned, getPinOnClick } from '../helpers';
-import { ColumnRenderer } from '../renderers';
+import { ColumnRenderer } from '../renderers/column_renderer';
 
 interface Props {
   _id: string;

@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
+import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
@@ -26,10 +26,10 @@ import { HttpServiceSetup } from '../http/http_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
-import { PluginsConfig } from './plugins_config';
+import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
-/** @internal */
+/** @public */
 export interface PluginsServiceSetup {
   contracts: Map<PluginName, unknown>;
   uiPlugins: {
@@ -38,7 +38,7 @@ export interface PluginsServiceSetup {
   };
 }
 
-/** @internal */
+/** @public */
 export interface PluginsServiceStart {
   contracts: Map<PluginName, unknown>;
 }
@@ -56,19 +56,20 @@ export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-e
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
+  private readonly config$: Observable<PluginsConfig>;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
     this.pluginsSystem = new PluginsSystem(coreContext);
+    this.config$ = coreContext.configService
+      .atPath<PluginsConfigType>('plugins')
+      .pipe(map(rawConfig => new PluginsConfig(rawConfig, coreContext.env)));
   }
 
   public async setup(deps: PluginsServiceSetupDeps) {
     this.log.debug('Setting up plugins service');
 
-    const config = await this.coreContext.configService
-      .atPath('plugins', PluginsConfig)
-      .pipe(first())
-      .toPromise();
+    const config = await this.config$.pipe(first()).toPromise();
 
     const { error$, plugin$ } = discover(config, this.coreContext);
     await this.handleDiscoveryErrors(error$);
@@ -130,6 +131,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await plugin$
       .pipe(
         mergeMap(async plugin => {
+          const schema = plugin.getConfigSchema();
+          if (schema) {
+            await this.coreContext.configService.setSchema(plugin.configPath, schema);
+          }
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
           if (pluginEnableStatuses.has(plugin.name)) {

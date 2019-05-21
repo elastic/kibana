@@ -26,7 +26,6 @@ import 'ui/collapsible_sidebar';
 
 import { capabilities } from 'ui/capabilities';
 import 'ui/apply_filters';
-import 'ui/listen';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
@@ -53,6 +52,7 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+import { getNewPlatform } from 'ui/new_platform';
 
 import { data } from 'plugins/data';
 data.search.loadLegacyDirectives();
@@ -419,10 +419,12 @@ function VisEditor(
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
-    $scope.$listen(queryFilter, 'update', function () {
-      $scope.filters = queryFilter.getFilters();
-      $scope.fetch();
-    });
+    const filterUpdateSubscription = queryFilter.getUpdates$().subscribe(
+      () => {
+        $scope.filters = queryFilter.getFilters();
+        $scope.fetch();
+      },
+    );
 
     // update the searchSource when query updates
     $scope.fetch = function () {
@@ -439,6 +441,7 @@ function VisEditor(
       }
       savedVis.destroy();
       stateMonitor.destroy();
+      filterUpdateSubscription.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {
@@ -505,7 +508,7 @@ function VisEditor(
               // url, not the unsaved one.
               chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-              const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
+              const lastDashboardAbsoluteUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);
