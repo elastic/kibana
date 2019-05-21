@@ -82,7 +82,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
   };
 
   describe('feature controls', () => {
-    it(`APIs can't be accessed by user with logstash-* "read" privileges`, async () => {
+    it(`APIs can't be accessed by user with no privileges`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
       const password = `${username}-password`;
@@ -106,7 +106,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       }
     });
 
-    it('APIs can be accessed user with global "all" and logstash-* "read" privileges', async () => {
+    it('APIs can be accessed user with global "all" privileges', async () => {
       const username = 'global_all';
       const roleName = 'global_all';
       const password = `${username}-password`;
@@ -138,7 +138,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
     });
 
     // this could be any role which doesn't have access to the siem feature
-    it(`APIs can't be accessed by user with dashboard "all" and logstash-* "read" privileges`, async () => {
+    it(`APIs can't be accessed by user with dashboard "all" privileges`, async () => {
       const username = 'dashboard_all';
       const roleName = 'dashboard_all';
       const password = `${username}-password`;
@@ -172,7 +172,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
     });
 
     describe('spaces', () => {
-      // the following tests create a user_1 which has siem read access to space_1, logs read access to space_2 and dashboard all access to space_3
+      // the following tests create a user_1 which has siem read access to space_1 and dashboard all access to space_2
       const space1Id = 'space_1';
       const space2Id = 'space_2';
 
