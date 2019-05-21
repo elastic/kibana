@@ -660,11 +660,11 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                       value={watch.threshold
                         .slice(0, comparators[watch.thresholdComparator].requiredValues)
                         .join(` ${andThresholdText} `)}
-                      isActive={
+                      isActive={Boolean(
                         watchThresholdPopoverOpen ||
-                        !!errors.threshold0.length ||
-                        (errors.threshold1 && !!errors.threshold1.length)
-                      }
+                          errors.threshold0.length ||
+                          (errors.threshold1 && errors.threshold1.length)
+                      )}
                       onClick={() => {
                         setWatchThresholdPopoverOpen(true);
                       }}
@@ -717,7 +717,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                                   errors={errors}
                                 >
                                   <EuiFieldNumber
-                                    value={watch.threshold[i] || ''}
+                                    value={watch.threshold[i] == null ? '' : watch.threshold[i]}
                                     min={1}
                                     onChange={e => {
                                       const { value } = e.target;
