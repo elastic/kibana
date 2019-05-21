@@ -67,9 +67,13 @@ function validateOrder(list: NumberRowModel[]) {
   list.forEach((model, index, array) => {
     const previousModel = array[index - 1];
     if (previousModel && model.value !== EMPTY_STRING) {
-      model.isInvalid = model.value <= previousModel.value;
+      const isInvalidOrderOfItem = model.value <= previousModel.value;
 
-      if (model.isInvalid) {
+      if (!model.isInvalid && isInvalidOrderOfItem) {
+        model.isInvalid = true;
+      }
+
+      if (isInvalidOrderOfItem) {
         isInvalidOrder = true;
       }
     }
