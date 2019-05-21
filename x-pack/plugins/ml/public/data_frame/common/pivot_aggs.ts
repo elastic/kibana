@@ -70,6 +70,7 @@ export interface PivotAggsConfig {
   agg: PIVOT_SUPPORTED_AGGS;
   field: FieldName;
   aggName: AggName;
+  dropDownName: string;
 }
 
 export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;

@@ -12,7 +12,7 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
     <span
       className="mlGroupByLabel__text"
     >
-      the-group-by-label
+      the-group-by-agg-name
     </span>
   </EuiFlexItem>
   <EuiFlexItem
@@ -54,7 +54,8 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
         defaultData={
           Object {
             "agg": "date_histogram",
-            "aggName": "the-group-by-label",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
             "field": "the-group-by-field",
             "interval": "10m",
           }
@@ -94,7 +95,7 @@ exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
     <span
       className="mlGroupByLabel__text"
     >
-      the-group-by-label
+      the-group-by-agg-name
     </span>
   </EuiFlexItem>
   <EuiFlexItem
@@ -136,7 +137,8 @@ exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
         defaultData={
           Object {
             "agg": "histogram",
-            "aggName": "the-group-by-label",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
             "field": "the-group-by-field",
             "interval": "100",
           }
@@ -176,7 +178,7 @@ exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
     <span
       className="mlGroupByLabel__text"
     >
-      the-group-by-label
+      the-group-by-agg-name
     </span>
   </EuiFlexItem>
   <EuiFlexItem
@@ -207,7 +209,8 @@ exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
         defaultData={
           Object {
             "agg": "terms",
-            "aggName": "the-group-by-label",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
             "field": "the-group-by-field",
           }
         }
