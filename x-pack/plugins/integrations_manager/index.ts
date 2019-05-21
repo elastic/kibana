@@ -13,7 +13,9 @@ import { plugin } from './server';
 
 const ID = 'integrations_manager';
 const ICON = 'merge';
-const pluginTitle = i18n.translate('xpack.integrations_manager.pluginTitle', {
+const PREFIX = `xpack.${ID}`;
+const ROOT = `plugins/${ID}`;
+const pluginTitle = i18n.translate(`${PREFIX}.pluginTitle`, {
   defaultMessage: 'Integrations Manager',
 });
 
@@ -21,19 +23,19 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     id: ID,
-    configPrefix: 'xpack.integrations_manager',
+    configPrefix: PREFIX,
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
       app: {
         title: pluginTitle,
         description: pluginTitle,
-        main: 'plugins/integrations_manager/index',
+        main: `${ROOT}/index`,
         euiIconType: ICON,
         order: 8100,
       },
       // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
-      home: ['plugins/integrations_manager/register_feature'],
+      home: [`${ROOT}/register_feature`],
     },
 
     init(server: Server) {
