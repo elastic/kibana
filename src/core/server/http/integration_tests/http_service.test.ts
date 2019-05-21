@@ -183,8 +183,8 @@ describe('http service', () => {
         router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
         const { http } = await root.setup();
-        http.registerOnRequest((req, t) => t.next());
-        http.registerOnRequest(async (req, t) => {
+        http.registerOnPostAuth((req, t) => t.next());
+        http.registerOnPostAuth(async (req, t) => {
           await Promise.resolve();
           return t.next();
         });
@@ -197,7 +197,7 @@ describe('http service', () => {
       it('Should support redirecting to configured url', async () => {
         const redirectTo = '/redirect-url';
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) => t.redirected(redirectTo));
+        http.registerOnPostAuth(async (req, t) => t.redirected(redirectTo));
         await root.start();
 
         const response = await kbnTestServer.request.get(root, '/').expect(302);
@@ -206,7 +206,7 @@ describe('http service', () => {
 
       it('Should failing a request with configured error and status code', async () => {
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) =>
+        http.registerOnPostAuth(async (req, t) =>
           t.rejected(new Error('unexpected error'), { statusCode: 400 })
         );
         await root.start();
@@ -218,7 +218,7 @@ describe('http service', () => {
 
       it(`Shouldn't expose internal error details`, async () => {
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) => {
+        http.registerOnPostAuth(async (req, t) => {
           throw new Error('sensitive info');
         });
         await root.start();
@@ -232,12 +232,12 @@ describe('http service', () => {
 
       it(`Shouldn't share request object between interceptors`, async () => {
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) => {
+        http.registerOnPostAuth(async (req, t) => {
           // @ts-ignore. don't complain customField is not defined on Request type
           req.customField = { value: 42 };
           return t.next();
         });
-        http.registerOnRequest((req, t) => {
+        http.registerOnPostAuth((req, t) => {
           // @ts-ignore don't complain customField is not defined on Request type
           if (typeof req.customField !== 'undefined') {
             throw new Error('Request object was mutated');
