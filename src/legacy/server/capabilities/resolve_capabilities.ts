@@ -23,16 +23,12 @@ import { Capabilities } from '../../../core/public';
 import { mergeCapabilities } from './merge_capabilities';
 import { CapabilitiesModifier } from './capabilities_mixin';
 
-export const resolveCapabilities = async (
+export const resolveCapabilities = (
   request: Request,
   modifiers: CapabilitiesModifier[],
   ...capabilities: Array<Partial<Capabilities>>
-) => {
-  let resolvedCaps = mergeCapabilities(...capabilities);
-
-  for (const provider of modifiers) {
-    resolvedCaps = await provider(request, resolvedCaps);
-  }
-
-  return resolvedCaps;
-};
+) =>
+  modifiers.reduce(
+    async (resolvedCaps, modifier) => modifier(request, await resolvedCaps),
+    Promise.resolve(mergeCapabilities(...capabilities))
+  );

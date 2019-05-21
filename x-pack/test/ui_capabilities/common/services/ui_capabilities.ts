@@ -86,7 +86,7 @@ export class UICapabilitiesService {
     const dom = cheerio.load(response.data.toString());
     const element = dom('kbn-injected-metadata');
     if (!element) {
-      throw new Error('Unable to find "kbn-injected-metadata" element ');
+      throw new Error('Unable to find "kbn-injected-metadata" element');
     }
 
     const dataAttrJson = element.attr('data');
