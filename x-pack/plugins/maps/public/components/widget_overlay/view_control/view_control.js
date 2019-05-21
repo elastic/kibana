@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiButton,
   EuiPopover,
   EuiText,
@@ -58,9 +57,9 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
       ? _.round(mouseCoordinates.lon, DECIMAL_DEGREES_PRECISION)
       : '';
     return (
-      <EuiPanel className="mapWidgetControl mapViewControl__coordinates" paddingSize="none">
+      <div className="mapViewControl__coordinates">
         <EuiText size="xs">
-          <p>
+          <small>
             <strong>
               <FormattedMessage
                 id="xpack.maps.viewControl.latLabel"
@@ -73,19 +72,20 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
                 defaultMessage="lon:"
               />
             </strong> {lon}
-          </p>
+          </small>
         </EuiText>
-      </EuiPanel>
+      </div>
     );
   }
 
   return (
     <EuiFlexGroup
-      justifyContent="spaceBetween"
+      justifyContent="flexEnd"
+      alignItems="center"
       gutterSize="s"
       responsive={false}
     >
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         {mouseCoordinates && renderMouseCoordinates()}
       </EuiFlexItem>
 
