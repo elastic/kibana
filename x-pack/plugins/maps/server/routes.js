@@ -30,12 +30,17 @@ export function initRoutes(server, licenseUid) {
     path: `${ROOT}/${EMS_DATA_FILE_PATH}`,
     handler: async (request) => {
 
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
+      }
+
       if (!request.query.id) {
         server.log('warning', 'Must supply id parameters to retrieve EMS file');
         return null;
       }
 
-      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
+      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
       const layer = ems.fileLayers.find(layer => layer.id === request.query.id);
       if (!layer) {
         return null;
@@ -58,6 +63,11 @@ export function initRoutes(server, licenseUid) {
     path: `${ROOT}/${EMS_DATA_TMS_PATH}`,
     handler: async (request, h) => {
 
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
+      }
+
       if (!request.query.id ||
         typeof parseInt(request.query.x, 10) !== 'number' ||
         typeof parseInt(request.query.y, 10) !== 'number' ||
@@ -67,7 +77,7 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
+      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
       const tmsService = ems.tmsServices.find(layer => layer.id === request.query.id);
       if (!tmsService) {
         return null;
@@ -99,9 +109,15 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_META_PATH}`,
     handler: async () => {
+
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
+      }
+
       let ems;
       try {
-        ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, mapConfig.proxyElasticMapsServiceInMaps);
+        ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
       } catch (e) {
         server.log('warning', `Cannot connect to EMS, error: ${e.message}`);
         ems = {
