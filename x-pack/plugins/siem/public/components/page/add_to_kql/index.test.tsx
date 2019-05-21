@@ -102,7 +102,7 @@ describe('AddToKql Component', async () => {
         },
       },
       filterQuery: {
-        query: {
+        kuery: {
           kind: 'kuery',
           expression: 'host.name: siem-kibana',
         },
@@ -158,7 +158,7 @@ describe('AddToKql Component', async () => {
         },
       },
       filterQuery: {
-        query: {
+        kuery: {
           kind: 'kuery',
           expression: 'host.name: siem-kibana',
         },

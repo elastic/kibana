@@ -33,12 +33,12 @@ interface Props {
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
 }
 
-const client = new ApolloClient({
+export const apolloClient = new ApolloClient({
   cache: new Cache(),
   link: new ApolloLink((o, f) => (f ? f(o) : null)),
 });
 
-export const apolloClientObservable = new BehaviorSubject(client);
+export const apolloClientObservable = new BehaviorSubject(apolloClient);
 
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProviders = pure<Props>(
@@ -49,7 +49,7 @@ export const TestProviders = pure<Props>(
     onDragEnd = jest.fn(),
   }) => (
     <I18nProvider>
-      <ApolloProvider client={client}>
+      <ApolloProvider client={apolloClient}>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <KibanaConfigContext.Provider value={mockFramework}>
@@ -58,6 +58,18 @@ export const TestProviders = pure<Props>(
           </ThemeProvider>
         </ReduxStoreProvider>
       </ApolloProvider>
+    </I18nProvider>
+  )
+);
+
+export const TestProviderWithoutDragAndDrop = pure<Props>(
+  ({
+    children,
+    store = createStore(state, apolloClientObservable),
+    mockFramework = mockFrameworks.default_UTC,
+  }) => (
+    <I18nProvider>
+      <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
     </I18nProvider>
   )
 );

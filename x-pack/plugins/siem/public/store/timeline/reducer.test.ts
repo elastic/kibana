@@ -411,7 +411,6 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-
         excluded: false,
         kqlQuery: '',
       };
@@ -615,7 +614,6 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-
         excluded: false,
         kqlQuery: '',
       };
@@ -649,7 +647,8 @@ describe('Timeline', () => {
       });
       const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
       const addedAndDataProvider = update.foo.dataProviders[indexProvider].and[0];
-      expect(addedAndDataProvider).toEqual(andProviderToAdd);
+      const { and, ...expectedResult } = andProviderToAdd;
+      expect(addedAndDataProvider).toEqual(expectedResult);
       newTimeline.foo.highlightedDropAndProviderId = '';
     });
 

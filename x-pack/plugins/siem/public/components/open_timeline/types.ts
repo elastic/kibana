@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ActionCreator } from 'typescript-fsa';
+
 import { AllTimelinesVariables } from '../../containers/timeline/all';
+import { Note } from '../../lib/note';
+import { TimelineModel } from '../../store/timeline/model';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -131,4 +136,23 @@ export interface OpenTimelineProps {
   title: string;
   /** The total (server-side) count of the search results */
   totalSearchResultsCount: number;
+}
+
+export interface OpenTimelineDispatchProps {
+  addTimeline: ActionCreator<{ id: string; timeline: TimelineModel }>;
+  addNotes: ActionCreator<{ notes: Note[] }>;
+  createNewTimeline: ActionCreator<{
+    id: string;
+    columns: ColumnHeader[];
+    show?: boolean;
+  }>;
+  setTimelineRangeDatePicker: ActionCreator<{
+    from: number;
+    to: number;
+  }>;
+  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
+}
+
+export interface OpenTimelineReduxProps {
+  timeline: TimelineModel;
 }
