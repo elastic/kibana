@@ -11,6 +11,7 @@ import { getFunctionHelp } from '../../strings';
 interface Arguments {
   filterColumn: string;
   valueColumn: string;
+  filterGroup: string | null;
 }
 
 interface Return {
@@ -44,8 +45,8 @@ export function dropdownControl(): ContextFunction<
         help: argHelp.valueColumn,
       },
       filterGroup: {
-        type: ['string', 'null'],
-        help: 'Group name for the filter',
+        types: ['string', 'null'],
+        help: argHelp.filterGroup,
       },
     },
     fn: (context, { valueColumn, filterColumn, filterGroup }) => {

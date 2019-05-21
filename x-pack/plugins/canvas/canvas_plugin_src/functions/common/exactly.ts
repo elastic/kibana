@@ -9,6 +9,7 @@ import { getFunctionHelp } from '../../strings';
 interface Arguments {
   column: string;
   value: string;
+  filterGroup: string | null;
 }
 
 export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter> {
@@ -34,8 +35,8 @@ export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter>
         help: argHelp.value,
       },
       filterGroup: {
-        type: ['string', 'null'],
-        help: 'Group name for the filter',
+        types: ['string', 'null'],
+        help: argHelp.filterGroup,
       },
     },
     fn: (context, args) => {

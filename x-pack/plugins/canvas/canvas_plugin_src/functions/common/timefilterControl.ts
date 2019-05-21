@@ -10,6 +10,7 @@ import { getFunctionHelp } from '../../strings';
 interface Arguments {
   column: string;
   compact: boolean;
+  filterGroup: string | null;
 }
 export function timefilterControl(): NullContextFunction<
   'timefilterControl',
@@ -39,8 +40,8 @@ export function timefilterControl(): NullContextFunction<
         options: [true, false],
       },
       filterGroup: {
-        type: ['string', 'null'],
-        help: 'Group name for the filter',
+        types: ['string', 'null'],
+        help: argHelp.filterGroup,
       },
     },
     fn: (_context, args) => {

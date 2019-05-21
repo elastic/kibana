@@ -12,6 +12,7 @@ interface Arguments {
   column: string;
   from: string | null;
   to: string | null;
+  filterGroup: string | null;
 }
 
 export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, Filter> {
@@ -43,7 +44,7 @@ export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, F
         help: argHelp.to,
       },
       filterGroup: {
-        type: ['string', 'null'],
+        types: ['string', 'null'],
         help: 'Group name for the filter',
       },
     },
