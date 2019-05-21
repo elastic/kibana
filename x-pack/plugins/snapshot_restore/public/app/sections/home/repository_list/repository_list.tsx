@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
-import { BASE_PATH } from '../../../constants';
+import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { loadRepositories } from '../../../services/http';
+import { uiMetricService } from '../../../services/ui_metric';
 
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
@@ -56,6 +57,12 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       reload();
     }
   };
+
+  // Track component loaded
+  const { trackUiMetric } = uiMetricService;
+  useEffect(() => {
+    trackUiMetric(UIM_REPOSITORY_LIST_LOAD);
+  }, []);
 
   let content;
 

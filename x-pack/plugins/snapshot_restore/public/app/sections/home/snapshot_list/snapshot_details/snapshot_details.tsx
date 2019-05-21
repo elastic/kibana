@@ -22,8 +22,13 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { SectionError, SectionLoading } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
+import {
+  UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
+  UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
+} from '../../../../constants';
 import { loadSnapshot } from '../../../../services/http';
 import { linkToRepository } from '../../../../services/navigation';
+import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
 interface Props extends RouteComponentProps {
@@ -35,6 +40,11 @@ interface Props extends RouteComponentProps {
 const TAB_SUMMARY = 'summary';
 const TAB_FAILURES = 'failures';
 
+const panelTypeToUiMetricMap: { [key: string]: string } = {
+  [TAB_SUMMARY]: UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
+  [TAB_FAILURES]: UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
+};
+
 const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   repositoryName,
   snapshotId,
@@ -45,7 +55,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       i18n: { FormattedMessage, translate },
     },
   } = useAppDependencies();
-
+  const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
@@ -94,7 +104,10 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         <EuiTabs>
           {tabOptions.map(tab => (
             <EuiTab
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                trackUiMetric(panelTypeToUiMetricMap[tab.id]);
+                setActiveTab(tab.id);
+              }}
               isSelected={tab.id === activeTab}
               key={tab.id}
               data-test-subject={tab.testSubj}
