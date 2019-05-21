@@ -10,4 +10,4 @@
   - PM approval for bigger, user-facing features	
   - Merge to master (this closed the issue)
   - Backported to appropriate versions
-  - Add to Observability Weekly Updates
+  - Add to [Observability Weekly Updates](https://docs.google.com/document/d/1_SrBK5BwonOKsCbpSwG6T-sq45BLD5RJ1nbK_tBhe9o/edit)
