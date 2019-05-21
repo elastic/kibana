@@ -235,7 +235,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       });
     }
 
-    public async selectAggType(value: string | number, nth = 0) {
+    public async selectAggType(value: string, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
       await comboBox.setElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
