@@ -16,6 +16,11 @@
 .mapWidgetOverlay__layerWrapper {
   align-items: flex-end;
   width: $euiSize * 20;
+  min-height: 0; // Fixes scroll in Firefox
+}
+
+.mapWidgetControl__headerFlexItem {
+  flex-shrink: 0;
 }
 
 .mapWidgetControl {
