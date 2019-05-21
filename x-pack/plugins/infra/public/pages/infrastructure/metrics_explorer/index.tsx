@@ -13,6 +13,7 @@ import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/too
 import { SourceQuery } from '../../../../common/graphql/types';
 import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
+import { useFields } from '../../../hooks/use_fields';
 
 interface MetricsExplorerPageProps {
   intl: InjectedIntl;
@@ -41,6 +42,12 @@ export const MetricsExplorerPage = injectI18n(
       handleLoadMore,
     } = useMetricsExplorerState(source, derivedIndexPattern);
 
+    const { fields } = useFields(source.metricAlias, source.fields.timestamp);
+    const alteredDerivedIndexPattern = {
+      ...derivedIndexPattern,
+      fields,
+    };
+
     return (
       <div>
         <DocumentTitle
@@ -57,7 +64,7 @@ export const MetricsExplorerPage = injectI18n(
           }
         />
         <MetricsExplorerToolbar
-          derivedIndexPattern={derivedIndexPattern}
+          derivedIndexPattern={alteredDerivedIndexPattern}
           timeRange={currentTimerange}
           options={options}
           onRefresh={handleRefresh}

@@ -65,7 +65,9 @@ export const MetricsExplorerMetrics = injectI18n(
       [options, onChange]
     );
 
-    const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
+    const comboOptions = fields
+      .filter(field => field.aggregatable)
+      .map(field => ({ label: field.name, value: field.name }));
     const selectedOptions = options.metrics
       .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
       .map(metric => ({
