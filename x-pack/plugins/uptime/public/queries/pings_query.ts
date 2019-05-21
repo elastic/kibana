@@ -14,6 +14,7 @@ query PingList(
   $status: String
   $sort: String
   $size: Int
+  $location: String
 ) {
   allPings(
     dateRangeStart: $dateRangeStart
@@ -22,6 +23,7 @@ query PingList(
     status: $status
     sort: $sort
     size: $size
+    location: $location
   ) {
       total
       pings {

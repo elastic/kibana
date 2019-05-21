@@ -35,13 +35,13 @@ export const getLogEntryAtTime = (entries: LogEntry[], time: TimeKey) => {
 };
 
 export const isTimestampColumn = (column: LogEntryColumn): column is LogEntryTimestampColumn =>
-  'timestamp' in column;
+  column != null && 'timestamp' in column;
 
 export const isMessageColumn = (column: LogEntryColumn): column is LogEntryMessageColumn =>
-  'message' in column;
+  column != null && 'message' in column;
 
 export const isFieldColumn = (column: LogEntryColumn): column is LogEntryFieldColumn =>
-  'field' in column;
+  column != null && 'field' in column;
 
 export const isConstantSegment = (
   segment: LogEntryMessageSegment
