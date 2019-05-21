@@ -90,7 +90,7 @@ export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
             <p>
               {i18n.translate('xpack.ml.dataframe.jobsList.startModalBody', {
                 defaultMessage:
-                  'Starting a data frame job can cause a significant load on your cluster. Are you sure you want to start this job?',
+                  'A data frame job will increase search and indexing load in your cluster. Please stop the job if excessive load is experienced. Are you sure you want to start this job?',
               })}
             </p>
           </EuiConfirmModal>
