@@ -94,7 +94,7 @@ function requestRepoTree({
   uri,
   revision,
   path,
-  limit = 50,
+  limit = 1000,
   parents = false,
 }: FetchRepoTreePayload) {
   const query: FileTreeQuery = { limit, flatten: true };

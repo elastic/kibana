@@ -20,7 +20,6 @@
 import _ from 'lodash';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import 'ui/listen';
 import uiRoutes from 'ui/routes';
 import { i18n } from '@kbn/i18n';
 
@@ -79,8 +78,14 @@ function ContextAppRouteController(
     'contextAppRoute.state.successorCount',
   ], () => this.state.save(true));
 
-  $scope.$listen(queryFilter, 'update', () => {
-    this.filters = _.cloneDeep(queryFilter.getFilters());
+  const updateSubsciption = queryFilter.getUpdates$().subscribe({
+    next: () => {
+      this.filters = _.cloneDeep(queryFilter.getFilters());
+    }
+  });
+
+  $scope.$on('$destroy', function () {
+    updateSubsciption.unsubscribe();
   });
 
   this.anchorType = $routeParams.type;

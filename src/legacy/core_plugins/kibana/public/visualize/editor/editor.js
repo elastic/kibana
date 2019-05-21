@@ -26,7 +26,6 @@ import 'ui/collapsible_sidebar';
 
 import { capabilities } from 'ui/capabilities';
 import 'ui/apply_filters';
-import 'ui/listen';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
@@ -420,10 +419,12 @@ function VisEditor(
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
-    $scope.$listen(queryFilter, 'update', function () {
-      $scope.filters = queryFilter.getFilters();
-      $scope.fetch();
-    });
+    const filterUpdateSubscription = queryFilter.getUpdates$().subscribe(
+      () => {
+        $scope.filters = queryFilter.getFilters();
+        $scope.fetch();
+      },
+    );
 
     // update the searchSource when query updates
     $scope.fetch = function () {
@@ -440,6 +441,7 @@ function VisEditor(
       }
       savedVis.destroy();
       stateMonitor.destroy();
+      filterUpdateSubscription.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {
