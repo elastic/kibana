@@ -345,48 +345,44 @@ export class DataRecognizer {
   }
 
   async dataRecognizerJobsExist(moduleId) {
-    try {
-      const results = {};
+    const results = {};
 
-      // Load the module with the specified ID and check if the jobs
-      // in the module have been created.
-      const module = await this.getModule(moduleId);
-      if (module && module.jobs) {
-        // Add a wildcard at the front of each of the job IDs in the module,
-        // as a prefix may have been supplied when creating the jobs in the module.
-        const jobIds = module.jobs.map(job => `*${job.id}`);
-        const { jobsExist } = jobServiceProvider(this.callWithRequest);
-        const jobInfo = await jobsExist(jobIds);
+    // Load the module with the specified ID and check if the jobs
+    // in the module have been created.
+    const module = await this.getModule(moduleId);
+    if (module && module.jobs) {
+      // Add a wildcard at the front of each of the job IDs in the module,
+      // as a prefix may have been supplied when creating the jobs in the module.
+      const jobIds = module.jobs.map(job => `*${job.id}`);
+      const { jobsExist } = jobServiceProvider(this.callWithRequest);
+      const jobInfo = await jobsExist(jobIds);
 
-        // Check if the value for any of the jobs is false.
-        const doJobsExist = (Object.values(jobInfo).includes(false)) === false;
-        results.jobsExist = doJobsExist;
+      // Check if the value for any of the jobs is false.
+      const doJobsExist = (Object.values(jobInfo).includes(false)) === false;
+      results.jobsExist = doJobsExist;
 
-        if (doJobsExist === true) {
-          // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
-          const jobStats = await this.callWithRequest('ml.jobStats', { jobId: jobIds });
-          const jobStatsJobs = [];
-          if (jobStats.jobs && jobStats.jobs.length > 0) {
-            jobStats.jobs.forEach((job) => {
-              const jobStat = {
-                id: job.job_id
-              };
+      if (doJobsExist === true) {
+        // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
+        const jobStats = await this.callWithRequest('ml.jobStats', { jobId: jobIds });
+        const jobStatsJobs = [];
+        if (jobStats.jobs && jobStats.jobs.length > 0) {
+          jobStats.jobs.forEach((job) => {
+            const jobStat = {
+              id: job.job_id
+            };
 
-              if (job.data_counts) {
-                jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp;
-                jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp;
-              }
-              jobStatsJobs.push(jobStat);
-            });
-          }
-          results.jobs = jobStatsJobs;
+            if (job.data_counts) {
+              jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp;
+              jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp;
+            }
+            jobStatsJobs.push(jobStat);
+          });
         }
+        results.jobs = jobStatsJobs;
       }
-
-      return results;
-    } catch (e) {
-      throw e;
     }
+
+    return results;
   }
 
   async loadIndexPatterns() {

@@ -85,11 +85,6 @@ export const ml = (kibana) => {
         if (isEnabled === true) {
           addLinksToSampleDatasets(server);
         }
-
-        const config = server.config();
-        return {
-          mlEnabled: config.get('xpack.ml.enabled'),
-        };
       });
 
       xpackMainPlugin.registerFeature({

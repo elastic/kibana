@@ -350,7 +350,7 @@ export function jobsProvider(callWithRequest) {
       // Check if each of the supplied IDs match existing jobs.
       jobIds.forEach((jobId) => {
         // Create a Regex for each supplied ID as wildcard * is allowed.
-        const regexp = new RegExp(`^${jobId.split(/\*+/).join('.*')}$`);
+        const regexp = new RegExp(`^${jobId.replace(/\*+/g, '.*')}$`);
         const exists = allJobIds.some(existsJobId => regexp.test(existsJobId));
         results[jobId] = exists;
       });
