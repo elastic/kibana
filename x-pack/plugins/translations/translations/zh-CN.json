@@ -6228,7 +6228,6 @@
     "xpack.ml.jobsList.deleteJobModal.deleteButtonLabel": "删除",
     "xpack.ml.jobsList.deleteJobModal.deleteJobsDescription": "是否确定要删除{jobsCount, plural, one {此作业} other {这些作业}}？",
     "xpack.ml.jobsList.deleteJobModal.deleteJobsTitle": "删除 {jobsCount, plural, one {{jobId}} other {# 个作业}}",
-    "xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription": "删除多个作业可能非常耗时。作业将在后台删除，但可能不会立即从作业列表中消失",
     "xpack.ml.jobsList.deleteJobModal.deletingJobsStatusLabel": "正在删除作业",
     "xpack.ml.jobsList.descriptionLabel": "描述",
     "xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage": "无法保存对 {jobId} 所做的更改",
