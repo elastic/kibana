@@ -209,6 +209,7 @@ export class JsonUploadAndParse extends Component {
                   onFileUpload,
                   onFileRemove,
                   fileRef,
+                  setIndexName: indexName => this.setState({ indexName }),
                   setFileRef: fileRef => this.setState({ fileRef }),
                   setParsedFile: parsedFile => this.setState({ parsedFile }),
                   transformDetails,

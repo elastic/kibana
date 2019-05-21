@@ -34,7 +34,7 @@ export class JsonIndexFilePicker extends Component {
   render() {
     const {
       resetFileAndIndexSettings, setParsedFile, onFileRemove, onFileUpload,
-      transformDetails, setFileRef
+      transformDetails, setFileRef, setIndexName
     } = this.props;
     const { fileParsingProgress, fileUploadError, fileRef } = this.state;
 
@@ -90,6 +90,10 @@ export class JsonIndexFilePicker extends Component {
                 onFileRemove && onFileRemove(fileRef);
               } else if (fileList.length === 1) { // Parse & index file
                 const file = fileList[0];
+                if (file.name) {
+                  const initIndexName = file.name.split('.')[0];
+                  setIndexName(initIndexName);
+                }
                 // Check valid size
                 if (file.size > MAX_FILE_SIZE) {
                   this.setState({
@@ -115,8 +119,8 @@ export class JsonIndexFilePicker extends Component {
                 setFileRef(file);
                 setParsedFile(parsedFileResult);
 
-              } else { // TODO: Support multiple file upload?
-                console.warn('Multiple file upload not currently supported');
+              } else {
+                // No else
               }
             }}
           />
