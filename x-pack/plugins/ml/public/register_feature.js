@@ -8,13 +8,15 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+import { i18n } from '@kbn/i18n';
+
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'ml',
-    title: i18n('xpack.ml.machineLearningTitle', {
+    title: i18n.translate('xpack.ml.machineLearningTitle', {
       defaultMessage: 'Machine Learning'
     }),
-    description: i18n('xpack.ml.machineLearningDescription', {
+    description: i18n.translate('xpack.ml.machineLearningDescription', {
       defaultMessage: 'Automatically model the normal behavior of your time series data to detect anomalies.'
     }),
     icon: 'machineLearningApp',

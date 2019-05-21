@@ -8,3 +8,4 @@ export { BaseAuthenticationProvider, AuthenticationProviderOptions } from './bas
 export { BasicAuthenticationProvider, BasicCredentials } from './basic';
 export { SAMLAuthenticationProvider } from './saml';
 export { TokenAuthenticationProvider } from './token';
+export { OIDCAuthenticationProvider } from './oidc';
