@@ -134,6 +134,7 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
             <EuiFlexItem>
               <EuiFieldText
                 aria-labelledby={`visEditorIpRangeCidrLabel${labelledbyId}`}
+                compressed={true}
                 isInvalid={showValidation ? item.isInvalid : false}
                 onChange={ev => {
                   onChangeValue(index, ev.target.value);
@@ -144,7 +145,17 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                aria-label={deleteBtnAriaLabel}
+                aria-label={i18n.translate(
+                  'common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel',
+                  {
+                    defaultMessage: 'Remove the CIDR mask value of {mask}',
+                    values: { mask: item.mask },
+                  }
+                )}
+                title={i18n.translate('common.ui.aggTypes.ipRanges.removeCidrMaskButtonTitle', {
+                  defaultMessage: 'Remove the CIDR mask value of {mask}',
+                  values: { mask: item.mask },
+                })}
                 disabled={models.length === 1}
                 color="danger"
                 iconType="trash"

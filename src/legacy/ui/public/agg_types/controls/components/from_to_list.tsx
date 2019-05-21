@@ -65,9 +65,6 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
       to: { value: item.to, isInvalid: false },
     }))
   );
-  const deleteBtnAriaLabel = i18n.translate('common.ui.aggTypes.ipRanges.removeRangeAriaLabel', {
-    defaultMessage: 'Remove this range',
-  });
 
   const onUpdate = (modelList: FromToModel[]) => {
     setModels(modelList);
@@ -151,6 +148,7 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
             <EuiFlexItem>
               <EuiFieldText
                 aria-labelledby={`visEditorIpRangeFromLabel${labelledbyId}`}
+                compressed={true}
                 isInvalid={showValidation ? item.from.isInvalid : false}
                 onChange={ev => {
                   onChangeValue('from', index, ev.target.value);
@@ -162,6 +160,7 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
             <EuiFlexItem>
               <EuiFieldText
                 aria-labelledby={`visEditorIpRangeToLabel${labelledbyId}`}
+                compressed={true}
                 isInvalid={showValidation ? item.to.isInvalid : false}
                 onChange={ev => {
                   onChangeValue('to', index, ev.target.value);
@@ -172,7 +171,14 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                aria-label={deleteBtnAriaLabel}
+                aria-label={i18n.translate('common.ui.aggTypes.ipRanges.removeRangeAriaLabel', {
+                  defaultMessage: 'Remove the range of {from} to {to}',
+                  values: { from: item.from.value, to: item.to.value },
+                })}
+                title={i18n.translate('common.ui.aggTypes.ipRanges.removeRangeTitle', {
+                  defaultMessage: 'Remove the range of {from} to {to}',
+                  values: { from: item.from.value, to: item.to.value },
+                })}
                 disabled={models.length === 1}
                 color="danger"
                 iconType="trash"

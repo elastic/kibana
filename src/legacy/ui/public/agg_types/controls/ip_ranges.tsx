@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFlexItem, EuiFormRow, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiFlexItem, EuiFormRow, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggParamEditorProps } from 'ui/vis/editors/default';
@@ -83,12 +83,12 @@ function IpRangesParamEditor({
         )}
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButton fill={true} fullWidth={true} onClick={onAdd} size="s">
+          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
             <FormattedMessage
               id="common.ui.aggTypes.ipRanges.addRangeButtonLabel"
               defaultMessage="Add Range"
             />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </>
     </EuiFormRow>
