@@ -20,22 +20,17 @@ export const Summary = pure(() => (
       <p>
         <FormattedMessage
           id="xpack.siem.overview.startedText"
-          defaultMessage="Welcome to Security Information &amp; Event Management (SIEM). Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {blog} and {videos}."
+          defaultMessage="Welcome to Security Information &amp; Event Management (SIEM). Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {siemSolution} page."
           values={{
             docs: (
-              <EuiLink href={documentationLinks.kibana} target="blank">
+              <EuiLink href={documentationLinks.siem} target="blank">
                 documentation
               </EuiLink>
             ),
             data: <EuiLink href="kibana#home/tutorial_directory/security">ingesting data</EuiLink>,
-            blog: (
-              <EuiLink href="#" target="blank">
-                blog posts
-              </EuiLink>
-            ),
-            videos: (
-              <EuiLink href="#" target="blank">
-                videos
+            siemSolution: (
+              <EuiLink href="https://www.elastic.co/solutions/security-analytics" target="blank">
+                Security Analytics
               </EuiLink>
             ),
           }}
@@ -52,7 +47,7 @@ export const Summary = pure(() => (
           defaultMessage="If you have input or suggestions regarding your experience with SIEM, please feel free to {feedback}."
           values={{
             feedback: (
-              <EuiLink href="https://discuss.elastic.co/" target="blank">
+              <EuiLink href="https://discuss.elastic.co/c/siem" target="blank">
                 submit feedback online
               </EuiLink>
             ),
