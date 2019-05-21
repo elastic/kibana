@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getAllStats } from './monitoring';
-export { getLocalStats } from './local';
-export { encryptTelemetry } from './encryption';
-export { createTelemetryUsageCollector } from './usage';
+export { encryptTelemetry } from './encrypt';
