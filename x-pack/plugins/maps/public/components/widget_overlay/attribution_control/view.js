@@ -87,7 +87,7 @@ export class AttributionControl  extends React.Component {
       return null;
     }
     return (
-      <div className="mapAttributionControl" paddingSize="none" grow={false}>
+      <div className="mapAttributionControl">
         <EuiText size="xs">
           <small><strong>{this._renderAttributions()}</strong></small>
         </EuiText>

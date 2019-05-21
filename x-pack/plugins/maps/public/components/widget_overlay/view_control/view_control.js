@@ -84,7 +84,7 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
   return (
     <EuiFlexGroup
       justifyContent="flexEnd"
-      alignItems="center"
+      alignItems="flexEnd"
       gutterSize="s"
       responsive={false}
     >

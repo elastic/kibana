@@ -12,6 +12,7 @@
   bottom: $euiSizeM;
   pointer-events: none; /* 1 */
 }
+
 .mapWidgetOverlay__layerWrapper {
   align-items: flex-end;
   width: $euiSize * 20;
@@ -37,5 +38,3 @@
   flex-shrink: 0;
   text-transform: uppercase;
 }
-
-
