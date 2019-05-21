@@ -45,6 +45,12 @@ export const hostsFilterQueryExpression = () =>
     hosts => (hosts.filterQuery ? hosts.filterQuery.query.expression : null)
   );
 
+export const hostsFilterQueryAsKuery = () =>
+  createSelector(
+    selectHosts,
+    hosts => (hosts.filterQuery ? hosts.filterQuery.query : null)
+  );
+
 export const hostsFilterQueryAsJson = () =>
   createSelector(
     selectHosts,
