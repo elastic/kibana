@@ -4,28 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
-import React from 'react';
-
-import { DataFrameJobListRow } from './common';
-import { DeleteAction, getActions } from './actions';
-
-import dataFrameJobListRow from './__mocks__/data_frame_job_list_row.json';
-
-describe('Data Frame: Job List Actions <DeleteAction />', () => {
-  test('Minimal initialization', () => {
-    const item: DataFrameJobListRow = dataFrameJobListRow;
-    const props = {
-      disabled: false,
-      item,
-      deleteJob(d: DataFrameJobListRow) {},
-    };
-
-    const wrapper = shallow(<DeleteAction {...props} />);
-
-    expect(wrapper).toMatchSnapshot();
-  });
-});
+import { getActions } from './actions';
 
 describe('Data Frame: Job List Actions', () => {
   test('getActions()', () => {
