@@ -88,10 +88,10 @@ const props = {
     },
     {
       groups: ['test'],
-      id: 'timeseries-only-test-job',
+      id: 'non-timeseries-job',
       isRunning: false,
       isSingleMetricViewerJob: false,
-      job_id: 'timeseries-only-test-job',
+      job_id: 'non-timeseries-job',
       timeRange: {
         fromPx: 1,
         label: 'Apr 17th 2019, 20:04 to May 18th 2019, 19:45',
@@ -125,7 +125,7 @@ describe('JobSelectorTable', () => {
     test('job cannot be selected if it is not a single metric viewer job', () => {
       const timeseriesOnlyProps = { ...props, singleSelection: 'true', timeseriesOnly: 'true' };
       const { getByTestId } = render(<JobSelectorTable {...timeseriesOnlyProps} />);
-      const radioButton = getByTestId('timeseries-only-test-job-radio-button');
+      const radioButton = getByTestId('non-timeseries-job-radio-button');
       expect(radioButton.firstChild.disabled).toEqual(true);
     });
 
