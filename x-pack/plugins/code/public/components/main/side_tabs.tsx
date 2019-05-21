@@ -23,6 +23,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
   loadingStructureTree: boolean;
   hasStructure: boolean;
+  languageServerInitializing: boolean;
 }
 
 class CodeSideTabs extends React.PureComponent<Props> {
@@ -41,7 +42,7 @@ class CodeSideTabs extends React.PureComponent<Props> {
       <div>
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />
-        <EuiText textAlign="center">Loading {text} tree</EuiText>
+        <EuiText textAlign="center">{text}</EuiText>
         <EuiSpacer size="m" />
         <EuiText textAlign="center">
           <EuiLoadingSpinner size="xl" />
@@ -51,16 +52,20 @@ class CodeSideTabs extends React.PureComponent<Props> {
   }
 
   public get tabs() {
-    const fileTabContent = this.props.loadingFileTree ? (
-      this.renderLoadingSpinner('file')
+    const { languageServerInitializing, loadingFileTree, loadingStructureTree } = this.props;
+    const fileTabContent = loadingFileTree ? (
+      this.renderLoadingSpinner('Loading file tree')
     ) : (
       <div className="codeFileTree__container">{<FileTree />}</div>
     );
-    const structureTabContent = this.props.loadingStructureTree ? (
-      this.renderLoadingSpinner('structure')
-    ) : (
-      <SymbolTree />
-    );
+    let structureTabContent: React.ReactNode;
+    if (languageServerInitializing) {
+      structureTabContent = this.renderLoadingSpinner('Language server is initializing');
+    } else if (loadingStructureTree) {
+      structureTabContent = this.renderLoadingSpinner('Loading structure tree');
+    } else {
+      structureTabContent = <SymbolTree />;
+    }
     return [
       {
         id: Tabs.file,

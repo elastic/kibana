@@ -9,7 +9,7 @@ import React from 'react';
 
 import {
   getPivotQuery,
-  IndexPatternContext,
+  KibanaContext,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
@@ -26,7 +26,7 @@ jest.mock('react', () => {
 
 describe('Data Frame: <PivotPreview />', () => {
   test('Minimal initialization', () => {
-    const indexPattern = {
+    const currentIndexPattern = {
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -34,13 +34,17 @@ describe('Data Frame: <PivotPreview />', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      formRowLabel: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
-    const aggs: PivotAggsConfig[] = [
-      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', formRowLabel: 'the-agg-label' },
-    ];
+    const agg: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.AVG,
+      field: 'the-agg-field',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
+    };
     const props = {
-      aggs,
+      aggs: { 'the-agg-name': agg },
       groupBy: { 'the-group-by-name': groupBy },
       query: getPivotQuery('the-query'),
     };
@@ -49,9 +53,11 @@ describe('Data Frame: <PivotPreview />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <IndexPatternContext.Provider value={indexPattern}>
+        <KibanaContext.Provider
+          value={{ currentIndexPattern, indexPatterns: {}, kbnBaseUrl: 'url', kibanaConfig: {} }}
+        >
           <PivotPreview {...props} />
-        </IndexPatternContext.Provider>
+        </KibanaContext.Provider>
       </div>
     );
 

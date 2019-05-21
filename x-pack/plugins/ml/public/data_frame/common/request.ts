@@ -85,7 +85,7 @@ export function getDataFramePreviewRequest(
           field: g.field,
         },
       };
-      request.pivot.group_by[g.formRowLabel] = termsAgg;
+      request.pivot.group_by[g.aggName] = termsAgg;
     } else if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
       const histogramAgg: HistogramAgg = {
         histogram: {
@@ -93,7 +93,7 @@ export function getDataFramePreviewRequest(
           interval: g.interval,
         },
       };
-      request.pivot.group_by[g.formRowLabel] = histogramAgg;
+      request.pivot.group_by[g.aggName] = histogramAgg;
     } else if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
       const dateHistogramAgg: DateHistogramAgg = {
         date_histogram: {
@@ -116,12 +116,12 @@ export function getDataFramePreviewRequest(
           dateHistogramAgg.date_histogram.format = format;
         }
       }
-      request.pivot.group_by[g.formRowLabel] = dateHistogramAgg;
+      request.pivot.group_by[g.aggName] = dateHistogramAgg;
     }
   });
 
   aggs.forEach(agg => {
-    request.pivot.aggregations[agg.formRowLabel] = {
+    request.pivot.aggregations[agg.aggName] = {
       [agg.agg]: {
         field: agg.field,
       },
@@ -141,7 +141,7 @@ export function getDataFrameRequest(
       indexPatternTitle,
       getPivotQuery(pivotState.search),
       dictionaryToArray(pivotState.groupByList),
-      pivotState.aggs
+      dictionaryToArray(pivotState.aggList)
     ),
     dest: {
       index: jobDetailsState.targetIndex,

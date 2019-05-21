@@ -22,12 +22,14 @@ import {
 } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import { UMBreadcrumb } from './breadcrumbs';
-import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
+import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
 import { UptimeDatePicker } from './components/functional/uptime_date_picker';
@@ -44,9 +46,13 @@ export interface UptimeAppProps {
   basePath: string;
   darkMode: boolean;
   client: UMGraphQLClient;
+  isApmAvailable: boolean;
+  isInfraAvailable: boolean;
+  isLogsAvailable: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
+  setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
 }
 
@@ -58,6 +64,7 @@ const Application = (props: UptimeAppProps) => {
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
+    setBadge,
   } = props;
 
   let colors: UptimeAppColors;
@@ -82,6 +89,19 @@ const Application = (props: UptimeAppProps) => {
 
   useEffect(() => {
     renderGlobalHelpControls();
+    setBadge(
+      !capabilities.get().uptime.save
+        ? {
+            text: i18n.translate('xpack.uptime.badge.readOnly.text', {
+              defaultMessage: 'Read only',
+            }),
+            tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
+              defaultMessage: 'Unable to save',
+            }),
+            iconType: 'glasses',
+          }
+        : undefined
+    );
   }, []);
 
   const refreshApp = () => {
@@ -142,7 +162,7 @@ const Application = (props: UptimeAppProps) => {
                             )}
                           />
                           <Route
-                            path="/monitor/:id"
+                            path="/monitor/:id/:location?"
                             render={routerProps => (
                               <MonitorPage
                                 query={client.query}

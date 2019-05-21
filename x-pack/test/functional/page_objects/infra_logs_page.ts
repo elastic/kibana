@@ -9,12 +9,18 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
-export function InfraLogsPageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function InfraLogsPageProvider({
+  getPageObjects,
+  getService,
+}: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
-  // const find = getService('find');
-  // const browser = getService('browser');
+  const pageObjects = getPageObjects(['common']);
 
   return {
+    async navigateTo() {
+      await pageObjects.common.navigateToApp('infraLogs');
+    },
+
     async getLogStream() {
       return await testSubjects.find('logStream');
     },

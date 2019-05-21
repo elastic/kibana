@@ -64,7 +64,9 @@ export class NotificationsService {
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
-    return { toasts: this.toasts.start({ i18n: i18nDep, targetDomElement: toastsContainer }) };
+    return {
+      toasts: this.toasts.start({ i18n: i18nDep, targetDomElement: toastsContainer }),
+    };
   }
 
   public stop() {

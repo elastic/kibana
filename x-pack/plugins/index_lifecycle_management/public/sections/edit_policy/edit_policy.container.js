@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { EditPolicy as PresentationComponent } from './edit_policy';
+
 import {
   getSaveAsNewPolicy,
   getSelectedPolicy,
@@ -16,6 +16,7 @@ import {
   getIsNewPolicy,
   getSelectedOriginalPolicyName
 } from '../../store/selectors';
+
 import {
   setSelectedPolicy,
   setSelectedPolicyName,
@@ -23,7 +24,9 @@ import {
   saveLifecyclePolicy,
   fetchPolicies,
 } from '../../store/actions';
+
 import { findFirstError } from '../../services/find_errors';
+import { EditPolicy as PresentationComponent } from './edit_policy';
 
 export const EditPolicy = connect(
   state => {

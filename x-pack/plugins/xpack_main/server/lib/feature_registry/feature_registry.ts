@@ -9,7 +9,6 @@ import { cloneDeep, difference, uniq } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeatureKibanaPrivileges {
-  grantWithBaseRead?: boolean;
   management?: {
     [sectionId: string]: string[];
   };
@@ -65,7 +64,6 @@ const managementSchema = Joi.object().pattern(
 const catalogueSchema = Joi.array().items(Joi.string());
 
 const privilegeSchema = Joi.object({
-  grantWithBaseRead: Joi.bool(),
   management: managementSchema,
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),

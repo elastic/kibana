@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiFieldSearch,
@@ -28,12 +28,14 @@ import { SourceIndexPreview } from '../../components/source_index_preview';
 import { PivotPreview } from './pivot_preview';
 
 import {
+  AggName,
   DropDownLabel,
   getPivotQuery,
   groupByConfigHasInterval,
-  IndexPatternContext,
-  Label,
+  isKibanaContext,
+  KibanaContext,
   PivotAggsConfig,
+  PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
 } from '../../common';
@@ -41,8 +43,7 @@ import {
 import { getPivotDropdownOptions } from './common';
 
 export interface DefinePivotExposedState {
-  aggList: Label[];
-  aggs: PivotAggsConfig[];
+  aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict;
   search: string;
   valid: boolean;
@@ -53,8 +54,7 @@ const emptySearch = '';
 
 export function getDefaultPivotState(): DefinePivotExposedState {
   return {
-    aggList: [] as Label[],
-    aggs: [] as PivotAggsConfig[],
+    aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
     search: defaultSearch,
     valid: false,
@@ -69,11 +69,13 @@ interface Props {
 export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
   const defaults = { ...getDefaultPivotState(), ...overrides };
 
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
@@ -98,52 +100,81 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     aggOptionsData,
   } = getPivotDropdownOptions(indexPattern);
 
-  const addGroupByInterval = (label: Label, item: PivotGroupByConfig) => {
-    groupByList[label] = item;
-    setGroupByList({ ...groupByList });
-  };
-
   const addGroupBy = (d: DropDownLabel[]) => {
-    const label: Label = d[0].label;
-    groupByList[label] = groupByOptionsData[label];
+    const label: AggName = d[0].label;
+    const config: PivotGroupByConfig = groupByOptionsData[label];
+    const aggName: AggName = config.aggName;
+
+    if (groupByList[aggName] === undefined) {
+      groupByList[aggName] = config;
+      setGroupByList({ ...groupByList });
+    } else {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.definePivot.groupByExistsErrorMessage', {
+          defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
+          values: { aggName },
+        })
+      );
+    }
+  };
+
+  const updateGroupBy = (previousAggName: AggName, item: PivotGroupByConfig) => {
+    delete groupByList[previousAggName];
+    groupByList[item.aggName] = item;
     setGroupByList({ ...groupByList });
   };
 
-  const deleteGroupBy = (label: Label) => {
-    delete groupByList[label];
+  const deleteGroupBy = (aggName: AggName) => {
+    delete groupByList[aggName];
     setGroupByList({ ...groupByList });
   };
 
   // The list of selected aggregations
-  const [aggList, setAggList] = useState(defaults.aggList as Label[]);
+  const [aggList, setAggList] = useState(defaults.aggList);
 
   const addAggregation = (d: DropDownLabel[]) => {
-    const label: Label = d[0].label;
-    const newList = uniq([...aggList, label]);
-    setAggList(newList);
+    const label: AggName = d[0].label;
+    const config: PivotAggsConfig = aggOptionsData[label];
+    const aggName: AggName = config.aggName;
+
+    if (aggList[aggName] === undefined) {
+      aggList[aggName] = config;
+      setAggList({ ...aggList });
+    } else {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.definePivot.aggExistsErrorMessage', {
+          defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
+          values: { aggName },
+        })
+      );
+    }
   };
 
-  const deleteAggregation = (label: Label) => {
-    const newList = aggList.filter(l => l !== label);
-    setAggList(newList);
+  const updateAggregation = (previousAggName: AggName, item: PivotAggsConfig) => {
+    delete aggList[previousAggName];
+    aggList[item.aggName] = item;
+    setAggList({ ...aggList });
   };
 
-  const pivotAggs = aggList.map(l => aggOptionsData[l]);
+  const deleteAggregation = (aggName: AggName) => {
+    delete aggList[aggName];
+    setAggList({ ...aggList });
+  };
+
+  const pivotAggsArr = dictionaryToArray(aggList);
   const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(search);
 
-  const valid = pivotGroupByArr.length > 0 && aggList.length > 0;
+  const valid = pivotGroupByArr.length > 0 && pivotAggsArr.length > 0;
   useEffect(
     () => {
-      onChange({ aggList, aggs: pivotAggs, groupByList, search, valid });
+      onChange({ aggList, groupByList, search, valid });
     },
     [
-      aggList,
-      pivotAggs.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
+      pivotAggsArr.map(d => `${d.agg} ${d.field} ${d.aggName}`).join(' '),
       pivotGroupByArr
         .map(
-          d =>
-            `${d.agg} ${d.field} ${groupByConfigHasInterval(d) ? d.interval : ''} ${d.formRowLabel}`
+          d => `${d.agg} ${d.field} ${groupByConfigHasInterval(d) ? d.interval : ''} ${d.aggName}`
         )
         .join(' '),
       search,
@@ -179,7 +210,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             <Fragment>
               <GroupByListForm
                 list={groupByList}
-                onChange={addGroupByInterval}
+                options={groupByOptionsData}
+                onChange={updateGroupBy}
                 deleteHandler={deleteGroupBy}
               />
               <DropDown
@@ -203,7 +235,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             <Fragment>
               <AggListForm
                 list={aggList}
-                optionsData={aggOptionsData}
+                options={aggOptionsData}
+                onChange={updateAggregation}
                 deleteHandler={deleteAggregation}
               />
               <DropDown
@@ -232,7 +265,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       <EuiFlexItem>
         <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
         <EuiSpacer size="l" />
-        <PivotPreview aggs={pivotAggs} groupBy={groupByList} query={pivotQuery} />
+        <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

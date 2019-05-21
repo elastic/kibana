@@ -18,16 +18,12 @@
  */
 
 import _ from 'lodash';
-import { FilterBarLibMapFilterProvider } from './map_filter';
+import { mapFilter } from './map_filter';
 
-export function FilterBarLibMapAndFlattenFiltersProvider(Private, Promise) {
-  const mapFilter = Private(FilterBarLibMapFilterProvider);
-  return function (filters) {
-    return _(filters)
-      .flatten()
-      .compact()
-      .map(mapFilter)
-      .thru(Promise.all)
-      .value();
-  };
+export function mapAndFlattenFilters(indexPatterns, filters) {
+  const flattened = _(filters)
+    .flatten()
+    .compact()
+    .map(item => mapFilter(indexPatterns, item)).value();
+  return Promise.all(flattened);
 }

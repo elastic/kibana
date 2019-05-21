@@ -8,10 +8,11 @@ import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
+import { StaticIndexPattern } from 'ui/index_patterns';
+
 import { ml } from '../../../services/ml_api_service';
 
 import { SimpleQuery } from '../../common';
-import { IndexPatternContextValue } from '../../common/index_pattern_context';
 import { EsDoc, EsFieldName, getDefaultSelectableFields } from './common';
 
 const SEARCH_SIZE = 1000;
@@ -30,7 +31,7 @@ export interface UseSourceIndexDataReturnType {
 }
 
 export const useSourceIndexData = (
-  indexPattern: IndexPatternContextValue,
+  indexPattern: StaticIndexPattern,
   query: SimpleQuery,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
@@ -39,40 +40,38 @@ export const useSourceIndexData = (
   const [status, setStatus] = useState(SOURCE_INDEX_STATUS.UNUSED);
   const [tableItems, setTableItems] = useState([] as EsDoc[]);
 
-  if (indexPattern !== null) {
-    const getSourceIndexData = async function() {
-      setErrorMessage('');
-      setStatus(SOURCE_INDEX_STATUS.LOADING);
+  const getSourceIndexData = async function() {
+    setErrorMessage('');
+    setStatus(SOURCE_INDEX_STATUS.LOADING);
 
-      try {
-        const resp: SearchResponse<any> = await ml.esSearch({
-          index: indexPattern.title,
-          size: SEARCH_SIZE,
-          body: { query },
-        });
+    try {
+      const resp: SearchResponse<any> = await ml.esSearch({
+        index: indexPattern.title,
+        size: SEARCH_SIZE,
+        body: { query },
+      });
 
-        const docs = resp.hits.hits;
+      const docs = resp.hits.hits;
 
-        if (selectedFields.length === 0) {
-          const newSelectedFields = getDefaultSelectableFields(docs);
-          setSelectedFields(newSelectedFields);
-        }
-
-        setTableItems(docs as EsDoc[]);
-        setStatus(SOURCE_INDEX_STATUS.LOADED);
-      } catch (e) {
-        setErrorMessage(JSON.stringify(e));
-        setTableItems([] as EsDoc[]);
-        setStatus(SOURCE_INDEX_STATUS.ERROR);
+      if (selectedFields.length === 0) {
+        const newSelectedFields = getDefaultSelectableFields(docs);
+        setSelectedFields(newSelectedFields);
       }
-    };
 
-    useEffect(
-      () => {
-        getSourceIndexData();
-      },
-      [indexPattern.title, query.query_string.query]
-    );
-  }
+      setTableItems(docs as EsDoc[]);
+      setStatus(SOURCE_INDEX_STATUS.LOADED);
+    } catch (e) {
+      setErrorMessage(JSON.stringify(e));
+      setTableItems([] as EsDoc[]);
+      setStatus(SOURCE_INDEX_STATUS.ERROR);
+    }
+  };
+
+  useEffect(
+    () => {
+      getSourceIndexData();
+    },
+    [indexPattern.title, query.query_string.query]
+  );
   return { errorMessage, status, tableItems };
 };

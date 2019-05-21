@@ -5,10 +5,7 @@
  */
 
 import qs from 'querystring';
-import {
-  UptimeUrlParams,
-  getSupportedUrlParams,
-} from '../lib/helper/url_params/get_supported_url_params';
+import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
 interface Location {
   pathname: string;

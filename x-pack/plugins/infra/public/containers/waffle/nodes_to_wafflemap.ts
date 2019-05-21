@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
 
-import { InfraNode, InfraNodePath } from '../../graphql/types';
+import { InfraSnapshotNode, InfraSnapshotNodePath } from '../../graphql/types';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,
@@ -16,13 +16,13 @@ import {
 } from '../../lib/lib';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 
-export function createId(path: InfraNodePath[]) {
+export function createId(path: InfraSnapshotNodePath[]) {
   return path.map(p => p.value).join('/');
 }
 
 function findOrCreateGroupWithNodes(
   groups: InfraWaffleMapGroup[],
-  path: InfraNodePath[]
+  path: InfraSnapshotNodePath[]
 ): InfraWaffleMapGroupOfNodes {
   const id = path.length === 0 ? '__all__' : createId(path);
   /**
@@ -62,7 +62,7 @@ function findOrCreateGroupWithNodes(
 
 function findOrCreateGroupWithGroups(
   groups: InfraWaffleMapGroup[],
-  path: InfraNodePath[]
+  path: InfraSnapshotNodePath[]
 ): InfraWaffleMapGroupOfGroups {
   const id = path.length === 0 ? '__all__' : createId(path);
   const lastPath = last(path);
@@ -85,7 +85,7 @@ function findOrCreateGroupWithGroups(
   };
 }
 
-export function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
+export function createWaffleMapNode(node: InfraSnapshotNode): InfraWaffleMapNode {
   const nodePathItem = last(node.path);
   if (!nodePathItem) {
     throw new Error('There must be at least one node path item');
@@ -94,6 +94,7 @@ export function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
     pathId: node.path.map(p => p.value).join('/'),
     path: node.path,
     id: nodePathItem.value,
+    ip: nodePathItem.ip,
     name: nodePathItem.label || nodePathItem.value,
     metric: node.metric,
   };
@@ -105,8 +106,8 @@ function withoutGroup(group: InfraWaffleMapGroup) {
   };
 }
 
-export function nodesToWaffleMap(nodes: InfraNode[]): InfraWaffleMapGroup[] {
-  return nodes.reduce((groups: InfraWaffleMapGroup[], node: InfraNode) => {
+export function nodesToWaffleMap(nodes: InfraSnapshotNode[]): InfraWaffleMapGroup[] {
+  return nodes.reduce((groups: InfraWaffleMapGroup[], node: InfraSnapshotNode) => {
     const waffleNode = createWaffleMapNode(node);
     if (node.path.length === 2) {
       const parentGroup = findOrCreateGroupWithNodes(

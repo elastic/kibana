@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import {
-  IndexPatternContext,
+  KibanaContext,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
@@ -26,7 +26,7 @@ jest.mock('react', () => {
 
 describe('Data Frame: <DefinePivotSummary />', () => {
   test('Minimal initialization', () => {
-    const indexPattern = {
+    const currentIndexPattern = {
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -34,14 +34,17 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      formRowLabel: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
-    const aggs: PivotAggsConfig[] = [
-      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', formRowLabel: 'the-agg-label' },
-    ];
+    const agg: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.AVG,
+      field: 'the-agg-field',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
+    };
     const props: DefinePivotExposedState = {
-      aggList: ['the-agg-name'],
-      aggs,
+      aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       search: 'the-query',
       valid: true,
@@ -51,9 +54,11 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <IndexPatternContext.Provider value={indexPattern}>
+        <KibanaContext.Provider
+          value={{ currentIndexPattern, indexPatterns: {}, kbnBaseUrl: 'url', kibanaConfig: {} }}
+        >
           <DefinePivotSummary {...props} />
-        </IndexPatternContext.Provider>
+        </KibanaContext.Provider>
       </div>
     );
 

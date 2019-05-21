@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server, ServerOptions } from 'hapi';
+import { Request, Server, ServerOptions } from 'hapi';
 
 import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
@@ -25,15 +25,16 @@ import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
-import { Router } from './router';
+import { Router, KibanaRequest } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 
-export interface HttpServerInfo {
+export interface HttpServerSetup {
   server: Server;
   options: ServerOptions;
+  registerRouter: (router: Router) => void;
   /**
    * Define custom authentication and/or authorization mechanism for incoming requests.
    * Applied to all resources by default. Only one AuthenticationHandler can be registered.
@@ -48,12 +49,18 @@ export interface HttpServerInfo {
    * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
    */
   registerOnRequest: (requestHandler: OnRequestHandler) => void;
+  getBasePathFor: (request: KibanaRequest | Request) => string;
+  setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
 }
 
 export class HttpServer {
   private server?: Server;
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
+  private basePathCache = new WeakMap<
+    ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
+    string
+  >();
 
   constructor(private readonly log: Logger) {}
 
@@ -61,19 +68,63 @@ export class HttpServer {
     return this.server !== undefined && this.server.listener.listening;
   }
 
-  public registerRouter(router: Router) {
+  private registerRouter(router: Router) {
     if (this.isListening()) {
       throw new Error('Routers can be registered only when HTTP server is stopped.');
     }
 
+    this.log.debug(`registering route handler for [${router.path}]`);
     this.registeredRouters.add(router);
   }
 
-  public async start(config: HttpConfig): Promise<HttpServerInfo> {
-    this.log.debug('starting http server');
+  // passing hapi Request works for BWC. can be deleted once we remove legacy server.
+  private getBasePathFor(config: HttpConfig, request: KibanaRequest | Request) {
+    const incomingMessage =
+      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
 
+    const requestScopePath = this.basePathCache.get(incomingMessage) || '';
+    const serverBasePath = config.basePath || '';
+    return `${serverBasePath}${requestScopePath}`;
+  }
+
+  // should work only for KibanaRequest as soon as spaces migrate to NP
+  private setBasePathFor(request: KibanaRequest | Request, basePath: string) {
+    const incomingMessage =
+      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+    if (this.basePathCache.has(incomingMessage)) {
+      throw new Error(
+        'Request basePath was previously set. Setting multiple times is not supported.'
+      );
+    }
+    this.basePathCache.set(incomingMessage, basePath);
+  }
+
+  public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
     this.server = createServer(serverOptions);
+
+    return {
+      options: serverOptions,
+      registerRouter: this.registerRouter.bind(this),
+      registerOnRequest: this.registerOnRequest.bind(this),
+      registerAuth: <T>(
+        fn: AuthenticationHandler<T>,
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) => this.registerAuth(fn, cookieOptions, config.basePath),
+      getBasePathFor: this.getBasePathFor.bind(this, config),
+      setBasePathFor: this.setBasePathFor.bind(this),
+      // Return server instance with the connection options so that we can properly
+      // bridge core and the "legacy" Kibana internally. Once this bridge isn't
+      // needed anymore we shouldn't return the instance from this method.
+      server: this.server,
+    };
+  }
+
+  public async start(config: HttpConfig) {
+    if (this.server === undefined) {
+      throw new Error('Http server is not setup up yet');
+    }
+    this.log.debug('starting http server');
 
     this.setupBasePathRewrite(this.server, config);
 
@@ -94,19 +145,6 @@ export class HttpServer {
         config.rewriteBasePath ? config.basePath : ''
       }`
     );
-
-    // Return server instance with the connection options so that we can properly
-    // bridge core and the "legacy" Kibana internally. Once this bridge isn't
-    // needed anymore we shouldn't return anything from this method.
-    return {
-      server: this.server,
-      options: serverOptions,
-      registerOnRequest: this.registerOnRequest.bind(this),
-      registerAuth: <T>(
-        fn: AuthenticationHandler<T>,
-        cookieOptions: SessionStorageCookieOptions<T>
-      ) => this.registerAuth(fn, cookieOptions, config.basePath),
-    };
   }
 
   public async stop() {

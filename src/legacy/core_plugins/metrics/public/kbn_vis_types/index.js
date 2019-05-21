@@ -18,30 +18,33 @@
  */
 
 import { MetricsRequestHandlerProvider } from './request_handler';
+import { i18n } from '@kbn/i18n';
 import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+
+import { PANEL_TYPES } from '../../common/panel_types';
 
 // register the provider with the visTypes registry so that other know it exists
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 VisTypesRegistryProvider.register(MetricsVisProvider);
 
-export default function MetricsVisProvider(Private, i18n) {
+export default function MetricsVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const ReactEditorController = Private(ReactEditorControllerProvider).handler;
   const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
 
   return VisFactory.createReactVisualization({
     name: 'metrics',
-    title: i18n('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'Visual Builder' }),
-    description: i18n('tsvb.kbnVisTypes.metricsDescription',
+    title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'Visual Builder' }),
+    description: i18n.translate('tsvb.kbnVisTypes.metricsDescription',
       { defaultMessage: 'Build time-series using a visual pipeline interface' }),
     icon: 'visVisualBuilder',
     feedbackMessage: defaultFeedbackMessage,
     visConfig: {
       defaults: {
         id: '61ca57f0-469d-11e7-af02-69e470af7417',
-        type: 'timeseries',
+        type: PANEL_TYPES.TIMESERIES,
         series: [
           {
             id: '61ca57f1-469d-11e7-af02-69e470af7417',

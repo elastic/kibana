@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withHandlers, withProps, withState } from 'recompose';
+import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
@@ -51,19 +51,22 @@ const configuration = {
   tooltipZ: 1100,
 };
 
-const groupHandlerCreators = {
-  groupNodes: ({ commit }) => () => commit('actionEvent', { event: 'group' }),
-  ungroupNodes: ({ commit }) => () => commit('actionEvent', { event: 'ungroup' }),
-};
-
-const componentLayoutState = ({ aeroStore, setAeroStore, elements, selectedToplevelNodes }) => {
+const componentLayoutState = ({
+  aeroStore,
+  setAeroStore,
+  elements,
+  selectedToplevelNodes,
+  height,
+  width,
+  registerLayout,
+}) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
   const newState = {
     primaryUpdate: null,
     currentScene: {
       shapes,
-      configuration,
+      configuration: { ...configuration, pageHeight: height, pageWidth: width },
       selectedShapes,
       selectionState: aeroStore
         ? aeroStore.getCurrentState().currentScene.selectionState
@@ -81,6 +84,7 @@ const componentLayoutState = ({ aeroStore, setAeroStore, elements, selectedTople
     aeroStore.setCurrentState(newState);
   } else {
     setAeroStore((aeroStore = createStore(newState, updater)));
+    registerLayout(aeroStore);
   }
   return { aeroStore };
 };
@@ -111,13 +115,13 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
   dispatch,
-  insertNodes: pageId => selectedNodes => dispatch(insertNodes(selectedNodes, pageId)),
-  removeNodes: pageId => nodeIds => dispatch(removeElements(nodeIds, pageId)),
+  insertNodes: (selectedNodes, pageId) => dispatch(insertNodes(selectedNodes, pageId)),
+  removeNodes: (nodeIds, pageId) => dispatch(removeElements(nodeIds, pageId)),
   selectToplevelNodes: nodes =>
     dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
   // TODO: Abstract this out, this is similar to layering code in sidebar/index.js:
-  elementLayer: (pageId, selectedElement, movement) => {
-    dispatch(elementLayer({ pageId, elementId: selectedElement.id, movement }));
+  elementLayer: (pageId, elementId, movement) => {
+    dispatch(elementLayer({ pageId, elementId, movement }));
   },
 });
 
@@ -148,6 +152,11 @@ export const InteractivePage = compose(
       }
     },
   })),
+  lifecycle({
+    componentWillUnmount() {
+      this.props.unregisterLayout(this.props.aeroStore);
+    },
+  }),
   withState('canvasOrigin', 'saveCanvasOrigin'),
   withState('_forceRerender', 'forceRerender'),
   withProps(({ aeroStore }) => ({ cursor: aeroStore.getCurrentState().currentScene.cursor })),
@@ -164,7 +173,6 @@ export const InteractivePage = compose(
   withProps(({ commit, forceRerender }) => ({
     commit: (...args) => forceRerender(commit(...args)),
   })),
-  withHandlers(groupHandlerCreators),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent
 );

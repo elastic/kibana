@@ -7,8 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
-import { goToPolicyList } from '../../services/navigation';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 import {
   EuiPage,
   EuiPageBody,
@@ -26,10 +26,7 @@ import {
   EuiFlexItem,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
-import { HotPhase } from './components/hot_phase';
-import { WarmPhase } from './components/warm_phase';
-import { DeletePhase } from './components/delete_phase';
-import { ColdPhase } from './components/cold_phase';
+
 import {
   PHASE_HOT,
   PHASE_COLD,
@@ -37,11 +34,18 @@ import {
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
 } from '../../constants';
+
+import { goToPolicyList } from '../../services/navigation';
 import { findFirstError } from '../../services/find_errors';
+import { LearnMoreLink } from '../components';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';
 import { ErrableFormRow } from './form_errors';
-import { LearnMoreLink } from '../components';
+import { HotPhase } from './components/hot_phase';
+import { WarmPhase } from './components/warm_phase';
+import { DeletePhase } from './components/delete_phase';
+import { ColdPhase } from './components/cold_phase';
+
 class EditPolicyUi extends Component {
   static propTypes = {
     selectedPolicy: PropTypes.object.isRequired,
@@ -57,17 +61,22 @@ class EditPolicyUi extends Component {
       isShowingPolicyJsonFlyout: false,
     };
   }
+
   selectPolicy = policyName => {
     const { setSelectedPolicy, policies } = this.props;
+
     const selectedPolicy = policies.find(policy => {
       return policy.name === policyName;
     });
+
     if (selectedPolicy) {
       setSelectedPolicy(selectedPolicy);
     }
   };
+
   componentDidMount() {
     window.scrollTo(0, 0);
+
     const {
       isPolicyListLoaded,
       fetchPolicies,
@@ -75,6 +84,7 @@ class EditPolicyUi extends Component {
         params: { policyName },
       } = { params: {} },
     } = this.props;
+
     if (policyName) {
       const decodedPolicyName = decodeURIComponent(policyName);
       if (isPolicyListLoaded) {
@@ -88,10 +98,12 @@ class EditPolicyUi extends Component {
       this.props.setSelectedPolicy(null);
     }
   }
+
   backToPolicyList = () => {
     this.props.setSelectedPolicy(null);
     goToPolicyList();
   };
+
   submit = async () => {
     const { intl } = this.props;
     this.setState({ isShowingErrors: true });
