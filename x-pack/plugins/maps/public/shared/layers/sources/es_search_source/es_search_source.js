@@ -10,6 +10,7 @@ import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
+import { SearchSource } from '../../../../kibana_services';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -85,10 +86,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   getFieldNames() {
-    return [
-      this._descriptor.geoField,
-      ...this._descriptor.tooltipProperties
-    ];
+    return [this._descriptor.geoField];
   }
 
   async getImmutableProperties() {
@@ -140,10 +138,13 @@ export class ESSearchSource extends AbstractESSource {
 
     let featureCollection;
     const indexPattern = await this._getIndexPattern();
+    const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
+      return metaField !== '_id';
+    });
     const flattenHit = hit => {
       const properties = indexPattern.flattenHit(hit);
       // remove metaFields
-      indexPattern.metaFields.forEach(metaField => {
+      unusedMetaFields.forEach(metaField => {
         delete properties[metaField];
       });
       return properties;
@@ -154,7 +155,12 @@ export class ESSearchSource extends AbstractESSource {
       const geoField = await this._getGeoField();
       featureCollection = hitsToGeoJson(resp.hits.hits, flattenHit, geoField.name, geoField.type);
     } catch(error) {
-      throw new Error(`Unable to convert search response to geoJson feature collection, error: ${error.message}`);
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {
+          defaultMessage: 'Unable to convert search response to geoJson feature collection, error: {errorMsg}',
+          values: { errorMsg: error.message }
+        })
+      );
     }
 
     return {
@@ -169,20 +175,47 @@ export class ESSearchSource extends AbstractESSource {
     return this._descriptor.tooltipProperties.length > 0;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
-    const tooltipProps = [];
-    let indexPattern;
-    try {
-      indexPattern = await this._getIndexPattern();
-    } catch(error) {
-      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
-      return [];
+  async _loadTooltipProperties(docId, indexPattern) {
+    if (this._descriptor.tooltipProperties.length === 0) {
+      return {};
     }
 
-    this._descriptor.tooltipProperties.forEach(propertyName => {
-      tooltipProps.push(new ESTooltipProperty(propertyName, properties[propertyName], indexPattern));
+    const searchSource = new SearchSource();
+    searchSource.setField('index', indexPattern);
+    searchSource.setField('size', 1);
+    const query = {
+      language: 'kuery',
+      query: `_id:${docId}`
+    };
+    searchSource.setField('query', query);
+    searchSource.setField('fields', this._descriptor.tooltipProperties);
+
+    const resp = await searchSource.fetch();
+
+    const hit = _.get(resp, 'hits.hits[0]');
+    if (!hit) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg', {
+          defaultMessage: 'Unable to find document, _id: {docId}',
+          values: { docId }
+        })
+      );
+    }
+
+    const properties = indexPattern.flattenHit(hit);
+    indexPattern.metaFields.forEach(metaField => {
+      delete properties[metaField];
     });
-    return tooltipProps;
+    return properties;
+  }
+
+  async filterAndFormatPropertiesToHtml(properties) {
+    const indexPattern = await this._getIndexPattern();
+    const propertyValues = await this._loadTooltipProperties(properties._id, indexPattern);
+
+    return this._descriptor.tooltipProperties.map(propertyName => {
+      return new ESTooltipProperty(propertyName, propertyValues[propertyName], indexPattern);
+    });
   }
 
   isFilterByMapBounds() {

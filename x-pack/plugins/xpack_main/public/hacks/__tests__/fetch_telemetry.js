@@ -26,7 +26,8 @@ describe('fetch_telemetry', () => {
       toISOString: () => 'min456'
     });
 
-    $http.post.withArgs(`fake/api/telemetry/v1/clusters/_stats`, {
+    $http.post.withArgs(`fake/api/telemetry/v2/clusters/_stats`, {
+      unencrypted: true,
       timeRange: {
         min: 'min456',
         max: 'max123'
@@ -34,7 +35,7 @@ describe('fetch_telemetry', () => {
     })
       .returns(response);
 
-    expect(fetchTelemetry($http, { basePath, _moment: () => moment })).to.be(response);
+    expect(fetchTelemetry($http, { basePath, _moment: () => moment, unencrypted: true })).to.be(response);
   });
 
 });
