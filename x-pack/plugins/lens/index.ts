@@ -7,12 +7,13 @@
 import * as Joi from 'joi';
 import { Server } from 'hapi';
 import { resolve } from 'path';
+import { LegacyPluginInitializer } from 'src/legacy/types';
 
 import { PLUGIN_ID } from './common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
-export const lens = (kibana: any) => {
+export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
