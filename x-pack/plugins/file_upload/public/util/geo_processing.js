@@ -47,7 +47,7 @@ function geoJsonToEs(parsedGeojson, datatype) {
 
   if (datatype === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
     return features.reduce((accu, feature) => {
-      const properties = _.get(feature, 'properties');
+      const properties = feature.properties;
       accu.push({
         coordinates: {
           'type': feature.geometry.type.toLowerCase(),
@@ -59,7 +59,7 @@ function geoJsonToEs(parsedGeojson, datatype) {
     }, []);
   } else if (datatype === ES_GEO_FIELD_TYPE.GEO_POINT) {
     return features.reduce((accu, feature) => {
-      const properties = _.get(feature, 'properties');
+      const properties = feature.properties;
       accu.push({
         coordinates: feature.geometry.coordinates,
         ...(!_.isEmpty(properties) ? { ...properties } : {})
@@ -67,7 +67,6 @@ function geoJsonToEs(parsedGeojson, datatype) {
       return accu;
     }, []);
   } else {
-    console.warn(`Unhandled datatype: ${datatype}`);
     return [];
   }
 }

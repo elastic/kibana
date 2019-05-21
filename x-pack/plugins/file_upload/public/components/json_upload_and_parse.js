@@ -83,7 +83,9 @@ export class JsonUploadAndParse extends Component {
       !!indexName && !hasIndexErrors && !indexRequestInFlight;
     if (isIndexReady !== this.state.isIndexReady) {
       this.setState({ isIndexReady });
-      onIndexReadyStatusChange && onIndexReadyStatusChange(isIndexReady);
+      if (onIndexReadyStatusChange) {
+        onIndexReadyStatusChange(isIndexReady);
+      }
     }
   }
 

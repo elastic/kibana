@@ -11,7 +11,6 @@ import { indexPatternService } from '../../../maps/public/kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
 
-const IMPORT_RETRIES = 5;
 const basePath = chrome.addBasePath('/api/fileupload');
 const fileType = 'json';
 
@@ -84,15 +83,22 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   } else { // Custom transform
     indexingDetails = transform.getIndexingDetails(parsedFile);
   }
-  return indexingDetails
-    ? {
+  if (indexingDetails && indexingDetails.data && indexingDetails.data.length) {
+    return {
       success: true,
       indexingDetails
-    }
-    : {
+    };
+  } else if (indexingDetails && indexingDetails.data) {
+    return {
+      success: false,
+      error: `No indexing details defined for datatype: ${dataType}`
+    };
+  } else {
+    return {
       success: false,
       error: `Unknown error performing transform: ${transform}`,
     };
+  }
 }
 
 async function writeToIndex(indexingDetails) {
@@ -126,7 +132,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
     return {
       success: false,
       error: i18n.translate('xpack.file_upload.noIndexSuppliedErrorMessage', {
-        defaultMessage: 'No index supplied'
+        defaultMessage: 'No index provided.'
       })
     };
   }
@@ -148,28 +154,18 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
       ingestPipeline: {} // TODO: Support custom ingest pipelines
     };
 
-    let retries = IMPORT_RETRIES;
     let resp = {
       success: false,
       failures: [],
       docCount: 0,
     };
+    resp = await writeToIndex(aggs);
 
-    while (resp.success === false && retries > 0) {
-      resp = await writeToIndex(aggs);
-
-      if (retries < IMPORT_RETRIES) {
-        console.log(`Retrying import ${IMPORT_RETRIES - retries}`);
-      }
-
-      retries--;
-    }
-    failures = [...failures, ...resp.failures];
-
+    failures = [ ...failures, ...resp.failures ];
     if (resp.success) {
-      docCount = resp.docCount;
+      ({ success } = resp);
+      docCount = docCount + resp.docCount;
     } else {
-      console.error(resp);
       success = false;
       error = resp.error;
       docCount = 0;
@@ -202,7 +198,6 @@ export async function createIndexPattern(indexPatternName) {
       fields: indexPattern.fields
     };
   } catch (error) {
-    console.error(`Error creating index pattern: ${error}`);
     return {
       success: false,
       error,

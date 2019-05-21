@@ -106,11 +106,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   }
 
   async getDisplayName() {
-    try {
-      return this._descriptor.name;
-    } catch (error) {
-      return this._descriptor.id;
-    }
+    return this._descriptor.name;
   }
 
   canFormatFeatureProperties() {

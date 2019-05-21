@@ -10,12 +10,12 @@ import rewind from 'geojson-rewind';
 export function geoJsonCleanAndValidate(parsedFile) {
   const reader = new jsts.io.GeoJSONReader();
   const geoJson = reader.read(parsedFile);
+  const writer = new jsts.io.GeoJSONWriter();
 
   const features = geoJson.features.map(({ id, geometry, properties }) => {
-    const writer = new jsts.io.GeoJSONWriter();
-    const geojsonGeometry = (!geometry.isSimple() || !geometry.isValid())
-      ? writer.write(geometry.buffer(0))
-      : writer.write(geometry);
+    const geojsonGeometry = (geometry.isSimple() || geometry.isValid())
+      ? writer.write(geometry)
+      : writer.write(geometry.buffer(0));
     return ({
       type: 'Feature',
       ...(id ? { id } : {}),

@@ -85,7 +85,7 @@ export class IndexSettings extends Component {
       return (
         <FormattedMessage
           id="xpack.file_upload.indexNameAlreadyExistsErrorMessage"
-          defaultMessage="Index name or pattern already exists"
+          defaultMessage="Index name or pattern already exists."
         />
       );
     }
@@ -100,7 +100,7 @@ export class IndexSettings extends Component {
       return (
         <FormattedMessage
           id="xpack.file_upload.indexNameContainsIllegalCharactersErrorMessage"
-          defaultMessage="Index name contains illegal characters"
+          defaultMessage="Index name contains illegal characters."
         />
       );
     }

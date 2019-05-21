@@ -40,7 +40,6 @@ export async function parseFile(file, previewCallback = null, transformDetails,
         }
         resolve(cleanAndValidJson);
       } catch (e) {
-        console.log(e);
         reject(e);
       }
     };

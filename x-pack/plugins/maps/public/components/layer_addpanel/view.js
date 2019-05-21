@@ -70,7 +70,6 @@ export class AddLayerPanel extends Component {
     await this.props.removeTransientLayer();
     if (!source) {
       this.setState({ layer: null });
-      console.error(`Failed to add source`);
       return;
     }
     this.setState({
