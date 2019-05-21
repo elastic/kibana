@@ -23,6 +23,7 @@ export function checkViewOrCreateJobs(Private, $route, kbnBaseUrl, kbnUrl) {
     // Load the module, and check if the job(s) in the module have been created.
     // If so, load the jobs in the Anomaly Explorer.
     // Otherwise open the data recognizer wizard for the module.
+    // Always want to call reject() so as not to load original page.
     ml.dataRecognizerModuleJobsExist({ moduleId })
       .then((resp) => {
         const basePath = `${chrome.getBasePath()}/app/`;
@@ -30,13 +31,9 @@ export function checkViewOrCreateJobs(Private, $route, kbnBaseUrl, kbnUrl) {
         if (resp.jobsExist === true) {
           const resultsPageUrl = mlJobService.createResultsUrlForJobs(resp.jobs, 'explorer');
           window.location.href = `${basePath}${resultsPageUrl}`;
-
-          // Not strictly needed as setting window location, but call reject() for clarity.
           reject();
         } else {
           window.location.href = `${basePath}ml#/jobs/new_job/simple/recognize?id=${moduleId}&index=${indexPatternId}`;
-
-          // Not strictly needed as setting window location, but call reject() for clarity.
           reject();
         }
 
@@ -55,8 +52,6 @@ export function checkViewOrCreateJobs(Private, $route, kbnBaseUrl, kbnUrl) {
 
 
         kbnUrl.redirect(`/jobs`);
-
-        // Call reject() to ensure we redirect out of original route.
         reject();
       });
   });
