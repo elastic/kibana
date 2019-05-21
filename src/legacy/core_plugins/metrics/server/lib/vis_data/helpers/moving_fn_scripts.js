@@ -17,10 +17,24 @@
  * under the License.
  */
 
-export const MODEL_TYPES = {
-  UNWEIGHTED: 'simple',
-  WEIGHTED_EXPONENTIAL: 'ewma',
-  WEIGHTED_EXPONENTIAL_DOUBLE: 'holt',
-  WEIGHTED_EXPONENTIAL_TRIPLE: 'holt_winters',
-  WEIGHTED_LINEAR: 'linear',
+
+import { MODEL_TYPES } from '../../../../common/model_options';
+
+export const MODEL_SCRIPTS = {
+  [MODEL_TYPES.UNWEIGHTED]: () => 'MovingFunctions.unweightedAvg(values)',
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL]: ({
+    alpha
+  }) => `MovingFunctions.ewma(values, ${alpha})`,
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE]: ({
+    alpha,
+    beta
+  }) => `MovingFunctions.holt(values, ${alpha}, ${beta})`,
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE]: ({
+    alpha,
+    beta,
+    gamma,
+    period,
+    multiplicative
+  }) => `if (values.length > ${period}*2) {MovingFunctions.holtWinters(values, ${alpha}, ${beta}, ${gamma}, ${period}, ${multiplicative})}`,
+  [MODEL_TYPES.WEIGHTED_LINEAR]: () => 'MovingFunctions.linearWeightedAvg(values)',
 };

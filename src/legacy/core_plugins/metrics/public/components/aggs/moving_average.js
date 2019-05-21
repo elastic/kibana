@@ -40,10 +40,10 @@ import { MODEL_TYPES } from '../../../common/model_options';
 
 const DEFAULTS = {
   model_type: MODEL_TYPES.UNWEIGHTED,
-  alpha: 0.3,
-  beta: 0.1,
-  gamma: 0.1,
-  period: 5,
+  alpha: 0,
+  beta: 0,
+  gamma: 0,
+  period: 1,
   multiplicative: true,
   window: 10,
 };
@@ -98,8 +98,20 @@ const MovingAverageAggUi = props => {
   const selectedModelOption = modelOptions.find(({ value }) => model.model_type === value);
 
   const multiplicativeOptions = [
-    { label: 'True', value: true },
-    { label: 'False', value: false },
+    {
+      label: intl.formatMessage({
+        id: 'tsvb.movingAverage.multiplicativeOptions.true',
+        defaultMessage: 'True',
+      }),
+      value: true
+    },
+    {
+      label: intl.formatMessage({
+        id: 'tsvb.movingAverage.multiplicativeOptions.false',
+        defaultMessage: 'False',
+      }),
+      value: false
+    },
   ];
   const selectedMultiplicative = multiplicativeOptions.find(({ value }) => model.multiplicative === value);
 
@@ -200,27 +212,21 @@ const MovingAverageAggUi = props => {
 
             <EuiFlexGroup gutterSize="s">
               {
-                (
-                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL ||
-                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE ||
-                  model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE
-                ) && (
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      id={htmlId('alpha')}
-                      label={(<FormattedMessage
-                        id="tsvb.movingAverage.alpha"
-                        defaultMessage="Alpha"
-                      />)}
-                    >
-                      <EuiFieldNumber
-                        step={0.1}
-                        onChange={handleNumberChange('alpha')}
-                        value={model.alpha}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                )
+                <EuiFlexItem>
+                  <EuiFormRow
+                    id={htmlId('alpha')}
+                    label={(<FormattedMessage
+                      id="tsvb.movingAverage.alpha"
+                      defaultMessage="Alpha"
+                    />)}
+                  >
+                    <EuiFieldNumber
+                      step={0.1}
+                      onChange={handleNumberChange('alpha')}
+                      value={model.alpha}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
               }
               {
                 (
