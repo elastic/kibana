@@ -60,11 +60,14 @@ describe('Saved object does not have layer list', () => {
   });
 
   function mockDataSourceResponse(dataSources) {
-    require('../meta').getDataSourcesSync = () => {
+    require('../meta').getEMSDataSourcesSync = () => {
       return dataSources;
     };
     require('../meta').isMetaDataLoaded = () => {
       return true;
+    };
+    require('../meta').getKibanaTileMap = () => {
+      return null;
     };
   }
 
@@ -126,9 +129,11 @@ describe('Saved object does not have layer list', () => {
   it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', () => {
 
     mockDataSourceResponse({
-      kibana: mockKibanaDataSource,
       ems: mockEmsDataSource
     });
+    require('../meta').getKibanaTileMap = () => {
+      return mockKibanaDataSource.tilemap;
+    };
 
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{

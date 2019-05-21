@@ -32,7 +32,7 @@ const markdownIt = new MarkdownIt({
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 uiModules.get('kibana')
-  .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
+  .service('serviceSettings', function ($sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
@@ -247,11 +247,8 @@ uiModules.get('kibana')
 
       async getJsonForRegionLayer(fileLayerConfig) {
         const url = await this.getUrlForRegionLayer(fileLayerConfig);
-        const json = await $http({
-          url: url,
-          method: 'GET'
-        });
-        return json.data;
+        const response = await fetch(url);
+        return await response.json();
       }
 
     }
