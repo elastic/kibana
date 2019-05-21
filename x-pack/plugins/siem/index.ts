@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 
 import { initServerWithKibana } from './server/kibana.index';
 
-const APP_ID = 'siem';
+export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

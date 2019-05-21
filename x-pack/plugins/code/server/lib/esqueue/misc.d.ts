@@ -33,6 +33,7 @@ export interface EsClient {
   search(params: AnyObject): Promise<any>;
   delete(params: AnyObject): Promise<any>;
   deleteByQuery(params: AnyObject): Promise<any>;
+  updateByQuery(params: AnyObject): Promise<any>;
 }
 
 export type LogFn = (msg: string | Error, tags: string[]) => void;

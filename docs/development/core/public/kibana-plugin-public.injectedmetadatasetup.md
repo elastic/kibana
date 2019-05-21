@@ -17,6 +17,7 @@ export interface InjectedMetadataSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [getBasePath](./kibana-plugin-public.injectedmetadatasetup.getbasepath.md) | <code>() =&gt; string</code> |  |
+|  [getCapabilities](./kibana-plugin-public.injectedmetadatasetup.getcapabilities.md) | <code>() =&gt; Capabilities</code> |  |
 |  [getCspConfig](./kibana-plugin-public.injectedmetadatasetup.getcspconfig.md) | <code>() =&gt; {`<p/>`        warnLegacyBrowsers: boolean;`<p/>`    }</code> |  |
 |  [getInjectedVar](./kibana-plugin-public.injectedmetadatasetup.getinjectedvar.md) | <code>(name: string, defaultValue?: any) =&gt; unknown</code> |  |
 |  [getInjectedVars](./kibana-plugin-public.injectedmetadatasetup.getinjectedvars.md) | <code>() =&gt; {`<p/>`        [key: string]: unknown;`<p/>`    }</code> |  |
