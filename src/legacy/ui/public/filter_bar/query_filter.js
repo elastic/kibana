@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import * as Rx from 'rxjs';
+import { Subject } from 'rxjs';
+
 import { onlyDisabled } from './lib/only_disabled';
 import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';
@@ -40,8 +41,8 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
     pinnedByDefault = newValue;
   });
 
-  const update$ = new Rx.Subject();
-  const fetch$ = new Rx.Subject();
+  const update$ = new Subject();
+  const fetch$ = new Subject();
 
   queryFilter.getUpdates$ = function () {
     return update$.asObservable();
