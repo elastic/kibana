@@ -42,7 +42,8 @@ export const uncommonProcessesSelector = () =>
 export const hostsFilterQueryExpression = () =>
   createSelector(
     selectHosts,
-    hosts => (hosts.filterQuery ? hosts.filterQuery.query.expression : null)
+    hosts =>
+      hosts.filterQuery && hosts.filterQuery.query ? hosts.filterQuery.query.expression : null
   );
 
 export const hostsFilterQueryAsKuery = () =>
