@@ -18,6 +18,7 @@
  */
 
 import './region_map_vis_params';
+import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -27,7 +28,7 @@ import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
-VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config, i18n) {
+VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config) {
 
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
@@ -39,8 +40,8 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
 
   return VisFactory.createBaseVisualization({
     name: 'region_map',
-    title: i18n('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
-    description: i18n('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
+    title: i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
+    description: i18n.translate('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
 provided base maps, or add your own. Darker colors represent higher values.' }),
     icon: 'visMapRegion',
     visConfig: {
@@ -66,16 +67,16 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
       collections: {
         legendPositions: [{
           value: 'bottomleft',
-          text: i18n('regionMap.mapVis.regionMapEditorConfig.bottomLeftText', { defaultMessage: 'bottom left' }),
+          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomLeftText', { defaultMessage: 'bottom left' }),
         }, {
           value: 'bottomright',
-          text: i18n('regionMap.mapVis.regionMapEditorConfig.bottomRightText', { defaultMessage: 'bottom right' }),
+          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomRightText', { defaultMessage: 'bottom right' }),
         }, {
           value: 'topleft',
-          text: i18n('regionMap.mapVis.regionMapEditorConfig.topLeftText', { defaultMessage: 'top left' }),
+          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topLeftText', { defaultMessage: 'top left' }),
         }, {
           value: 'topright',
-          text: i18n('regionMap.mapVis.regionMapEditorConfig.topRightText', { defaultMessage: 'top right' }),
+          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topRightText', { defaultMessage: 'top right' }),
         }],
         colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
         vectorLayers: vectorLayers,
@@ -85,7 +86,7 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', { defaultMessage: 'Value' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', { defaultMessage: 'Value' }),
           min: 1,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits',
@@ -98,7 +99,7 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-globe',
-          title: i18n('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'shape field' }),
+          title: i18n.translate('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'shape field' }),
           min: 1,
           max: 1,
           aggFilter: ['terms']
