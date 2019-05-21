@@ -218,7 +218,11 @@ export const JobCreateForm: SFC<Props> = React.memo(
         {!created && (
           <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
             <EuiFlexItem grow={false} style={{ width: '200px' }}>
-              <EuiButton fill isDisabled={created && started} onClick={createAndStartDataFrame}>
+              <EuiButton
+                color="warning"
+                isDisabled={created && started}
+                onClick={createAndStartDataFrame}
+              >
                 {i18n.translate('xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameButton', {
                   defaultMessage: 'Create & start',
                 })}
@@ -230,7 +234,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
                   'xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameDescription',
                   {
                     defaultMessage:
-                      'Create and start the data frame job. After the job is started, you will be offered options to continue exploring the data frame job.',
+                      'Use with caution, creating a data frame job may cause a significant load on your cluster. After the job is started, you will be offered options to continue exploring the data frame job.',
                   }
                 )}
               </EuiText>
@@ -240,7 +244,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
         {created && (
           <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
             <EuiFlexItem grow={false} style={{ width: '200px' }}>
-              <EuiButton isDisabled={created && started} onClick={startDataFrame}>
+              <EuiButton color="warning" isDisabled={created && started} onClick={startDataFrame}>
                 {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameButton', {
                   defaultMessage: 'Start',
                 })}
@@ -250,7 +254,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameDescription', {
                   defaultMessage:
-                    'Starts the data frame job. After the job is started, you will be offered options to continue exploring the data frame job.',
+                    'Starts the data frame job. Use with caution, creating a data frame job may cause a significant load on your cluster. After the job is started, you will be offered options to continue exploring the data frame job.',
                 })}
               </EuiText>
             </EuiFlexItem>
