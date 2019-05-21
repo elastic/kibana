@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { pure } from 'recompose';
-import styled from 'styled-components';
 import {
   Chart,
   BarSeries,
@@ -16,7 +15,6 @@ import {
   getSpecId,
   ScaleType,
   Settings,
-  LIGHT_THEME,
   mergeWithDefaultTheme,
   PartialTheme,
   CustomSeriesColorsMap,
@@ -123,12 +121,3 @@ export const BarChart = pure<{ barChart: BarChartData[] | null | undefined }>(({
     )}
   </AutoSizer>
 ));
-
-// const SeriesChart = styled(EuiSeriesChart)`
-//   svg
-//     .rv-xy-plot__axis--horizontal
-//     .rv-xy-plot__axis__ticks
-//     .rv-xy-plot__axis__tick:not(:first-child):not(:last-child) {
-//     display: none;
-//   }
-// `;

@@ -14,16 +14,26 @@ import {
   Position,
   getAxisId,
   getSpecId,
-  PartialTheme,
   Settings,
-  LIGHT_THEME,
-  mergeWithDefaultTheme,
+  CustomSeriesColorsMap,
+  DataSeriesColorsValues,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
 import { AreaChartData, WrappedByAutoSizer, ChartHolder, numberFormatter } from './common';
 import { AutoSizer } from '../auto_sizer';
 
-const seriesAreaStyle = () => (mergeWithDefaultTheme({}), LIGHT_THEME);
+const getAreaSeriesStyle = (areaSeriesKey: string, color: string | undefined) => {
+  if (!color) return undefined;
+  const areaCustomSeriesColors: CustomSeriesColorsMap = new Map();
+  const areaDataSeriesColorValues: DataSeriesColorsValues = {
+    colorValues: [],
+    specId: getSpecId(areaSeriesKey),
+  };
+
+  areaCustomSeriesColors.set(areaDataSeriesColorValues, color);
+
+  return areaCustomSeriesColors;
+};
 
 const dateFormatter = (d: string) => {
   return d.toLocaleString().split('T')[0];
@@ -37,21 +47,24 @@ export const AreaChartBaseComponent = pure<{
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings theme={seriesAreaStyle()} />
-        {data.map((series, idx) =>
-          series.value != null ? (
+        <Settings />
+        {data.map((series, idx) => {
+          const areaSeriesKey = series.key;
+          const areaSeriesSpecId = getSpecId(areaSeriesKey);
+          return series.value != null ? (
             <AreaSeries
-              id={getSpecId(`area-${series.key}-${idx}`)}
-              key={`stat-items-areachart-${series.key}`}
+              id={areaSeriesSpecId}
+              key={areaSeriesKey}
               name={series.key.replace('Histogram', '')}
               data={series.value}
               xScaleType={ScaleType.Ordinal}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
+              customSeriesColors={getAreaSeriesStyle(areaSeriesKey, series.color)}
             />
-          ) : null
-        )}
+          ) : null;
+        })}
 
         <Axis
           id={getAxisId(`group-${data[0].key}-x`)}

@@ -31,6 +31,7 @@ export interface ChartData {
   x: number | string | null;
   y: number | string | null;
   y0?: number;
+  g?: number | string;
 }
 
 export interface BarChartData {
