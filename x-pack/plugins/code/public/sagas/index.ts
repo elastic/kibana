@@ -20,6 +20,7 @@ import { watchLoadConfigs, watchSwitchProjectLanguageServer } from './project_co
 import {
   watchLoadRepoListStatus,
   watchLoadRepoStatus,
+  watchPollingRepoStatus,
   watchRepoCloneStatusPolling,
   watchRepoDeleteStatusPolling,
   watchRepoIndexStatusPolling,
@@ -77,6 +78,7 @@ export function* rootSaga() {
   yield fork(watchLoadConfigs);
   yield fork(watchLoadRepoListStatus);
   yield fork(watchLoadRepoStatus);
+  yield fork(watchPollingRepoStatus);
   yield fork(watchRepoDeleteStatusPolling);
   yield fork(watchRepoIndexStatusPolling);
   yield fork(watchRepoCloneStatusPolling);

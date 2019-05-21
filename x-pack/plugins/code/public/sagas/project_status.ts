@@ -8,10 +8,12 @@ import moment from 'moment';
 import { Action } from 'redux-actions';
 import { delay } from 'redux-saga';
 import { kfetch } from 'ui/kfetch';
-import { all, call, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository, RepositoryUri, WorkerReservedProgress } from '../../model';
+import * as ROUTES from '../components/routes';
+import { routeSelector } from '../selectors';
 import {
   deleteRepo,
   fetchReposSuccess,
@@ -79,35 +81,43 @@ function isInProgress(progress: number): boolean {
   return progress < WorkerReservedProgress.COMPLETED && progress >= WorkerReservedProgress.INIT;
 }
 
-function* handleRepoListStatusLoaded(action: Action<any>) {
-  const statuses = action.payload;
-  for (const repoUri of Object.keys(statuses)) {
-    const status = statuses[repoUri];
-    if (status.deleteStatus) {
-      yield put(pollRepoDeleteStatus(repoUri));
-    } else if (status.indexStatus) {
-      if (isInProgress(status.indexStatus.progress)) {
-        yield put(pollRepoIndexStatus(repoUri));
-      }
-    } else if (status.gitStatus) {
-      if (isInProgress(status.gitStatus.progress)) {
-        yield put(pollRepoCloneStatus(repoUri));
+function* handleReposStatusLoaded(action: Action<any>) {
+  const route = yield select(routeSelector);
+  // Only load all repository status for admin page
+  if (route.path === ROUTES.ADMIN) {
+    const statuses = action.payload;
+    for (const repoUri of Object.keys(statuses)) {
+      const status = statuses[repoUri];
+      if (status.deleteStatus) {
+        yield put(pollRepoDeleteStatus(repoUri));
+      } else if (status.indexStatus) {
+        if (isInProgress(status.indexStatus.progress)) {
+          yield put(pollRepoIndexStatus(repoUri));
+        }
+      } else if (status.gitStatus) {
+        if (isInProgress(status.gitStatus.progress)) {
+          yield put(pollRepoCloneStatus(repoUri));
+        }
       }
     }
   }
 }
 
-// `fetchReposSuccess` is issued by the repository admin page.
 export function* watchLoadRepoListStatus() {
+  // After all the repositories have been loaded, we should start load
+  // their status.
   yield takeEvery(String(fetchReposSuccess), handleRepoListStatus);
-  // After all the status of all the repositoriesin the list has been loaded,
-  // start polling status only for those still in progress.
-  yield takeEvery(String(loadStatusSuccess), handleRepoListStatusLoaded);
 }
 
 // `loadRepoSuccess` is issued by the main source view page.
 export function* watchLoadRepoStatus() {
   yield takeLatest(String(loadRepoSuccess), handleRepoStatus);
+}
+
+export function* watchPollingRepoStatus() {
+  // After the status of the repos or a given repo has been loaded, check
+  // if we need to start polling the status.
+  yield takeEvery(String(loadStatusSuccess), handleReposStatusLoaded);
 }
 
 const REPO_STATUS_POLLING_FREQ_MS = 1000;
