@@ -21,6 +21,7 @@ import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from '../utils/deep_freeze';
+import { Capabilities } from '..';
 
 /** @public */
 export interface LegacyNavLink {
@@ -48,6 +49,7 @@ export interface InjectedMetadataParams {
       id: PluginName;
       plugin: DiscoveredPlugin;
     }>;
+    capabilities: Capabilities;
     legacyMetadata: {
       app: unknown;
       translations: unknown;
@@ -97,6 +99,10 @@ export class InjectedMetadataService {
         return this.state.version;
       },
 
+      getCapabilities: () => {
+        return this.state.capabilities;
+      },
+
       getCspConfig: () => {
         return this.state.csp;
       },
@@ -133,6 +139,7 @@ export interface InjectedMetadataSetup {
   getBasePath: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaVersion: () => string;
+  getCapabilities: () => Capabilities;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };

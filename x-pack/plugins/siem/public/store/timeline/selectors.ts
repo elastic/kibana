@@ -32,7 +32,10 @@ export const getKqlFilterQuerySelector = () =>
   createSelector(
     selectTimeline,
     timeline =>
-      timeline && timeline.kqlQuery && timeline.kqlQuery.filterQuery
+      timeline &&
+      timeline.kqlQuery &&
+      timeline.kqlQuery.filterQuery &&
+      timeline.kqlQuery.filterQuery.query
         ? timeline.kqlQuery.filterQuery.query.expression
         : null
   );
