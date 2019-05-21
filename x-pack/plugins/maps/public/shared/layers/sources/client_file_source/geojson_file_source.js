@@ -16,8 +16,8 @@ export class GeojsonFileSource extends AbstractVectorSource {
 
   static type = GEOJSON_FILE;
   static title = 'Import GeoJSON Vector File';
-  static description = 'Upload a GeoJSON file & Index in Elasticsearch';
-  static icon = 'emsApp';
+  static description = 'Import a GeoJSON file & Index in Elasticsearch';
+  static icon = 'importAction';
   static indexReadyFile = true;
 
   static createDescriptor(featureCollection, name) {

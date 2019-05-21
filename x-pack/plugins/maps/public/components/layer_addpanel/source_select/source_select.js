@@ -23,12 +23,14 @@ export function SourceSelect({
     const icon = Source.icon
       ? <EuiIcon type={Source.icon} size="l" />
       : null;
+    const cardStyle =
+      `${Source.indexReadyFile ? 'mapLayerImportpanel__card' : ''} mapLayerAddpanel__card`;
 
     return (
       <Fragment key={Source.type}>
         <EuiSpacer size="s" />
         <EuiCard
-          className="mapLayerAddpanel__card"
+          className={cardStyle}
           title={Source.title}
           icon={icon}
           onClick={() => updateSourceSelection(Source)}
