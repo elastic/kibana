@@ -6,14 +6,14 @@
 
 import React, { useEffect, useReducer, useMemo } from 'react';
 import { Datasource, Visualization } from '../../types';
-import { reducer, getInitialState } from '../state_management';
+import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
 
 export interface EditorFrameProps {
-  datasources: Record<string, Datasource>;
-  visualizations: Record<string, Visualization>;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
 
   initialDatasource: string | null;
   initialVisualization: string | null;
@@ -26,8 +26,8 @@ export function EditorFrame(props: EditorFrameProps) {
   useEffect(
     () => {
       let datasourceGotSwitched = false;
-      if (state.datasourceIsLoading && state.activeDatasource) {
-        props.datasources[state.activeDatasource].initialize().then(datasourceState => {
+      if (state.datasource.isLoading && state.datasource.activeId) {
+        props.datasourceMap[state.datasource.activeId].initialize().then(datasourceState => {
           if (!datasourceGotSwitched) {
             dispatch({
               type: 'UPDATE_DATASOURCE_STATE',
@@ -41,14 +41,14 @@ export function EditorFrame(props: EditorFrameProps) {
         };
       }
     },
-    [state.activeDatasource, state.datasourceIsLoading]
+    [state.datasource.activeId, state.datasource.isLoading]
   );
 
   const datasourcePublicAPI = useMemo(
     () =>
-      state.activeDatasource && !state.datasourceIsLoading
-        ? props.datasources[state.activeDatasource].getPublicAPI(
-            state.datasourceState,
+      state.datasource.activeId && !state.datasource.isLoading
+        ? props.datasourceMap[state.datasource.activeId].getPublicAPI(
+            state.datasource.state,
             (newState: unknown) => {
               dispatch({
                 type: 'UPDATE_DATASOURCE_STATE',
@@ -57,29 +57,34 @@ export function EditorFrame(props: EditorFrameProps) {
             }
           )
         : undefined,
-    [props.datasources, state.datasourceIsLoading, state.activeDatasource, state.datasourceState]
+    [
+      props.datasourceMap,
+      state.datasource.isLoading,
+      state.datasource.activeId,
+      state.datasource.state,
+    ]
   );
 
   return (
     <FrameLayout
       dataPanel={
         <DataPanelWrapper
-          activeDatasource={state.activeDatasource}
-          datasourceIsLoading={state.datasourceIsLoading}
-          datasourceState={state.datasourceState}
-          datasources={props.datasources}
+          activeDatasource={state.datasource.activeId}
+          datasourceIsLoading={state.datasource.isLoading}
+          datasourceState={state.datasource.state}
+          datasourceMap={props.datasourceMap}
           dispatch={dispatch}
         />
       }
       configPanel={
-        state.activeDatasource &&
-        !state.datasourceIsLoading && (
+        state.datasource.activeId &&
+        !state.datasource.isLoading && (
           <ConfigPanelWrapper
-            visualizations={props.visualizations}
-            activeVisualization={state.activeVisualization}
+            visualizationMap={props.visualizationMap}
+            activeVisualizationId={state.visualization.activeId}
             datasourcePublicAPI={datasourcePublicAPI!}
             dispatch={dispatch}
-            visualizationState={state.visualizationState}
+            visualizationStateMap={state.visualization.stateMap}
           />
         )
       }
