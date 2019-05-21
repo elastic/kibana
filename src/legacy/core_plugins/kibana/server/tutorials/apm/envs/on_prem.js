@@ -37,6 +37,7 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
+  createDotNetAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
 export function onPremInstructions(apmIndexPattern) {
@@ -135,6 +136,10 @@ export function onPremInstructions(apmIndexPattern) {
           {
             id: INSTRUCTION_VARIANT.GO,
             instructions: createGoAgentInstructions(),
+          },
+          {
+            id: INSTRUCTION_VARIANT.DOTNET,
+            instructions: createDotNetAgentInstructions(),
           },
         ],
         statusCheck: {
