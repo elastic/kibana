@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
@@ -40,7 +40,7 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
               color="primary"
               iconType="pause"
               iconSide="left"
@@ -50,7 +50,7 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
                 id="xpack.infra.logs.stopStreamingButtonLabel"
                 defaultMessage="Stop streaming"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -70,12 +70,12 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
+            <EuiButtonEmpty iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
               <FormattedMessage
                 id="xpack.infra.logs.startStreamingButtonLabel"
                 defaultMessage="Stream live"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
