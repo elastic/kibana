@@ -8,22 +8,52 @@ import { EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
+
 import {
   DataFramePreviewRequest,
   DropDownLabel,
   DropDownOption,
+  FieldName,
   PivotAggsConfigDict,
+  pivotAggsFieldSupport,
   PivotGroupByConfigDict,
-  pivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
+  pivotGroupByFieldSupport,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
 
-export enum FIELD_TYPE {
-  DATE = 'date',
-  IP = 'ip',
-  NUMBER = 'number',
-  STRING = 'string',
+export interface Field {
+  name: FieldName;
+  type: KBN_FIELD_TYPES;
+}
+
+function getDefaultGroupByConfig(
+  aggName: string,
+  fieldName: FieldName,
+  groupByAgg: PIVOT_SUPPORTED_GROUP_BY_AGGS
+) {
+  switch (groupByAgg) {
+    case PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS:
+      return {
+        agg: groupByAgg,
+        aggName,
+        field: fieldName,
+      };
+    case PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM:
+      return {
+        agg: groupByAgg,
+        aggName,
+        field: fieldName,
+        interval: '10',
+      };
+    case PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM:
+      return {
+        agg: groupByAgg,
+        aggName,
+        field: fieldName,
+        interval: '1m',
+      };
+  }
 }
 
 export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
@@ -35,55 +65,28 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
   const aggOptions: EuiComboBoxOptionProps[] = [];
   const aggOptionsData: PivotAggsConfigDict = {};
 
+  const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
-    .filter(field => field.aggregatable === true)
-    .map(field => ({ name: field.name, type: field.type }));
+    .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
+    .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
   fields.forEach(field => {
-    // group by
-    if (field.type === FIELD_TYPE.STRING) {
-      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
+    // Group by
+    const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
+    availableGroupByAggs.forEach(groupByAgg => {
+      const aggName = `${groupByAgg}(${field.name})`;
       const groupByOption: DropDownLabel = { label: aggName };
       groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-        field: field.name,
-        aggName,
-      };
-    } else if (field.type === FIELD_TYPE.NUMBER) {
-      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label: aggName };
-      groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
-        field: field.name,
-        aggName,
-        interval: '10',
-      };
-    } else if (field.type === FIELD_TYPE.DATE) {
-      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label: aggName };
-      groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
-        field: field.name,
-        aggName,
-        interval: '1m',
-      };
-    }
+      groupByOptionsData[aggName] = getDefaultGroupByConfig(aggName, field.name, groupByAgg);
+    });
 
-    // aggregations
+    // Aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
-    pivotSupportedAggs.forEach(agg => {
-      if (
-        (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
-          (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
-        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
-      ) {
-        const aggName = `${agg}(${field.name})`;
-        aggOption.options.push({ label: aggName });
-        aggOptionsData[aggName] = { agg, field: field.name, aggName };
-      }
+    const availableAggs = pivotAggsFieldSupport[field.type];
+    availableAggs.forEach(agg => {
+      const aggName = `${agg}(${field.name})`;
+      aggOption.options.push({ label: aggName });
+      aggOptionsData[aggName] = { agg, field: field.name, aggName };
     });
     aggOptions.push(aggOption);
   });

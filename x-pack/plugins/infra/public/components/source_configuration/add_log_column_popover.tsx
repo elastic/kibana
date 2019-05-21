@@ -29,7 +29,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
     () => [
       {
         optionProps: {
-          append: <BuiltinBadge />,
+          append: <SystemColumnBadge />,
           'data-test-subj': 'addTimestampLogColumn',
           // this key works around EuiSelectable using a lowercased label as
           // key, which leads to conflicts with field names
@@ -45,7 +45,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
       {
         optionProps: {
           'data-test-subj': 'addMessageLogColumn',
-          append: <BuiltinBadge />,
+          append: <SystemColumnBadge />,
           // this key works around EuiSelectable using a lowercased label as
           // key, which leads to conflicts with field names
           key: 'message',
@@ -158,11 +158,11 @@ const usePopoverVisibilityState = (initialState: boolean) => {
   );
 };
 
-const BuiltinBadge: React.FunctionComponent = () => (
+const SystemColumnBadge: React.FunctionComponent = () => (
   <EuiBadge>
     <FormattedMessage
-      id="xpack.infra.sourceConfiguration.builtInColumnBadgeLabel"
-      defaultMessage="Built-in"
+      id="xpack.infra.sourceConfiguration.systemColumnBadgeLabel"
+      defaultMessage="System"
     />
   </EuiBadge>
 );

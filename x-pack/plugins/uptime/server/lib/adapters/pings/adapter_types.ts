@@ -14,14 +14,16 @@ export interface UMPingsAdapter {
     monitorId?: string | null,
     status?: string | null,
     sort?: string | null,
-    size?: number | null
+    size?: number | null,
+    location?: string | null
   ): Promise<PingResults>;
 
   getLatestMonitorDocs(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string | null
+    monitorId?: string | null,
+    location?: string | null
   ): Promise<Ping[]>;
 
   getPingHistogram(
