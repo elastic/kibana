@@ -32,10 +32,5 @@ export class DataRequest {
     return this._descriptor.dataId;
   }
 
-  getIdOffsetFromMeta() {
-    const idOffset = _.get(this._descriptor, 'dataMeta.idOffset');
-    return (typeof idOffset === 'number') ? idOffset : 0;
-  }
-
 }
 

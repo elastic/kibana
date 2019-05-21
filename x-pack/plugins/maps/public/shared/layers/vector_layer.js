@@ -9,7 +9,7 @@ import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE, DEFAULT_ES_DOC_LIMIT } from '../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
@@ -35,7 +35,14 @@ const ALL_SHAPE_MB_FILTER = [
   ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
 ];
 
-const ID_ROTATION = 2;
+
+let idCounter = 0;
+function generateNumericalId() {
+  const newId = idCounter < Number.MAX_SAFE_INTEGER ? idCounter : 0;
+  idCounter = newId + 1;
+  return newId;
+}
+
 
 export class VectorLayer extends AbstractLayer {
 
@@ -333,12 +340,6 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-
-  _getIdOffsetForCurrentRequest() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    return (sourceDataRequest) ? sourceDataRequest.getIdOffsetFromMeta() : 0;
-  }
-
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
@@ -357,11 +358,9 @@ export class VectorLayer extends AbstractLayer {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data: featureCollection, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
-      const idOffset = (this._getIdOffsetForCurrentRequest() + 1) % ID_ROTATION;
-      this._assignIdsToFeatures(featureCollection, idOffset);
+      this._assignIdsToFeatures(featureCollection);
       const newMeta = {
-        ...meta,
-        idOffset: idOffset
+        ...meta
       };
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, newMeta);
       return {
@@ -376,15 +375,10 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _assignIdsToFeatures(featureCollection, idOffset) {
+  _assignIdsToFeatures(featureCollection) {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
-      let id;
-      if(typeof feature.id === 'number') {
-        id = feature.id;
-      } else {
-        id = (idOffset * DEFAULT_ES_DOC_LIMIT) +  i;
-      }
+      const id = generateNumericalId();
       feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
       feature.id = id;
     }
