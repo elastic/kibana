@@ -36,13 +36,13 @@ import {
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 
 interface KqlQueryHosts {
-  filterQuery: KueryFilterQuery;
+  filterQuery: KueryFilterQuery | null;
   model: KueryFilterModel.hosts;
   type: hostsModel.HostsType;
 }
 
 interface KqlQueryNetwork {
-  filterQuery: KueryFilterQuery;
+  filterQuery: KueryFilterQuery | null;
   model: KueryFilterModel.network;
   type: networkModel.NetworkType;
 }
@@ -50,16 +50,16 @@ interface KqlQueryNetwork {
 export type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
 
 interface UrlState {
-  [key: string]: any;
   kqlQuery: KqlQuery[];
   timerange: UrlInputsModel;
 }
+type KeyUrlState = keyof UrlState;
 
 interface UrlStateProps {
   indexPattern: StaticIndexPattern;
-  mapToUrlState?: (value: any) => UrlState | undefined;
-  onChange?: (urlState: UrlState, previousUrlState: UrlState | undefined) => void;
-  onInitialize?: (urlState: UrlState | undefined) => void;
+  mapToUrlState?: (value: any) => UrlState;
+  onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
+  onInitialize?: (urlState: UrlState) => void;
   urlState: UrlState;
 }
 
@@ -91,13 +91,47 @@ interface UrlStateDispatchProps {
   }>;
 }
 
+interface TimerangeActions {
+  absolute: ActionCreator<{
+    from: number;
+    fromStr: undefined;
+    id: InputsModelId;
+    to: number;
+    toStr: undefined;
+  }>;
+  relative: ActionCreator<{
+    from: number;
+    fromStr: string;
+    id: InputsModelId;
+    to: number;
+    toStr: string;
+  }>;
+}
+
+interface KqlActions {
+  hosts: ActionCreator<{
+    filterQuery: SerializedFilterQuery;
+    hostsType: hostsModel.HostsType;
+  }>;
+  network: ActionCreator<{
+    filterQuery: SerializedFilterQuery;
+    networkType: networkModel.NetworkType;
+  }>;
+}
+
+interface UrlStateMappedToActionsType {
+  kqlQuery: KqlActions;
+  timerange: TimerangeActions;
+}
+
 type UrlStateContainerProps = UrlStateProps & UrlStateDispatchProps;
 
-interface UrlStateContainerLifecycles {
+interface UrlStateRouterProps {
   history: History;
   location: Location;
 }
-export type UrlStateContainerLifecycleProps = UrlStateContainerLifecycles & UrlStateContainerProps;
+
+export type UrlStateContainerLifecycleProps = UrlStateRouterProps & UrlStateContainerProps;
 
 export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
   const trailingPath = pathname.match(/([^\/]+$)/);
@@ -133,19 +167,22 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
   }: UrlStateContainerLifecycleProps) {
     const { history, location, urlState } = this.props;
     if (JSON.stringify(urlState) !== JSON.stringify(prevUrlState)) {
-      Object.keys(urlState).forEach((urlKey: string) => {
-        if (JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])) {
-          if (urlKey === 'kqlQuery') {
-            urlState.kqlQuery.forEach((value: KqlQuery, index: number) => {
-              if (
-                JSON.stringify(urlState.kqlQuery[index]) !==
-                JSON.stringify(prevUrlState.kqlQuery[index])
-              ) {
-                this.replaceStateInLocation(urlState.kqlQuery[index], 'kqlQuery');
-              }
-            });
-          } else {
-            this.replaceStateInLocation(urlState[urlKey], urlKey);
+      Object.keys(urlState).forEach((key: string) => {
+        if ('kqlQuery' === key || 'timerange' === key) {
+          const urlKey: KeyUrlState = key;
+          if (JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])) {
+            if (urlKey === 'kqlQuery') {
+              urlState.kqlQuery.forEach((value: KqlQuery, index: number) => {
+                if (
+                  JSON.stringify(urlState.kqlQuery[index]) !==
+                  JSON.stringify(prevUrlState.kqlQuery[index])
+                ) {
+                  this.replaceStateInLocation(urlState.kqlQuery[index], 'kqlQuery');
+                }
+              });
+            } else {
+              this.replaceStateInLocation(urlState[urlKey], urlKey);
+            }
           }
         }
       });
@@ -163,7 +200,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
 
   private replaceStateInLocation = throttle(
     1000,
-    (urlState: UrlInputsModel | KqlQuery, urlStateKey: string) => {
+    (urlState: UrlInputsModel | KqlQuery | KqlQuery[], urlStateKey: string) => {
       const { history, location } = this.props;
       const newLocation = replaceQueryStringInLocation(
         location,
@@ -176,7 +213,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     }
   );
 
-  private urlStateMappedToActions = {
+  private urlStateMappedToActions: UrlStateMappedToActionsType = {
     kqlQuery: {
       hosts: this.props.setHostsKql,
       network: this.props.setNetworkKql,
@@ -188,61 +225,70 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
   };
 
   private handleInitialize = (location: Location) => {
-    Object.keys(this.urlStateMappedToActions).forEach(key => {
-      const newUrlStateString = getParamFromQueryString(getQueryStringFromLocation(location), key);
-      if (newUrlStateString) {
-        if (key === 'timerange') {
-          const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
-          const globalId: InputsModelId = 'global';
-          const globalRange: UrlTimeRange = timerangeStateData.global;
-          const globalType: TimeRangeKinds = get('global.kind', timerangeStateData);
-          if (globalType) {
-            if (globalRange.linkTo.length === 0) {
-              this.props.toggleTimelineLinkTo({ linkToId: 'global' });
+    Object.keys(this.urlStateMappedToActions).forEach((key: string) => {
+      if ('kqlQuery' === key || 'timerange' === key) {
+        const urlKey: KeyUrlState = key;
+        const newUrlStateString = getParamFromQueryString(
+          getQueryStringFromLocation(location),
+          urlKey
+        );
+        if (newUrlStateString) {
+          if (urlKey === 'timerange') {
+            const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
+            const globalId: InputsModelId = 'global';
+            const globalRange: UrlTimeRange = timerangeStateData.global;
+            const globalType: TimeRangeKinds = get('global.kind', timerangeStateData);
+            if (globalType) {
+              if (globalRange.linkTo.length === 0) {
+                this.props.toggleTimelineLinkTo({ linkToId: 'global' });
+              }
+              if (globalType === 'absolute') {
+                this.urlStateMappedToActions.timerange.absolute({
+                  ...globalRange,
+                  id: globalId,
+                });
+              }
             }
-            // @ts-ignore
-            this.urlStateMappedToActions.timerange[globalType]({
-              ...globalRange,
-              id: globalId,
-            });
-          }
-          const timelineId: InputsModelId = 'timeline';
-          const timelineRange: UrlTimeRange = timerangeStateData.timeline;
-          const timelineType: TimeRangeKinds = get('timeline.kind', timerangeStateData);
-          if (timelineType) {
-            if (timelineRange.linkTo.length === 0) {
-              this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
-            }
-            // @ts-ignore
-            this.urlStateMappedToActions.timerange[timelineType]({
-              ...timelineRange,
-              id: timelineId,
-            });
-          }
-        }
-        if (key === 'kqlQuery') {
-          const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
-          if (isKqlForRoute(location.pathname, kqlQueryStateData)) {
-            const filterQuery = {
-              query: kqlQueryStateData.filterQuery,
-              serializedQuery: convertKueryToElasticSearchQuery(
-                kqlQueryStateData.filterQuery.expression,
-                this.props.indexPattern
-              ),
-            };
-            if (kqlQueryStateData.model === 'hosts') {
-              this.urlStateMappedToActions.kqlQuery.hosts({
-                filterQuery,
-                hostsType: kqlQueryStateData.type,
-              });
-            }
-            if (kqlQueryStateData.model === 'network') {
-              this.urlStateMappedToActions.kqlQuery.network({
-                filterQuery,
-                networkType: kqlQueryStateData.type,
+            const timelineId: InputsModelId = 'timeline';
+            const timelineRange: UrlTimeRange = timerangeStateData.timeline;
+            const timelineType: TimeRangeKinds = get('timeline.kind', timerangeStateData);
+            if (timelineType) {
+              if (timelineRange.linkTo.length === 0) {
+                this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
+              }
+              // @ts-ignore
+              this.urlStateMappedToActions.timerange[timelineType]({
+                ...timelineRange,
+                id: timelineId,
               });
             }
           }
+          if (urlKey === 'kqlQuery') {
+            const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
+            if (isKqlForRoute(location.pathname, kqlQueryStateData)) {
+              const filterQuery = {
+                query: kqlQueryStateData.filterQuery,
+                serializedQuery: convertKueryToElasticSearchQuery(
+                  kqlQueryStateData.filterQuery ? kqlQueryStateData.filterQuery.expression : '',
+                  this.props.indexPattern
+                ),
+              };
+              if (kqlQueryStateData.model === 'hosts') {
+                this.urlStateMappedToActions.kqlQuery.hosts({
+                  filterQuery,
+                  hostsType: kqlQueryStateData.type,
+                });
+              }
+              if (kqlQueryStateData.model === 'network') {
+                this.urlStateMappedToActions.kqlQuery.network({
+                  filterQuery,
+                  networkType: kqlQueryStateData.type,
+                });
+              }
+            }
+          }
+        } else {
+          this.replaceStateInLocation(this.props.urlState[urlKey], urlKey);
         }
       }
     });
@@ -310,25 +356,24 @@ const makeMapStateToProps = () => {
           : {},
         kqlQuery: [
           {
-            filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details) || '',
+            filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
             type: hostsModel.HostsType.details,
-            model: 'hosts',
+            model: KueryFilterModel.hosts,
           },
           {
-            filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page) || '',
+            filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
             type: hostsModel.HostsType.page,
-            model: 'hosts',
+            model: KueryFilterModel.hosts,
           },
           {
-            filterQuery:
-              getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details) || '',
+            filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details),
             type: networkModel.NetworkType.details,
-            model: 'network',
+            model: KueryFilterModel.network,
           },
           {
-            filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page) || '',
+            filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
             type: networkModel.NetworkType.page,
-            model: 'network',
+            model: KueryFilterModel.network,
           },
         ],
       },
@@ -346,7 +391,6 @@ export const UrlStateContainer = connect(
     setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
     toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
   }
-  // @ts-ignore
 )(UrlStateComponents);
 
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
