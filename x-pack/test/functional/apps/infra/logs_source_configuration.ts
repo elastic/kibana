@@ -72,7 +72,11 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await pageObjects.infraLogs.getLogStream();
       });
 
-      it('renders the default log columns', async () => {
+      it('renders the default log columns with their headers', async () => {
+        const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
+
+        expect(columnHeaderLabels).to.eql(['Timestamp', 'event.dataset', 'Message', '']);
+
         const logStreamEntries = await infraLogStream.getStreamEntries();
 
         expect(logStreamEntries.length).to.be.greaterThan(0);
@@ -97,7 +101,11 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await infraSourceConfigurationFlyout.closeFlyout();
       });
 
-      it('renders the changed log columns', async () => {
+      it('renders the changed log columns with their headers', async () => {
+        const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
+
+        expect(columnHeaderLabels).to.eql(['Timestamp', 'host.name', '']);
+
         const logStreamEntries = await infraLogStream.getStreamEntries();
 
         expect(logStreamEntries.length).to.be.greaterThan(0);
