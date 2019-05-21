@@ -25,7 +25,7 @@ import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { FlowTarget, IndexType, LastEventIndexKey } from '../../graphql/types';
+import { FlowTarget, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
 import { TlsTable } from '../../components/page/network/tls_table';
@@ -50,8 +50,6 @@ interface IPDetailsComponentReduxProps {
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
-const indexTypes = [IndexType.FILEBEAT, IndexType.PACKETBEAT];
-
 const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
@@ -60,9 +58,9 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     filterQuery,
     flowTarget,
   }) => (
-    <WithSource sourceId="default" indexTypes={indexTypes}>
-      {({ filebeatIndicesExist, indexPattern }) =>
-        indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
+    <WithSource sourceId="default">
+      {({ indicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
           <StickyContainer>
             <FiltersGlobal>
               <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
