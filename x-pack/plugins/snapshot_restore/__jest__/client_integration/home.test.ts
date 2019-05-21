@@ -6,7 +6,13 @@
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import {
+  setupEnvironment,
+  pageHelpers,
+  nextTick,
+  getRandomString,
+  findTestSubject,
+} from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
 
 const { setup } = pageHelpers.home;
@@ -115,6 +121,84 @@ describe('<SnapshotRestoreHome />', () => {
         } else {
           expect(row).toEqual(['', repository.name, mapTypeToText[repository.type], '']);
         }
+      });
+    });
+
+    test('should have a button to reload the repositories', async () => {
+      const { component, exists, find } = testBed;
+      const totalRequests = server.requests.length;
+      expect(exists('reloadButton')).toBe(true);
+
+      await act(async () => {
+        find('reloadButton').simulate('click');
+        await nextTick();
+        component.update();
+      });
+
+      expect(server.requests.length).toBe(totalRequests + 1);
+      expect(server.requests[server.requests.length - 1].url).toBe(
+        '/api/snapshot_restore/repositories'
+      );
+    });
+
+    test('should have a button to register a new repository', () => {
+      const { exists } = testBed;
+      expect(exists('registerRepositoryButton')).toBe(true);
+    });
+
+    test('should have action buttons on each row to edit and delete a repository', () => {
+      const { table } = testBed;
+      const { rows } = table.getMetaData('repositoryTable');
+      const lastColumn = rows[0].columns[rows[0].columns.length - 1].reactWrapper;
+
+      expect(findTestSubject(lastColumn, 'editRepositoryButton').length).toBe(1);
+      expect(findTestSubject(lastColumn, 'deleteRepositoryButton').length).toBe(1);
+    });
+
+    describe('delete repository', () => {
+      test('should show a confirmation when clicking the delete repository button', async () => {
+        const { table, actions } = testBed;
+        const { rows } = table.getMetaData('repositoryTable');
+
+        await actions.clickRepositoryActionAt(0, 'delete');
+
+        // We need to read the document "body" as the modal is added there and not inside
+        // the component DOM tree.
+        expect(
+          document.body.querySelector('[data-test-subj="deleteRepositoryConfirmation"]')
+        ).not.toBe(null);
+
+        expect(
+          document.body.querySelector('[data-test-subj="deleteRepositoryConfirmation"]')!
+            .textContent
+        ).toContain(`Remove repository '${rows[0].columns[1].value}'?`);
+      });
+
+      test('should send the correct HTTP request to delete repository', async () => {
+        const { component, table, actions } = testBed;
+        const { rows } = table.getMetaData('repositoryTable');
+
+        await actions.clickRepositoryActionAt(0, 'delete');
+
+        const modal = document.body.querySelector(
+          '[data-test-subj="deleteRepositoryConfirmation"]'
+        );
+        const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+          '[data-test-subj="confirmModalConfirmButton"]'
+        );
+
+        await act(async () => {
+          confirmButton!.click();
+          await nextTick();
+          component.update();
+        });
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(latestRequest.method).toBe('DELETE');
+        expect(latestRequest.url).toBe(
+          `/api/snapshot_restore/repositories/${rows[0].columns[1].value}`
+        );
       });
     });
 

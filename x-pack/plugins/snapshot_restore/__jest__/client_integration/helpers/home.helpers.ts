@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { act } from 'react-dom/test-utils';
+
 import { registerTestBed, findTestSubject, TestBed } from '../../../../../test_utils';
 import { SnapshotRestoreHome } from '../../../public/app/sections/home/home';
 import { BASE_PATH } from '../../../public/app/constants';
@@ -22,6 +24,7 @@ export interface HomeTestBed extends TestBed<TestSubjects> {
   actions: {
     selectRepositoryAt: (index: number) => void;
     clickRepositoryAt: (index: number) => void;
+    clickRepositoryActionAt: (index: number, action: 'delete' | 'edit') => void;
   };
 }
 
@@ -33,17 +36,30 @@ export const setup = async (): Promise<HomeTestBed> => {
    * User Actions
    */
 
-  const selectRepositoryAt = (index = 0) => {
+  const selectRepositoryAt = (index: number) => {
     const { rows } = testBed.table.getMetaData(TABLE);
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
     checkBox.simulate('change', { target: { checked: true } });
   };
 
-  const clickRepositoryAt = (index = 0) => {
+  const clickRepositoryAt = (index: number) => {
     const { rows } = testBed.table.getMetaData(TABLE);
     const repositoryLink = findTestSubject(rows[index].reactWrapper, 'repositoryLink');
     repositoryLink.simulate('click');
+  };
+
+  const clickRepositoryActionAt = async (index: number, action: 'delete' | 'edit') => {
+    const { component, table } = testBed;
+    const { rows } = table.getMetaData('repositoryTable');
+    const currentRow = rows[index];
+    const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
+    const button = findTestSubject(lastColumn, `${action}RepositoryButton`);
+
+    await act(async () => {
+      button.simulate('click');
+      component.update();
+    });
   };
 
   return {
@@ -51,6 +67,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     actions: {
       selectRepositoryAt,
       clickRepositoryAt,
+      clickRepositoryActionAt,
     },
   };
 };
@@ -60,8 +77,12 @@ export type TestSubjects =
   | 'cell'
   | 'checkboxSelectAll'
   | 'checkboxSelectRow-aa'
+  | 'deleteRepositoryConfirmation'
+  | 'documentationLink'
   | 'emptyPrompt'
   | 'emptyPrompt.registerRepositoryButton'
+  | 'registerRepositoryButton'
+  | 'reloadButton'
   | 'repositoryLink'
   | 'repositoryList'
   | 'repositoryTable'
@@ -70,7 +91,6 @@ export type TestSubjects =
   | 'row'
   | 'snapshotList'
   | 'sectionLoading'
-  | 'documentationLink'
   | 'snapshotRestoreApp'
   | 'snapshotRestoreApp.appTitle'
   | 'snapshotRestoreApp.repositoryList'

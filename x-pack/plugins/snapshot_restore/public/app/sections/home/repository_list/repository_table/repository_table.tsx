@@ -105,6 +105,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                   iconType="pencil"
                   color="primary"
                   href={`#${BASE_PATH}/edit_repository/${name}`}
+                  data-test-subj="editRepositoryButton"
                 />
               </EuiToolTip>
             );
@@ -131,7 +132,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                         )}
                         iconType="trash"
                         color="danger"
-                        data-test-subj="srRepositoryListDeleteActionButton"
+                        data-test-subj="deleteRepositoryButton"
                         onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
                       />
                     </EuiToolTip>
@@ -203,7 +204,12 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     toolsRight: (
       <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
         <EuiFlexItem>
-          <EuiButton color="secondary" iconType="refresh" onClick={reload}>
+          <EuiButton
+            color="secondary"
+            iconType="refresh"
+            onClick={reload}
+            data-test-subj="reloadButton"
+          >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
               defaultMessage="Reload"
@@ -217,7 +223,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             })}
             fill
             iconType="plusInCircle"
-            data-test-subj="srRepositoriesAddButton"
+            data-test-subj="registerRepositoryButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"

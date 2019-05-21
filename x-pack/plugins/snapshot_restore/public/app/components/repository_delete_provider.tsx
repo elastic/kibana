@@ -147,7 +147,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
             )
           }
           buttonColor="danger"
-          data-test-subj="srDeleteRepositoryConfirmationModal"
+          data-test-subj="deleteRepositoryConfirmation"
         >
           {isSingle ? (
             <p>
