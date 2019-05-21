@@ -34,6 +34,8 @@ export class JobRunner {
     this._percentageComplete = 0;
 
     this._progress$ = new BehaviorSubject(this._percentageComplete);
+    // link the _subscribers list from the JobCreator
+    // to the progress BehaviorSubject.
     jobCreator.subscribers.forEach(s => this._progress$.subscribe(s));
   }
 
@@ -60,6 +62,9 @@ export class JobRunner {
     return success;
   }
 
+  // start the datafeed and then start polling for progress
+  // the complete percentage is added to an observable
+  // so all pre-subscribed listeners can follow along.
   public async startDatafeed(): Promise<boolean> {
     const openSuccess = await this.openJob();
     if (openSuccess) {
@@ -80,6 +85,8 @@ export class JobRunner {
             }, this._refreshInterval);
           }
         };
+        // wait for the first check to run and then return success.
+        // all subsequent checks will update the observable
         await check();
         return true;
       } catch (error) {
