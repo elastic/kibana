@@ -115,7 +115,7 @@ uiRoutes
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, $location, Private) {
+      ip: function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -319,7 +319,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async (menuItem, navController, anchorElement) => {
+      run: async (menuItem, navController, anchorElement) => { // eslint-disable-line no-unused-vars
         const sharingData = await this.getSharingData();
         showShareContextMenu({
           anchorElement,
