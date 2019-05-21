@@ -12,6 +12,7 @@ const esStackBase = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC
 
 export const putWatchApiUrl = `${esBase}/watcher-api-put-watch.html`;
 export const executeWatchApiUrl = `${esBase}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`;
+export const watcherGettingStartedUrl = `${esStackBase}/watcher-getting-started.html`;
 
 export const watchActionsConfigurationMap = {
   [ACTION_TYPES.SLACK]: `${esStackBase}/actions-slack.html#configuring-slack`,
