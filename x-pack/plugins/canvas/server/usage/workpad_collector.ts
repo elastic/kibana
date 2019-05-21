@@ -64,7 +64,7 @@ interface WorkpadTelemetry {
 */
 export function handleResponse(response: SearchResponse<WorkpadSearch>): WorkpadTelemetry {
   const workpadDocs = response.hits.hits;
-  if (workpadDocs == null) {
+  if (workpadDocs === null) {
     return {};
   }
 
