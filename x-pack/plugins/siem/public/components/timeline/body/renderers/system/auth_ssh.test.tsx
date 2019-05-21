@@ -10,8 +10,7 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
-
-import { AuthSsh } from '.';
+import { AuthSsh } from './auth_ssh';
 
 describe('AuthSsh', () => {
   describe('rendering', () => {

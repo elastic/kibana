@@ -12,8 +12,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData } from '../../../../../mock';
 import { TestProviders } from '../../../../../mock/test_providers';
-
-import { SuricataDetails } from '.';
+import { SuricataDetails } from './suricata_details';
 
 describe('SuricataDetails', () => {
   describe('rendering', () => {

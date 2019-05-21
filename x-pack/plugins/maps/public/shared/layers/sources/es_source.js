@@ -19,6 +19,7 @@ import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_pro
 
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../../store/util';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -245,7 +246,7 @@ export class AbstractESSource extends AbstractVectorSource {
       const geoField = await this._getGeoField();
       // geo_bounds aggregation only supports geo_point
       // there is currently no backend support for getting bounding box of geo_shape field
-      return geoField.type !== 'geo_shape';
+      return geoField.type !== ES_GEO_FIELD_TYPE.GEO_SHAPE;
     } catch (error) {
       return false;
     }

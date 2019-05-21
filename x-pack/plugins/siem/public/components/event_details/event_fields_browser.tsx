@@ -14,18 +14,18 @@ import { pure } from 'recompose';
 import { DetailItem } from '../../graphql/types';
 
 import { getColumns } from './columns';
-import { getItems, search } from './helpers';
+import { search } from './helpers';
 
 interface Props {
   data: DetailItem[];
-  id: string;
+  eventId: string;
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */
-export const EventFieldsBrowser = pure<Props>(({ data, id }) => (
+export const EventFieldsBrowser = pure<Props>(({ data, eventId }) => (
   <EuiInMemoryTable
-    items={getItems(data, id)}
-    columns={getColumns(id)}
+    items={data}
+    columns={getColumns(eventId)}
     pagination={false}
     search={search}
     sorting={true}

@@ -31,6 +31,7 @@
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginSetupContext](./kibana-plugin-server.pluginsetupcontext.md) | Context passed to the plugins <code>setup</code> method. |
+|  [PluginStartContext](./kibana-plugin-server.pluginstartcontext.md) | Context passed to the plugins <code>start</code> method. |
 
 ## Type Aliases
 

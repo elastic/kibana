@@ -16,7 +16,8 @@ import { getEmptyValue } from '../../../empty_value';
 import { defaultHeaders } from '../column_headers/default_headers';
 
 import { columnRenderers } from '.';
-import { deleteItemIdx, findItem, getColumnRenderer, getValues } from '.';
+import { getColumnRenderer } from './get_column_renderer';
+import { getValues, findItem, deleteItemIdx } from './helpers';
 
 describe('get_column_renderer', () => {
   let nonSuricata: TimelineNonEcsData[];

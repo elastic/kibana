@@ -11,7 +11,7 @@ getLegacyMetadata: () => {
         app: unknown;
         translations: unknown;
         bundleId: string;
-        nav: unknown;
+        nav: LegacyNavLink[];
         version: string;
         branch: string;
         buildNum: number;

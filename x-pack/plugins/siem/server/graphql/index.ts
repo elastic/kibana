@@ -15,6 +15,7 @@ import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
 import { hostsSchema } from './hosts';
 import { ipDetailsSchemas } from './ip_details';
+import { kpiHostsSchema } from './kpi_hosts';
 import { kpiNetworkSchema } from './kpi_network';
 import { networkSchema } from './network';
 import { overviewSchema } from './overview';
@@ -26,7 +27,6 @@ import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
-
 export const schemas = [
   authenticationsSchema,
   ecsSchema,
@@ -38,6 +38,7 @@ export const schemas = [
   hostsSchema,
   ...ipDetailsSchemas,
   kpiNetworkSchema,
+  kpiHostsSchema,
   networkSchema,
   overviewSchema,
   rootSchema,

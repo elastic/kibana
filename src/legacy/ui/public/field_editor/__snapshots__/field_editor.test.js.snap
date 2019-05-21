@@ -151,13 +151,16 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={true}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -379,14 +382,17 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       error={null}
+      fullWidth={true}
       isInvalid={false}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={false}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
         value="doc.test.value"
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -672,13 +678,16 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={true}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -834,7 +843,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 </eui-code>,
                 "painlessLink": <eui-link
                   href="(docLink for scriptedFields.painless)"
-                  target="_window"
+                  target="_blank"
                 >
                   <FormattedMessage
                     defaultMessage="Painless"
@@ -986,14 +995,17 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     </eui-form-row>
     <eui-form-row
       error={null}
+      fullWidth={true}
       isInvalid={false}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={false}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
         value="doc.test.value"
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -1332,13 +1344,16 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={true}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>

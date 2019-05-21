@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { networkActions } from '../../../../store/actions';
 import {
   Direction,
   DomainsEdges,
@@ -18,7 +19,7 @@ import {
   FlowDirection,
   FlowTarget,
 } from '../../../../graphql/types';
-import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
 
@@ -115,7 +116,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         headerCount={totalCount}
         headerSupplement={
           <FlowDirectionSelect
-            id={DomainsTableId}
             selectedDirection={flowDirection}
             onChangeDirection={this.onChangeDomainsDirection}
           />
@@ -153,7 +153,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     }
   };
 
-  private onChangeDomainsDirection = (_: string, flowDirection: FlowDirection) =>
+  private onChangeDomainsDirection = (flowDirection: FlowDirection) =>
     this.props.updateDomainsDirection({ flowDirection, networkType: this.props.type });
 }
 

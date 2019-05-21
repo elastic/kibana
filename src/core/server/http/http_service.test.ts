@@ -22,7 +22,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpService, Router } from '.';
-import { HttpConfigType } from './http_config';
+import { HttpConfigType, config } from './http_config';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -30,16 +30,19 @@ import { getEnvOptions } from '../config/__mocks__/env';
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
 
-const createConfigService = (value: Partial<HttpConfigType> = {}) =>
-  new ConfigService(
+const createConfigService = (value: Partial<HttpConfigType> = {}) => {
+  const configService = new ConfigService(
     new BehaviorSubject<Config>(
       new ObjectToConfigAdapter({
-        http: value,
+        server: value,
       })
     ),
     env,
     logger
   );
+  configService.setSchema(config.path, config.schema);
+  return configService;
+};
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -115,7 +118,7 @@ test('stops http server', async () => {
 });
 
 test('register route handler', async () => {
-  const configService = createConfigService({});
+  const configService = createConfigService();
 
   const registerRouterMock = jest.fn();
   const httpServer = {
@@ -155,7 +158,7 @@ test('returns http server contract on setup', async () => {
 });
 
 test('does not start http server if process is dev cluster master', async () => {
-  const configService = createConfigService({});
+  const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
     setup: noop,
@@ -190,7 +193,7 @@ test('does not start http server if configured with `autoListen:false`', async (
 
   const service = new HttpService({
     configService,
-    env: new Env('.', getEnvOptions({ isDevClusterMaster: true })),
+    env: new Env('.', getEnvOptions()),
     logger,
   });
 

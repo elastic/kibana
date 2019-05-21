@@ -19,11 +19,9 @@
 
 import _ from 'lodash';
 
-export function FilterBarPushFiltersProvider() {
-  return function ($state) {
-    if (!_.isObject($state)) throw new Error('pushFilters requires a state object');
-    return function (filters) {
-      $state.$newFilters = filters;
-    };
-  };
+// TODO: should it be here or in vis filters (only place where it's used).
+// $newFilters is not defined by filter_bar as well.
+export function pushFilterBarFilters($state, filters) {
+  if (!_.isObject($state)) throw new Error('pushFilters requires a state object');
+  $state.$newFilters = filters;
 }

@@ -9,5 +9,5 @@ An Observable that will emit whenever a fatal error is added with `add()`
 <b>Signature:</b>
 
 ```typescript
-get$: () => Rx.Observable<ErrorInfo>;
+get$: () => Rx.Observable<FatalErrorInfo>;
 ```
