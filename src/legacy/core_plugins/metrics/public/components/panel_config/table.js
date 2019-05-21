@@ -43,21 +43,62 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
+import chrome from 'ui/chrome';
+const { QueryBar } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
+const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 export class TablePanelConfig extends Component {
-
   constructor(props) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = {
+      selectedTab: 'data',
+      indexPatternForQuery: {},
+      uiQueryLanguage: uiSettingsQueryLanguage,
+    };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
       parts.bar_color_rules = [{ id: uuid.v1() }];
     }
     this.props.onChange(parts);
+    await this.fetchIndexPatternsForQuery();
+  }
+
+  fetchIndexPatternsForQuery = async () => {
+    const searchIndexPattern = this.props.model.index_pattern ?
+      this.props.model.index_pattern :
+      this.props.model.default_index_pattern;
+    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
+    this.setState({ indexPatternForQuery: indexPatternObject });
+  }
+
+  async componentDidMount() {
+    await this.fetchIndexPatternsForQuery();
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (
+      prevProps &&
+      prevProps.model &&
+      (prevProps.model.index_pattern !== this.props.model.index_pattern ||
+        prevProps.model.default_index_pattern !== this.props.model.default_index_pattern)
+    ) {
+      await this.fetchIndexPatternsForQuery();
+    }
+  }
+
+  fetchIndexPatternsForQuery = async () => {
+    const searchIndexPattern = this.props.model.index_pattern ?
+      this.props.model.index_pattern :
+      this.props.model.default_index_pattern;
+    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
+    this.setState({ indexPatternForQuery: indexPatternObject });
   }
 
   switchTab(selectedTab) {
@@ -76,9 +117,19 @@ export class TablePanelConfig extends Component {
     });
   };
 
+  handleSubmit = query => {
+    this.props.onChange({ filter: query.query });
+  }
+
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '', pivot_label: '', pivot_rows: 10, pivot_type: '' };
+    const defaults = {
+      drilldown_url: '',
+      filter: { query: '', language: uiSettingsQueryLanguage },
+      pivot_label: '',
+      pivot_rows: 10,
+      pivot_type: '',
+    };
     const model = { ...defaults, ...this.props.model };
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
@@ -163,6 +214,8 @@ export class TablePanelConfig extends Component {
             name={this.props.name}
             visData$={this.props.visData$}
             onChange={this.props.onChange}
+            indexPatterns={this.state.indexPatternForQuery}
+            uiQueryLanguage={uiSettingsQueryLanguage}
           />
         </div>
       );
@@ -221,10 +274,17 @@ export class TablePanelConfig extends Component {
                   />)}
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBar
+                    query={{
+                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      query: model.filter.query || '',
+                    }}
+                    screenTitle={'TablePanelConfigQuery'}
+                    onSubmit={this.handleSubmit}
+                    appName={'VisEditor'}
+                    indexPatterns={[this.state.indexPatternForQuery]}
+                    store={localStorage || {}}
+                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

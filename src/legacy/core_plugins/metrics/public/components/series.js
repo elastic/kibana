@@ -28,6 +28,7 @@ import { TableSeries as table } from './vis_types/table/series';
 import { GaugeSeries as gauge } from './vis_types/gauge/series';
 import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 const lookup = {
   top_n: topN,
@@ -46,16 +47,17 @@ export class Series extends Component {
       visible: true,
       selectedTab: 'metrics',
       uiRestrictions: undefined,
+      indexPatternForQuery: {},
     };
 
     this.visDataSubscription = null;
   }
 
-  switchTab = (selectedTab) => {
+  switchTab = selectedTab => {
     this.setState({ selectedTab });
   };
 
-  handleChange = (part) => {
+  handleChange = part => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = assign({}, model, part);
@@ -71,7 +73,7 @@ export class Series extends Component {
     });
   };
 
-  toggleVisible = (e) => {
+  toggleVisible = e => {
     e.preventDefault();
 
     this.setState({
@@ -79,48 +81,67 @@ export class Series extends Component {
     });
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     if (this.props.visData$) {
-      this.visDataSubscription = this.props.visData$
-        .subscribe(visData => this.setState({
+      this.visDataSubscription = this.props.visData$.subscribe(visData =>
+        this.setState({
           uiRestrictions: get(visData, 'uiRestrictions'),
-        }));
+        })
+      );
     }
+    await this.fetchIndexPatternsForQuery();
   }
 
+  fetchIndexPatternsForQuery = async () => {
+    const searchIndexPattern = this.props.panel.index_pattern
+      ? this.props.panel.index_pattern
+      : this.props.panel.default_index_pattern;
+    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
+    this.setState({ indexPatternForQuery: indexPatternObject });
+  }
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
-
-    const params = {
-      className: this.props.className,
-      disableAdd: this.props.disableAdd,
-      disableDelete: this.props.disableDelete,
-      fields: this.props.fields,
-      name: this.props.name,
-      onAdd: this.props.onAdd,
-      onChange: this.handleChange,
-      onClone: this.props.onClone,
-      onDelete: this.props.onDelete,
-      model: this.props.model,
-      panel: this.props.panel,
-      selectedTab: this.state.selectedTab,
-      style: this.props.style,
-      uiRestrictions: this.state.uiRestrictions,
-      switchTab: this.switchTab,
-      toggleVisible: this.toggleVisible,
-      togglePanelActivation: this.togglePanelActivation,
-      visible: this.state.visible,
-      dragHandleProps: this.props.dragHandleProps,
-    };
-
-    return Boolean(Component) ?
-      (<Component {...params}/>) :
-      (<FormattedMessage
-        id="tsvb.seriesConfig.missingSeriesComponentDescription"
-        defaultMessage="Missing Series component for panel type: {panelType}"
-        values={{ panelType: panel.type }}
-      />);
+    if (Component) {
+      const params = {
+        className: this.props.className,
+        disableAdd: this.props.disableAdd,
+        disableDelete: this.props.disableDelete,
+        dragHandleProps: this.props.dragHandleProps,
+        fields: this.props.fields,
+        name: this.props.name,
+        onAdd: this.props.onAdd,
+        onChange: this.handleChange,
+        onClone: this.props.onClone,
+        onDelete: this.props.onDelete,
+        onMouseDown: this.props.onMouseDown,
+        onTouchStart: this.props.onTouchStart,
+        onShouldSortItem: this.props.onShouldSortItem,
+        onSortableItemMount: this.props.onSortableItemMount,
+        onSortableItemReadyToMove: this.props.onSortableItemReadyToMove,
+        model: this.props.model,
+        panel: this.props.panel,
+        selectedTab: this.state.selectedTab,
+        sortData: this.props.sortData,
+        style: this.props.style,
+        uiRestrictions: this.state.uiRestrictions,
+        switchTab: this.switchTab,
+        toggleVisible: this.toggleVisible,
+        togglePanelActivation: this.togglePanelActivation,
+        visible: this.state.visible,
+        indexPatternForQuery: this.state.indexPatternForQuery,
+      };
+      return <Component {...params} />;
+    }
+    return (
+      <div>
+        <FormattedMessage
+          id="tsvb.seriesConfig.missingSeriesComponentDescription"
+          defaultMessage="Missing Series component for panel type: {panelType}"
+          values={{ panelType: panel.type }}
+        />
+      </div>
+    );
   }
 
   componentWillUnmount() {

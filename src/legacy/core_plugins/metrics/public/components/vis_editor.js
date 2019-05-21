@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
-import { isEqual, isEmpty, debounce } from 'lodash';
+import { isEqual, isEmpty, debounce, get } from 'lodash';
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';
@@ -66,7 +66,7 @@ export class VisEditor extends Component {
     this.props.vis.updateState();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  handleChange = async (partialModel) => {
+  handleChange = async partialModel => {
     if (isEmpty(partialModel)) {
       return;
     }
@@ -76,7 +76,6 @@ export class VisEditor extends Component {
       ...partialModel,
     };
     let dirty = true;
-
     if (this.state.autoApply || hasTypeChanged) {
       this.updateVisState();
 
@@ -85,13 +84,13 @@ export class VisEditor extends Component {
 
     if (this.props.isEditorMode) {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
-
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns)
-          .then(visFields => this.setState({
+        fetchFields(extractedIndexPatterns).then(visFields =>
+          this.setState({
             visFields,
             extractedIndexPatterns,
-          }));
+          })
+        );
       }
     }
 
@@ -106,7 +105,7 @@ export class VisEditor extends Component {
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = (event) => {
+  handleAutoApplyToggle = event => {
     this.setState({ autoApply: event.target.checked });
   };
 
@@ -138,7 +137,7 @@ export class VisEditor extends Component {
       return (
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange}/>
+            <VisPicker model={model} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}
@@ -171,11 +170,22 @@ export class VisEditor extends Component {
     return null;
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.props.renderComplete();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    if (
+      prevProps &&
+      prevProps.timeRange &&
+      (prevProps.timeRange.from !== this.props.timeRange.from ||
+        prevProps.timeRange.to !== this.props.timeRange.to)
+    ) {
+      this.setState({
+        dateRangeFrom: get(this.props, 'timeRange.from', 'now-15m'),
+        dateRangeTo: get(this.props, 'timeRange.to', 'now'),
+      });
+    }
     this.props.renderComplete();
   }
 

@@ -42,6 +42,7 @@ export function seriesAgg(resp, panel, series) {
           const fn = SeriesAgg[m.function];
           return fn && fn(acc) || acc;
         }, targetSeries);
+      console.log('calculateLabel(_.last(series.metrics), series.metrics:', calculateLabel(_.last(series.metrics), series.metrics));
       results.push({
         id: `${series.id}`,
         label: series.label || calculateLabel(_.last(series.metrics), series.metrics),

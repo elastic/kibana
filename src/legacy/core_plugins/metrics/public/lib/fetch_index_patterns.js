@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import chrome from 'ui/chrome';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
-import _ from 'lodash';
-import { buildEsQuery } from '@kbn/es-query';
-export function splitByEverything(req, panel, esQueryConfig, indexPattern) {
-  return next => doc => {
-    panel.series.filter(c => !(c.aggregate_by && c.aggregate_function)).forEach(column => {
-      if (column.filter) {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.filter`, buildEsQuery(indexPattern, [column.filter], [], esQueryConfig));
-      } else {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
-      }
-    });
-    return next(doc);
-  };
+export async function fetchIndexPatterns(indexPatternString) {
+  let indexPatternObject;
+  const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+    type: 'index-pattern',
+    fields: ['title', 'fields'],
+    search: `"${indexPatternString}"`,
+    search_fields: ['title'],
+  });
+  const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+    indexPattern => indexPattern.attributes.title === indexPatternString
+  );
+  if (exactMatch) {
+    indexPatternObject = getFromSavedObject(exactMatch);
+  }
+  return indexPatternObject;
 }
-

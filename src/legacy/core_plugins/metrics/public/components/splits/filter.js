@@ -17,21 +17,29 @@
  * under the License.
  */
 
-import { createTextHandler } from '../lib/create_text_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
+import { Storage } from 'ui/storage';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+const localStorage = new Storage(window.localStorage);
+const uiSettings = chrome.getUiSettingsClient();
+const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
-  const defaults = { filter: '' };
+  const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
-  const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
+  const handleSubmit = query => {
+    onChange({ filter: query.query });
+  };
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -57,9 +65,14 @@ export const SplitByFilter = props => {
             defaultMessage="Query string"
           />)}
         >
-          <EuiFieldText
-            value={model.filter}
-            onChange={handleTextChange('filter')}
+          <QueryBar
+            query={{ language: (model.filter.language ? model.filter.language : uiSettingsQueryLanguage), query: model.filter.query }}
+            screenTitle={'DataMetricsGroupByFilter'}
+            onSubmit={handleSubmit}
+            appName={'VisEditor'}
+            indexPatterns={props.indexPatterns}
+            store={localStorage || {}}
+            showDatePicker={false}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -71,4 +84,5 @@ SplitByFilter.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  indexPatterns: PropTypes.array,
 };

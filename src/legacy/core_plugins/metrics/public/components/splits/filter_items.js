@@ -24,8 +24,16 @@ import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
+import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+
+const localStorage = new Storage(window.localStorage);
+const uiSettings = chrome.getUiSettingsClient();
+const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 class FilterItemsUi extends Component {
 
   constructor(props) {
@@ -41,15 +49,24 @@ class FilterItemsUi extends Component {
       }));
     };
   }
-
+  handleSubmit = (model, query) => {
+    const part = { filter: query.query };
+    collectionActions.handleChange(this.props, _.assign({}, model, part));
+  }
   renderRow(row, i, items) {
+    const indexPatterns = this.props.indexPatterns;
     const defaults = { filter: '', label: '' };
     const model = { ...defaults, ...row };
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
-    const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
+
+    const newFilter = () => ({
+      color: this.props.model.color,
+      id: uuid.v1(),
+      filter: { language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage, query: '' },
+    });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete
@@ -67,12 +84,16 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFieldText
+          <QueryBar
+            query={{ language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage, query: model.filter.query || '' }}
+            screenTitle={'DataMetricsGroupByFiltersFilter'}
             placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
             aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
-            onChange={this.handleChange(model, 'filter')}
-            value={model.filter}
-            fullWidth
+            onSubmit={(query) => this.handleSubmit(model, query)}
+            appName={'VisEditor'}
+            indexPatterns={indexPatterns}
+            store={localStorage || {}}
+            showDatePicker={false}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -112,7 +133,8 @@ class FilterItemsUi extends Component {
 FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  indexPatterns: PropTypes.array,
 };
 
 export const FilterItems = injectI18n(FilterItemsUi);
