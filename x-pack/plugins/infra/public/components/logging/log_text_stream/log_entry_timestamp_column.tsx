@@ -8,49 +8,28 @@ import { darken, transparentize } from 'polished';
 import React, { memo } from 'react';
 
 import { css } from '../../../../../../common/eui_styled_components';
-import { TextScale } from '../../../../common/log_text_scale';
-import { tintOrShade } from '../../../utils/styles';
 import { useFormattedTime } from '../../formatted_time';
-import { LogTextStreamItemField } from './item_field';
+import { LogEntryColumnContent } from './log_entry_column';
 
-interface LogTextStreamItemDateFieldProps {
-  dataTestSubj?: string;
-  hasHighlights: boolean;
+interface LogEntryTimestampColumnProps {
   isHighlighted: boolean;
   isHovered: boolean;
-  scale: TextScale;
   time: number;
 }
 
-export const LogTextStreamItemDateField = memo<LogTextStreamItemDateFieldProps>(
-  ({ dataTestSubj, hasHighlights, isHighlighted, isHovered, scale, time }) => {
+export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
+  ({ isHighlighted, isHovered, time }) => {
     const formattedTime = useFormattedTime(time);
 
     return (
-      <LogTextStreamItemDateFieldWrapper
-        data-test-subj={dataTestSubj}
-        hasHighlights={hasHighlights}
-        isHovered={isHovered}
-        isHighlighted={isHighlighted}
-        scale={scale}
-      >
+      <TimestampColumnContent isHovered={isHovered} isHighlighted={isHighlighted}>
         {formattedTime}
-      </LogTextStreamItemDateFieldWrapper>
+      </TimestampColumnContent>
     );
   }
 );
 
-const highlightedFieldStyle = css`
-  background-color: ${props =>
-    tintOrShade(
-      props.theme.eui.euiTextColor as any,
-      props.theme.eui.euiColorSecondary as any,
-      0.15
-    )};
-  border-color: ${props => props.theme.eui.euiColorSecondary};
-`;
-
-const hoveredFieldStyle = css`
+const hoveredContentStyle = css`
   background-color: ${props =>
     props.theme.darkMode
       ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
@@ -62,16 +41,17 @@ const hoveredFieldStyle = css`
   color: ${props => props.theme.eui.euiColorFullShade};
 `;
 
-const LogTextStreamItemDateFieldWrapper = LogTextStreamItemField.extend.attrs<{
-  hasHighlights: boolean;
+const TimestampColumnContent = LogEntryColumnContent.extend.attrs<{
   isHovered: boolean;
   isHighlighted: boolean;
 }>({})`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   border-right: solid 2px ${props => props.theme.eui.euiColorLightShade};
   color: ${props => props.theme.eui.euiColorDarkShade};
+  overflow: hidden;
+  text-align: right;
+  text-overflow: clip;
   white-space: pre;
 
-  ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
-  ${props => (props.isHovered || props.isHighlighted ? hoveredFieldStyle : '')};
+  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
 `;
