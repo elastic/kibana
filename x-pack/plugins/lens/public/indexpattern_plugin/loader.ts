@@ -29,7 +29,7 @@ export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifi
     .then(resp => {
       return resp.savedObjects.map(savedObject => {
         const { id, attributes } = (savedObject as unknown) as IndexPatternSavedObject;
-        return Object.assign(attributes as IndexPatternSavedObject['attributes'], {
+        return Object.assign(attributes, {
           id,
           title: attributes.title,
           fields: (JSON.parse(attributes.fields) as IndexPatternField[]).filter(
