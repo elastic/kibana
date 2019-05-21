@@ -25,6 +25,7 @@ export interface HomeTestBed extends TestBed<TestSubjects> {
     selectRepositoryAt: (index: number) => void;
     clickRepositoryAt: (index: number) => void;
     clickRepositoryActionAt: (index: number, action: 'delete' | 'edit') => void;
+    selectTab: (tab: 'snapshots' | 'repositories') => void;
   };
 }
 
@@ -62,12 +63,22 @@ export const setup = async (): Promise<HomeTestBed> => {
     });
   };
 
+  const selectTab = (tab: 'repositories' | 'snapshots') => {
+    const tabs = ['snapshots', 'repositories'];
+
+    testBed
+      .find('tab')
+      .at(tabs.indexOf(tab))
+      .simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
       selectRepositoryAt,
       clickRepositoryAt,
       clickRepositoryActionAt,
+      selectTab,
     },
   };
 };
@@ -80,7 +91,9 @@ export type TestSubjects =
   | 'deleteRepositoryConfirmation'
   | 'documentationLink'
   | 'emptyPrompt'
+  | 'emptyPrompt.documentationLink'
   | 'emptyPrompt.registerRepositoryButton'
+  | 'emptyPrompt.title'
   | 'registerRepositoryButton'
   | 'reloadButton'
   | 'repositoryLink'

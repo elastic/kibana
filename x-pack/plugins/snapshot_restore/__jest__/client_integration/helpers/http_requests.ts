@@ -52,11 +52,18 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadSnapshotsResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { errors: {}, snapshots: [], repositories: [] };
+
+    server.respondWith('GET', `${API_BASE_PATH}snapshots`, mockResponse(defaultResponse, response));
+  };
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
     setGetRepositoryResponse,
     setSaveRepositoryResponse,
+    setLoadSnapshotsResponse,
   };
 };
 
