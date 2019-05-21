@@ -211,13 +211,16 @@ export const JobCreateForm: SFC<Props> = React.memo(
       return `PUT _data_frame/transforms/${jobId}\n${JSON.stringify(jobConfig, null, 2)}\n\n`;
     }
 
-    const ITEM_STYLE = { width: '300px' };
+    // TODO move this to SASS
+    const FLEX_GROUP_STYLE = { height: '90px', maxWidth: '800px' };
+    const FLEX_ITEM_STYLE = { width: '200px' };
+    const PANEL_ITEM_STYLE = { width: '300px' };
 
     return (
       <EuiForm>
         {!created && (
-          <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
-            <EuiFlexItem grow={false} style={{ width: '200px' }}>
+          <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+            <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
               <EuiButton
                 color="warning"
                 isDisabled={created && started}
@@ -242,8 +245,8 @@ export const JobCreateForm: SFC<Props> = React.memo(
           </EuiFlexGroup>
         )}
         {created && (
-          <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
-            <EuiFlexItem grow={false} style={{ width: '200px' }}>
+          <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+            <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
               <EuiButton color="warning" isDisabled={created && started} onClick={startDataFrame}>
                 {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameButton', {
                   defaultMessage: 'Start',
@@ -260,8 +263,8 @@ export const JobCreateForm: SFC<Props> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
-          <EuiFlexItem grow={false} style={{ width: '200px' }}>
+        <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+          <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
             <EuiButton isDisabled={created} onClick={createDataFrame}>
               {i18n.translate('xpack.ml.dataframe.jobCreateForm.createDataFrameButton', {
                 defaultMessage: 'Create',
@@ -277,8 +280,8 @@ export const JobCreateForm: SFC<Props> = React.memo(
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup alignItems="center" style={{ maxWidth: '800px' }}>
-          <EuiFlexItem grow={false} style={{ width: '200px' }}>
+        <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+          <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
             <EuiCopy textToCopy={getJobConfigDevConsoleStatement()}>
               {(copy: () => void) => (
                 <EuiButton onClick={copy} style={{ width: '100%' }}>
@@ -328,7 +331,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
           <Fragment>
             <EuiHorizontalRule />
             <EuiFlexGrid gutterSize="l">
-              <EuiFlexItem style={ITEM_STYLE}>
+              <EuiFlexItem style={PANEL_ITEM_STYLE}>
                 <EuiCard
                   icon={<EuiIcon size="xxl" type="list" />}
                   title={i18n.translate('xpack.ml.dataframe.jobCreateForm.jobsListCardTitle', {
@@ -344,7 +347,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
                 />
               </EuiFlexItem>
               {started === true && createIndexPattern === true && indexPatternId === undefined && (
-                <EuiFlexItem style={ITEM_STYLE}>
+                <EuiFlexItem style={PANEL_ITEM_STYLE}>
                   <EuiPanel style={{ position: 'relative' }}>
                     <EuiProgress size="xs" color="primary" position="absolute" />
                     <EuiText color="subdued" size="s">
@@ -361,7 +364,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
                 </EuiFlexItem>
               )}
               {started === true && indexPatternId !== undefined && (
-                <EuiFlexItem style={ITEM_STYLE}>
+                <EuiFlexItem style={PANEL_ITEM_STYLE}>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="discoverApp" />}
                     title={i18n.translate('xpack.ml.dataframe.jobCreateForm.discoverCardTitle', {
