@@ -11,12 +11,6 @@ import { SourceStatusAdapter } from './index';
 export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
   public async getIndexNames(request: FrameworkRequest, aliasName: string | string[]) {
-    // eslint-disable-next-line no-console
-    console.log('I am told to get index names with the alias name:', aliasName);
-    if (Array.isArray(aliasName)) {
-      // eslint-disable-next-line no-console
-      console.log('--> My alias name is an array:', aliasName);
-    }
     const indexMaps = await Promise.all([
       this.framework
         .callWithRequest(request, 'indices.getAlias', {
@@ -31,13 +25,10 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
         })
         .catch(withDefaultIfNotFound<DatabaseGetIndicesResponse>({})),
     ]);
-    const obj = indexMaps.reduce(
+    return indexMaps.reduce(
       (indexNames, indexMap) => [...indexNames, ...Object.keys(indexMap)],
       [] as string[]
     );
-    // eslint-disable-next-line no-console
-    console.log('The return obj is:', obj);
-    return obj;
   }
 
   public async hasAlias(request: FrameworkRequest, aliasName: string): Promise<boolean> {
