@@ -116,6 +116,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 client: e.target.value,
               });
             }}
+            data-test-subj="clientInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -161,6 +162,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 bucket: e.target.value,
               });
             }}
+            data-test-subj="bucketInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -206,6 +208,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 basePath: e.target.value,
               });
             }}
+            data-test-subj="basePathInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -251,6 +254,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 compress: e.target.checked,
               });
             }}
+            data-test-subj="compressToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -297,6 +301,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 chunkSize: e.target.value,
               });
             }}
+            data-test-subj="chunkSizeInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -342,6 +347,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 serverSideEncryption: e.target.checked,
               });
             }}
+            data-test-subj="serverSideEncryptionToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -389,6 +395,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 bufferSize: e.target.value,
               });
             }}
+            data-test-subj="bufferSizeInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -435,6 +442,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             fullWidth
+            data-test-subj="cannedAclSelect"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -481,6 +489,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             fullWidth
+            data-test-subj="storageClassSelect"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -527,6 +536,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 maxSnapshotBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxSnapshotBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -573,6 +583,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 maxRestoreBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxRestoreBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -618,6 +629,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 readonly: e.target.checked,
               });
             }}
+            data-test-subj="readOnlyToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

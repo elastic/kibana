@@ -100,6 +100,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 client: e.target.value,
               });
             }}
+            data-test-subj="clientInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -145,6 +146,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 container: e.target.value,
               });
             }}
+            data-test-subj="containerInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -190,6 +192,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 basePath: e.target.value,
               });
             }}
+            data-test-subj="basePathInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -235,6 +238,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 compress: e.target.checked,
               });
             }}
+            data-test-subj="compressToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -281,6 +285,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 chunkSize: e.target.value,
               });
             }}
+            data-test-subj="chunkSizeInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -327,6 +332,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 maxSnapshotBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxSnapshotBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -373,6 +379,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 maxRestoreBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxRestoreBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -420,6 +427,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
               });
             }}
             fullWidth
+            data-test-subj="locationModeSelect"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -466,6 +474,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
               });
             }}
+            data-test-subj="readOnlyToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

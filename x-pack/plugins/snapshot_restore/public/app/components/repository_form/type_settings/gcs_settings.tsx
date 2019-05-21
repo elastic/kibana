@@ -87,6 +87,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 client: e.target.value,
               });
             }}
+            data-test-subj="clientInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -132,6 +133,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 bucket: e.target.value,
               });
             }}
+            data-test-subj="bucketInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -177,6 +179,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 basePath: e.target.value,
               });
             }}
+            data-test-subj="basePathInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -222,6 +225,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 compress: e.target.checked,
               });
             }}
+            data-test-subj="compressToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -268,6 +272,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 chunkSize: e.target.value,
               });
             }}
+            data-test-subj="chunkSizeInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -314,6 +319,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 maxSnapshotBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxSnapshotBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -360,6 +366,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 maxRestoreBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxRestoreBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -405,6 +412,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 readonly: e.target.checked,
               });
             }}
+            data-test-subj="readOnlyToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

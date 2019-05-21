@@ -16,26 +16,4 @@ const testBedConfig = {
   },
 };
 
-export const setup = registerTestBed<TestSubjects>(WithProviders(RepositoryEdit), testBedConfig);
-
-export type TestSubjects =
-  | 'chunkSizeInput'
-  | 'compressToggle'
-  | 'locationInput'
-  | 'maxRestoreBytesInput'
-  | 'maxSnashotBytesInput'
-  | 'readOnlyToggle'
-  | 'repositoryForm'
-  | 'snapshotRestoreApp'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.chunkSizeInput'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.compressToggle'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.locationInput'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.maxRestoreBytesInput'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.maxSnashotBytesInput'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.readOnlyToggle'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.submitButton'
-  | 'snapshotRestoreApp.repositoryForm.stepTwo.title'
-  | 'stepTwo'
-  | 'submitButton'
-  | 'title';
+export const setup = registerTestBed(WithProviders(RepositoryEdit), testBedConfig);
