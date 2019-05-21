@@ -26,12 +26,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { LatestMonitor, MonitorSeriesPoint, Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
+import { MonitorPageLink } from './monitor_page_link';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
@@ -111,17 +111,40 @@ export const MonitorListComponent = ({
               defaultMessage: 'ID',
             }),
             render: (id: string, monitor: LatestMonitor) => (
-              <EuiLink>
-                <Link
-                  data-test-subj={`monitor-page-link-${id}`}
-                  to={`/monitor/${id}${linkParameters}`}
-                >
-                  {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
-                    ? monitor.ping.monitor.name
-                    : id}
-                </Link>
-              </EuiLink>
+              <MonitorPageLink
+                id={id}
+                location={get<string | undefined>(monitor, 'ping.observer.geo.name')}
+                linkParameters={linkParameters}
+              >
+                {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
+                  ? monitor.ping.monitor.name
+                  : id}
+              </MonitorPageLink>
             ),
+          },
+          {
+            field: 'ping.observer.geo.name',
+            name: i18n.translate('xpack.uptime.monitorList.geoName', {
+              defaultMessage: 'Location',
+              description: 'Users can specify a name for a location',
+            }),
+            render: (locationName: string | null | undefined) =>
+              !!locationName ? (
+                locationName
+              ) : (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/add-host-metadata.html#add-host-metadata"
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
+                    defaultMessage: 'Add location',
+                    description:
+                      'Text that instructs the user to navigate to our docs to add a geographic location to their data',
+                  })}
+                  &nbsp;
+                  <EuiIcon size="s" type="popout" />
+                </EuiLink>
+              ),
           },
           {
             field: 'ping.url.full',
