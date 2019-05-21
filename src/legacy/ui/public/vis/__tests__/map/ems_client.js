@@ -18,12 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
-import EMS_FILES from './ems_mocks/sample_files.json';
-import EMS_TILES from './ems_mocks/sample_tiles.json';
-
-
-import { EMSClient } from '../../../../../core_plugins/tile_map/common/ems_client';
+import { getEMSClient } from './ems_client_util';
 
 describe('ems_client', () => {
 
@@ -178,27 +173,3 @@ describe('ems_client', () => {
 
 });
 
-
-function getEMSClient(options = {}) {
-
-  const emsClient = new EMSClient({
-    language: 'en',
-    kbnVersion: '7.x.x',
-    manifestServiceUrl: 'https://foobar',
-    htmlSanitizer: x => x,
-    landingPageUrl: 'https://landing.foobar',
-    ...options
-  });
-
-  emsClient._getManifest = async (url) => {
-    //simulate network calls
-    if (url.startsWith('https://foobar')) {
-      return EMS_CATALOGUE;
-    } else if (url.startsWith('https://tiles.foobar')) {
-      return EMS_TILES;
-    } else if (url.startsWith('https://files.foobar')) {
-      return EMS_FILES;
-    }
-  };
-  return emsClient;
-}
