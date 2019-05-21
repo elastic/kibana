@@ -21,7 +21,7 @@ import { EuiBadge } from '@elastic/eui';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { SFC } from 'react';
-import { existsOperator, isOneOfOperator } from 'ui/filter_bar/filter_editor/lib/filter_operators';
+import { existsOperator, isOneOfOperator } from '../filter_editor/lib/filter_operators';
 
 interface Props {
   filter: Filter;
