@@ -10,17 +10,20 @@ import { queryDatatable } from '../../../../common/lib/datatable/query';
 // @ts-ignore
 import { getDemoRows } from './get_demo_rows';
 import { ContextFunction, Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
+import { getFunctionHelp } from '../../../strings';
 
 interface Arguments {
   type: string | null;
 }
 
 export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().demodata;
+
   return {
     name: 'demodata',
     aliases: [],
     type: 'datatable',
-    help: 'A mock data set that includes project CI times with usernames, countries and run phases',
+    help,
     context: {
       types: ['filter'],
     },
@@ -28,7 +31,7 @@ export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datat
       type: {
         types: ['string', 'null'],
         aliases: ['_'],
-        help: 'The name of the demo data set to use',
+        help: argHelp.type,
         default: 'ci',
         options: ['ci', 'shirts'],
       },
