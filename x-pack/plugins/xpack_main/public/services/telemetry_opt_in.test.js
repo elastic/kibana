@@ -63,7 +63,7 @@ describe('TelemetryOptInProvider', () => {
     const { provider, mockHttp } = setup({ optedIn: true });
     await provider.setOptIn(false);
 
-    expect(mockHttp.post).toHaveBeenCalledWith(`/api/telemetry/v1/optIn`, { enabled: false });
+    expect(mockHttp.post).toHaveBeenCalledWith(`/api/telemetry/v2/optIn`, { enabled: false });
 
     expect(provider.getOptIn()).toEqual(false);
   });
@@ -72,7 +72,7 @@ describe('TelemetryOptInProvider', () => {
     const { provider, mockHttp } = setup({ optedIn: false });
     await provider.setOptIn(true);
 
-    expect(mockHttp.post).toHaveBeenCalledWith(`/api/telemetry/v1/optIn`, { enabled: true });
+    expect(mockHttp.post).toHaveBeenCalledWith(`/api/telemetry/v2/optIn`, { enabled: true });
 
     expect(provider.getOptIn()).toEqual(true);
   });
@@ -81,7 +81,7 @@ describe('TelemetryOptInProvider', () => {
     const { provider, mockHttp } = setup({ optedIn: false, simulatePostError: true });
     await provider.setOptIn(true);
 
-    expect(mockHttp.post).toHaveBeenCalledWith(`/api/telemetry/v1/optIn`, { enabled: true });
+    expect(mockHttp.post).toHaveBeenCalledWith(`/api/telemetry/v2/optIn`, { enabled: true });
 
     // opt-in change should not be reflected
     expect(provider.getOptIn()).toEqual(false);
