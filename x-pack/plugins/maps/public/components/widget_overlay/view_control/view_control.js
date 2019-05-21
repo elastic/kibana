@@ -9,13 +9,14 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiButtonIcon,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
 import { SetView } from './set_view';
 import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoordinates }) {
   const toggleSetViewVisibility = () => {
@@ -30,18 +31,20 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
     <EuiPopover
       anchorPosition="upRight"
       button={(
-        <EuiButton
+        <EuiButtonIcon
           className="mapViewControl__gotoButton"
-          fill
-          size="s"
           onClick={toggleSetViewVisibility}
           data-test-subj="toggleSetViewVisibilityButton"
-        >
-          <FormattedMessage
-            id="xpack.maps.viewControl.goToButtonLabel"
-            defaultMessage="Go to"
-          />
-        </EuiButton>)}
+          iconType="crosshairs"
+          color="text"
+          aria-label={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            defaultMessage: 'Go to'
+          })}
+          title={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            defaultMessage: 'Go to'
+          })}
+        />
+      )}
       isOpen={isSetViewOpen}
       closePopover={closeSetView}
     >
