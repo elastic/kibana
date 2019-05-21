@@ -8,50 +8,56 @@ import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
 import { css } from '../../../../../../common/eui_styled_components';
-import { TextScale } from '../../../../common/log_text_scale';
-import { LogTextStreamItemField } from './item_field';
+import { LogEntryColumnContent } from './log_entry_column';
 
-interface LogTextStreamItemFieldFieldProps {
-  dataTestSubj?: string;
+interface LogEntryFieldColumnProps {
   encodedValue: string;
   isHighlighted: boolean;
   isHovered: boolean;
-  scale: TextScale;
+  isWrapped: boolean;
 }
 
-export const LogTextStreamItemFieldField: React.FunctionComponent<
-  LogTextStreamItemFieldFieldProps
-> = ({ dataTestSubj, encodedValue, isHighlighted, isHovered, scale }) => {
+export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
+  encodedValue,
+  isHighlighted,
+  isHovered,
+  isWrapped,
+}) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
 
   return (
-    <LogTextStreamItemFieldFieldWrapper
-      data-test-subj={dataTestSubj}
-      isHighlighted={isHighlighted}
-      isHovered={isHovered}
-      scale={scale}
-    >
+    <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} isWrapped={isWrapped}>
       {value}
-    </LogTextStreamItemFieldFieldWrapper>
+    </FieldColumnContent>
   );
 };
 
-const hoveredFieldStyle = css`
+const hoveredContentStyle = css`
   background-color: ${props =>
     props.theme.darkMode
       ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
       : darken(0.05, props.theme.eui.euiColorHighlight)};
 `;
 
-const LogTextStreamItemFieldFieldWrapper = LogTextStreamItemField.extend.attrs<{
+const wrappedContentStyle = css`
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-all;
+`;
+
+const unwrappedContentStyle = css`
+  overflow: hidden;
+  white-space: pre;
+`;
+
+const FieldColumnContent = LogEntryColumnContent.extend.attrs<{
   isHighlighted: boolean;
   isHovered: boolean;
+  isWrapped?: boolean;
 }>({})`
-  flex: 1 0 0%;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  text-overflow: ellipsis;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredFieldStyle : '')};
+  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
 `;
