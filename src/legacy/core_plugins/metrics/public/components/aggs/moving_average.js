@@ -35,7 +35,7 @@ import {
   EuiFormRow,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { MODEL_TYPES } from '../../../common/model_options';
 
 const DEFAULTS = {
@@ -48,42 +48,37 @@ const DEFAULTS = {
   window: 10,
 };
 
-const MovingAverageAggUi = props => {
-  const { siblings, intl } = props;
+export const MovingAverageAgg = props => {
+  const { siblings } = props;
 
   const model = { ...DEFAULTS, ...props.model };
   const modelOptions = [
     {
-      label: intl.formatMessage({
-        id: 'tsvb.movingAverage.modelOptions.simpleLabel',
+      label: i18n.translate('tsvb.movingAverage.modelOptions.simpleLabel', {
         defaultMessage: 'Simple',
       }),
       value: MODEL_TYPES.UNWEIGHTED,
     },
     {
-      label: intl.formatMessage({
-        id: 'tsvb.movingAverage.modelOptions.linearLabel',
+      label: i18n.translate('tsvb.movingAverage.modelOptions.linearLabel', {
         defaultMessage: 'Linear',
       }),
       value: MODEL_TYPES.WEIGHTED_LINEAR,
     },
     {
-      label: intl.formatMessage({
-        id: 'tsvb.movingAverage.modelOptions.exponentiallyWeightedLabel',
+      label: i18n.translate('tsvb.movingAverage.modelOptions.exponentiallyWeightedLabel', {
         defaultMessage: 'Exponentially Weighted',
       }),
       value: MODEL_TYPES.WEIGHTED_EXPONENTIAL,
     },
     {
-      label: intl.formatMessage({
-        id: 'tsvb.movingAverage.modelOptions.holtLinearLabel',
+      label: i18n.translate('tsvb.movingAverage.modelOptions.holtLinearLabel', {
         defaultMessage: 'Holt-Linear',
       }),
       value: MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE,
     },
     {
-      label: intl.formatMessage({
-        id: 'tsvb.movingAverage.modelOptions.holtWintersLabel',
+      label: i18n.translate('tsvb.movingAverage.modelOptions.holtWintersLabel', {
         defaultMessage: 'Holt-Winters',
       }),
       value: MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE,
@@ -99,15 +94,13 @@ const MovingAverageAggUi = props => {
 
   const multiplicativeOptions = [
     {
-      label: intl.formatMessage({
-        id: 'tsvb.movingAverage.multiplicativeOptions.true',
+      label: i18n.translate('tsvb.movingAverage.multiplicativeOptions.true', {
         defaultMessage: 'True',
       }),
       value: true
     },
     {
-      label: intl.formatMessage({
-        id: 'tsvb.movingAverage.multiplicativeOptions.false',
+      label: i18n.translate('tsvb.movingAverage.multiplicativeOptions.false', {
         defaultMessage: 'False',
       }),
       value: false
@@ -127,10 +120,9 @@ const MovingAverageAggUi = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.movingAverage.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            {i18n.translate('tsvb.movingAverage.aggregationLabel', {
+              defaultMessage: 'Aggregation',
+            })}
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -143,10 +135,9 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.metricLabel"
-              defaultMessage="Metric"
-            />)}
+            label={i18n.translate('tsvb.movingAverage.metricLabel', {
+              defaultMessage: 'Metric',
+            })}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
@@ -164,14 +155,13 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('model_type')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.modelLabel"
-              defaultMessage="Model"
-            />)}
+            label={i18n.translate('tsvb.movingAverage.modelLabel', {
+              defaultMessage: 'Model',
+            })}
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={intl.formatMessage({ id: 'tsvb.movingAverage.model.selectPlaceholder', defaultMessage: 'Select' })}
+              placeholder={i18n.translate('tsvb.movingAverage.model.selectPlaceholder', { defaultMessage: 'Select' })}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model_type')}
@@ -182,10 +172,9 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('windowSize')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.windowSizeLabel"
-              defaultMessage="Window Size"
-            />)}
+            label={i18n.translate('tsvb.movingAverage.windowSizeLabel', {
+              defaultMessage: 'Window Size',
+            })}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -215,10 +204,9 @@ const MovingAverageAggUi = props => {
                 <EuiFlexItem>
                   <EuiFormRow
                     id={htmlId('alpha')}
-                    label={(<FormattedMessage
-                      id="tsvb.movingAverage.alpha"
-                      defaultMessage="Alpha"
-                    />)}
+                    label={i18n.translate('tsvb.movingAverage.alpha', {
+                      defaultMessage: 'Alpha',
+                    })}
                   >
                     <EuiFieldNumber
                       step={0.1}
@@ -236,10 +224,9 @@ const MovingAverageAggUi = props => {
                   <EuiFlexItem>
                     <EuiFormRow
                       id={htmlId('beta')}
-                      label={(<FormattedMessage
-                        id="tsvb.movingAverage.beta"
-                        defaultMessage="Beta"
-                      />)}
+                      label={i18n.translate('tsvb.movingAverage.beta', {
+                        defaultMessage: 'Beta',
+                      })}
                     >
                       <EuiFieldNumber
                         step={0.1}
@@ -256,10 +243,9 @@ const MovingAverageAggUi = props => {
                     <EuiFlexItem>
                       <EuiFormRow
                         id={htmlId('gamma')}
-                        label={(<FormattedMessage
-                          id="tsvb.movingAverage.gamma"
-                          defaultMessage="Gamma"
-                        />)}
+                        label={i18n.translate('tsvb.movingAverage.gamma', {
+                          defaultMessage: 'Gamma',
+                        })}
                       >
                         <EuiFieldNumber
                           step={0.1}
@@ -271,10 +257,9 @@ const MovingAverageAggUi = props => {
                     <EuiFlexItem>
                       <EuiFormRow
                         id={htmlId('period')}
-                        label={(<FormattedMessage
-                          id="tsvb.movingAverage.period"
-                          defaultMessage="Period (days)"
-                        />)}
+                        label={i18n.translate('tsvb.movingAverage.period', {
+                          defaultMessage: 'Period (days)',
+                        })}
                       >
                         <EuiFieldNumber
                           step={1}
@@ -286,14 +271,12 @@ const MovingAverageAggUi = props => {
                     <EuiFlexItem>
                       <EuiFormRow
                         id={htmlId('multiplicative')}
-                        label={(<FormattedMessage
-                          id="tsvb.movingAverage.multiplicative"
-                          defaultMessage="Multiplicative"
-                        />)}
+                        label={i18n.translate('tsvb.movingAverage.multiplicative', {
+                          defaultMessage: 'Multiplicative',
+                        })}
                       >
                         <EuiComboBox
-                          placeholder={intl.formatMessage({
-                            id: 'tsvb.movingAverage.multiplicative.selectPlaceholder',
+                          placeholder={i18n.translate('tsvb.movingAverage.multiplicative.selectPlaceholder', {
                             defaultMessage: 'Select'
                           })}
                           options={multiplicativeOptions}
@@ -314,7 +297,7 @@ const MovingAverageAggUi = props => {
   );
 };
 
-MovingAverageAggUi.propTypes = {
+MovingAverageAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -325,5 +308,3 @@ MovingAverageAggUi.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
-
-export const MovingAverageAgg = injectI18n(MovingAverageAggUi);
