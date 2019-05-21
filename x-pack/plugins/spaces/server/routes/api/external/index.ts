@@ -10,7 +10,7 @@ import { initGetSpacesApi } from './get';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 
-export function initPublicSpacesApi(server: any) {
+export function initExternalSpacesApi(server: any) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
   initDeleteSpacesApi(server, routePreCheckLicenseFn);
