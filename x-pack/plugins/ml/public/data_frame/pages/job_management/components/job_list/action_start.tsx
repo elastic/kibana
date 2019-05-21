@@ -19,7 +19,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
+import { DataFrameJobListRow, isCompletedBatchJob } from './common';
 
 interface StartActionProps {
   item: DataFrameJobListRow;
@@ -43,12 +43,7 @@ export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
   });
 
   // Disable start for batch jobs which have completed.
-  // If `checkpoint=1` and `sync` is missing from the config and state is stopped,
-  // then this is a completed batch data frame job.
-  const completedBatchJob =
-    item.state.checkpoint === 1 &&
-    item.config.sync === undefined &&
-    item.state.task_state === DATA_FRAME_RUNNING_STATE.STOPPED;
+  const completedBatchJob = isCompletedBatchJob(item);
 
   let startButton = (
     <EuiButtonEmpty
