@@ -6,6 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import moment from 'moment';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
@@ -13,12 +14,14 @@ import { ActionCreator } from 'typescript-fsa';
 import { hostsActions } from '../../../../store/actions';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
-import { getOrEmptyTag } from '../../../empty_value';
+import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import * as i18n from './translations';
 import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
+import { PreferenceFormattedDate } from '../../../formatted_date';
+import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 
 interface OwnProps {
   data: Ecs[];
@@ -120,10 +123,22 @@ const getEventsColumns = (
   Columns<EcsEdges>
 ] => [
   {
-    name: i18n.HOST_NAME,
-    sortable: true,
+    name: i18n.TIMESTAMP,
+    sortable: false,
     truncateText: false,
-    hideForMobile: false,
+    render: ({ node }) =>
+      node.timestamp != null ? (
+        <LocalizedDateTooltip date={moment(new Date(node.timestamp)).toDate()}>
+          <PreferenceFormattedDate value={new Date(node.timestamp)} />
+        </LocalizedDateTooltip>
+      ) : (
+        getEmptyTagValue()
+      ),
+  },
+  {
+    name: i18n.HOST_NAME,
+    sortable: false,
+    truncateText: false,
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: getOr(null, 'host.name', node),
@@ -134,9 +149,8 @@ const getEventsColumns = (
   },
   {
     name: i18n.EVENT_MODULE_DATASET,
-    sortable: true,
+    sortable: false,
     truncateText: true,
-    hideForMobile: true,
     render: ({ node }) => (
       <>
         {getRowItemDraggables({
@@ -154,22 +168,9 @@ const getEventsColumns = (
     ),
   },
   {
-    name: i18n.EVENT_CATEGORY,
-    sortable: true,
-    truncateText: true,
-    hideForMobile: true,
-    render: ({ node }) =>
-      getRowItemDraggables({
-        rowItems: getOr(null, 'event.category', node),
-        attrName: 'event.category',
-        idPrefix: `host-${pageType}-events-table-${node._id}`,
-      }),
-  },
-  {
     name: i18n.EVENT_ACTION,
-    sortable: true,
+    sortable: false,
     truncateText: true,
-    hideForMobile: true,
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: getOr(null, 'event.action', node),
@@ -179,7 +180,7 @@ const getEventsColumns = (
   },
   {
     name: i18n.USER,
-    sortable: true,
+    sortable: false,
     truncateText: true,
     render: ({ node }) =>
       getRowItemDraggables({
@@ -189,18 +190,8 @@ const getEventsColumns = (
       }),
   },
   {
-    name: i18n.MESSAGE,
-    sortable: false,
-    truncateText: true,
-    render: ({ node }) =>
-      getRowItemDraggables({
-        rowItems: getOr(null, 'message', node),
-        attrName: 'message',
-        idPrefix: `host-${pageType}-events-table-${node._id}`,
-      }),
-  },
-  {
     name: i18n.SOURCE,
+    sortable: false,
     truncateText: true,
     render: ({ node }) => (
       <>
@@ -216,7 +207,7 @@ const getEventsColumns = (
   },
   {
     name: i18n.DESTINATION,
-    sortable: true,
+    sortable: false,
     truncateText: true,
     render: ({ node }) => (
       <>
@@ -229,5 +220,29 @@ const getEventsColumns = (
         :{getOrEmptyTag('destination.port', node)}
       </>
     ),
+  },
+  {
+    name: i18n.MESSAGE,
+    sortable: false,
+    truncateText: true,
+    width: '25%',
+    render: ({ node }) => {
+      const message = getOr(null, 'message[0]', node);
+      const overflowLength = 50;
+      return message != null
+        ? getRowItemDraggable({
+            rowItem: message,
+            attrName: 'message',
+            idPrefix: `host-${pageType}-events-table-${node._id}`,
+            dragDisplayValue: message.substring(0, overflowLength),
+            render: () => (
+              <>
+                {message.substring(0, overflowLength)}
+                {message.length > overflowLength && '...'}
+              </>
+            ),
+          })
+        : getEmptyTagValue();
+    },
   },
 ];

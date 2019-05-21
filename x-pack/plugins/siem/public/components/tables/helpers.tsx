@@ -19,12 +19,14 @@ export const getRowItemDraggable = ({
   attrName,
   idPrefix,
   render,
+  dragDisplayValue,
 }: {
   rowItem: string | null | undefined;
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
+  dragDisplayValue?: string;
   maxOverflow?: number;
 }): JSX.Element => {
   if (rowItem != null) {
@@ -39,7 +41,11 @@ export const getRowItemDraggable = ({
           name: rowItem,
           excluded: false,
           kqlQuery: '',
-          queryMatch: { field: attrName, value: rowItem },
+          queryMatch: {
+            field: attrName,
+            value: rowItem,
+            displayValue: dragDisplayValue || rowItem,
+          },
         }}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
@@ -62,6 +68,7 @@ export const getRowItemDraggables = ({
   attrName,
   idPrefix,
   render,
+  dragDisplayValue,
   displayCount = 5,
   maxOverflow = 5,
 }: {
@@ -70,6 +77,7 @@ export const getRowItemDraggables = ({
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
+  dragDisplayValue?: string;
   maxOverflow?: number;
 }): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
@@ -87,7 +95,11 @@ export const getRowItemDraggables = ({
               name: rowItem,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: attrName, value: rowItem },
+              queryMatch: {
+                field: attrName,
+                value: rowItem,
+                displayValue: dragDisplayValue || rowItem,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
