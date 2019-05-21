@@ -27,10 +27,6 @@ import { HttpConfigType, config, HttpConfig } from './http_config';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { exec } from 'child_process';
-import { expectationFailed } from 'hapi/node_modules/@types/boom';
-import { executionAsyncId } from 'async_hooks';
-import { create } from 'domain';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());

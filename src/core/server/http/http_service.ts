@@ -100,7 +100,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
   }
 
   private async createServer(config: HttpConfig) {
-    const port = config.port;
+    const { port } = config;
 
     if (!port || this.secondaryServers.has(port)) {
       throw new Error(`port ${port} is already in use`);
