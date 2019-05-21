@@ -8,7 +8,7 @@ import querystring from 'querystring';
 import React from 'react';
 import url from 'url';
 
-import { SearchScope } from '../../../model';
+import { SearchOptions, SearchScope } from '../../../model';
 import { SearchScopeText } from '../../common/types';
 import { history } from '../../utils/url';
 import { ShortcutsProvider, Shortcut } from '../shortcuts';
@@ -24,13 +24,20 @@ import {
 interface Props {
   query: string;
   onSearchScopeChanged: (s: SearchScope) => void;
-  repoScope: string[];
+  searchOptions: SearchOptions;
+  enableSubmitWhenOptionsChanged: boolean;
 }
 
 export class SearchBar extends React.PureComponent<Props> {
   public queryBar: any = null;
 
   public onSearchChanged = (query: string) => {
+    // Merge the default repository scope if necessary.
+    const repoScopes = this.props.searchOptions.repoScope.map(repo => repo.uri);
+    if (this.props.searchOptions.defaultRepoScopeOn && this.props.searchOptions.defaultRepoScope) {
+      repoScopes.push(this.props.searchOptions.defaultRepoScope.uri);
+    }
+
     // Update the url and push to history as well.
     const queries = querystring.parse(history.location.search.replace('?', ''));
     history.push(
@@ -39,7 +46,7 @@ export class SearchBar extends React.PureComponent<Props> {
         query: {
           ...queries,
           q: query,
-          repoScope: this.props.repoScope,
+          repoScope: repoScopes,
         },
       })
     );
@@ -51,21 +58,21 @@ export class SearchBar extends React.PureComponent<Props> {
     }
   }
 
+  public onSubmit = (q: string) => {
+    this.onSearchChanged(q);
+  };
+
+  public onSelect = (item: AutocompleteSuggestion) => {
+    history.push(item.selectUrl);
+  };
+
+  public suggestionProviders = [
+    new SymbolSuggestionsProvider(),
+    new FileSuggestionsProvider(),
+    new RepositorySuggestionsProvider(),
+  ];
+
   public render() {
-    const onSubmit = (q: string) => {
-      this.onSearchChanged(q);
-    };
-
-    const onSelect = (item: AutocompleteSuggestion) => {
-      history.push(item.selectUrl);
-    };
-
-    const suggestionProviders = [
-      new SymbolSuggestionsProvider(),
-      new FileSuggestionsProvider(),
-      new RepositorySuggestionsProvider(),
-    ];
-
     return (
       <div className="codeSearchbar__container">
         <ShortcutsProvider />
@@ -101,12 +108,12 @@ export class SearchBar extends React.PureComponent<Props> {
         />
         <QueryBar
           query={this.props.query}
-          onSubmit={onSubmit}
-          onSelect={onSelect}
+          onSubmit={this.onSubmit}
+          onSelect={this.onSelect}
           appName="code"
-          suggestionProviders={suggestionProviders}
+          suggestionProviders={this.suggestionProviders}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
-          enableSubmitWhenOptionsChanged={true}
+          enableSubmitWhenOptionsChanged={this.props.enableSubmitWhenOptionsChanged}
           ref={instance => {
             if (instance) {
               // @ts-ignore

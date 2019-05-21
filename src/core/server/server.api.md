@@ -61,9 +61,7 @@ export class ConfigService {
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
     constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
-    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
-    atPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
+    atPath<TSchema>(path: ConfigPath): Observable<TSchema>;
     getConfig$(): Observable<Config>;
     // (undocumented)
     getUnusedPaths(): Promise<string[]>;
@@ -71,8 +69,10 @@ export class ConfigService {
     getUsedPaths(): Promise<string[]>;
     // (undocumented)
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
-    optionalAtPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig | undefined>;
-}
+    optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
+    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
+    setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
+    }
 
 // @public (undocumented)
 export interface CoreSetup {
@@ -259,8 +259,8 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<Plugi
 export interface PluginInitializerContext {
     // (undocumented)
     config: {
-        create: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config>;
-        createIfExists: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config | undefined>;
+        create: <Schema>() => Observable<Schema>;
+        createIfExists: <Schema>() => Observable<Schema | undefined>;
     };
     // (undocumented)
     env: {
@@ -338,7 +338,7 @@ export class ScopedClusterClient {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/plugins/plugin_context.ts:36:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugin_context.ts:35:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

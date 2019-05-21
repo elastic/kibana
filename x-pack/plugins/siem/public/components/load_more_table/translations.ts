@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const LOADING = i18n.translate('xpack.siem.loadingMoreTable.loadingDescription', {
-  defaultMessage: 'Loading',
+  defaultMessage: 'Loading…',
 });
 
 export const LOAD_MORE = i18n.translate('xpack.siem.loadingMoreTable.loadMoreDescription', {

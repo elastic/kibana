@@ -18,10 +18,11 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import wmsOptionsTemplate from './wms_options.html';
 const module = uiModules.get('kibana');
 
-module.directive('wmsOptions', function (serviceSettings, i18n) {
+module.directive('wmsOptions', function (serviceSettings) {
   return {
     restrict: 'E',
     template: wmsOptionsTemplate,
@@ -31,7 +32,7 @@ module.directive('wmsOptions', function (serviceSettings, i18n) {
       collections: '=',
     },
     link: function ($scope) {
-      $scope.wmsLinkText = i18n('tileMap.wmsOptions.wmsLinkText', { defaultMessage: 'here' });
+      $scope.wmsLinkText = i18n.translate('tileMap.wmsOptions.wmsLinkText', { defaultMessage: 'here' });
 
       new Promise((resolve, reject) => {
 

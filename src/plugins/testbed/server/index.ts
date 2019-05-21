@@ -18,6 +18,7 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import {
   Logger,
@@ -26,7 +27,14 @@ import {
   PluginSetupContext,
   PluginStartContext,
 } from 'kibana/server';
-import { TestBedConfig } from './config';
+
+export const config = {
+  schema: schema.object({
+    secret: schema.string({ defaultValue: 'Not really a secret :/' }),
+  }),
+};
+
+type ConfigType = TypeOf<typeof config.schema>;
 
 class Plugin {
   private readonly log: Logger;
@@ -43,10 +51,10 @@ class Plugin {
     );
 
     return {
-      data$: this.initializerContext.config.create(TestBedConfig).pipe(
-        map(config => {
-          this.log.debug(`I've got value from my config: ${config.secret}`);
-          return `Some exposed data derived from config: ${config.secret}`;
+      data$: this.initializerContext.config.create<ConfigType>().pipe(
+        map(configValue => {
+          this.log.debug(`I've got value from my config: ${configValue.secret}`);
+          return `Some exposed data derived from config: ${configValue.secret}`;
         })
       ),
       pingElasticsearch$: setupContext.elasticsearch.adminClient$.pipe(

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Function } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   condition: boolean | null;
@@ -12,25 +13,24 @@ interface Arguments {
 }
 
 export function ifFn(): Function<'if', Arguments, any> {
+  const { help, args: argHelp } = getFunctionHelp().if;
+
   return {
     name: 'if',
-    help: 'Perform conditional logic',
+    help,
     args: {
       condition: {
         types: ['boolean', 'null'],
         aliases: ['_'],
-        help:
-          'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
+        help: argHelp.condition,
       },
       then: {
         resolve: false,
-        help: 'The return value if true',
+        help: argHelp.then,
       },
       else: {
         resolve: false,
-        help:
-          'The return value if false. If else is not specified, and the condition is false' +
-          'then the input context to the function will be returned',
+        help: argHelp.else,
       },
     },
     fn: async (context, args) => {

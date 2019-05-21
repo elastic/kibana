@@ -5,6 +5,7 @@
  */
 
 import { NullContextFunction, Render } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -15,6 +16,8 @@ export function timefilterControl(): NullContextFunction<
   Arguments,
   Render<Arguments>
 > {
+  const { help, args: argHelp } = getFunctionHelp().timefilterControl;
+
   return {
     name: 'timefilterControl',
     aliases: [],
@@ -22,16 +25,16 @@ export function timefilterControl(): NullContextFunction<
     context: {
       types: ['null'],
     },
-    help: 'Configure a time filter control element',
+    help,
     args: {
       column: {
         types: ['string'],
         aliases: ['field', 'c'],
-        help: 'The column or field to attach the filter to',
+        help: argHelp.column,
       },
       compact: {
         types: ['boolean'],
-        help: 'Show the time filter as a button that triggers a popover',
+        help: argHelp.compact,
         default: true,
         options: [true, false],
       },
