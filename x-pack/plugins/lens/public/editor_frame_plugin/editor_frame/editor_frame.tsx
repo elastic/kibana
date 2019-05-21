@@ -44,6 +44,8 @@ export function EditorFrame(props: EditorFrameProps) {
     [state.datasource.activeId, state.datasource.isLoading]
   );
 
+  // create public datasource api for current state
+  // as soon as datasource is available and memoize it
   const datasourcePublicAPI = useMemo(
     () =>
       state.datasource.activeId && !state.datasource.isLoading
