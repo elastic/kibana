@@ -87,7 +87,10 @@ export const ExpandableEvent = pure<Props>(
                   {showHoverContent ? (
                     <HoverActionsContainer data-test-subj="hover-actions-container">
                       <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-                        <WithCopyToClipboard text={stringifiedEvent} titleSummary={i18n.EVENT} />
+                        <WithCopyToClipboard
+                          text={stringifiedEvent}
+                          titleSummary={i18n.EVENT.toLowerCase()}
+                        />
                       </EuiToolTip>
                     </HoverActionsContainer>
                   ) : null}
