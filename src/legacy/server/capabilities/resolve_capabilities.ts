@@ -17,38 +17,18 @@
  * under the License.
  */
 
-import Joi from 'joi';
-import { Server } from 'hapi';
+import { Request } from 'hapi';
 
 import { Capabilities } from '../../../core/public';
+import { mergeCapabilities } from './merge_capabilities';
 import { CapabilitiesModifier } from './capabilities_mixin';
-import { resolveCapabilities } from './resolve_capabilities';
 
-export const registerCapabilitiesRoute = (
-  server: Server,
-  defaultCapabilities: Capabilities,
-  modifiers: CapabilitiesModifier[]
-) => {
-  server.route({
-    path: '/api/capabilities',
-    method: 'POST',
-    options: {
-      validate: {
-        payload: Joi.object({
-          capabilities: Joi.object().required(),
-        }).required(),
-      },
-    },
-    async handler(request) {
-      const { capabilities } = request.payload as { capabilities: Capabilities };
-      return {
-        capabilities: await resolveCapabilities(
-          request,
-          modifiers,
-          defaultCapabilities,
-          capabilities
-        ),
-      };
-    },
-  });
-};
+export const resolveCapabilities = (
+  request: Request,
+  modifiers: CapabilitiesModifier[],
+  ...capabilities: Array<Partial<Capabilities>>
+) =>
+  modifiers.reduce(
+    async (resolvedCaps, modifier) => modifier(request, await resolvedCaps),
+    Promise.resolve(mergeCapabilities(...capabilities))
+  );
