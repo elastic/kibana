@@ -6,7 +6,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, findTestSubject, TestBed } from '../../../../../test_utils';
+import { registerTestBed, findTestSubject, TestBed, nextTick } from '../../../../../test_utils';
 import { SnapshotRestoreHome } from '../../../public/app/sections/home/home';
 import { BASE_PATH } from '../../../public/app/constants';
 import { WithProviders } from './providers';
@@ -44,10 +44,15 @@ export const setup = async (): Promise<HomeTestBed> => {
     checkBox.simulate('change', { target: { checked: true } });
   };
 
-  const clickRepositoryAt = (index: number) => {
+  const clickRepositoryAt = async (index: number) => {
     const { rows } = testBed.table.getMetaData(TABLE);
     const repositoryLink = findTestSubject(rows[index].reactWrapper, 'repositoryLink');
-    repositoryLink.simulate('click');
+
+    await act(async () => {
+      repositoryLink.simulate('click');
+      await nextTick();
+      testBed.component.update();
+    });
   };
 
   const clickRepositoryActionAt = async (index: number, action: 'delete' | 'edit') => {
@@ -101,6 +106,11 @@ export type TestSubjects =
   | 'repositoryTable'
   | 'repositoryDetail'
   | 'repositoryDetail.title'
+  | 'repositoryDetail.sectionLoading'
+  | 'repositoryDetail.documentationLink'
+  | 'repositoryDetail.repositoryType'
+  | 'repositoryDetail.snapshotCount'
+  | 'repositoryDetail.verifyRepositoryButton'
   | 'row'
   | 'snapshotList'
   | 'sectionLoading'
@@ -123,4 +133,5 @@ export type TestSubjects =
   | 'tab'
   | 'tableHeaderCell_name_0'
   | 'tableHeaderCell_type_1'
-  | 'tableHeaderSortButton';
+  | 'tableHeaderSortButton'
+  | 'verifyRepositoryButton';

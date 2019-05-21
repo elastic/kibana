@@ -183,9 +183,11 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {type === REPOSITORY_TYPES.source
-              ? textService.getRepositoryTypeName(type, repository.settings.delegateType)
-              : textService.getRepositoryTypeName(type)}
+            <span data-test-subj="repositoryType">
+              {type === REPOSITORY_TYPES.source
+                ? textService.getRepositoryTypeName(type, repository.settings.delegateType)
+                : textService.getRepositoryTypeName(type)}
+            </span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -194,6 +196,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               href={documentationLinksService.getRepositoryTypeDocUrl(type)}
               target="_blank"
               iconType="help"
+              data-test-subj="documentationLink"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryDetails.repositoryTypeDocLink"
@@ -212,7 +215,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {renderSnapshotCount()}
+        <span data-test-subj="snapshotCount">{renderSnapshotCount()}</span>
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
@@ -288,7 +291,12 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
       ) : (
         <Fragment>
           <EuiSpacer size="m" />
-          <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
+          <EuiButton
+            onClick={verifyRepository}
+            color="primary"
+            isLoading={isLoadingVerification}
+            data-test-subj="verifyRepositoryButton"
+          >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
               defaultMessage="Verify repository"
@@ -377,7 +385,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody data-test-subj="srRepositoryDetailsContent">{renderBody()}</EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="content">{renderBody()}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>

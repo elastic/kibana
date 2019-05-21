@@ -31,13 +31,15 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     server.respondWith('GET', `${API_BASE_PATH}repository_types`, JSON.stringify(response));
   };
 
-  const setGetRepositoryResponse = (response: HttpResponse) => {
+  const setGetRepositoryResponse = (response?: HttpResponse) => {
     const defaultResponse = {};
 
     server.respondWith(
       'GET',
       /api\/snapshot_restore\/repositories\/.+/,
-      mockResponse(defaultResponse, response)
+      response
+        ? mockResponse(defaultResponse, response)
+        : [200, { 'Content-Type': 'application/json' }, '']
     );
   };
 
@@ -74,7 +76,7 @@ export const init = () => {
   // Define default response for unhandled requests.
   // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
   // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, '']);
+  server.respondWith([200, {}, 'DefaultResponse']);
 
   const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
 

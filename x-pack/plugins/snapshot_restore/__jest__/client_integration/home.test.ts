@@ -235,19 +235,102 @@ describe('<SnapshotRestoreHome />', () => {
 
       describe('detail panel', () => {
         test('should show the detail when clicking on a repository', async () => {
-          const { component, exists, find, actions } = testBed;
+          const { exists, actions } = testBed;
 
           expect(exists('repositoryDetail')).toBe(false);
 
-          await act(async () => {
-            actions.clickRepositoryAt(0);
-
-            await nextTick();
-            component.update();
-          });
+          await actions.clickRepositoryAt(0);
 
           expect(exists('repositoryDetail')).toBe(true);
+        });
+
+        test('should set the correct title', async () => {
+          const { find, actions } = testBed;
+
+          await actions.clickRepositoryAt(0);
+
           expect(find('repositoryDetail.title').text()).toEqual(repo1.name);
+        });
+
+        test('should show a loading while fetching the repository', async () => {
+          const { find, exists, actions } = testBed;
+
+          // By providing undefined, the "loading section" will be displayed
+          httpRequestsMockHelpers.setGetRepositoryResponse(undefined);
+
+          await actions.clickRepositoryAt(0);
+
+          expect(exists('repositoryDetail.sectionLoading')).toBe(true);
+          expect(find('repositoryDetail.sectionLoading').text()).toEqual('Loading repository…');
+        });
+
+        describe('when the repository has been fetched', () => {
+          beforeEach(async () => {
+            httpRequestsMockHelpers.setGetRepositoryResponse({
+              repository: {
+                name: 'my-repo',
+                type: 'fs',
+                settings: { location: '/tmp/es-backups' },
+              },
+              snapshots: { count: 0 },
+            });
+
+            await testBed.actions.clickRepositoryAt(0);
+          });
+
+          test('should have a link to the documentation', async () => {
+            const { exists } = testBed;
+
+            expect(exists('repositoryDetail.documentationLink')).toBe(true);
+          });
+
+          test('should set the correct repository settings', () => {
+            const { find } = testBed;
+
+            expect(find('repositoryDetail.repositoryType').text()).toEqual('Shared file system');
+            expect(find('repositoryDetail.snapshotCount').text()).toEqual(
+              'Repository has no snapshots'
+            );
+          });
+
+          test('should have a button to verify the status of the repository', async () => {
+            const { exists, find, component, table } = testBed;
+            expect(exists('repositoryDetail.verifyRepositoryButton')).toBe(true);
+
+            await act(async () => {
+              find('repositoryDetail.verifyRepositoryButton').simulate('click');
+              await nextTick();
+              component.update();
+            });
+
+            const latestRequest = server.requests[server.requests.length - 1];
+            const { rows } = table.getMetaData('repositoryTable');
+
+            expect(latestRequest.method).toBe('GET');
+            expect(latestRequest.url).toBe(
+              `/api/snapshot_restore/repositories/${rows[0].columns[1].value}/verify`
+            );
+          });
+        });
+
+        describe('when the repository has been fetched (and has snapshots)', () => {
+          beforeEach(async () => {
+            httpRequestsMockHelpers.setGetRepositoryResponse({
+              repository: {
+                name: 'my-repo',
+                type: 'fs',
+                settings: { location: '/tmp/es-backups' },
+              },
+              snapshots: { count: 2 },
+            });
+
+            await testBed.actions.clickRepositoryAt(0);
+          });
+
+          test('should indicate the number of snapshots found', () => {
+            const { find } = testBed;
+            expect(find('repositoryDetail.snapshotCount').text()).toEqual('2 snapshots found');
+          });
         });
       });
     });
