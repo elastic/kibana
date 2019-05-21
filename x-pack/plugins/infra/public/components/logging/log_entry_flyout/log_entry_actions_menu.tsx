@@ -79,7 +79,7 @@ const useVisibility = (initialVisibility: boolean = false) => {
 
 const getUptimeLink = (logItem: InfraLogItem) => {
   const searchExpressions = logItem.fields
-    .filter(({ field, value }) => !!value && UPTIME_FIELDS.includes(field))
+    .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
     .map(({ field, value }) => `${field}:${value}`);
 
   if (searchExpressions.length === 0) {
