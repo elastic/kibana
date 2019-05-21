@@ -16,7 +16,6 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { HelpMenu } from '../../components/help_menu';
-import { IndexType } from '../../graphql/types';
 import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { StatefulTimeline } from '../../components/timeline';
@@ -63,8 +62,6 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-const indexTypes = [IndexType.ANY];
-
 export const HomePage = pure(() => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
@@ -72,7 +69,7 @@ export const HomePage = pure(() => (
         <Page data-test-subj="pageContainer">
           <HelpMenu />
 
-          <WithSource sourceId="default" indexTypes={indexTypes}>
+          <WithSource sourceId="default">
             {({ browserFields }) => (
               <DragDropContextWrapper browserFields={browserFields}>
                 <Flyout

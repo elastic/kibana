@@ -7,11 +7,8 @@
 import { RequestBasicOptions } from '../framework/types';
 
 export const mockOptionsNetwork: RequestBasicOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
-    logAlias: 'filebeat-*',
-    auditbeatAlias: 'auditbeat-*',
-    packetbeatAlias: 'packetbeat-*',
-    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',
@@ -63,11 +60,8 @@ export const mockResultNetwork = {
 };
 
 export const mockOptionsHost: RequestBasicOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
-    logAlias: 'filebeat-*',
-    auditbeatAlias: 'auditbeat-*',
-    packetbeatAlias: 'packetbeat-*',
-    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',

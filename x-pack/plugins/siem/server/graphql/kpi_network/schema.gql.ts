@@ -18,6 +18,11 @@ export const kpiNetworkSchema = gql`
   }
 
   extend type Source {
-    KpiNetwork(id: String, timerange: TimerangeInput!, filterQuery: String): KpiNetworkData
+    KpiNetwork(
+      id: String
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): KpiNetworkData
   }
 `;

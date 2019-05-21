@@ -9,6 +9,9 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
+import { WithSource } from '../../containers/source';
+import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
+
 import { ColumnHeader } from './body/column_headers/column_header';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
 import { defaultHeaders } from './body/column_headers/default_headers';
@@ -26,11 +29,6 @@ import { Timeline } from './timeline';
 
 import { timelineActions } from '../../store/actions';
 import { KqlMode, TimelineModel } from '../../store/timeline/model';
-import { IndexType } from '../../graphql/types';
-import { WithSource } from '../../containers/source';
-import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
-
-const indexTypes = [IndexType.ANY];
 
 export interface OwnProps {
   id: string;
@@ -187,8 +185,8 @@ class StatefulTimelineComponent extends React.Component<Props> {
     } = this.props;
 
     return (
-      <WithSource sourceId="default" indexTypes={indexTypes}>
-        {({ browserFields, indexPattern }) => (
+      <WithSource sourceId="default">
+        {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
             columns={columns}

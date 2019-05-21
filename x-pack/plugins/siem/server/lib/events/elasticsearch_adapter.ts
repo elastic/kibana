@@ -28,12 +28,7 @@ import {
   TimelineDetailsData,
   TimelineEdges,
 } from '../../graphql/types';
-import {
-  getDocumentation,
-  getIndexAlias,
-  hasDocumentation,
-  IndexAlias,
-} from '../../utils/beat_schema';
+import { getDocumentation, getIndexAlias, hasDocumentation } from '../../utils/beat_schema';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit } from '../../utils/build_query';
@@ -141,7 +136,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
           ...getOr({}, [options.indexName, 'mappings', 'properties'], mapResponse),
         },
         getDataFromHits(merge(sourceData, hitsData)),
-        getIndexAlias(options.indexName)
+        getIndexAlias(options.defaultIndex, options.indexName)
       ),
     };
   }
@@ -296,7 +291,7 @@ const getDataFromHits = (sources: EventSource, category?: string, path?: string)
 const getSchemaFromData = (
   properties: MappingProperties,
   data: DetailItem[],
-  index: IndexAlias,
+  index: string,
   path?: string
 ): DetailItem[] =>
   !isEmpty(properties)
