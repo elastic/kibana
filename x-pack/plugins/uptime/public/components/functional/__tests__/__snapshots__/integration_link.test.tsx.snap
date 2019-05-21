@@ -1,9 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`IntegrationLink component renders a disabled link when href is undefined 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiToolTip
+      content="Required data for this integration was not found."
+      delay="regular"
+      position="top"
+    >
+      <EuiIcon
+        type="apmApp"
+      />
+    </EuiToolTip>
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiText
+      color="subdued"
+    >
+      click for bar
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
 exports[`IntegrationLink component renders without errors 1`] = `
 <EuiLink
   aria-label="foo"
-  color="subdued"
+  color="primary"
   href="/app/foo?kuery=localhost"
   type="button"
 >

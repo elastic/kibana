@@ -19,9 +19,12 @@ import { getPivotPreviewDevConsoleStatement, getPivotDropdownOptions } from './c
 
 describe('Data Frame: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
+    // The field name includes the characters []> which cannot be used for aggregation names.
+    // The test results verifies that the characters should still be present in field and dropDownName values,
+    // but should be stripped for aggName values.
     const indexPattern: StaticIndexPattern = {
       title: 'the-index-pattern-title',
-      fields: [{ name: 'the-field', type: 'number', aggregatable: true, searchable: true }],
+      fields: [{ name: 'the-f[i]e>ld', type: 'number', aggregatable: true, searchable: true }],
     };
 
     const options = getPivotDropdownOptions(indexPattern);
@@ -29,33 +32,62 @@ describe('Data Frame: Define Pivot Common', () => {
     expect(options).toEqual({
       aggOptions: [
         {
-          label: 'the-field',
+          label: 'the-f[i]e>ld',
           options: [
-            { label: 'avg(the-field)' },
-            { label: 'max(the-field)' },
-            { label: 'min(the-field)' },
-            { label: 'sum(the-field)' },
-            { label: 'value_count(the-field)' },
+            { label: 'avg(the-f[i]e>ld)' },
+            { label: 'cardinality(the-f[i]e>ld)' },
+            { label: 'max(the-f[i]e>ld)' },
+            { label: 'min(the-f[i]e>ld)' },
+            { label: 'sum(the-f[i]e>ld)' },
+            { label: 'value_count(the-f[i]e>ld)' },
           ],
         },
       ],
       aggOptionsData: {
-        'avg(the-field)': { agg: 'avg', field: 'the-field', aggName: 'avg(the-field)' },
-        'max(the-field)': { agg: 'max', field: 'the-field', aggName: 'max(the-field)' },
-        'min(the-field)': { agg: 'min', field: 'the-field', aggName: 'min(the-field)' },
-        'sum(the-field)': { agg: 'sum', field: 'the-field', aggName: 'sum(the-field)' },
-        'value_count(the-field)': {
+        'avg(the-f[i]e>ld)': {
+          agg: 'avg',
+          field: 'the-f[i]e>ld',
+          aggName: 'the-field.avg',
+          dropDownName: 'avg(the-f[i]e>ld)',
+        },
+        'cardinality(the-f[i]e>ld)': {
+          agg: 'cardinality',
+          field: 'the-f[i]e>ld',
+          aggName: 'the-field.cardinality',
+          dropDownName: 'cardinality(the-f[i]e>ld)',
+        },
+        'max(the-f[i]e>ld)': {
+          agg: 'max',
+          field: 'the-f[i]e>ld',
+          aggName: 'the-field.max',
+          dropDownName: 'max(the-f[i]e>ld)',
+        },
+        'min(the-f[i]e>ld)': {
+          agg: 'min',
+          field: 'the-f[i]e>ld',
+          aggName: 'the-field.min',
+          dropDownName: 'min(the-f[i]e>ld)',
+        },
+        'sum(the-f[i]e>ld)': {
+          agg: 'sum',
+          field: 'the-f[i]e>ld',
+          aggName: 'the-field.sum',
+          dropDownName: 'sum(the-f[i]e>ld)',
+        },
+        'value_count(the-f[i]e>ld)': {
           agg: 'value_count',
-          field: 'the-field',
-          aggName: 'value_count(the-field)',
+          field: 'the-f[i]e>ld',
+          aggName: 'the-field.value_count',
+          dropDownName: 'value_count(the-f[i]e>ld)',
         },
       },
-      groupByOptions: [{ label: 'histogram(the-field)' }],
+      groupByOptions: [{ label: 'histogram(the-f[i]e>ld)' }],
       groupByOptionsData: {
-        'histogram(the-field)': {
+        'histogram(the-f[i]e>ld)': {
           agg: 'histogram',
-          field: 'the-field',
-          aggName: 'histogram(the-field)',
+          field: 'the-f[i]e>ld',
+          aggName: 'the-field',
+          dropDownName: 'histogram(the-f[i]e>ld)',
           interval: '10',
         },
       },
@@ -72,12 +104,14 @@ describe('Data Frame: Define Pivot Common', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const agg: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.AVG,
       field: 'the-agg-field',
-      aggName: 'the-agg-label',
+      aggName: 'the-agg-agg-name',
+      dropDownName: 'the-agg-drop-down-name',
     };
     const request = getDataFramePreviewRequest('the-index-pattern-title', query, [groupBy], [agg]);
     const pivotPreviewDevConsoleStatement = getPivotPreviewDevConsoleStatement(request);
@@ -95,14 +129,14 @@ describe('Data Frame: Define Pivot Common', () => {
   },
   "pivot": {
     "group_by": {
-      "the-group-by-label": {
+      "the-group-by-agg-name": {
         "terms": {
           "field": "the-group-by-field"
         }
       }
     },
     "aggregations": {
-      "the-agg-label": {
+      "the-agg-agg-name": {
         "avg": {
           "field": "the-agg-field"
         }
