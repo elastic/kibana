@@ -4,10 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { Chrome } from 'ui/chrome';
-import chrome from 'ui/chrome';
+import { Chrome } from 'ui/chrome';
+import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import { IndexPatternField } from './indexpattern';
 
-export const getIndexPatterns = () => {
+interface IndexPatternSavedObject {
+  id: string;
+  type: string;
+  attributes: {
+    title: string;
+    timeFieldName?: string;
+    fields: string;
+    fieldFormatMap: string;
+  };
+}
+
+export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifications) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
   return savedObjectsClient
     .find({
@@ -15,19 +27,18 @@ export const getIndexPatterns = () => {
       perPage: 1000, // TODO: Paginate index patterns
     })
     .then(resp => {
-      return resp.savedObjects.map(({ id, attributes }) => {
-        return Object.assign(attributes, {
+      return resp.savedObjects.map(savedObject => {
+        const { id, attributes } = (savedObject as unknown) as IndexPatternSavedObject;
+        return Object.assign(attributes as IndexPatternSavedObject['attributes'], {
           id,
           title: attributes.title,
-          fields: JSON.parse(attributes.fields as string).filter(
-            // don't show non-keyword string fields
-            ({ type, esTypes }: any) =>
-              type !== 'string' || (esTypes && esTypes.includes('keyword'))
+          fields: (JSON.parse(attributes.fields) as IndexPatternField[]).filter(
+            ({ type, esTypes }) => type !== 'string' || (esTypes && esTypes.includes('keyword'))
           ),
         });
       });
     })
     .catch(err => {
-      // TODO: Show errors to users
+      toastNotifications.addDanger('Failed to load index patterns');
     });
 };

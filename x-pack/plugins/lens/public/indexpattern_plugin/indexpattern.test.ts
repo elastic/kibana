@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternDatasource, IndexPatternPersistedState } from './indexpattern';
-import { DatasourcePublicAPI, Operation } from '../types';
+import {
+  getIndexPatternDatasource,
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+} from './indexpattern';
+import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 
 jest.mock('./loader');
 
@@ -64,8 +68,12 @@ const expectedIndexPatterns = {
 
 describe('IndexPattern Data Source', () => {
   let persistedState: IndexPatternPersistedState;
+  let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
 
   beforeEach(() => {
+    // @ts-ignore
+    indexPatternDatasource = getIndexPatternDatasource();
+
     persistedState = {
       currentIndexPattern: '1',
       columnOrder: ['col1'],
