@@ -1,4 +1,5 @@
 .mapAttributionControl {
   @include mapOverlayIsTextOnly;
   pointer-events: all;
+  padding-left: $euiSizeM;
 }

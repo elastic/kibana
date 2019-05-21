@@ -6,6 +6,10 @@
   border-top: 1px solid $euiColorLightestShade;
 }
 
+.mapLayerControl__addLayerButton {
+  flex-shrink: 0;
+}
+
 .mapLayerControl__addLayerButton,
 .mapLayerControl__openLayerTOCButton,
 .mapViewControl__gotoButton {

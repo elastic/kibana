@@ -12,17 +12,9 @@
   bottom: $euiSizeM;
   pointer-events: none; /* 1 */
 }
-
-.mapWidgetOverlay__rightSideWrapper {
-  overflow: hidden; // Fixes Chrome overflow
-}
-
-.mapWidgetOverlay__rightSide {
-  width: $euiSize * 20;
-}
-
 .mapWidgetOverlay__layerWrapper {
   align-items: flex-end;
+  width: $euiSize * 20;
 }
 
 .mapWidgetControl {
