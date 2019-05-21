@@ -165,14 +165,18 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
       }
 
       // Transpile ts server code
-      await transpileWithBabel(['**/*.{ts,tsx}', '!**/public/**'], buildRoot, [
-        require.resolve('@kbn/babel-preset/node_preset'),
-      ]);
+      await transpileWithBabel(
+        ['**/*.{ts,tsx}', '!**/public/**', '**/server/**/*.{ts,tsx}', '**/common/**/*.{ts,tsx}'],
+        buildRoot,
+        [require.resolve('@kbn/babel-preset/node_preset')]
+      );
 
       // Transpile ts client code
-      await transpileWithBabel(['**/public/**/*.{ts,tsx}'], buildRoot, [
-        require.resolve('@kbn/babel-preset/webpack_preset'),
-      ]);
+      await transpileWithBabel(
+        ['**/public/**/*.{ts,tsx}', '!**/server/**', '!**/common/**'],
+        buildRoot,
+        [require.resolve('@kbn/babel-preset/webpack_preset')]
+      );
 
       del.sync([
         path.join(buildRoot, '**', '*.{ts,tsx,d.ts}'),
