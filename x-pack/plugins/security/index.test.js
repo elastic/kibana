@@ -25,10 +25,7 @@ describe('config schema', () => {
           const validationResult = schema.validate({
             authProviders: ['oidc'],
           });
-          expect(validationResult.error).toMatchInlineSnapshot(
-            // eslint-disable-next-line max-len
-            `[ValidationError: child "authc" fails because [child "oidc" fails because [child "realm" fails because ["realm" is required]]]]`
-          );
+          expect(validationResult.error).toMatchSnapshot();
         });
 
         it(`is valid when authProviders is "['oidc']" and realm is specified`, async () => {
@@ -50,10 +47,7 @@ describe('config schema', () => {
           const validationResult = schema.validate({
             authProviders: ['oidc', 'basic'],
           });
-          expect(validationResult.error).toMatchInlineSnapshot(
-            // eslint-disable-next-line max-len
-            `[ValidationError: child "authc" fails because [child "oidc" fails because [child "realm" fails because ["realm" is required]]]]`
-          );
+          expect(validationResult.error).toMatchSnapshot();
         });
 
         it(`is valid when authProviders is "['oidc', 'basic']" and realm is specified`, async () => {
@@ -80,9 +74,7 @@ describe('config schema', () => {
               },
             },
           });
-          expect(validationResult.error).toMatchInlineSnapshot(
-            `[ValidationError: child "authc" fails because ["oidc" is not allowed]]`
-          );
+          expect(validationResult.error).toMatchSnapshot();
         });
       });
     });

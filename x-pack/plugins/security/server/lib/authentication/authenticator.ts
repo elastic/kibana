@@ -83,7 +83,7 @@ function getProviderSpecificOptions(
   const authc = config.get<Record<string, AuthenticationProviderSpecificOptions | undefined>>(
     `xpack.security.authc`
   );
-  if (authc[providerType] !== undefined) {
+  if (authc && authc[providerType] !== undefined) {
     return authc[providerType] as AuthenticationProviderSpecificOptions;
   }
 
