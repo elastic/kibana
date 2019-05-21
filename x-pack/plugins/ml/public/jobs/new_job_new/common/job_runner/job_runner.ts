@@ -7,11 +7,9 @@
 import { BehaviorSubject } from 'rxjs';
 import { ml } from '../../../../services/ml_api_service';
 import { mlJobService } from '../../../../services/job_service';
-// import { parseInterval } from '../../../../../common/util/parse_interval';
 import { JobCreator } from '../job_creator';
 import { DatafeedId, JobId } from '../job_creator/configs';
 import { DATAFEED_STATE } from '../../../../../common/constants/states';
-// import { ChartSettings } from '../chart_settings';
 
 const REFRESH_INTERVAL_MS = 100;
 type Progress = number;
@@ -24,20 +22,15 @@ export class JobRunner {
   private _end: number = 0;
   private _datafeedState: DATAFEED_STATE = DATAFEED_STATE.STOPPED;
   private _refreshInterval = REFRESH_INTERVAL_MS;
-  // private _bucketSpan: BucketSpan;
-  // private _chartSettings: ChartSettings;
 
   private _progress$: BehaviorSubject<Progress>;
   private _percentageComplete: Progress = 0;
-  // private _resultsIntervalSeconds: number;
 
   constructor(jobCreator: JobCreator) {
     this._jobId = jobCreator.jobId;
     this._datafeedId = jobCreator.datafeedId;
     this._start = jobCreator.start;
     this._end = jobCreator.end;
-    // this._bucketSpan = jobCreator.bucketSpan;
-    // this._chartSettings = new ChartSettings(1000);
     this._percentageComplete = 0;
 
     this._progress$ = new BehaviorSubject(this._percentageComplete);
@@ -56,10 +49,6 @@ export class JobRunner {
     this._refreshInterval = REFRESH_INTERVAL_MS;
   }
 
-  // public get isRunning(): boolean {
-  //   return this._datafeedState === DATAFEED_STATE.STARTED;
-  // }
-
   private async openJob(): Promise<boolean> {
     let success = false;
     try {
@@ -71,30 +60,33 @@ export class JobRunner {
     return success;
   }
 
-  public async start() {
+  public async startDatafeed(): Promise<boolean> {
     const openSuccess = await this.openJob();
     if (openSuccess) {
-      await mlJobService.startDatafeed(this._datafeedId, this._jobId, this._start, this._end);
-      this._datafeedState = DATAFEED_STATE.STARTED;
-      this._percentageComplete = 0;
-      // const bucketSpanSeconds = parseInterval(this._bucketSpan).asSeconds();
+      try {
+        await mlJobService.startDatafeed(this._datafeedId, this._jobId, this._start, this._end);
+        this._datafeedState = DATAFEED_STATE.STARTED;
+        this._percentageComplete = 0;
 
-      const check = async () => {
-        const isRunning = await this.isRunning();
+        const check = async () => {
+          const isRunning = await this.isRunning();
 
-        this._percentageComplete = await this.getProgress();
-        this._progress$.next(this._percentageComplete);
+          this._percentageComplete = await this.getProgress();
+          this._progress$.next(this._percentageComplete);
 
-        if (isRunning) {
-          setTimeout(() => {
-            check();
-          }, this._refreshInterval);
-        }
-      };
-
-      check();
+          if (isRunning) {
+            setTimeout(async () => {
+              await check();
+            }, this._refreshInterval);
+          }
+        };
+        await check();
+        return true;
+      } catch (error) {
+        return false;
+      }
     } else {
-      // console.error('could not open job');
+      return false;
     }
   }
 
@@ -103,15 +95,6 @@ export class JobRunner {
     const progress = (lrts - this._start) / (this._end - this._start);
     return Math.round(progress * 100);
   }
-
-  // create the interval size for querying results.
-  // it should not be smaller than the bucket_span
-  // calculateResultsIntervalSeconds(): number {
-  //   const bucketSpanSeconds = parseInterval(this._bucketSpan).asSeconds();
-  //   return this._chartSettings.intervalSeconds < bucketSpanSeconds
-  //     ? bucketSpanSeconds
-  //     : this._chartSettings.intervalSeconds;
-  // }
 
   public subscribeToProgress(func: ProgressSubscriber) {
     this._progress$.subscribe(func);
@@ -131,8 +114,6 @@ export class JobRunner {
     const stats = await ml.getDatafeedStats({ datafeedId: this._datafeedId });
     if (stats.datafeeds.length) {
       return stats.datafeeds[0].state;
-    } else {
-      // throw { error: 'cannot read datafeed state' };
     }
     return DATAFEED_STATE.STOPPED;
   }

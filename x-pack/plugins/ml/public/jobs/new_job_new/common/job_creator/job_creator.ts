@@ -10,7 +10,6 @@ import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './config
 import { createEmptyJob, createEmptyDatafeed } from './util';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-// import { ChartSettings } from '../chart_settings';
 
 export class JobCreator {
   protected _indexPattern: IndexPatternWithType;
@@ -24,19 +23,11 @@ export class JobCreator {
   protected _start: number = 0;
   protected _end: number = 0;
   protected _subscribers: ProgressSubscriber[];
-  // protected _jobRunner: JobRunner;
-  // protected _chartSettings: ChartSettings;
 
-  constructor(
-    indexPattern: IndexPatternWithType,
-    savedSearch: SavedSearch,
-    query: object
-    // chartSettings: ChartSettings
-  ) {
+  constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
     this._indexPatternTitle = indexPattern.title;
-    // this._chartSettings = chartSettings;
 
     this._job_config = createEmptyJob();
     this._datafeed_config = createEmptyDatafeed(this._indexPatternTitle);
@@ -48,7 +39,6 @@ export class JobCreator {
     }
 
     this._datafeed_config.query = query;
-    // this._jobRunner = new JobRunner(this);
     this._subscribers = [];
   }
 
@@ -196,35 +186,32 @@ export class JobCreator {
       await this.createDatafeed();
       await this.startDatafeed();
     } catch (error) {
-      // console.error(error);
+      throw error;
     }
   }
 
-  public async createJob() {
+  public async createJob(): Promise<object> {
     try {
       return await mlJobService.saveNewJob(this._job_config);
     } catch (error) {
-      // console.error(error);
+      throw error;
     }
   }
 
-  public async createDatafeed() {
+  public async createDatafeed(): Promise<object> {
     try {
       return await mlJobService.saveNewDatafeed(this._datafeed_config, this._job_config.job_id);
     } catch (error) {
-      // console.error(error);
+      throw error;
     }
   }
 
   public async startDatafeed(): Promise<JobRunner> {
     const jobRunner = new JobRunner(this);
-    jobRunner.start();
+    jobRunner.startDatafeed();
     return jobRunner;
   }
 
-  /**
-   * subscribeToProgress
-   */
   public subscribeToProgress(func: ProgressSubscriber) {
     this._subscribers.push(func);
   }
