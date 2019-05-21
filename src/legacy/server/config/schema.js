@@ -175,6 +175,10 @@ export default () => Joi.object({
     pollInterval: Joi.number().default(1500),
   }).default(),
 
+  stats: Joi.object({
+    maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)
+  }).default(),
+
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
@@ -205,6 +209,7 @@ export default () => Joi.object({
   }).default(),
   map: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
+    proxyElasticMapsServiceInMaps: Joi.boolean().default(false),
     tilemap: Joi.object({
       url: Joi.string(),
       options: Joi.object({

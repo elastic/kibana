@@ -1,7 +1,0 @@
-{
-  "id": "dummy-security",
-  "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "ui": false,
-  "server": true
-}
