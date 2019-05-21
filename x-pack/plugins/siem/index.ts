@@ -7,11 +7,12 @@
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
+import { i18n } from '@kbn/i18n';
 import { initServerWithKibana } from './server/kibana.index';
 
 export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
-
+export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
   return new kibana.Plugin({
@@ -39,6 +40,19 @@ export function siem(kibana: any) {
           url: `/app/${APP_ID}`,
         },
       ],
+      uiSettingDefaults: {
+        [DEFAULT_INDEX_KEY]: {
+          name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
+            defaultMessage: 'Default index',
+          }),
+          value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
+            defaultMessage: 'Default Elasticsearch index to search',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+      },
     },
     init(server: Server) {
       initServerWithKibana(server);
