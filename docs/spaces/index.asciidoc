@@ -11,7 +11,7 @@ You can change your current space at any time, by clicking on the space avatar i
 [role="screenshot"]
 image::spaces/images/change-space.png["Change current space"]
 
-With security enabled, you can <<spaces-securing, control which users have access to individual spaces>>.
+With security enabled, you can <<xpack-security-authorization, control which users have access to individual spaces>>.
 
 
 [float]
