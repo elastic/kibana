@@ -8,11 +8,14 @@ import { SearchParams, SearchResponse } from 'elasticsearch';
 import { get } from 'lodash';
 // @ts-ignore Library missing definitions
 import { fromExpression } from '@kbn/interpreter/common';
-import { CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
 import { AST, collectFns } from './collector_helpers';
 import { TelemetryCollector } from './collector';
 
+const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {
+  // Making this a string instead of importing from constants because
+  // typescript can't recognize the type from a JS file, and switching constants
+  // to TS causes eslint problems elsewhere.
   [CUSTOM_ELEMENT_TYPE]: {
     content: string;
   };
