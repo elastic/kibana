@@ -16,8 +16,8 @@ describe('editor_frame state management', () => {
       props = {
         datasourceMap: { testDatasource: ({} as unknown) as Datasource },
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
-        initialDatasource: 'testDatasource',
-        initialVisualization: 'testVis',
+        initialDatasourceId: 'testDatasource',
+        initialVisualizationId: 'testVis',
       };
     });
 
@@ -38,7 +38,7 @@ describe('editor_frame state management', () => {
     });
 
     it('should not initialize visualization if no initial visualization is passed in', () => {
-      const initialState = getInitialState({ ...props, initialVisualization: null });
+      const initialState = getInitialState({ ...props, initialVisualizationId: null });
 
       expect(initialState.visualization.stateMap).toEqual({});
       expect(props.visualizationMap.testVis.initialize).not.toHaveBeenCalled();

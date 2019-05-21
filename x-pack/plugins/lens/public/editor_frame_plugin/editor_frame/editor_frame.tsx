@@ -15,8 +15,8 @@ export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
 
-  initialDatasource: string | null;
-  initialVisualization: string | null;
+  initialDatasourceId: string | null;
+  initialVisualizationId: string | null;
 }
 
 export function EditorFrame(props: EditorFrameProps) {

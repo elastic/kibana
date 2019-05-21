@@ -59,8 +59,8 @@ describe('editor_frame', () => {
             datasourceMap={{
               testDatasource: mockDatasource,
             }}
-            initialDatasource="testDatasource"
-            initialVisualization="testVis"
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
           />
         );
       });
@@ -79,8 +79,8 @@ describe('editor_frame', () => {
             datasourceMap={{
               testDatasource: mockDatasource,
             }}
-            initialDatasource={null}
-            initialVisualization={null}
+            initialDatasourceId={null}
+            initialVisualizationId={null}
           />
         );
       });
@@ -99,8 +99,8 @@ describe('editor_frame', () => {
             datasourceMap={{
               testDatasource: mockDatasource,
             }}
-            initialDatasource="testDatasource"
-            initialVisualization="testVis"
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
           />
         );
       });
@@ -128,8 +128,8 @@ describe('editor_frame', () => {
                   }),
               },
             }}
-            initialDatasource="testDatasource"
-            initialVisualization="testVis"
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
           />
         );
       });
@@ -157,8 +157,8 @@ describe('editor_frame', () => {
               initialize: () => Promise.resolve(),
             },
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
@@ -181,8 +181,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
@@ -216,8 +216,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
@@ -248,8 +248,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
@@ -290,8 +290,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
@@ -315,8 +315,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
@@ -337,8 +337,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
 
@@ -371,8 +371,8 @@ describe('editor_frame', () => {
             testDatasource: mockDatasource,
             testDatasource2: mockDatasource2,
           }}
-          initialDatasource="testDatasource"
-          initialVisualization="testVis"
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
         />
       );
       await waitForPromises();

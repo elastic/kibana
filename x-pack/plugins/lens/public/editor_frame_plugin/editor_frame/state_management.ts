@@ -43,18 +43,18 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     datasource: {
       state: null,
-      isLoading: Boolean(props.initialDatasource),
-      activeId: props.initialDatasource,
+      isLoading: Boolean(props.initialDatasourceId),
+      activeId: props.initialDatasourceId,
     },
     visualization: {
-      stateMap: props.initialVisualization
+      stateMap: props.initialVisualizationId
         ? {
-            [props.initialVisualization]: props.visualizationMap[
-              props.initialVisualization
+            [props.initialVisualizationId]: props.visualizationMap[
+              props.initialVisualizationId
             ].initialize(),
           }
         : {},
-      activeId: props.initialVisualization,
+      activeId: props.initialVisualizationId,
     },
   };
 };

@@ -33,8 +33,8 @@ export class EditorFramePlugin {
           <EditorFrame
             datasourceMap={this.datasources}
             visualizationMap={this.visualizations}
-            initialDatasource={Object.keys(this.datasources)[0]}
-            initialVisualization={Object.keys(this.visualizations)[0]}
+            initialDatasourceId={Object.keys(this.datasources)[0]}
+            initialVisualizationId={Object.keys(this.visualizations)[0]}
           />,
           domElement
         );
