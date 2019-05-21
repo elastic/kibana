@@ -17,7 +17,7 @@ const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 export const LogEntryActionsMenu: React.FunctionComponent<{
   logItem: InfraLogItem;
 }> = ({ logItem }) => {
-  const [hide, isVisible, show] = useVisibility();
+  const { hide, isVisible, show } = useVisibility();
 
   const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
 
@@ -74,7 +74,7 @@ const useVisibility = (initialVisibility: boolean = false) => {
   const hide = useCallback(() => setIsVisible(false), [setIsVisible]);
   const show = useCallback(() => setIsVisible(true), [setIsVisible]);
 
-  return [hide, isVisible, show] as [typeof hide, typeof isVisible, typeof show];
+  return { hide, isVisible, show };
 };
 
 const getUptimeLink = (logItem: InfraLogItem) => {
