@@ -19,7 +19,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameJobListRow } from './common';
+import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
 
 interface StartActionProps {
   item: DataFrameJobListRow;
@@ -42,12 +42,20 @@ export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
     defaultMessage: 'Start',
   });
 
+  // Disable start for batch jobs which have completed.
+  // If `checkpoint=1` and `sync` is missing from the config and state is stopped,
+  // then this is a completed batch data frame job.
+  const completedBatchJob =
+    item.state.checkpoint === 1 &&
+    item.config.sync === undefined &&
+    item.state.task_state === DATA_FRAME_RUNNING_STATE.STOPPED;
+
   let startButton = (
     <EuiButtonEmpty
       size="xs"
       color="text"
-      disabled={!canStartStopDataFrameJob}
-      iconType="trash"
+      disabled={!canStartStopDataFrameJob || completedBatchJob}
+      iconType="play"
       onClick={openModal}
       aria-label={buttonStartText}
     >
@@ -55,11 +63,18 @@ export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
     </EuiButtonEmpty>
   );
 
-  if (!canStartStopDataFrameJob) {
+  if (!canStartStopDataFrameJob || completedBatchJob) {
     startButton = (
       <EuiToolTip
         position="top"
-        content={createPermissionFailureMessage('canStartStopDataFrameJob')}
+        content={
+          !canStartStopDataFrameJob
+            ? createPermissionFailureMessage('canStartStopDataFrameJob')
+            : i18n.translate('xpack.ml.dataframe.jobsList.completeBatchJobToolTip', {
+                defaultMessage: '{jobId} is a completed batch job and cannot be restarted.',
+                values: { jobId: item.config.id },
+              })
+        }
       >
         {startButton}
       </EuiToolTip>

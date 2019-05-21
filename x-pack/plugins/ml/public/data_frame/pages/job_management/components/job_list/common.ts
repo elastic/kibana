@@ -12,6 +12,7 @@ export interface DataFrameJob {
   dest: string;
   id: JobId;
   source: string;
+  sync?: object;
 }
 
 export enum DATA_FRAME_RUNNING_STATE {

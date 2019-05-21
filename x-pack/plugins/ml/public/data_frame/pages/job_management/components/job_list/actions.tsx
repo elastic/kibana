@@ -66,13 +66,7 @@ export const getActions = (getJobs: () => void) => {
     },
     {
       render: (item: DataFrameJobListRow) => {
-        return (
-          <DeleteAction
-            deleteJob={deleteJob}
-            disabled={item.state.task_state === DATA_FRAME_RUNNING_STATE.STARTED}
-            item={item}
-          />
-        );
+        return <DeleteAction deleteJob={deleteJob} item={item} />;
       },
     },
   ];

@@ -19,15 +19,16 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameJobListRow } from './common';
+import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
 
 interface DeleteActionProps {
-  disabled: boolean;
   item: DataFrameJobListRow;
   deleteJob(d: DataFrameJobListRow): void;
 }
 
-export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => {
+export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, item }) => {
+  const disabled = item.state.task_state === DATA_FRAME_RUNNING_STATE.STARTED;
+
   const canDeleteDataFrameJob: boolean = checkPermission('canDeleteDataFrameJob');
 
   const [isModalVisible, setModalVisible] = useState(false);
