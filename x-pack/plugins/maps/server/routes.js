@@ -99,10 +99,9 @@ export function initRoutes(server, licenseUid) {
     method: 'GET',
     path: `${ROOT}/${EMS_META_PATH}`,
     handler: async () => {
-
       let ems;
       try {
-        ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, !mapConfig.proxyElasticMapsServiceInMaps);
+        ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, mapConfig.proxyElasticMapsServiceInMaps);
       } catch (e) {
         server.log('warning', `Cannot connect to EMS, error: ${e.message}`);
         ems = {
