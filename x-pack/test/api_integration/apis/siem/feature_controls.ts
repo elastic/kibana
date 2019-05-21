@@ -87,16 +87,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       const roleName = 'logstash_read';
       const password = `${username}-password`;
       try {
-        await security.role.create(roleName, {
-          elasticsearch: {
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-          },
-        });
+        await security.role.create(roleName, {});
 
         await security.user.create(username, {
           password,
@@ -121,14 +112,6 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: {
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-          },
           kibana: [
             {
               base: ['all'],
@@ -154,21 +137,13 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       }
     });
 
-    // this could be any role which doesn't have access to the infra feature
+    // this could be any role which doesn't have access to the siem feature
     it(`APIs can't be accessed by user with dashboard "all" and logstash-* "read" privileges`, async () => {
       const username = 'dashboard_all';
       const roleName = 'dashboard_all';
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: {
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-          },
           kibana: [
             {
               feature: {
@@ -200,7 +175,6 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       // the following tests create a user_1 which has siem read access to space_1, logs read access to space_2 and dashboard all access to space_3
       const space1Id = 'space_1';
       const space2Id = 'space_2';
-      const space3Id = 'space_3';
 
       const roleName = 'user_1';
       const username = 'user_1';
@@ -217,38 +191,19 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
           name: space2Id,
           disabledFeatures: [],
         });
-        await spaces.create({
-          id: space3Id,
-          name: space3Id,
-          disabledFeatures: [],
-        });
         await security.role.create(roleName, {
-          elasticsearch: {
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-          },
           kibana: [
             {
               feature: {
-                infrastructure: ['read'],
+                siem: ['read'],
               },
               spaces: [space1Id],
             },
             {
               feature: {
-                logs: ['read'],
-              },
-              spaces: [space2Id],
-            },
-            {
-              feature: {
                 dashboard: ['all'],
               },
-              spaces: [space3Id],
+              spaces: [space2Id],
             },
           ],
         });
@@ -261,7 +216,6 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       after(async () => {
         await spaces.delete(space1Id);
         await spaces.delete(space2Id);
-        await spaces.delete(space3Id);
         await security.role.delete(roleName);
         await security.user.delete(username);
       });
@@ -274,19 +228,11 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
         expectGraphIQLResponse(graphQLIResult);
       });
 
-      it(`user_1 can access APIs in space_2`, async () => {
+      it(`user_1 can't access APIs in space_2`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space2Id);
-        expectGraphQLResponse(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password, space2Id);
-        expectGraphIQLResponse(graphQLIResult);
-      });
-
-      it(`user_1 can't access APIs in space_3`, async () => {
-        const graphQLResult = await executeGraphQLQuery(username, password, space3Id);
         expectGraphQL404(graphQLResult);
 
-        const graphQLIResult = await executeGraphIQLRequest(username, password, space3Id);
+        const graphQLIResult = await executeGraphIQLRequest(username, password, space2Id);
         expectGraphIQL404(graphQLIResult);
       });
     });
