@@ -13,13 +13,14 @@ query ErrorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: Stri
     dateRangeEnd: $dateRangeEnd
     filters: $filters
   ) {
-    latestMessage
-    monitorId
-    type
     count
+    latestMessage
+    location
+    monitorId
+    name
     statusCode
     timestamp
-    name
+    type
   }
 }
 `;
