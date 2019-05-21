@@ -31,17 +31,19 @@ interface CreateOptions {
 }
 
 interface FindOptions {
-  perPage?: number;
-  page?: number;
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  sortField?: string;
-  hasReference?: {
-    type: string;
-    id: string;
+  options?: {
+    perPage?: number;
+    page?: number;
+    search?: string;
+    defaultSearchOperator?: 'AND' | 'OR';
+    searchFields?: string[];
+    sortField?: string;
+    hasReference?: {
+      type: string;
+      id: string;
+    };
+    fields?: string[];
   };
-  fields?: string[];
 }
 
 interface ConstructorOptions {
@@ -101,7 +103,7 @@ export class ActionsClient {
   /**
    * Find actions
    */
-  public async find(options: FindOptions = {}) {
+  public async find({ options = {} }: FindOptions) {
     return await this.savedObjectsClient.find({
       ...options,
       type: 'action',

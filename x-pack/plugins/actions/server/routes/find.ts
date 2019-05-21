@@ -66,14 +66,16 @@ export function findRoute(server: Hapi.Server) {
       const query = request.query;
       const actionsClient = request.getActionsClient();
       return await actionsClient.find({
-        perPage: query.per_page,
-        page: query.page,
-        search: query.search,
-        defaultSearchOperator: query.default_search_operator,
-        searchFields: query.search_fields,
-        sortField: query.sort_field,
-        hasReference: query.has_reference,
-        fields: query.fields,
+        options: {
+          perPage: query.per_page,
+          page: query.page,
+          search: query.search,
+          defaultSearchOperator: query.default_search_operator,
+          searchFields: query.search_fields,
+          sortField: query.sort_field,
+          hasReference: query.has_reference,
+          fields: query.fields,
+        },
       });
     },
   });
