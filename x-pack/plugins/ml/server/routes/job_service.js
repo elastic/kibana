@@ -165,4 +165,19 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/jobs_exist',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { jobsExist } = jobServiceProvider(callWithRequest);
+      const { jobIds } = request.payload;
+      return jobsExist(jobIds)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

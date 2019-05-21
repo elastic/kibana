@@ -18,15 +18,16 @@
  */
 
 import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
+import { i18n } from '@kbn/i18n';
 import storage from '../storage';
 
-export function SenseTopNavController(Private, i18n) {
+export function SenseTopNavController(Private) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
 
   const controller = new KbnTopNavController([
     {
       key: 'welcome',
-      label: i18n('console.topNav.welcomeTabLabel', {
+      label: i18n.translate('console.topNav.welcomeTabLabel', {
         defaultMessage: 'Welcome'
       }),
       hideButton: true,
@@ -35,10 +36,10 @@ export function SenseTopNavController(Private, i18n) {
     },
     {
       key: 'history',
-      label: i18n('console.topNav.historyTabLabel', {
+      label: i18n.translate('console.topNav.historyTabLabel', {
         defaultMessage: 'History'
       }),
-      description: i18n('console.topNav.historyTabDescription', {
+      description: i18n.translate('console.topNav.historyTabDescription', {
         defaultMessage: 'History',
       }),
       template: `<sense-history></sense-history>`,
@@ -46,10 +47,10 @@ export function SenseTopNavController(Private, i18n) {
     },
     {
       key: 'settings',
-      label: i18n('console.topNav.settingsTabLabel', {
+      label: i18n.translate('console.topNav.settingsTabLabel', {
         defaultMessage: 'Settings'
       }),
-      description: i18n('console.topNav.settingsTabDescription', {
+      description: i18n.translate('console.topNav.settingsTabDescription', {
         defaultMessage: 'Settings',
       }),
       template: `<sense-settings></sense-settings>`,
@@ -57,10 +58,10 @@ export function SenseTopNavController(Private, i18n) {
     },
     {
       key: 'help',
-      label: i18n('console.topNav.helpTabLabel', {
+      label: i18n.translate('console.topNav.helpTabLabel', {
         defaultMessage: 'Help'
       }),
-      description: i18n('console.topNav.helpTabDescription', {
+      description: i18n.translate('console.topNav.helpTabDescription', {
         defaultMessage: 'Help',
       }),
       template: `<sense-help></sense-help>`,

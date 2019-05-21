@@ -12,6 +12,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 import moment from 'moment';
 import d3 from 'd3';
@@ -31,7 +32,7 @@ module.directive('mlJobSelectList', function (Private) {
     replace: true,
     transclude: true,
     template,
-    controller: function ($scope, i18n) {
+    controller: function ($scope) {
       const mlJobSelectService = Private(JobSelectServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];
@@ -209,7 +210,7 @@ module.directive('mlJobSelectList', function (Private) {
 
           const fromString = timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
           const toString =  timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-          timeRange.label = i18n('xpack.ml.jobSelectList.groupTimeRangeLabel', {
+          timeRange.label = i18n.translate('xpack.ml.jobSelectList.groupTimeRangeLabel', {
             defaultMessage: '{fromString} to {toString}',
             values: {
               fromString,
@@ -363,7 +364,7 @@ module.directive('mlJobSelectList', function (Private) {
 
             const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
             const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-            job.timeRange.label = i18n('xpack.ml.jobSelectList.jobTimeRangeLabel', {
+            job.timeRange.label = i18n.translate('xpack.ml.jobSelectList.jobTimeRangeLabel', {
               defaultMessage: '{fromString} to {toString}',
               values: {
                 fromString,

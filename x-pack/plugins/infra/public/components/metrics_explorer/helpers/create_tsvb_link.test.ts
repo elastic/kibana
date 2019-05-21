@@ -52,4 +52,16 @@ describe('createTSVBLink()', () => {
       "../app/kibana#/visualize/create?type=metrics&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))&_a=(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_position:left,axis_scale:normal,default_index_pattern:'my-beats-*',filter:'host.name: example-01',id:test-id,index_pattern:'my-beats-*',interval:auto,series:!((axis_position:right,chart_type:line,color:%233185FC,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:time,type:timeseries),title:example-01,type:metrics))"
     );
   });
+  it('should work with filterQuery', () => {
+    const customSource = {
+      ...source,
+      metricAlias: 'my-beats-*',
+      fields: { ...source.fields, timestamp: 'time' },
+    };
+    const customOptions = { ...options, filterQuery: 'system.network.name:lo*' };
+    const link = createTSVBLink(customSource, customOptions, series, timeRange);
+    expect(link).toBe(
+      "../app/kibana#/visualize/create?type=metrics&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))&_a=(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_position:left,axis_scale:normal,default_index_pattern:'my-beats-*',filter:'system.network.name:lo* AND host.name: example-01',id:test-id,index_pattern:'my-beats-*',interval:auto,series:!((axis_position:right,chart_type:line,color:%233185FC,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:time,type:timeseries),title:example-01,type:metrics))"
+    );
+  });
 });
