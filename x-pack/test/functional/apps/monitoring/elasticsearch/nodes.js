@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
           await nodesList.clickCpuCol();
 
           const nodesAll = await nodesList.getNodesAll();
-          const tableData = [{ cpu: undefined }, { cpu: '0% \n3% max\n0% min' }, { cpu: '2% \n3% max\n0% min' }];
+          const tableData = [{ cpu: '2% \n3% max\n0% min' }, { cpu: '0% \n3% max\n0% min' }, { cpu: undefined }];
           nodesAll.forEach((obj, node) => {
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
           });
