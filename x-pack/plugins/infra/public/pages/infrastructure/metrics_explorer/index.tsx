@@ -7,6 +7,8 @@
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_explorer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/toolbar';
@@ -18,10 +20,11 @@ interface MetricsExplorerPageProps {
   intl: InjectedIntl;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   derivedIndexPattern: StaticIndexPattern;
+  uiCapabilities: UICapabilities;
 }
 
-export const MetricsExplorerPage = injectI18n(
-  ({ intl, source, derivedIndexPattern }: MetricsExplorerPageProps) => {
+export const MetricsExplorerPage = injectUICapabilities(
+  injectI18n(({ intl, source, derivedIndexPattern, uiCapabilities }: MetricsExplorerPageProps) => {
     if (!source) {
       return null;
     }
@@ -91,9 +94,10 @@ export const MetricsExplorerPage = injectI18n(
             onFilter={handleFilterQuerySubmit}
             onRefetch={handleRefresh}
             onTimeChange={handleTimeChange}
+            uiCapabilities={uiCapabilities}
           />
         )}
       </div>
     );
-  }
+  })
 );

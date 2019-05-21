@@ -11,6 +11,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
+import { UICapabilities } from 'ui/capabilities';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -26,10 +27,11 @@ interface Props {
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
+  uiCapabilities: UICapabilities;
 }
 
 export const MetricsExplorerChartContextMenu = injectI18n(
-  ({ intl, onFilter, options, series, source, timeRange }: Props) => {
+  ({ intl, onFilter, options, series, source, timeRange, uiCapabilities }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const supportFiltering = options.groupBy != null && onFilter != null;
     const handleFilter = useCallback(
@@ -60,12 +62,8 @@ export const MetricsExplorerChartContextMenu = injectI18n(
         ]
       : [];
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: 'Actions',
-        items: [
-          ...filterByItem,
+    const openInVisualize = uiCapabilities.visualize.show
+      ? [
           {
             name: intl.formatMessage({
               id: 'xpack.infra.metricsExplorer.openInTSVB',
@@ -75,9 +73,22 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             icon: 'visualizeApp',
             disabled: options.metrics.length === 0,
           },
-        ],
+        ]
+      : [];
+
+    const itemPanels = [...filterByItem, ...openInVisualize];
+
+    // If there are no itemPanels then there is no reason to show the actions button.
+    if (itemPanels.length === 0) return null;
+
+    const panels: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        title: 'Actions',
+        items: itemPanels,
       },
     ];
+
     const handleClose = () => setPopoverState(false);
     const handleOpen = () => setPopoverState(true);
     const actionAriaLabel = intl.formatMessage(

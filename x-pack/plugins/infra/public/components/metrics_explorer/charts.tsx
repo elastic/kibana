@@ -7,6 +7,7 @@
 import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { UICapabilities } from 'ui/capabilities';
 import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -28,6 +29,7 @@ interface Props {
   intl: InjectedIntl;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
+  uiCapabilities: UICapabilities;
 }
 export const MetricsExplorerCharts = injectI18n(
   ({
@@ -41,6 +43,7 @@ export const MetricsExplorerCharts = injectI18n(
     source,
     timeRange,
     onTimeChange,
+    uiCapabilities,
   }: Props) => {
     if (!data && loading) {
       return (
@@ -91,6 +94,7 @@ export const MetricsExplorerCharts = injectI18n(
                 source={source}
                 timeRange={timeRange}
                 onTimeChange={onTimeChange}
+                uiCapabilities={uiCapabilities}
               />
             </EuiFlexItem>
           ))}
