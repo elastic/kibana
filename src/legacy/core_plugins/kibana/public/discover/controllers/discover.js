@@ -319,7 +319,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async (menuItem, navController, anchorElement) => {
+      run: async (menuItem, navController, anchorElement) => { // eslint-disable-line no-unused-vars
         const sharingData = await this.getSharingData();
         showShareContextMenu({
           anchorElement,
