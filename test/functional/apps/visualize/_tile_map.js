@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const retry = getService('retry');
   const inspector = getService('inspector');
   const find = getService('find');
   const filterBar = getService('filterBar');
@@ -74,6 +75,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickBucket('Geo Coordinates');
         log.debug('Click aggregation Geohash');
         await PageObjects.visualize.selectAggregation('Geohash');
+        log.debug('Click field geo.coordinates');
+        await retry.try(async function tryingForTime() {
+          await PageObjects.visualize.selectField('geo.coordinates');
+        });
         await PageObjects.visualize.clickGo();
       });
 

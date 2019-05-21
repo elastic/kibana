@@ -90,12 +90,12 @@ function FieldParamEditor({
       return;
     }
 
-    if (indexedFields[0].length === 1) {
-      setValue(indexedFields[0].value);
-    }
+    const options = indexedFields[0].options;
 
-    if (indexedFields[0].options.length === 1) {
-      setValue(indexedFields[0].options[0].value);
+    if (!options) {
+      setValue(indexedFields[0].value);
+    } else if (options.length === 1) {
+      setValue(options[0].value);
     }
   }, []);
 

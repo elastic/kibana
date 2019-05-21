@@ -39,6 +39,12 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
 
     async setElement(comboBoxElement, value) {
       log.debug(`comboBox.setElement, value: ${value}`);
+      const isOptionSelected = await this.isOptionSelected(comboBoxElement, value);
+
+      if (isOptionSelected) {
+        return;
+      }
+
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
@@ -176,6 +182,12 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
         const toggleBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
         await toggleBtn.click();
       }
+    }
+
+    async isOptionSelected(comboBoxElement, value) {
+      log.debug(`comboBox.isOptionSelected, value: ${value}`);
+      const selectedOptions = await comboBoxElement.findAllByClassName('euiComboBoxPill', WAIT_FOR_EXISTS_TIME);
+      return selectedOptions.length === 1 && await selectedOptions[0].getVisibleText() === value;
     }
 
   }
