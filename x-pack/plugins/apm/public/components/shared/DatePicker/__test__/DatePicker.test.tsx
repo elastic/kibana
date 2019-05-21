@@ -8,7 +8,7 @@ import React from 'react';
 import { LocationProvider } from '../../../../context/LocationContext';
 import {
   UrlParamsContext,
-  getUIFilters
+  useUiFilters
 } from '../../../../context/UrlParamsContext';
 import { tick } from '../../../../utils/testHelpers';
 import { DatePicker } from '../index';
@@ -26,7 +26,7 @@ const MockUrlParamsProvider: React.FC<{
     value={{
       urlParams: params,
       refreshTimeRange: mockRefreshTimeRange,
-      uiFilters: getUIFilters(params)
+      uiFilters: useUiFilters(params)
     }}
     children={children}
   />

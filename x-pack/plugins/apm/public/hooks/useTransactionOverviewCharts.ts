@@ -8,12 +8,12 @@ import { useMemo } from 'react';
 import { loadTransactionOverviewCharts } from '../services/rest/apm/transaction_groups';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { IUrlParams } from '../context/UrlParamsContext/types';
-import { getUIFilters } from '../context/UrlParamsContext';
+import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 
 export function useTransactionOverviewCharts(urlParams: IUrlParams) {
   const { serviceName, start, end, transactionType } = urlParams;
-  const uiFilters = getUIFilters(urlParams);
+  const uiFilters = useUiFilters(urlParams);
 
   const { data, error, status } = useFetcher(
     () => {

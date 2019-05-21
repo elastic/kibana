@@ -20,7 +20,7 @@ import {
   loadErrorGroupList
 } from '../../../services/rest/apm/error_groups';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { getUIFilters } from '../../../context/UrlParamsContext';
+import { useUiFilters } from '../../../context/UrlParamsContext';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
@@ -34,7 +34,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   location
 }) => {
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
-  const uiFilters = getUIFilters(urlParams);
+  const uiFilters = useUiFilters(urlParams);
   const { data: errorDistributionData } = useFetcher(
     () => {
       if (serviceName && start && end) {

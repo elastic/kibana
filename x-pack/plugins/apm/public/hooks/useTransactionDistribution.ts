@@ -7,7 +7,7 @@
 import { loadTransactionDistribution } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
-import { getUIFilters } from '../context/UrlParamsContext';
+import { useUiFilters } from '../context/UrlParamsContext';
 
 const INITIAL_DATA = {
   buckets: [],
@@ -26,7 +26,7 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     traceId,
     transactionName
   } = urlParams;
-  const uiFilters = getUIFilters(urlParams);
+  const uiFilters = useUiFilters(urlParams);
 
   const { data = INITIAL_DATA, status, error } = useFetcher(
     () => {

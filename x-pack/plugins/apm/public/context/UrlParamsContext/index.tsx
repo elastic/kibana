@@ -28,7 +28,7 @@ interface TimeRangeRefreshAction {
   time: TimeRange;
 }
 
-function getUIFilters(urlParams: IUrlParams): UIFilters {
+function useUiFilters(urlParams: IUrlParams): UIFilters {
   return useMemo(
     () => ({
       kuery: urlParams.kuery,
@@ -73,7 +73,7 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
     urlParamsReducer,
     resolveUrlParams(location, {})
   );
-  const uiFilters = getUIFilters(urlParams);
+  const uiFilters = useUiFilters(urlParams);
 
   function refreshTimeRange(time: TimeRange) {
     dispatch({ type: TIME_RANGE_REFRESH, time });
@@ -94,4 +94,4 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
   );
 };
 
-export { UrlParamsContext, UrlParamsProvider, getUIFilters };
+export { UrlParamsContext, UrlParamsProvider, useUiFilters };
