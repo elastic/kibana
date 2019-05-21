@@ -95,7 +95,7 @@ export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
               defaultMessage: 'Start',
             })}
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-            buttonColor="danger"
+            buttonColor="primary"
           >
             <p>
               {i18n.translate('xpack.ml.dataframe.jobsList.startModalBody', {

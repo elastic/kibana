@@ -221,13 +221,9 @@ export const JobCreateForm: SFC<Props> = React.memo(
         {!created && (
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-              <EuiButton
-                color="warning"
-                isDisabled={created && started}
-                onClick={createAndStartDataFrame}
-              >
+              <EuiButton fill isDisabled={created && started} onClick={createAndStartDataFrame}>
                 {i18n.translate('xpack.ml.dataframe.jobCreateForm.createAndStartDataFrameButton', {
-                  defaultMessage: 'Create & start',
+                  defaultMessage: 'Create and start',
                 })}
               </EuiButton>
             </EuiFlexItem>
@@ -247,7 +243,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
         {created && (
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-              <EuiButton color="warning" isDisabled={created && started} onClick={startDataFrame}>
+              <EuiButton fill isDisabled={created && started} onClick={startDataFrame}>
                 {i18n.translate('xpack.ml.dataframe.jobCreateForm.startDataFrameButton', {
                   defaultMessage: 'Start',
                 })}
