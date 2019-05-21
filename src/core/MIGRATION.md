@@ -20,7 +20,8 @@
 * [Frequently asked questions](#frequently-asked-questions)
   * [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
   * [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
-  * [How is static code shared between plugins?](#how-is-static-code-shared-between-plugins)
+  * [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
+  * [How can I avoid passing Core services deeply within my UI component tree?](#how-can-i-avoid-passing-core-services-deeply-within-my-ui-component-tree)
   * [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
   * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
 
@@ -174,7 +175,7 @@ Core services that expose functionality to plugins always have their `setup` fun
 
 Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to the lifecycle functions `setup` and/or `start`.
 
-Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well.
+Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well. 3rd party plugins wishing to allow other plugins to integrate with it are also highly encouraged to expose types for their plugin interfaces.
 
 **foobar plugin.ts:**
 
@@ -669,26 +670,140 @@ No. That said, the migration process will require a lot of refactoring, and Type
 
 At the very least, any plugin exposing an extension point should do so with first-class type support so downstream plugins that _are_ using TypeScript can depend on those types.
 
-### How is static code shared between plugins?
+### Can static code be shared between plugins?
 
-Plugins are strongly discouraged from sharing static code for other plugins to import. There will be times when it is necessary, so it will remain possible, but it has serious drawbacks that won't necessarily be clear at development time.
+**tl;dr** Yes, but it should be limited to pure functional code that does not depend on outside state from the platform or a plugin.
 
-1. When a plugin is uninstalled, its code is removed from the filesystem, so all imports referencing it will break. This will result in Kibana failing to start or load, and there is no way to recover beyond installing the missing plugin or disabling the plugin with the broken import.
-2. When a plugin is disabled, its static exports will still be importable by any other plugin. This can result in undesirable effects where it _appears_ like a plugin is enabled when it is not. In the worst case, it can result in an unexpected user experience where features that should have been disabled are not.
-3. Code that is statically imported will be _copied_ into the plugin that imported it. This will bloat your plugin's client-side bundles and its footprint on the server's file system. Often today client-side imports expose a global singleton, and due to this copying behavior that will no longer work.
+#### Background
 
-If you must share code statically, regardless of whether static code is on the server or in the browser, it can be imported via relative paths.
+> Don't care why, just want to know how? Skip to the ["how" section below](#how-to-decide-what-code-can-be-statically-imported).
 
-For some background, this has long been problematic in Kibana for two reasons:
+Legacy Kibana has never run as a single page application. Each plugin has it's own entry point and gets "ownership" of every module it imports when it is loaded into the browser. This has allowed stateful modules to work without breaking other plugins because each time the user navigates to a new plugin, the browser reloads with a different entry bundle, clearing the state of the previous plugin.
 
-* Plugin directories were configurable, so there was no reliably relative path for imports across plugins and from core. This has since been addressed and all plugins in the Kibana repo have reliable locations relative to the Kibana root.
-* The `x-pack` directory moved into `node_modules` at build time, so a relative import from `x-pack` to `src` that worked during development would break once a Kibana distribution was built. This is still a problem today, but the fix is in flight via issue [#32722](https://github.com/elastic/kibana/pull/32722).
+Because of this "feature" many undesirable things developed in the legacy platform:
+- We had to invent an unconventional and fragile way of allowing plugins to integrate and communicate with one another, `uiExports`.
+- It has never mattered if shared modules in `ui/public` were stateful or cleaned up after themselves, so many of them behave like global singletons. These modules could never work in single-page application because of this state.
+- We've had to ship Webpack with Kibana in production so plugins could be disabled or installed and still have access to all the "platform" features of `ui/public` modules and all the `uiExports` would be present for any enabled plugins.
+- We've had to require that 3rd-party plugin developers release a new version of their plugin for each and every version of Kibana because these shared modules have no stable API and are coupled tightly both to their consumers and the Kibana platform.
 
-Any code not exported via the index of either the `server` or `public` directories should never be imported outside that plugin as it should be considered unstable and subject to change at any time.
+The New Platform's primary goal is to make developing Kibana plugins easier, both for developers at Elastic and in the community. The approach we've chosen is to enable plugins to integrate and communicate _at runtime_ rather than at build time. By wiring services and plugins up at runtime, we can ship stable APIs that do not have to be compiled into every plugin and instead live inside a solid core that each plugin gets connected to when it executes.
+
+This applies to APIs that plugins expose as well. In the new platform, plugins can communicate through an explicit interface rather than importing all the code from one another and having to recompile Webpack bundles when a plugin is disabled or a new plugin is installed.
+
+You've probably noticed that this is not the typical way a JavaScript developer works. We're used to importing code at the top of files (and for some use-cases this is still fine). However, we're not building a typical JavaScript application, we're building an application that is installed into a dynamic system (the Kibana Platform).
+
+#### What goes wrong if I do share modules with state?
+
+One goal of a stable Kibana core API is to allow Kibana instances to run plugins with varying minor versions, e.g. Kibana 8.4.0 running PluginX 8.0.1 and PluginY 8.2.5. This will be made possible by building each plugin into an “immutable bundle” that can be installed into Kibana. You can think of an immutable bundle as code that doesn't share any imported dependencies with any other bundles, that is all it's dependencies are bundled together.
+
+This method of building and installing plugins comes with side effects which are important to be aware of when developing a plugin.
+
+
+- **Any code you export to other plugins will get copied into their bundles.** If a plugin is built for 8.1 and is running on Kibana 8.2, any modules it imported that changed will not be updated in that plugin.
+- **When a plugin is disabled, other plugins can still import its static exports.** This can make code difficult to reason about and result in poor user experience. For example, users generally expect that all of a plugin’s features will be disabled when the plugin is disabled. If another plugin imports a disabled plugin’s feature and exposes it to the user, then users will be confused about whether that plugin really is disabled or not.
+- **Plugins cannot share state by importing each others modules.** Sharing state via imports does not work because exported modules will be copied into plugins that import them. Let’s say your plugin exports a module that’s imported by other plugins. If your plugin populates state into this module, a natural expectation would be that the other plugins now have access to this state. However, because those plugins have copies of the exported module, this assumption will be incorrect.
+
+#### How to decide what code can be statically imported
+
+The general rule of thumb here is: any module that is not purely functional should not be shared statically, and instead should be exposed at runtime via the plugin's `setup` and/or `start` contracts.
+
+Ask yourself these questions when deciding to share code through static exports or plugin contracts:
+- Is its behavior dependent on any state populated from my plugin?
+- If a plugin uses an old copy (from an older version of Kibana) of this module, will it still break?
+
+If you answered yes to any of the above questions, you probably have an impure module that cannot be shared across plugins. Another way to think about this: if someone literally copied and pasted your exported module into their plugin, would it break if:
+- Your original module changed in a future version and the copy was the old version; or
+- If your plugin doesn’t have access to the copied version in the other plugin (because it doesn't know about it).
+
+If your module were to break for either of these reasons, it should not be exported statically. This can be more easily illustrated by examples of what can and cannot be exported statically.
+
+Examples of code that could be shared statically:
+- Constants. Strings and numbers that do not ever change (even between Kibana versions)
+  - If constants do change between Kibana versions, then they should only be exported statically if the old value would not _break_ if it is still used. For instance, exporting a constant like `VALID_INDEX_NAME_CHARACTERS` would be fine, but exporting a constant like `API_BASE_PATH` would not because if this changed, old bundles using the previous value would break.
+- React components that do not depend on module state.
+  - Make sure these components are not dependent on or pre-wired to Core services. In many of these cases you can export a HOC that takes the Core service and returns a component wired up to that particular service instance.
+  - These components do not need to be "pure" in the sense that they do not use React state or React hooks, they just cannot rely on state inside the module or any modules it imports.
+- Pure computation functions, for example lodash-like functions like `mapValues`.
+
+Examples of code that could **not** be shared statically and how to fix it:
+- A function that calls a Core service, but does not take that service as a parameter.
+  - If the function does not take a client as an argument, it must have an instance of the client in its internal state, populated by your plugin. This would not work across plugin boundaries because your plugin would not be able to call `setClient` in the copy of this module in other plugins:
+    ```js
+    let esClient;
+    export const setClient = (client) => esClient = client;
+    export const query = (params) => esClient.search(params);
+    ```
+  - This could be fixed by requiring the calling code to provide the client:
+    ```js
+    export const query = (esClient, params) => esClient.search(params);
+    ```
+- A function that allows other plugins to register values that get pushed into an array defined internally to the module.
+  - The values registered would only be visible to the plugin that imported it. Each plugin would essentially have their own registry of visTypes that is not visible to any other plugins.
+    ```js
+    const visTypes = [];
+    export const registerVisType = (visType) => visTypes.push(visType);
+    export const getVisTypes = () => visTypes;
+    ```
+  - For state that does need to be shared across plugins, you will need to expose methods in your plugin's `setup` and `start` contracts.
+    ```js
+    class MyPlugin {
+      constructor() { this.visTypes = [] }
+      setup() {
+        return { 
+          registerVisType: (visType) => this.visTypes.push(visType)
+        }
+      }
+
+      start() {
+        return {
+          getVisTypes: () => this.visTypes
+        }
+      }
+    }
+    ```
+
+In any case, you will also need to carefully consider backward compatibility (BWC). Whatever you choose to export will need to work for the entire major version cycle (eg. Kibana 8.0-8.9), regardless of which version of the export a plugin has bundled and which minor version of Kibana they're using. Breaking changes to static exports are only allowed in major versions. However, during the 7.x cycle, all of these APIs are considered "experimental" and can be broken at any time. We will not consider these APIs stable until 8.0 at the earliest.
+
+#### Concrete Example
+
+Ok, you've decided you want to export static code from your plugin, how do you do it? The New Platform only considers values exported from `my_plugin/public` and `my_plugin/server` to be stable. The linter will only let you import statically from these top-level modules. In the future, our tooling will enforce that these APIs do not break between minor versions. All code shared among plugins should be exported in these modules like so:
+
+```ts
+// my_plugin/public/index.ts
+export { MyPureComponent } from './components';
+
+// regular plugin export used by core to initialize your plugin
+export const plugin = ...;
+```
+
+These can then be imported using relative paths from other plugins:
+
+```ts
+// my_other_plugin/public/components/my_app.ts
+import { MyPureComponent } from '../my_plugin/public';
+```
+
+If you have code that should be available to other plugins on both the client and server, you can have a common directory. _See [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)_
+
+### How can I avoid passing Core services deeply within my UI component tree?
+
+There are some Core services that are purely presentational, for example `core.overlays.openModal()` or `core.application.createLink()` where UI code does need access to these deeply within your application. However, passing these services down as props throughout your application leads to lots of boilerplate. To avoid this, you have three options:
+1. Use an abstraction layer, like Redux, to decouple your UI code from core (**this is the highly preferred option**); or
+    - [redux-thunk](https://github.com/reduxjs/redux-thunk#injecting-a-custom-argument) and [redux-saga](https://redux-saga.js.org/docs/api/#createsagamiddlewareoptions) already have ways to do this.
+1. Use React Context to provide these services to large parts of your React tree; or
+1. Create a high-order-component that injects core into a React component; or
+    - This would be a stateful module that holds a reference to Core, but provides it as props to components with a `withCore(MyComponent)` interface. This can make testing components simpler. (Note: this module cannot be shared across plugin boundaries, see above).
+1. Create a global singleton module that gets imported into each module that needs it. (Note: this module cannot be shared across plugin boundaries, see above). [Example](https://gist.github.com/epixa/06c8eeabd99da3c7545ab295e49acdc3).
+
+If you find that you need many different Core services throughout your application, this may be a code smell and could lead to pain down the road. For instance, if you need access to an HTTP Client or SavedObjectsClient in many places in your React tree, it's likely that a data layer abstraction (like Redux) could make developing your plugin much simpler (see option 1).
+
+Without such an abstraction, you will need to mock out Core services throughout your test suite and will couple your UI code very tightly to Core. However, if you can contain all of your integration points with Core to Redux middleware and/or reducers, you only need to mock Core services once, and benefit from being able to change those integrations with Core in one place rather than many. This will become incredibly handy when Core APIs have breaking changes.
 
 ### How is "common" code shared on both the client and server?
 
 There is no formal notion of "common" code that can safely be imported from either client-side or server-side code. However, if a plugin author wishes to maintain a set of code in their plugin in a single place and then expose it to both server-side and client-side code, they can do so by exporting in the index files for both the `server` and `public` directories.
+
+Plugins should not ever import code from deeply inside another plugin (eg. `my_plugin/public/components`) or from other top-level directories (eg. `my_plugin/common/constants`) as these are not checked for breaking changes and are considered unstable and subject to change at any time. You can have other top-level directories like `my_plugin/common`, but our tooling will not treat these as a stable API and linter rules will prevent importing from these directories _from outside the plugin_.
 
 The benefit of this approach is that the details of where code lives and whether it is accessible in multiple runtimes is an implementation detail of the plugin itself. A plugin consumer that is writing client-side code only ever needs to concern themselves with the client-side contracts being exposed, and the same can be said for server-side contracts on the server.
 
