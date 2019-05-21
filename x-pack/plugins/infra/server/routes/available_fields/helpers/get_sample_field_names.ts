@@ -27,6 +27,7 @@ export const getSampleFieldNames = async (
       aggs: {
         events: {
           composite: {
+            size: 100,
             sources: [{ dataset: { terms: { field: 'event.dataset' } } }],
           },
           aggs: {
