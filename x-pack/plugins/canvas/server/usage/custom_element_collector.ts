@@ -5,6 +5,7 @@
  */
 
 import { SearchParams, SearchResponse } from 'elasticsearch';
+import { get } from 'lodash';
 // @ts-ignore Library missing definitions
 import { fromExpression } from '@kbn/interpreter/common';
 import { CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
@@ -120,7 +121,7 @@ const customElementCollector: TelemetryCollector = async function customElementC
 
   const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
 
-  if (esResponse.hits.hits.length > 0) {
+  if (get(esResponse, 'hits.hits.length') > 0) {
     return handleResponse(esResponse);
   }
 
