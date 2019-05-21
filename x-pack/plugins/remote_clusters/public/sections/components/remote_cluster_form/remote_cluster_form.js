@@ -29,6 +29,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import {
@@ -244,15 +245,11 @@ export const RemoteClusterForm = injectI18n(
             </EuiTitle>
           )}
           description={(
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
-                  defaultMessage="A list of remote cluster nodes to query for the cluster state.
-                    Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
-                />
-              </p>
-            </Fragment>
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
+              defaultMessage="A list of remote cluster nodes to query for the cluster state.
+                Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
+            />
           )}
           fullWidth
         >
@@ -502,12 +499,57 @@ export const RemoteClusterForm = injectI18n(
     }
 
     renderErrors = () => {
-      const { areErrorsVisible } = this.state;
+      const {
+        areErrorsVisible,
+        fields: {
+          name,
+        },
+        fieldsErrors: {
+          name: errorClusterName,
+        },
+        localSeedErrors,
+        seedInput,
+      } = this.state;
+
       const hasErrors = this.hasErrors();
 
       if (!areErrorsVisible || !hasErrors) {
         return null;
       }
+
+      const errorExplanation = [];
+
+      if (errorClusterName) {
+        errorExplanation.push({
+          key: 'nameExplanation',
+          where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputErrorsScreenReaderExplanation', {
+            defaultMessage: 'The input "Name". You have entered: {name}.',
+            values: { name }
+          }),
+          what: errorClusterName
+        });
+      }
+      if (localSeedErrors && localSeedErrors.length) {
+        errorExplanation.push({
+          key: 'seedExplanation',
+          where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputErrorsScreenReaderExplanation', {
+            defaultMessage: 'The "Seed Nodes" input. You have entered: {seedInput}.',
+            values: { seedInput }
+          }),
+          what: localSeedErrors.join(' ')
+        });
+      }
+
+      const messageToBeRendered = (
+        <Fragment>
+          {errorExplanation.length && errorExplanation.map(errorMessage => (
+            <p key={errorMessage.key}>
+              {errorMessage.where}<br/>
+              {errorMessage.what}
+            </p>
+          ))}
+        </Fragment>
+      );
 
       return (
         <Fragment>
@@ -522,7 +564,9 @@ export const RemoteClusterForm = injectI18n(
             )}
             color="danger"
             iconType="cross"
-          />
+          >
+            {messageToBeRendered}
+          </EuiCallOut>
         </Fragment>
       );
     }
@@ -546,7 +590,9 @@ export const RemoteClusterForm = injectI18n(
 
       return (
         <Fragment>
-          {this.renderSaveErrorFeedback()}
+          <div role="region" aria-live="assertive">
+            {this.renderSaveErrorFeedback()}
+          </div>
 
           <EuiForm>
             <EuiDescribedFormGroup
@@ -602,7 +648,9 @@ export const RemoteClusterForm = injectI18n(
             {this.renderSkipUnavailable()}
           </EuiForm>
 
-          {this.renderErrors()}
+          <div role="region" aria-live="assertive">
+            {this.renderErrors()}
+          </div>
 
           <EuiSpacer size="l" />
 

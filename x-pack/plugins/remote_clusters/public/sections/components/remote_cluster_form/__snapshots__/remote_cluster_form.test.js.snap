@@ -3,6 +3,10 @@
 exports[`RemoteClusterForm renders untouched state 1`] = `
 Array [
   <div
+    aria-live="assertive"
+    role="region"
+  />,
+  <div
     class="euiForm"
   >
     <div
@@ -102,9 +106,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              <p>
-                A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
-              </p>
+              A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
             </div>
           </div>
         </div>
@@ -295,6 +297,10 @@ Array [
       </div>
     </div>
   </div>,
+  <div
+    aria-live="assertive"
+    role="region"
+  />,
   <div
     class="euiSpacer euiSpacer--l"
   />,
@@ -547,6 +553,15 @@ Array [
       >
         Fix errors before continuing.
       </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        The input "Name". You have entered: .
+        <br />
+        Name is required.
+      </p>
     </div>
   </div>,
 ]
