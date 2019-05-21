@@ -72,7 +72,7 @@ function parseTsconfig(pluginSourcePath, configPath) {
 
 // transpile with babel
 async function transpileWithBabel(srcGlobs, buildRoot, presets) {
-  await asyncPipeline([
+  await asyncPipeline(
     vfs.src(
       srcGlobs.concat([
         '!**/*.d.ts',
@@ -90,8 +90,8 @@ async function transpileWithBabel(srcGlobs, buildRoot, presets) {
       presets,
     }),
 
-    vfs.dest(buildRoot),
-  ]);
+    vfs.dest(buildRoot)
+  );
 }
 
 module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaVersion, files) {
