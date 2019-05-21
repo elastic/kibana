@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import '@elastic/charts/dist/style.css';
 import {
   AnnotationDomainTypes,
@@ -101,6 +101,21 @@ const getTimeBuckets = (watch: any) => {
 
 const WatchVisualizationUi = () => {
   const { watch } = useContext(WatchContext);
+  const {
+    index,
+    timeField,
+    triggerIntervalSize,
+    triggerIntervalUnit,
+    aggType,
+    aggField,
+    termSize,
+    termField,
+    thresholdComparator,
+    timeWindowSize,
+    timeWindowUnit,
+    groupBy,
+    threshold,
+  } = watch;
 
   const domain = getDomain(watch);
   const timeBuckets = new TimeBuckets();
@@ -116,6 +131,8 @@ const WatchVisualizationUi = () => {
   // Fetching visualization data is independent of watch actions
   const watchWithoutActions = new ThresholdWatch({ ...watch, actions: [] });
 
+  const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
+
   const {
     isLoading,
     data: watchVisualizationData,
@@ -125,9 +142,27 @@ const WatchVisualizationUi = () => {
 
   useEffect(
     () => {
+      // Prevents refetch on initial render
+      if (isInitialRequest) {
+        return setIsInitialRequest(false);
+      }
       reload();
     },
-    [watch]
+    [
+      index,
+      timeField,
+      triggerIntervalSize,
+      triggerIntervalUnit,
+      aggType,
+      aggField,
+      termSize,
+      termField,
+      thresholdComparator,
+      timeWindowSize,
+      timeWindowUnit,
+      groupBy,
+      threshold,
+    ]
   );
 
   if (isLoading) {

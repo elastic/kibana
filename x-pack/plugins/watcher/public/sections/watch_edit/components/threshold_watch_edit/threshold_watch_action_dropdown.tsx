@@ -61,7 +61,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
 
   const button = (
     <EuiButton
-      data-test-subj="createIndexPatternButton"
+      data-test-subj="addWatchActionButton"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setIsPopOverOpen(!isPopoverOpen)}
@@ -75,7 +75,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
 
   return (
     <EuiPopover
-      id="singlePanel"
+      id="watchActionPanel"
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopOverOpen(false)}
@@ -96,7 +96,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
               }}
             >
               <EuiFlexGroup>
-                <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                <EuiFlexItem grow={false} className="watcherThresholdWatchActionContextMenuItem">
                   <EuiIcon type={action.iconClass} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

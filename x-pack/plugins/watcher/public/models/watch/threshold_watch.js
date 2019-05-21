@@ -128,7 +128,7 @@ export class ThresholdWatch extends BaseWatch {
     if (this.index !== undefined
         && this.index.length > 0
         && this.timeFields !== undefined
-        && this.timeFields.length === 0
+        && this.timeFields.length === 1 // first option will have empty value
     ) {
       errors.index.push(
         i18n.translate(

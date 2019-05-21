@@ -132,7 +132,7 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
 const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTitle: string }) => {
   // hooks
   const [indexPatterns, setIndexPatterns] = useState([]);
-  const [fields, setFields] = useState([]);
+  const [esFields, setEsFields] = useState([]);
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
 
@@ -142,6 +142,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   const [watchDurationPopoverOpen, setWatchDurationPopoverOpen] = useState(false);
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
   const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const { watch, setWatchProperty } = useContext(WatchContext);
   const licenseService = useContext(LicenseServiceContext);
 
@@ -152,10 +153,11 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   };
   const loadData = async () => {
     if (watch.index && watch.index.length > 0) {
-      const theFields = await getFields(watch.index);
-      setFields(theFields);
-      setTimeFieldOptions(getTimeFieldOptions(theFields));
-      setWatchProperty('timeFields', theFields);
+      const allEsFields = await getFields(watch.index);
+      const timeFields = getTimeFieldOptions(allEsFields);
+      setEsFields(allEsFields);
+      setTimeFieldOptions(timeFields);
+      setWatchProperty('timeFields', timeFields);
     }
     getIndexPatterns();
   };
@@ -177,7 +179,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   const expressionErrorMessage = i18n.translate(
     'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
     {
-      defaultMessage: 'Please fix the errors in the expression below.',
+      defaultMessage: 'Your expression has errors.',
     }
   );
   const expressionFields = [
@@ -286,11 +288,12 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                     setWatchProperty('timeFields', []);
                     return;
                   }
-                  const theFields = await getFields(indices);
-                  setFields(theFields);
-                  setWatchProperty('timeFields', theFields);
+                  const currentEsFields = await getFields(indices);
+                  const timeFields = getTimeFieldOptions(currentEsFields);
 
-                  setTimeFieldOptions(getTimeFieldOptions(theFields));
+                  setEsFields(currentEsFields);
+                  setWatchProperty('timeFields', timeFields);
+                  setTimeFieldOptions(timeFields);
                 }}
                 onSearchChange={async search => {
                   setIndexOptions(await getIndexOptions(search, indexPatterns));
@@ -393,12 +396,6 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            {hasExpressionErrors ? (
-              <Fragment>
-                <EuiText color="danger">{expressionErrorMessage}</EuiText>
-                <EuiSpacer size="m" />
-              </Fragment>
-            ) : null}
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiPopover
@@ -504,7 +501,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                                   setWatchProperty('aggField', '');
                                 }
                               }}
-                              options={fields.reduce(
+                              options={esFields.reduce(
                                 (options, field: any) => {
                                   if (
                                     aggTypes[watch.aggType].validNormalizedTypes.includes(
@@ -629,7 +626,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                                 onChange={e => {
                                   setWatchProperty('termField', e.target.value);
                                 }}
-                                options={fields.reduce(
+                                options={esFields.reduce(
                                   (options, field: any) => {
                                     if (
                                       groupByTypes[watch.groupBy].validNormalizedTypes.includes(
@@ -809,6 +806,15 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {hasExpressionErrors ? (
+              <Fragment>
+                <EuiSpacer size="m" />
+                <EuiText color="danger" size="s">
+                  {expressionErrorMessage}
+                </EuiText>
+                <EuiSpacer size="m" />
+              </Fragment>
+            ) : null}
             {hasErrors ? null : (
               <Fragment>
                 <WatchVisualization />
@@ -822,18 +828,31 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
+              color="secondary"
               type="submit"
+              iconType="check"
               isDisabled={hasErrors || hasActionErrors}
+              isLoading={isSaving}
               onClick={async () => {
+                setIsSaving(true);
                 const savedWatch = await onWatchSave(watch, licenseService);
                 if (savedWatch && savedWatch.validationError) {
+                  setIsSaving(false);
                   return setModal(savedWatch.validationError);
                 }
               }}
             >
-              {i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveButtonLabel', {
-                defaultMessage: 'Save',
-              })}
+              {watch.isNew ? (
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchEdit.threshold.createButtonLabel"
+                  defaultMessage="Create"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchEdit.threshold.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

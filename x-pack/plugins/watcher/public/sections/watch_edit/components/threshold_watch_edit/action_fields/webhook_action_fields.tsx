@@ -13,6 +13,7 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../../../components/form_errors';
@@ -107,6 +108,11 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             )}
           >
             <EuiFieldNumber
+              prepend={
+                <EuiText size="xs">
+                  <strong>:</strong>
+                </EuiText>
+              }
               fullWidth
               name="port"
               value={port || ''}
@@ -133,6 +139,11 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             )}
           >
             <EuiFieldText
+              prepend={
+                <EuiText size="xs">
+                  <strong>/</strong>
+                </EuiText>
+              }
               fullWidth
               name="path"
               value={path || ''}
