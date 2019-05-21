@@ -30,6 +30,7 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { exec } from 'child_process';
 import { expectationFailed } from 'hapi/node_modules/@types/boom';
 import { executionAsyncId } from 'async_hooks';
+import { create } from 'domain';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
@@ -193,10 +194,9 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ configService, env, logger });
-  const setup = await service.setup();
-  expect(setup.createNewServer).toBeDefined();
-  delete setup.createNewServer;
-  expect(setup).toEqual(httpServer);
+  const { createNewServer, ...setupHttpServer } = await service.setup();
+  expect(createNewServer).toBeDefined();
+  expect(setupHttpServer).toEqual(httpServer);
 });
 
 test('does not start http server if process is dev cluster master', async () => {
