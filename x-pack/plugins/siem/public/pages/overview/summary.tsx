@@ -44,7 +44,7 @@ export const Summary = pure(() => (
       <p>
         <FormattedMessage
           id="xpack.siem.overview.feedbackText"
-          defaultMessage="If you have input or suggestions regarding your experience with SIEM, please feel free to {feedback}."
+          defaultMessage="If you have input or suggestions regarding your experience with Elastic SIEM, please feel free to {feedback}."
           values={{
             feedback: (
               <EuiLink href="https://discuss.elastic.co/c/siem" target="blank">
