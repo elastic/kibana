@@ -125,14 +125,11 @@ export class ActionsClient {
     if (!this.actionTypeService.has(actionTypeId)) {
       throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
     }
-    this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
-    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
-    return await this.savedObjectsClient.update(
-      'action',
-      id,
-      actionWithSplitActionTypeConfig,
-      options
-    );
+    if (data.actionTypeConfig) {
+      this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
+      data = this.moveEncryptedAttributesToSecrets(data);
+    }
+    return await this.savedObjectsClient.update<any>('action', id, data, options);
   }
 
   /**

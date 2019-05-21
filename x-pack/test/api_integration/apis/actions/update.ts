@@ -44,6 +44,63 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
+    it('should support partial updates', async () => {
+      await supertest
+        .put('/api/action/1')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            actionTypeId: 'test',
+            description: 'My description updated again',
+          },
+        })
+        .expect(200);
+      await supertest
+        .get('/api/action/1')
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            id: '1',
+            type: 'action',
+            references: [],
+            version: resp.body.version,
+            updated_at: resp.body.updated_at,
+            attributes: {
+              actionTypeId: 'test',
+              description: 'My description updated again',
+              actionTypeConfig: {
+                unencrypted: 'unencrypted text',
+              },
+            },
+          });
+        });
+    });
+
+    it('should not be able to pass null to actionTypeConfig', async () => {
+      await supertest
+        .put('/api/action/1')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            actionTypeId: 'test',
+            description: 'My description updated',
+            actionTypeConfig: null,
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'child "attributes" fails because [child "actionTypeConfig" fails because ["actionTypeConfig" must be an object]]',
+            validation: {
+              source: 'payload',
+              keys: ['attributes.actionTypeConfig'],
+            },
+          });
+        });
+    });
+
     it('should not return encrypted attributes', async () => {
       await supertest
         .put('/api/action/1')
