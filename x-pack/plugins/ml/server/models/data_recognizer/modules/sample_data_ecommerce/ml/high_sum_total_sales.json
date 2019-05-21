@@ -5,7 +5,7 @@
     "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "Mean total sales",
+        "detector_description": "High total sales",
         "function": "high_sum",
         "field_name": "taxful_total_price",
         "over_field_name": "customer_full_name.keyword"
