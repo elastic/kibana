@@ -165,6 +165,10 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
       }
 
       // Transpile ts server code
+      //
+      // Include every ts/tsx file which is not inside a public directory
+      // and then add all server and common code (there is at least one example of a public directory
+      // inside the server directory )
       await transpileWithBabel(
         ['**/*.{ts,tsx}', '!**/public/**', '**/server/**/*.{ts,tsx}', '**/common/**/*.{ts,tsx}'],
         buildRoot,
@@ -172,6 +176,9 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
       );
 
       // Transpile ts client code
+      //
+      // Include everything inside a public directory which is not
+      // inside a server or common directory.
       await transpileWithBabel(
         ['**/public/**/*.{ts,tsx}', '!**/server/**', '!**/common/**'],
         buildRoot,
