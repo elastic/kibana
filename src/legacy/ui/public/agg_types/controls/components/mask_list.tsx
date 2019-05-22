@@ -35,8 +35,10 @@ export interface MaskObject {
   mask: string;
 }
 
-interface MaskModel extends MaskObject {
+interface MaskModel {
   id: string;
+  model: string;
+  value: string;
   isInvalid: boolean;
 }
 
@@ -46,28 +48,41 @@ interface MaskListProps {
   showValidation: boolean;
   onBlur(): void;
   onChange(list: MaskObject[]): void;
+  setValidity(isValid: boolean): void;
 }
 
 const generateId = htmlIdGenerator();
 
-function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: MaskListProps) {
+function MaskList({
+  labelledbyId,
+  list,
+  showValidation,
+  onBlur,
+  onChange,
+  setValidity,
+}: MaskListProps) {
   const [models, setModels] = useState(
-    list.map(item => ({ ...item, id: generateId(), isInvalid: false }))
-  );
-  const deleteBtnAriaLabel = i18n.translate(
-    'common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel',
-    {
-      defaultMessage: 'Remove this CIDR mask',
-    }
+    list.length
+      ? list.map(item => ({
+          model: item.mask,
+          value: item.mask,
+          id: generateId(),
+          isInvalid: false,
+        }))
+      : [{ id: generateId(), model: '0.0.0.0/1', value: '0.0.0.0/1', isInvalid: false }]
   );
 
   const onUpdate = (modelList: MaskModel[]) => {
     setModels(modelList);
-    onChange(modelList.map(({ mask }) => ({ mask })));
+    onChange(modelList.map(({ model }) => ({ mask: model })));
   };
 
   const onChangeValue = (index: number, value: string) => {
-    models[index].mask = value;
+    const mask = models[index];
+    const { model, isInvalid } = validateValue(value);
+    mask.value = value;
+    mask.model = model;
+    mask.isInvalid = isInvalid;
     onUpdate(models);
   };
   const onDelete = (id: string) => {
@@ -77,7 +92,7 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
 
   const validateValue = (mask: string) => {
     const result = {
-      value: mask,
+      model: mask,
       isInvalid: false,
     };
     if (!mask) {
@@ -85,7 +100,7 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
       return result;
     }
     try {
-      new CidrMask(mask);
+      result.model = new CidrMask(mask).toString();
       result.isInvalid = false;
       return result;
     } catch (e) {
@@ -95,15 +110,30 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
   };
 
   const getUpdatedModels = (objList: MaskObject[], modelList: MaskModel[]) => {
+    if (!objList.length) {
+      return modelList;
+    }
     return objList.map((item, index) => {
-      const model = modelList[index] || { id: generateId(), mask: '', isInvalid: false };
-      const { value, isInvalid } = validateValue(model.mask);
+      const maskModel = modelList[index] || {
+        id: generateId(),
+        value: item.mask,
+        model: item.mask,
+        isInvalid: false,
+      };
+      const { model, isInvalid } = validateValue(item.mask);
+      if (item.mask !== maskModel.model) {
+        maskModel.value = model;
+      }
       return {
-        ...model,
-        value,
+        ...maskModel,
+        model,
         isInvalid,
       };
     });
+  };
+
+  const hasInvalidValues = (modelList: MaskModel[]) => {
+    return !!modelList.find(({ isInvalid }) => isInvalid);
   };
 
   useEffect(
@@ -112,6 +142,18 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
     },
     [list]
   );
+
+  useEffect(
+    () => {
+      setValidity(!hasInvalidValues(models));
+    },
+    [models]
+  );
+
+  // resposible for setting up an initial value ([mask: '0.0.0.0/1']) when there is no default value
+  useEffect(() => {
+    onChange(models.map(({ model }) => ({ mask: model })));
+  }, []);
 
   if (!list || !list.length) {
     return null;
@@ -139,7 +181,7 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
                 onChange={ev => {
                   onChangeValue(index, ev.target.value);
                 }}
-                value={item.mask}
+                value={item.value}
                 onBlur={onBlur}
               />
             </EuiFlexItem>
@@ -149,12 +191,12 @@ function MaskList({ labelledbyId, list, showValidation, onBlur, onChange }: Mask
                   'common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel',
                   {
                     defaultMessage: 'Remove the CIDR mask value of {mask}',
-                    values: { mask: item.mask },
+                    values: { mask: item.value },
                   }
                 )}
                 title={i18n.translate('common.ui.aggTypes.ipRanges.removeCidrMaskButtonTitle', {
                   defaultMessage: 'Remove the CIDR mask value of {mask}',
-                  values: { mask: item.mask },
+                  values: { mask: item.value },
                 })}
                 disabled={models.length === 1}
                 color="danger"

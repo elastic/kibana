@@ -37,6 +37,7 @@ export interface FromToObject {
 }
 
 interface FromToItem {
+  model: string;
   value: string;
   isInvalid: boolean;
 }
@@ -53,53 +54,85 @@ interface FromToListProps {
   showValidation: boolean;
   onBlur(): void;
   onChange(list: FromToObject[]): void;
+  setValidity(isValid: boolean): void;
 }
 
 const generateId = htmlIdGenerator();
 
-function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: FromToListProps) {
-  const [models, setModels] = useState(
-    list.map(item => ({
-      id: generateId(),
-      from: { value: item.from, isInvalid: false },
-      to: { value: item.to, isInvalid: false },
-    }))
+function FromToList({
+  labelledbyId,
+  list,
+  showValidation,
+  onBlur,
+  onChange,
+  setValidity,
+}: FromToListProps) {
+  const [ranges, setRanges] = useState(
+    list.length
+      ? list.map(item => ({
+          id: generateId(),
+          from: { value: item.from, model: item.from, isInvalid: false },
+          to: { value: item.to, model: item.to, isInvalid: false },
+        }))
+      : [
+          {
+            id: generateId(),
+            from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
+            to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
+          },
+        ]
   );
 
   const onUpdate = (modelList: FromToModel[]) => {
-    setModels(modelList);
-    onChange(modelList.map(({ from, to }) => ({ from: from.value, to: to.value })));
+    setRanges(modelList);
+    onChange(modelList.map(({ from, to }) => ({ from: from.model, to: to.model })));
   };
 
   const onChangeValue = (modelName: 'from' | 'to', index: number, value: string) => {
-    models[index][modelName].value = value;
-    onUpdate(models);
+    const range = ranges[index][modelName];
+    const { model, isInvalid } = validateValue(value);
+    range.value = value;
+    range.model = model;
+    range.isInvalid = isInvalid;
+    onUpdate(ranges);
   };
   const onDelete = (id: string) => {
-    const newArray = models.filter(model => model.id !== id);
+    const newArray = ranges.filter(model => model.id !== id);
     onUpdate(newArray);
   };
 
-  const getUpdatedModels = (objList: FromToObject[], modelList: FromToModel[]) => {
+  const getUpdatedModels = (objList: FromToObject[], rangeList: FromToModel[]) => {
+    if (!objList.length) {
+      return rangeList;
+    }
     return objList.map((item, index) => {
-      const model = modelList[index] || {
+      const range = rangeList[index] || {
         id: generateId(),
-        from: { value: '', isInvalid: false },
-        to: { value: '', isInvalid: false },
+        from: { value: item.from, model: item.from, isInvalid: false },
+        to: { value: item.to, model: item.to, isInvalid: false },
       };
-      const from = validateValue(model.from.value);
-      const to = validateValue(model.to.value);
+
+      validateItem(item.from, range.from);
+      validateItem(item.to, range.to);
+
       return {
-        id: model.id,
-        from,
-        to,
+        ...range,
       };
     });
   };
 
+  const validateItem = (value: string, modelObj: FromToItem) => {
+    const { model, isInvalid } = validateValue(value);
+    if (value !== modelObj.model) {
+      modelObj.value = model;
+    }
+    modelObj.model = model;
+    modelObj.isInvalid = isInvalid;
+  };
+
   const validateValue = (ipAddress: string) => {
     const result = {
-      value: ipAddress,
+      model: ipAddress,
       isInvalid: false,
     };
     if (!ipAddress) {
@@ -107,7 +140,7 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
       return result;
     }
     try {
-      new Ipv4Address(ipAddress);
+      result.model = new Ipv4Address(ipAddress).toString();
       result.isInvalid = false;
       return result;
     } catch (e) {
@@ -116,12 +149,28 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
     }
   };
 
+  const hasInvalidValues = (modelList: FromToModel[]) => {
+    return !!modelList.find(({ from, to }) => from.isInvalid || to.isInvalid);
+  };
+
   useEffect(
     () => {
-      setModels(getUpdatedModels(list, models));
+      setRanges(getUpdatedModels(list, ranges));
     },
     [list]
   );
+
+  useEffect(
+    () => {
+      setValidity(!hasInvalidValues(ranges));
+    },
+    [ranges]
+  );
+
+  // resposible for setting up an initial value ([from: '0.0.0.0', to: '255.255.255.255' ]) when there is no default value
+  useEffect(() => {
+    onChange(ranges.map(({ from, to }) => ({ from: from.model, to: to.model })));
+  }, []);
 
   if (!list || !list.length) {
     return null;
@@ -142,7 +191,7 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      {models.map((item, index) => (
+      {ranges.map((item, index) => (
         <Fragment key={item.id}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem>
@@ -179,7 +228,7 @@ function FromToList({ labelledbyId, list, showValidation, onBlur, onChange }: Fr
                   defaultMessage: 'Remove the range of {from} to {to}',
                   values: { from: item.from.value, to: item.to.value },
                 })}
-                disabled={models.length === 1}
+                disabled={ranges.length === 1}
                 color="danger"
                 iconType="trash"
                 onClick={() => onDelete(item.id)}

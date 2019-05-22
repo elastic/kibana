@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiFlexItem, EuiFormRow, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -32,23 +32,12 @@ interface IpRange {
 
 function IpRangesParamEditor({
   agg,
-  value,
+  value = { fromTo: [] as FromToObject[], mask: [] as MaskObject[] },
   setTouched,
   setValue,
   setValidity,
   showValidation,
 }: AggParamEditorProps<IpRange>) {
-  const isValid = true;
-
-  useEffect(
-    () => {
-      setValidity(isValid);
-
-      return () => setValidity(true);
-    },
-    [isValid]
-  );
-
   const handleChange = (modelName: IpRangeTypes, items: Array<FromToObject | MaskObject>) => {
     setValue({
       ...value,
@@ -71,6 +60,7 @@ function IpRangesParamEditor({
             showValidation={showValidation}
             onBlur={setTouched}
             onChange={items => handleChange(IpRangeTypes.MASK, items)}
+            setValidity={setValidity}
           />
         ) : (
           <FromToList
@@ -79,6 +69,7 @@ function IpRangesParamEditor({
             showValidation={showValidation}
             onBlur={setTouched}
             onChange={items => handleChange(IpRangeTypes.FROM_TO, items)}
+            setValidity={setValidity}
           />
         )}
         <EuiSpacer size="s" />
