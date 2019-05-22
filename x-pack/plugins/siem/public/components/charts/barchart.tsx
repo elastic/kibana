@@ -57,11 +57,11 @@ export const BarChartBaseComponent = pure<{
             name={series.key}
             xScaleType={ScaleType.Ordinal}
             yScaleType={ScaleType.Linear}
-            xAccessor="y"
-            yAccessors={['x']}
+            xAccessor="x"
+            yAccessors={['y']}
             splitSeriesAccessors={['g']}
             data={series.value!}
-            stackAccessors={['x']}
+            stackAccessors={['y']}
             customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
           />
         );
@@ -91,7 +91,7 @@ export const BarChartWithCustomPrompt = pure<{
     data.length &&
     data.some(
       ({ value }) =>
-        value != null && value.length > 0 && value.every(chart => chart.x != null && chart.x > 0)
+        value != null && value.length > 0 && value.every(chart => chart.y != null && chart.y > 0)
     ) ? (
     <BarChartBaseComponent height={height} width={width} data={data} />
   ) : (
