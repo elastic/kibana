@@ -73,7 +73,7 @@ class ObjectsTableUI extends Component {
     basePath: PropTypes.string.isRequired,
     perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
-    confirmModalPromise: PropTypes.object.isRequired,
+    confirmModalPromise: PropTypes.function.isRequired,
     services: PropTypes.array.isRequired,
     uiCapabilities: PropTypes.object.isRequired,
     goInspectObject: PropTypes.func.isRequired,
