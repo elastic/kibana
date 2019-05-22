@@ -92,7 +92,8 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'child "attributes" fails because [child "actionTypeConfig" fails because ["actionTypeConfig" must be an object]]',
+            message:
+              'child "attributes" fails because [child "actionTypeConfig" fails because ["actionTypeConfig" must be an object]]',
             validation: {
               source: 'payload',
               keys: ['attributes.actionTypeConfig'],
