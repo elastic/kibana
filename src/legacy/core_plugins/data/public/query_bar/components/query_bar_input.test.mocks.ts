@@ -67,6 +67,10 @@ const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
 export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
 const mockKfetch = jest.fn(() => createKfetch(setup().http));
 
+export const mockFetchIndexPatterns = jest
+  .fn()
+  .mockReturnValue(Promise.resolve([mockIndexPattern]));
+
 jest.mock('ui/chrome', () => mockChromeFactory());
 jest.mock('ui/kfetch', () => ({
   kfetch: () => {},
@@ -88,7 +92,7 @@ jest.mock('ui/kfetch', () => ({
 }));
 
 jest.mock('../lib/fetch_index_patterns', () => ({
-  fetchIndexPatterns: jest.fn().mockReturnValue(Promise.resolve([mockIndexPattern])),
+  fetchIndexPatterns: mockFetchIndexPatterns,
 }));
 
 import _ from 'lodash';
