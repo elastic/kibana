@@ -11,9 +11,9 @@ export default function codeApp({ loadTestFile }: TestInvoker) {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./manage_repositories'));
     loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./explore_repository'));
+    // loadTestFile(require.resolve('./explore_repository'));
     loadTestFile(require.resolve('./code_intelligence'));
     loadTestFile(require.resolve('./with_security'));
-    loadTestFile(require.resolve('./history'));
+    // loadTestFile(require.resolve('./history'));
   });
 }
