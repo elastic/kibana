@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
@@ -42,8 +44,12 @@ export function SuggestionPanel({
 
   return (
     <>
-      {/* TODO: I18N */}
-      <h2>Suggestions</h2>
+      <h2>
+        <FormattedMessage
+          id="xpack.lens.editorFrame.suggestionPanelTitle"
+          defaultMessage="Suggestions"
+        />
+      </h2>
       {suggestions.map((suggestion, index) => {
         return (
           <button

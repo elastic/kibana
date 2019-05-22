@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop } from '../../drag_drop';
@@ -53,8 +55,7 @@ export function WorkspacePanel({
     );
 
     if (suggestions.length === 0) {
-      // TODO specify and implement behavior in case
-      // of no valid suggestions
+      // TODO specify and implement behavior in case of no valid suggestions
       return;
     }
 
@@ -64,9 +65,20 @@ export function WorkspacePanel({
     dispatch(toSwitchAction(suggestion));
   }
 
+  function renderEmptyWorkspace() {
+    return (
+      <p>
+        <FormattedMessage
+          id="xpack.lens.editorFrame.emptyWorkspace"
+          defaultMessage="This is the workspace panel. Drop fields here"
+        />
+      </p>
+    );
+  }
+
   function renderVisualization() {
     if (activeVisualizationId === null) {
-      return <p>{/* TODO: I18N */}This is the workspace panel. Drop fields here</p>;
+      return renderEmptyWorkspace();
     }
 
     const activeVisualization = visualizationMap[activeVisualizationId];

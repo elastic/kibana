@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
+import { I18nProvider } from '@kbn/i18n/react';
 
+import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
 
 export class EditorFramePlugin {
@@ -34,12 +35,14 @@ export class EditorFramePlugin {
         const firstVisualizationId = Object.keys(this.visualizations)[0];
 
         render(
-          <EditorFrame
-            datasourceMap={this.datasources}
-            visualizationMap={this.visualizations}
-            initialDatasourceId={firstDatasourceId || null}
-            initialVisualizationId={firstVisualizationId || null}
-          />,
+          <I18nProvider>
+            <EditorFrame
+              datasourceMap={this.datasources}
+              visualizationMap={this.visualizations}
+              initialDatasourceId={firstDatasourceId || null}
+              initialVisualizationId={firstVisualizationId || null}
+            />
+          </I18nProvider>,
           domElement
         );
       },
