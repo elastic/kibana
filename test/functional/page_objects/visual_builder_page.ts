@@ -113,13 +113,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async getMarkdownTableVariables(): Promise<
       Array<{ key: string; value: string; selector: WebElementWrapper }>
     > {
-      const testTableVariables = await retry.try(
-        async () => await testSubjects.find('tsvbMarkdownVariablesTable')
-      );
+      const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
-      const exists = await retry.try(
-        async () => await find.existsByDisplayedByCssSelector(variablesSelector)
-      );
+      const exists = await find.existsByCssSelector(variablesSelector);
       if (!exists) {
         log.debug('variable list is empty');
         return [];
