@@ -15,10 +15,12 @@ import { Repository, RepositoryType, RepositoryVerification } from '../../../com
 import { Plugins } from '../../../shim';
 import { deserializeRepositorySettings, serializeRepositorySettings } from '../../lib';
 
-let isCloudEnabled = false;
+let isCloudEnabled: boolean = false;
+let callWithInternalUser: any;
 
 export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
   isCloudEnabled = plugins.cloud.config.isCloudEnabled;
+  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('repository_types', getTypesHandler);
   router.get('repositories', getAllHandler);
   router.get('repositories/{name}', getOneHandler);
@@ -108,10 +110,15 @@ export const getVerificationHandler: RouterRouteHandler = async (
   };
 };
 
-export const getTypesHandler: RouterRouteHandler = async (req, callWithRequest) => {
+export const getTypesHandler: RouterRouteHandler = async () => {
   // In ECE/ESS, do not enable the default types
   const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
-  const plugins: any[] = await callWithRequest('cat.plugins', { format: 'json' });
+
+  // Call with internal user so that the requesting user does not need `monitoring` cluster
+  // privilege just to see list of available repository types
+  const plugins: any[] = await callWithInternalUser('cat.plugins', { format: 'json' });
+
+  // Filter list of plugins to repository-related ones
   if (plugins && plugins.length) {
     const pluginNames: string[] = [...new Set(plugins.map(plugin => plugin.component))];
     pluginNames.forEach(pluginName => {
