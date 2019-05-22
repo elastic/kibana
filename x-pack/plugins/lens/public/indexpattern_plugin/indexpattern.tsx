@@ -59,12 +59,11 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       const indexPatterns: Record<string, IndexPattern> = {};
 
       if (indexPatternObjects) {
-        indexPatternObjects.forEach((obj: Partial<IndexPattern>) => {
-          indexPatterns[obj.id!] = obj as IndexPattern;
+        indexPatternObjects.forEach(obj => {
+          indexPatterns[obj.id] = obj;
         });
       }
 
-      // TODO: Make fetch request to load indexPatterns from saved objects
       if (state) {
         return {
           ...state,
@@ -72,7 +71,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         };
       }
       return {
-        currentIndexPattern: indexPatternObjects ? (indexPatternObjects[0] as IndexPattern).id : '',
+        currentIndexPattern: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
         columns: {},
         columnOrder: [],
@@ -95,8 +94,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         <div>
           Index Pattern Data Source
           <div>
-            {props.state &&
-              props.state.currentIndexPattern &&
+            {props.state.currentIndexPattern &&
               Object.keys(props.state.indexPatterns).map(key => (
                 <div key={key}>{props.state.indexPatterns[key].title}</div>
               ))}
