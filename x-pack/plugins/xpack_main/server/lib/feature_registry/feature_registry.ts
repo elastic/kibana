@@ -221,9 +221,9 @@ export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const managementSchema = Joi.object().pattern(
   managementSectionIdRegex,
-  Joi.array().items(Joi.string())
+  Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
-const catalogueSchema = Joi.array().items(Joi.string());
+const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
 const privilegeSchema = Joi.object({
   management: managementSchema,
@@ -252,7 +252,7 @@ const schema = Joi.object({
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
   icon: Joi.string(),
   description: Joi.string(),
-  navLinkId: Joi.string(),
+  navLinkId: Joi.string().regex(uiCapabilitiesRegex),
   app: Joi.array()
     .items(Joi.string())
     .required(),

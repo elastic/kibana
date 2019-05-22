@@ -14,10 +14,13 @@ import { IpDetails } from './ip_details';
 import { KpiHosts } from './kpi_hosts';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
+import { Note } from './note';
+import { PinnedEvent } from './pinned_event';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
-import { SourceConfigurations, Sources } from './sources';
+import { Sources, SourceConfiguration } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
+import { Timeline } from './timeline';
 
 export * from './hosts';
 
@@ -39,6 +42,9 @@ export interface AppBackendLibs extends AppDomainLibs {
   framework: FrameworkAdapter;
   sources: Sources;
   sourceStatus: SourceStatus;
+  timeline: Timeline;
+  note: Note;
+  pinnedEvent: PinnedEvent;
 }
 
 export interface Configuration {
@@ -47,7 +53,7 @@ export interface Configuration {
     partitionSize: number;
     partitionFactor: number;
   };
-  sources: SourceConfigurations;
+  sources: Record<string, SourceConfiguration>;
 }
 
 export interface SiemContext {

@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiFormRow,
-  EuiButton,
   EuiLink,
-  EuiFieldText,
   EuiSpacer,
   EuiHorizontalRule,
   EuiDescriptionList,
@@ -21,32 +18,25 @@ import {
   EuiDescriptionListDescription,
   EuiFormLabel,
   EuiText,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { timeDurationString } from '../../../lib/time_duration';
 import { RefreshControl } from '../refresh_control';
+import { CustomInterval } from './custom_interval';
 
 const ListGroup = ({ children }) => <ul style={{ listStyle: 'none', margin: 0 }}>{[children]}</ul>;
 
-export class AutoRefreshControls extends Component {
-  static propTypes = {
-    refreshInterval: PropTypes.number,
-    setRefresh: PropTypes.func.isRequired,
-    disableInterval: PropTypes.func.isRequired,
-  };
+export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterval }) => {
+  const RefreshItem = ({ duration, label }) => (
+    <li>
+      <EuiLink onClick={() => setRefresh(duration)}>{label}</EuiLink>
+    </li>
+  );
 
-  refreshInput = null;
-
-  render() {
-    const { refreshInterval, setRefresh, disableInterval } = this.props;
-
-    const RefreshItem = ({ duration, label }) => (
-      <li>
-        <EuiLink onClick={() => setRefresh(duration)}>{label}</EuiLink>
-      </li>
-    );
-
-    return (
-      <div>
+  return (
+    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">
           <EuiFlexItem>
             <EuiDescriptionList textStyle="reverse">
@@ -55,11 +45,6 @@ export class AutoRefreshControls extends Component {
                 {refreshInterval > 0 ? (
                   <Fragment>
                     <span>Every {timeDurationString(refreshInterval)}</span>
-                    <div>
-                      <EuiLink size="s" onClick={disableInterval}>
-                        Disable auto-refresh
-                      </EuiLink>
-                    </div>
                   </Fragment>
                 ) : (
                   <span>Manually</span>
@@ -68,7 +53,22 @@ export class AutoRefreshControls extends Component {
             </EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RefreshControl />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
+              {refreshInterval > 0 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip position="bottom" content="Disable auto-refresh">
+                    <EuiButtonIcon
+                      iconType="cross"
+                      onClick={disableInterval}
+                      aria-label="Disable auto-refresh"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <RefreshControl />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -100,35 +100,17 @@ export class AutoRefreshControls extends Component {
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiText>
+      </EuiFlexItem>
 
-        <EuiSpacer size="m" />
+      <EuiFlexItem grow={false}>
+        <CustomInterval onSubmit={value => setRefresh(value)} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
-        <form
-          onSubmit={ev => {
-            ev.preventDefault();
-            setRefresh(this.refreshInput.value);
-          }}
-        >
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiFormRow
-                label="Set a custom interval"
-                helpText="Use shorthand notation, like 30s, 10m, or 1h"
-                compressed
-              >
-                <EuiFieldText inputRef={i => (this.refreshInput = i)} />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow label="&nbsp;">
-                <EuiButton size="s" type="submit" style={{ minWidth: 'auto' }}>
-                  Set
-                </EuiButton>
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </form>
-      </div>
-    );
-  }
-}
+AutoRefreshControls.propTypes = {
+  refreshInterval: PropTypes.number,
+  setRefresh: PropTypes.func.isRequired,
+  disableInterval: PropTypes.func.isRequired,
+};

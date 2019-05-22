@@ -222,6 +222,49 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  ['contains space', 'contains_invalid()_chars', ''].forEach(prohibitedChars => {
+    it(`prevents features from being registered with a navLinkId of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          navLinkId: prohibitedChars,
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it(`prevents features from being registered with a management id of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          management: {
+            kibana: [prohibitedChars],
+          },
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it(`prevents features from being registered with a catalogue entry of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          catalogue: [prohibitedChars],
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+  });
+
   ['catalogue', 'management', 'navLinks', `doesn't match valid regex`].forEach(prohibitedId => {
     it(`prevents features from being registered with an ID of "${prohibitedId}"`, () => {
       const featureRegistry = new FeatureRegistry();
