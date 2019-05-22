@@ -17,7 +17,7 @@ import {
   AreaSeries,
   BarSeries,
 } from '@elastic/charts';
-import { Datatable } from '../../../canvas/canvas_plugin_src/functions/types';
+import { KibanaDatatable } from '../types';
 
 /**
  * This file contains TypeScript type definitions and their equivalent expression
@@ -28,17 +28,11 @@ import { Datatable } from '../../../canvas/canvas_plugin_src/functions/types';
  * which does the heavy-lifting.
  */
 
-/**
- * Configuration for the chart's legend.
- */
 export interface LegendConfig {
   isVisible: boolean;
   position: Position;
 }
 
-/**
- * LegendConfig as an expression type.
- */
 export const legendConfig = {
   name: 'legendConfig',
   aliases: [],
@@ -51,7 +45,7 @@ export const legendConfig = {
     isVisible: { types: ['boolean'] },
     position: { types: ['string'] },
   },
-  fn: function fn(_context: any, args: LegendConfig) {
+  fn: function fn(_context: unknown, args: LegendConfig) {
     return {
       type: 'legendConfig',
       ...args,
@@ -59,34 +53,22 @@ export const legendConfig = {
   },
 };
 
-/**
- * Properties common to all axes.
- */
 interface AxisConfig {
   title: string;
   showGridlines: boolean;
   position: Position;
 }
 
-/**
- * AxisConfig expression definition.
- */
 const axisConfig = {
   title: { types: ['string'] },
   showGridlines: { types: ['boolean'] },
   position: { types: ['string'] },
 };
 
-/**
- * Y-axis configuration.
- */
 export interface YConfig extends AxisConfig {
   accessors: string[];
 }
 
-/**
- * YConfig as an expression type.
- */
 export const yConfig = {
   name: 'yConfig',
   aliases: [],
@@ -102,7 +84,7 @@ export const yConfig = {
       multi: true,
     },
   },
-  fn: function fn(_context: any, args: YConfig) {
+  fn: function fn(_context: unknown, args: YConfig) {
     return {
       type: 'yConfig',
       ...args,
@@ -110,16 +92,10 @@ export const yConfig = {
   },
 };
 
-/**
- * X-axis configuration.
- */
 export interface XConfig extends AxisConfig {
   accessor: string;
 }
 
-/**
- * XConfig as an expression type.
- */
 export const xConfig = {
   name: 'xConfig',
   aliases: [],
@@ -132,7 +108,7 @@ export const xConfig = {
     ...axisConfig,
     accessor: { types: ['string'] },
   },
-  fn: function fn(_context: any, args: XConfig) {
+  fn: function fn(_context: unknown, args: XConfig) {
     return {
       type: 'xConfig',
       ...args,
@@ -140,9 +116,6 @@ export const xConfig = {
   },
 };
 
-/**
- * The arguments to the XY chart expression function.
- */
 export interface XYArgs {
   seriesType: 'bar' | 'line' | 'area';
   title: string;
@@ -153,14 +126,19 @@ export interface XYArgs {
   stackAccessors: string[];
 }
 
-/**
- * The XY chart expression function.
- */
+export interface XYChartProps {
+  data: KibanaDatatable;
+  args: XYArgs;
+}
+
 export const xyChart = {
   name: 'xy_chart',
   type: 'render',
   args: {
-    seriesType: { types: ['string'] },
+    seriesType: {
+      types: ['string'],
+      options: ['bar', 'line', 'area'],
+    },
     title: { types: ['string'] },
     legend: { types: ['legendConfig'] },
     y: { types: ['yConfig'] },
@@ -175,7 +153,7 @@ export const xyChart = {
     },
   },
   context: { types: ['kibana_datatable'] },
-  fn(data: Datatable, args: XYArgs) {
+  fn(data: KibanaDatatable, args: XYArgs) {
     return {
       type: 'render',
       as: 'xy_chart_renderer',
@@ -187,24 +165,16 @@ export const xyChart = {
   },
 };
 
-/**
- * The XY chart expression renderer.
- */
 export const xyChartRenderer = {
   name: 'xy_chart_renderer',
   displayName: 'XY Chart',
   reuseDomNode: true,
-  render: async (domNode: HTMLDivElement, config: any, _handlers: any) => {
+  render: async (domNode: HTMLDivElement, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(<XYChart {...config} />, domNode);
   },
 };
 
-/**
- * Render an XY chart as a React component.
- *
- * @param props - The data and args which are used to render the chart.
- */
-function XYChart({ data, args }: { data: Datatable; args: XYArgs }) {
+export function XYChart({ data, args }: XYChartProps) {
   const { legend, x, y, splitSeriesAccessors, stackAccessors, seriesType } = args;
   const seriesProps = {
     splitSeriesAccessors,

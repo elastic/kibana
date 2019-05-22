@@ -14,8 +14,41 @@ import {
   yConfig,
   XYArgs,
   xyChart,
+  XYChart,
 } from './xy_expression';
-import { Datatable } from '../../../canvas/canvas_plugin_src/functions/types';
+import { KibanaDatatable } from '../types';
+import React from 'react';
+import { shallow } from 'enzyme';
+
+function sampleArgs() {
+  const data: KibanaDatatable = {
+    type: 'kibana_datatable',
+    columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+    rows: [{ a: 1, b: 2, c: 3 }, { a: 1, b: 5, c: 4 }],
+  };
+
+  const args: XYArgs = {
+    seriesType: 'line',
+    title: 'My fanci line chart',
+    legend: { isVisible: false, position: Position.Top },
+    y: {
+      accessors: ['a', 'b'],
+      position: Position.Left,
+      showGridlines: false,
+      title: 'A and B',
+    },
+    x: {
+      accessor: 'c',
+      position: Position.Bottom,
+      showGridlines: false,
+      title: 'C',
+    },
+    splitSeriesAccessors: [],
+    stackAccessors: [],
+  };
+
+  return { data, args };
+}
 
 describe('xy_expression', () => {
   describe('configs', () => {
@@ -62,41 +95,39 @@ describe('xy_expression', () => {
 
   describe('xyChart', () => {
     test('it renders with the specified data and args', () => {
-      const data: Datatable = {
-        type: 'datatable',
-        columns: [
-          { name: 'a', type: 'number' },
-          { name: 'b', type: 'number' },
-          { name: 'c', type: 'number' },
-        ],
-        rows: [{ a: 1, b: 2, c: 3 }, { a: 1, b: 5, c: 4 }],
-      };
-
-      const args: XYArgs = {
-        seriesType: 'line',
-        title: 'My fanci line chart',
-        legend: { isVisible: false, position: Position.Top },
-        y: {
-          accessors: ['a', 'b'],
-          position: Position.Left,
-          showGridlines: false,
-          title: 'A and B',
-        },
-        x: {
-          accessor: 'c',
-          position: Position.Bottom,
-          showGridlines: false,
-          title: 'C',
-        },
-        splitSeriesAccessors: [],
-        stackAccessors: [],
-      };
+      const { data, args } = sampleArgs();
 
       expect(xyChart.fn(data, args)).toEqual({
         type: 'render',
         as: 'xy_chart_renderer',
         value: { data, args },
       });
+    });
+  });
+
+  describe('XYChart component', () => {
+    test('it renders line', () => {
+      const { data, args } = sampleArgs();
+
+      expect(
+        shallow(<XYChart data={data} args={{ ...args, seriesType: 'line' }} />)
+      ).toMatchSnapshot();
+    });
+
+    test('it renders bar', () => {
+      const { data, args } = sampleArgs();
+
+      expect(
+        shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />)
+      ).toMatchSnapshot();
+    });
+
+    test('it renders area', () => {
+      const { data, args } = sampleArgs();
+
+      expect(
+        shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />)
+      ).toMatchSnapshot();
     });
   });
 });
