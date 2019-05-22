@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const getClientPlatform = () => {
+export const getClientPlatform = (): 'osx' | 'windows' | 'linux' | 'other' => {
   const platform = navigator.platform.toLowerCase();
   if (platform.indexOf('mac') >= 0) {
     return 'osx';
