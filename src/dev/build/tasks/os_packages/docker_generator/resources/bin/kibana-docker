@@ -101,6 +101,7 @@ kibana_vars=(
     xpack.monitoring.elasticsearch.password
     xpack.monitoring.elasticsearch.pingTimeout
     xpack.monitoring.elasticsearch.hosts
+    xpack.monitoring.elasticsearch.url
     xpack.monitoring.elasticsearch.username
     xpack.monitoring.elasticsearch.ssl.certificateAuthorities
     xpack.monitoring.elasticsearch.ssl.verificationMode
