@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { Action, ActionContext, ExecuteActionContext } from './action';
+export { Action, ActionContext } from './action';
 export { actionRegistry } from './action_registry';
 export { IncompatibleActionError } from './incompatible_action_error';

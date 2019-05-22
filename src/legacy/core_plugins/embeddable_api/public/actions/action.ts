@@ -22,16 +22,12 @@ import { trackUiMetric } from '../../../ui_metric/public';
 
 import { IEmbeddable } from '../embeddables';
 
-export interface ExecuteActionContext<
+export interface ActionContext<
   TEmbeddable extends IEmbeddable = IEmbeddable,
   TTriggerContext extends {} = {}
 > {
   embeddable: TEmbeddable;
   triggerContext?: TTriggerContext;
-}
-
-export interface ActionContext<TEmbeddable extends IEmbeddable = IEmbeddable> {
-  embeddable: TEmbeddable;
 }
 
 export abstract class Action<
@@ -52,7 +48,9 @@ export abstract class Action<
   /**
    * Optional icon that can be displayed along with the title.
    */
-  public getIcon(context: ActionContext): EuiContextMenuItemIcon | undefined {
+  public getIcon(
+    context: ActionContext<TEmbeddable, TTriggerContext>
+  ): EuiContextMenuItemIcon | undefined {
     return undefined;
   }
 
@@ -60,25 +58,25 @@ export abstract class Action<
    * Returns a title to be displayed to the user.
    * @param context
    */
-  public abstract getDisplayName(context: ActionContext): string;
+  public abstract getDisplayName(context: ActionContext<TEmbeddable, TTriggerContext>): string;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  public isCompatible(context: ActionContext): Promise<boolean> {
+  public isCompatible(context: ActionContext<TEmbeddable, TTriggerContext>): Promise<boolean> {
     return Promise.resolve(true);
   }
 
   /**
    * If this returns something other than undefined, this is used instead of execute when clicked.
    */
-  public getHref(context: ActionContext): string | undefined {
+  public getHref(context: ActionContext<TEmbeddable, TTriggerContext>): string | undefined {
     return undefined;
   }
 
   /**
    * Executes the action.
    */
-  public abstract execute(context: ExecuteActionContext<TEmbeddable, TTriggerContext>): void;
+  public abstract execute(context: ActionContext<TEmbeddable, TTriggerContext>): void;
 }

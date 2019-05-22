@@ -21,7 +21,7 @@ import React from 'react';
 import { getNewPlatform } from 'ui/new_platform';
 
 import {
-  ExecuteActionContext,
+  ActionContext,
   actionRegistry,
   Action,
   triggerRegistry,
@@ -39,7 +39,7 @@ class SamplePanelAction extends Action {
     return 'Sample Panel Action';
   }
 
-  public execute = ({ embeddable }: ExecuteActionContext) => {
+  public execute = ({ embeddable }: ActionContext) => {
     if (!embeddable) {
       return;
     }

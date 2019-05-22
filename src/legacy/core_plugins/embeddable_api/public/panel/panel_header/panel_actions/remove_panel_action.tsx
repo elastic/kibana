@@ -21,12 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
-import {
-  Action,
-  ExecuteActionContext,
-  ActionContext,
-  IncompatibleActionError,
-} from '../../../actions';
+import { Action, ActionContext, IncompatibleActionError } from '../../../actions';
 
 export const REMOVE_PANEL_ACTION = 'deletePanel';
 
@@ -71,7 +66,7 @@ export class RemovePanelAction extends Action {
     );
   }
 
-  public execute({ embeddable }: ExecuteActionContext) {
+  public execute({ embeddable }: ActionContext) {
     if (!embeddable.parent || !this.isCompatible({ embeddable })) {
       throw new IncompatibleActionError();
     }

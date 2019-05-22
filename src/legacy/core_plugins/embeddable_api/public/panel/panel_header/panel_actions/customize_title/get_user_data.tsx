@@ -18,10 +18,10 @@
  */
 import React from 'react';
 import { getNewPlatform } from 'ui/new_platform';
-import { ExecuteActionContext } from '../../../../actions';
+import { ActionContext } from '../../../../actions';
 import { CustomizePanelFlyout } from './customize_panel_flyout';
 
-export async function getUserData(context: ExecuteActionContext) {
+export async function getUserData(context: ActionContext) {
   return new Promise<{ title: string | undefined }>(resolve => {
     const session = getNewPlatform().start.core.overlays.openFlyout(
       <CustomizePanelFlyout

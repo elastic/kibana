@@ -20,7 +20,7 @@
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Action, ExecuteActionContext, ActionContext } from '../../../../actions';
+import { Action, ActionContext } from '../../../../actions';
 import { ViewMode } from '../../../../types';
 import { getUserData } from './get_user_data';
 
@@ -28,12 +28,10 @@ const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
 
 export class CustomizePanelTitleAction extends Action {
   public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
-  private getDataFromUser: (
-    context: ExecuteActionContext
-  ) => Promise<{ title: string | undefined }>;
+  private getDataFromUser: (context: ActionContext) => Promise<{ title: string | undefined }>;
   constructor(
     getDataFromUser: (
-      context: ExecuteActionContext
+      context: ActionContext
     ) => Promise<{ title: string | undefined }> = getUserData
   ) {
     super(CUSTOMIZE_PANEL_ACTION_ID);
@@ -55,7 +53,7 @@ export class CustomizePanelTitleAction extends Action {
     return Promise.resolve(embeddable.getInput().viewMode === ViewMode.EDIT ? true : false);
   }
 
-  public async execute({ embeddable }: ExecuteActionContext) {
+  public async execute({ embeddable }: ActionContext) {
     const customTitle = await this.getDataFromUser({ embeddable });
     embeddable.updateInput(customTitle);
   }

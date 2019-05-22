@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables/i_embeddable';
 import { IContainer } from '../../../../containers';
-import { Action, ExecuteActionContext, ActionContext } from '../../../../actions';
+import { Action, ActionContext } from '../../../../actions';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 
 export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
@@ -57,7 +57,7 @@ export class AddPanelAction extends Action {
     );
   }
 
-  public async execute({ embeddable }: ExecuteActionContext) {
+  public async execute({ embeddable }: ActionContext) {
     if (!isContainer(embeddable) || !(await this.isCompatible({ embeddable }))) {
       throw new Error('Context is incompatible');
     }

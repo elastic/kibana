@@ -26,7 +26,6 @@ import {
   CONTEXT_MENU_TRIGGER,
   triggerRegistry,
   ActionContext,
-  ExecuteActionContext,
 } from 'plugins/embeddable_api/index';
 import React from 'react';
 import { IncompatibleActionError } from 'plugins/embeddable_api/actions';
@@ -82,7 +81,7 @@ export class ExpandPanelAction extends Action {
     return Promise.resolve(Boolean(embeddable.parent && isDashboard(embeddable.parent)));
   }
 
-  public execute({ embeddable }: ExecuteActionContext) {
+  public execute({ embeddable }: ActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }

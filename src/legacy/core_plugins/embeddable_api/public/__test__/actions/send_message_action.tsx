@@ -22,7 +22,6 @@ import { EuiFlyoutBody } from '@elastic/eui';
 import {
   Action,
   ActionContext,
-  ExecuteActionContext,
   actionRegistry,
   IncompatibleActionError,
   triggerRegistry,
@@ -51,7 +50,7 @@ export class SendMessageAction extends Action {
   }
 
   async sendMessage(
-    context: ExecuteActionContext<Embeddable<EmbeddableInput, FullNameEmbeddableOutput>>,
+    context: ActionContext<Embeddable<EmbeddableInput, FullNameEmbeddableOutput>>,
     message: string
   ) {
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
@@ -61,7 +60,7 @@ export class SendMessageAction extends Action {
   }
 
   async execute(
-    context: ExecuteActionContext<
+    context: ActionContext<
       Embeddable<EmbeddableInput, FullNameEmbeddableOutput>,
       { message?: string }
     >

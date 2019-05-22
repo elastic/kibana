@@ -35,7 +35,7 @@ class SamplePanelLink extends Action {
   }
 
   public execute() {
-    return undefined;
+    return;
   }
 
   public getHref = () => {

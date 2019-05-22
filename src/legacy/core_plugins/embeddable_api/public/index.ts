@@ -16,13 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export {
-  actionRegistry,
-  ExecuteActionContext,
-  Action,
-  ActionContext,
-  IncompatibleActionError,
-} from './actions';
+export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
 
 export {
   APPLY_FILTER_TRIGGER,

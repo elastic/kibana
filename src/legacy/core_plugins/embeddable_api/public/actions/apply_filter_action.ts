@@ -23,7 +23,7 @@ import { Container, ContainerInput } from '../containers';
 import { IEmbeddable } from '../embeddables';
 import { APPLY_FILTER_TRIGGER, triggerRegistry } from '../triggers';
 import { Filter } from '../types';
-import { Action, ExecuteActionContext, ActionContext } from './action';
+import { Action, ActionContext } from './action';
 import { actionRegistry } from './action_registry';
 import { IncompatibleActionError } from './incompatible_action_error';
 import { IContainer } from '../containers/i_container';
@@ -65,7 +65,7 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
   public execute({
     embeddable,
     triggerContext,
-  }: ExecuteActionContext<IEmbeddable, { filters: Filter[] }>) {
+  }: ActionContext<IEmbeddable, { filters: Filter[] }>) {
     trackUiMetric('EmbeddableAPI', 'executeFilterAction');
     if (!triggerContext) {
       throw new Error('Applying a filter requires a filter as context');

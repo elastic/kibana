@@ -32,15 +32,15 @@ jest.mock('../context_menu_actions/open_context_menu', () => ({
 }));
 
 import { triggerRegistry } from '../triggers';
-import { Action, ExecuteActionContext, actionRegistry } from '../actions';
+import { Action, ActionContext, actionRegistry } from '../actions';
 import { executeTriggerActions } from './execute_trigger_actions';
 import { ContactCardEmbeddable } from '../__test__';
 
 class TestAction extends Action {
   public readonly type = 'testAction';
-  public checkCompatibility: (context: ExecuteActionContext) => boolean;
+  public checkCompatibility: (context: ActionContext) => boolean;
 
-  constructor(id: string, checkCompatibility: (context: ExecuteActionContext) => boolean) {
+  constructor(id: string, checkCompatibility: (context: ActionContext) => boolean) {
     super(id);
     this.checkCompatibility = checkCompatibility;
   }
@@ -49,11 +49,11 @@ class TestAction extends Action {
     return 'test';
   }
 
-  isCompatible(context: ExecuteActionContext) {
+  isCompatible(context: ActionContext) {
     return Promise.resolve(this.checkCompatibility(context));
   }
 
-  execute(context: ExecuteActionContext) {
+  execute(context: ActionContext) {
     executeFn(context);
   }
 }
