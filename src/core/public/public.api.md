@@ -37,16 +37,6 @@ export interface ApplicationStart {
 }
 
 // @public
-export interface BasePathSetup {
-    addToPath(path: string): string;
-    get(): string;
-    removeFromPath(path: string): string;
-}
-
-// @public
-export type BasePathStart = BasePathSetup;
-
-// @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
     catalogue: Record<string, boolean>;
@@ -119,8 +109,6 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    basePath: BasePathSetup;
-    // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
@@ -138,8 +126,6 @@ export interface CoreSetup {
 export interface CoreStart {
     // (undocumented)
     application: Pick<ApplicationStart, 'capabilities'>;
-    // (undocumented)
-    basePath: BasePathStart;
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
@@ -180,13 +166,45 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
-// 
 // @public (undocumented)
-export type HttpSetup = ReturnType<HttpService['setup']>;
+export interface HttpServiceBase {
+    // (undocumented)
+    addLoadingCount(count$: Observable<number>): void;
+    // (undocumented)
+    delete: HttpHandler;
+    // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    fetch: HttpHandler;
+    // (undocumented)
+    get: HttpHandler;
+    // (undocumented)
+    getBasePath(): string;
+    // (undocumented)
+    getLoadingCount$(): Observable<number>;
+    // (undocumented)
+    head: HttpHandler;
+    // (undocumented)
+    options: HttpHandler;
+    // (undocumented)
+    patch: HttpHandler;
+    // (undocumented)
+    post: HttpHandler;
+    // (undocumented)
+    prependBasePath(path: string): string;
+    // (undocumented)
+    put: HttpHandler;
+    // (undocumented)
+    removeBasePath(path: string): string;
+    // (undocumented)
+    stop(): void;
+}
 
 // @public (undocumented)
-export type HttpStart = ReturnType<HttpService['start']>;
+export type HttpSetup = HttpServiceBase;
+
+// @public (undocumented)
+export type HttpStart = HttpServiceBase;
 
 // @public
 export interface I18nSetup {
