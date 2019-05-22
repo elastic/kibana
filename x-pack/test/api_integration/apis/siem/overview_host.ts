@@ -40,6 +40,7 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {

@@ -52,6 +52,11 @@ function saveModuleItems(
     request);
 }
 
+function dataRecognizerJobsExist(callWithRequest, moduleId) {
+  const dr = new DataRecognizer(callWithRequest);
+  return dr.dataRecognizerJobsExist(moduleId);
+}
+
 export function dataRecognizer(server, commonRouteConfig) {
 
   server.route({
@@ -118,6 +123,20 @@ export function dataRecognizer(server, commonRouteConfig) {
         end,
         request
       )
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/ml/modules/jobs_exist/{moduleId}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const moduleId = request.params.moduleId;
+      return dataRecognizerJobsExist(callWithRequest, moduleId)
         .catch(resp => wrapError(resp));
     },
     config: {
