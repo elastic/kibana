@@ -159,7 +159,7 @@ and the tile layer configured by `map.tilemap.url` will be available in the <<ma
 
 `map.proxyElasticMapsServiceInMaps:`:: *Default: false*
 Set to true to proxy all <<maps, Maps application>> Elastic Maps Service requests through the Kibana server.
-This setting does not impact <<tilemap, Coordinate map visualization>> and <<regionmap, Region map visualization>>.
+This setting does not impact <<tilemap, Coordinate map visualizations>> and <<regionmap, Region map visualizations>>.
 
 [[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
 use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
