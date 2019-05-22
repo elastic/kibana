@@ -188,7 +188,7 @@ describe('service_settings (FKA tilemaptest)', function () {
           },
           {
             'id': 'road_map',
-            'name': 'Road map',
+            'name': 'Road Map - Bright',
             'url': 'https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
             'minZoom': 0,
             'maxZoom': 10,
