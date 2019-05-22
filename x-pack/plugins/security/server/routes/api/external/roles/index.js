@@ -10,7 +10,7 @@ import { initGetRolesApi } from './get';
 import { initDeleteRolesApi } from './delete';
 import { initPutRolesApi } from './put';
 
-export function initPublicRolesApi(server) {
+export function initExternalRolesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
