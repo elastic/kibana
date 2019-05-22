@@ -68,7 +68,11 @@ describe('get_column_renderer', () => {
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
     });
-    const wrapper = mount(<span>{column}</span>);
+    const wrapper = mount(
+      <TestProviders>
+        <span>{column}</span>
+      </TestProviders>
+    );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
@@ -81,7 +85,11 @@ describe('get_column_renderer', () => {
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
     });
-    const wrapper = mount(<span>{column}</span>);
+    const wrapper = mount(
+      <TestProviders>
+        <span>{column}</span>
+      </TestProviders>
+    );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });

@@ -3,13 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { getOr, omit, uniq } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
 import { Sort } from '../../components/timeline/body/sort';
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
+import {
+  DataProvider,
+  QueryOperator,
+} from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, timelineDefaults, TimelineModel } from './model';
@@ -94,15 +96,15 @@ export const addTimelineNoteToEvent = ({
 };
 
 interface AddNewTimelineParams {
-  id: string;
   columns: ColumnHeader[];
+  id: string;
   show?: boolean;
   timelineById: TimelineById;
 }
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
-  id,
   columns,
+  id,
   show = false,
   timelineById,
 }: AddNewTimelineParams): TimelineById => ({
@@ -258,22 +260,42 @@ const addProviderToTimeline = (
 };
 
 interface AddTimelineColumnParams {
-  id: string;
   column: ColumnHeader;
+  id: string;
+  index: number;
   timelineById: TimelineById;
 }
 
-export const addTimelineColumn = ({
-  id,
+/**
+ * Adds or updates a column. When updating a column, it will be moved to the
+ * new index
+ */
+export const upsertTimelineColumn = ({
   column,
+  id,
+  index,
   timelineById,
 }: AddTimelineColumnParams): TimelineById => {
   const timeline = timelineById[id];
+  const alreadyExistsAtIndex = timeline.columns.findIndex(c => c.id === column.id);
 
-  const alreadyExistsAtIndex = timeline.columns.some(c => c.id === column.id);
-  const columns = alreadyExistsAtIndex
-    ? timeline.columns // return the same collection, unmodified
-    : [...timeline.columns, column]; // add the column to the end
+  if (alreadyExistsAtIndex !== -1) {
+    // remove the existing entry and add the new one at the specified index
+    const reordered = timeline.columns.filter(c => c.id !== column.id);
+    reordered.splice(index, 0, column); // ⚠️ mutation
+
+    return {
+      ...timelineById,
+      [id]: {
+        ...timeline,
+        columns: reordered,
+      },
+    };
+  }
+
+  // add the new entry at the specified index
+  const columns = [...timeline.columns];
+  columns.splice(index, 0, column); // ⚠️ mutation
 
   return {
     ...timelineById,
@@ -727,6 +749,127 @@ export const updateTimelineProviderExcluded = ({
       dataProviders: andProviderId
         ? updateExcludedAndProvider(andProviderId, excluded, providerId, timeline)
         : updateExcludedProvider(excluded, providerId, timeline),
+    },
+  };
+};
+
+const updateProviderProperties = ({
+  excluded,
+  field,
+  operator,
+  providerId,
+  timeline,
+  value,
+}: {
+  excluded: boolean;
+  field: string;
+  operator: QueryOperator;
+  providerId: string;
+  timeline: TimelineModel;
+  value: string | number;
+}) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          excluded,
+          queryMatch: {
+            ...provider.queryMatch,
+            field,
+            displayField: field,
+            value,
+            displayValue: value,
+            operator,
+          },
+        }
+      : provider
+  );
+
+const updateAndProviderProperties = ({
+  andProviderId,
+  excluded,
+  field,
+  operator,
+  providerId,
+  timeline,
+  value,
+}: {
+  andProviderId: string;
+  excluded: boolean;
+  field: string;
+  operator: QueryOperator;
+  providerId: string;
+  timeline: TimelineModel;
+  value: string | number;
+}) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map(andProvider =>
+            andProvider.id === andProviderId
+              ? {
+                  ...andProvider,
+                  excluded,
+                  queryMatch: {
+                    ...andProvider.queryMatch,
+                    field,
+                    displayField: field,
+                    value,
+                    displayValue: value,
+                    operator,
+                  },
+                }
+              : andProvider
+          ),
+        }
+      : provider
+  );
+
+interface UpdateTimelineProviderEditPropertiesParams {
+  andProviderId?: string;
+  excluded: boolean;
+  field: string;
+  id: string;
+  operator: QueryOperator;
+  providerId: string;
+  timelineById: TimelineById;
+  value: string | number;
+}
+
+export const updateTimelineProviderProperties = ({
+  andProviderId,
+  excluded,
+  field,
+  id,
+  operator,
+  providerId,
+  timelineById,
+  value,
+}: UpdateTimelineProviderEditPropertiesParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: andProviderId
+        ? updateAndProviderProperties({
+            andProviderId,
+            excluded,
+            field,
+            operator,
+            providerId,
+            timeline,
+            value,
+          })
+        : updateProviderProperties({
+            excluded,
+            field,
+            operator,
+            providerId,
+            timeline,
+            value,
+          }),
     },
   };
 };
