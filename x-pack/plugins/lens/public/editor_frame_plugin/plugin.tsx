@@ -6,48 +6,48 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Datasource, Visualization, EditorFrameSetup } from '../types';
+import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 
 import { EditorFrame } from './editor_frame';
 
-class EditorFramePlugin {
+export class EditorFramePlugin {
   constructor() {}
 
-  private datasources: {
-    [key: string]: Datasource;
-  } = {};
-  private visualizations: {
-    [key: string]: Visualization;
-  } = {};
+  private datasources: Record<string, Datasource> = {};
+  private visualizations: Record<string, Visualization> = {};
 
-  private initialDatasource?: string;
+  private createInstance(): EditorFrameInstance {
+    let domElement: Element;
 
-  private element: Element | null = null;
+    function unmount() {
+      if (domElement) {
+        unmountComponentAtNode(domElement);
+      }
+    }
 
-  public setup(): EditorFrameSetup {
     return {
-      render: domElement => {
-        this.element = domElement;
+      mount: element => {
+        unmount();
+        domElement = element;
         render(
           <EditorFrame
-            datasources={this.datasources}
-            visualizations={this.visualizations}
-            initialDatasource={this.initialDatasource}
+            datasourceMap={this.datasources}
+            visualizationMap={this.visualizations}
+            initialDatasourceId={Object.keys(this.datasources)[0]}
+            initialVisualizationId={Object.keys(this.visualizations)[0]}
           />,
           domElement
         );
       },
-      registerDatasource: (name, datasource) => {
-        // casting it to an unknown datasource. This doesn't introduce runtime errors
-        // because each type T is always also an unknown, but typescript won't do it
-        // on it's own because we are loosing type information here.
-        // So it's basically explicitly saying "I'm dropping the information about type T here
-        // because this information isn't useful to me." but without using any which can leak
-        this.datasources[name] = datasource as Datasource<unknown>;
+      unmount,
+    };
+  }
 
-        if (!this.initialDatasource) {
-          this.initialDatasource = name;
-        }
+  public setup(): EditorFrameSetup {
+    return {
+      createInstance: this.createInstance.bind(this),
+      registerDatasource: (name, datasource) => {
+        this.datasources[name] = datasource as Datasource<unknown, unknown>;
       },
       registerVisualization: (name, visualization) => {
         this.visualizations[name] = visualization as Visualization<unknown, unknown>;
@@ -56,9 +56,6 @@ class EditorFramePlugin {
   }
 
   public stop() {
-    if (this.element) {
-      unmountComponentAtNode(this.element);
-    }
     return {};
   }
 }

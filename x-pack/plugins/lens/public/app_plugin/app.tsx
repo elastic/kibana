@@ -7,16 +7,16 @@
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 
-import { EditorFrameSetup } from '../types';
+import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
-export function App({ editorFrame }: { editorFrame: EditorFrameSetup }) {
+export function App({ editorFrame }: { editorFrame: EditorFrameInstance }) {
   return (
     <I18nProvider>
       <div>
         <h1>Lens</h1>
 
-        <NativeRenderer render={editorFrame.render} nativeProps={undefined} />
+        <NativeRenderer render={editorFrame.mount} nativeProps={undefined} />
       </div>
     </I18nProvider>
   );
