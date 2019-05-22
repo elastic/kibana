@@ -89,14 +89,6 @@ export interface Source {
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
-  /** The alias to read file data from */
-  logAlias: string;
-  /** The alias to read auditbeat data from */
-  auditbeatAlias: string;
-  /** The alias to read packetbeat data from */
-  packetbeatAlias: string;
-  /** The alias to read winlogbeat data from */
-  winlogbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -117,30 +109,8 @@ export interface SourceFields {
 }
 /** The status of an infrastructure data source */
 export interface SourceStatus {
-  /** Whether the configured auditbeat alias exists */
-  auditbeatAliasExists: boolean;
   /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
-  auditbeatIndicesExist: boolean;
-  /** The list of indices in the auditbeat alias */
-  auditbeatIndices: string[];
-  /** Whether the configured filebeat alias exists */
-  filebeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any filebeat indices */
-  filebeatIndicesExist: boolean;
-  /** The list of indices in the filebeat alias */
-  filebeatIndices: string[];
-  /** Whether the configured packetbeat alias exists */
-  packetbeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
-  packetbeatIndicesExist: boolean;
-  /** The list of indices in the packetbeat alias */
-  packetbeatIndices: string[];
-  /** Whether the configured winlogbeat alias exists */
-  winlogbeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any winlogbeat indices */
-  winlogbeatIndicesExist: boolean;
-  /** The list of indices in the winlogbeat alias */
-  winlogbeatIndices: string[];
+  indicesExist: boolean;
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
@@ -1319,6 +1289,8 @@ export interface AuthenticationsSourceArgs {
   pagination: PaginationInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface EventsSourceArgs {
   pagination: PaginationInput;
@@ -1328,6 +1300,8 @@ export interface EventsSourceArgs {
   timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -1339,11 +1313,15 @@ export interface TimelineSourceArgs {
   timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface TimelineDetailsSourceArgs {
   eventId: string;
 
   indexName: string;
+
+  defaultIndex: string[];
 }
 export interface LastEventTimeSourceArgs {
   id?: string | null;
@@ -1351,6 +1329,8 @@ export interface LastEventTimeSourceArgs {
   indexKey: LastEventIndexKey;
 
   details: LastTimeDetails;
+
+  defaultIndex: string[];
 }
 export interface HostsSourceArgs {
   id?: string | null;
@@ -1362,6 +1342,8 @@ export interface HostsSourceArgs {
   sort: HostsSortField;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface HostOverviewSourceArgs {
   id?: string | null;
@@ -1369,11 +1351,15 @@ export interface HostOverviewSourceArgs {
   hostName: string;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface HostFirstLastSeenSourceArgs {
   id?: string | null;
 
   hostName: string;
+
+  defaultIndex: string[];
 }
 export interface IpOverviewSourceArgs {
   id?: string | null;
@@ -1381,6 +1367,8 @@ export interface IpOverviewSourceArgs {
   filterQuery?: string | null;
 
   ip: string;
+
+  defaultIndex: string[];
 }
 export interface DomainsSourceArgs {
   filterQuery?: string | null;
@@ -1398,6 +1386,8 @@ export interface DomainsSourceArgs {
   flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface DomainFirstLastSeenSourceArgs {
   id?: string | null;
@@ -1407,6 +1397,8 @@ export interface DomainFirstLastSeenSourceArgs {
   domainName: string;
 
   flowTarget: FlowTarget;
+
+  defaultIndex: string[];
 }
 export interface TlsSourceArgs {
   filterQuery?: string | null;
@@ -1422,6 +1414,8 @@ export interface TlsSourceArgs {
   flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface UsersSourceArgs {
   filterQuery?: string | null;
@@ -1437,6 +1431,8 @@ export interface UsersSourceArgs {
   flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1444,6 +1440,8 @@ export interface KpiNetworkSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface KpiHostsSourceArgs {
   id?: string | null;
@@ -1451,6 +1449,8 @@ export interface KpiHostsSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
@@ -1466,6 +1466,8 @@ export interface NetworkTopNFlowSourceArgs {
   sort: NetworkTopNFlowSortField;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface NetworkDnsSourceArgs {
   filterQuery?: string | null;
@@ -1479,6 +1481,8 @@ export interface NetworkDnsSourceArgs {
   sort: NetworkDnsSortField;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface OverviewNetworkSourceArgs {
   id?: string | null;
@@ -1486,6 +1490,8 @@ export interface OverviewNetworkSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface OverviewHostSourceArgs {
   id?: string | null;
@@ -1493,6 +1499,8 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
@@ -1500,22 +1508,19 @@ export interface UncommonProcessesSourceArgs {
   pagination: PaginationInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
+export interface IndicesExistSourceStatusArgs {
+  defaultIndex: string[];
 }
 export interface IndexFieldsSourceStatusArgs {
-  indexTypes?: IndexType[] | null;
+  defaultIndex: string[];
 }
 
 // ====================================================
 // Enums
 // ====================================================
-
-export enum IndexType {
-  ANY = 'ANY',
-  FILEBEAT = 'FILEBEAT',
-  AUDITBEAT = 'AUDITBEAT',
-  PACKETBEAT = 'PACKETBEAT',
-  WINLOGBEAT = 'WINLOGBEAT',
-}
 
 export enum Direction {
   asc = 'asc',
@@ -1602,6 +1607,7 @@ export namespace GetAuthenticationsQuery {
     timerange: TimerangeInput;
     pagination: PaginationInput;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -1733,6 +1739,7 @@ export namespace GetDomainFirstLastSeenQuery {
     ip: string;
     domainName: string;
     flowTarget: FlowTarget;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -1768,6 +1775,7 @@ export namespace GetDomainsQuery {
     pagination: PaginationInput;
     sort: DomainsSortField;
     timerange: TimerangeInput;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -1874,6 +1882,7 @@ export namespace GetEventsQuery {
     pagination: PaginationInput;
     sortField: SortField;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2032,6 +2041,7 @@ export namespace GetLastEventTimeQuery {
     sourceId: string;
     indexKey: LastEventIndexKey;
     details: LastTimeDetails;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2059,6 +2069,7 @@ export namespace GetHostFirstLastSeenQuery {
   export type Variables = {
     sourceId: string;
     hostName: string;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2091,6 +2102,7 @@ export namespace GetHostsTableQuery {
     pagination: PaginationInput;
     sort: HostsSortField;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2179,6 +2191,7 @@ export namespace GetHostOverviewQuery {
     sourceId: string;
     hostName: string;
     timerange: TimerangeInput;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2265,6 +2278,7 @@ export namespace GetIpOverviewQuery {
     sourceId: string;
     filterQuery?: string | null;
     ip: string;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2455,6 +2469,7 @@ export namespace GetKpiHostsQuery {
     sourceId: string;
     timerange: TimerangeInput;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2511,6 +2526,7 @@ export namespace GetKpiNetworkQuery {
     sourceId: string;
     timerange: TimerangeInput;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2554,6 +2570,7 @@ export namespace GetNetworkDnsQuery {
     timerange: TimerangeInput;
     pagination: PaginationInput;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2634,6 +2651,7 @@ export namespace GetNetworkTopNFlowQuery {
     sort: NetworkTopNFlowSortField;
     flowTarget: FlowTarget;
     timerange: TimerangeInput;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2758,6 +2776,7 @@ export namespace GetOverviewHostQuery {
     sourceId: string;
     timerange: TimerangeInput;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2796,6 +2815,7 @@ export namespace GetOverviewNetworkQuery {
     sourceId: string;
     timerange: TimerangeInput;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2830,7 +2850,7 @@ export namespace GetOverviewNetworkQuery {
 export namespace SourceQuery {
   export type Variables = {
     sourceId?: string | null;
-    indexTypes?: IndexType[] | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2844,43 +2864,13 @@ export namespace SourceQuery {
 
     id: string;
 
-    configuration: Configuration;
-
     status: Status;
-  };
-
-  export type Configuration = {
-    __typename?: 'SourceConfiguration';
-
-    auditbeatAlias: string;
-
-    logAlias: string;
-
-    packetbeatAlias: string;
-
-    winlogbeatAlias: string;
   };
 
   export type Status = {
     __typename?: 'SourceStatus';
 
-    auditbeatIndicesExist: boolean;
-
-    auditbeatAliasExists: boolean;
-
-    auditbeatIndices: string[];
-
-    filebeatIndicesExist: boolean;
-
-    filebeatAliasExists: boolean;
-
-    filebeatIndices: string[];
-
-    winlogbeatIndicesExist: boolean;
-
-    winlogbeatAliasExists: boolean;
-
-    winlogbeatIndices: string[];
+    indicesExist: boolean;
 
     indexFields: IndexFields[];
   };
@@ -2911,6 +2901,7 @@ export namespace GetTimelineDetailsQuery {
     sourceId: string;
     eventId: string;
     indexName: string;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -2959,6 +2950,7 @@ export namespace GetTimelineQuery {
     pagination: PaginationInput;
     sortField: SortField;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -3637,6 +3629,7 @@ export namespace GetTlsQuery {
     pagination: PaginationInput;
     sort: TlsSortField;
     timerange: TimerangeInput;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -3714,6 +3707,7 @@ export namespace GetUncommonProcessesQuery {
     timerange: TimerangeInput;
     pagination: PaginationInput;
     filterQuery?: string | null;
+    defaultIndex: string[];
   };
 
   export type Query = {
@@ -3814,6 +3808,7 @@ export namespace GetUsersQuery {
     pagination: PaginationInput;
     sort: UsersSortField;
     timerange: TimerangeInput;
+    defaultIndex: string[];
   };
 
   export type Query = {

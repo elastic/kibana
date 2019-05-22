@@ -7,6 +7,7 @@
 import { loadTransactionDistribution } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
+import { useUiFilters } from '../context/UrlParamsContext';
 
 const INITIAL_DATA = {
   buckets: [],
@@ -23,9 +24,9 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     transactionType,
     transactionId,
     traceId,
-    transactionName,
-    kuery
+    transactionName
   } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
 
   const { data = INITIAL_DATA, status, error } = useFetcher(
     () => {
@@ -38,7 +39,7 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
           transactionName,
           transactionId,
           traceId,
-          kuery
+          uiFilters
         });
       }
     },
@@ -50,7 +51,7 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
       transactionName,
       transactionId,
       traceId,
-      kuery
+      uiFilters
     ]
   );
 

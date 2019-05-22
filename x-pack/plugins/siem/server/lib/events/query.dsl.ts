@@ -18,6 +18,7 @@ export const buildQuery = (options: RequestOptions) => {
   const { fields, filterQuery } = options;
   const esFields = [...reduceFields(fields, eventFieldsMap)];
   const filterClause = [...createQueryFilterClauses(filterQuery)];
+  const defaultIndex = options.defaultIndex;
 
   const getTimerangeFilter = (timerange: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerange) {
@@ -73,12 +74,7 @@ export const buildQuery = (options: RequestOptions) => {
 
   const queryDsl = {
     allowNoIndices: true,
-    index: [
-      options.sourceConfiguration.logAlias,
-      options.sourceConfiguration.auditbeatAlias,
-      options.sourceConfiguration.packetbeatAlias,
-      options.sourceConfiguration.winlogbeatAlias,
-    ],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: agg,

@@ -31,12 +31,12 @@ export function compose(server: Server): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);
   const framework = new KibanaBackendFrameworkAdapter(server);
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
-  const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework), sources);
+  const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
   const domainLibs: AppDomainLibs = {
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
-    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
+    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
     ipDetails: new IpDetails(new ElasticsearchIpOverviewAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),

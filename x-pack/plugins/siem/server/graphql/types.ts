@@ -118,14 +118,6 @@ export interface Source {
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
-  /** The alias to read file data from */
-  logAlias: string;
-  /** The alias to read auditbeat data from */
-  auditbeatAlias: string;
-  /** The alias to read packetbeat data from */
-  packetbeatAlias: string;
-  /** The alias to read winlogbeat data from */
-  winlogbeatAlias: string;
   /** The field mapping to use for this source */
   fields: SourceFields;
 }
@@ -146,30 +138,8 @@ export interface SourceFields {
 }
 /** The status of an infrastructure data source */
 export interface SourceStatus {
-  /** Whether the configured auditbeat alias exists */
-  auditbeatAliasExists: boolean;
   /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
-  auditbeatIndicesExist: boolean;
-  /** The list of indices in the auditbeat alias */
-  auditbeatIndices: string[];
-  /** Whether the configured filebeat alias exists */
-  filebeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any filebeat indices */
-  filebeatIndicesExist: boolean;
-  /** The list of indices in the filebeat alias */
-  filebeatIndices: string[];
-  /** Whether the configured packetbeat alias exists */
-  packetbeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
-  packetbeatIndicesExist: boolean;
-  /** The list of indices in the packetbeat alias */
-  packetbeatIndices: string[];
-  /** Whether the configured winlogbeat alias exists */
-  winlogbeatAliasExists: boolean;
-  /** Whether the configured alias or wildcard pattern resolve to any winlogbeat indices */
-  winlogbeatIndicesExist: boolean;
-  /** The list of indices in the winlogbeat alias */
-  winlogbeatIndices: string[];
+  indicesExist: boolean;
   /** The list of fields defined in the index mappings */
   indexFields: IndexField[];
 }
@@ -1348,6 +1318,8 @@ export interface AuthenticationsSourceArgs {
   pagination: PaginationInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface EventsSourceArgs {
   pagination: PaginationInput;
@@ -1357,6 +1329,8 @@ export interface EventsSourceArgs {
   timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -1368,11 +1342,15 @@ export interface TimelineSourceArgs {
   timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface TimelineDetailsSourceArgs {
   eventId: string;
 
   indexName: string;
+
+  defaultIndex: string[];
 }
 export interface LastEventTimeSourceArgs {
   id?: string | null;
@@ -1380,6 +1358,8 @@ export interface LastEventTimeSourceArgs {
   indexKey: LastEventIndexKey;
 
   details: LastTimeDetails;
+
+  defaultIndex: string[];
 }
 export interface HostsSourceArgs {
   id?: string | null;
@@ -1391,6 +1371,8 @@ export interface HostsSourceArgs {
   sort: HostsSortField;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface HostOverviewSourceArgs {
   id?: string | null;
@@ -1398,11 +1380,15 @@ export interface HostOverviewSourceArgs {
   hostName: string;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface HostFirstLastSeenSourceArgs {
   id?: string | null;
 
   hostName: string;
+
+  defaultIndex: string[];
 }
 export interface IpOverviewSourceArgs {
   id?: string | null;
@@ -1410,6 +1396,8 @@ export interface IpOverviewSourceArgs {
   filterQuery?: string | null;
 
   ip: string;
+
+  defaultIndex: string[];
 }
 export interface DomainsSourceArgs {
   filterQuery?: string | null;
@@ -1427,6 +1415,8 @@ export interface DomainsSourceArgs {
   flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface DomainFirstLastSeenSourceArgs {
   id?: string | null;
@@ -1436,6 +1426,8 @@ export interface DomainFirstLastSeenSourceArgs {
   domainName: string;
 
   flowTarget: FlowTarget;
+
+  defaultIndex: string[];
 }
 export interface TlsSourceArgs {
   filterQuery?: string | null;
@@ -1451,6 +1443,8 @@ export interface TlsSourceArgs {
   flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface UsersSourceArgs {
   filterQuery?: string | null;
@@ -1466,6 +1460,8 @@ export interface UsersSourceArgs {
   flowTarget: FlowTarget;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1473,6 +1469,8 @@ export interface KpiNetworkSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface KpiHostsSourceArgs {
   id?: string | null;
@@ -1480,6 +1478,8 @@ export interface KpiHostsSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
@@ -1495,6 +1495,8 @@ export interface NetworkTopNFlowSourceArgs {
   sort: NetworkTopNFlowSortField;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface NetworkDnsSourceArgs {
   filterQuery?: string | null;
@@ -1508,6 +1510,8 @@ export interface NetworkDnsSourceArgs {
   sort: NetworkDnsSortField;
 
   timerange: TimerangeInput;
+
+  defaultIndex: string[];
 }
 export interface OverviewNetworkSourceArgs {
   id?: string | null;
@@ -1515,6 +1519,8 @@ export interface OverviewNetworkSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface OverviewHostSourceArgs {
   id?: string | null;
@@ -1522,6 +1528,8 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
 }
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
@@ -1529,22 +1537,19 @@ export interface UncommonProcessesSourceArgs {
   pagination: PaginationInput;
 
   filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
+export interface IndicesExistSourceStatusArgs {
+  defaultIndex: string[];
 }
 export interface IndexFieldsSourceStatusArgs {
-  indexTypes?: IndexType[] | null;
+  defaultIndex: string[];
 }
 
 // ====================================================
 // Enums
 // ====================================================
-
-export enum IndexType {
-  ANY = 'ANY',
-  FILEBEAT = 'FILEBEAT',
-  AUDITBEAT = 'AUDITBEAT',
-  PACKETBEAT = 'PACKETBEAT',
-  WINLOGBEAT = 'WINLOGBEAT',
-}
 
 export enum Direction {
   asc = 'asc',
@@ -1729,6 +1734,8 @@ export namespace SourceResolvers {
     pagination: PaginationInput;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type EventsResolver<R = EventsData, Parent = Source, Context = SiemContext> = Resolver<
@@ -1745,6 +1752,8 @@ export namespace SourceResolvers {
     timerange?: TimerangeInput | null;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type TimelineResolver<R = TimelineData, Parent = Source, Context = SiemContext> = Resolver<
@@ -1763,6 +1772,8 @@ export namespace SourceResolvers {
     timerange?: TimerangeInput | null;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type TimelineDetailsResolver<
@@ -1774,6 +1785,8 @@ export namespace SourceResolvers {
     eventId: string;
 
     indexName: string;
+
+    defaultIndex: string[];
   }
 
   export type LastEventTimeResolver<
@@ -1787,6 +1800,8 @@ export namespace SourceResolvers {
     indexKey: LastEventIndexKey;
 
     details: LastTimeDetails;
+
+    defaultIndex: string[];
   }
 
   export type HostsResolver<R = HostsData, Parent = Source, Context = SiemContext> = Resolver<
@@ -1805,6 +1820,8 @@ export namespace SourceResolvers {
     sort: HostsSortField;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type HostOverviewResolver<R = HostItem, Parent = Source, Context = SiemContext> = Resolver<
@@ -1819,6 +1836,8 @@ export namespace SourceResolvers {
     hostName: string;
 
     timerange: TimerangeInput;
+
+    defaultIndex: string[];
   }
 
   export type HostFirstLastSeenResolver<
@@ -1830,6 +1849,8 @@ export namespace SourceResolvers {
     id?: string | null;
 
     hostName: string;
+
+    defaultIndex: string[];
   }
 
   export type IpOverviewResolver<
@@ -1843,6 +1864,8 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
 
     ip: string;
+
+    defaultIndex: string[];
   }
 
   export type DomainsResolver<R = DomainsData, Parent = Source, Context = SiemContext> = Resolver<
@@ -1867,6 +1890,8 @@ export namespace SourceResolvers {
     flowTarget: FlowTarget;
 
     timerange: TimerangeInput;
+
+    defaultIndex: string[];
   }
 
   export type DomainFirstLastSeenResolver<
@@ -1882,6 +1907,8 @@ export namespace SourceResolvers {
     domainName: string;
 
     flowTarget: FlowTarget;
+
+    defaultIndex: string[];
   }
 
   export type TlsResolver<R = TlsData, Parent = Source, Context = SiemContext> = Resolver<
@@ -1904,6 +1931,8 @@ export namespace SourceResolvers {
     flowTarget: FlowTarget;
 
     timerange: TimerangeInput;
+
+    defaultIndex: string[];
   }
 
   export type UsersResolver<R = UsersData, Parent = Source, Context = SiemContext> = Resolver<
@@ -1926,6 +1955,8 @@ export namespace SourceResolvers {
     flowTarget: FlowTarget;
 
     timerange: TimerangeInput;
+
+    defaultIndex: string[];
   }
 
   export type KpiNetworkResolver<
@@ -1939,6 +1970,8 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type KpiHostsResolver<R = KpiHostsData, Parent = Source, Context = SiemContext> = Resolver<
@@ -1953,6 +1986,8 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type NetworkTopNFlowResolver<
@@ -1974,6 +2009,8 @@ export namespace SourceResolvers {
     sort: NetworkTopNFlowSortField;
 
     timerange: TimerangeInput;
+
+    defaultIndex: string[];
   }
 
   export type NetworkDnsResolver<
@@ -1993,6 +2030,8 @@ export namespace SourceResolvers {
     sort: NetworkDnsSortField;
 
     timerange: TimerangeInput;
+
+    defaultIndex: string[];
   }
 
   export type OverviewNetworkResolver<
@@ -2006,6 +2045,8 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type OverviewHostResolver<
@@ -2019,6 +2060,8 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type UncommonProcessesResolver<
@@ -2032,6 +2075,8 @@ export namespace SourceResolvers {
     pagination: PaginationInput;
 
     filterQuery?: string | null;
+
+    defaultIndex: string[];
   }
 
   export type WhoAmIResolver<
@@ -2043,38 +2088,10 @@ export namespace SourceResolvers {
 /** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SourceConfiguration> {
-    /** The alias to read file data from */
-    logAlias?: LogAliasResolver<string, TypeParent, Context>;
-    /** The alias to read auditbeat data from */
-    auditbeatAlias?: AuditbeatAliasResolver<string, TypeParent, Context>;
-    /** The alias to read packetbeat data from */
-    packetbeatAlias?: PacketbeatAliasResolver<string, TypeParent, Context>;
-    /** The alias to read winlogbeat data from */
-    winlogbeatAlias?: WinlogbeatAliasResolver<string, TypeParent, Context>;
     /** The field mapping to use for this source */
     fields?: FieldsResolver<SourceFields, TypeParent, Context>;
   }
 
-  export type LogAliasResolver<
-    R = string,
-    Parent = SourceConfiguration,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type AuditbeatAliasResolver<
-    R = string,
-    Parent = SourceConfiguration,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type PacketbeatAliasResolver<
-    R = string,
-    Parent = SourceConfiguration,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type WinlogbeatAliasResolver<
-    R = string,
-    Parent = SourceConfiguration,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type FieldsResolver<
     R = SourceFields,
     Parent = SourceConfiguration,
@@ -2132,101 +2149,28 @@ export namespace SourceFieldsResolvers {
 /** The status of an infrastructure data source */
 export namespace SourceStatusResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SourceStatus> {
-    /** Whether the configured auditbeat alias exists */
-    auditbeatAliasExists?: AuditbeatAliasExistsResolver<boolean, TypeParent, Context>;
     /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
-    auditbeatIndicesExist?: AuditbeatIndicesExistResolver<boolean, TypeParent, Context>;
-    /** The list of indices in the auditbeat alias */
-    auditbeatIndices?: AuditbeatIndicesResolver<string[], TypeParent, Context>;
-    /** Whether the configured filebeat alias exists */
-    filebeatAliasExists?: FilebeatAliasExistsResolver<boolean, TypeParent, Context>;
-    /** Whether the configured alias or wildcard pattern resolve to any filebeat indices */
-    filebeatIndicesExist?: FilebeatIndicesExistResolver<boolean, TypeParent, Context>;
-    /** The list of indices in the filebeat alias */
-    filebeatIndices?: FilebeatIndicesResolver<string[], TypeParent, Context>;
-    /** Whether the configured packetbeat alias exists */
-    packetbeatAliasExists?: PacketbeatAliasExistsResolver<boolean, TypeParent, Context>;
-    /** Whether the configured alias or wildcard pattern resolve to any packetbeat indices */
-    packetbeatIndicesExist?: PacketbeatIndicesExistResolver<boolean, TypeParent, Context>;
-    /** The list of indices in the packetbeat alias */
-    packetbeatIndices?: PacketbeatIndicesResolver<string[], TypeParent, Context>;
-    /** Whether the configured winlogbeat alias exists */
-    winlogbeatAliasExists?: WinlogbeatAliasExistsResolver<boolean, TypeParent, Context>;
-    /** Whether the configured alias or wildcard pattern resolve to any winlogbeat indices */
-    winlogbeatIndicesExist?: WinlogbeatIndicesExistResolver<boolean, TypeParent, Context>;
-    /** The list of indices in the winlogbeat alias */
-    winlogbeatIndices?: WinlogbeatIndicesResolver<string[], TypeParent, Context>;
+    indicesExist?: IndicesExistResolver<boolean, TypeParent, Context>;
     /** The list of fields defined in the index mappings */
     indexFields?: IndexFieldsResolver<IndexField[], TypeParent, Context>;
   }
 
-  export type AuditbeatAliasExistsResolver<
+  export type IndicesExistResolver<
     R = boolean,
     Parent = SourceStatus,
     Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type AuditbeatIndicesExistResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type AuditbeatIndicesResolver<
-    R = string[],
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type FilebeatAliasExistsResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type FilebeatIndicesExistResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type FilebeatIndicesResolver<
-    R = string[],
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type PacketbeatAliasExistsResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type PacketbeatIndicesExistResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type PacketbeatIndicesResolver<
-    R = string[],
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type WinlogbeatAliasExistsResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type WinlogbeatIndicesExistResolver<
-    R = boolean,
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type WinlogbeatIndicesResolver<
-    R = string[],
-    Parent = SourceStatus,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context, IndicesExistArgs>;
+  export interface IndicesExistArgs {
+    defaultIndex: string[];
+  }
+
   export type IndexFieldsResolver<
     R = IndexField[],
     Parent = SourceStatus,
     Context = SiemContext
   > = Resolver<R, Parent, Context, IndexFieldsArgs>;
   export interface IndexFieldsArgs {
-    indexTypes?: IndexType[] | null;
+    defaultIndex: string[];
   }
 }
 /** A descriptor of a field in an index */
