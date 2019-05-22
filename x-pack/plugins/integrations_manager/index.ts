@@ -10,8 +10,8 @@ import { resolve } from 'path';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import { plugin } from './server';
+import { ID } from './common/constants';
 
-const ID = 'integrations_manager';
 const ICON = 'merge';
 const PREFIX = `xpack.${ID}`;
 const ROOT = `plugins/${ID}`;
