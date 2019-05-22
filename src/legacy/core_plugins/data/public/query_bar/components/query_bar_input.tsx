@@ -28,7 +28,7 @@ import {
   AutocompleteSuggestionType,
   getAutocompleteProvider,
 } from 'ui/autocomplete_providers';
-import { debounce, compact } from 'lodash';
+import { debounce, compact, isEqual } from 'lodash';
 import { IndexPattern, StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedLog } from 'ui/persisted_log';
 import chrome from 'ui/chrome';
@@ -387,8 +387,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
 
-    this.fetchIndexPatterns();
-    this.updateSuggestions();
+    this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -396,11 +395,11 @@ export class QueryBarInputUI extends Component<Props, State> {
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
 
-    if (!_.isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
-      this.fetchIndexPatterns();
+    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
+      this.fetchIndexPatterns().then(this.updateSuggestions);
+    } else {
+      this.updateSuggestions();
     }
-
-    this.updateSuggestions();
 
     if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
       if (this.inputRef) {

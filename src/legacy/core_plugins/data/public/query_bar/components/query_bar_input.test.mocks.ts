@@ -20,6 +20,21 @@
 import { createKfetch } from 'ui/kfetch/kfetch';
 import { setup } from '../../../../../../test_utils/public/kfetch_test_setup';
 
+const mockIndexPattern = {
+  id: '1234',
+  title: 'logstash-*',
+  fields: [
+    {
+      name: 'response',
+      type: 'number',
+      esTypes: ['integer'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+    },
+  ],
+};
+
 const mockChromeFactory = jest.fn(() => {
   return {
     getBasePath: () => `foo`,
@@ -70,6 +85,10 @@ jest.mock('ui/autocomplete_providers', () => ({
 jest.mock('ui/kfetch', () => ({
   __newPlatformSetup__: jest.fn(),
   kfetch: mockKfetch,
+}));
+
+jest.mock('../lib/fetch_index_patterns', () => ({
+  fetchIndexPatterns: jest.fn().mockReturnValue(Promise.resolve([mockIndexPattern])),
 }));
 
 import _ from 'lodash';

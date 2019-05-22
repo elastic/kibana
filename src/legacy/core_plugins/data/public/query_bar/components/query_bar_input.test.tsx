@@ -131,6 +131,8 @@ describe('QueryBarInput', () => {
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
+    mockPersistedLogFactory.mockClear();
+
     mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={kqlQuery}
