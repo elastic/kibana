@@ -42,7 +42,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
         api: ['infra'],
         savedObject: {
           all: ['infrastructure-ui-source'],
-          read: [],
+          read: ['index-pattern'],
         },
         ui: ['show', 'configureSource', 'save'],
       },
@@ -50,7 +50,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
         api: ['infra'],
         savedObject: {
           all: [],
-          read: ['infrastructure-ui-source'],
+          read: ['infrastructure-ui-source', 'index-pattern'],
         },
         ui: ['show'],
       },
