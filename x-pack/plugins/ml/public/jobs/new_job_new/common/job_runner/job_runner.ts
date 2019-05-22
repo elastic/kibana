@@ -129,7 +129,8 @@ export class JobRunner {
     const stats = await ml.getJobStats({ jobId: this._jobId });
 
     if (stats.jobs.length) {
-      return stats.jobs[0].data_counts.latest_record_timestamp;
+      const time = stats.jobs[0].data_counts.latest_record_timestamp;
+      return time === undefined ? 0 : time;
     }
     return 0;
   }
