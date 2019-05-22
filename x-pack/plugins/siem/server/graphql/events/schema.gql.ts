@@ -81,6 +81,7 @@ export const eventsSchema = gql`
       sortField: SortField!
       timerange: TimerangeInput
       filterQuery: String
+      defaultIndex: [String!]!
     ): EventsData!
     Timeline(
       pagination: PaginationInput!
@@ -88,12 +89,18 @@ export const eventsSchema = gql`
       fieldRequested: [String!]!
       timerange: TimerangeInput
       filterQuery: String
+      defaultIndex: [String!]!
     ): TimelineData!
-    TimelineDetails(eventId: String!, indexName: String!): TimelineDetailsData!
+    TimelineDetails(
+      eventId: String!
+      indexName: String!
+      defaultIndex: [String!]!
+    ): TimelineDetailsData!
     LastEventTime(
       id: String
       indexKey: LastEventIndexKey!
       details: LastTimeDetails!
+      defaultIndex: [String!]!
     ): LastEventTimeData!
   }
 `;

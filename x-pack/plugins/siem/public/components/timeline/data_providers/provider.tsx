@@ -8,7 +8,7 @@ import { noop } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { DataProvider } from './data_provider';
+import { DataProvider, IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
 
 interface OwnProps {
@@ -23,8 +23,9 @@ export const Provider = pure<OwnProps>(({ dataProvider }) => (
     isEnabled={dataProvider.enabled}
     isExcluded={dataProvider.excluded}
     providerId={dataProvider.id}
-    toggleEnabledProvider={noop}
     toggleExcludedProvider={noop}
+    toggleEnabledProvider={noop}
     val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
+    operator={dataProvider.queryMatch.operator || IS_OPERATOR}
   />
 ));
