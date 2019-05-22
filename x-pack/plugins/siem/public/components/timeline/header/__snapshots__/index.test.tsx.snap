@@ -2,6 +2,7 @@
 
 exports[`Header rendering renders correctly against snapshot 1`] = `
 <Component
+  browserFields={Object {}}
   dataProviders={
     Array [
       Object {
@@ -214,6 +215,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
   }
   onChangeDataProviderKqlQuery={[MockFunction]}
   onChangeDroppableAndProvider={[MockFunction]}
+  onDataProviderEdited={[MockFunction]}
   onDataProviderRemoved={[MockFunction]}
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}
