@@ -5,9 +5,9 @@
  */
 
 import { isUndefined } from 'lodash';
-import { get, pick, set } from 'lodash/fp';
-import React from 'react';
+import { get, keyBy, pick, set } from 'lodash/fp';
 import { Query } from 'react-apollo';
+import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import chrome from 'ui/chrome';
 
@@ -30,6 +30,20 @@ export interface BrowserField {
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
+
+export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
+  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+    (acc, namespace) => [
+      ...acc,
+      ...Object.values(namespace.fields != null ? namespace.fields : {}),
+    ],
+    []
+  );
+
+export const getAllFieldsByName = (
+  browserFields: BrowserFields
+): { [fieldName: string]: Partial<BrowserField> } =>
+  keyBy('name', getAllBrowserFields(browserFields));
 
 interface WithSourceArgs {
   indicesExist: boolean;
