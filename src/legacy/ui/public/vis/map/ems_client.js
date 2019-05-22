@@ -16,5 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DummyOnRequestPlugin } from './plugin';
-export const plugin = () => new DummyOnRequestPlugin();
+
+
+export { EMSClient } from '../../../../core_plugins/tile_map/common/ems_client';

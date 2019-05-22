@@ -53,6 +53,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sortFieldId: 'timestamp',
                 direction: Direction.desc,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -83,6 +84,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sortFieldId: 'timestamp',
                 direction: Direction.desc,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -106,6 +108,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'hosts',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -125,6 +128,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'network',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -145,6 +149,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 details: {
                   hostName: 'zeek-sensor-amsterdam',
                 },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -164,6 +169,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'ipDetails',
                 details: { ip: '138.68.4.250' },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -186,6 +192,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'hosts',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -205,6 +212,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'network',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -225,6 +233,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 details: {
                   hostName: 'raspberrypi',
                 },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -244,6 +253,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'ipDetails',
                 details: { ip: '54.239.219.228' },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -266,6 +276,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 sourceId: 'default',
                 indexKey: 'hosts',
                 details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {
@@ -286,6 +297,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 details: {
                   hostName: 'demo-stack-nginx-01',
                 },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               },
             })
             .then(resp => {

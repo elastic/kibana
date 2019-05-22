@@ -1431,10 +1431,10 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.1.23":
-  version "0.1.23"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.23.tgz#84401643e33d54570fd44a0541d6c176805fb722"
-  integrity sha512-L9P9LsKWt67hdgHJh+oTxQn6/F4fn7hpHu+jXuRaaysmddZ9IrSeg3y/1q1TPIsftgWgjQL31agD0Sm6/F/kOg==
+"@elastic/javascript-typescript-langserver@^0.1.24":
+  version "0.1.24"
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.24.tgz#afd9ed9817e42743b574579063a9ee59cb3eea34"
+  integrity sha512-WTdJnDBIEeFYHNZeEOAzbsAwwYKPYP2Gl5t2YEhClGRNcMPVNS4+WUWc0iQ0wTW4o0+9SnRNvMpCVAF7NpRWvw==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     javascript-typescript-langserver "^2.11.3"
@@ -8194,9 +8194,9 @@ core-js@^2.5.3, core-js@^2.5.7:
   integrity sha512-RszJCAxg/PP6uzXVXL6BsxSXx/B05oJAQ2vkJRjyjrEcNVycaqOmNb5OTxZPE3xa5gwZduqza6L9JOCenh/Ecw==
 
 core-js@^2.6.5:
-  version "2.6.7"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.7.tgz#c2b19af9b50ec49c356ee087d6155632a889e968"
-  integrity sha512-ydmsQxDVH7lDpYoirXft8S83ddKKfdsrsmWhtyj7xafXVLbLhKOyfD7kAi2ueFfeP7m9rNavjW59O3hLLzzC5A==
+  version "2.6.8"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.8.tgz#dc3a1e633a04267944e0cb850d3880f340248139"
+  integrity sha512-RWlREFU74TEkdXzyl1bka66O3kYp8jeTXrvJZDzVVMH8AiHUSOFpL1yfhQJ+wHocAm1m+4971W1PPzfLuCv1vg==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"

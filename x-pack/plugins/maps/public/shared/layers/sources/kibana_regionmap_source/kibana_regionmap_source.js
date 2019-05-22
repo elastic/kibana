@@ -59,7 +59,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async _getVectorFileMeta() {
-    const regionList = await getKibanaRegionList();
+    const regionList = getKibanaRegionList();
     const meta = regionList.find(source => source.name === this._descriptor.name);
     if (!meta) {
       throw new Error(i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
