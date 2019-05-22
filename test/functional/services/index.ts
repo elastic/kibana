@@ -42,6 +42,7 @@ import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 // @ts-ignore not TS yet
 import { InspectorProvider } from './inspector';
+import { VisualTestingProvider } from './visual_testing';
 // @ts-ignore not TS yet
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
@@ -84,4 +85,5 @@ export const services = {
   inspector: InspectorProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
+  visualTesting: VisualTestingProvider,
 };
