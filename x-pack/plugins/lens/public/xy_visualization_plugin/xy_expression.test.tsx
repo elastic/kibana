@@ -30,14 +30,20 @@ function sampleArgs() {
   const args: XYArgs = {
     seriesType: 'line',
     title: 'My fanci line chart',
-    legend: { isVisible: false, position: Position.Top },
+    legend: {
+      type: 'lens_xy_legendConfig',
+      isVisible: false,
+      position: Position.Top,
+    },
     y: {
+      type: 'lens_xy_yConfig',
       accessors: ['a', 'b'],
       position: Position.Left,
       showGridlines: false,
       title: 'A and B',
     },
     x: {
+      type: 'lens_xy_xConfig',
       accessor: 'c',
       position: Position.Bottom,
       showGridlines: false,
@@ -58,8 +64,8 @@ describe('xy_expression', () => {
         position: Position.Left,
       };
 
-      expect(legendConfig.fn(null, args)).toEqual({
-        type: 'legendConfig',
+      expect(legendConfig.fn(null, args, {})).toEqual({
+        type: 'lens_xy_legendConfig',
         ...args,
       });
     });
@@ -72,8 +78,8 @@ describe('xy_expression', () => {
         title: 'Foooo!',
       };
 
-      expect(xConfig.fn(null, args)).toEqual({
-        type: 'xConfig',
+      expect(xConfig.fn(null, args, {})).toEqual({
+        type: 'lens_xy_xConfig',
         ...args,
       });
     });
@@ -86,8 +92,8 @@ describe('xy_expression', () => {
         title: 'Barrrrrr!',
       };
 
-      expect(yConfig.fn(null, args)).toEqual({
-        type: 'yConfig',
+      expect(yConfig.fn(null, args, {})).toEqual({
+        type: 'lens_xy_yConfig',
         ...args,
       });
     });
@@ -99,7 +105,7 @@ describe('xy_expression', () => {
 
       expect(xyChart.fn(data, args)).toEqual({
         type: 'render',
-        as: 'xy_chart_renderer',
+        as: 'lens_xy_chart_renderer',
         value: { data, args },
       });
     });
