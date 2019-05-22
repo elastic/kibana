@@ -15,18 +15,22 @@ import { DataProvider } from '../data_providers/data_provider';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
+  OnDataProviderEdited,
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
+import { BrowserFields } from '../../../containers/source';
 
 interface Props {
+  browserFields: BrowserFields;
+  dataProviders: DataProvider[];
   id: string;
   indexPattern: StaticIndexPattern;
-  dataProviders: DataProvider[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
+  onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
@@ -40,11 +44,13 @@ const TimelineHeaderContainer = styled.div`
 
 export const TimelineHeader = pure<Props>(
   ({
+    browserFields,
     id,
     indexPattern,
     dataProviders,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
+    onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
@@ -52,10 +58,12 @@ export const TimelineHeader = pure<Props>(
   }) => (
     <TimelineHeaderContainer data-test-subj="timelineHeader">
       <DataProviders
+        browserFields={browserFields}
         id={id}
         dataProviders={dataProviders}
         onChangeDroppableAndProvider={onChangeDroppableAndProvider}
         onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+        onDataProviderEdited={onDataProviderEdited}
         onDataProviderRemoved={onDataProviderRemoved}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
         onToggleDataProviderExcluded={onToggleDataProviderExcluded}

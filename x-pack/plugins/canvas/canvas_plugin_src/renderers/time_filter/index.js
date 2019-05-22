@@ -19,15 +19,18 @@ export const timeFilter = () => ({
     const filterExpression = handlers.getFilter();
     const filterExists = filterExpression !== '';
     const ast = fromExpression(filterExpression);
+
     if (filterExists) {
-      // Check if the current column is what we expect it to be. If the user changes column this will be called again,
-      // but we don't want to run setFilter() unless we have to because it will cause a data refresh
+      // Check if the current column is what we expect it to be. If the user changes column this
+      // will be called again, but we don't want to run setFilter() unless we have to because it
+      // will cause a data refresh
       const column = get(ast, 'chain[0].arguments.column[0]');
       if (column !== config.column) {
         set(ast, 'chain[0].arguments.column[0]', config.column);
         handlers.setFilter(toExpression(ast));
       }
     }
+
     ReactDOM.render(
       <TimeFilter
         compact={config.compact}

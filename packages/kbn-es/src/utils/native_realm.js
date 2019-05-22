@@ -44,8 +44,11 @@ exports.NativeRealm = class NativeRealm {
         },
       });
     } catch (error) {
-      if (attempt < 3 && error.meta && error.meta.statusCode === 401) {
-        this._log.warning('[elastic] user not available yet, waiting 1.5 seconds and trying again');
+      if (attempt < 3) {
+        this._log.warning(
+          'assuming that [elastic] user not available yet, waiting 1.5 seconds and trying again'
+        );
+        this._log.info(' -- error.meta', error.meta);
         await new Promise(resolve => setTimeout(resolve, 1500));
         return await this.setPassword(username, password, {
           attempt: attempt + 1,
