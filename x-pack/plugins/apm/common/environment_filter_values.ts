@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import './job_select_list_directive';
-import './job_select_button_directive.js';
-import './job_select_service.js';
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';
+export const ENVIRONMENT_NOT_DEFINED = 'ENVIRONMENT_NOT_DEFINED';
