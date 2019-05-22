@@ -7,5 +7,10 @@
 <b>Signature:</b>
 
 ```typescript
-http: HttpServiceSetup;
+http: {
+        registerAuth: HttpServiceSetup['registerAuth'];
+        registerOnRequest: HttpServiceSetup['registerOnRequest'];
+        getBasePathFor: HttpServiceSetup['getBasePathFor'];
+        setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    };
 ```

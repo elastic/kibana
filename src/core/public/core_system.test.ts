@@ -18,14 +18,12 @@
  */
 
 import {
-  BasePathServiceConstructor,
   ChromeServiceConstructor,
   FatalErrorsServiceConstructor,
   HttpServiceConstructor,
   I18nServiceConstructor,
   InjectedMetadataServiceConstructor,
   LegacyPlatformServiceConstructor,
-  MockBasePathService,
   MockChromeService,
   MockFatalErrorsService,
   MockHttpService,
@@ -78,7 +76,6 @@ describe('constructor', () => {
     expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(BasePathServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
@@ -167,11 +164,6 @@ describe('#setup()', () => {
   it('calls http#setup()', async () => {
     await setupCore();
     expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls basePath#setup()', async () => {
-    await setupCore();
-    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls uiSettings#setup()', async () => {

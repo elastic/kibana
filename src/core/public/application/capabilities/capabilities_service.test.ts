@@ -19,13 +19,11 @@
 
 import { InjectedMetadataService } from '../../injected_metadata';
 import { CapabilitiesService } from './capabilities_service';
-import { basePathServiceMock } from '../../base_path/base_path_service.mock';
 
 describe('#start', () => {
-  const basePath = basePathServiceMock.createStartContract();
-  basePath.addToPath.mockImplementation(str => str);
   const injectedMetadata = new InjectedMetadataService({
     injectedMetadata: {
+      version: 'kibanaVersion',
       capabilities: {
         catalogue: {},
         management: {},
@@ -42,7 +40,7 @@ describe('#start', () => {
 
   it('filters available apps based on returned navLinks', async () => {
     const service = new CapabilitiesService();
-    expect((await service.start({ apps, basePath, injectedMetadata })).availableApps).toEqual([
+    expect((await service.start({ apps, injectedMetadata })).availableApps).toEqual([
       { id: 'app1' },
     ]);
   });
@@ -51,7 +49,6 @@ describe('#start', () => {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
       apps,
-      basePath,
       injectedMetadata,
     });
 
