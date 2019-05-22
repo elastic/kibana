@@ -17,30 +17,4 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { SearchBar } from './components/search_bar';
-
-// @ts-ignore
-import { setupDirective } from './directive';
-
-/**
- * Search Bar Service
- * @internal
- */
-export class SearchBarService {
-  public setup() {
-    return {
-      ui: {
-        SearchBar,
-      },
-      loadLegacyDirectives: once(setupDirective),
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
-
-/** @public */
-export type SearchBarSetup = ReturnType<SearchBarService['setup']>;
+export { SearchService } from './search_service';

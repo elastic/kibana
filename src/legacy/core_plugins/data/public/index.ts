@@ -17,32 +17,32 @@
  * under the License.
  */
 
-import { SearchBarService } from './search_bar';
+import { SearchService } from './search';
 import { QueryService } from './query';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
-  private readonly searchBar: SearchBarService;
+  private readonly search: SearchService;
   private readonly query: QueryService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
     this.query = new QueryService();
-    this.searchBar = new SearchBarService();
+    this.search = new SearchService();
   }
 
   public setup() {
     return {
       indexPatterns: this.indexPatterns.setup(),
-      search: this.searchBar.setup(),
+      search: this.search.setup(),
       query: this.query.setup(),
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
-    this.searchBar.stop();
+    this.search.stop();
     this.query.stop();
   }
 }

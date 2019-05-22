@@ -17,4 +17,27 @@
  * under the License.
  */
 
-export { SearchBarService } from './search_bar_service';
+import { once } from 'lodash';
+import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
+
+/**
+ * Search Bar Service
+ * @internal
+ */
+export class SearchService {
+  public setup() {
+    return {
+      ui: {
+        SearchBar,
+      },
+      loadLegacyDirectives: once(setupSearchBarDirective),
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type SearchSetup = ReturnType<SearchService['setup']>;
