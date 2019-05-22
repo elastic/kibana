@@ -7,6 +7,50 @@
 /* eslint-disable no-undef */
 
 (function () {
+  /**
+   * Go from ['a', 'b', 'c', 'd', 'e']
+   * To ['a.b.c.d.e', 'a.b.c.d', 'a.b.c', 'a.b']
+   * @param arr The array to outpu
+   */
+  const outputArray = (arr) => {
+    const output = [];
+    let i = 0;
+    while(i < arr.length - 1) {
+      const end = i ? i * -1 : undefined;
+      output.push(arr.slice(0, end).join('.'));
+      i++;
+    }
+    return output;
+  };
+
+  const getAllNestedPathsFromArray = (arr, computedArray = []) => {
+    // Output the array without skipping any item
+    let output = [...computedArray, ...outputArray(arr)];
+
+    // We remove the "head" and the "tail" of the array (pos 0 and arr.length -1)
+    // We go from ['a', 'b', 'c', 'd', 'e'] (5 items)
+    // To 3 modified arrays
+    // ['a', 'c', 'd', 'e'] => outputArray()
+    // ['a', 'd', 'e'] => outputArray()
+    // ['a', 'e'] => outputArray()
+    let itemsToSkip = arr.length - 2;
+    if (itemsToSkip > 0) {
+      while(itemsToSkip) {
+        const newArray = [...arr];
+        newArray.splice(1, itemsToSkip);
+        output = [...output, ...outputArray(newArray)];
+        itemsToSkip--;
+      }
+    }
+
+    if (arr.length > 2) {
+      // Recursively call the function skipping the first array item
+      return getAllNestedPathsFromArray(arr.slice(1), output);
+    }
+
+    return output.sort();
+  };
+
   chrome.storage.sync.get(['domTreeRoot', 'outputType'], ({ domTreeRoot, outputType }) => {
     const datasetKey = 'testSubj';
 
@@ -41,10 +85,6 @@
 
       const testSubjectOnNode = node.dataset[datasetKey];
 
-      if (testSubjectOnNode) {
-        dataTestSubjects.add(testSubjectOnNode);
-      }
-
       const updatedPath = testSubjectOnNode
         ? [...path, testSubjectOnNode]
         : path;
@@ -53,7 +93,13 @@
         const pathToString = updatedPath.join('.');
 
         if (pathToString) {
+          // Add the complete nested path ('a.b.c.d')
           dataTestSubjects.add(pathToString);
+          // Add each item separately
+          updatedPath.forEach(dataTestSubjects.add.bind(dataTestSubjects));
+          // Add all the combination ('a.b', 'a.c', 'a.e', ...)
+          const nestedPaths = getAllNestedPathsFromArray(updatedPath);
+          nestedPaths.forEach(dataTestSubjects.add.bind(dataTestSubjects));
         }
 
         return;
@@ -81,14 +127,17 @@
     const documentClicksHandler = () => {
       const total = dataTestSubjects.size;
 
-      findTestSubjects();
+      // Wait to be sure that the DOM has updated
+      setTimeout(() => {
+        findTestSubjects();
+        if (dataTestSubjects.size === total) {
+          // No new test subject, nothing to output
+          return;
+        }
 
-      if (dataTestSubjects.size === total) {
-        // No new test subject, nothing to output
-        return;
-      }
+        output();
+      }, 500);
 
-      output();
     };
 
     // Add meta data on the window object
