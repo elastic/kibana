@@ -76,6 +76,7 @@ async function transpileWithBabel(srcGlobs, buildRoot, presets) {
     vfs.src(
       srcGlobs.concat([
         '!**/*.d.ts',
+        '!**/*.{test,test.mocks,mock,mocks}.{ts,tsx}',
         '!**/node_modules/**',
         '!**/bower_components/**',
         '!**/__tests__/**',
