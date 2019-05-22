@@ -25,6 +25,17 @@ mkdir -p .chromedriver
 curl "https://chromedriver.storage.googleapis.com/$chromedriverDistVersion/chromedriver_linux64.zip" > .chromedriver/chromedriver.zip
 echo "$chromedriverPkgVersion" > .chromedriver/pkgVersion
 
+# cache the @percy/agent chromium archive
+percyAgentDistVersion="$(node -e "console.log(require('@percy/agent/package.json').version)")"
+percyAgentPkgVersion="$(node -e "console.log(require('./package.json').devDependencies['@percy/agent'])")"
+if [ -z "$percyAgentDistVersion" ] || [ -z "$percyAgentPkgVersion" ]; then
+  echo "UNABLE TO DETERMINE @percy/agent VERSIONS"
+  exit 1
+fi
+mkdir -p .chromedriver
+curl "https://chromedriver.storage.googleapis.com/$chromedriverDistVersion/chromedriver_linux64.zip" > .chromedriver/chromedriver.zip
+echo "$chromedriverPkgVersion" > .chromedriver/pkgVersion
+
 # cache the geckodriver archive
 geckodriverPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
 if [ -z "$geckodriverPkgVersion" ]; then
