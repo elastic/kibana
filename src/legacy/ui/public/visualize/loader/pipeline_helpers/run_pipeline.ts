@@ -25,15 +25,15 @@ import { getInterpreter } from 'plugins/interpreter/interpreter';
 import { Adapters } from 'ui/inspector';
 import { Filters, Query, TimeRange } from 'ui/visualize';
 
-interface InitialContextObject {
+export interface InitialContextObject {
   timeRange?: TimeRange;
   filters?: Filters;
   query?: Query;
 }
 
-type getInitialContextFunction = () => InitialContextObject;
+export type getInitialContextFunction = () => InitialContextObject;
 
-interface RunPipelineHandlers {
+export interface RunPipelineHandlers {
   getInitialContext: getInitialContextFunction;
   inspectorAdapters?: Adapters;
 }
