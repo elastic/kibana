@@ -130,27 +130,6 @@ else
 fi
 
 ###
-### use the @percy/agent chromium cache if it exists
-###
-if [ -d "$dir/.percy-agent" ]; then
-  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies['@percy/agent'])")"
-  cachedPkgVersion="$(cat "$dir/.percy-agent/pkgVersion")"
-  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
-    export PUPPETEER_EXECUTABLE_PATH="$dir/.percy-agent/chromium.zip"
-    export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-    echo " -- Using @percy/agent chromium cache at $PUPPETEER_EXECUTABLE_PATH"
-  else
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo "  SKIPPING @percy/agent chromium CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  fi
-else
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  echo "  @percy/agent chromium CACHE NOT FOUND"
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-fi
-
-###
 ### use the geckodriver cache if it exists
 ###
 if [ -d "$dir/.geckodriver" ]; then
@@ -174,6 +153,8 @@ fi
 ### skip chomium download, use the system chrome install
 ###
 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+PUPPETEER_EXECUTABLE_PATH="$(command -v google-chrome-stable)"
+export PUPPETEER_EXECUTABLE_PATH
 
 ###
 ### install dependencies
