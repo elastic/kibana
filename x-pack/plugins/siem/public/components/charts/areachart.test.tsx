@@ -38,16 +38,8 @@ describe('AreaChartBaseComponent', () => {
       wrapper = mount(<AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />);
     });
 
-    it('should render two area series', () => {
-      expect(wrapper.find('EuiAreaSeries')).toHaveLength(2);
-    });
-
-    it('should render a customized x-asix', () => {
-      expect(wrapper.find('EuiXAxis')).toHaveLength(1);
-    });
-
-    it('should render a customized y-asix', () => {
-      expect(wrapper.find('EuiYAxis')).toHaveLength(1);
+    it('should render Chart', () => {
+      expect(wrapper.find('Chart')).toHaveLength(1);
     });
   });
 
@@ -59,7 +51,7 @@ describe('AreaChartBaseComponent', () => {
     });
 
     it('should not render without height and width', () => {
-      expect(wrapper.find('SeriesChart')).toHaveLength(0);
+      expect(wrapper.find('Chart')).toHaveLength(0);
     });
   });
 });
@@ -113,7 +105,7 @@ describe('AreaChartWithCustomPrompt', () => {
     });
 
     it('render AreaChartBaseComponent', () => {
-      expect(wrapper.find('[data-test-subj="stat-area-chart"]').first()).toHaveLength(1);
+      expect(wrapper.find('Chart')).toHaveLength(1);
       expect(wrapper.find('ChartHolder')).toHaveLength(0);
     });
   });
@@ -195,7 +187,7 @@ describe('AreaChartWithCustomPrompt', () => {
     });
 
     it('render Chart Holder', () => {
-      expect(wrapper.find('[data-test-subj="stat-area-chart"]')).toHaveLength(0);
+      expect(wrapper.find('Chart')).toHaveLength(0);
       expect(wrapper.find('ChartHolder')).toHaveLength(1);
     });
   });

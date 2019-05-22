@@ -6,6 +6,7 @@
 import { EuiFlexGroup, EuiText, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { CustomSeriesColorsMap, DataSeriesColorsValues, getSpecId } from '@elastic/charts';
 
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -51,4 +52,27 @@ export const WrappedByAutoSizer = styled.div`
 
 export const numberFormatter = (value: string | number) => {
   return value.toLocaleString && value.toLocaleString();
+};
+
+export enum SeriesType {
+  BAR = 'bar',
+  AREA = 'area',
+  LINE = 'line',
+}
+
+export const getSeriesStyle = (
+  seriesKey: string,
+  color: string | undefined,
+  seriesType?: SeriesType
+) => {
+  if (!color) return undefined;
+  const customSeriesColors: CustomSeriesColorsMap = new Map();
+  const dataSeriesColorValues: DataSeriesColorsValues = {
+    colorValues: seriesType === SeriesType.BAR ? [seriesKey] : [],
+    specId: getSpecId(seriesKey),
+  };
+
+  customSeriesColors.set(dataSeriesColorValues, color);
+
+  return customSeriesColors;
 };

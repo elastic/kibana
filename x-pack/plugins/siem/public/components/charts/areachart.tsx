@@ -7,36 +7,55 @@
 import React from 'react';
 import { pure } from 'recompose';
 import {
-  Chart,
   Axis,
   AreaSeries,
-  ScaleType,
-  Position,
+  Chart,
   getAxisId,
   getSpecId,
-  Settings,
-  CustomSeriesColorsMap,
-  DataSeriesColorsValues,
+  Position,
+  ScaleType,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
-import { AreaChartData, WrappedByAutoSizer, ChartHolder, numberFormatter } from './common';
+import {
+  AreaChartData,
+  ChartHolder,
+  getSeriesStyle,
+  numberFormatter,
+  WrappedByAutoSizer,
+} from './common';
 import { AutoSizer } from '../auto_sizer';
-
-const getAreaSeriesStyle = (areaSeriesKey: string, color: string | undefined) => {
-  if (!color) return undefined;
-  const areaCustomSeriesColors: CustomSeriesColorsMap = new Map();
-  const areaDataSeriesColorValues: DataSeriesColorsValues = {
-    colorValues: [],
-    specId: getSpecId(areaSeriesKey),
-  };
-
-  areaCustomSeriesColors.set(areaDataSeriesColorValues, color);
-
-  return areaCustomSeriesColors;
-};
 
 const dateFormatter = (d: string) => {
   return d.toLocaleString().split('T')[0];
+};
+
+const getSeriesLineStyle = (color: string | undefined) => {
+  return color
+    ? {
+        area: {
+          fill: color,
+          opacity: 0.04,
+          visible: true,
+        },
+        line: {
+          stroke: color,
+          strokeWidth: 1,
+          visible: true,
+        },
+        border: {
+          visible: false,
+          strokeWidth: 1,
+          stroke: color,
+        },
+        point: {
+          visible: false,
+          radius: 0.2,
+          stroke: color,
+          strokeWidth: 1,
+          opacity: 1,
+        },
+      }
+    : undefined;
 };
 
 export const AreaChartBaseComponent = pure<{
@@ -47,21 +66,21 @@ export const AreaChartBaseComponent = pure<{
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings />
         {data.map((series, idx) => {
-          const areaSeriesKey = series.key;
-          const areaSeriesSpecId = getSpecId(areaSeriesKey);
+          const seriesKey = series.key;
+          const seriesSpecId = getSpecId(seriesKey);
           return series.value != null ? (
             <AreaSeries
-              id={areaSeriesSpecId}
-              key={areaSeriesKey}
+              id={seriesSpecId}
+              key={seriesKey}
               name={series.key.replace('Histogram', '')}
               data={series.value}
               xScaleType={ScaleType.Ordinal}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
-              customSeriesColors={getAreaSeriesStyle(areaSeriesKey, series.color)}
+              areaSeriesStyle={getSeriesLineStyle(series.color)}
+              customSeriesColors={getSeriesStyle(seriesKey, series.color)}
             />
           ) : null;
         })}

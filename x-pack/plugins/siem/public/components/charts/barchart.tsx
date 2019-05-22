@@ -17,18 +17,17 @@ import {
   Settings,
   mergeWithDefaultTheme,
   PartialTheme,
-  CustomSeriesColorsMap,
-  DataSeriesColorsValues,
 } from '@elastic/charts';
 import { getAxisId } from '@elastic/charts';
-import { BarChartData, WrappedByAutoSizer, ChartHolder, numberFormatter } from './common';
+import {
+  BarChartData,
+  WrappedByAutoSizer,
+  ChartHolder,
+  numberFormatter,
+  SeriesType,
+  getSeriesStyle,
+} from './common';
 import { AutoSizer } from '../auto_sizer';
-
-const getYTicks = (value: string | number) => {
-  const label = value.toString();
-  const labelLength = 4;
-  return label.length > labelLength ? `${label.slice(0, labelLength)}.` : label;
-};
 
 const getTheme = () => {
   const theme: PartialTheme = {
@@ -37,19 +36,6 @@ const getTheme = () => {
     },
   };
   return mergeWithDefaultTheme(theme);
-};
-
-const getBarSeriesStyle = (barSeriesKey: string, color: string | undefined) => {
-  if (!color) return undefined;
-  const barCustomSeriesColors: CustomSeriesColorsMap = new Map();
-  const barDataSeriesColorValues: DataSeriesColorsValues = {
-    colorValues: [barSeriesKey],
-    specId: getSpecId(barSeriesKey),
-  };
-
-  barCustomSeriesColors.set(barDataSeriesColorValues, color);
-
-  return barCustomSeriesColors;
 };
 
 export const BarChartBaseComponent = pure<{
@@ -63,6 +49,7 @@ export const BarChartBaseComponent = pure<{
       {data.map(series => {
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);
+        const seriesType = SeriesType.BAR;
         return (
           <BarSeries
             id={barSeriesSpecId}
@@ -74,7 +61,8 @@ export const BarChartBaseComponent = pure<{
             yAccessors={['x']}
             splitSeriesAccessors={['g']}
             data={series.value!}
-            customSeriesColors={getBarSeriesStyle(barSeriesKey, series.color)}
+            stackAccessors={['x']}
+            customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
           />
         );
       })}
@@ -89,7 +77,6 @@ export const BarChartBaseComponent = pure<{
         id={getAxisId(`stat-items-barchart-${data[0].key}-y`)}
         position={Position.Left}
         tickSize={0}
-        tickFormat={getYTicks}
       />
     </Chart>
   ) : null;

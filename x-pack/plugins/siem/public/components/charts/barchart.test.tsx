@@ -13,10 +13,14 @@ import { BarChartData } from './common';
 describe('BarChartBaseComponent', () => {
   let wrapper: ReactWrapper;
   const mockBarChartData: BarChartData[] = [
-    { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
+    {
+      key: 'uniqueSourceIps',
+      value: [{ x: 1714, y: 'uniqueSourceIps', g: 'uniqueSourceIps' }],
+      color: '#DB1374',
+    },
     {
       key: 'uniqueDestinationIps',
-      value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+      value: [{ x: 2354, y: 'uniqueDestinationIps', g: 'uniqueDestinationIps' }],
       color: '#490092',
     },
   ];
@@ -26,16 +30,8 @@ describe('BarChartBaseComponent', () => {
       wrapper = mount(<BarChartBaseComponent height={100} width={120} data={mockBarChartData} />);
     });
 
-    it('should render two area series', () => {
-      expect(wrapper.find('EuiBarSeries')).toHaveLength(2);
-    });
-
-    it('should render a customized x-asix', () => {
-      expect(wrapper.find('EuiXAxis')).toHaveLength(1);
-    });
-
-    it('should render a customized y-asix', () => {
-      expect(wrapper.find('EuiYAxis')).toHaveLength(1);
+    it('should render two bar series', () => {
+      expect(wrapper.find('Chart')).toHaveLength(1);
     });
   });
 
@@ -45,7 +41,7 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should not render without height and width', () => {
-      expect(wrapper.find('SeriesChart')).toHaveLength(0);
+      expect(wrapper.find('Chart')).toHaveLength(0);
     });
   });
 });
@@ -91,7 +87,7 @@ describe.each([
     });
 
     it('render BarChartBaseComponent', () => {
-      expect(wrapper.find('[data-test-subj="stat-bar-chart"]').first()).toHaveLength(1);
+      expect(wrapper.find('Chart')).toHaveLength(1);
       expect(wrapper.find('ChartHolder')).toHaveLength(0);
     });
   });
@@ -166,7 +162,7 @@ describe.each([
   });
 
   it('render Chart Holder', () => {
-    expect(wrapper.find('[data-test-subj="stat-bar-chart"]')).toHaveLength(0);
+    expect(wrapper.find('Chart')).toHaveLength(0);
     expect(wrapper.find('ChartHolder')).toHaveLength(1);
   });
 });
