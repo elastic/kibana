@@ -33,10 +33,11 @@ interface Props {
   onClose: () => void;
 }
 
+const os = getClientPlatform();
+
 const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[] =>
   shortcuts.map(
     (shortcutKeyMap: ShortcutMap): DescriptionListItem => {
-      const os = getClientPlatform();
       const osShortcuts = shortcutKeyMap[os];
       return {
         title: shortcutKeyMap.help,
