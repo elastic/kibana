@@ -34,7 +34,7 @@ export class HelpMenuComponent extends React.PureComponent {
 
         <EuiSpacer />
 
-        <EuiButton iconType="popout" href="https://discuss.elastic.co/" target="_blank">
+        <EuiButton iconType="popout" href="https://discuss.elastic.co/c/siem" target="_blank">
           <FormattedMessage id="xpack.siem.chrome.help.feedback" defaultMessage="Submit feedback" />
         </EuiButton>
       </>
