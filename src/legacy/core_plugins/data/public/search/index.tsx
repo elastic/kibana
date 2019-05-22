@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchService } from './search_service';
+export { SearchService, SearchSetup } from './search_service';

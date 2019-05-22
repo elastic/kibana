@@ -21,7 +21,7 @@ import { once } from 'lodash';
 import { QueryBar, fromUser, toUser, setupDirective as setupQueryBarDirective } from './query_bar';
 
 /**
- * Query Bar Service
+ * Query Service
  *
  * @internal
  */

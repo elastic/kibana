@@ -21,7 +21,7 @@ import { once } from 'lodash';
 import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
 
 /**
- * Search Bar Service
+ * Search Service
  * @internal
  */
 export class SearchService {

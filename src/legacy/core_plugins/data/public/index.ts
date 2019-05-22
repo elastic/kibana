@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SearchService } from './search';
-import { QueryService } from './query';
+import { SearchService, SearchSetup } from './search';
+import { QueryService, QuerySetup } from './query';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
@@ -57,6 +57,8 @@ export const data = new DataPlugin().setup();
 /** @public */
 export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
+  search: SearchSetup;
+  query: QuerySetup;
 }
 
 /** @public types */
