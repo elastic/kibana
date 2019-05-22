@@ -107,7 +107,30 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('Container view mode change propagates to children', async () => {
+test('Container view mode change propagates to existing children', async () => {
+  const embeddableFactories = new EmbeddableFactoryRegistry();
+  embeddableFactories.registerFactory(new ContactCardEmbeddableFactory());
+  const container = new DashboardContainer(
+    getSampleDashboardInput({
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          embeddableId: '123',
+          explicitInput: { firstName: 'Sam' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
+    }),
+    embeddableFactories
+  );
+  await nextTick();
+
+  const embeddable = await container.getChild('123');
+  expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
+  container.updateInput({ viewMode: ViewMode.EDIT });
+  expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+});
+
+test('Container view mode change propagates to new children', async () => {
   const embeddableFactories = new EmbeddableFactoryRegistry();
   embeddableFactories.registerFactory(new ContactCardEmbeddableFactory());
   const container = new DashboardContainer(getSampleDashboardInput(), embeddableFactories);

@@ -47,6 +47,7 @@ import {
   FilterableEmbeddable,
 } from '../__test__/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/constants';
 
 const embeddableFactories = new EmbeddableFactoryRegistry();
 embeddableFactories.registerFactory(new ContactCardEmbeddableFactory());
@@ -605,6 +606,63 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
     if (container.getOutput().embeddableLoaded['123']) {
       const child = container.getChild('123');
       expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
+      done();
+    }
+  });
+});
+
+test('container stores ErrorEmbeddables when a saved object cannot be found', async done => {
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {
+        '123': {
+          type: VISUALIZE_EMBEDDABLE_TYPE,
+          explicitInput: {},
+          embeddableId: '123',
+          savedObjectId: '456',
+        },
+      },
+      viewMode: ViewMode.EDIT,
+    },
+    embeddableFactories
+  );
+
+  container.getOutput$().subscribe(() => {
+    if (container.getOutput().embeddableLoaded['123']) {
+      const child = container.getChild('123');
+      expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
+      done();
+    }
+  });
+});
+
+test('ErrorEmbeddables get updated when parent does', async done => {
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {
+        '123': {
+          type: VISUALIZE_EMBEDDABLE_TYPE,
+          explicitInput: {},
+          embeddableId: '123',
+          savedObjectId: '456',
+        },
+      },
+      viewMode: ViewMode.EDIT,
+    },
+    embeddableFactories
+  );
+
+  container.getOutput$().subscribe(() => {
+    if (container.getOutput().embeddableLoaded['123']) {
+      const embeddable = container.getChild('123');
+
+      expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+
+      container.updateInput({ viewMode: ViewMode.VIEW });
+
+      expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
       done();
     }
   });

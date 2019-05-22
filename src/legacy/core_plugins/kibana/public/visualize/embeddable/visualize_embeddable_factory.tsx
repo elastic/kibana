@@ -65,8 +65,7 @@ import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
-
-export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizeInput,
@@ -167,7 +166,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       );
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input.id);
+      return new ErrorEmbeddable(e, input, parent);
     }
   }
 

@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import { Embeddable, EmbeddableOutput } from 'plugins/embeddable_api/index';
 import { DisabledLabVisualization } from './disabled_lab_visualization';
 import { VisualizeInput } from './visualize_embeddable';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './visualize_embeddable_factory';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
   private domNode?: HTMLElement;

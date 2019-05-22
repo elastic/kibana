@@ -106,13 +106,13 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
       })
       .catch((e: Error) => {
         console.error(e); // eslint-disable-line no-console
-        return new ErrorEmbeddable(e, input.id);
+        return new ErrorEmbeddable(e, input, parent);
       });
   }
 
   public async create(input: SearchInput) {
     return Promise.resolve(
-      new ErrorEmbeddable('Saved searches can only be created from a saved object', input.id)
+      new ErrorEmbeddable('Saved searches can only be created from a saved object', input)
     );
   }
 }

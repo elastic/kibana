@@ -307,7 +307,7 @@ export abstract class Container<
         ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
     } catch (e) {
-      embeddable = new ErrorEmbeddable(e, panel.embeddableId);
+      embeddable = new ErrorEmbeddable(e, { id: panel.embeddableId }, this);
     }
 
     if (embeddable) {

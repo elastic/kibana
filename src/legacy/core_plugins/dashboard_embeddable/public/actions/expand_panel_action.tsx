@@ -74,6 +74,7 @@ export class ExpandPanelAction extends Action {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
+    // TODO: use 'minimize' when an eui-icon of such is available.
     return <EuiIcon type={isExpanded(embeddable) ? 'expand' : 'expand'} />;
   }
 

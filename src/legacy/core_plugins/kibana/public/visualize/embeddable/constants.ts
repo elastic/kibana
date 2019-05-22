@@ -16,7 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-export { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
-export { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
-export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+
+export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';

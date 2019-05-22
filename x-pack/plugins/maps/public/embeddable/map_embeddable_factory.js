@@ -103,7 +103,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   async create(input) {
     window.location.href = chrome.addBasePath(createMapPath(''));
     return Promise.resolve(
-      new ErrorEmbeddable('Maps can only be created from a saved object', input.id)
+      new ErrorEmbeddable('Maps can only be created from a saved object', input)
     );
   }
 }

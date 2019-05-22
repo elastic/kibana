@@ -35,7 +35,6 @@ import { embeddableFactories } from '../embeddables/embeddable_factories_registr
 import React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
-import { ErrorEmbeddable } from '../embeddables';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const container = new HelloWorldContainer({ id: 'hello', panels: {} }, embeddableFactories);

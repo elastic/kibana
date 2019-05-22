@@ -40,7 +40,7 @@ import {
 } from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './visualize_embeddable_factory';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
