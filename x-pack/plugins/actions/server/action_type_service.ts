@@ -60,7 +60,7 @@ export class ActionTypeService {
    * Returns an action type, throws if not registered
    */
   public get(id: string) {
-    if (!this.actionTypes[id]) {
+    if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.actionTypeService.get.missingActionTypeError', {
           defaultMessage: 'Action type "{id}" is not registered.',

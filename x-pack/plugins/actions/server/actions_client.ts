@@ -78,16 +78,6 @@ export class ActionsClient {
    */
   public async create({ data, options }: CreateOptions) {
     const { actionTypeId } = data;
-    if (!this.actionTypeService.has(actionTypeId)) {
-      throw Boom.badRequest(
-        i18n.translate('xpack.actions.actionsClient.create.missingActionTypeError', {
-          defaultMessage: 'Action type "{actionTypeId}" is not registered.',
-          values: {
-            actionTypeId,
-          },
-        })
-      );
-    }
     this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
     const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
     return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
@@ -122,9 +112,8 @@ export class ActionsClient {
    */
   public async update({ id, data, options = {} }: UpdateOptions) {
     const { actionTypeId } = data;
-    if (!this.actionTypeService.has(actionTypeId)) {
-      throw Boom.badRequest(`Action type "${actionTypeId}" is not registered.`);
-    }
+    // Throws an error if action type is invalid
+    this.actionTypeService.get(actionTypeId);
     if (data.actionTypeConfig) {
       this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
       data = this.moveEncryptedAttributesToSecrets(data);

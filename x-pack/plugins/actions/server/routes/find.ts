@@ -37,7 +37,7 @@ export function findRoute(server: Hapi.Server) {
               .min(0)
               .default(20),
             page: Joi.number()
-              .min(0)
+              .min(1)
               .default(1),
             search: Joi.string()
               .allow('')
