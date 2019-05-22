@@ -180,6 +180,14 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
   }
 
   function initFields(indexPattern, input) {
+    if(!indexPattern.fields && Array.isArray(input)) {
+      //assign the date_nanos format to date_nanos typed ES fields
+      for (const field of input) {
+        if(field.esTypes && field.esTypes.indexOf('date_nanos') !== -1) {
+          indexPattern.fieldFormatMap[field.name] = fieldformats.getInstance('date_nanos');
+        }
+      }
+    }
     const oldValue = indexPattern.fields;
     const newValue = input || oldValue || [];
     indexPattern.fields = new FieldList(indexPattern, newValue);
