@@ -18,12 +18,12 @@
  */
 
 import { once } from 'lodash';
-import { QueryBar } from './components/query_bar';
 import { fromUser } from './lib/from_user';
 import { toUser } from './lib/to_user';
 
 // @ts-ignore
 import { setupDirective } from './directive';
+import { QueryBar, QueryBarInput } from './components';
 
 /**
  * Query Bar Service
@@ -40,6 +40,7 @@ export class QueryBarService {
       },
       ui: {
         QueryBar,
+        QueryBarInput,
       },
     };
   }
