@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { History, Location } from 'history';
+import { Location } from 'history';
 import { get, throttle } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import { connect } from 'react-redux';
-import { Route, RouteProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import { hostsActions, inputsActions, networkActions } from '../../store/actions';
 import {
@@ -22,12 +21,12 @@ import {
   State,
 } from '../../store';
 import {
-  AbsoluteUrlTimeRange,
+  AbsoluteTimeRange,
   InputsModelId,
-  RelativeUrlTimeRange,
+  LinkTo,
+  RelativeTimeRange,
   TimeRangeKinds,
   UrlInputsModel,
-  UrlTimeRange,
 } from '../../store/inputs/model';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { URL_STATE_KEYS, CONSTANTS } from './constants';
@@ -39,13 +38,7 @@ import {
   replaceQueryStringInLocation,
   isKqlForRoute,
 } from './helpers';
-import {
-  KeyUrlState,
-  KqlQuery,
-  UrlStateContainerLifecycleProps,
-  UrlStateContainerProps,
-  UrlStateMappedToActionsType,
-} from './types';
+import { KeyUrlState, KqlQuery, UrlStateContainerLifecycleProps } from './types';
 
 export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecycleProps> {
   public render() {
@@ -59,9 +52,12 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     const { history, location, urlState } = this.props;
     if (JSON.stringify(urlState) !== JSON.stringify(prevUrlState)) {
       URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-        if (JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])) {
+        if (
+          urlState[urlKey] &&
+          JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])
+        ) {
           if (urlKey === CONSTANTS.kqlQuery) {
-            urlState[CONSTANTS.kqlQuery].forEach((value: KqlQuery, index: number) => {
+            urlState[urlKey].forEach((value: KqlQuery, index: number) => {
               if (
                 JSON.stringify(urlState[CONSTANTS.kqlQuery][index]) !==
                 JSON.stringify(prevUrlState[CONSTANTS.kqlQuery][index])
@@ -104,17 +100,6 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     }
   );
 
-  private urlStateMappedToActions: UrlStateMappedToActionsType = {
-    [CONSTANTS.kqlQuery]: {
-      hosts: this.props.setHostsKql,
-      network: this.props.setNetworkKql,
-    },
-    [CONSTANTS.timerange]: {
-      absolute: this.props.setAbsoluteTimerange,
-      relative: this.props.setRelativeTimerange,
-    },
-  };
-
   private handleInitialize = (location: Location) => {
     URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
       const newUrlStateString = getParamFromQueryString(
@@ -125,44 +110,50 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
         if (urlKey === CONSTANTS.timerange) {
           const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
           const globalId: InputsModelId = 'global';
-          const globalRange: UrlTimeRange = timerangeStateData.global;
-          const globalType: TimeRangeKinds = get('global.kind', timerangeStateData);
+          const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
+          const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
           if (globalType) {
-            if (globalRange.linkTo.length === 0) {
+            if (globalLinkTo.linkTo.length === 0) {
               this.props.toggleTimelineLinkTo({ linkToId: 'global' });
             }
             if (globalType === 'absolute') {
-              const absoluteRange: AbsoluteUrlTimeRange = get('global.kind', timerangeStateData);
-              this.urlStateMappedToActions.timerange[globalType]({
+              const absoluteRange: AbsoluteTimeRange = get('global.timerange', timerangeStateData);
+              this.props.setAbsoluteTimerange({
                 ...absoluteRange,
                 id: globalId,
               });
             }
             if (globalType === 'relative') {
-              const relativeRange: RelativeUrlTimeRange = get('global.kind', timerangeStateData);
-              this.urlStateMappedToActions.timerange[globalType]({
+              const relativeRange: RelativeTimeRange = get('global.timerange', timerangeStateData);
+              this.props.setRelativeTimerange({
                 ...relativeRange,
                 id: globalId,
               });
             }
           }
           const timelineId: InputsModelId = 'timeline';
-          const timelineRange: UrlTimeRange = timerangeStateData.timeline;
-          const timelineType: TimeRangeKinds = get('timeline.kind', timerangeStateData);
+          const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
+          const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
           if (timelineType) {
-            if (timelineRange.linkTo.length === 0) {
+            if (timelineLinkTo.linkTo.length === 0) {
               this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
             }
             if (timelineType === 'absolute') {
-              const absoluteRange: AbsoluteUrlTimeRange = get('timeline.kind', timerangeStateData);
-              this.urlStateMappedToActions.timerange[timelineType]({
+              const absoluteRange: AbsoluteTimeRange = get(
+                'timeline.timerange',
+                timerangeStateData
+              );
+              this.props.setAbsoluteTimerange({
                 ...absoluteRange,
                 id: timelineId,
               });
             }
             if (timelineType === 'relative') {
-              const relativeRange: RelativeUrlTimeRange = get('timeline.kind', timerangeStateData);
-              this.urlStateMappedToActions.timerange[timelineType]({
+              const relativeRange: RelativeTimeRange = get(
+                'timeline.timerange',
+                timerangeStateData
+              );
+              this.props.setRelativeTimerange({
                 ...relativeRange,
                 id: timelineId,
               });
@@ -180,13 +171,13 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
               ),
             };
             if (kqlQueryStateData.model === 'hosts') {
-              this.urlStateMappedToActions[CONSTANTS.kqlQuery].hosts({
+              this.props.setHostsKql({
                 filterQuery,
                 hostsType: kqlQueryStateData.type,
               });
             }
             if (kqlQueryStateData.model === 'network') {
-              this.urlStateMappedToActions[CONSTANTS.kqlQuery].network({
+              this.props.setNetworkKql({
                 filterQuery,
                 networkType: kqlQueryStateData.type,
               });
@@ -200,7 +191,6 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
   };
 
   private handleLocationChange = (prevLocation: Location, newLocation: Location) => {
-    // debugger;
     const { onChange, mapToUrlState } = this.props;
     if (!onChange || !mapToUrlState) {
       return;
@@ -215,13 +205,9 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
       'urlStateKey'
     );
 
-    console.log('decodeRisonUrlState(newUrlStateString)', decodeRisonUrlState(newUrlStateString));
-    console.log('typeof', typeof decodeRisonUrlState(newUrlStateString));
-
     if (previousUrlStateString !== newUrlStateString) {
       const previousUrlState = mapToUrlState(decodeRisonUrlState(previousUrlStateString));
       const newUrlState = mapToUrlState(decodeRisonUrlState(newUrlStateString));
-      // debugger;
       if (typeof newUrlState !== 'undefined') {
         onChange(newUrlState, previousUrlState);
       }
@@ -229,31 +215,14 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
   };
 }
 
-export const UrlStateComponents = pure<UrlStateContainerProps>(props => (
-  <Route<RouteProps>>
-    {({ history, location }) => (
-      <UrlStateContainerLifecycle
-        data-test-subj={'urlStateComponents'}
-        history={history}
-        location={location}
-        {...props}
-      />
-    )}
-  </Route>
-));
-
 const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
   const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, [CONSTANTS.timerange]: globalTimerange } = inputState.global;
-    const {
-      linkTo: timelineLinkTo,
-      [CONSTANTS.timerange]: timelineTimerange,
-    } = inputState.timeline;
-
+    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
+    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
     return {
       urlState: {
         [CONSTANTS.timerange]: {
@@ -262,8 +231,8 @@ const makeMapStateToProps = () => {
             linkTo: globalLinkTo,
           },
           timeline: {
-            [CONSTANTS.timerange]: timelineLinkTo,
-            linkTo: timelineTimerange,
+            [CONSTANTS.timerange]: timelineTimerange,
+            linkTo: timelineLinkTo,
           },
         },
         [CONSTANTS.kqlQuery]: [
@@ -304,4 +273,4 @@ export const UrlStateContainer = connect(
     toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
   }
   // @ts-ignore
-)(UrlStateComponents);
+)(withRouter(UrlStateContainerLifecycle));

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface AbsoluteTimeRange {
+export interface AbsoluteTimeRange {
   kind: 'absolute';
   fromStr: undefined;
   toStr: undefined;
@@ -12,7 +12,7 @@ interface AbsoluteTimeRange {
   to: number;
 }
 
-interface RelativeTimeRange {
+export interface RelativeTimeRange {
   kind: 'relative';
   fromStr: string;
   toStr: string;
@@ -51,7 +51,7 @@ export interface InputsRange {
   linkTo: InputsModelId[];
 }
 
-interface LinkTo {
+export interface LinkTo {
   linkTo: InputsModelId[];
 }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KeyUrlState } from './';
+import { KeyUrlState } from './types';
 
 export enum CONSTANTS {
   kqlQuery = 'kqlQuery',

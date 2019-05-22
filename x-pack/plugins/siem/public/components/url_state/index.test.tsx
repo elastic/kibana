@@ -10,11 +10,9 @@ import * as React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import { UrlStateContainer, UrlStateContainerLifecycle, UrlStateContainerLifecycleProps } from './';
-
-import { isKqlForRoute } from './helpers';
-
+import { UrlStateContainer, UrlStateContainerLifecycle } from './';
 import { UrlStateContainerLifecycleProps } from './types';
+import { CONSTANTS } from './constants';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
 import {
   createStore,
@@ -71,7 +69,7 @@ const mockProps: UrlStateContainerLifecycleProps = {
     title: 'filebeat-*,packetbeat-*',
   },
   urlState: {
-    timerange: {
+    [CONSTANTS.timerange]: {
       global: {
         kind: 'relative',
         fromStr: 'now-24h',
@@ -89,7 +87,7 @@ const mockProps: UrlStateContainerLifecycleProps = {
         linkTo: ['global'],
       },
     },
-    kqlQuery: [
+    [CONSTANTS.kqlQuery]: [
       {
         filterQuery,
         type: networkModel.NetworkType.page,
@@ -124,172 +122,80 @@ const mockProps: UrlStateContainerLifecycleProps = {
   }>,
 };
 
-describe('UrlStateComponents', () => {
-  describe('UrlStateContainer', () => {
-    const state: State = mockGlobalState;
+describe('UrlStateContainer', () => {
+  const state: State = mockGlobalState;
 
-    let store = createStore(state, apolloClientObservable);
+  let store = createStore(state, apolloClientObservable);
 
-    beforeEach(() => {
-      store = createStore(state, apolloClientObservable);
-    });
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-    test('mounts and renders', () => {
-      const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <Router history={mockHistory}>
-              <UrlStateContainer />
-            </Router>
-          </TestProviders>
-        </MockedProvider>
-      );
-      const urlStateComponents = wrapper.find('[data-test-subj="urlStateComponents"]');
-      urlStateComponents.exists();
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
-    test('componentDidUpdate - timerange redux state updates the url', async () => {
-      const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
+  beforeEach(() => {
+    store = createStore(state, apolloClientObservable);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  test('mounts and renders', () => {
+    const wrapper = mount(
+      <MockedProvider>
+        <TestProviders store={store}>
+          <Router history={mockHistory}>
+            <UrlStateContainer />
+          </Router>
+        </TestProviders>
+      </MockedProvider>
+    );
+    const urlStateComponents = wrapper.find('[data-test-subj="urlStateComponents"]');
+    urlStateComponents.exists();
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
+  test('componentDidUpdate - timerange redux state updates the url', async () => {
+    const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
 
-      const newUrlState = {
-        timerange: {
-          timeline: {
-            kind: 'relative',
-            fromStr: 'now-24h',
-            toStr: 'now',
-            from: 1558048243696,
-            to: 1558134643697,
-            linkTo: ['global'],
-          },
+    const newUrlState = {
+      [CONSTANTS.timerange]: {
+        timeline: {
+          kind: 'relative',
+          fromStr: 'now-24h',
+          toStr: 'now',
+          from: 1558048243696,
+          to: 1558134643697,
+          linkTo: ['global'],
         },
-      };
+      },
+    };
 
-      wrapper.setProps({ urlState: newUrlState });
-      wrapper.update();
-      await wait(1000);
-      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
-        hash: '',
-        pathname: '/network',
-        search:
-          '?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now),timerange:!(global)))',
-        state: '',
-      });
-    });
-    test('componentDidUpdate - kql query redux state updates the url', async () => {
-      const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
-
-      const newUrlState = {
-        kqlQuery: [
-          {
-            filterQuery,
-            type: networkModel.NetworkType.details,
-            model: KueryFilterModel.network,
-          },
-        ],
-      };
-
-      wrapper.setProps({ urlState: newUrlState });
-      wrapper.update();
-      await wait(1000);
-      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
-        hash: '',
-        pathname: '/network',
-        search:
-          "?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),model:network,type:details)",
-        state: '',
-      });
+    wrapper.setProps({ urlState: newUrlState });
+    wrapper.update();
+    await wait(1000);
+    expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
+      hash: '',
+      pathname: '/network',
+      search:
+        '?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))',
+      state: '',
     });
   });
-  describe('isKqlForRoute', () => {
-    test('host page and host page kuery', () => {
-      const result = isKqlForRoute('/hosts', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
+  test('componentDidUpdate - kql query redux state updates the url', async () => {
+    const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
+
+    const newUrlState = {
+      [CONSTANTS.kqlQuery]: [
+        {
+          filterQuery,
+          type: networkModel.NetworkType.details,
+          model: KueryFilterModel.network,
         },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.page,
-      });
-      expect(result).toBeTruthy();
-    });
-    test('host page and host details kuery', () => {
-      const result = isKqlForRoute('/hosts', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.details,
-      });
-      expect(result).toBeFalsy();
-    });
-    test('host details and host details kuery', () => {
-      const result = isKqlForRoute('/hosts/siem-kibana', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.details,
-      });
-      expect(result).toBeTruthy();
-    });
-    test('host details and host page kuery', () => {
-      const result = isKqlForRoute('/hosts/siem-kibana', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.page,
-      });
-      expect(result).toBeFalsy();
-    });
-    test('network page and network page kuery', () => {
-      const result = isKqlForRoute('/network', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.page,
-      });
-      expect(result).toBeTruthy();
-    });
-    test('network page and network details kuery', () => {
-      const result = isKqlForRoute('/network', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.details,
-      });
-      expect(result).toBeFalsy();
-    });
-    test('network details and network details kuery', () => {
-      const result = isKqlForRoute('/network/ip/10.100.7.198', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.details,
-      });
-      expect(result).toBeTruthy();
-    });
-    test('network details and network page kuery', () => {
-      const result = isKqlForRoute('/network/ip/123.234.34', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.page,
-      });
-      expect(result).toBeFalsy();
+      ],
+    };
+
+    wrapper.setProps({ urlState: newUrlState });
+    wrapper.update();
+    await wait(1000);
+    expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
+      hash: '',
+      pathname: '/network',
+      search:
+        "?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),model:network,type:details)",
+      state: '',
     });
   });
 });

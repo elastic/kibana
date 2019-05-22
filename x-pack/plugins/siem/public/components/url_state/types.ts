@@ -39,7 +39,7 @@ export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
   indexPattern: StaticIndexPattern;
-  mapToUrlState?: (value: any) => UrlState;
+  mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
   urlState: UrlState;
@@ -71,39 +71,6 @@ export interface UrlStateDispatchProps {
   toggleTimelineLinkTo: ActionCreator<{
     linkToId: InputsModelId;
   }>;
-}
-
-export interface TimerangeActions {
-  absolute: ActionCreator<{
-    from: number;
-    fromStr: undefined;
-    id: InputsModelId;
-    to: number;
-    toStr: undefined;
-  }>;
-  relative: ActionCreator<{
-    from: number;
-    fromStr: string;
-    id: InputsModelId;
-    to: number;
-    toStr: string;
-  }>;
-}
-
-export interface KqlActions {
-  hosts: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    hostsType: hostsModel.HostsType;
-  }>;
-  network: ActionCreator<{
-    filterQuery: SerializedFilterQuery;
-    networkType: networkModel.NetworkType;
-  }>;
-}
-
-export interface UrlStateMappedToActionsType {
-  [CONSTANTS.kqlQuery]: KqlActions;
-  [CONSTANTS.timerange]: TimerangeActions;
 }
 
 export type UrlStateContainerProps = UrlStateProps & UrlStateDispatchProps;

@@ -9,9 +9,9 @@ import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
 import { hostsModel } from '../../store/hosts';
 import { networkModel } from '../../store/network';
-import { KqlQuery } from './index';
+import { KqlQuery } from './types';
 
-export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
+export const decodeRisonUrlState = (value: string | undefined): RisonValue | undefined => {
   try {
     return value ? decode(value) : undefined;
   } catch (error) {
@@ -22,7 +22,7 @@ export const decodeRisonUrlState = (value: string | undefined): RisonValue | any
   }
 };
 
-export const encodeRisonUrlState = (state: any) => encode(state);
+export const encodeRisonUrlState = (state: RisonValue) => encode(state);
 
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
@@ -31,9 +31,9 @@ export const getParamFromQueryString = (queryString: string, key: string): strin
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
-export const replaceStateKeyInQueryString = <UrlState extends any>(
+export const replaceStateKeyInQueryString = (
   stateKey: string,
-  urlState: UrlState | undefined
+  urlState: RisonValue | undefined
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
   const encodedUrlState =

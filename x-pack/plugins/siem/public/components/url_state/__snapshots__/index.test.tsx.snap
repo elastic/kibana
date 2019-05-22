@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
+exports[`UrlStateContainer mounts and renders 1`] = `
 <MockedProvider
   addTypename={true}
 >
@@ -289,8 +289,8 @@ exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
                         }
                       }
                     >
-                      <Connect(pure(Component))>
-                        <pure(Component)
+                      <Connect(withRouter(UrlStateContainerLifecycle))>
+                        <withRouter(UrlStateContainerLifecycle)
                           setAbsoluteTimerange={[Function]}
                           setHostsKql={[Function]}
                           setNetworkKql={[Function]}
@@ -334,202 +334,149 @@ exports[`UrlStateComponents UrlStateContainer mounts and renders 1`] = `
                                   },
                                 },
                                 "timeline": Object {
-                                  "linkTo": Object {
+                                  "linkTo": Array [
+                                    "global",
+                                  ],
+                                  "timerange": Object {
                                     "from": 0,
                                     "fromStr": "now-24h",
                                     "kind": "relative",
                                     "to": 1,
                                     "toStr": "now",
                                   },
-                                  "timerange": Array [
-                                    "global",
-                                  ],
                                 },
                               },
                             }
                           }
                         >
-                          <Component
-                            setAbsoluteTimerange={[Function]}
-                            setHostsKql={[Function]}
-                            setNetworkKql={[Function]}
-                            setRelativeTimerange={[Function]}
-                            toggleTimelineLinkTo={[Function]}
-                            urlState={
-                              Object {
-                                "kqlQuery": Array [
-                                  Object {
-                                    "filterQuery": null,
-                                    "model": "hosts",
-                                    "type": "details",
-                                  },
-                                  Object {
-                                    "filterQuery": null,
-                                    "model": "hosts",
-                                    "type": "page",
-                                  },
-                                  Object {
-                                    "filterQuery": null,
-                                    "model": "network",
-                                    "type": "details",
-                                  },
-                                  Object {
-                                    "filterQuery": null,
-                                    "model": "network",
-                                    "type": "page",
-                                  },
-                                ],
-                                "timerange": Object {
-                                  "global": Object {
-                                    "linkTo": Array [
-                                      "timeline",
+                          <Route>
+                            <UrlStateContainerLifecycle
+                              history={
+                                Object {
+                                  "action": "POP",
+                                  "block": [MockFunction],
+                                  "createHref": [MockFunction],
+                                  "go": [MockFunction],
+                                  "goBack": [MockFunction],
+                                  "goForward": [MockFunction],
+                                  "length": 2,
+                                  "listen": [MockFunction] {
+                                    "calls": Array [
+                                      Array [
+                                        [Function],
+                                      ],
                                     ],
-                                    "timerange": Object {
-                                      "from": 0,
-                                      "fromStr": "now-24h",
-                                      "kind": "relative",
-                                      "to": 1,
-                                      "toStr": "now",
-                                    },
-                                  },
-                                  "timeline": Object {
-                                    "linkTo": Object {
-                                      "from": 0,
-                                      "fromStr": "now-24h",
-                                      "kind": "relative",
-                                      "to": 1,
-                                      "toStr": "now",
-                                    },
-                                    "timerange": Array [
-                                      "global",
+                                    "results": Array [
+                                      Object {
+                                        "type": "return",
+                                        "value": undefined,
+                                      },
                                     ],
                                   },
-                                },
-                              }
-                            }
-                          >
-                            <Route>
-                              <UrlStateContainerLifecycle
-                                data-test-subj="urlStateComponents"
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [MockFunction],
-                                    "createHref": [MockFunction],
-                                    "go": [MockFunction],
-                                    "goBack": [MockFunction],
-                                    "goForward": [MockFunction],
-                                    "length": 2,
-                                    "listen": [MockFunction] {
-                                      "calls": Array [
-                                        Array [
-                                          [Function],
-                                        ],
-                                      ],
-                                      "results": Array [
-                                        Object {
-                                          "type": "return",
-                                          "value": undefined,
-                                        },
-                                      ],
-                                    },
-                                    "location": Object {
-                                      "hash": "",
-                                      "pathname": "/network",
-                                      "search": "",
-                                      "state": "",
-                                    },
-                                    "push": [MockFunction],
-                                    "replace": [MockFunction] {
-                                      "calls": Array [
-                                        Array [
-                                          Object {
-                                            "hash": "",
-                                            "pathname": "/network",
-                                            "search": "?kqlQuery=!((filterQuery:!n,model:hosts,type:details),(filterQuery:!n,model:hosts,type:page),(filterQuery:!n,model:network,type:details),(filterQuery:!n,model:network,type:page))",
-                                            "state": "",
-                                          },
-                                        ],
-                                      ],
-                                      "results": Array [
-                                        Object {
-                                          "type": "return",
-                                          "value": undefined,
-                                        },
-                                      ],
-                                    },
-                                  }
-                                }
-                                location={
-                                  Object {
+                                  "location": Object {
                                     "hash": "",
                                     "pathname": "/network",
                                     "search": "",
                                     "state": "",
-                                  }
-                                }
-                                setAbsoluteTimerange={[Function]}
-                                setHostsKql={[Function]}
-                                setNetworkKql={[Function]}
-                                setRelativeTimerange={[Function]}
-                                toggleTimelineLinkTo={[Function]}
-                                urlState={
-                                  Object {
-                                    "kqlQuery": Array [
+                                  },
+                                  "push": [MockFunction],
+                                  "replace": [MockFunction] {
+                                    "calls": Array [
+                                      Array [
+                                        Object {
+                                          "hash": "",
+                                          "pathname": "/network",
+                                          "search": "?kqlQuery=!((filterQuery:!n,model:hosts,type:details),(filterQuery:!n,model:hosts,type:page),(filterQuery:!n,model:network,type:details),(filterQuery:!n,model:network,type:page))",
+                                          "state": "",
+                                        },
+                                      ],
+                                    ],
+                                    "results": Array [
                                       Object {
-                                        "filterQuery": null,
-                                        "model": "hosts",
-                                        "type": "details",
-                                      },
-                                      Object {
-                                        "filterQuery": null,
-                                        "model": "hosts",
-                                        "type": "page",
-                                      },
-                                      Object {
-                                        "filterQuery": null,
-                                        "model": "network",
-                                        "type": "details",
-                                      },
-                                      Object {
-                                        "filterQuery": null,
-                                        "model": "network",
-                                        "type": "page",
+                                        "type": "return",
+                                        "value": undefined,
                                       },
                                     ],
-                                    "timerange": Object {
-                                      "global": Object {
-                                        "linkTo": Array [
-                                          "timeline",
-                                        ],
-                                        "timerange": Object {
-                                          "from": 0,
-                                          "fromStr": "now-24h",
-                                          "kind": "relative",
-                                          "to": 1,
-                                          "toStr": "now",
-                                        },
-                                      },
-                                      "timeline": Object {
-                                        "linkTo": Object {
-                                          "from": 0,
-                                          "fromStr": "now-24h",
-                                          "kind": "relative",
-                                          "to": 1,
-                                          "toStr": "now",
-                                        },
-                                        "timerange": Array [
-                                          "global",
-                                        ],
+                                  },
+                                }
+                              }
+                              location={
+                                Object {
+                                  "hash": "",
+                                  "pathname": "/network",
+                                  "search": "",
+                                  "state": "",
+                                }
+                              }
+                              match={
+                                Object {
+                                  "isExact": false,
+                                  "params": Object {},
+                                  "path": "/",
+                                  "url": "/",
+                                }
+                              }
+                              setAbsoluteTimerange={[Function]}
+                              setHostsKql={[Function]}
+                              setNetworkKql={[Function]}
+                              setRelativeTimerange={[Function]}
+                              toggleTimelineLinkTo={[Function]}
+                              urlState={
+                                Object {
+                                  "kqlQuery": Array [
+                                    Object {
+                                      "filterQuery": null,
+                                      "model": "hosts",
+                                      "type": "details",
+                                    },
+                                    Object {
+                                      "filterQuery": null,
+                                      "model": "hosts",
+                                      "type": "page",
+                                    },
+                                    Object {
+                                      "filterQuery": null,
+                                      "model": "network",
+                                      "type": "details",
+                                    },
+                                    Object {
+                                      "filterQuery": null,
+                                      "model": "network",
+                                      "type": "page",
+                                    },
+                                  ],
+                                  "timerange": Object {
+                                    "global": Object {
+                                      "linkTo": Array [
+                                        "timeline",
+                                      ],
+                                      "timerange": Object {
+                                        "from": 0,
+                                        "fromStr": "now-24h",
+                                        "kind": "relative",
+                                        "to": 1,
+                                        "toStr": "now",
                                       },
                                     },
-                                  }
+                                    "timeline": Object {
+                                      "linkTo": Array [
+                                        "global",
+                                      ],
+                                      "timerange": Object {
+                                        "from": 0,
+                                        "fromStr": "now-24h",
+                                        "kind": "relative",
+                                        "to": 1,
+                                        "toStr": "now",
+                                      },
+                                    },
+                                  },
                                 }
-                              />
-                            </Route>
-                          </Component>
-                        </pure(Component)>
-                      </Connect(pure(Component))>
+                              }
+                            />
+                          </Route>
+                        </withRouter(UrlStateContainerLifecycle)>
+                      </Connect(withRouter(UrlStateContainerLifecycle))>
                     </Router>
                   </DragDropContext>
                 </ThemeProvider>
