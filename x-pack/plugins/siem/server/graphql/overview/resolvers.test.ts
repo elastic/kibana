@@ -43,7 +43,7 @@ const mockOverviewLibs: OverviewResolversDeps = {
 
 const mockSrcLibs: SourcesResolversDeps = {
   sources: new Sources(mockSourcesAdapter),
-  sourceStatus: new SourceStatus(mockSourceStatusAdapter, new Sources(mockSourcesAdapter)),
+  sourceStatus: new SourceStatus(mockSourceStatusAdapter),
 };
 
 const req: FrameworkRequest = {
@@ -67,13 +67,16 @@ describe('Test Overview SIEM Resolvers', () => {
   test('Make sure that getOverviewNetwork have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       {},
-      { id: 'default' },
+      {
+        id: 'default',
+      },
       context,
       {} as GraphQLResolveInfo
     );
     const data = await createOverviewResolvers(mockOverviewLibs).Source.OverviewNetwork(
       source as Source,
       {
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         timerange: {
           interval: '12h',
           to: 1514782800000,
@@ -89,7 +92,9 @@ describe('Test Overview SIEM Resolvers', () => {
   test('Make sure that getOverviewHost have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       {},
-      { id: 'default' },
+      {
+        id: 'default',
+      },
       context,
       {} as GraphQLResolveInfo
     );
@@ -101,6 +106,7 @@ describe('Test Overview SIEM Resolvers', () => {
           to: 1514782800000,
           from: 1546318799999,
         },
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       },
       context,
       {} as GraphQLResolveInfo

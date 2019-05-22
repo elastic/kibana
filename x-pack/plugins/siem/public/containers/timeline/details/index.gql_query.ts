@@ -7,10 +7,15 @@
 import gql from 'graphql-tag';
 
 export const timelineDetailsQuery = gql`
-  query GetTimelineDetailsQuery($sourceId: ID!, $eventId: String!, $indexName: String!) {
+  query GetTimelineDetailsQuery(
+    $sourceId: ID!
+    $eventId: String!
+    $indexName: String!
+    $defaultIndex: [String!]!
+  ) {
     source(id: $sourceId) {
       id
-      TimelineDetails(eventId: $eventId, indexName: $indexName) {
+      TimelineDetails(eventId: $eventId, indexName: $indexName, defaultIndex: $defaultIndex) {
         data {
           category
           description

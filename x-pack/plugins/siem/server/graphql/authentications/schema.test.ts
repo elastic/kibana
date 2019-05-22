@@ -24,9 +24,9 @@ import { authenticationsSchema } from './schema.gql';
 const testCaseSource = {
   id: 'Test case to query Authentications',
   query: `
-    query AuthenticationsQuery ($timerange: TimerangeInput!, $pagination: PaginationInput!) {
+    query AuthenticationsQuery ($timerange: TimerangeInput!, $pagination: PaginationInput!, $defaultIndex: [String!]!) {
       source(id: "default") {
-        Authentications(timerange: $timerange, pagination: $pagination) {
+        Authentications(timerange: $timerange, pagination: $pagination, defaultIndex: $defaultIndex) {
           totalCount
           edges {
             node {
@@ -81,6 +81,7 @@ const testCaseSource = {
       limit: 2,
       cursor: null,
     },
+    defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   },
   context: {
     req: {
