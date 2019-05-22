@@ -8,7 +8,7 @@ import React from 'react';
 
 import { IndexPattern } from 'ui/index_patterns';
 
-interface KibanaContextValue {
+export interface KibanaContextValue {
   combinedQuery: any;
   currentIndexPattern: IndexPattern;
   currentSavedSearch: any;

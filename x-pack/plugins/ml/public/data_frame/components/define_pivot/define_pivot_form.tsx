@@ -34,6 +34,7 @@ import {
   groupByConfigHasInterval,
   isKibanaContext,
   KibanaContext,
+  KibanaContextValue,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -53,11 +54,14 @@ export interface DefinePivotExposedState {
 const defaultSearch = '*';
 const emptySearch = '';
 
-export function getDefaultPivotState(): DefinePivotExposedState {
+export function getDefaultPivotState(kibanaContext: KibanaContextValue): DefinePivotExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
-    search: defaultSearch,
+    search:
+      kibanaContext.currentSavedSearch.id !== undefined
+        ? kibanaContext.combinedQuery
+        : defaultSearch,
     valid: false,
   };
 }
@@ -76,11 +80,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const indexPattern = kibanaContext.currentIndexPattern;
 
-  const defaultPivotState = getDefaultPivotState();
-  if (kibanaContext.currentSavedSearch.id !== undefined) {
-    defaultPivotState.search = kibanaContext.combinedQuery;
-  }
-  const defaults = { ...defaultPivotState, ...overrides };
+  const defaults = getDefaultPivotState(kibanaContext);
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
