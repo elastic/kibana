@@ -19,7 +19,7 @@ node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
 
-# checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
 if [ "$CI_GROUP" == "1" ]; then
   # build kbn_tp_sample_panel_action
