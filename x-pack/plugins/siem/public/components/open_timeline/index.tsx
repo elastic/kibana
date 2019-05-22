@@ -26,8 +26,10 @@ import { State, timelineSelectors } from '../../store';
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   createTimeline as dispatchCreateNewTimeline,
+  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
 import { TimelineModel } from '../../store/timeline/model';
@@ -324,11 +326,13 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
     timelineId: string;
   }) => {
     const {
+      applyKqlFilterQuery,
       addNotes,
       addTimeline,
       closeModalTimeline,
       isModal,
       setTimelineRangeDatePicker,
+      setKqlFilterQueryDraft,
       updateIsLoading,
     } = this.props;
 
@@ -347,12 +351,14 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
         );
+
         const { notes, ...timelineModel } = timelineToOpen;
         const momentDate = dateMath.parse('now-24h');
         setTimelineRangeDatePicker({
           from: getOr(momentDate ? momentDate.valueOf() : 0, 'dateRange.start', timelineModel),
           to: getOr(Date.now(), 'dateRange.end', timelineModel),
         });
+
         addTimeline({
           id: 'timeline-1',
           timeline: {
@@ -418,6 +424,32 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
             title: duplicate ? '' : timelineModel.title || '',
           },
         });
+
+        if (
+          timelineModel.kqlQuery != null &&
+          timelineModel.kqlQuery.filterQuery != null &&
+          timelineModel.kqlQuery.filterQuery.kuery != null &&
+          timelineModel.kqlQuery.filterQuery.kuery.expression !== ''
+        ) {
+          setKqlFilterQueryDraft({
+            id: 'timeline-1',
+            filterQueryDraft: {
+              kind: 'kuery',
+              expression: timelineModel.kqlQuery.filterQuery.kuery.expression || '',
+            },
+          });
+          applyKqlFilterQuery({
+            id: 'timeline-1',
+            filterQuery: {
+              kuery: {
+                kind: 'kuery',
+                expression: timelineModel.kqlQuery.filterQuery.kuery.expression || '',
+              },
+              serializedQuery: timelineModel.kqlQuery.filterQuery.serializedQuery || '',
+            },
+          });
+        }
+
         if (!duplicate) {
           addNotes({
             notes:
@@ -479,9 +511,11 @@ const makeMapStateToProps = () => {
 export const StatefulOpenTimeline = connect(
   makeMapStateToProps,
   {
+    applyKqlFilterQuery: dispatchApplyKqlFilterQuery,
     addTimeline: dispatchAddTimeline,
     addNotes: dispatchAddNotes,
     createNewTimeline: dispatchCreateNewTimeline,
+    setKqlFilterQueryDraft: dispatchSetKqlFilterQueryDraft,
     setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
     updateIsLoading: dispatchUpdateIsLoading,
   }
