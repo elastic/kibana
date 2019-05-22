@@ -30,7 +30,7 @@ exports.NativeRealm = class NativeRealm {
   }
 
   async setPassword(username, password = this._elasticPassword, { attempt = 1 } = {}) {
-    await this._autoRetry(this._log, async () => {
+    await this._autoRetry(async () => {
       this._log.info(
         (attempt > 1 ? `attempt ${attempt}: ` : '') +
           `setting ${chalk.bold(username)} password to ${chalk.bold(password)}`
