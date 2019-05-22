@@ -24,5 +24,8 @@ export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
       defaultMessage:
         'The datatable column from which to extract the unique values for the drop down',
     }),
+    filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
+      defaultMessage: 'Group name for the filter',
+    }),
   },
 };
