@@ -11,7 +11,13 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockFrameworks, mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
+import {
+  apolloClientObservable,
+  mockFrameworks,
+  mockIndexPattern,
+  mockGlobalState,
+  TestProviders,
+} from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { KibanaConfigContext } from '../../../formatted_date';
 
@@ -22,10 +28,10 @@ describe('Load More Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   describe('rendering', () => {

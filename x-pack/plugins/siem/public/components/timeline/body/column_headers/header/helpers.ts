@@ -42,6 +42,3 @@ interface GetSortDirectionParams {
 
 export const getSortDirection = ({ header, sort }: GetSortDirectionParams): SortDirection =>
   header.id === sort.columnId ? sort.sortDirection : 'none';
-
-export const justifyActions = (isLoading: boolean): 'center' | 'spaceBetween' =>
-  isLoading ? 'center' : 'spaceBetween';

@@ -25,10 +25,29 @@ export const DROP_ANYTHING = i18n.translate('xpack.siem.dataProviders.dropAnythi
   defaultMessage: 'Drop anything',
 });
 
+export const EDIT_MENU_ITEM = i18n.translate('xpack.siem.dataProviders.editMenuItem', {
+  defaultMessage: 'Edit filter',
+});
+
+export const EDIT_TITLE = i18n.translate('xpack.siem.dataProviders.editTitle', {
+  defaultMessage: 'EDIT FILTER',
+});
+
 export const EXCLUDE_DATA_PROVIDER = i18n.translate(
   'xpack.siem.dataProviders.excludeDataProvider',
   {
     defaultMessage: 'Exclude results',
+  }
+);
+
+export const EXISTS_LABEL = i18n.translate('xpack.siem.dataProviders.existsLabel', {
+  defaultMessage: 'exists',
+});
+
+export const FILTER_FOR_FIELD_PRESENT = i18n.translate(
+  'xpack.siem.dataProviders.filterForFieldPresentLabel',
+  {
+    defaultMessage: 'Filter for field present',
   }
 );
 
@@ -91,3 +110,11 @@ export const TEMPORARILY_DISABLE_DATA_PROVIDER = i18n.translate(
     defaultMessage: 'Temporarily disable',
   }
 );
+
+export const VALUE = i18n.translate('xpack.siem.dataProviders.valuePlaceholder', {
+  defaultMessage: 'value',
+});
+
+export const VALUE_ARIA_LABEL = i18n.translate('xpack.siem.dataProviders.valueAriaLabel', {
+  defaultMessage: 'value',
+});

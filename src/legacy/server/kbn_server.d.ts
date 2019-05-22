@@ -39,6 +39,7 @@ import {
   SavedObjectsSchema,
   SavedObjectsManagement,
 } from './saved_objects';
+import { Capabilities } from '../../core/public';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -72,12 +73,14 @@ declare module 'hapi' {
     ) => void;
     savedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
+    getUiNavLinks(): Array<{ _id: string }>;
   }
 
   interface Request {
     getSavedObjectsClient(): SavedObjectsClient;
     getBasePath(): string;
     getUiSettingsService(): any;
+    getCapabilities(): Promise<Capabilities>;
   }
 
   interface ResponseToolkit {

@@ -60,7 +60,7 @@ export const dataFrame = {
   },
   stopDataFrameTransformsJob(jobId) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_stop`,
+      url: `${basePath}/_data_frame/transforms/${jobId}/_stop?force=true`,
       method: 'POST',
     });
   },
