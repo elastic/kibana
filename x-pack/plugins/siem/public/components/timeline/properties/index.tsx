@@ -229,7 +229,7 @@ export class Properties extends React.PureComponent<Props, State> {
                   datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
                 }
               >
-                <SuperDatePicker id="timeline" />
+                <SuperDatePicker id="timeline" timelineId={timelineId} />
               </DatePicker>
             </EuiFlexGroup>
           </EuiFlexItem>
