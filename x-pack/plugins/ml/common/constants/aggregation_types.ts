@@ -29,7 +29,7 @@ export enum KIBANA_AGGREGATION {
   MIN = 'min',
   SUM = 'sum',
   MEDIAN = 'median',
-  CARDINALITY = 'CARDINALITY',
+  CARDINALITY = 'cardinality',
 }
 
 export enum ES_AGGREGATION {
@@ -39,5 +39,5 @@ export enum ES_AGGREGATION {
   MIN = 'min',
   SUM = 'sum',
   PERCENTILES = 'percentiles',
-  CARDINALITY = 'CARDINALITY',
+  CARDINALITY = 'cardinality',
 }
