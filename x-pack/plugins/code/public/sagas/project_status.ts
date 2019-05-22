@@ -52,7 +52,7 @@ import {
   indexRepoStatusPollingStopPattern,
 } from './status';
 
-const REPO_STATUS_POLLING_FREQ_MS = 3000;
+const REPO_STATUS_POLLING_FREQ_MS = 1000;
 
 function fetchStatus(repoUri: string) {
   return kfetch({
