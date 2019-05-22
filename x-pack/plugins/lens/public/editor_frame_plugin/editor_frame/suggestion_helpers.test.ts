@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getInitialState, reducer } from './state_management';
-import { EditorFrameProps } from '.';
-import { Datasource, Visualization } from '../../types';
 import { getSuggestions } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource } from '../mock_extensions';
+import { TableColumn } from '../../types';
 
 describe('suggestion helpers', () => {
   it('should return suggestions array', () => {
@@ -95,12 +93,10 @@ describe('suggestion helpers', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const mockDatasource = createMockDatasource();
-    const tableState1 = {};
-    const table1 = [];
-    const tableState2 = {};
-    const table2 = [];
+    const table1: TableColumn[] = [];
+    const table2: TableColumn[] = [];
     getSuggestions(
-      [{ state: tableState1, tableColumns: table1 }, { state: tableState2, tableColumns: table2 }],
+      [{ state: {}, tableColumns: table1 }, { state: {}, tableColumns: table2 }],
       {
         vis1: mockVisualization1,
         vis2: mockVisualization2,
@@ -120,11 +116,9 @@ describe('suggestion helpers', () => {
     const mockVisualization2 = createMockVisualization();
     const mockDatasource = createMockDatasource();
     const tableState1 = {};
-    const table1 = [];
     const tableState2 = {};
-    const table2 = [];
     const suggestions = getSuggestions(
-      [{ state: tableState1, tableColumns: table1 }, { state: tableState2, tableColumns: table2 }],
+      [{ state: tableState1, tableColumns: [] }, { state: tableState2, tableColumns: [] }],
       {
         vis1: {
           ...mockVisualization1,
@@ -147,5 +141,32 @@ describe('suggestion helpers', () => {
     expect(suggestions[0].datasourceState).toBe(tableState1);
     expect(suggestions[1].datasourceState).toBe(tableState2);
     expect(suggestions[1].datasourceState).toBe(tableState2);
+  });
+
+  it('should pass the state of the currently active visualization to getSuggestions', () => {
+    const mockVisualization1 = createMockVisualization();
+    const mockVisualization2 = createMockVisualization();
+    const mockDatasource = createMockDatasource();
+    const currentState = {};
+    getSuggestions(
+      [{ state: {}, tableColumns: [] }, { state: {}, tableColumns: [] }],
+      {
+        vis1: mockVisualization1,
+        vis2: mockVisualization2,
+      },
+      'vis1',
+      currentState,
+      mockDatasource.publicAPIMock
+    );
+    expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: currentState,
+      })
+    );
+    expect(mockVisualization2.getSuggestions).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: currentState,
+      })
+    );
   });
 });
