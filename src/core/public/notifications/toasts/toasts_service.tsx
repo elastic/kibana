@@ -38,6 +38,12 @@ interface StartDeps {
   targetDomElement: HTMLElement;
 }
 
+/** @public */
+export type ToastsSetup = Pick<ToastsApi, Exclude<keyof ToastsApi, 'registerOverlays'>>;
+
+/** @public */
+export type ToastsStart = ToastsSetup;
+
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;

@@ -21,8 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
 import { I18nStart, I18nSetup } from '../i18n';
-import { ToastsService } from './toasts';
-import { ToastsApi } from './toasts/toasts_api';
+import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { UiSettingsSetup } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
@@ -87,8 +86,10 @@ export class NotificationsService {
 
 /** @public */
 export interface NotificationsSetup {
-  toasts: Pick<ToastsApi, Exclude<keyof ToastsApi, 'registerOverlays'>>;
+  toasts: ToastsSetup;
 }
 
 /** @public */
-export type NotificationsStart = NotificationsSetup;
+export interface NotificationsStart {
+  toasts: ToastsStart;
+}

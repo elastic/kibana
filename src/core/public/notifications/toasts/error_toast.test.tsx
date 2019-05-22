@@ -31,9 +31,14 @@ interface ErrorToastProps {
   toastMessage?: string;
 }
 
+let openModal: jest.Mock;
+
+beforeEach(() => (openModal = jest.fn()));
+
 function render(props: ErrorToastProps = {}) {
   return (
     <ErrorToast
+      openModal={openModal}
       error={props.error || new Error('error message')}
       title={props.title || 'An error occured'}
       toastMessage={props.toastMessage || 'This is the toast message'}
@@ -48,9 +53,9 @@ it('renders matching snapshot', () => {
 
 it('should open a modal when clicking button', () => {
   const wrapper = mountWithIntl(render());
-  expect(document.body.querySelector('[data-test-subj="fullErrorModal"]')).toBeFalsy();
+  expect(openModal).not.toHaveBeenCalled();
   wrapper.find('button').simulate('click');
-  expect(document.body.querySelector('[data-test-subj="fullErrorModal"]')).toBeTruthy();
+  expect(openModal).toHaveBeenCalled();
 });
 
 afterAll(() => {

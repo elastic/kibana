@@ -62,26 +62,26 @@ export class ToastsApi {
   private uiSettings: UiSettingsSetup;
   private i18n: I18nSetup;
 
-  private overlays: Promise<OverlayStart>;
-  public registerOverlays!: (overlays: OverlayStart) => void;
+  private overlays?: OverlayStart;
 
   constructor(deps: { uiSettings: UiSettingsSetup; i18n: I18nSetup }) {
     this.uiSettings = deps.uiSettings;
     this.i18n = deps.i18n;
-    this.overlays = new Promise(resolve => {
-      this.registerOverlays = resolve;
-    });
+  }
+
+  public registerOverlays(overlays: OverlayStart) {
+    this.overlays = overlays;
   }
 
   public get$() {
     return this.toasts$.asObservable();
   }
 
-  public async add(toastOrTitle: ToastInput) {
+  public add(toastOrTitle: ToastInput) {
     const toast: Toast = {
       id: String(this.idCounter++),
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),
-      ...(await normalizeToast(toastOrTitle)),
+      ...normalizeToast(toastOrTitle),
     };
 
     this.toasts$.next([...this.toasts$.getValue(), toast]);
@@ -123,24 +123,34 @@ export class ToastsApi {
     });
   }
 
-  public async addError(error: Error, options: ErrorToastOptions) {
+  public addError(error: Error, options: ErrorToastOptions) {
     const message = options.toastMessage || error.message;
-    return this.add(
-      this.overlays.then(overlays => ({
-        color: 'danger',
-        iconType: 'alert',
-        title: options.title,
-        toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
-        text: (
-          <ErrorToast
-            openModal={overlays.openModal}
-            error={error}
-            title={options.title}
-            toastMessage={message}
-            i18nContext={this.i18n.Context}
-          />
-        ),
-      }))
-    );
+    return this.add({
+      color: 'danger',
+      iconType: 'alert',
+      title: options.title,
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
+      text: (
+        <ErrorToast
+          openModal={this.openModal}
+          error={error}
+          title={options.title}
+          toastMessage={message}
+          i18nContext={this.i18n.Context}
+        />
+      ),
+    });
+  }
+
+  private openModal(
+    ...args: Parameters<OverlayStart['openModal']>
+  ): ReturnType<OverlayStart['openModal']> {
+    if (!this.overlays) {
+      // This case should never happen because no rendering should be occurring
+      // before the ToastService is started.
+      throw new Error(`Modal opened before ToastService was started.`);
+    }
+
+    return this.overlays.openModal(...args);
   }
 }

@@ -243,6 +243,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
+      overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });

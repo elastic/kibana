@@ -17,21 +17,19 @@
  * under the License.
  */
 
+import React from 'react';
+
 import {
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,
-  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import ReactDOM from 'react-dom';
 
 import { I18nSetup } from '../../i18n';
 import { OverlayStart } from '../../overlays';
