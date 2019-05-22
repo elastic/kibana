@@ -30,7 +30,7 @@ export const initAvailableFieldsAPI = ({ framework }: InfraBackendLibs) => {
         callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
       try {
         const indexPatternsService = framework.getIndexPatternsService(req);
-        const fields: FieldDescriptor = await indexPatternsService.getFieldsForWildcard({
+        const fields = await indexPatternsService.getFieldsForWildcard({
           pattern: req.payload.indexPattern,
         });
         const sampleFieldNames = await getSampleFieldNames(search, req.payload);
