@@ -71,7 +71,10 @@ function createObjects(resp: any, indexPatternTitle: string) {
   const fields: Field[] = [];
   const aggs: Aggregation[] = [];
   // for speed, a map of aggregations, keyed on their id
-  const aggMap: Record<AggId, Aggregation> = {};
+
+  // create a AggMap type to allow an enum (AggId) to be used as a Record key and then initialized with {}
+  type AggMap = Record<AggId, Aggregation>;
+  const aggMap: AggMap = {} as AggMap;
   // for speed, a map of aggregation id lists from a field, keyed on the field id
   const aggIdMap: Record<FieldId, AggId[]> = {};
 
