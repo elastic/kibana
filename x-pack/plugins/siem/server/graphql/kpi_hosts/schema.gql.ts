@@ -32,6 +32,11 @@ export const kpiHostsSchema = gql`
   }
 
   extend type Source {
-    KpiHosts(id: String, timerange: TimerangeInput!, filterQuery: String): KpiHostsData!
+    KpiHosts(
+      id: String
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): KpiHostsData!
   }
 `;

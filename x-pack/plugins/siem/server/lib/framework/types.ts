@@ -146,6 +146,7 @@ export interface RequestBasicOptions {
   sourceConfiguration: SourceConfiguration;
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
+  defaultIndex: string[];
 }
 
 export interface RequestOptions extends RequestBasicOptions {

@@ -14,10 +14,9 @@ import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
+import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { ColumnHeader } from '../column_headers/column_header';
-import { stringifyEvent } from '../helpers';
 
 import { EventColumnView } from './event_column_view';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -33,8 +32,10 @@ interface Props {
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isLoading: boolean;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
+  onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
@@ -68,8 +69,10 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
       event,
       eventIdToNoteIds,
       getNotesByIds,
+      isLoading,
       onColumnResized,
       onPinEvent,
+      onUpdateColumns,
       onUnPinEvent,
       pinnedEventIds,
       rowRenderers,
@@ -136,11 +139,12 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
             })}
             <EuiFlexItem data-test-subj="event-details" grow={true}>
               <ExpandableEvent
+                browserFields={browserFields}
                 id={event._id}
+                isLoading={isLoading}
                 event={detailsData || []}
                 forceExpand={!!this.state.expanded[event._id] && !loading}
-                hideExpandButton={true}
-                stringifiedEvent={stringifyEvent(event)}
+                onUpdateColumns={onUpdateColumns}
                 timelineId={timelineId}
                 width={width}
               />

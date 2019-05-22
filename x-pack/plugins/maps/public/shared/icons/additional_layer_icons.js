@@ -9,7 +9,7 @@ import React from 'react';
 
 export const FillableCircle = ({ style }) => (
   <svg
-    className="euiIcon euiIcon--medium"
+    className="euiIcon euiIcon--medium mapFillableCircle"
     xmlns="http://www.w3.org/2000/svg"
     width="16"
     height="16"

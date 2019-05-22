@@ -24,7 +24,7 @@ import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 import 'ui/render_directive';
 
 uiModules.get('apps/discover')
-  .directive('docViewer', function (config, Private) {
+  .directive('docViewer', function (Private) {
     const docViews = Private(DocViewsRegistryProvider);
     return {
       restrict: 'E',
