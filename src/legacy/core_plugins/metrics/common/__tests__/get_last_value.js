@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getLastValue from '../get_last_value';
+import { getLastValue } from '../get_last_value';
 
 describe('getLastValue(data)', () => {
 

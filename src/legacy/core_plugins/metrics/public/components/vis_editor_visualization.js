@@ -27,7 +27,7 @@ import { PANEL_TYPES } from '../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 250;
 
-class VisEditorVisualization extends Component {
+class VisEditorVisualizationUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -278,7 +278,7 @@ class VisEditorVisualization extends Component {
   }
 }
 
-VisEditorVisualization.propTypes = {
+VisEditorVisualizationUI.propTypes = {
   model: PropTypes.object,
   onCommit: PropTypes.func,
   uiState: PropTypes.object,
@@ -290,4 +290,4 @@ VisEditorVisualization.propTypes = {
   appState: PropTypes.object,
 };
 
-export default injectI18n(VisEditorVisualization);
+export const VisEditorVisualization = injectI18n(VisEditorVisualizationUI);

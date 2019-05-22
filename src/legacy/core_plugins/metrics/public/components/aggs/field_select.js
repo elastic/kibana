@@ -107,5 +107,4 @@ FieldSelectUi.propTypes = {
   uiRestrictions: PropTypes.object,
 };
 
-const FieldSelect = injectI18n(FieldSelectUi);
-export default FieldSelect;
+export const FieldSelect = injectI18n(FieldSelectUi);

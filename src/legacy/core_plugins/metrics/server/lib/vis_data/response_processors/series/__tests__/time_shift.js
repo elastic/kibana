@@ -19,8 +19,8 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import timeShift from '../time_shift';
-import stdMetric from '../std_metric';
+import { timeShift } from '../time_shift';
+import { stdMetric } from '../std_metric';
 
 describe('timeShift(resp, panel, series)', () => {
   let panel;

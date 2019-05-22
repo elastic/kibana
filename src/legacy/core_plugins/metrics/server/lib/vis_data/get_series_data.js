@@ -17,8 +17,8 @@
  * under the License.
  */
 import { getSeriesRequestParams } from './series/get_request_params';
-import handleResponseBody from './series/handle_response_body';
-import handleErrorResponse from './handle_error_response';
+import { handleResponseBody } from './series/handle_response_body';
+import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';

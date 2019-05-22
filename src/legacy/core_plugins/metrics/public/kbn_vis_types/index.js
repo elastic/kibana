@@ -29,7 +29,7 @@ import { PANEL_TYPES } from '../../common/panel_types';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 VisTypesRegistryProvider.register(MetricsVisProvider);
 
-export default function MetricsVisProvider(Private) {
+export function MetricsVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const ReactEditorController = Private(ReactEditorControllerProvider).handler;
   const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
@@ -73,11 +73,11 @@ export default function MetricsVisProvider(Private) {
         show_legend: 1,
         show_grid: 1
       },
-      component: require('../components/vis_editor')
+      component: require('../components/vis_editor').VisEditor
     },
     editor: ReactEditorController,
     editorConfig: {
-      component: require('../components/vis_editor')
+      component: require('../components/vis_editor').VisEditor
     },
     options: {
       showQueryBar: false,

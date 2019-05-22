@@ -24,9 +24,9 @@ import { injectI18n } from '@kbn/i18n/react';
 import {
   EuiComboBox,
 } from '@elastic/eui';
-import calculateSiblings from '../lib/calculate_siblings';
-import calculateLabel from '../../../common/calculate_label';
-import basicAggs from '../../../common/basic_aggs';
+import { calculateSiblings } from '../lib/calculate_siblings';
+import { calculateLabel } from '../../../common/calculate_label';
+import { basicAggs } from '../../../common/basic_aggs';
 import { toPercentileNumber } from '../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../common/metric_types';
 
@@ -145,5 +145,4 @@ MetricSelectUi.propTypes = {
   includeSiblings: PropTypes.bool,
 };
 
-const MetricSelect = injectI18n(MetricSelectUi);
-export default MetricSelect;
+export const MetricSelect = injectI18n(MetricSelectUi);

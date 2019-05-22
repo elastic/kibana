@@ -21,7 +21,7 @@ import { isArray, findLast } from 'lodash';
 
 const DEFAULT_VALUE = 0;
 
-export default (data, defaultValue = DEFAULT_VALUE) => {
+export const getLastValue = (data, defaultValue = DEFAULT_VALUE) => {
   if (!isArray(data)) {
     return data;
   }

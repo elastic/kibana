@@ -50,7 +50,7 @@ export const convertIntervalToUnit = (intervalString, unit) => {
   return { value, unit };
 };
 
-export default (unit) => {
+export const unitToSeconds = (unit) => {
   return units[unit];
 };
 

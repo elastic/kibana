@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import calculateAuto from './calculate_auto';
+import { calculateAuto } from './calculate_auto';
 import moment from 'moment';
-import unitToSeconds from './unit_to_seconds';
+import { unitToSeconds } from './unit_to_seconds';
 import {
   INTERVAL_STRING_RE,
   GTE_INTERVAL_RE,
@@ -50,7 +50,7 @@ const getTimeRangeBucketSize = ({ min, max }) => {
   return calculateAuto.near(100, duration).asSeconds();
 };
 
-export default (req, interval, capabilities) => {
+export const getBucketSize = (req, interval, capabilities) => {
   const bucketSize = getTimeRangeBucketSize(req.payload.timerange);
   let intervalString = `${bucketSize}s`;
 
