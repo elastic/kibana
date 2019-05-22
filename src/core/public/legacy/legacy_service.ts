@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import { CoreSetup, CoreStart } from '../';
+import { InternalCoreSetup, InternalCoreStart } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -27,11 +27,11 @@ export interface LegacyPlatformParams {
 }
 
 interface SetupDeps {
-  core: CoreSetup;
+  core: InternalCoreSetup;
 }
 
 interface StartDeps {
-  core: CoreStart;
+  core: InternalCoreStart;
   targetDomElement: HTMLElement;
 }
 
@@ -91,6 +91,8 @@ export class LegacyPlatformService {
         euiIconType: navLink.euiIconType,
         icon: navLink.icon,
         appUrl: navLink.url,
+        subUrlBase: navLink.subUrlBase,
+        linkToLastSubUrl: navLink.linkToLastSubUrl,
       })
     );
 

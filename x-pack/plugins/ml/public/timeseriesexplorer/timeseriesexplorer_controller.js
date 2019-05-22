@@ -13,6 +13,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
 import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
@@ -87,11 +88,10 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   AppState,
   config,
-  i18n) {
+  globalState) {
 
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectSeverityService');
-  const globalState = $injector.get('globalState');
   const mlJobSelectService = $injector.get('mlJobSelectService');
 
   $scope.timeFieldName = 'timestamp';
@@ -151,7 +151,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
       selectedJobIds = _.without(selectedJobIds, ...invalidIds);
       if (invalidIds.length > 0) {
-        let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+        let warningText = i18n.translate('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
           defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
           values: {
             invalidIdsCount: invalidIds.length,
@@ -159,7 +159,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           }
         });
         if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-          warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+          warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
             defaultMessage: ', auto selecting first job'
           });
         }
@@ -171,27 +171,29 @@ module.controller('MlTimeSeriesExplorerController', function (
         if (selectedJobIds.length > 1) {
         // if more than one job, select the first job from the selection.
           toastNotifications.addWarning(
-            i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+            i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
               defaultMessage: 'You can only view one job at a time in this dashboard'
             })
           );
-          setGlobalState(globalState, [selectedJobIds[0]]);
+
+          setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
           mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else {
         // if a group has been loaded
           if (selectedJobIds.length > 0) {
           // if the group contains valid jobs, select the first
             toastNotifications.addWarning(
-              i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+              i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
                 defaultMessage: 'You can only view one job at a time in this dashboard'
               })
             );
-            setGlobalState(globalState, [selectedJobIds[0]]);
+
+            setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
             mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
           } else if ($scope.jobs.length > 0) {
           // if there are no valid jobs in the group but there are valid jobs
           // in the list of all jobs, select the first
-            setGlobalState(globalState, [$scope.jobs[0].id]);
+            setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
             mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
           } else {
           // if there are no valid jobs left.
@@ -201,7 +203,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
       // if some ids have been filtered out because they were invalid.
       // refresh the URL with the first valid id
-        setGlobalState(globalState, [selectedJobIds[0]]);
+        setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
         mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
       } else if (selectedJobIds.length > 0) {
       // normal behavior. a job ID has been loaded from the URL
@@ -210,7 +212,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
         // no jobs were loaded from the URL, so add the first job
         // from the full jobs list.
-          setGlobalState(globalState, [$scope.jobs[0].id]);
+          setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
           mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
         } else {
         // Jobs exist, but no time series jobs.
@@ -773,7 +775,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     const appStateDtrIdx = $scope.appState.mlTimeSeriesExplorer.detectorIndex;
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
-      const warningText = i18n('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
+      const warningText = i18n.translate('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
         defaultMessage: 'Requested detector index {detectorIndex} is not valid for job {jobId}',
         values: {
           detectorIndex,

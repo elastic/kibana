@@ -10,11 +10,12 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
-import { IndexType } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
+import { timelineActions } from '../../store/actions';
+import { KqlMode, TimelineModel } from '../../store/timeline/model';
 
 import { ColumnHeader } from './body/column_headers/column_header';
-import { DataProvider } from './data_providers/data_provider';
+import { DataProvider, QueryOperator } from './data_providers/data_provider';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import {
@@ -22,14 +23,11 @@ import {
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnDataProviderRemoved,
+  OnDataProviderEdited,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';
 import { Timeline } from './timeline';
-import { timelineActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
-
-const indexTypes = [IndexType.ANY];
 
 export interface OwnProps {
   id: string;
@@ -62,6 +60,20 @@ interface DispatchProps {
   addProvider?: ActionCreator<{
     id: string;
     provider: DataProvider;
+  }>;
+  onDataProviderEdited?: ActionCreator<{
+    andProviderId?: string;
+    excluded: boolean;
+    field: string;
+    id: string;
+    operator: QueryOperator;
+    providerId: string;
+    value: string | number;
+  }>;
+  updateColumns?: ActionCreator<{
+    id: string;
+    category: string;
+    columns: ColumnHeader[];
   }>;
   updateProviders?: ActionCreator<{
     id: string;
@@ -172,7 +184,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
     } = this.props;
 
     return (
-      <WithSource sourceId="default" indexTypes={indexTypes}>
+      <WithSource sourceId="default">
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
@@ -191,6 +203,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
             onChangeDataProviderKqlQuery={this.onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={this.onChangeDroppableAndProvider}
             onChangeItemsPerPage={this.onChangeItemsPerPage}
+            onDataProviderEdited={this.onDataProviderEdited}
             onDataProviderRemoved={this.onDataProviderRemoved}
             onToggleDataProviderEnabled={this.onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={this.onToggleDataProviderExcluded}
@@ -230,6 +243,24 @@ class StatefulTimelineComponent extends React.Component<Props> {
       excluded,
       providerId,
       andProviderId,
+    });
+
+  private onDataProviderEdited: OnDataProviderEdited = ({
+    andProviderId,
+    excluded,
+    field,
+    operator,
+    providerId,
+    value,
+  }) =>
+    this.props.onDataProviderEdited!({
+      andProviderId,
+      excluded,
+      field,
+      id: this.props.id,
+      operator,
+      providerId,
+      value,
     });
 
   private onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
@@ -283,13 +314,15 @@ export const StatefulTimeline = connect(
   {
     addProvider: timelineActions.addProvider,
     createTimeline: timelineActions.createTimeline,
-    updateSort: timelineActions.updateSort,
+    onDataProviderEdited: timelineActions.dataProviderEdited,
+    updateColumns: timelineActions.updateColumns,
     updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
     updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
     updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
     updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
     updateItemsPerPage: timelineActions.updateItemsPerPage,
     updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
+    updateSort: timelineActions.updateSort,
     removeProvider: timelineActions.removeProvider,
   }
 )(StatefulTimelineComponent);

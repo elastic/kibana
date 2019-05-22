@@ -10,7 +10,7 @@ import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowTarget } from '../../../../graphql/types';
-import { mockGlobalState, TestProviders } from '../../../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { IpOverview } from './index';
@@ -19,10 +19,10 @@ import { mockData } from './mock';
 describe('IP Overview Component', () => {
   const state: State = mockGlobalState;
 
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   describe('rendering', () => {

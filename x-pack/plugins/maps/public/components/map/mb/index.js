@@ -14,6 +14,7 @@ import {
   clearMouseCoordinates,
   clearGoto,
   setTooltipState,
+  setMapInitError,
   updateDrawState
 } from '../../../actions/store_actions';
 import {
@@ -64,6 +65,9 @@ function mapDispatchToProps(dispatch) {
     },
     setTooltipState(tooltipState) {
       dispatch(setTooltipState(tooltipState));
+    },
+    setMapInitError(errorMessage) {
+      dispatch(setMapInitError(errorMessage));
     },
     disableDrawState() {
       dispatch(updateDrawState(null));

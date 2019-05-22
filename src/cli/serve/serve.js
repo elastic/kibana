@@ -70,6 +70,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
 
+  if (opts.oss) {
+    delete rawConfig.xpack;
+  }
+
   if (opts.dev) {
     set('env', 'development');
     set('optimize.watch', true);
@@ -180,19 +184,20 @@ export default function (program) {
       .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
-      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
   command
     .action(async function (opts) {
-      if (opts.dev) {
+      if (opts.dev && opts.devConfig !== false) {
         try {
           const kbnDevConfig = fromRoot('config/kibana.dev.yml');
           if (statSync(kbnDevConfig).isFile()) {
             opts.config.push(kbnDevConfig);
           }
         } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+          // ignore, kibana.dev.yml does not exist
         }
       }
 
@@ -212,8 +217,6 @@ export default function (program) {
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
-          isOssModeSupported: !IS_KIBANA_DISTRIBUTABLE,
-          isXPackInstalled: XPACK_INSTALLED,
           isReplModeSupported: CAN_REPL,
         },
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),

@@ -17,19 +17,11 @@
  * under the License.
  */
 
-import {
-  mockGetAutocompleteProvider,
-  mockGetAutocompleteSuggestions,
-  mockPersistedLog,
-  mockPersistedLogFactory,
-} from './query_bar.test.mocks';
+import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 
-import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryBar } from './query_bar';
-import { QueryLanguageSwitcher } from './language_switcher';
-import { QueryBarUI } from './query_bar';
 
 const noop = () => {
   return;
@@ -38,11 +30,6 @@ const noop = () => {
 const kqlQuery = {
   query: 'response:200',
   language: 'kuery',
-};
-
-const luceneQuery = {
-  query: 'response:200',
-  language: 'lucene',
 };
 
 const createMockWebStorage = () => ({
@@ -98,39 +85,6 @@ describe('QueryBar', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('Should pass the query language to the language switcher', () => {
-    const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
-        query={luceneQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        intl={null as any}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true', () => {
-    const component = shallowWithIntl(
-      <QueryBar.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
   it('Should create a unique PersistedLog based on the appName and query language', () => {
     shallowWithIntl(
       <QueryBar.WrappedComponent
@@ -146,119 +100,5 @@ describe('QueryBar', () => {
     );
 
     expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
-  });
-
-  it("On language selection, should store the user's preference in localstorage and reset the query", () => {
-    const mockStorage = createMockStorage();
-    const mockCallback = jest.fn();
-
-    const component = mountWithIntl(
-      <QueryBar.WrappedComponent
-        query={kqlQuery}
-        onSubmit={mockCallback}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={mockStorage}
-        disableAutoFocus={true}
-        intl={null as any}
-      />
-    );
-
-    component
-      .find(QueryLanguageSwitcher)
-      .props()
-      .onSelectLanguage('lucene');
-    expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
-    expect(mockCallback).toHaveBeenCalledWith({
-      dateRange: {
-        from: 'now-15m',
-        to: 'now',
-      },
-      query: {
-        query: '',
-        language: 'lucene',
-      },
-    });
-  });
-
-  it('Should call onSubmit with the current query when the user hits enter inside the query bar', () => {
-    const mockCallback = jest.fn();
-
-    const component = mountWithIntl(
-      <QueryBar.WrappedComponent
-        query={kqlQuery}
-        onSubmit={mockCallback}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-      />
-    );
-
-    const instance = component.instance() as QueryBarUI;
-    const input = instance.inputRef;
-    const inputWrapper = component.find(EuiFieldText).find('input');
-    inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });
-    inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
-
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith({
-      dateRange: {
-        from: 'now-15m',
-        to: 'now',
-      },
-      query: {
-        query: 'extension:jpg',
-        language: 'kuery',
-      },
-    });
-  });
-
-  it('Should use PersistedLog for recent search suggestions', async () => {
-    const component = mountWithIntl(
-      <QueryBar.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-      />
-    );
-
-    const instance = component.instance() as QueryBarUI;
-    const input = instance.inputRef;
-    const inputWrapper = component.find(EuiFieldText).find('input');
-    inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });
-    inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
-
-    expect(mockPersistedLog.add).toHaveBeenCalledWith('extension:jpg');
-
-    mockPersistedLog.get.mockClear();
-    inputWrapper.simulate('change', { target: { value: 'extensi' } });
-    expect(mockPersistedLog.get).toHaveBeenCalledTimes(1);
-  });
-
-  it('Should get suggestions from the autocomplete provider for the current language', () => {
-    mountWithIntl(
-      <QueryBar.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-      />
-    );
-
-    expect(mockGetAutocompleteProvider).toHaveBeenCalledWith('kuery');
-    expect(mockGetAutocompleteSuggestions).toHaveBeenCalled();
   });
 });

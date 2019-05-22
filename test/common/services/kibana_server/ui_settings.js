@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 import { get } from 'lodash';
 
 export class KibanaServerUiSettings {
@@ -64,8 +64,8 @@ export class KibanaServerUiSettings {
         changes: {
           ...this._defaults,
           ...doc,
-        }
-      }
+        },
+      },
     });
   }
 
@@ -77,8 +77,8 @@ export class KibanaServerUiSettings {
     this._log.debug('applying update to kibana config: %j', updates);
     await this._wreck.post('/api/kibana/settings', {
       payload: {
-        changes: updates
-      }
+        changes: updates,
+      },
     });
   }
 }

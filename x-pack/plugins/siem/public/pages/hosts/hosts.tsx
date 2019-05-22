@@ -8,10 +8,14 @@ import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
+import { FiltersGlobal } from '../../components/filters_global';
+import { HeaderPage } from '../../components/header_page';
+import { LastEventTime } from '../../components/last_event_time';
 import {
   EventsTable,
   HostsTable,
@@ -27,11 +31,12 @@ import { HostsQuery } from '../../containers/hosts';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { UrlStateContainer } from '../../components/url_state';
 
 const basePath = chrome.getBasePath();
 
@@ -46,14 +51,21 @@ interface HostsComponentReduxProps {
 
 type HostsComponentProps = HostsComponentReduxProps;
 
-const indexTypes = [IndexType.AUDITBEAT];
-
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={indexTypes}>
-    {({ auditbeatIndicesExist, indexPattern }) =>
-      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
-        <>
-          <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+  <WithSource sourceId="default">
+    {({ indicesExist, indexPattern }) =>
+      indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+        <StickyContainer>
+          <FiltersGlobal>
+            <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+            <UrlStateContainer indexPattern={indexPattern} />
+          </FiltersGlobal>
+
+          <HeaderPage
+            subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+            title={i18n.HOSTS}
+          />
+
           <GlobalTime>
             {({ to, from, setQuery }) => (
               <>
@@ -186,7 +198,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
               </>
             )}
           </GlobalTime>
-        </>
+        </StickyContainer>
       ) : (
         <EmptyPage
           title={i18n.NO_AUDITBEAT_INDICES}

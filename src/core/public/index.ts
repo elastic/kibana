@@ -17,23 +17,38 @@
  * under the License.
  */
 
+/**
+ * The Kibana Core APIs for client-side plugins.
+ *
+ * A plugin's `public/index` file must contain a named import, `plugin`, that
+ * implements {@link PluginInitializer} which returns an object that implements
+ * {@link Plugin}.
+ *
+ * The plugin integrates with the core system via lifecycle events: `setup`,
+ * `start`, and `stop`. In each lifecycle method, the plugin will receive the
+ * corresponding core services available (either {@link CoreSetup} or
+ * {@link CoreStart}) and any interfaces returned by dependency plugins'
+ * lifecycle method. Anything returned by the plugin's lifecycle method will be
+ * exposed to downstream dependencies when their corresponding lifecycle methods
+ * are invoked.
+ *
+ * @packageDocumentation
+ */
+
 import { BasePathSetup, BasePathStart } from './base_path';
 import {
   ChromeBadge,
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeNavLink,
   ChromeSetup,
+  ChromeStart,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nSetup, I18nStart } from './i18n';
-import {
-  InjectedMetadataParams,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-  LegacyNavLink,
-} from './injected_metadata';
+import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
   ErrorToastOptions,
   NotificationsSetup,
@@ -43,20 +58,14 @@ import {
   ToastsApi,
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
-import {
-  Plugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginSetupContext,
-  PluginStartContext,
-} from './plugins';
+import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
 
 /**
- * Core services exposed to the setup lifecycle
+ * Core services exposed to the `Plugin` setup lifecycle
  *
  * @public
  *
@@ -65,28 +74,24 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
-  /** {@link ApplicationSetup} */
-  application: ApplicationSetup;
-  /** {@link I18nSetup} */
-  i18n: I18nSetup;
-  /** {@link InjectedMetadataSetup} */
-  injectedMetadata: InjectedMetadataSetup;
-  /** {@link FatalErrorsSetup} */
-  fatalErrors: FatalErrorsSetup;
-  /** {@link NotificationsSetup} */
-  notifications: NotificationsSetup;
-  /** {@link HttpSetup} */
-  http: HttpSetup;
   /** {@link BasePathSetup} */
   basePath: BasePathSetup;
-  /** {@link UiSettingsSetup} */
-  uiSettings: UiSettingsSetup;
   /** {@link ChromeSetup} */
   chrome: ChromeSetup;
+  /** {@link FatalErrorsSetup} */
+  fatalErrors: FatalErrorsSetup;
+  /** {@link HttpSetup} */
+  http: HttpSetup;
+  /** {@link I18nSetup} */
+  i18n: I18nSetup;
+  /** {@link NotificationsSetup} */
+  notifications: NotificationsSetup;
+  /** {@link UiSettingsSetup} */
+  uiSettings: UiSettingsSetup;
 }
 
 /**
- * Core services exposed to the start lifecycle
+ * Core services exposed to the `Plugin` start lifecycle
  *
  * @public
  *
@@ -96,19 +101,31 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: ApplicationStart;
+  application: Pick<ApplicationStart, 'capabilities'>;
   /** {@link BasePathStart} */
   basePath: BasePathStart;
+  /** {@link ChromeStart} */
+  chrome: ChromeStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
-  /** {@link InjectedMetadataStart} */
-  injectedMetadata: InjectedMetadataStart;
   /** {@link NotificationsStart} */
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
+}
+
+/** @internal */
+export interface InternalCoreSetup extends CoreSetup {
+  application: ApplicationSetup;
+  injectedMetadata: InjectedMetadataSetup;
+}
+
+/** @internal */
+export interface InternalCoreStart extends CoreStart {
+  application: ApplicationStart;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export {
@@ -118,26 +135,23 @@ export {
   BasePathStart,
   HttpSetup,
   HttpStart,
+  ErrorToastOptions,
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,
   ChromeSetup,
+  ChromeStart,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
-  ErrorToastOptions,
+  ChromeNavLink,
   I18nSetup,
   I18nStart,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-  InjectedMetadataParams,
   LegacyNavLink,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
-  PluginSetupContext,
-  PluginStartContext,
   NotificationsSetup,
   NotificationsStart,
   OverlayRef,

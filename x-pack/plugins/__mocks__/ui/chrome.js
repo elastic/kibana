@@ -14,6 +14,8 @@ function getUiSettingsClient() {
           return { from: 'now-15m', to: 'now', mode: 'quick' };
         case 'timepicker:refreshIntervalDefaults':
           return { display: 'Off', pause: false, value: 0 };
+        case 'siem:defaultIndex':
+          return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
         default:
           throw new Error(`Unexpected config key: ${key}`);
       }
@@ -39,6 +41,8 @@ function getInjected(key) {
       return uiCapabilities;
     case 'isCloudEnabled':
       return false;
+    case 'siem:defaultIndex':
+      return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }

@@ -24,6 +24,7 @@ import {
   HttpServiceSetup,
   HttpServiceStart,
   ConfigService,
+  LoggerFactory,
   PluginsServiceSetup,
   PluginsServiceStart,
 } from '../../core/server';
@@ -38,6 +39,7 @@ import {
   SavedObjectsSchema,
   SavedObjectsManagement,
 } from './saved_objects';
+import { Capabilities } from '../../core/public';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -70,12 +72,14 @@ declare module 'hapi' {
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
     savedObjectsManagement(): SavedObjectsManagement;
+    getUiNavLinks(): Array<{ _id: string }>;
   }
 
   interface Request {
     getSavedObjectsClient(): SavedObjectsClient;
     getBasePath(): string;
     getUiSettingsService(): any;
+    getCapabilities(): Promise<Capabilities>;
   }
 
   interface ResponseToolkit {
@@ -88,6 +92,9 @@ type Unpromise<T> = T extends Promise<infer U> ? U : T;
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
+    coreContext: {
+      logger: LoggerFactory;
+    };
     setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;

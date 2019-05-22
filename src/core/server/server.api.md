@@ -61,9 +61,7 @@ export class ConfigService {
     // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
     constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
-    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "ConfigWithSchema" needs to be exported by the entry point index.d.ts
-    atPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
+    atPath<TSchema>(path: ConfigPath): Observable<TSchema>;
     getConfig$(): Observable<Config>;
     // (undocumented)
     getUnusedPaths(): Promise<string[]>;
@@ -71,25 +69,29 @@ export class ConfigService {
     getUsedPaths(): Promise<string[]>;
     // (undocumented)
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
-    optionalAtPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig | undefined>;
-}
+    optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
+    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
+    setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
+    }
 
-// @public (undocumented)
+// @public
 export interface CoreSetup {
     // (undocumented)
-    elasticsearch: ElasticsearchServiceSetup;
+    elasticsearch: {
+        adminClient$: Observable<ClusterClient>;
+        dataClient$: Observable<ClusterClient>;
+    };
     // (undocumented)
-    http: HttpServiceSetup;
-    // (undocumented)
-    plugins: PluginsServiceSetup;
+    http: {
+        registerAuth: HttpServiceSetup['registerAuth'];
+        registerOnRequest: HttpServiceSetup['registerOnRequest'];
+        getBasePathFor: HttpServiceSetup['getBasePathFor'];
+        setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    };
 }
 
-// @public (undocumented)
+// @public
 export interface CoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
-    // (undocumented)
-    plugins: PluginsServiceStart;
 }
 
 // @public
@@ -135,6 +137,24 @@ export type HttpServiceSetup = HttpServerSetup;
 // @public (undocumented)
 export interface HttpServiceStart {
     isListening: () => boolean;
+}
+
+// @internal (undocumented)
+export interface InternalCoreSetup {
+    // (undocumented)
+    elasticsearch: ElasticsearchServiceSetup;
+    // (undocumented)
+    http: HttpServiceSetup;
+    // (undocumented)
+    plugins: PluginsServiceSetup;
+}
+
+// @public (undocumented)
+export interface InternalCoreStart {
+    // (undocumented)
+    http: HttpServiceStart;
+    // (undocumented)
+    plugins: PluginsServiceStart;
 }
 
 // @public (undocumented)
@@ -245,9 +265,9 @@ export interface OnRequestToolkit {
 // @public
 export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> {
     // (undocumented)
-    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
     // (undocumented)
-    start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
@@ -259,8 +279,8 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<Plugi
 export interface PluginInitializerContext {
     // (undocumented)
     config: {
-        create: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config>;
-        createIfExists: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config | undefined>;
+        create: <Schema>() => Observable<Schema>;
+        createIfExists: <Schema>() => Observable<Schema | undefined>;
     };
     // (undocumented)
     env: {
@@ -272,22 +292,6 @@ export interface PluginInitializerContext {
 
 // @public
 export type PluginName = string;
-
-// @public
-export interface PluginSetupContext {
-    // (undocumented)
-    elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-    };
-    // (undocumented)
-    http: {
-        registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnRequest: HttpServiceSetup['registerOnRequest'];
-        getBasePathFor: HttpServiceSetup['getBasePathFor'];
-        setBasePathFor: HttpServiceSetup['setBasePathFor'];
-    };
-}
 
 // @public (undocumented)
 export interface PluginsServiceSetup {
@@ -304,10 +308,6 @@ export interface PluginsServiceSetup {
 export interface PluginsServiceStart {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
-}
-
-// @public
-export interface PluginStartContext {
 }
 
 // @public (undocumented)
@@ -338,9 +338,7 @@ export class ScopedClusterClient {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/plugins/plugin_context.ts:36:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-
-// (No @packageDocumentation comment for this package)
 
 ```
