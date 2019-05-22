@@ -11,6 +11,8 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
+import { timelineActions } from '../../store/actions';
+import { KqlMode, TimelineModel } from '../../store/timeline/model';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
@@ -26,9 +28,6 @@ import {
   OnToggleDataProviderExcluded,
 } from './events';
 import { Timeline } from './timeline';
-
-import { timelineActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
 
 export interface OwnProps {
   id: string;

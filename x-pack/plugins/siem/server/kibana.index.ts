@@ -10,6 +10,11 @@ import { Server } from 'hapi';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { createLogger } from './utils/logger';
+import {
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  timelineSavedObjectType,
+} from './saved_objects';
 
 const APP_ID = 'siem';
 
@@ -46,8 +51,7 @@ export const initServerWithKibana = (kbnServer: Server) => {
       all: {
         api: ['siem'],
         savedObject: {
-          // Add your saveObject that user need to access
-          all: [],
+          all: [noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType],
           read: ['config'],
         },
         ui: ['show'],
@@ -56,7 +60,12 @@ export const initServerWithKibana = (kbnServer: Server) => {
         api: ['siem'],
         savedObject: {
           all: [],
-          read: ['config'],
+          read: [
+            'config',
+            noteSavedObjectType,
+            pinnedEventSavedObjectType,
+            timelineSavedObjectType,
+          ],
         },
         ui: ['show'],
       },
