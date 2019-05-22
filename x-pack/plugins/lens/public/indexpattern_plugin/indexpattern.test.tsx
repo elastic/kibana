@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
+import React from 'react';
+import { EuiComboBox } from '@elastic/eui';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
   IndexPatternPrivateState,
+  IndexPatternDataPanel,
+  IndexPatternDimensionPanel,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 
@@ -75,7 +80,7 @@ describe('IndexPattern Data Source', () => {
     indexPatternDatasource = getIndexPatternDatasource();
 
     persistedState = {
-      currentIndexPattern: '1',
+      currentIndexPatternId: '1',
       columnOrder: ['col1'],
       columns: {
         col1: {
@@ -95,7 +100,7 @@ describe('IndexPattern Data Source', () => {
     it('should load a default state', async () => {
       const state = await indexPatternDatasource.initialize();
       expect(state).toEqual({
-        currentIndexPattern: '1',
+        currentIndexPatternId: '1',
         indexPatterns: expectedIndexPatterns,
         columns: {},
         columnOrder: [],
@@ -104,10 +109,43 @@ describe('IndexPattern Data Source', () => {
 
     it('should initialize from saved state', async () => {
       const state = await indexPatternDatasource.initialize(persistedState);
-
       expect(state).toEqual({
         ...persistedState,
         indexPatterns: expectedIndexPatterns,
+      });
+    });
+  });
+
+  describe('#renderDataPanel', () => {
+    let state: IndexPatternPrivateState;
+
+    beforeEach(async () => {
+      state = await indexPatternDatasource.initialize(persistedState);
+    });
+
+    it('should match snapshot', () => {
+      expect(
+        shallow(<IndexPatternDataPanel state={state} setState={() => {}} />)
+      ).toMatchSnapshot();
+    });
+
+    it('should call setState when the index pattern is switched', async () => {
+      const setState = jest.fn();
+
+      const wrapper = shallow(<IndexPatternDataPanel {...{ state, setState }} />);
+
+      const comboBox = wrapper.findWhere(node => !!node.length && node.type() === EuiComboBox);
+
+      comboBox.prop('onChange')([
+        {
+          label: expectedIndexPatterns['2'].title,
+          value: '2',
+        },
+      ]);
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        currentIndexPatternId: '2',
       });
     });
   });
@@ -146,6 +184,26 @@ describe('IndexPattern Data Source', () => {
           dataType: 'string',
           isBucketed: false,
         } as Operation);
+      });
+    });
+
+    describe('renderDimensionPanel', () => {
+      let state: IndexPatternPrivateState;
+
+      beforeEach(async () => {
+        state = await indexPatternDatasource.initialize(persistedState);
+      });
+
+      it('should render a dimension panel', () => {
+        const wrapper = shallow(
+          <IndexPatternDimensionPanel
+            state={state}
+            setState={() => {}}
+            filterOperations={(operation: Operation) => true}
+          />
+        );
+
+        expect(wrapper).toMatchSnapshot();
       });
     });
   });
