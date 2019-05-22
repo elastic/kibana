@@ -27,7 +27,12 @@ export const SuricataDetails = pure<{ browserFields: BrowserFields; data: Ecs }>
   if (signatureId != null && signature != null) {
     return (
       <Details>
-        <SuricataSignature id={data._id} signature={signature} signatureId={signatureId} />
+        <SuricataSignature
+          contextId="test"
+          id={data._id}
+          signature={signature}
+          signatureId={signatureId}
+        />
         <SuricataRefs signatureId={signatureId} />
         <EuiSpacer size="s" />
         <NetflowRenderer data={data} />

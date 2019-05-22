@@ -843,7 +843,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 </eui-code>,
                 "painlessLink": <eui-link
                   href="(docLink for scriptedFields.painless)"
-                  target="_window"
+                  target="_blank"
                 >
                   <FormattedMessage
                     defaultMessage="Painless"

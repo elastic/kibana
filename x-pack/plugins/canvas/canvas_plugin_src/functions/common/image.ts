@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { NullContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticLogo } from '../../lib/elastic_logo';
 
-type ImageMode = 'contain' | 'cover' | 'stretch';
+export enum ImageMode {
+  CONTAIN = 'contain',
+  COVER = 'cover',
+  STRETCH = 'stretch',
+}
 
 interface Arguments {
   dataurl: string | null;
@@ -23,14 +28,14 @@ interface Return {
   dataurl: string;
 }
 
-const modes: ImageMode[] = ['contain', 'cover', 'stretch'];
-
 export function image(): NullContextFunction<'image', Arguments, Return> {
+  const { help, args: argHelp } = getFunctionHelp().image;
+
   return {
     name: 'image',
     aliases: [],
     type: 'image',
-    help: 'Display an image',
+    help,
     context: {
       types: ['null'],
     },
@@ -38,22 +43,19 @@ export function image(): NullContextFunction<'image', Arguments, Return> {
       dataurl: {
         // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
         types: ['string', 'null'],
-        help: 'The HTTP(S) URL or base64 data of an image.',
+        help: argHelp.dataurl,
         aliases: ['_', 'url'],
         default: elasticLogo,
       },
       mode: {
         types: ['string', 'null'],
-        help:
-          '"contain" will show the entire image, scaled to fit.' +
-          '"cover" will fill the container with the image, cropping from the sides or bottom as needed.' +
-          '"stretch" will resize the height and width of the image to 100% of the container',
+        help: argHelp.mode,
         default: 'contain',
-        options: modes,
+        options: Object.values(ImageMode),
       },
     },
     fn: (_context, { dataurl, mode }) => {
-      if (!mode || !modes.includes(mode)) {
+      if (!mode || !Object.values(ImageMode).includes(mode)) {
         throw new Error('"mode" must be "contain", "cover", or "stretch"');
       }
 

@@ -117,4 +117,14 @@ export const jobs = {
     });
   },
 
+  jobsExist(jobIds) {
+    return http({
+      url: `${basePath}/jobs/jobs_exist`,
+      method: 'POST',
+      data: {
+        jobIds,
+      }
+    });
+  },
+
 };
