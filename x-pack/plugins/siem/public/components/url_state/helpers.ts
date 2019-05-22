@@ -11,7 +11,8 @@ import { hostsModel } from '../../store/hosts';
 import { networkModel } from '../../store/network';
 import { KqlQuery } from './types';
 
-export const decodeRisonUrlState = (value: string | undefined): RisonValue | undefined => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
   try {
     return value ? decode(value) : undefined;
   } catch (error) {
@@ -22,7 +23,8 @@ export const decodeRisonUrlState = (value: string | undefined): RisonValue | und
   }
 };
 
-export const encodeRisonUrlState = (state: RisonValue) => encode(state);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
@@ -31,9 +33,10 @@ export const getParamFromQueryString = (queryString: string, key: string): strin
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
-export const replaceStateKeyInQueryString = (
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
-  urlState: RisonValue | undefined
+  urlState: UrlState | undefined
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
   const encodedUrlState =
