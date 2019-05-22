@@ -4,10 +4,10 @@
 
 ## CoreSetup.http property
 
-[IHttpService](./kibana-plugin-public.ihttpservice.md)
+[HttpSetup](./kibana-plugin-public.httpsetup.md)
 
 <b>Signature:</b>
 
 ```typescript
-http: IHttpService;
+http: HttpSetup;
 ```

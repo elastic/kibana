@@ -17,31 +17,25 @@
  * under the License.
  */
 
-import { HttpDeps, IHttpService } from './types';
+import { HttpDeps, HttpSetup, HttpStart, HttpServiceBase } from './types';
 import { setup } from './http_setup';
 
 /** @internal */
 export class HttpService {
-  private satupService!: IHttpService;
-  private startedService!: IHttpService;
+  private service!: HttpServiceBase;
 
-  public setup(deps: HttpDeps): IHttpService {
-    this.satupService = setup(deps.injectedMetadata, deps.fatalErrors);
-    return this.satupService;
+  public setup(deps: HttpDeps): HttpSetup {
+    this.service = setup(deps.injectedMetadata, deps.fatalErrors);
+    return this.service;
   }
 
-  public start(deps: HttpDeps): IHttpService {
-    this.startedService = setup(deps.injectedMetadata, deps.fatalErrors);
-    return this.startedService;
+  public start(deps: HttpDeps): HttpStart {
+    return this.service || this.setup(deps);
   }
 
   public stop() {
-    if (this.satupService) {
-      this.satupService.stop();
-    }
-
-    if (this.startedService) {
-      this.startedService.stop();
+    if (this.service) {
+      this.service.stop();
     }
   }
 }

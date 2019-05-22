@@ -27,7 +27,7 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { NotificationsSetup } from '../notifications';
 import { NavLinksService } from './nav_links/nav_links_service';
 import { ApplicationStart } from '../application';
-import { IHttpService } from '../http';
+import { HttpStart } from '../http';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -70,7 +70,7 @@ interface SetupDeps {
 
 interface StartDeps {
   application: ApplicationStart;
-  http: IHttpService;
+  http: HttpStart;
 }
 
 /** @internal */

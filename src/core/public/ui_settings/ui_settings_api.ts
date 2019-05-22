@@ -19,7 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { IHttpService } from '../http';
+import { HttpSetup } from '../http';
 import { UiSettingsState } from './types';
 
 export interface UiSettingsApiResponse {
@@ -47,7 +47,7 @@ export class UiSettingsApi {
 
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: IHttpService) {}
+  constructor(private readonly http: HttpSetup) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is

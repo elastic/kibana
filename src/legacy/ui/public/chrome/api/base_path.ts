@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { IHttpService } from '../../../../../core/public';
+import { HttpSetup } from '../../../../../core/public';
 
-let newPlatformHttp: IHttpService;
+let newPlatformHttp: HttpSetup;
 
-export function __newPlatformSetup__(instance: IHttpService) {
+export function __newPlatformSetup__(instance: HttpSetup) {
   if (newPlatformHttp) {
     throw new Error('ui/chrome/api/http is already initialized');
   }
@@ -31,6 +31,6 @@ export function __newPlatformSetup__(instance: IHttpService) {
 
 export function initChromeBasePathApi(chrome: { [key: string]: any }) {
   chrome.getBasePath = newPlatformHttp.getBasePath.bind(newPlatformHttp);
-  chrome.addBasePath = newPlatformHttp.addToPath.bind(newPlatformHttp);
-  chrome.removeBasePath = newPlatformHttp.removeFromPath.bind(newPlatformHttp);
+  chrome.addBasePath = newPlatformHttp.appendToBasePath.bind(newPlatformHttp);
+  chrome.removeBasePath = newPlatformHttp.removeFromBasePath.bind(newPlatformHttp);
 }

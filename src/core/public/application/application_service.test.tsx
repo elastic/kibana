@@ -28,8 +28,7 @@ describe('#start()', () => {
     setup.registerApp({ id: 'app1' } as any);
     setup.registerLegacyApp({ id: 'app2' } as any);
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-    expect((await service.start({ injectedMetadata })).availableApps)
-      .toMatchInlineSnapshot(`
+    expect((await service.start({ injectedMetadata })).availableApps).toMatchInlineSnapshot(`
 Array [
   Object {
     "id": "app1",

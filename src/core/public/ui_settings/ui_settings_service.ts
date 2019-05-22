@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { IHttpService } from '../http';
+import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 
 interface UiSettingsServiceDeps {
-  http: IHttpService;
+  http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
 

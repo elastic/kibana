@@ -32,7 +32,7 @@ import { format } from 'url';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { modifyUrl } from '../utils';
-import { HttpBody, HttpFetchOptions, IHttpService } from './types';
+import { HttpBody, HttpFetchOptions, HttpServiceBase } from './types';
 import { HttpFetchError } from './http_fetch_error';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
@@ -41,13 +41,13 @@ const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
 export const setup = (
   injectedMetadata: InjectedMetadataSetup,
   fatalErrors: FatalErrorsSetup | null
-): IHttpService => {
+): HttpServiceBase => {
   const loadingCount$ = new BehaviorSubject(0);
   const stop$ = new Subject();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
   const basePath = injectedMetadata.getBasePath() || '';
 
-  function addToPath(path: string): string {
+  function appendToBasePath(path: string): string {
     return modifyUrl(path, parts => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${basePath}${parts.pathname}`;
@@ -69,7 +69,7 @@ export const setup = (
       options || {}
     );
     const url = format({
-      pathname: prependBasePath ? addToPath(path) : path,
+      pathname: prependBasePath ? appendToBasePath(path) : path,
       query,
     });
 
@@ -131,7 +131,7 @@ export const setup = (
     return basePath;
   }
 
-  function removeFromPath(path: string): string {
+  function removeFromBasePath(path: string): string {
     if (!basePath) {
       return path;
     }
@@ -187,8 +187,8 @@ export const setup = (
   return {
     stop,
     getBasePath,
-    addToPath,
-    removeFromPath,
+    appendToBasePath,
+    removeFromBasePath,
     fetch,
     delete: shorthand('DELETE'),
     get: shorthand('GET'),

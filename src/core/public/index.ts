@@ -45,7 +45,7 @@ import {
   ChromeStart,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { IHttpService } from './http';
+import { HttpServiceBase, HttpSetup, HttpStart } from './http';
 import { I18nSetup, I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
@@ -76,8 +76,8 @@ export interface CoreSetup {
   chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
-  /** {@link IHttpService} */
-  http: IHttpService;
+  /** {@link HttpSetup} */
+  http: HttpSetup;
   /** {@link I18nSetup} */
   i18n: I18nSetup;
   /** {@link NotificationsSetup} */
@@ -100,8 +100,8 @@ export interface CoreStart {
   application: Pick<ApplicationStart, 'capabilities'>;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
-  /** {@link IHttpService} */
-  http: IHttpService;
+  /** {@link HttpStart} */
+  http: HttpStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link NotificationsStart} */
@@ -125,7 +125,9 @@ export interface InternalCoreStart extends CoreStart {
 export {
   ApplicationSetup,
   ApplicationStart,
-  IHttpService,
+  HttpServiceBase,
+  HttpSetup,
+  HttpStart,
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,

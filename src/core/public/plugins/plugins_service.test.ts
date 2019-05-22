@@ -169,9 +169,9 @@ test('`PluginsService.setup` calls loadPluginBundles with http and plugins', asy
   await pluginsService.setup(mockSetupDeps);
 
   expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.addToPath, 'pluginA');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.addToPath, 'pluginB');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.addToPath, 'pluginC');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.appendToBasePath, 'pluginA');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.appendToBasePath, 'pluginB');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.appendToBasePath, 'pluginC');
 });
 
 test('`PluginsService.setup` initalizes plugins with CoreContext', async () => {

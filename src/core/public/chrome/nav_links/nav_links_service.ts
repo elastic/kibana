@@ -22,11 +22,11 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, NavLinkUpdateableFields } from './nav_link';
 import { ApplicationStart } from '../../application';
-import { IHttpService } from '../../http';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
   application: ApplicationStart;
-  http: IHttpService;
+  http: HttpStart;
 }
 
 export class NavLinksService {
@@ -42,7 +42,7 @@ export class NavLinksService {
               new NavLinkWrapper({
                 ...app,
                 // Either rootRoute or appUrl must be defined.
-                baseUrl: relativeToAbsolute(http.addToPath((app.rootRoute || app.appUrl)!)),
+                baseUrl: relativeToAbsolute(http.appendToBasePath((app.rootRoute || app.appUrl)!)),
               }),
             ] as [string, NavLinkWrapper]
         )

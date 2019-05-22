@@ -70,7 +70,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       );
 
     // Load plugin bundles
-    await this.loadPluginBundles(deps.http.addToPath);
+    await this.loadPluginBundles(deps.http.appendToBasePath);
 
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();

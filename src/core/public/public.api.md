@@ -113,7 +113,7 @@ export interface CoreSetup {
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
-    http: IHttpService;
+    http: HttpSetup;
     // (undocumented)
     i18n: I18nSetup;
     // (undocumented)
@@ -129,7 +129,7 @@ export interface CoreStart {
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
-    http: IHttpService;
+    http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
     // (undocumented)
@@ -166,24 +166,12 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
-// @public
-export interface I18nSetup {
-    Context: ({ children }: {
-        children: default.ReactNode;
-    }) => JSX.Element;
-}
-
 // @public (undocumented)
-export type I18nStart = I18nSetup;
-
-// Warning: (ae-missing-release-tag) "IHttpService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export interface IHttpService {
+export interface HttpServiceBase {
     // (undocumented)
     addLoadingCount(count$: Observable<number>): void;
     // (undocumented)
-    addToPath(path: string): string;
+    appendToBasePath(path: string): string;
     // (undocumented)
     delete: HttpHandler;
     // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
@@ -207,10 +195,26 @@ export interface IHttpService {
     // (undocumented)
     put: HttpHandler;
     // (undocumented)
-    removeFromPath(path: string): string;
+    removeFromBasePath(path: string): string;
     // (undocumented)
     stop(): void;
 }
+
+// @public (undocumented)
+export type HttpSetup = HttpServiceBase;
+
+// @public (undocumented)
+export type HttpStart = HttpServiceBase;
+
+// @public
+export interface I18nSetup {
+    Context: ({ children }: {
+        children: default.ReactNode;
+    }) => JSX.Element;
+}
+
+// @public (undocumented)
+export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {

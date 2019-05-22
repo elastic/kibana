@@ -45,49 +45,49 @@ describe('getBasePath', () => {
   });
 });
 
-describe('addToPath', () => {
+describe('appendToBasePath', () => {
   it('adds the base path to the path if it is relative and starts with a slash', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.addToPath('/a/b')).toBe('/foo/bar/a/b');
+    expect(http.appendToBasePath('/a/b')).toBe('/foo/bar/a/b');
   });
 
   it('leaves the query string and hash of path unchanged', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.addToPath('/a/b?x=y#c/d/e')).toBe('/foo/bar/a/b?x=y#c/d/e');
+    expect(http.appendToBasePath('/a/b?x=y#c/d/e')).toBe('/foo/bar/a/b?x=y#c/d/e');
   });
 
   it('returns the path unchanged if it does not start with a slash', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.addToPath('a/b')).toBe('a/b');
+    expect(http.appendToBasePath('a/b')).toBe('a/b');
   });
 
   it('returns the path unchanged it it has a hostname', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.addToPath('http://localhost:5601/a/b')).toBe('http://localhost:5601/a/b');
+    expect(http.appendToBasePath('http://localhost:5601/a/b')).toBe('http://localhost:5601/a/b');
   });
 });
 
-describe('removeFromPath', () => {
+describe('removeFromBasePath', () => {
   it('removes the basePath if relative path starts with it', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.removeFromPath('/foo/bar/a/b')).toBe('/a/b');
+    expect(http.removeFromBasePath('/foo/bar/a/b')).toBe('/a/b');
   });
 
   it('leaves query string and hash intact', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.removeFromPath('/foo/bar/a/b?c=y#1234')).toBe('/a/b?c=y#1234');
+    expect(http.removeFromBasePath('/foo/bar/a/b?c=y#1234')).toBe('/a/b?c=y#1234');
   });
 
   it('ignores urls with hostnames', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.removeFromPath('http://localhost:5601/foo/bar/a/b')).toBe(
+    expect(http.removeFromBasePath('http://localhost:5601/foo/bar/a/b')).toBe(
       'http://localhost:5601/foo/bar/a/b'
     );
   });
@@ -95,13 +95,13 @@ describe('removeFromPath', () => {
   it('returns slash if path is just basePath', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.removeFromPath('/foo/bar')).toBe('/');
+    expect(http.removeFromBasePath('/foo/bar')).toBe('/');
   });
 
   it('returns full path if basePath is not its own segment', () => {
     const { http } = setup(setupFakeBasePath);
 
-    expect(http.removeFromPath('/foo/barhop')).toBe('/foo/barhop');
+    expect(http.removeFromBasePath('/foo/barhop')).toBe('/foo/barhop');
   });
 });
 

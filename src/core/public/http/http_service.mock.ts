@@ -18,7 +18,7 @@
  */
 
 import { HttpService } from './http_service';
-import { IHttpService } from './types';
+import { HttpSetup, HttpStart } from './types';
 
 const createServiceMock = () => ({
   fetch: jest.fn(),
@@ -30,15 +30,15 @@ const createServiceMock = () => ({
   delete: jest.fn(),
   options: jest.fn(),
   getBasePath: jest.fn(),
-  addToPath: jest.fn(),
-  removeFromPath: jest.fn(),
+  appendToBasePath: jest.fn(),
+  removeFromBasePath: jest.fn(),
   addLoadingCount: jest.fn(),
   getLoadingCount$: jest.fn(),
   stop: jest.fn(),
 });
 
-const createSetupContractMock = (): jest.Mocked<IHttpService> => createServiceMock();
-const createStartContractMock = (): jest.Mocked<IHttpService> => createServiceMock();
+const createSetupContractMock = (): jest.Mocked<HttpSetup> => createServiceMock();
+const createStartContractMock = (): jest.Mocked<HttpStart> => createServiceMock();
 const createMock = (): jest.Mocked<PublicMethodsOf<HttpService>> => ({
   setup: jest.fn().mockReturnValue(createSetupContractMock()),
   start: jest.fn().mockReturnValue(createStartContractMock()),
