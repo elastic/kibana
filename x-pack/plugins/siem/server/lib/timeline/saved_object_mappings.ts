@@ -82,6 +82,9 @@ export const timelineSavedObjectMappings: {
               displayValue: {
                 type: 'text',
               },
+              operator: {
+                type: 'text',
+              },
             },
           },
           and: {
@@ -113,6 +116,9 @@ export const timelineSavedObjectMappings: {
                     type: 'text',
                   },
                   displayValue: {
+                    type: 'text',
+                  },
+                  operator: {
                     type: 'text',
                   },
                 },

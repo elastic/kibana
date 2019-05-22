@@ -37,6 +37,7 @@ const SavedDataProviderQueryMatchBasicRuntimeType = runtimeTypes.partial({
   displayField: unionWithNullType(runtimeTypes.string),
   value: unionWithNullType(runtimeTypes.string),
   displayValue: unionWithNullType(runtimeTypes.string),
+  operator: unionWithNullType(runtimeTypes.string),
 });
 
 const SavedDataProviderQueryMatchRuntimeType = runtimeTypes.partial({

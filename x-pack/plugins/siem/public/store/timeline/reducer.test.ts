@@ -7,6 +7,7 @@
 import { cloneDeep, set } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
+import { IS_OPERATOR, DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -49,6 +50,7 @@ const timelineByIdMock: TimelineById = {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -346,6 +348,7 @@ describe('Timeline', () => {
           queryMatch: {
             field: '',
             value: '',
+            operator: IS_OPERATOR,
           },
 
           excluded: false,
@@ -357,7 +360,7 @@ describe('Timeline', () => {
     });
 
     test('should add a new timeline provider', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '567',
         name: 'data provider 2',
@@ -365,6 +368,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -380,7 +384,7 @@ describe('Timeline', () => {
     });
 
     test('should NOT add a new timeline provider if it already exists', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '123',
         name: 'data provider 1',
@@ -388,6 +392,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -402,7 +407,7 @@ describe('Timeline', () => {
     });
 
     test('should UPSERT an existing timeline provider if it already exists', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '123',
         name: 'my name changed',
@@ -410,6 +415,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
         excluded: false,
         kqlQuery: '',
@@ -605,7 +611,7 @@ describe('Timeline', () => {
 
   describe('#addAndProviderToTimelineProvider', () => {
     test('should add a new and provider to an existing timeline provider', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '567',
         name: 'data provider 2',
@@ -613,6 +619,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
         excluded: false,
         kqlQuery: '',
@@ -626,7 +633,7 @@ describe('Timeline', () => {
 
       newTimeline.foo.highlightedDropAndProviderId = '567';
 
-      const andProviderToAdd = {
+      const andProviderToAdd: DataProvider = {
         and: [],
         id: '568',
         name: 'And Data Provider',
@@ -634,6 +641,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -653,16 +661,16 @@ describe('Timeline', () => {
     });
 
     test('should NOT add a new timeline and provider if it already exists', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [
           {
-            and: [],
             id: '568',
             name: 'And Data Provider',
             enabled: true,
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -675,6 +683,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -689,7 +698,7 @@ describe('Timeline', () => {
 
       newTimeline.foo.highlightedDropAndProviderId = '567';
 
-      const andProviderToAdd = {
+      const andProviderToAdd: DataProvider = {
         and: [],
         id: '568',
         name: 'And Data Provider',
@@ -697,6 +706,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -809,6 +819,7 @@ describe('Timeline', () => {
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -821,7 +832,7 @@ describe('Timeline', () => {
     });
 
     test('should add update a timeline with new providers', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '567',
         name: 'data provider 2',
@@ -829,6 +840,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -950,6 +962,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -996,6 +1009,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
@@ -1021,6 +1035,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
             {
@@ -1033,6 +1048,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -1072,16 +1088,16 @@ describe('Timeline', () => {
   describe('#updateTimelineAndProviderEnabled', () => {
     let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
     beforeEach(() => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [
           {
-            and: [],
             id: '568',
             name: 'And Data Provider',
             enabled: true,
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -1094,6 +1110,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1154,6 +1171,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1222,6 +1240,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -1268,6 +1287,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
@@ -1293,6 +1313,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
             {
@@ -1305,6 +1326,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -1344,16 +1366,16 @@ describe('Timeline', () => {
   describe('#updateTimelineAndProviderExcluded', () => {
     let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
     beforeEach(() => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [
           {
-            and: [],
             id: '568',
             name: 'And Data Provider',
             enabled: true,
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -1366,6 +1388,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1426,6 +1449,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1480,6 +1504,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
 
               excluded: false,
@@ -1547,6 +1572,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
 
               excluded: false,
@@ -1616,6 +1642,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1639,6 +1666,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
 
               excluded: false,

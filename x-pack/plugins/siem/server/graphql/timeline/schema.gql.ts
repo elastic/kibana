@@ -25,6 +25,7 @@ const queryMatch = `
   displayField: String
   value: String
   displayValue: String
+  operator: String
 `;
 
 const kueryFilterQuery = `

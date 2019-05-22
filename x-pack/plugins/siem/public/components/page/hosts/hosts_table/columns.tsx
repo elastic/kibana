@@ -19,6 +19,7 @@ import { PreferenceFormattedDate } from '../../../formatted_date';
 import { HostDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
@@ -52,7 +53,7 @@ export const getHostsColumns = (
               id,
               name: hostName[0],
               kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName[0] },
+              queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

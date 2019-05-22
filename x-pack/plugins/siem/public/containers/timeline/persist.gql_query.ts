@@ -37,6 +37,7 @@ export const persistTimelineMutation = gql`
             displayField
             value
             displayValue
+            operator
           }
           and {
             id
@@ -49,6 +50,7 @@ export const persistTimelineMutation = gql`
               displayField
               value
               displayValue
+              operator
             }
           }
         }

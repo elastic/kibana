@@ -33,6 +33,7 @@ export const oneTimelineQuery = gql`
           displayField
           value
           displayValue
+          operator
         }
         and {
           id
@@ -45,6 +46,7 @@ export const oneTimelineQuery = gql`
             displayField
             value
             displayValue
+            operator
           }
         }
       }

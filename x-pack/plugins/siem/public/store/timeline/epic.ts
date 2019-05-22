@@ -38,6 +38,7 @@ import { TimeRange } from '../inputs/model';
 import {
   applyKqlFilterQuery,
   addProvider,
+  dataProviderEdited,
   removeColumn,
   removeProvider,
   updateColumns,
@@ -49,6 +50,7 @@ import {
   updateProviders,
   updateRange,
   updateSort,
+  upsertColumn,
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
@@ -84,6 +86,7 @@ export interface ActionTimeline {
 const timelineActionsType = [
   applyKqlFilterQuery.type,
   addProvider.type,
+  dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
   updateColumns.type,
@@ -96,6 +99,7 @@ const timelineActionsType = [
   updateSort.type,
   updateTitle.type,
   updateRange.type,
+  upsertColumn.type,
 ];
 
 export const dispatcherTimelinePersistQueue = new Subject();

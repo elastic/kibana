@@ -17,12 +17,12 @@ import {
   OnToggleDataProviderExcluded,
 } from '../events';
 
-import { DataProvider, DataProvidersAnd, IS_OPERATOR } from './data_provider';
+import { DataProvidersAnd, IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
 
 interface ProviderItemAndPopoverProps {
   browserFields: BrowserFields;
-  dataProvidersAnd: DataProvider[];
+  dataProvidersAnd: DataProvidersAnd[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;

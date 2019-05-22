@@ -42,7 +42,7 @@ export interface DataProvider {
     displayField?: string;
     value: string | number;
     displayValue?: string | number;
-    operator?: QueryOperator;
+    operator: QueryOperator;
   };
   /**
    * Additional query clauses that are ANDed with this query to narrow results

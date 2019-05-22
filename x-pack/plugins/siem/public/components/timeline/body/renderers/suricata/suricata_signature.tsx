@@ -18,6 +18,7 @@ import { Provider } from '../../../../timeline/data_providers/provider';
 import { TokensFlexItem } from '../helpers';
 import { getBeginningTokens } from './suricata_links';
 import { DefaultDraggable } from '../../../../draggables';
+import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';
@@ -60,6 +61,7 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
           queryMatch: {
             field: SURICATA_SIGNATURE_ID_FIELD_NAME,
             value: signatureId,
+            operator: IS_OPERATOR,
           },
         }}
         render={(dataProvider, _, snapshot) =>
