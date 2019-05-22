@@ -18,7 +18,7 @@ You cannot change the space identifier once the space is created.
 [role="screenshot"]
 image::spaces/images/edit-space.png["Updating a space"]
 
-==== Controlling features visibility
+==== Controlling feature visibility
 You can control which {kib} features are visible in each space. For example, you can hide “Dev Tools” in your “Executive” space, if users of that space don’t need this feature.
 
 [role="screenshot"]
