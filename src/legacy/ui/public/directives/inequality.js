@@ -23,7 +23,7 @@ function makeDirectiveDef(id, compare) {
   return function ($parse) {
     return {
       require: 'ngModel',
-      link: function ($scope, $attr, ngModel) {
+      link: function ($scope, $el, $attr, ngModel) {
         const getBound = function () { return $parse($attr[id])($scope); };
 
         ngModel.$parsers.push(validate);
