@@ -17,27 +17,17 @@
  * under the License.
  */
 
+import { Filter, Filters, FilterMeta } from '@kbn/es-query';
+export { Filter, Filters, FilterMeta };
+
 export interface TimeRange {
   to: string;
   from: string;
 }
-
 export interface RefreshConfig {
   isPaused: boolean;
   interval: number;
 }
-
-export interface FilterMeta {
-  disabled: boolean;
-}
-
-// TODO: Filter object representation needs to be fleshed out.
-export interface Filter {
-  meta: FilterMeta;
-  query: object;
-}
-
-export type Filters = Filter[];
 
 export enum QueryLanguageType {
   KUERY = 'kuery',

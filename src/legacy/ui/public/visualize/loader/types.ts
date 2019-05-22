@@ -17,26 +17,17 @@
  * under the License.
  */
 
+import { Filter, Filters, FilterMeta } from '@kbn/es-query';
+
 import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
-
 export interface TimeRange {
   from: string;
   to: string;
 }
-
-export interface FilterMeta {
-  disabled: boolean;
-}
-
-export interface Filter {
-  meta: FilterMeta;
-  query: object;
-}
-
-export type Filters = Filter[];
+export { Filter, Filters, FilterMeta };
 
 export enum QueryLanguageType {
   KUERY = 'kuery',
