@@ -155,7 +155,7 @@ requests. Supported on Elastic Cloud Enterprise.
 Set to false to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
 and the tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
-<<tilemap, Coordinate map visualization>>, and <<regionmap, Region map visualization>>
+<<tilemap, Coordinate map visualizations>>, and <<regionmap, Region map visualizations>>.
 
 `map.proxyElasticMapsServiceInMaps:`:: *Default: false*
 Set to true to proxy all <<maps, Maps application>> Elastic Maps Service requests through the Kibana server.
