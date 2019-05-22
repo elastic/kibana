@@ -6,20 +6,7 @@
 
 import { DatasourcePublicAPI, Visualization, Datasource } from '../types';
 
-type ArgumentType<T> = T extends (...args: infer A) => unknown ? A : unknown[];
-
-// This type returns a mocked version of type T to allow the caller to access
-// the mock APIs in a type safe way
-type Mocked<T> = {
-  // due to a bug in TS 3.3.3333 `(...args: unknown[]) => unknown` doesn't
-  // work here. After an upgrade to 3.4.3 this can be removed.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [K in keyof T]: T[K] extends (...args: any[]) => unknown
-    ? jest.Mock<ReturnType<T[K]>, ArgumentType<T[K]>>
-    : T[K]
-};
-
-export function createMockVisualization(): Mocked<Visualization> {
+export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     getMappingOfTableToRoles: jest.fn((_state, _datasource) => []),
     getPersistableState: jest.fn(_state => ({})),
@@ -30,12 +17,12 @@ export function createMockVisualization(): Mocked<Visualization> {
   };
 }
 
-export type DatasourceMock = Mocked<Datasource> & {
-  publicAPIMock: Mocked<DatasourcePublicAPI>;
+export type DatasourceMock = jest.Mocked<Datasource> & {
+  publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
 };
 
 export function createMockDatasource(): DatasourceMock {
-  const publicAPIMock: Mocked<DatasourcePublicAPI> = {
+  const publicAPIMock: jest.Mocked<DatasourcePublicAPI> = {
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
