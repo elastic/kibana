@@ -8,7 +8,7 @@ import React, { useContext } from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 import { AutoSizer } from '../../components/auto_sizer';
-import { LogFlyout } from '../../components/logging/log_flyout';
+import { LogEntryFlyout } from '../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
 import { PageContent } from '../../components/page';
@@ -58,7 +58,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           <WithLogPosition>
             {({ jumpToTargetPosition, stopLiveStreaming }) =>
               flyoutVisible ? (
-                <LogFlyout
+                <LogEntryFlyout
                   setFilter={applyFilterQueryFromKueryExpression}
                   setTarget={(timeKey, flyoutItemId) => {
                     jumpToTargetPosition(timeKey);
