@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { propFilter } from '../_prop_filter';
+import { propFilter } from '../../filter/prop_filter';
 
 describe('prop filter', function () {
   let nameFilter;
