@@ -22,11 +22,22 @@ import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { AggConfig } from 'ui/vis';
+import { AggParam } from '../agg_param';
 import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
 
 interface AggregateValueProp extends SelectValueProp {
   isCompatibleType(filedType: string): boolean;
   isCompatibleVis(visName: string): boolean;
+}
+
+function getCompatibleAggs(agg: AggConfig, visName: string): AggregateValueProp[] {
+  const fieldType = agg.params.field && agg.params.field.type;
+  const { options = [] } = agg.getAggParams().find(({ name }: AggParam) => name === 'aggregate');
+  return options.filter(
+    (option: AggregateValueProp) =>
+      fieldType && option.isCompatibleType(fieldType) && option.isCompatibleVis(visName)
+  );
 }
 
 function TopAggregateParamEditor({
@@ -44,10 +55,7 @@ function TopAggregateParamEditor({
   const isFirstRun = useRef(true);
   const fieldType = agg.params.field && agg.params.field.type;
   const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
-  const filteredOptions = aggParam.options.raw
-    .filter(
-      option => fieldType && option.isCompatibleType(fieldType) && option.isCompatibleVis(visName)
-    )
+  const filteredOptions = getCompatibleAggs(agg, visName)
     .map(({ text, value: val }) => ({ text, value: val }))
     .sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
   const options = [emptyValue, ...filteredOptions];
@@ -68,12 +76,6 @@ function TopAggregateParamEditor({
       />
     </>
   );
-
-  const helpText = !filteredOptions.length
-    ? i18n.translate('common.ui.aggTypes.aggregateWith.noAggsErrorTooltip', {
-        defaultMessage: 'The chosen field has no compatible aggregations.',
-      })
-    : null;
 
   useEffect(
     () => {
@@ -112,7 +114,6 @@ function TopAggregateParamEditor({
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
       className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
-      helpText={helpText}
     >
       <EuiSelect
         options={options}
@@ -127,4 +128,4 @@ function TopAggregateParamEditor({
   );
 }
 
-export { TopAggregateParamEditor };
+export { TopAggregateParamEditor, getCompatibleAggs };

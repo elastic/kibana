@@ -18,29 +18,23 @@
  */
 
 import React from 'react';
-import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SizeParamEditor } from './size';
+import { AggParamEditorProps } from '../../vis/editors/default';
+import { FieldParamType } from '../param_types';
+import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
 
-function TopSizeParamEditor(props: AggParamEditorProps<number | ''>) {
-  const iconTip = (
-    <>
-      {' '}
-      <EuiIconTip
-        position="right"
-        content={i18n.translate('common.ui.aggTypes.sizeTooltip', {
-          defaultMessage:
-            "Request top-K hits. Multiple hits will be combined via 'aggregate with'.",
-        })}
-        type="questionInCircle"
-      />
-    </>
-  );
-  const disabled = !getCompatibleAggs(props.agg, props.visName).length;
+function TopFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
+  const compatibleAggs = getCompatibleAggs(props.agg, props.visName);
+  let customError;
 
-  return <SizeParamEditor {...props} iconTip={iconTip} disabled={disabled} />;
+  if (!compatibleAggs.length) {
+    customError = i18n.translate('common.ui.aggTypes.aggregateWith.noAggsErrorTooltip', {
+      defaultMessage: 'The chosen field has no compatible aggregations.',
+    });
+  }
+
+  return <FieldParamEditor {...props} customError={customError} />;
 }
 
-export { TopSizeParamEditor };
+export { TopFieldParamEditor };

@@ -26,6 +26,7 @@ import topSortEditor from '../controls/top_sort.html';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { i18n } from '@kbn/i18n';
 import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
+import { TopFieldParamEditor } from '../controls/top_field';
 import { TopSizeParamEditor } from '../controls/top_size';
 import { TopAggregateParamEditor } from '../controls/top_aggregate';
 
@@ -70,6 +71,7 @@ export const topHitMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
+      editorComponent: TopFieldParamEditor,
       onlyAggregatable: false,
       filterFieldTypes: '*',
       write(agg, output) {

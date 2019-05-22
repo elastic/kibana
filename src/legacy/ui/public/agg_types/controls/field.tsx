@@ -30,16 +30,21 @@ import { FieldParamType } from '../param_types';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
+interface FieldParamEditorProps extends AggParamEditorProps<FieldParamType> {
+  customError?: string;
+}
+
 function FieldParamEditor({
   agg,
   aggParam,
+  customError,
   indexedFields = [],
   showValidation,
   value,
   setTouched,
   setValidity,
   setValue,
-}: AggParamEditorProps<FieldParamType>) {
+}: FieldParamEditorProps) {
   const selectedOptions: ComboBoxGroupedOption[] = value
     ? [{ label: value.displayName, value }]
     : [];
@@ -56,6 +61,10 @@ function FieldParamEditor({
   };
   const errors = [];
 
+  if (customError) {
+    errors.push(customError);
+  }
+
   if (!indexedFields.length) {
     errors.push(
       i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
@@ -70,7 +79,7 @@ function FieldParamEditor({
     setTouched();
   }
 
-  const isValid = !!value && !!indexedFields.length;
+  const isValid = !!value && !errors.length;
 
   useEffect(
     () => {

@@ -25,9 +25,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
   iconTip?: React.ReactNode;
+  disabled?: boolean;
 }
 
 function SizeParamEditor({
+  disabled,
   iconTip,
   value,
   setValue,
@@ -65,6 +67,7 @@ function SizeParamEditor({
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         min={1}
+        disabled={disabled}
         data-test-subj="sizeParamEditor"
       />
     </EuiFormRow>
