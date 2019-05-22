@@ -21,6 +21,7 @@ describe('MonitoringViewBaseController', function () {
   let opts;
   let titleService;
   let executorService;
+  const httpCall = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
   before(() => {
     titleService = spy();
@@ -75,17 +76,15 @@ describe('MonitoringViewBaseController', function () {
     let counter = 0;
     const opts = {
       title: 'testo',
-      getPageData: () => Promise.resolve(++counter),
+      getPageData: (ms) => httpCall(ms),
       $injector,
       $scope
     };
 
     const ctrl = new MonitoringViewBaseController(opts);
-    Promise.all([
-      ctrl.updateData(),
-      ctrl.updateData(),
-    ]).then(() => {
-      expect(counter).to.be(1);
+    ctrl.updateData(30).then(() => ++counter);
+    ctrl.updateData(60).then(() => {
+      expect(counter).to.be(0);
       done();
     });
   });
@@ -144,7 +143,6 @@ describe('MonitoringViewBaseController', function () {
     });
 
     it('disables timepicker and auto refresh', (done) => {
-      const httpCall = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
       opts = {
         title: 'test',
         getPageData: () => httpCall(60),
