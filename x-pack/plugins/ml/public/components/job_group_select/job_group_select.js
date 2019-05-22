@@ -8,6 +8,8 @@
 
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import template from './job_group_select.html';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -16,7 +18,7 @@ import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobGroupSelect', function (i18n) {
+module.directive('mlJobGroupSelect', function () {
   return {
     restrict: 'E',
     template,
@@ -33,7 +35,7 @@ module.directive('mlJobGroupSelect', function (i18n) {
         this.$scope = $scope;
         this.selectedGroups = [];
         this.groups = [];
-        this.$scope.newGroupLabel = i18n('xpack.ml.jobGroupSelect.newGroupLabel', { defaultMessage: '(new group)' });
+        this.$scope.newGroupLabel = i18n.translate('xpack.ml.jobGroupSelect.newGroupLabel', { defaultMessage: '(new group)' });
 
         // load the jobs, in case they've not been loaded before
         // in order to get the job groups
@@ -112,7 +114,7 @@ module.directive('mlJobGroupSelect', function (i18n) {
 
       groupTypes(group) {
         if(group.isTag === false) {
-          return i18n('xpack.ml.jobGroupSelect.existingGroupsLabel', { defaultMessage: 'Existing groups' });
+          return i18n.translate('xpack.ml.jobGroupSelect.existingGroupsLabel', { defaultMessage: 'Existing groups' });
         }
       }
     }
