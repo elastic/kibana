@@ -5,19 +5,21 @@
  */
 import {
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiFlexItem,
   EuiIcon,
   EuiFlexGroup,
+  EuiButton,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Action } from 'plugins/watcher/models/action';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ACTION_TYPES } from '../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
-
-const EMPTY_FIRST_OPTION_VALUE = 'empty-first-option';
 
 const disabledMessage = i18n.translate(
   'xpack.watcher.sections.watchEdit.actions.disabledOptionLabel',
@@ -25,13 +27,6 @@ const disabledMessage = i18n.translate(
     defaultMessage: 'Disabled. Configure elasticsearch.yml.',
   }
 );
-
-const firstActionOption = {
-  inputDisplay: i18n.translate('xpack.watcher.sections.watchEdit.actions.emptyFirstOptionLabel', {
-    defaultMessage: 'Add an action',
-  }),
-  value: EMPTY_FIRST_OPTION_VALUE,
-};
 
 interface Props {
   settings: {
@@ -47,54 +42,75 @@ interface Props {
 export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings, isLoading }) => {
   const { addAction } = useContext(WatchContext);
 
+  const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
+
   const allActionTypes = Action.getActionTypes() as Record<string, any>;
 
   const actions = Object.entries(allActionTypes).map(
-    ([type, { typeName, iconClass, selectMessage }]) => ({
-      type,
-      typeName,
-      iconClass,
-      selectMessage,
-      isEnabled: settings ? settings.actionTypes[type].enabled : true,
-    })
+    ([type, { typeName, iconClass, selectMessage }]) => {
+      const isEnabled = settings ? settings.actionTypes[type].enabled : true;
+      return {
+        type,
+        typeName,
+        iconClass,
+        selectMessage,
+        isEnabled,
+      };
+    }
   );
 
-  const actionOptions = actions
-    ? actions.map((action: any) => {
-        const isActionDisabled = action.type === ACTION_TYPES.EMAIL && !action.isEnabled; // Currently can only fully verify email action
-        const description = isActionDisabled ? disabledMessage : action.selectMessage;
-        return {
-          value: action.type,
-          inputDisplay: action.typeName,
-          disabled: isActionDisabled && !action.isEnabled,
-          dropdownDisplay: (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                <EuiIcon type={action.iconClass} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <strong>{action.typeName}</strong>
-                <EuiSpacer size="xs" />
-                <EuiText size="s" color="subdued">
-                  <p className="euiTextColor--subdued">{description}</p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        };
-      })
-    : [];
-  const actionOptionsWithEmptyValue = [firstActionOption, ...actionOptions];
+  const button = (
+    <EuiButton
+      data-test-subj="addWatchActionButton"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={() => setIsPopOverOpen(!isPopoverOpen)}
+    >
+      <FormattedMessage
+        id="xpack.watcher.sections.watchEdit.actions.addActionButtonLabel"
+        defaultMessage="Add action"
+      />
+    </EuiButton>
+  );
+
   return (
-    <EuiSuperSelect
-      options={actionOptionsWithEmptyValue}
-      valueOfSelected={EMPTY_FIRST_OPTION_VALUE}
-      onChange={(value: string) => {
-        addAction({ type: value, defaults: { isNew: true } });
-      }}
-      itemLayoutAlign="top"
-      hasDividers
-      isLoading={isLoading}
-    />
+    <EuiPopover
+      id="watchActionPanel"
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopOverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel
+        items={actions.map((action, index) => {
+          const isActionDisabled = action.type === ACTION_TYPES.EMAIL && !action.isEnabled; // Currently can only fully verify email action
+          const description = isActionDisabled ? disabledMessage : action.selectMessage;
+          return (
+            <EuiContextMenuItem
+              key={`${action.type}-${index}`}
+              disabled={isActionDisabled}
+              onClick={() => {
+                addAction({ type: action.type, defaults: { isNew: true } });
+                setIsPopOverOpen(false);
+              }}
+            >
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false} className="watcherThresholdWatchActionContextMenuItem">
+                  <EuiIcon type={action.iconClass} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <strong>{action.typeName}</strong>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="s">
+                    <p>{description}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiContextMenuItem>
+          );
+        })}
+      />
+    </EuiPopover>
   );
 };

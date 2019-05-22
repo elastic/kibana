@@ -36,6 +36,7 @@ export class ThresholdWatch extends BaseWatch {
 
     this.index = props.index;
     this.timeField = props.timeField;
+    this.timeFields = props.timeFields || undefined;
     this.triggerIntervalSize =
       props.triggerIntervalSize == null
         ? DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE
@@ -124,6 +125,20 @@ export class ThresholdWatch extends BaseWatch {
         )
       );
     }
+    if (this.index !== undefined
+        && this.index.length > 0
+        && this.timeFields !== undefined
+        && this.timeFields.length === 1 // first option will have empty value
+    ) {
+      errors.index.push(
+        i18n.translate(
+          'xpack.watcher.sections.watchEdit.threshold.invalidIndexValidationMessage',
+          {
+            defaultMessage: 'Your index query does not have an associated time field',
+          }
+        )
+      );
+    }
     if (!this.timeField) {
       errors.timeField.push(
         i18n.translate(
@@ -140,6 +155,16 @@ export class ThresholdWatch extends BaseWatch {
           'xpack.watcher.sections.watchEdit.threshold.intervalSizeIsRequiredValidationMessage',
           {
             defaultMessage: 'Interval size is required',
+          }
+        )
+      );
+    }
+    if (this.triggerIntervalSize !== undefined && this.triggerIntervalSize < 0) {
+      errors.triggerIntervalSize.push(
+        i18n.translate(
+          'xpack.watcher.sections.watchEdit.threshold.intervalSizeNegativeNumberValidationMessage',
+          {
+            defaultMessage: 'Interval size cannot be a negative number',
           }
         )
       );

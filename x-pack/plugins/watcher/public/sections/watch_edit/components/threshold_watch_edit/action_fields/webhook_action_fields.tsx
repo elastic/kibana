@@ -5,7 +5,16 @@
  */
 import React, { Fragment, useEffect } from 'react';
 
-import { EuiCodeEditor, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiCodeEditor,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../../../components/form_errors';
 import { WebhookAction } from '../../../../../../common/types/action_types';
@@ -33,100 +42,118 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.webhookAction.methodFieldLabel',
-          {
-            defaultMessage: 'Method',
-          }
-        )}
-      >
-        <EuiSelect
-          fullWidth
-          name="method"
-          value={method || 'get'}
-          options={HTTP_VERBS.map(verb => ({ text: verb.toUpperCase(), value: verb }))}
-          onChange={e => {
-            editAction({ key: 'method', value: e.target.value });
-          }}
-        />
-      </EuiFormRow>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.methodFieldLabel',
+              {
+                defaultMessage: 'Method',
+              }
+            )}
+          >
+            <EuiSelect
+              name="method"
+              value={method || 'get'}
+              options={HTTP_VERBS.map(verb => ({ text: verb.toUpperCase(), value: verb }))}
+              onChange={e => {
+                editAction({ key: 'method', value: e.target.value });
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
 
-      <ErrableFormRow
-        id="webhookHost"
-        errorKey="host"
-        fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && host !== undefined}
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.webhookAction.hostFieldLabel',
-          {
-            defaultMessage: 'Host',
-          }
-        )}
-      >
-        <EuiFieldText
-          fullWidth
-          name="host"
-          value={host || ''}
-          onChange={e => {
-            editAction({ key: 'host', value: e.target.value });
-          }}
-          onBlur={() => {
-            if (!host) {
-              editAction({ key: 'host', value: '' });
-            }
-          }}
-        />
-      </ErrableFormRow>
+        <EuiFlexItem>
+          <ErrableFormRow
+            id="webhookHost"
+            errorKey="host"
+            fullWidth
+            errors={errors}
+            isShowingErrors={hasErrors && host !== undefined}
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.hostFieldLabel',
+              {
+                defaultMessage: 'Host',
+              }
+            )}
+          >
+            <EuiFieldText
+              fullWidth
+              name="host"
+              value={host || ''}
+              onChange={e => {
+                editAction({ key: 'host', value: e.target.value });
+              }}
+              onBlur={() => {
+                if (!host) {
+                  editAction({ key: 'host', value: '' });
+                }
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
 
-      <ErrableFormRow
-        id="webhookPort"
-        errorKey="port"
-        fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && port !== undefined}
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.webhookAction.methodPortLabel',
-          {
-            defaultMessage: 'Port',
-          }
-        )}
-      >
-        <EuiFieldNumber
-          fullWidth
-          name="port"
-          value={port || ''}
-          onChange={e => {
-            editAction({ key: 'port', value: parseInt(e.target.value, 10) });
-          }}
-          onBlur={() => {
-            if (!port) {
-              editAction({ key: 'port', value: '' });
-            }
-          }}
-        />
-      </ErrableFormRow>
+        <EuiFlexItem>
+          <ErrableFormRow
+            id="webhookPort"
+            errorKey="port"
+            fullWidth
+            errors={errors}
+            isShowingErrors={hasErrors && port !== undefined}
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.methodPortLabel',
+              {
+                defaultMessage: 'Port',
+              }
+            )}
+          >
+            <EuiFieldNumber
+              prepend={
+                <EuiText size="xs">
+                  <strong>:</strong>
+                </EuiText>
+              }
+              fullWidth
+              name="port"
+              value={port || ''}
+              onChange={e => {
+                editAction({ key: 'port', value: parseInt(e.target.value, 10) });
+              }}
+              onBlur={() => {
+                if (!port) {
+                  editAction({ key: 'port', value: '' });
+                }
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
 
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.webhookAction.pathFieldLabel',
-          {
-            defaultMessage: 'Path',
-          }
-        )}
-      >
-        <EuiFieldText
-          fullWidth
-          name="path"
-          value={path || ''}
-          onChange={e => {
-            editAction({ key: 'path', value: e.target.value });
-          }}
-        />
-      </EuiFormRow>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.pathFieldLabel',
+              {
+                defaultMessage: 'Path',
+              }
+            )}
+          >
+            <EuiFieldText
+              prepend={
+                <EuiText size="xs">
+                  <strong>/</strong>
+                </EuiText>
+              }
+              fullWidth
+              name="path"
+              value={path || ''}
+              onChange={e => {
+                editAction({ key: 'path', value: e.target.value });
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <ErrableFormRow
         id="webhookBody"
