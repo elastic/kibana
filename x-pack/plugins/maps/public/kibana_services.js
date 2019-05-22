@@ -8,10 +8,12 @@ import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 export let indexPatternService;
 export let SearchSource;
 export let filterBarQueryFilter;
+export let xpackInfo;
 
 export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
   const inspectorRequest = inspectorAdapters.requests.start(
@@ -40,4 +42,5 @@ uiModules.get('app/maps').run(($injector) => {
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
   filterBarQueryFilter = Private(FilterBarQueryFilterProvider);
+  xpackInfo = Private(XPackInfoProvider);
 });

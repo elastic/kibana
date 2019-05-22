@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List Actions <StartAction /> Minimal initialization 1`] = `
+<Fragment>
+  <EuiToolTip
+    content="Your license has expired. Please contact your administrator."
+    delay="regular"
+    position="top"
+  >
+    <EuiButtonEmpty
+      aria-label="Start"
+      color="text"
+      disabled={true}
+      iconSide="left"
+      iconType="play"
+      onClick={[Function]}
+      size="xs"
+      type="button"
+    >
+      Start
+    </EuiButtonEmpty>
+  </EuiToolTip>
+</Fragment>
+`;

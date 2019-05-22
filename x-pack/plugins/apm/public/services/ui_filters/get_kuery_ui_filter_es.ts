@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { convertKueryToEsQuery, getAPMIndexPatternForKuery } from '../../kuery';
+import { ESFilter } from 'elasticsearch';
+import { convertKueryToEsQuery, getAPMIndexPatternForKuery } from '../kuery';
 
-export async function getEncodedEsQuery(kuery?: string) {
+export async function getKueryUiFilterES(
+  kuery?: string
+): Promise<ESFilter | undefined> {
   if (!kuery) {
     return;
   }
@@ -16,6 +19,5 @@ export async function getEncodedEsQuery(kuery?: string) {
     return;
   }
 
-  const esFilterQuery = convertKueryToEsQuery(kuery, indexPattern);
-  return encodeURIComponent(JSON.stringify(esFilterQuery));
+  return convertKueryToEsQuery(kuery, indexPattern) as ESFilter;
 }
