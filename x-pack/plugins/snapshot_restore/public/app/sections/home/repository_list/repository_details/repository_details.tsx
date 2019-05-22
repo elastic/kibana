@@ -9,6 +9,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
@@ -163,7 +164,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   };
 
   const renderRepository = () => {
-    const { repository } = repositoryDetails;
+    const { repository, isManagedRepository } = repositoryDetails;
 
     if (!repository) {
       return null;
@@ -172,6 +173,22 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     const { type } = repository as Repository;
     return (
       <Fragment>
+        {isManagedRepository ? (
+          <Fragment>
+            <EuiCallOut
+              size="s"
+              color="warning"
+              iconType="iInCircle"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"
+                  defaultMessage="This is a managed repository. Proceed with caution!"
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </Fragment>
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
           <EuiFlexItem>
             <EuiTitle size="s">
@@ -329,6 +346,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
                         onClick={() =>
                           deleteRepositoryPrompt([repositoryName], onRepositoryDeleted)
                         }
+                        isDisabled={repositoryDetails.isManagedRepository}
                       >
                         <FormattedMessage
                           id="xpack.snapshotRestore.repositoryDetails.removeButtonLabel"

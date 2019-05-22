@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -27,6 +28,7 @@ import { uiMetricService } from '../../../../services/ui_metric';
 
 interface Props extends RouteComponentProps {
   repositories: Repository[];
+  managedRepository?: string;
   reload: () => Promise<void>;
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
@@ -34,6 +36,7 @@ interface Props extends RouteComponentProps {
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
+  managedRepository,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
@@ -54,14 +57,25 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (name: Repository['name'], repository: Repository) => {
+      render: (name: Repository['name']) => {
         return (
-          <EuiLink
-            onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
-            href={openRepositoryDetailsUrl(name)}
-          >
-            {name}
-          </EuiLink>
+          <Fragment>
+            <EuiLink
+              onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
+              href={openRepositoryDetailsUrl(name)}
+            >
+              {name}
+            </EuiLink>
+            &nbsp;&nbsp;
+            {managedRepository === name ? (
+              <EuiBadge color="primary">
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            ) : null}
+          </Fragment>
         );
       },
     },
@@ -132,6 +146,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                         color="danger"
                         data-test-subj="srRepositoryListDeleteActionButton"
                         onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
+                        isDisabled={Boolean(name === managedRepository)}
                       />
                     </EuiToolTip>
                   );
@@ -159,6 +174,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: Repository[]) => setSelectedItems(newSelectedItems),
+    selectable: ({ name }: Repository) => Boolean(name !== managedRepository),
   };
 
   const search = {

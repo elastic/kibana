@@ -30,12 +30,28 @@ export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
   router.delete('repositories/{names}', deleteHandler);
 }
 
+export const getManagedRepositoryName = async () => {
+  const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
+    filterPath: '*.*managed_repository',
+    flatSettings: true,
+    includeDefaults: true,
+  });
+  const { 'cluster.metadata.managed_repository': managedRepositoryName = undefined } = {
+    ...defaults,
+    ...persistent,
+    ...transient,
+  };
+  return managedRepositoryName;
+};
+
 export const getAllHandler: RouterRouteHandler = async (
   req,
   callWithRequest
 ): Promise<{
   repositories: Repository[];
+  managedRepository?: string;
 }> => {
+  const managedRepository = await getManagedRepositoryName();
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -48,7 +64,7 @@ export const getAllHandler: RouterRouteHandler = async (
       settings: deserializeRepositorySettings(settings),
     };
   });
-  return { repositories };
+  return { repositories, managedRepository };
 };
 
 export const getOneHandler: RouterRouteHandler = async (
@@ -56,9 +72,11 @@ export const getOneHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<{
   repository: Repository | {};
+  isManagedRepository?: boolean;
   snapshots: { count: number | undefined } | {};
 }> => {
   const { name } = req.params;
+  const managedRepository = await getManagedRepositoryName();
   const repositoryByName = await callWithRequest('snapshot.getRepository', { repository: name });
   const { snapshots } = await callWithRequest('snapshot.get', {
     repository: name,
@@ -75,6 +93,7 @@ export const getOneHandler: RouterRouteHandler = async (
         type,
         settings: deserializeRepositorySettings(settings),
       },
+      isManagedRepository: managedRepository === name,
       snapshots: {
         count: snapshots ? snapshots.length : null,
       },
