@@ -273,4 +273,4 @@ export const UrlStateContainer = connect(
     toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
   }
   // @ts-ignore
-)(withRouter(UrlStateContainerLifecycle));
+)(withRouter(UrlStateContainerLifecycle)) as typeof UrlStateContainerPropTypes;
