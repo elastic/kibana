@@ -49,9 +49,13 @@ describe('Date Nanos Format', function () {
       pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
       expected: 'May 5, 2019 @ 14:04:56.357111234',
     }, {
-      input: '2019-05-05T14:04:56.357001234Z',
+      input: '2019-05-05T14:04:56.357Z',
       pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
-      expected: 'May 5, 2019 @ 14:04:56.357001234',
+      expected: 'May 5, 2019 @ 14:04:56.357000000',
+    }, {
+      input: '2019-05-05T14:04:56Z',
+      pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+      expected: 'May 5, 2019 @ 14:04:56.000000000',
     }, {
       input: '2019-05-05T14:04:56.201900001Z',
       pattern: 'MMM D, YYYY @ HH:mm:ss SSSS',

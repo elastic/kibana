@@ -30,16 +30,16 @@ export function analysePatternForFract(pattern) {
   const fracSecMatch = pattern.match('S+'); //extract fractional seconds sub-pattern
   return {
     length: fracSecMatch[0] ? fracSecMatch[0].length : 0,
-    match: fracSecMatch[0],
+    patternNanos: fracSecMatch[0],
     pattern,
     patternEscaped: fracSecMatch[0] ? pattern.replace(fracSecMatch[0], `[${fracSecMatch[0]}]`) : '',
   };
 }
 
 /**
- * Format a given moment.js date object, for patterns with more then 3 fractional seconds (S)
- * the raw data information given by the textual timestamp is replaced, since moment.js
- * doesn't cover Fractional seconds formatting
+ * Format a given moment.js date object
+ * Since momentjs would loose the exact value for fractional seconds with a higher resolution than
+ * milliseconds, the fractional pattern is replaced by the fractional value of the raw timestamp
  */
 export function formatWithNanos(dateMomentObj, valRaw, fracPatternObj) {
 
@@ -50,8 +50,15 @@ export function formatWithNanos(dateMomentObj, valRaw, fracPatternObj) {
   } else {
     //Beyond SSS the precise value of the raw datetime string is used
     const valFormatted = dateMomentObj.format(fracPatternObj.patternEscaped);
-    const precise = valRaw.substr(20, fracPatternObj.length);
-    return valFormatted.replace(fracPatternObj.match, precise);
+    //Extract fractional value of ES formatted timestamp, zero pad if necessary:
+    //2020-05-18T20:45:05.957Z -> 957000000
+    //2020-05-18T20:45:05.957000123Z -> 957000123
+    //we do not need to take care of the year 10000 bug since max year of date_nanos is 2262
+    const valNanos = valRaw
+      .substr(20, valRaw.length - 21) //remove timezone(Z)
+      .padEnd(9, '0') //pad shorter fractionals
+      .substr(0, fracPatternObj.patternNanos.length);
+    return valFormatted.replace(fracPatternObj.patternNanos, valNanos);
   }
 }
 
