@@ -4,16 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getKibanaInstructions } from './kibana_instructions';
-import { getElasticsearchInstructions } from './elasticsearch_instructions';
+import {
+  getKibanaInstructionsForEnablingMetricbeat,
+  getKibanaInstructionsForDisablingInternalCollection,
+} from './kibana';
+import {
+  getElasticsearchInstructionsForEnablingMetricbeat,
+  getElasticsearchInstructionsForDisablingInternalCollection
+} from './elasticsearch';
+import {
+  INSTRUCTION_STEP_ENABLE_METRICBEAT,
+  INSTRUCTION_STEP_DISABLE_INTERNAL
+} from '../constants';
 
-export function getInstructionSteps(productName, product, opts) {
+export function getInstructionSteps(productName, product, step, meta, opts) {
   switch (productName) {
     case 'kibana':
-      return getKibanaInstructions(product, opts);
+      if (step === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+        return getKibanaInstructionsForEnablingMetricbeat(product, meta, opts);
+      }
+      if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
+        return getKibanaInstructionsForDisablingInternalCollection(product, meta, opts);
+      }
     case 'elasticsearch':
-      return getElasticsearchInstructions(product, opts);
-
+      if (step === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+        return getElasticsearchInstructionsForEnablingMetricbeat(product, meta, opts);
+      }
+      if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
+        return getElasticsearchInstructionsForDisablingInternalCollection(product, meta, opts);
+      }
   }
   return [];
 }

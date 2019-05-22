@@ -8,11 +8,12 @@ import { get, uniq } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
 
+const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 const APM_CUSTOM_ID = 'apm';
 const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
 
 const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
-  const start = get(req.payload, 'timeRange.min', 'now-30s');
+  const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
   const end = get(req.payload, 'timeRange.max', 'now');
 
   const filters = [
@@ -274,7 +275,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       totalUniqueInstanceCount: 0,
       totalUniqueFullyMigratedCount: 0,
       detected: null,
-      byUuid: null,
+      byUuid: {},
     };
 
     const fullyMigratedUuidsMap = {};
@@ -290,7 +291,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     else if (indexBuckets.length === 1) {
       const singleIndexBucket = indexBuckets[0];
       const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
-
 
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
@@ -377,6 +377,10 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       [product.name]: productStatus,
     };
   }, {});
+
+  status._meta = {
+    secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
+  };
 
   return status;
 };

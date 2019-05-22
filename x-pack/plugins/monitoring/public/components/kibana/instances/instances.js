@@ -13,7 +13,6 @@ import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { I18nContext } from 'ui/i18n';
 
 const getColumns = (kbnUrl, scope) => {
   const columns = [
@@ -132,39 +131,37 @@ export class KibanaInstances extends PureComponent {
     }));
 
     return (
-      <I18nContext>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPanel>
-              <ClusterStatus stats={clusterStatus} />
-            </EuiPanel>
-            <EuiSpacer size="m" />
-            <EuiPageContent>
-              <EuiMonitoringTable
-                className="kibanaInstancesTable"
-                rows={dataFlattened}
-                columns={getColumns(angular.kbnUrl, angular.$scope)}
-                sorting={this.sorting}
-                pagination={this.pagination}
-                setupMode={setupMode}
-                productUuidField="kibana.uuid"
-                search={{
-                  box: {
-                    incremental: true,
-                    placeholder: i18n.translate('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
-                      defaultMessage: 'Filter Instances…'
-                    })
-                  },
-                }}
-                onTableChange={this.onTableChange}
-                executeQueryOptions={{
-                  defaultFields: ['name']
-                }}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-      </I18nContext>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPanel>
+            <ClusterStatus stats={clusterStatus} />
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPageContent>
+            <EuiMonitoringTable
+              className="kibanaInstancesTable"
+              rows={dataFlattened}
+              columns={getColumns(angular.kbnUrl, angular.$scope)}
+              sorting={this.sorting}
+              pagination={this.pagination}
+              setupMode={setupMode}
+              productUuidField="kibana.uuid"
+              search={{
+                box: {
+                  incremental: true,
+                  placeholder: i18n.translate('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
+                    defaultMessage: 'Filter Instances…'
+                  })
+                },
+              }}
+              onTableChange={this.onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['name']
+              }}
+            />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }

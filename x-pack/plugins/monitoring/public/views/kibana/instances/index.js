@@ -12,6 +12,7 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { KibanaInstances } from 'plugins/monitoring/components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/kibana/instances', {
   template,
@@ -39,25 +40,27 @@ uiRoutes.when('/kibana/instances', {
 
       const renderReact = () => {
         this.renderReact(
-          <SetupModeRenderer
-            scope={$scope}
-            injector={$injector}
-            productName="kibana"
-            render={({ setupMode, flyoutComponent }) => (
-              <Fragment>
-                {flyoutComponent}
-                <KibanaInstances
-                  instances={this.data.kibanas}
-                  setupMode={setupMode}
-                  clusterStatus={this.data.clusterStatus}
-                  angular={{
-                    $scope,
-                    kbnUrl,
-                  }}
-                />
-              </Fragment>
-            )}
-          />
+          <I18nContext>
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName="kibana"
+              render={({ setupMode, flyoutComponent }) => (
+                <Fragment>
+                  {flyoutComponent}
+                  <KibanaInstances
+                    instances={this.data.kibanas}
+                    setupMode={setupMode}
+                    clusterStatus={this.data.clusterStatus}
+                    angular={{
+                      $scope,
+                      kbnUrl,
+                    }}
+                  />
+                </Fragment>
+              )}
+            />
+          </I18nContext>
         );
       };
 

@@ -8,15 +8,19 @@ import { setAngularState, getSetupModeState, initSetupModeState, updateSetupMode
 import { Flyout } from '../metricbeat_migration/flyout';
 
 export class SetupModeRenderer extends React.Component {
-  state = { renderState: false, isFlyoutOpen: false, instanceUuid: null }
+  state = {
+    renderState: false,
+    isFlyoutOpen: false,
+    instanceUuid: null,
+  }
 
   componentWillMount() {
     const { scope, injector } = this.props;
     setAngularState(scope, injector);
-    initSetupModeState(() => this.setState({ renderState: false }));
+    initSetupModeState(() => this.setState({ renderState: true }));
   }
 
-  getFlyout(data) {
+  getFlyout(data, meta) {
     const { productName } = this.props;
     const { isFlyoutOpen, instanceUuid } = this.state;
     if (!data || !isFlyoutOpen) {
@@ -29,6 +33,7 @@ export class SetupModeRenderer extends React.Component {
         onClose={() => this.setState({ isFlyoutOpen: false })}
         productName={productName}
         product={product}
+        meta={meta}
         updateProduct={updateSetupModeData}
       />
     );
@@ -38,6 +43,7 @@ export class SetupModeRenderer extends React.Component {
     const { render, productName } = this.props;
     const setupModeState = getSetupModeState();
     const data = setupModeState.data ? setupModeState.data[productName] : null;
+    const meta = setupModeState.data ? setupModeState.data._meta : null;
 
     return render({
       setupMode: {
@@ -47,7 +53,7 @@ export class SetupModeRenderer extends React.Component {
         openFlyout: (instanceUuid) => this.setState({ isFlyoutOpen: true, instanceUuid }),
         closeFlyout: () => this.setState({ isFlyoutOpen: false }),
       },
-      flyoutComponent: this.getFlyout(data),
+      flyoutComponent: this.getFlyout(data, meta),
     });
   }
 }
