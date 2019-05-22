@@ -36,7 +36,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
-      this.tags('ciGroup3');
+      this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_search_source'));
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./joins'));
