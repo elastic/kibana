@@ -18,6 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ConfirmWatchesModal, ErrableFormRow } from '../../../../components';
 import { putWatchApiUrl } from '../../../../lib/documentation_links';
 import { onWatchSave, saveWatch } from '../../watch_edit_actions';
@@ -36,6 +37,8 @@ export const JsonWatchEditForm = () => {
     title: string;
     message: string;
   } | null>(null);
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const hasActionErrors = !!validationResult && validationResult.type === 'error';
 
@@ -164,20 +167,33 @@ export const JsonWatchEditForm = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subject="btnSaveWatch"
+              data-test-subj="btnSaveWatch"
               fill
+              color="secondary"
               type="submit"
+              iconType="check"
+              isLoading={isSaving}
               isDisabled={hasErrors}
               onClick={async () => {
+                setIsSaving(true);
                 const savedWatch = await onWatchSave(watch, licenseService);
                 if (savedWatch && savedWatch.validationError) {
+                  setIsSaving(false);
                   return setValidationResult(savedWatch.validationError);
                 }
               }}
             >
-              {i18n.translate('xpack.watcher.sections.watchEdit.json.saveButtonLabel', {
-                defaultMessage: 'Save',
-              })}
+              {watch.isNew ? (
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchEdit.json.createButtonLabel"
+                  defaultMessage="Create"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchEdit.json.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

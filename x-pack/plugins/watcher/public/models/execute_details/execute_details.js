@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TIME_UNITS } from '../../../common/constants';
 
 export class ExecuteDetails {
   constructor(props = {}) {
@@ -47,9 +48,16 @@ export class ExecuteDetails {
 
   formatTime(timeUnit, timeValue) {
     const now = 'now';
+
     if (timeValue === 0) {
       return now;
     }
+
+    // milliseconds is the default in Date Math
+    if (timeUnit === TIME_UNITS.MILLISECOND) {
+      return timeValue;
+    }
+
     return `${now}+${timeValue}${timeUnit}`;
   }
 

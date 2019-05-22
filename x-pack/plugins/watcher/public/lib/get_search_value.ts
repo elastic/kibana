@@ -11,6 +11,6 @@ import { pick, values } from 'lodash';
  * @param array of property keys to use to generate the search value
  * @return newline delimited string built from the specified properties
  */
-export function getSearchValue(obj, fields) {
+export function getSearchValue(obj: {}, fields: any[]) {
   return values(pick(obj, fields)).join('\n');
 }

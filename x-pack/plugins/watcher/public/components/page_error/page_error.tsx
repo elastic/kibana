@@ -33,6 +33,4 @@ export function PageError({ errorCode, id }: { errorCode?: any; id?: any }) {
     default:
       return <PageErrorForbidden />;
   }
-
-  return null;
 }

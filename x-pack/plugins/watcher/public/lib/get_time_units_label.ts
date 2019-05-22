@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function clamp(val, min, max) {
-  return Math.min(Math.max(min, val), max);
-}
+import { TIME_UNITS } from '../constants';
+
+export const getTimeUnitsLabel = (unit: string, size: number) => {
+  const timeUnit = TIME_UNITS[unit];
+  return size === 1 ? timeUnit.labelSingular : timeUnit.labelPlural;
+};
