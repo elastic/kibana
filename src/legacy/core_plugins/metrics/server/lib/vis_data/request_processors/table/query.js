@@ -42,7 +42,7 @@ export function query(req, panel, esQueryConfig, indexPatternObject) {
     };
     doc.query.bool.must.push(timerange);
     if (panel.filter) {
-      doc.query.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
+      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
     }
 
     return next(doc);

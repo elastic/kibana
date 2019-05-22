@@ -25,7 +25,7 @@ import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
 import { data } from 'plugins/data';
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
@@ -35,7 +35,6 @@ const localStorage = new Storage(window.localStorage);
 const uiSettings = chrome.getUiSettingsClient();
 const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 class FilterItemsUi extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
@@ -49,8 +48,8 @@ class FilterItemsUi extends Component {
       }));
     };
   }
-  handleSubmit = (model, query) => {
-    const part = { filter: query.query };
+  handleQueryChange = (model, filter) => {
+    const part = { filter };
     collectionActions.handleChange(this.props, _.assign({}, model, part));
   }
   renderRow(row, i, items) {
@@ -84,16 +83,18 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryBar
-            query={{ language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage, query: model.filter.query || '' }}
+          <QueryBarInput
+            query={{
+              language: model.filter.language || uiSettingsQueryLanguage,
+              query: model.filter.query || '',
+            }}
             screenTitle={'DataMetricsGroupByFiltersFilter'}
             placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
             aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
-            onSubmit={(query) => this.handleSubmit(model, query)}
+            onChange={(query) => this.handleQueryChange(model, query)}
             appName={'VisEditor'}
             indexPatterns={indexPatterns}
             store={localStorage || {}}
-            showDatePicker={false}
           />
         </EuiFlexItem>
         <EuiFlexItem>

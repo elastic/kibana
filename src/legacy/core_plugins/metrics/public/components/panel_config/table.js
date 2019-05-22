@@ -47,7 +47,7 @@ import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
 import chrome from 'ui/chrome';
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 export class TablePanelConfig extends Component {
@@ -60,14 +60,13 @@ export class TablePanelConfig extends Component {
     };
   }
 
-  async componentWillMount() {
+  componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
       parts.bar_color_rules = [{ id: uuid.v1() }];
     }
     this.props.onChange(parts);
-    await this.fetchIndexPatternsForQuery();
   }
 
   fetchIndexPatternsForQuery = async () => {
@@ -117,8 +116,8 @@ export class TablePanelConfig extends Component {
     });
   };
 
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
+  handleQueryChange = filter => {
+    this.props.onChange({ filter });
   }
 
   render() {
@@ -274,17 +273,16 @@ export class TablePanelConfig extends Component {
                   />)}
                   fullWidth
                 >
-                  <QueryBar
+                  <QueryBarInput
                     query={{
                       language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TablePanelConfigQuery'}
-                    onSubmit={this.handleSubmit}
+                    onChange={this.handleQueryChange}
                     appName={'VisEditor'}
                     indexPatterns={[this.state.indexPatternForQuery]}
                     store={localStorage || {}}
-                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

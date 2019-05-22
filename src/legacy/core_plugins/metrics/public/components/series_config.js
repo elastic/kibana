@@ -40,7 +40,7 @@ import { data } from 'plugins/data';
 import { Storage } from 'ui/storage';
 import chrome from 'ui/chrome';
 
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
@@ -50,8 +50,8 @@ export const SeriesConfig = props => {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const htmlId = htmlIdGenerator();
-  const handleSubmit = query => {
-    props.onChange({ filter: query.query });
+  const handleQueryChange = query => {
+    props.onChange({ filter: query });
   };
 
   return (
@@ -72,13 +72,13 @@ export const SeriesConfig = props => {
         />)}
         fullWidth
       >
-        <QueryBar
+        <QueryBarInput
           query={{
             language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
             query: (model.filter && model.filter.query) ? model.filter.query : ''
           }}
           screenTitle={'TSVBTopNDataOptionsTab'}
-          onSubmit={handleSubmit}
+          onChange={handleQueryChange}
           appName={'VisEditor'}
           indexPatterns={[props.indexPatternForQuery]}
           store={localStorage || {}}

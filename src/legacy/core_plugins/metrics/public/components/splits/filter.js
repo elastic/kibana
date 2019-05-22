@@ -22,7 +22,7 @@ import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { data } from 'plugins/data';
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,12 +33,12 @@ const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
-  const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
+  const defaults = { filter: { language: uiSettingsQueryLanguage, query: '' } };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
-  const handleSubmit = query => {
-    onChange({ filter: query.query });
+  const handleQueryChange = filter => {
+    onChange({ filter });
   };
   return (
     <EuiFlexGroup alignItems="center">
@@ -65,14 +65,16 @@ export const SplitByFilter = props => {
             defaultMessage="Query string"
           />)}
         >
-          <QueryBar
-            query={{ language: (model.filter.language ? model.filter.language : uiSettingsQueryLanguage), query: model.filter.query }}
+          <QueryBarInput
+            query={{
+              language: model.filter.language || uiSettingsQueryLanguage,
+              query: model.filter.query || '',
+            }}
             screenTitle={'DataMetricsGroupByFilter'}
-            onSubmit={handleSubmit}
+            onChange={handleQueryChange}
             appName={'VisEditor'}
             indexPatterns={props.indexPatterns}
             store={localStorage || {}}
-            showDatePicker={false}
           />
         </EuiFormRow>
       </EuiFlexItem>

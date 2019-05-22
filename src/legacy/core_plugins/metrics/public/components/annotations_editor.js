@@ -32,8 +32,7 @@ import { Storage } from 'ui/storage';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { data } from 'plugins/data';
 import chrome from 'ui/chrome';
-const { QueryBar } = data.query.ui;
-// const { QueryBarInput } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 import {
@@ -93,8 +92,8 @@ export class AnnotationsEditor extends Component {
       handleChange(_.assign({}, item, part));
     };
   }
-  handleSubmit = (model, query) => {
-    const part = { query_string: query.query };
+  handleQueryChange = (model, filter) => {
+    const part = { query_string: filter };
     collectionActions.handleChange(this.props, _.assign({}, model, part));
   };
   renderRow(row) {
@@ -186,29 +185,13 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  {/* <QueryBarInput
+                  <QueryBarInput
                     query={{
-                      language: model.query_string.language
-                        ? model.query_string.language
-                        : uiSettingsQueryLanguage,
-                      query: model.query_string.query,
-                    }}
-                    screenTitle={'AnnotationsEditor'}
-                    onChange={query => this.handleSubmit(model, query)}
-                    appName={'VisEditor'}
-                    indexPatterns={[indexPatternForQuery]}
-                    store={localStorage || {}}
-                    showDatePicker={false}
-                  /> */}
-                  <QueryBar
-                    query={{
-                      language: model.query_string.language
-                        ? model.query_string.language
-                        : uiSettingsQueryLanguage,
+                      language: model.query_string.language || uiSettingsQueryLanguage,
                       query: model.query_string.query || '',
                     }}
                     screenTitle={'AnnotationsEditor'}
-                    onSubmit={query => this.handleSubmit(model, query)}
+                    onChange={query => this.handleQueryChange(model, query)}
                     appName={'VisEditor'}
                     indexPatterns={[indexPatternForQuery]}
                     store={localStorage || {}}

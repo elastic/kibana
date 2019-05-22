@@ -25,7 +25,7 @@ import { YesNo } from '../../yes_no';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
 import { data } from 'plugins/data';
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,
@@ -50,8 +50,8 @@ const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
-  const handleSubmit = query => {
-    props.onChange({ filter: query.query });
+  const handleQueryChange = filter => {
+    props.onChange({ filter });
   };
   const defaults = {
     fill: '',
@@ -325,18 +325,16 @@ export const TimeseriesConfig = injectI18n(function (props) {
           />)}
           fullWidth
         >
-          <QueryBar
-            query={
-              {
-                language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
-                query: (model.filter && model.filter.query) ? model.filter.query : ''
-              }}
+          <QueryBarInput
+            query={{
+              language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
+              query: (model.filter && model.filter.query) ? model.filter.query : ''
+            }}
             screenTitle={'TSVBDataOptionsTab'}
-            onSubmit={handleSubmit}
+            onChange={handleQueryChange}
             appName={'VisEditor'}
             indexPatterns={[props.indexPatternForQuery]}
             store={localStorage || {}}
-            showDatePicker={false}
           />
 
         </EuiFormRow>

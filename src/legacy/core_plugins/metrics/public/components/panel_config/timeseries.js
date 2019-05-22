@@ -47,11 +47,7 @@ import { data } from 'plugins/data';
 import chrome from 'ui/chrome';
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
-/*
-QueryBarInput will be the text input, the language switcher, and autocomplete.
-import { QueryBarInput } from 'ui/query_bar';
-*/
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 class TimeseriesPanelConfigUi extends Component {
   constructor(props) {
@@ -84,8 +80,8 @@ class TimeseriesPanelConfigUi extends Component {
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
   }
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
+  handleQueryChange = filter => {
+    this.props.onChange({ filter });
   }
   switchTab(selectedTab) {
     this.setState({ selectedTab });
@@ -226,17 +222,16 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBar
+                  <QueryBarInput
                     query={{
-                      language: model.filter.language || uiSettingsQueryLanguage,
+                      language: model.filter.language ? model.filter.language : 'kuery',
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TimeseriesPanelConfigQuery'}
-                    onSubmit={this.handleSubmit}
+                    onChange={this.handleQueryChange}
                     appName={'VisEditor'}
                     indexPatterns={[this.state.indexPatternForQuery]}
                     store={localStorage || {}}
-                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

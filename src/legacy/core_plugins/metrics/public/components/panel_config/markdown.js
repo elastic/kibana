@@ -48,7 +48,7 @@ import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
 import chrome from 'ui/chrome';
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
@@ -102,14 +102,9 @@ class MarkdownPanelConfigUi extends Component {
       this.props.onChange(parts);
     });
   }
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
+  handleQueryChange = filter => {
+    this.props.onChange({ filter });
   }
-
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
-  }
-
   render() {
     const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
     const model = { ...defaults, ...this.props.model };
@@ -191,17 +186,16 @@ class MarkdownPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBar
+                  <QueryBarInput
                     query={{
                       language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
                       query: model.filter.query || '',
                     }}
                     screenTitle={'MarkdownPanelConfigQuery'}
-                    onSubmit={this.handleSubmit}
+                    onChange={this.handleQueryChange}
                     appName={'VisEditor'}
                     indexPatterns={[this.state.indexPatternForQuery]}
                     store={localStorage || {}}
-                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

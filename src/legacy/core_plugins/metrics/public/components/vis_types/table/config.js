@@ -44,7 +44,7 @@ import { data } from 'plugins/data';
 import { Storage } from 'ui/storage';
 import chrome from 'ui/chrome';
 
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 class TableSeriesConfigUI extends Component {
@@ -57,8 +57,8 @@ class TableSeriesConfigUI extends Component {
       });
     }
   }
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
+  handleQueryChange = filter => {
+    this.props.onChange({ filter });
   };
 
   render() {
@@ -133,18 +133,16 @@ class TableSeriesConfigUI extends Component {
               />)}
               fullWidth
             >
-              <QueryBar
-                query={
-                  {
-                    language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
-                    query: (model.filter && model.filter.query) ? model.filter.query : ''
-                  }}
+              <QueryBarInput
+                query={{
+                  language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
+                  query: (model.filter && model.filter.query) ? model.filter.query : ''
+                }}
                 screenTitle={'TSVBTableDataOptionsTab'}
-                onSubmit={this.handleSubmit}
+                onChange={this.handleQueryChange}
                 appName={'VisEditor'}
                 indexPatterns={[this.props.indexPatternForQuery]}
                 store={localStorage || {}}
-                showDatePicker={false}
               />
             </EuiFormRow>
           </EuiFlexItem>

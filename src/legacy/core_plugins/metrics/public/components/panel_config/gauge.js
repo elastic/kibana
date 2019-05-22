@@ -47,7 +47,7 @@ import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
 import chrome from 'ui/chrome';
-const { QueryBar } = data.query.ui;
+const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
@@ -60,7 +60,7 @@ class GaugePanelConfigUi extends Component {
     };
   }
 
-  async componentWillMount() {
+  componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (!model.gauge_color_rules ||
@@ -71,7 +71,6 @@ class GaugePanelConfigUi extends Component {
     if (model.gauge_inner_width == null) parts.gauge_inner_width = 10;
     if (model.gauge_style == null) parts.gauge_style = 'half';
     this.props.onChange(parts);
-    await this.fetchIndexPatternsForQuery();
   }
 
   fetchIndexPatternsForQuery = async () => {
@@ -82,8 +81,8 @@ class GaugePanelConfigUi extends Component {
     this.setState({ indexPatternForQuery: indexPatternObject });
   }
 
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
+  handleQueryChange = filter => {
+    this.props.onChange({ filter });
   }
 
   async componentDidMount() {
@@ -192,17 +191,16 @@ class GaugePanelConfigUi extends Component {
                   />)}
                   fullWidth
                 >
-                  <QueryBar
+                  <QueryBarInput
                     query={{
-                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      language: model.filter.language || uiSettingsQueryLanguage,
                       query: model.filter.query || '',
                     }}
                     screenTitle={'GaugePanelConfigQuery'}
-                    onSubmit={this.handleSubmit}
+                    onChange={this.handleQueryChange}
                     appName={'VisEditor'}
                     indexPatterns={[this.state.indexPatternForQuery]}
                     store={localStorage || {}}
-                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
