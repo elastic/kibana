@@ -19,6 +19,8 @@
 
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
+import { HttpConfig } from './http_config';
+import { HttpServerSetup } from './http_server';
 
 const createSetupContractMock = () => {
   const setupContract = {
@@ -35,6 +37,7 @@ const createSetupContractMock = () => {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
     },
+    createNewServer: async (cfg: HttpConfig): Promise<HttpServerSetup> => ({} as HttpServerSetup),
   };
   return setupContract;
 };
