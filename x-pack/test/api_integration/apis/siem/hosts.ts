@@ -46,6 +46,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             sort: {
               field: HostsFields.lastSeen,
               direction: Direction.asc,
@@ -79,6 +80,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               field: HostsFields.lastSeen,
               direction: Direction.asc,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             pagination: {
               limit: 2,
               cursor: '1',
@@ -140,6 +142,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {
@@ -155,6 +158,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
           variables: {
             sourceId: 'default',
             hostName: 'zeek-sensor-san-francisco',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {

@@ -187,10 +187,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.stopDataFrameTransformsJob = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stop',
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>',
         req: {
           jobId: {
             type: 'string'
+          },
+          force: {
+            type: 'boolean'
           }
         }
       }

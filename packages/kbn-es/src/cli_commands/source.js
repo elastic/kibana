@@ -29,13 +29,14 @@ exports.help = (defaults = {}) => {
   return dedent`
     Options:
 
-      --license       Run with a 'oss', 'basic', or 'trial' license [default: ${license}]
-      --source-path   Path to ES source [default: ${defaults['source-path']}]
-      --base-path     Path containing cache/installations [default: ${basePath}]
-      --install-path  Installation path, defaults to 'source' within base-path
-      --data-archive  Path to zip or tarball containing an ES data directory to seed the cluster with.
-      --password      Sets password for elastic user [default: ${password}]
-      -E              Additional key=value settings to pass to Elasticsearch
+      --license         Run with a 'oss', 'basic', or 'trial' license [default: ${license}]
+      --source-path     Path to ES source [default: ${defaults['source-path']}]
+      --base-path       Path containing cache/installations [default: ${basePath}]
+      --install-path    Installation path, defaults to 'source' within base-path
+      --data-archive    Path to zip or tarball containing an ES data directory to seed the cluster with.
+      --password        Sets password for elastic user [default: ${password}]
+      --password.[user] Sets password for native realm user [default: ${password}]
+      -E                Additional key=value settings to pass to Elasticsearch
 
     Example:
 
@@ -64,5 +65,5 @@ exports.run = async (defaults = {}) => {
     await cluster.extractDataDirectory(installPath, options.dataArchive);
   }
 
-  await cluster.run(installPath, { esArgs: options.esArgs });
+  await cluster.run(installPath, options);
 };

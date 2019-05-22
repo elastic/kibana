@@ -37,6 +37,7 @@ const usersTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               ip: IP,
               flowTarget: FlowTarget.destination,
               sort: { field: UsersFields.name, direction: Direction.asc },
