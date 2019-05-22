@@ -80,7 +80,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const indexPattern = kibanaContext.currentIndexPattern;
 
-  const defaults = getDefaultPivotState(kibanaContext);
+  const defaults = { ...getDefaultPivotState(kibanaContext), ...overrides };
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
