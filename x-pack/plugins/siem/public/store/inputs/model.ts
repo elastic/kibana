@@ -26,7 +26,11 @@ export type TimeRangeKinds = 'absolute' | 'relative';
 
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
 
-export type UrlTimeRange = AbsoluteTimeRange & LinkTo | RelativeTimeRange & LinkTo;
+export type AbsoluteUrlTimeRange = AbsoluteTimeRange & LinkTo;
+
+export type RelativeUrlTimeRange = RelativeTimeRange & LinkTo;
+
+export type UrlTimeRange = AbsoluteUrlTimeRange | RelativeUrlTimeRange;
 
 export interface Policy {
   kind: 'manual' | 'interval';

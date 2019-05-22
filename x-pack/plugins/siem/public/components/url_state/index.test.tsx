@@ -10,12 +10,11 @@ import * as React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import {
-  isKqlForRoute,
-  UrlStateContainer,
-  UrlStateContainerLifecycle,
-  UrlStateContainerLifecycleProps,
-} from './';
+import { UrlStateContainer, UrlStateContainerLifecycle, UrlStateContainerLifecycleProps } from './';
+
+import { isKqlForRoute } from './helpers';
+
+import { UrlStateContainerLifecycleProps } from './types';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
 import {
   createStore,
