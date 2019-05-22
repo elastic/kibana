@@ -18,17 +18,17 @@
  */
 
 import { SearchBarService } from './search_bar';
-import { QueryBarService } from './query_bar';
+import { QueryService } from './query';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
   private readonly searchBar: SearchBarService;
-  private readonly queryBar: QueryBarService;
+  private readonly query: QueryService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
-    this.queryBar = new QueryBarService();
+    this.query = new QueryService();
     this.searchBar = new SearchBarService();
   }
 
@@ -36,14 +36,14 @@ class DataPlugin {
     return {
       indexPatterns: this.indexPatterns.setup(),
       search: this.searchBar.setup(),
-      query: this.queryBar.setup(),
+      query: this.query.setup(),
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
     this.searchBar.stop();
-    this.queryBar.stop();
+    this.query.stop();
   }
 }
 

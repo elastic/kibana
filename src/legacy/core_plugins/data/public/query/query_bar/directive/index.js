@@ -17,37 +17,22 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { QueryBar } from './components/query_bar';
-import { fromUser } from './lib/from_user';
-import { toUser } from './lib/to_user';
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+import { QueryBar } from '../components';
 
-// @ts-ignore
-import { setupDirective } from './directive';
+const app = uiModules.get('app/data', ['react']);
 
-/**
- * Query Bar Service
- *
- * @internal
- */
-export class QueryBarService {
-  public setup() {
-    return {
-      loadLegacyDirectives: once(setupDirective),
-      helpers: {
-        fromUser,
-        toUser,
-      },
-      ui: {
-        QueryBar,
-      },
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
+export function setupDirective() {
+  app.directive('queryBar', (reactDirective, localStorage) => {
+    return reactDirective(
+      wrapInI18nContext(QueryBar),
+      undefined,
+      {},
+      {
+        store: localStorage,
+      }
+    );
+  });
 }
-
-/** @public */
-export type QueryBarSetup = ReturnType<QueryBarService['setup']>;

@@ -17,24 +17,9 @@
  * under the License.
  */
 
+export { QueryBar } from './components';
+export { fromUser } from './lib/from_user';
+export { toUser } from './lib/to_user';
 
-
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-import { QueryBar } from '../components';
-
-const app = uiModules.get('app/data', ['react']);
-
-export function setupDirective() {
-  app.directive('queryBar', (reactDirective, localStorage) => {
-    return reactDirective(
-      wrapInI18nContext(QueryBar),
-      undefined,
-      {},
-      {
-        store: localStorage,
-      }
-    );
-  });
-}
+// @ts-ignore
+export { setupDirective } from './directive';
