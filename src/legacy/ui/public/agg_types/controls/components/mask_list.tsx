@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import React, { useState, useEffect, Fragment } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFormLabel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFieldText, EuiFormLabel, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CidrMask } from '../../../utils/cidr_mask';
+import { InputList, InputListConfig, InputObject } from './input_list';
 
-export interface MaskObject {
+export type MaskObject = InputObject & {
   mask: string;
-}
+};
 
 interface MaskModel {
   id: string;
@@ -51,165 +44,56 @@ interface MaskListProps {
   setValidity(isValid: boolean): void;
 }
 
-const generateId = htmlIdGenerator();
-
-function MaskList({
-  labelledbyId,
-  list,
-  showValidation,
-  onBlur,
-  onChange,
-  setValidity,
-}: MaskListProps) {
-  const [models, setModels] = useState(
-    list.length
-      ? list.map(item => ({
-          model: item.mask,
-          value: item.mask,
-          id: generateId(),
-          isInvalid: false,
-        }))
-      : [{ id: generateId(), model: '0.0.0.0/1', value: '0.0.0.0/1', isInvalid: false }]
-  );
-
-  const onUpdate = (modelList: MaskModel[]) => {
-    setModels(modelList);
-    onChange(modelList.map(({ model }) => ({ mask: model })));
-  };
-
-  const onChangeValue = (index: number, value: string) => {
-    const mask = models[index];
-    const { model, isInvalid } = validateValue(value);
-    mask.value = value;
-    mask.model = model;
-    mask.isInvalid = isInvalid;
-    onUpdate(models);
-  };
-  const onDelete = (id: string) => {
-    const newArray = models.filter(model => model.id !== id);
-    onUpdate(newArray);
-  };
-
-  const validateValue = (mask: string) => {
-    const result = {
-      model: mask,
+function MaskList({ labelledbyId, showValidation, onBlur, ...rest }: MaskListProps) {
+  const maskListConfig: InputListConfig = {
+    defaultValue: {
+      model: '0.0.0.0/1',
+      value: '0.0.0.0/1',
       isInvalid: false,
-    };
-    if (!mask) {
-      result.isInvalid = true;
-      return result;
-    }
-    try {
-      result.model = new CidrMask(mask).toString();
-      result.isInvalid = false;
-      return result;
-    } catch (e) {
-      result.isInvalid = true;
-      return result;
-    }
-  };
-
-  const getUpdatedModels = (objList: MaskObject[], modelList: MaskModel[]) => {
-    if (!objList.length) {
-      return modelList;
-    }
-    return objList.map((item, index) => {
-      const maskModel = modelList[index] || {
-        id: generateId(),
-        value: item.mask,
-        model: item.mask,
-        isInvalid: false,
-      };
-      const { model, isInvalid } = validateValue(item.mask);
-      if (item.mask !== maskModel.model) {
-        maskModel.value = model;
-      }
-      return {
-        ...maskModel,
-        model,
-        isInvalid,
-      };
-    });
-  };
-
-  const hasInvalidValues = (modelList: MaskModel[]) => {
-    return !!modelList.find(({ isInvalid }) => isInvalid);
-  };
-
-  useEffect(
-    () => {
-      setModels(getUpdatedModels(list, models));
     },
-    [list]
-  );
-
-  useEffect(
-    () => {
-      setValidity(!hasInvalidValues(models));
-    },
-    [models]
-  );
-
-  // resposible for setting up an initial value ([mask: '0.0.0.0/1']) when there is no default value
-  useEffect(() => {
-    onChange(models.map(({ model }) => ({ mask: model })));
-  }, []);
-
-  if (!list || !list.length) {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiFlexItem className="euiFormLabel">
-        <EuiFormLabel htmlFor={`visEditorIpRangeCidrLabel${labelledbyId}`}>
-          <FormattedMessage
-            id="common.ui.aggTypes.ipRanges.cidrMaskLabel"
-            defaultMessage="CIDR Mask"
-          />
-        </EuiFormLabel>
+    validateClass: CidrMask,
+    getModelValue: item => ({
+      model: item.mask,
+      value: item.mask,
+      isInvalid: false,
+    }),
+    getModel: (models: MaskModel[], index) => models[index],
+    getRemoveBtnAriaLabel: (item: MaskModel) =>
+      i18n.translate('common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel', {
+        defaultMessage: 'Remove the CIDR mask value of {mask}',
+        values: { mask: item.value },
+      }),
+    onChangeFn: ({ model }: MaskModel) => ({ mask: model }),
+    hasInvalidValuesFn: ({ isInvalid }) => isInvalid,
+    renderInputRow: (item: MaskModel, index, onChangeValue) => (
+      <EuiFlexItem>
+        <EuiFieldText
+          aria-labelledby={`visEditorIpRangeCidrLabel${labelledbyId}`}
+          isInvalid={showValidation ? item.isInvalid : false}
+          onChange={ev => {
+            onChangeValue(index, ev.target.value);
+          }}
+          value={item.value}
+          onBlur={onBlur}
+        />
       </EuiFlexItem>
-      <EuiSpacer size="xs" />
-      {models.map((item, index) => (
-        <Fragment key={item.id}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem>
-              <EuiFieldText
-                aria-labelledby={`visEditorIpRangeCidrLabel${labelledbyId}`}
-                compressed={true}
-                isInvalid={showValidation ? item.isInvalid : false}
-                onChange={ev => {
-                  onChangeValue(index, ev.target.value);
-                }}
-                value={item.value}
-                onBlur={onBlur}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.translate(
-                  'common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel',
-                  {
-                    defaultMessage: 'Remove the CIDR mask value of {mask}',
-                    values: { mask: item.value },
-                  }
-                )}
-                title={i18n.translate('common.ui.aggTypes.ipRanges.removeCidrMaskButtonTitle', {
-                  defaultMessage: 'Remove the CIDR mask value of {mask}',
-                  values: { mask: item.value },
-                })}
-                disabled={models.length === 1}
-                color="danger"
-                iconType="trash"
-                onClick={() => onDelete(item.id)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-        </Fragment>
-      ))}
-    </>
+    ),
+    validateModel: (validateFn, object: MaskObject, model: MaskModel) => {
+      validateFn(object.mask, model);
+    },
+  };
+  const header = (
+    <EuiFlexItem>
+      <EuiFormLabel htmlFor={`visEditorIpRangeCidrLabel${labelledbyId}`}>
+        <FormattedMessage
+          id="common.ui.aggTypes.ipRanges.cidrMaskLabel"
+          defaultMessage="CIDR Mask"
+        />
+      </EuiFormLabel>
+    </EuiFlexItem>
   );
+
+  return <InputList config={maskListConfig} header={header} {...rest} />;
 }
 
 export { MaskList };

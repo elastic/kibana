@@ -1,0 +1,204 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { useState, useEffect, Fragment } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
+
+export interface InputListConfig {
+  defaultValue: {};
+  validateClass: new (value: string) => object;
+  getModelValue(item: InputObject): {};
+  getModel(models: InputModel[], index: number, modelName?: string): InputModel | InputItem;
+  getRemoveBtnAriaLabel(model: InputModel): string;
+  onChangeFn(model: InputModel): InputObject;
+  hasInvalidValuesFn(model: InputModel): boolean;
+  renderInputRow(
+    model: InputModel,
+    index: number,
+    onChangeFn: (index: number, value: string, modelName?: string) => void
+  ): React.ReactNode;
+  validateModel(
+    validateFn: (value: string, modelObj: InputItem) => void,
+    object: InputObject,
+    model: InputModel
+  ): void;
+}
+interface InputModelBase {
+  id: string;
+  [key: string]: any;
+}
+export interface InputObject {
+  [prop: string]: string;
+}
+interface InputItem {
+  model: string;
+  value: string;
+  isInvalid: boolean;
+}
+
+export type InputModel =
+  | InputModelBase & { [model: string]: InputItem }
+  | InputModelBase & InputItem;
+
+interface InputListProps {
+  config: InputListConfig;
+  header: React.ReactNode;
+  list: InputObject[];
+  onChange(list: InputObject[]): void;
+  setValidity(isValid: boolean): void;
+}
+
+const generateId = htmlIdGenerator();
+
+function InputList({ config, header, list, onChange, setValidity }: InputListProps) {
+  const [models, setModels] = useState(
+    list.length
+      ? list.map(
+          item =>
+            ({
+              id: generateId(),
+              ...config.getModelValue(item),
+            } as InputModel)
+        )
+      : [
+          {
+            id: generateId(),
+            ...config.defaultValue,
+          } as InputModel,
+        ]
+  );
+
+  const onUpdate = (modelList: InputModel[]) => {
+    setModels(modelList);
+    onChange(modelList.map(config.onChangeFn));
+  };
+
+  const onChangeValue = (index: number, value: string, modelName?: string) => {
+    const range = config.getModel(models, index, modelName);
+    const { model, isInvalid } = validateValue(value);
+    range.value = value;
+    range.model = model;
+    range.isInvalid = isInvalid;
+    onUpdate(models);
+  };
+  const onDelete = (id: string) => {
+    const newArray = models.filter(model => model.id !== id);
+    onUpdate(newArray);
+  };
+
+  const getUpdatedModels = (objList: InputObject[], modelList: InputModel[]) => {
+    if (!objList.length) {
+      return modelList;
+    }
+    return objList.map((item, index) => {
+      const model = modelList[index] || {
+        id: generateId(),
+        ...config.getModelValue(item),
+      };
+
+      config.validateModel(validateItem, item, model);
+
+      return model;
+    });
+  };
+
+  const validateItem = (value: string, modelObj: InputItem) => {
+    const { model, isInvalid } = validateValue(value);
+    if (value !== modelObj.model) {
+      modelObj.value = model;
+    }
+    modelObj.model = model;
+    modelObj.isInvalid = isInvalid;
+  };
+
+  const validateValue = (inputValue: string) => {
+    const result = {
+      model: inputValue,
+      isInvalid: false,
+    };
+    if (!inputValue) {
+      result.isInvalid = true;
+      return result;
+    }
+    try {
+      result.model = new config.validateClass(inputValue).toString();
+      result.isInvalid = false;
+      return result;
+    } catch (e) {
+      result.isInvalid = true;
+      return result;
+    }
+  };
+
+  const hasInvalidValues = (modelList: InputModel[]) => {
+    return !!modelList.find(config.hasInvalidValuesFn);
+  };
+
+  useEffect(
+    () => {
+      setModels(getUpdatedModels(list, models));
+    },
+    [list]
+  );
+
+  useEffect(
+    () => {
+      setValidity(!hasInvalidValues(models));
+    },
+    [models]
+  );
+
+  // resposible for setting up an initial value ([from: '0.0.0.0', to: '255.255.255.255' ]) when there is no default value
+  useEffect(() => {
+    onChange(models.map(config.onChangeFn));
+  }, []);
+
+  if (!list || !list.length) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        {header}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      {models.map((item, index) => (
+        <Fragment key={item.id}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {config.renderInputRow(item, index, onChangeValue)}
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={config.getRemoveBtnAriaLabel(item)}
+                title={config.getRemoveBtnAriaLabel(item)}
+                disabled={models.length === 1}
+                color="danger"
+                iconType="trash"
+                onClick={() => onDelete(item.id)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+export { InputList };
