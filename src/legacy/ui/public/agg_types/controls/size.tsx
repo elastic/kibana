@@ -44,7 +44,7 @@ function SizeParamEditor({
       {iconTip}
     </>
   );
-  const isValid = Number(value) > 0;
+  const isValid = disabled || Number(value) > 0;
 
   useEffect(
     () => {

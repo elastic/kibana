@@ -51,7 +51,6 @@ function TopAggregateParamEditor({
   setTouched,
   wrappedWithInlineComp,
 }: AggParamEditorProps<AggregateValueProp> & SelectParamEditorProps<AggregateValueProp>) {
-  const isValid = !!value;
   const isFirstRun = useRef(true);
   const fieldType = agg.params.field && agg.params.field.type;
   const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
@@ -59,6 +58,8 @@ function TopAggregateParamEditor({
     .map(({ text, value: val }) => ({ text, value: val }))
     .sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
   const options = [emptyValue, ...filteredOptions];
+  const disabled = fieldType && !filteredOptions.length;
+  const isValid = disabled || !!value;
 
   const label = (
     <>
@@ -121,7 +122,7 @@ function TopAggregateParamEditor({
         onChange={handleChange}
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}
-        disabled={!filteredOptions.length}
+        disabled={disabled}
         onBlur={setTouched}
       />
     </EuiFormRow>
