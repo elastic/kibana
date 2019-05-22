@@ -31,7 +31,8 @@ import {
   AggName,
   DropDownLabel,
   getPivotQuery,
-  groupByConfigHasInterval,
+  isGroupByDateHistogram,
+  isGroupByHistogram,
   isKibanaContext,
   KibanaContext,
   PivotAggsConfig,
@@ -174,7 +175,10 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       pivotAggsArr.map(d => `${d.agg} ${d.field} ${d.aggName}`).join(' '),
       pivotGroupByArr
         .map(
-          d => `${d.agg} ${d.field} ${groupByConfigHasInterval(d) ? d.interval : ''} ${d.aggName}`
+          d =>
+            `${d.agg} ${d.field} ${isGroupByHistogram(d) ? d.interval : ''} ${
+              isGroupByDateHistogram(d) ? d.calendar_interval : ''
+            } ${d.aggName}`
         )
         .join(' '),
       search,

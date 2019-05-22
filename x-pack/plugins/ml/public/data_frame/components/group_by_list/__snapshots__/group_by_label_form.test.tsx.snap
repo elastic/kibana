@@ -55,9 +55,9 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
           Object {
             "agg": "date_histogram",
             "aggName": "the-group-by-agg-name",
+            "calendar_interval": "10m",
             "dropDownName": "the-group-by-drop-down-name",
             "field": "the-group-by-field",
-            "interval": "10m",
           }
         }
         onChange={[Function]}
