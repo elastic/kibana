@@ -122,7 +122,13 @@ export class SpacesService {
   }
 
   private populateCache(http: HttpServiceSetup, request: RequestFacade) {
-    const spaceId = getSpaceIdFromPath(http.getBasePathFor(request), this.serverBasePath);
+    const isLegacyRequest = typeof (request as any).getBasePath === 'function';
+
+    const basePath = isLegacyRequest
+      ? (request as Record<string, any>).getBasePath()
+      : http.getBasePathFor(request);
+
+    const spaceId = getSpaceIdFromPath(basePath, this.serverBasePath);
 
     this.contextCache.set(request, {
       spaceId,
