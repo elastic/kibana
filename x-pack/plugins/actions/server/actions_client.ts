@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { i18n } from '@kbn/i18n';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { ActionTypeService } from './action_type_service';

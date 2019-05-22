@@ -21,6 +21,6 @@ declare module 'hapi' {
     xpack_main: XPackMainPlugin;
     security?: SecurityPlugin;
     encrypted_saved_objects?: EncryptedSavedObjectsPlugin;
-    actions: ActionsPlugin;
+    actions?: ActionsPlugin;
   }
 }

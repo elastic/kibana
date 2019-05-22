@@ -11,7 +11,7 @@ export function listActionTypesRoute(server: Hapi.Server) {
     method: 'GET',
     path: `/api/action/types`,
     async handler(request: Hapi.Request) {
-      return request.server.plugins.actions.listTypes();
+      return request.server.plugins.actions!.listTypes();
     },
   });
 }

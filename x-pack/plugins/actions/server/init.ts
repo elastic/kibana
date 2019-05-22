@@ -5,6 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ActionsClient } from './actions_client';
 import { ActionTypeService } from './action_type_service';
 import {
@@ -40,17 +41,21 @@ export function init(server: Legacy.Server) {
   updateRoute(server);
   listActionTypesRoute(server);
 
-  // Expose service to server
-  server.decorate('request', 'getActionsClient', function() {
-    const request = this;
-    const savedObjectsClient = request.getSavedObjectsClient();
+  function createActionsClient(savedObjectsClient: SavedObjectsClient) {
     const actionsClient = new ActionsClient({
       savedObjectsClient,
       actionTypeService,
       encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
     });
     return actionsClient;
+  }
+
+  // Expose service to server
+  server.decorate('request', 'getActionsClient', function() {
+    const request = this;
+    return createActionsClient(request.getSavedObjectsClient());
   });
+  server.expose('createActionsClient', createActionsClient);
   server.expose('registerType', actionTypeService.register.bind(actionTypeService));
   server.expose('listTypes', actionTypeService.list.bind(actionTypeService));
 }
