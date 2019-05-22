@@ -55,7 +55,6 @@ const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'managem
 
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
-
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const managementSchema = Joi.object().pattern(
