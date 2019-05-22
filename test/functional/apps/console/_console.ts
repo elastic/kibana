@@ -35,6 +35,7 @@ GET _search
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
+  const visualTesting = getService('visualTesting');
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
@@ -51,6 +52,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(actualRequest);
         expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
       });
+
+      await visualTesting.snapshot();
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
