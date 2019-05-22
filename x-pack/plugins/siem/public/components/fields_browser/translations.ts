@@ -68,7 +68,7 @@ export const SELECT_FIELDS = i18n.translate('xpack.siem.fieldBrowser.selectField
 
 export const VIEW_CATEGORY = (categoryId: string) =>
   i18n.translate('xpack.siem.fieldBrowser.viewCategoryTooltip', {
-    defaultMessage: 'View all ${categoryId} fields',
+    defaultMessage: 'View all {categoryId} fields',
     values: {
       categoryId,
     },
