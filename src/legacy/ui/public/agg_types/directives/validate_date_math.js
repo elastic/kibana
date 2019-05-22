@@ -27,7 +27,7 @@ uiModules.get('kibana').directive('validateDateMath', function () {
     scope: {
       'ngModel': '='
     },
-    link: function (ngModel) {
+    link: function ($scope, elem, attr, ngModel) {
       ngModel.$parsers.unshift(validateDateMath);
       ngModel.$formatters.unshift(validateDateMath);
 
