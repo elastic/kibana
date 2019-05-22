@@ -60,7 +60,6 @@ export class LegacyPlatformService {
       fatalErrors,
       notifications,
       http,
-      basePath,
       uiSettings,
       chrome,
     } = core;
@@ -73,7 +72,7 @@ export class LegacyPlatformService {
     require('ui/kfetch').__newPlatformSetup__(http);
     require('ui/notify/toasts').__newPlatformSetup__(notifications.toasts);
     require('ui/chrome/api/loading_count').__newPlatformSetup__(http);
-    require('ui/chrome/api/base_path').__newPlatformSetup__(basePath);
+    require('ui/chrome/api/base_path').__newPlatformSetup__(http);
     require('ui/chrome/api/ui_settings').__newPlatformSetup__(uiSettings);
     require('ui/chrome/api/injected_vars').__newPlatformSetup__(injectedMetadata);
     require('ui/chrome/api/controls').__newPlatformSetup__(chrome);

@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpStart = ReturnType<HttpService['start']>;
+export declare type HttpStart = HttpServiceBase;
 ```
