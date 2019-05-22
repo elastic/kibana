@@ -16,7 +16,7 @@ import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
-import { SourceConfigurations, Sources } from './sources';
+import { Sources, SourceConfiguration } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
 
 export * from './hosts';
@@ -47,7 +47,7 @@ export interface Configuration {
     partitionSize: number;
     partitionFactor: number;
   };
-  sources: SourceConfigurations;
+  sources: Record<string, SourceConfiguration>;
 }
 
 export interface SiemContext {

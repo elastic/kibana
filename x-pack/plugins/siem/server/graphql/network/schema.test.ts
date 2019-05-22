@@ -38,6 +38,7 @@ const testNetworkTopNFlowSource = {
       $pagination: PaginationInput!
       $sort: NetworkTopNFlowSortField!
       $timerange: TimerangeInput!
+      $defaultIndex: [String!]!
     ) {
       source(id: "default") {
         NetworkTopNFlow(
@@ -47,6 +48,7 @@ const testNetworkTopNFlowSource = {
           pagination: $pagination
           sort: $sort
           timerange: $timerange
+          defaultIndex: $defaultIndex
         ) {
           totalCount
           edges {
@@ -87,6 +89,7 @@ const testNetworkTopNFlowSource = {
       to: new Date('2018-01-01T05:00:00.000Z').valueOf(),
       from: new Date('2019-01-01T04:59:59.999Z').valueOf(),
     },
+    defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
     flowTarget: FlowTarget.source,
     flowDirection: FlowDirection.uniDirectional,
@@ -120,6 +123,7 @@ const testNetworkDnsSource = {
       $timerange: TimerangeInput!
       $pagination: PaginationInput!
       $filterQuery: String
+      $defaultIndex: [String!]!
     ) {
       source(id: "default") {
         NetworkDns(
@@ -128,6 +132,7 @@ const testNetworkDnsSource = {
           timerange: $timerange
           pagination: $pagination
           filterQuery: $filterQuery
+          defaultIndex: $defaultIndex
         ) {
           totalCount
           edges {
@@ -159,6 +164,7 @@ const testNetworkDnsSource = {
       to: 1514782800000,
       from: 1546318799999,
     },
+    defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     isPtrIncluded: false,
     sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
     pagination: {

@@ -32,9 +32,10 @@ const testOverviewNetworkSource = {
     query GetOverviewNetworkQuery(
       $timerange: TimerangeInput!
       $filterQuery: String
+      $defaultIndex: [String!]!
     ) {
       source(id: "default") {
-        OverviewNetwork(timerange: $timerange, filterQuery: $filterQuery) {
+        OverviewNetwork(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
           packetbeatFlow
           packetbeatDNS
           filebeatSuricata
@@ -50,6 +51,7 @@ const testOverviewNetworkSource = {
       to: 1514782800000,
       from: 1546318799999,
     },
+    defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   },
   context: {
     req: {
@@ -72,10 +74,11 @@ const testOverviewHostSource = {
   query: `
     query GetOverviewHostQuery(
       $timerange: TimerangeInput!
-      $filterQuery: String
+      $filterQuery: String,
+      $defaultIndex: [String!]!
     ) {
       source(id: "default") {
-        OverviewHost(timerange: $timerange, filterQuery: $filterQuery) {
+        OverviewHost(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
           auditbeatAuditd
           auditbeatFIM
           auditbeatLogin
@@ -92,6 +95,7 @@ const testOverviewHostSource = {
       to: 1514782800000,
       from: 1546318799999,
     },
+    defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   },
   context: {
     req: {

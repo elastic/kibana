@@ -13,11 +13,8 @@ import {
 } from '.';
 
 export const mockGetHostsOptions: HostsRequestOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
-    logAlias: 'filebeat-*',
-    auditbeatAlias: 'auditbeat-*',
-    packetbeatAlias: 'packetbeat-*',
-    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',
@@ -275,10 +272,6 @@ export const mockGetHostsResult = {
 
 export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
   sourceConfiguration: {
-    logAlias: 'filebeat-*',
-    auditbeatAlias: 'auditbeat-*',
-    packetbeatAlias: 'packetbeat-*',
-    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',
@@ -289,6 +282,7 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   fields: [
     '_id',
     'host.architecture',
@@ -486,11 +480,8 @@ export const mockGetHostOverviewResult = {
 };
 
 export const mockGetHostLastFirstSeenOptions: HostLastFirstSeenRequestOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
-    logAlias: 'filebeat-*',
-    auditbeatAlias: 'auditbeat-*',
-    packetbeatAlias: 'packetbeat-*',
-    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',

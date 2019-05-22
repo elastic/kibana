@@ -30,9 +30,7 @@ let localSource: Array<{
     data: {
       source: {
         status: {
-          auditbeatIndicesExist: boolean;
-          filebeatIndicesExist: boolean;
-          winlogbeatIndicesExist: boolean;
+          indicesExist: boolean;
         };
       };
     };
@@ -78,9 +76,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it renders the Setup Instructions text when no index is available', async () => {
-    localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-    localSource[0].result.data.source.status.filebeatIndicesExist = false;
-    localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
+    localSource[0].result.data.source.status.indicesExist = false;
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
@@ -96,29 +92,8 @@ describe('Hosts - rendering', () => {
     expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
   });
 
-  test('it renders the Setup Instructions text when auditbeat index is not available', async () => {
-    localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-    localSource[0].result.data.source.status.filebeatIndicesExist = true;
-    localSource[0].result.data.source.status.winlogbeatIndicesExist = true;
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={localSource} addTypename={false}>
-          <Router history={mockHistory}>
-            <Hosts />
-          </Router>
-        </MockedProvider>
-      </TestProviders>
-    );
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
-    wrapper.update();
-    expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
-  });
-
-  test('it DOES NOT render the Setup Instructions text when auditbeat index is available', async () => {
-    localSource[0].result.data.source.status.auditbeatIndicesExist = true;
-    localSource[0].result.data.source.status.filebeatIndicesExist = false;
-    localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
+  test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
+    localSource[0].result.data.source.status.indicesExist = true;
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>

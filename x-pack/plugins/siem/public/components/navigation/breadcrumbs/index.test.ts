@@ -20,6 +20,9 @@ jest.mock('ui/chrome', () => ({
   breadcrumbs: {
     set: jest.fn(),
   },
+  getUiSettingsClient: () => ({
+    get: jest.fn(),
+  }),
 }));
 
 describe('Navigation Breadcrumbs', () => {
