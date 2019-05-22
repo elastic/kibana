@@ -4,6 +4,7 @@
 
 ## CoreSetup interface
 
+Context passed to the plugins `setup` method.
 
 <b>Signature:</b>
 
@@ -15,7 +16,6 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> |  |
-|  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> |  |
-|  [plugins](./kibana-plugin-server.coresetup.plugins.md) | <code>PluginsServiceSetup</code> |  |
+|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{`<p/>`        adminClient$: Observable&lt;ClusterClient&gt;;`<p/>`        dataClient$: Observable&lt;ClusterClient&gt;;`<p/>`    }</code> |  |
+|  [http](./kibana-plugin-server.coresetup.http.md) | <code>{`<p/>`        registerAuth: HttpServiceSetup['registerAuth'];`<p/>`        registerOnRequest: HttpServiceSetup['registerOnRequest'];`<p/>`        getBasePathFor: HttpServiceSetup['getBasePathFor'];`<p/>`        setBasePathFor: HttpServiceSetup['setBasePathFor'];`<p/>`    }</code> |  |
 
