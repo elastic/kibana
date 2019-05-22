@@ -11,7 +11,7 @@ import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { UrlStateContainer, UrlStateContainerLifecycle } from './';
-import { UrlStateContainerLifecycleProps } from './types';
+import { UrlStateContainerPropTypes } from './types';
 import { CONSTANTS } from './constants';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
 import {
@@ -54,7 +54,7 @@ const filterQuery: KueryFilterQuery = {
   kind: 'kuery',
 };
 
-const mockProps: UrlStateContainerLifecycleProps = {
+const mockProps: UrlStateContainerPropTypes = {
   history: mockHistory,
   location,
   indexPattern: {

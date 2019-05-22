@@ -73,11 +73,11 @@ export interface UrlStateDispatchProps {
   }>;
 }
 
-export type UrlStateContainerProps = UrlStateProps & UrlStateDispatchProps;
-
 export interface UrlStateRouterProps {
   history: History;
   location: Location;
 }
 
-export type UrlStateContainerLifecycleProps = UrlStateRouterProps & UrlStateContainerProps;
+export type UrlStateContainerPropTypes = UrlStateRouterProps &
+  UrlStateProps &
+  UrlStateDispatchProps;

@@ -38,9 +38,9 @@ import {
   replaceQueryStringInLocation,
   isKqlForRoute,
 } from './helpers';
-import { KeyUrlState, KqlQuery, UrlStateContainerLifecycleProps } from './types';
+import { KeyUrlState, KqlQuery, UrlStateContainerPropTypes } from './types';
 
-export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerLifecycleProps> {
+export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerPropTypes> {
   public render() {
     return null;
   }
@@ -48,7 +48,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
   public componentDidUpdate({
     location: prevLocation,
     urlState: prevUrlState,
-  }: UrlStateContainerLifecycleProps) {
+  }: UrlStateContainerPropTypes) {
     const { history, location, urlState } = this.props;
     if (JSON.stringify(urlState) !== JSON.stringify(prevUrlState)) {
       URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
