@@ -7,13 +7,13 @@ import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function codeApp({ loadTestFile }: TestInvoker) {
-  describe('Code', function codeAppTestSuite() {
+  describe('Code app', function codeAppTestSuite() {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./manage_repositories'));
     loadTestFile(require.resolve('./search'));
-    // loadTestFile(require.resolve('./explore_repository'));
+    loadTestFile(require.resolve('./explore_repository'));
     loadTestFile(require.resolve('./code_intelligence'));
     loadTestFile(require.resolve('./with_security'));
-    // loadTestFile(require.resolve('./history'));
+    loadTestFile(require.resolve('./history'));
   });
 }

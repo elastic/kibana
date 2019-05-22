@@ -48,17 +48,6 @@ export default function manageRepositoriesFunctionalTests({
       // after(async () => await esArchiver.unload('code'));
 
       after(async () => {
-        // Navigate to the code app.
-        await PageObjects.common.navigateToApp('code');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // Clean up the imported repository
-        await PageObjects.code.clickDeleteRepositoryButton();
-        await retry.tryForTime(300000, async () => {
-          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
-          expect(repositoryItems).to.have.length(0);
-        });
-
         await PageObjects.security.logout();
       });
 
