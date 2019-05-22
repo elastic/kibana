@@ -28,6 +28,7 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
     exposeStaticDir: jest.fn(),
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
+    getSavedObjectsService: jest.fn(),
   };
   let mockBuildQuery: jest.SpyInstance;
   let mockBuildAuthQuery: jest.SpyInstance;

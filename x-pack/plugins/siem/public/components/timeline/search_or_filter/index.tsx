@@ -63,7 +63,7 @@ class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
       applyKqlFilterQuery({
         id: timelineId,
         filterQuery: {
-          query: {
+          kuery: {
             kind: 'kuery',
             expression,
           },
