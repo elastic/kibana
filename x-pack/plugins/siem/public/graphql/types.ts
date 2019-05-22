@@ -1,10 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+     * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+     * or more contributor license agreements. Licensed under the Elastic License;
+     * you may not use this file except in compliance with the Elastic License.
+     */
 
 // ====================================================
 // START: Typescript template
@@ -1456,7 +1456,7 @@ export interface PageInfoNote {
 }
 
 export interface SortNote {
-  sortField: string;
+  sortField: SortFieldNote;
 
   sortOrder: Direction;
 }
@@ -1971,6 +1971,11 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Enums
 // ====================================================
+
+export enum SortFieldNote {
+  updatedBy = 'updatedBy',
+  updated = 'updated',
+}
 
 export enum Direction {
   asc = 'asc',

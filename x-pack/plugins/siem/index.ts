@@ -14,6 +14,7 @@ import { savedObjectMappings } from './server/saved_objects';
 export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
 export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
   return new kibana.Plugin({

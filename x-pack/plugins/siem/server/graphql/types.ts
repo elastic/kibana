@@ -1485,7 +1485,7 @@ export interface PageInfoNote {
 }
 
 export interface SortNote {
-  sortField: string;
+  sortField: SortFieldNote;
 
   sortOrder: Direction;
 }
@@ -2000,6 +2000,11 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Enums
 // ====================================================
+
+export enum SortFieldNote {
+  updatedBy = 'updatedBy',
+  updated = 'updated',
+}
 
 export enum Direction {
   asc = 'asc',
