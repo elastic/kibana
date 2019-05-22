@@ -18,13 +18,13 @@
  */
 
 import { resolve } from 'path';
+import { LegacyPluginInitializer } from 'src/legacy/plugin_discovery/types';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export const plugin: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       embeddableActions: ['plugins/embeddable_api/actions/apply_filter_action'],
     },
   });
-}
+};

@@ -24,10 +24,10 @@ import { IEmbeddable } from '../embeddables';
 
 export interface ExecuteActionContext<
   TEmbeddable extends IEmbeddable = IEmbeddable,
-  TActionContext extends {} = {}
+  TTriggerContext extends {} = {}
 > {
   embeddable: TEmbeddable;
-  triggerContext?: TActionContext;
+  triggerContext?: TTriggerContext;
 }
 
 export interface ActionContext<TEmbeddable extends IEmbeddable = IEmbeddable> {
@@ -36,7 +36,7 @@ export interface ActionContext<TEmbeddable extends IEmbeddable = IEmbeddable> {
 
 export abstract class Action<
   TEmbeddable extends IEmbeddable = IEmbeddable,
-  TActionContext extends {} = {}
+  TTriggerContext extends {} = {}
 > {
   /**
    * Determined the order when there is more than one action matched to a trigger.
@@ -80,5 +80,5 @@ export abstract class Action<
   /**
    * Executes the action.
    */
-  public abstract execute(context: ExecuteActionContext<TEmbeddable, TActionContext>): void;
+  public abstract execute(context: ExecuteActionContext<TEmbeddable, TTriggerContext>): void;
 }

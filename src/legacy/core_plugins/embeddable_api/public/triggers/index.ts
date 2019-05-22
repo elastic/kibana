@@ -17,8 +17,24 @@
  * under the License.
  */
 
-export { triggerRegistry, Trigger } from './trigger_registry';
+export { Trigger } from './trigger_registry';
 export { executeTriggerActions } from './execute_trigger_actions';
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
+
+import { TriggerRegistry } from './trigger_registry';
+
+export const triggerRegistry = new TriggerRegistry();
+
+triggerRegistry.registerTrigger({
+  id: CONTEXT_MENU_TRIGGER,
+  title: 'Context menu',
+  actionIds: [],
+});
+
+triggerRegistry.registerTrigger({
+  id: APPLY_FILTER_TRIGGER,
+  title: 'Filter click',
+  actionIds: [],
+});

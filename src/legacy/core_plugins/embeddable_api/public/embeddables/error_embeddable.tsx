@@ -43,7 +43,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
 
   public reload() {}
 
-  public render(dom: React.ReactNode) {
+  public render(dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     const stack = typeof this.error === 'string' ? '' : this.error.stack;
     ReactDOM.render(

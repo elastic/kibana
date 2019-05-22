@@ -26,23 +26,23 @@ export interface Trigger {
   actionIds: string[];
 }
 
-class TriggerRegistry {
-  constructor(private triggers: Trigger[]) {}
+export class TriggerRegistry {
+  constructor(private triggers: { [id: string]: Trigger } = {}) {}
 
   public getTriggers() {
     return this.triggers;
   }
 
   public getTrigger(id: string) {
-    return this.triggers.find(trigger => trigger.id === id);
+    return this.triggers[id];
   }
 
   public registerTrigger(trigger: Trigger) {
     trackUiMetric('EmbeddableAPI', 'triggerRegistered');
-    this.triggers.push(trigger);
+    this.triggers[trigger.id] = trigger;
   }
   public reset() {
-    this.triggers = [];
+    this.triggers = {};
   }
 
   public detachAction({ triggerId, actionId }: { triggerId: string; actionId: string }) {
@@ -65,20 +65,3 @@ class TriggerRegistry {
     }
   }
 }
-
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
-
-export const triggerRegistry = new TriggerRegistry([]);
-
-triggerRegistry.registerTrigger({
-  id: CONTEXT_MENU_TRIGGER,
-  title: 'Context menu',
-  actionIds: [],
-});
-
-triggerRegistry.registerTrigger({
-  id: APPLY_FILTER_TRIGGER,
-  title: 'Filter click',
-  actionIds: [],
-});

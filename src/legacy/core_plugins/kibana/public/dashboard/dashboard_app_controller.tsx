@@ -671,6 +671,9 @@ export class DashboardAppController {
             }
           });
 
+          // This code needs to be replaced with a better mechanism for adding new embeddables of
+          // any type from the add panel. Likely this will happen via creating a visualization "inline",
+          // without navigating away from the UX.
           if (this.routeParams[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
             container.addSavedObjectEmbeddable(
               VISUALIZE_EMBEDDABLE_TYPE,
@@ -681,7 +684,9 @@ export class DashboardAppController {
           }
         }
 
-        container.render(dashboardDom);
+        if (dashboardDom) {
+          container.render(dashboardDom);
+        }
       });
   }
 
