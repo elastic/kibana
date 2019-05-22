@@ -28,7 +28,7 @@ import {
   AutocompleteSuggestionType,
   getAutocompleteProvider,
 } from 'ui/autocomplete_providers';
-import { debounce, compact } from 'lodash';
+import { debounce, compact, isEqual } from 'lodash';
 import { IndexPattern } from 'ui/index_patterns';
 import { PersistedLog } from 'ui/persisted_log';
 import chrome from 'ui/chrome';
@@ -375,7 +375,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
-    this.updateSuggestions();
+
+    if (
+      !isEqual(prevProps.indexPatterns, this.props.indexPatterns) ||
+      !isEqual(prevProps.query, this.props.query)
+    ) {
+      this.updateSuggestions();
+    }
 
     if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
       if (this.inputRef) {
