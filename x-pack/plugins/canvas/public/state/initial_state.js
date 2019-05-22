@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { capabilities } from 'ui/capabilities';
 import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = path => {
@@ -12,8 +13,7 @@ export const getInitialState = path => {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      isFirstLoad: true,
-      canUserWrite: true,
+      canUserWrite: capabilities.get().canvas.save,
       elementStats: {
         total: 0,
         ready: 0,
@@ -21,10 +21,14 @@ export const getInitialState = path => {
         error: 0,
       },
       fullscreen: false,
-      selectedElement: null,
+      selectedToplevelNodes: [],
       resolvedArgs: {},
       refresh: {
         interval: 0,
+      },
+      autoplay: {
+        enabled: false,
+        interval: 10000,
       },
       // values in resolvedArgs should live under a unique index so they can be looked up.
       // The ID of the element is a great example.

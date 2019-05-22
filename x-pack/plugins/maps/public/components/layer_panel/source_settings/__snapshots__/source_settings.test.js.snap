@@ -11,7 +11,6 @@ exports[`Should render source settings editor 1`] = `
       <EuiFlexItem>
         <EuiTitle
           size="xs"
-          textTransform="none"
         >
           <h5>
             <FormattedMessage
@@ -24,7 +23,7 @@ exports[`Should render source settings editor 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer
-      margin="m"
+      size="m"
     />
     <div>
       mockSourceEditor

@@ -145,9 +145,7 @@ export function VislibVisualizationsAreaChartProvider(Private) {
               return !_.isNull(d.y);
             })
             .interpolate(interpolate);
-          return area(data.values.filter(function (d) {
-            return !_.isNull(d.y);
-          }));
+          return area(data.values);
         })
         .style('stroke-width', '1px');
 

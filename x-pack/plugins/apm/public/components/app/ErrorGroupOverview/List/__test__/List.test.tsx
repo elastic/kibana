@@ -8,11 +8,7 @@ import { mount } from 'enzyme';
 import { Location } from 'history';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import {
-  mockMoment,
-  mountWithRouterAndStore,
-  toJson
-} from '../../../../../utils/testHelpers';
+import { mockMoment, toJson } from '../../../../../utils/testHelpers';
 import { ErrorGroupList } from '../index';
 import props from './props.json';
 
@@ -38,11 +34,7 @@ describe('ErrorGroupOverview -> List', () => {
   });
 
   it('should render with data', () => {
-    const storeState = { location: {} };
-    const wrapper = mountWithRouterAndStore(
-      <ErrorGroupList {...props} />,
-      storeState
-    );
+    const wrapper = mount(<ErrorGroupList {...props} />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

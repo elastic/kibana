@@ -8,7 +8,7 @@ import { isArray, isObject, isString } from 'lodash';
 import mustache from 'mustache';
 import chrome from 'ui/chrome';
 import uuid from 'uuid';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from '../../../../../../typings/common';
 // @ts-ignore
 import * as rest from '../../../../../services/rest/watcher';
 import { createErrorGroupWatch } from '../createErrorGroupWatch';

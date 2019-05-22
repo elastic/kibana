@@ -1,3 +1,4 @@
+[role="xpack"]
 [[adding-policy-to-index]]
 === Adding a policy to an index
 

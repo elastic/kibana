@@ -5,8 +5,6 @@
  */
 
 import { get } from 'lodash';
-import { fetchUserActions } from '../../../../server/lib/user_action';
-import { UA_APP_NAME, USER_ACTIONS } from '../../common';
 
 const ROLLUP_USAGE_TYPE = 'rollups';
 
@@ -170,6 +168,7 @@ export function registerRollupUsageCollector(server) {
 
   const collector = server.usage.collectorSet.makeUsageCollector({
     type: ROLLUP_USAGE_TYPE,
+    isReady: () => true,
     fetch: async callCluster => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
@@ -181,8 +180,6 @@ export function registerRollupUsageCollector(server) {
         rollupVisualizations,
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
-
-      const userActions = await fetchUserActions(server, UA_APP_NAME, USER_ACTIONS);
 
       return {
         index_patterns: {
@@ -197,7 +194,6 @@ export function registerRollupUsageCollector(server) {
             total: rollupVisualizationsFromSavedSearches,
           },
         },
-        user_actions: userActions,
       };
     },
   });

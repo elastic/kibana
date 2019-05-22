@@ -8,9 +8,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
-import { UA_APP_LOAD } from '../../common';
+import { UIM_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
-import { registerRouter, setUserHasLeftApp, trackUserAction } from './services';
+import { registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
 import { JobList, JobCreate } from './sections';
 
 class ShareRouter extends Component {
@@ -41,7 +41,7 @@ class ShareRouter extends Component {
 
 export class App extends Component { // eslint-disable-line react/no-multi-comp
   componentDidMount() {
-    trackUserAction(UA_APP_LOAD);
+    trackUiMetric(UIM_APP_LOAD);
   }
 
   componentWillUnmount() {

@@ -115,7 +115,7 @@ function ExplorerChartContainer({
             >
               <EuiButtonEmpty
                 iconSide="right"
-                iconType="popout"
+                iconType="stats"
                 size="xs"
                 onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
               >

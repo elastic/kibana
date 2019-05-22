@@ -27,13 +27,11 @@ interface Exception {
   module?: string;
   handled?: boolean;
   stacktrace?: IStackframe[];
-  [key: string]: unknown;
 }
 
 interface Log {
   message: string;
   stacktrace?: IStackframe[];
-  [key: string]: unknown;
 }
 
 export interface ErrorRaw extends APMBaseDoc {
@@ -50,9 +48,7 @@ export interface ErrorRaw extends APMBaseDoc {
     // either exception or log are given
     exception?: Exception[];
     log?: Log;
-    [key: string]: unknown;
   };
-  [key: string]: unknown;
 
   // Shared by errors and transactions
   container?: Container;

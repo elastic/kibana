@@ -22,9 +22,7 @@ export interface FrontendLibs {
   configBlocks: ConfigBlocksLib;
 }
 
-export interface FramworkAdapterConstructable {
-  new (uiModule: IModule): FrameworkAdapter;
-}
+export type FramworkAdapterConstructable = new (uiModule: IModule) => FrameworkAdapter;
 
 // FIXME: replace AxiosRequestConfig with something more defined
 export type RequestConfig = AxiosRequestConfig;

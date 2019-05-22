@@ -6,6 +6,10 @@
 
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { idx } from '@kbn/elastic-idx';
 import {
   borderRadius,
   fontFamilyCode,
@@ -14,11 +18,7 @@ import {
   unit,
   units
 } from '../../../../../../../style/variables';
-
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/ui/Span';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 
 const ContextUrl = styled.div`
   padding: ${px(units.half)} ${px(unit)};

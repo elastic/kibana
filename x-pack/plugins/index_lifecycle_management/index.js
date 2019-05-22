@@ -8,12 +8,10 @@ import { resolve } from 'path';
 import { registerTemplatesRoutes } from './server/routes/api/templates';
 import { registerNodesRoutes } from './server/routes/api/nodes';
 import { registerPoliciesRoutes } from './server/routes/api/policies';
-import { registerLifecycleRoutes } from './server/routes/api/lifecycle';
 import { registerIndexRoutes } from './server/routes/api/index';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN_ID } from './common/constants';
 import { indexLifecycleDataEnricher } from './index_lifecycle_data';
-import { registerIndexLifecycleManagementUsageCollector } from './server/usage';
 
 export function indexLifecycleManagement(kibana) {
   return new kibana.Plugin({
@@ -52,9 +50,7 @@ export function indexLifecycleManagement(kibana) {
       registerTemplatesRoutes(server);
       registerNodesRoutes(server);
       registerPoliciesRoutes(server);
-      registerLifecycleRoutes(server);
       registerIndexRoutes(server);
-      registerIndexLifecycleManagementUsageCollector(server);
 
       if (
         server.config().get('xpack.ilm.ui.enabled') &&

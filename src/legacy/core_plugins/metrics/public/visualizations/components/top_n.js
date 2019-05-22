@@ -119,7 +119,7 @@ class TopN extends Component {
 
     return (
       <div className={className}>
-        <table className="tvbVisTopN__table" ref={this.tableRef}>
+        <table className="tvbVisTopN__table" data-test-subj="tvbVisTopNTable" ref={this.tableRef}>
           <tbody>
             { rows }
           </tbody>

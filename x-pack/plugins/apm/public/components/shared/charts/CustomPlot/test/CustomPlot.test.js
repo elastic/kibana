@@ -16,7 +16,7 @@ import InteractivePlot from '../InteractivePlot';
 import {
   getResponseTimeSeries,
   getEmptySerie
-} from '../../../../../store/selectors/chartSelectors';
+} from '../../../../../selectors/chartSelectors';
 
 function getXValueByIndex(index) {
   return responseWithData.responseTimes.avg[index].x;
@@ -29,7 +29,7 @@ describe('when response has data', () => {
   let onSelectionEnd;
 
   beforeEach(() => {
-    const series = getResponseTimeSeries(responseWithData);
+    const series = getResponseTimeSeries({ apmTimeseries: responseWithData });
     onHover = jest.fn();
     onMouseLeave = jest.fn();
     onSelectionEnd = jest.fn();

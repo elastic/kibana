@@ -10,7 +10,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export function SectionError({ title, error }) {
+export function SectionError(props) {
+  const { title, error, ...rest } = props;
   const data = error.data ? error.data : error;
   const {
     error: errorString,
@@ -23,6 +24,7 @@ export function SectionError({ title, error }) {
       title={title}
       color="danger"
       iconType="alert"
+      {...rest}
     >
       <div>{message || errorString}</div>
       { cause && (

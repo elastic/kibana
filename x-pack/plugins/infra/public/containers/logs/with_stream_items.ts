@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { SearchResult } from '../../../common/log_search_result';
 import { logEntriesActions, logEntriesSelectors, logPositionSelectors, State } from '../../store';
-import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
+import { LogEntry } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
@@ -24,45 +24,56 @@ export const withStreamItems = connect(
   }),
   bindPlainActionCreators({
     loadNewerEntries: logEntriesActions.loadNewerEntries,
+    reloadEntries: logEntriesActions.reloadEntries,
+    setSourceId: logEntriesActions.setSourceId,
   })
 );
 
-export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
+export const WithStreamItems = asChildFunctionRenderer(withStreamItems, {
+  onInitialize: props => {
+    if (!props.isReloading && !props.isLoadingMore) {
+      props.reloadEntries();
+    }
+  },
+});
 
 const selectItems = createSelector(
   logEntriesSelectors.selectEntries,
   logEntriesSelectors.selectIsReloadingEntries,
   logPositionSelectors.selectIsAutoReloading,
   // searchResultsSelectors.selectSearchResultsById,
-  (logEntries, isReloading, isAutoReloading /*, searchResults*/) =>
+  (logEntries, isReloading, isAutoReloading /* , searchResults */) =>
     isReloading && !isAutoReloading
       ? []
       : logEntries.map(logEntry =>
-          createLogEntryStreamItem(logEntry /*, searchResults[logEntry.gid] || null*/)
+          createLogEntryStreamItem(logEntry /* , searchResults[logEntry.gid] || null */)
         )
 );
 
-const createLogEntryStreamItem = (logEntry: LogEntry, searchResult?: SearchResult) => ({
+const createLogEntryStreamItem = (logEntry: LogEntry) => ({
   kind: 'logEntry' as 'logEntry',
-  logEntry: {
-    gid: logEntry.gid,
-    origin: {
-      id: logEntry.gid,
-      index: '',
-      type: '',
-    },
-    fields: {
-      time: logEntry.key.time,
-      tiebreaker: logEntry.key.tiebreaker,
-      message: logEntry.message.map(formatMessageSegment).join(''),
-    },
-  },
-  searchResult,
+  logEntry,
 });
 
-const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string =>
-  messageSegment.__typename === 'InfraLogMessageFieldSegment'
-    ? messageSegment.value
-    : messageSegment.__typename === 'InfraLogMessageConstantSegment'
-    ? messageSegment.constant
-    : 'failed to format message';
+/**
+ * This component serves as connection between the state and side-effects
+ * managed by redux and the state and effects managed by hooks. In particular,
+ * it forwards changes of the source id to redux via the action creator
+ * `setSourceId`.
+ *
+ * It will be mounted beneath the hierachy level where the redux store and the
+ * source state are initialized. Once the log entry state and loading
+ * side-effects have been migrated from redux to hooks it can be removed.
+ */
+export const ReduxSourceIdBridge = withStreamItems(
+  ({ setSourceId, sourceId }: { setSourceId: (sourceId: string) => void; sourceId: string }) => {
+    useEffect(
+      () => {
+        setSourceId(sourceId);
+      },
+      [setSourceId, sourceId]
+    );
+
+    return null;
+  }
+);

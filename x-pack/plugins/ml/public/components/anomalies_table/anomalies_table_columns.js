@@ -51,7 +51,7 @@ function renderTime(date, aggregationInterval) {
 function showLinksMenuForItem(item) {
   const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
   return (canConfigureRules ||
-    item.isTimeSeriesViewDetector ||
+    item.isTimeSeriesViewRecord ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined);
 }

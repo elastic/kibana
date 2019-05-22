@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`formatErrorString returns a formatted string containing each error 1`] = `
+"Error: foo is bar
+Error: bar is not foo
+"
+`;

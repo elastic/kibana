@@ -18,13 +18,17 @@
  */
 
 import { uiRegistry } from './_registry';
+import { capabilities } from '../capabilities';
 
 export const FeatureCatalogueRegistryProvider = uiRegistry({
   name: 'featureCatalogue',
   index: ['id'],
   group: ['category'],
   order: ['title'],
-  filter: featureCatalogItem => Object.keys(featureCatalogItem).length > 0
+  filter: featureCatalogItem => {
+    const isDisabledViaCapabilities = capabilities.get().catalogue[featureCatalogItem.id] === false;
+    return !isDisabledViaCapabilities && Object.keys(featureCatalogItem).length > 0;
+  }
 });
 
 export const FeatureCatalogueCategory = {

@@ -6,8 +6,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IStickyProperty } from '../../../shared/StickyProperties';
 import { StickyErrorProperties } from './StickyErrorProperties';
 

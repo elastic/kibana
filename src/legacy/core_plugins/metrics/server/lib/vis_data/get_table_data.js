@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import buildRequestBody from './table/build_request_body';
 import handleErrorResponse from './handle_error_response';
 import { get } from 'lodash';
@@ -33,14 +32,27 @@ export async function getTableData(req, panel) {
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
   const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
 
+  const meta = {
+    type: panel.type,
+    uiRestrictions: capabilities.uiRestrictions,
+  };
+
   try {
     const [resp] = await searchRequest.search({ body });
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
-    return { type: 'table', series: buckets.map(processBucket(panel)) };
+
+    return {
+      ...meta,
+      series: buckets.map(processBucket(panel)),
+    };
   } catch (err) {
     if (err.body) {
       err.response = err.body;
-      return { type: 'table', ...handleErrorResponse(panel)(err) };
+
+      return {
+        ...meta,
+        ...handleErrorResponse(panel)(err)
+      };
     }
   }
 }

@@ -13,11 +13,8 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-} from 'x-pack/plugins/upgrade_assistant/common/types';
-import {
-  CURRENT_MAJOR_VERSION,
-  PREV_MAJOR_VERSION,
-} from 'x-pack/plugins/upgrade_assistant/common/version';
+} from '../../../common/types';
+import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 
 describe('ReindexActions', () => {

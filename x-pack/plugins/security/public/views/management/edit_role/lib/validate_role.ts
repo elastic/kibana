@@ -4,22 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Copyright Elasticsearch B.V. ../../../../../common/model/index_privileger one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import { i18n } from '@kbn/i18n';
-import { IndexPrivilege } from '../../../../../common/model/index_privilege';
-import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
-import { Role } from '../../../../../common/model/role';
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+import { Role, RoleIndexPrivilege } from '../../../../../common/model';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;
@@ -32,8 +18,6 @@ export interface RoleValidationResult {
 
 export class RoleValidator {
   private shouldValidate?: boolean;
-
-  private inProgressSpacePrivileges: any[] = [];
 
   constructor(options: RoleValidatorOptions = {}) {
     this.shouldValidate = options.shouldValidate;
@@ -55,7 +39,7 @@ export class RoleValidator {
     if (!role.name) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRoles.validateRole.provideRoleNameWarningMessage',
+          'xpack.security.management.editRole.validateRole.provideRoleNameWarningMessage',
           {
             defaultMessage: 'Please provide a role name',
           }
@@ -64,18 +48,15 @@ export class RoleValidator {
     }
     if (role.name.length > 1024) {
       return invalid(
-        i18n.translate(
-          'xpack.security.management.editRoles.validateRole.nameLengthWarningMessage',
-          {
-            defaultMessage: 'Name must not exceed 1024 characters',
-          }
-        )
+        i18n.translate('xpack.security.management.editRole.validateRole.nameLengthWarningMessage', {
+          defaultMessage: 'Name must not exceed 1024 characters',
+        })
       );
     }
     if (!role.name.match(/^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*$/)) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRoles.validateRole.nameAllowedCharactersWarningMessage',
+          'xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage',
           {
             defaultMessage:
               'Name must begin with a letter or underscore and contain only letters, underscores, and numbers.',
@@ -93,7 +74,7 @@ export class RoleValidator {
 
     if (!Array.isArray(role.elasticsearch.indices)) {
       throw new TypeError(
-        i18n.translate('xpack.security.management.editRoles.validateRole.indicesTypeErrorMessage', {
+        i18n.translate('xpack.security.management.editRole.validateRole.indicesTypeErrorMessage', {
           defaultMessage: 'Expected {elasticIndices} to be an array',
           values: {
             elasticIndices: '"role.elasticsearch.indices"',
@@ -113,7 +94,7 @@ export class RoleValidator {
     return invalid();
   }
 
-  public validateIndexPrivilege(indexPrivilege: IndexPrivilege): RoleValidationResult {
+  public validateIndexPrivilege(indexPrivilege: RoleIndexPrivilege): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -121,7 +102,7 @@ export class RoleValidator {
     if (indexPrivilege.names.length && !indexPrivilege.privileges.length) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRoles.validateRole.onePrivilegeRequiredWarningMessage',
+          'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
           {
             defaultMessage: 'At least one privilege is required',
           }
@@ -133,7 +114,7 @@ export class RoleValidator {
 
   public validateSelectedSpaces(
     spaceIds: string[],
-    privilege: KibanaPrivilege | null
+    privilege: string | null
   ): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
@@ -149,7 +130,7 @@ export class RoleValidator {
     }
     return invalid(
       i18n.translate(
-        'xpack.security.management.editRoles.validateRole.oneSpaceRequiredWarningMessage',
+        'xpack.security.management.editRole.validateRole.oneSpaceRequiredWarningMessage',
         {
           defaultMessage: 'At least one space is required',
         }
@@ -159,7 +140,7 @@ export class RoleValidator {
 
   public validateSelectedPrivilege(
     spaceIds: string[],
-    privilege: KibanaPrivilege | null
+    privilege: string | null
   ): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
@@ -175,7 +156,7 @@ export class RoleValidator {
     }
     return invalid(
       i18n.translate(
-        'xpack.security.management.editRoles.validateRole.privilegeRequiredWarningMessage',
+        'xpack.security.management.editRole.validateRole.privilegeRequiredWarningMessage',
         {
           defaultMessage: 'Privilege is required',
         }
@@ -183,45 +164,18 @@ export class RoleValidator {
     );
   }
 
-  public setInProgressSpacePrivileges(inProgressSpacePrivileges: any[]) {
-    this.inProgressSpacePrivileges = [...inProgressSpacePrivileges];
-  }
-
-  public validateInProgressSpacePrivileges(role: Role): RoleValidationResult {
-    const { global } = role.kibana;
-
-    // A Global privilege of "all" will ignore all in progress privileges,
-    // so the form should not block saving in this scenario.
-    const shouldValidate = this.shouldValidate && !global.includes('all');
-
-    if (!shouldValidate) {
-      return valid();
-    }
-
-    const allInProgressValid = this.inProgressSpacePrivileges.every(({ spaces, privilege }) => {
-      return (
-        !this.validateSelectedSpaces(spaces, privilege).isInvalid &&
-        !this.validateSelectedPrivilege(spaces, privilege).isInvalid
-      );
-    });
-
-    if (allInProgressValid) {
-      return valid();
-    }
-    return invalid();
-  }
-
   public validateSpacePrivileges(role: Role): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
 
-    const privileges = Object.values(role.kibana.space || {});
+    const privileges = role.kibana || [];
 
-    const arePrivilegesValid = privileges.every(assignedPrivilege => !!assignedPrivilege);
-    const areInProgressPrivilegesValid = !this.validateInProgressSpacePrivileges(role).isInvalid;
+    const arePrivilegesValid = privileges.every(assignedPrivilege => {
+      return assignedPrivilege.base.length > 0 || Object.keys(assignedPrivilege.feature).length > 0;
+    });
 
-    if (arePrivilegesValid && areInProgressPrivilegesValid) {
+    if (arePrivilegesValid) {
       return valid();
     }
     return invalid();

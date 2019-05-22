@@ -1,3 +1,4 @@
+[role="xpack"]
 [[managing-index-lifecycle-policies]]
 === Managing index lifecycle policies
 

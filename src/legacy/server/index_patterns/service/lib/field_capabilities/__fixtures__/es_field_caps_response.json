@@ -193,6 +193,34 @@
           "index1"
         ]
       }
+    },
+    "multi_parent": {
+      "text": {
+        "type": "text",
+        "searchable": true,
+        "aggregatable": false
+      }
+    },
+    "multi_parent.child": {
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true
+      }
+    },
+    "object_parent": {
+      "object": {
+        "type": "object",
+        "searchable": false,
+        "aggregatable": false
+      }
+    },
+    "object_parent.child": {
+      "keyword": {
+        "type": "keyword",
+        "searchable": true,
+        "aggregatable": true
+      }
     }
   }
 }

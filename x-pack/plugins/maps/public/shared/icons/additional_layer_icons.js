@@ -9,7 +9,7 @@ import React from 'react';
 
 export const FillableCircle = ({ style }) => (
   <svg
-    className="euiIcon euiIcon--medium"
+    className="euiIcon euiIcon--medium mapFillableCircle"
     xmlns="http://www.w3.org/2000/svg"
     width="16"
     height="16"
@@ -44,7 +44,7 @@ export const FillableCircle = ({ style }) => (
   </svg>
 );
 
-export const FillableVector = ({ style }) => (
+export const FillableRectangle = ({ style }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -52,5 +52,11 @@ export const FillableVector = ({ style }) => (
     viewBox="0 0 16 16"
   >
     <rect width="15" height="15" x=".5" y=".5" style={style} rx="4"/>
+  </svg>
+);
+
+export const ColorableLine = ({ style }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <line x1="0" y1="6" x2="16" y2="6" style={style} />
   </svg>
 );

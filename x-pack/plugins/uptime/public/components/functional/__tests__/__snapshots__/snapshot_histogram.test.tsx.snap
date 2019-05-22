@@ -2,75 +2,12 @@
 
 exports[`SnapshotHistogram component renders the component without errors 1`] = `
 <FlexibleEuiSeriesChart
+  animateData={false}
   height={120}
   stackBy="y"
-  width={654.285714285714}
   xCrosshairFormat="YYYY-MM-DD hh:mmZ"
   xType="time"
 >
-  <EuiHistogramSeries
-    color="#FEFEFE"
-    data={
-      Array [
-        Object {
-          "x": 1548697920000,
-          "x0": 1548697620000,
-          "y": 7,
-        },
-        Object {
-          "x": 1548698220000,
-          "x0": 1548697920000,
-          "y": 7,
-        },
-        Object {
-          "x": 1548698520000,
-          "x0": 1548698220000,
-          "y": 7,
-        },
-        Object {
-          "x": 1548698820000,
-          "x0": 1548698520000,
-          "y": 7,
-        },
-        Object {
-          "x": 1548699120000,
-          "x0": 1548698820000,
-          "y": 8,
-        },
-        Object {
-          "x": 1548699420000,
-          "x0": 1548699120000,
-          "y": 8,
-        },
-        Object {
-          "x": 1548699720000,
-          "x0": 1548699420000,
-          "y": 8,
-        },
-        Object {
-          "x": 1548700020000,
-          "x0": 1548699720000,
-          "y": 8,
-        },
-        Object {
-          "x": 1548700320000,
-          "x0": 1548700020000,
-          "y": 8,
-        },
-        Object {
-          "x": 1548700620000,
-          "x0": 1548700320000,
-          "y": 8,
-        },
-        Object {
-          "x": 1548700920000,
-          "x0": 1548700620000,
-          "y": 8,
-        },
-      ]
-    }
-    name="Up"
-  />
   <EuiHistogramSeries
     color="#FF00FF"
     data={
@@ -133,6 +70,69 @@ exports[`SnapshotHistogram component renders the component without errors 1`] = 
       ]
     }
     name="Down"
+  />
+  <EuiHistogramSeries
+    color="#FEFEFE"
+    data={
+      Array [
+        Object {
+          "x": 1548697920000,
+          "x0": 1548697620000,
+          "y": 7,
+        },
+        Object {
+          "x": 1548698220000,
+          "x0": 1548697920000,
+          "y": 7,
+        },
+        Object {
+          "x": 1548698520000,
+          "x0": 1548698220000,
+          "y": 7,
+        },
+        Object {
+          "x": 1548698820000,
+          "x0": 1548698520000,
+          "y": 7,
+        },
+        Object {
+          "x": 1548699120000,
+          "x0": 1548698820000,
+          "y": 8,
+        },
+        Object {
+          "x": 1548699420000,
+          "x0": 1548699120000,
+          "y": 8,
+        },
+        Object {
+          "x": 1548699720000,
+          "x0": 1548699420000,
+          "y": 8,
+        },
+        Object {
+          "x": 1548700020000,
+          "x0": 1548699720000,
+          "y": 8,
+        },
+        Object {
+          "x": 1548700320000,
+          "x0": 1548700020000,
+          "y": 8,
+        },
+        Object {
+          "x": 1548700620000,
+          "x0": 1548700320000,
+          "y": 8,
+        },
+        Object {
+          "x": 1548700920000,
+          "x0": 1548700620000,
+          "y": 8,
+        },
+      ]
+    }
+    name="Up"
   />
 </FlexibleEuiSeriesChart>
 `;

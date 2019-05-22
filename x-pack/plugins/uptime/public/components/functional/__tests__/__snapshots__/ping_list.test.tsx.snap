@@ -2,78 +2,103 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiTitle
-        size="xs"
-        textTransform="none"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="Check History"
-            id="xpack.uptime.pingList.checkHistoryTitle"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiBadge
-        color="primary"
-        iconSide="left"
-      >
-        9231
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
   <EuiPanel
     grow={true}
     hasShadow={false}
-    paddingSize="l"
+    paddingSize="s"
   >
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFormRow
-          describedByIds={Array []}
-          fullWidth={false}
-          hasEmptyLabelSpace={false}
-          label="Status"
-          labelType="label"
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
         >
-          <EuiComboBox
-            compressed={false}
-            fullWidth={false}
-            isClearable={false}
-            onChange={[MockFunction]}
-            options={
-              Array [
-                Object {
-                  "label": "All",
-                  "value": "",
-                },
-              ]
-            }
-            selectedOptions={
-              Array [
-                Object {
-                  "label": "All",
-                  "value": "",
-                },
-              ]
-            }
-            singleSelection={
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiTitle
+              size="xs"
+            >
+              <h4>
+                <FormattedMessage
+                  defaultMessage="History"
+                  id="xpack.uptime.pingList.checkHistoryTitle"
+                  values={Object {}}
+                />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiBadge
+              color="hollow"
+              iconSide="left"
+            >
+              9231
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem
+            style={
               Object {
-                "asPlainText": true,
+                "minWidth": 200,
               }
             }
-          />
-        </EuiFormRow>
+          >
+            <EuiComboBox
+              aria-label="Status"
+              compressed={false}
+              fullWidth={false}
+              isClearable={false}
+              onChange={[Function]}
+              options={
+                Array [
+                  Object {
+                    "label": "All",
+                    "value": "",
+                  },
+                  Object {
+                    "label": "Up",
+                    "value": "up",
+                  },
+                  Object {
+                    "label": "Down",
+                    "value": "down",
+                  },
+                ]
+              }
+              selectedOptions={
+                Array [
+                  Object {
+                    "label": "Down",
+                    "value": "down",
+                  },
+                ]
+              }
+              singleSelection={
+                Object {
+                  "asPlainText": true,
+                }
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
+    <EuiSpacer
+      size="s"
+    />
     <EuiInMemoryTable
       columns={
         Array [
@@ -83,23 +108,13 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "field": "timestamp",
-            "name": "Timestamp",
-            "render": [Function],
-          },
-          Object {
+            "dataType": "number",
             "field": "monitor.ip",
             "name": "IP",
           },
           Object {
-            "dataType": "string",
-            "field": "monitor.id",
-            "name": "Id",
-            "width": "20%",
-          },
-          Object {
             "field": "monitor.duration.us",
-            "name": "Duration ms",
+            "name": "Duration",
             "render": [Function],
           },
           Object {
@@ -112,8 +127,10 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
+            "align": "right",
             "field": "http.response.status_code",
             "name": "Response code",
+            "render": [Function],
           },
         ]
       }
@@ -314,7 +331,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
       loading={false}
       pagination={
         Object {
-          "initialPageSize": 10,
+          "initialPageSize": 20,
           "pageSizeOptions": Array [
             5,
             10,

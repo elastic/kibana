@@ -11,11 +11,10 @@ import { AxiosRequestConfig } from 'axios';
 import React from 'react';
 import { Observable } from 'rxjs';
 import {
-  InfraMetricInput,
-  InfraNodeMetric,
-  InfraNodePath,
-  InfraPathInput,
-  InfraPathType,
+  InfraSnapshotMetricInput,
+  InfraSnapshotNodeMetric,
+  InfraSnapshotNodePath,
+  InfraSnapshotGroupbyInput,
   InfraTimerangeInput,
   SourceQuery,
 } from '../graphql/types';
@@ -33,11 +32,8 @@ export type InfraApolloClient = ApolloClient<NormalizedCacheObject>;
 export interface InfraFrameworkAdapter {
   // Insstance vars
   appState?: object;
-  dateFormat?: string;
   kbnVersion?: string;
-  scaledDateFormat?: string;
   timezone?: string;
-  darkMode?: boolean;
 
   // Methods
   setUISettings(key: string, value: any): void;
@@ -45,9 +41,10 @@ export interface InfraFrameworkAdapter {
   renderBreadcrumbs(component: React.ReactElement<any>): void;
 }
 
-export interface InfraFramworkAdapterConstructable {
-  new (uiModule: IModule, timezoneProvider: InfraTimezoneProvider): InfraFrameworkAdapter;
-}
+export type InfraFramworkAdapterConstructable = new (
+  uiModule: IModule,
+  timezoneProvider: InfraTimezoneProvider
+) => InfraFrameworkAdapter;
 
 // TODO: replace AxiosRequestConfig with something more defined
 export type InfraRequestConfig = AxiosRequestConfig;
@@ -105,8 +102,9 @@ export interface InfraWaffleMapNode {
   pathId: string;
   id: string;
   name: string;
-  path: InfraNodePath[];
-  metric: InfraNodeMetric;
+  ip?: string | null;
+  path: InfraSnapshotNodePath[];
+  metric: InfraSnapshotNodeMetric;
 }
 
 export type InfraWaffleMapGroup = InfraWaffleMapGroupOfNodes | InfraWaffleMapGroupOfGroups;
@@ -168,9 +166,8 @@ export interface InfraWaffleMapOptions {
   fields?: SourceQuery.Query['source']['configuration']['fields'] | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
-  metric: InfraMetricInput;
-  path: InfraPathInput[];
-  groupBy: InfraPathInput[];
+  metric: InfraSnapshotMetricInput;
+  groupBy: InfraSnapshotGroupbyInput[];
   legend: InfraWaffleMapLegend;
 }
 
@@ -207,6 +204,5 @@ export enum InfraWaffleMapDataFormat {
 
 export interface InfraGroupByOptions {
   text: string;
-  type: InfraPathType;
   field: string;
 }

@@ -8,7 +8,6 @@ exports[`Metric component does not render warning badge when no warning present 
   <EuiText
     className="monPipelineViewer__metric metricClass"
     color="subdued"
-    grow={true}
     size="s"
   >
     <span>

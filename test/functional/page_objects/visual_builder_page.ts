@@ -18,6 +18,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context.d';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -33,27 +34,46 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       fromTime = '2015-09-19 06:31:44.000',
       toTime = '2015-09-22 18:31:44.000'
     ) {
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickVisualBuilderChart');
-      await PageObjects.visualize.clickVisualBuilder();
+      await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    }
+
+    public async checkTabIsLoaded(testSubj: string, name: string) {
+      const isPresent = await testSubjects.exists(testSubj, { timeout: 5000 });
+      if (!isPresent) {
+        throw new Error(`TSVB ${name} tab is not loaded`);
+      }
+    }
+
+    public async checkVisualBuilderIsPresent() {
+      await this.checkTabIsLoaded('tvbVisEditor', 'Time Series');
+    }
+
+    public async checkMetricTabIsPresent() {
+      await this.checkTabIsLoaded('tsvbMetricValue', 'Metric');
+    }
+
+    public async checkGaugeTabIsPresent() {
+      await this.checkTabIsLoaded('tvbVisGaugeContainer', 'Gauge');
+    }
+
+    public async checkTopNTabIsPresent() {
+      await this.checkTabIsLoaded('tvbVisTopNTable', 'TopN');
     }
 
     public async clickMetric() {
       const button = await testSubjects.find('metricTsvbTypeBtn');
       await button.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async clickMarkdown() {
       const button = await testSubjects.find('markdownTsvbTypeBtn');
       await button.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async getMetricValue() {
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
       return metricValue.getVisibleText();
     }
@@ -61,10 +81,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async enterMarkdown(markdown: string) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       await input.type(markdown);
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async clearMarkdown() {
@@ -74,13 +92,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      if (process.platform === 'darwin') {
-        await input.pressKeys([browser.keys.COMMAND, 'a']); // Select all Mac
-      } else {
-        await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
-      }
-      await input.pressKeys(browser.keys.NULL); // Release modifier keys
-      await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
+      await input.clearValueWithKeyboard();
     }
 
     public async getMarkdownText() {
@@ -99,7 +111,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async getMarkdownTableVariables(): Promise<
-      Array<{ key: string; value: string; selector: any }>
+      Array<{ key: string; value: string; selector: WebElementWrapper }>
     > {
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
@@ -108,10 +120,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         log.debug('variable list is empty');
         return [];
       }
-      const variables: any[] = await testTableVariables.findAllByCssSelector(variablesSelector);
+      const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
 
       const variablesKeyValueSelectorMap = await Promise.all(
-        variables.map(async (variable: any) => {
+        variables.map(async variable => {
           const subVars = await variable.findAllByCssSelector('td');
           const selector = await subVars[0].findByTagName('a');
           const key = await selector.getVisibleText();
@@ -141,7 +153,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @returns {Promise<any[]>}
      * @memberof VisualBuilderPage
      */
-    public async getSubTabs() {
+    public async getSubTabs(): Promise<WebElementWrapper[]> {
       return await find.allByCssSelector('[data-test-subj$="-subtab"]');
     }
 
@@ -159,23 +171,21 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
-      await PageObjects.common.sleep(500);
     }
 
     public async clearOffsetSeries() {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async enterOffsetSeries(value: string) {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
       await el.type(value);
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async getRhythmChartLegendValue() {
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
@@ -183,7 +193,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickGauge() {
       await testSubjects.click('gaugeTsvbTypeBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async getGaugeLabel() {
@@ -198,7 +207,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickTopN() {
       await testSubjects.click('top_nTsvbTypeBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async getTopNLabel() {
@@ -213,7 +221,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clickTable() {
       await testSubjects.click('tableTsvbTypeBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async createNewAgg(nth = 0) {
@@ -228,7 +235,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       });
     }
 
-    public async selectAggType(value: string | number, nth = 0) {
+    public async selectAggType(value: string, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
       await comboBox.setElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
@@ -240,7 +247,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    public async fillInVariable(name = 'test', metric = 'count', nth = 0) {
+    public async fillInVariable(name = 'test', metric = 'Count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
       const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
       await varNameInput.type(name);

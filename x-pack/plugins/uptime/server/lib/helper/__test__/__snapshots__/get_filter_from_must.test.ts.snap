@@ -17,23 +17,6 @@ Object {
 }
 `;
 
-exports[`getFilterFromMust applies date range only for undefined filter string 2`] = `
-Object {
-  "bool": Object {
-    "filter": Array [
-      Object {
-        "range": Object {
-          "@timestamp": Object {
-            "gte": "start range",
-            "lte": "end range",
-          },
-        },
-      },
-    ],
-  },
-}
-`;
-
 exports[`getFilterFromMust applies filter clauses to output object 1`] = `
 Object {
   "bool": Object {

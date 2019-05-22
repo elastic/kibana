@@ -1,29 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AttributionControl is rendered 1`] = `
-<EuiPanel
-  className="mapWidgetControl mapAttributionControl"
-  grow={false}
-  hasShadow={false}
-  paddingSize="none"
+<div
+  className="mapAttributionControl"
 >
   <EuiText
-    color="subdued"
-    grow={true}
     size="xs"
   >
     <small>
-      attribution with no link
-      , 
-      <EuiLink
-        color="subdued"
-        href="https://coolmaps.com"
-        target="_blank"
-        type="button"
-      >
-        attribution with link
-      </EuiLink>
+      <strong>
+        attribution with no link
+        , 
+        <EuiLink
+          color="text"
+          href="https://coolmaps.com"
+          target="_blank"
+          type="button"
+        >
+          attribution with link
+        </EuiLink>
+      </strong>
     </small>
   </EuiText>
-</EuiPanel>
+</div>
 `;

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
+
 export default {
   rootDir: '../../..',
   roots: [
@@ -42,8 +44,10 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
+    'src/legacy/core_plugins/metrics/**/*.js'
   ],
   moduleNameMapper: {
+    '^plugins/([^\/.]*)/(.*)': '<rootDir>/src/legacy/core_plugins/$1/public/$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
@@ -58,6 +62,7 @@ export default {
   coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: [
     'html',
+    'text',
   ],
   moduleFileExtensions: [
     'js',
@@ -75,7 +80,7 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
-    'integration_tests/'
+    `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',

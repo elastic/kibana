@@ -7,11 +7,13 @@
 import path from 'path';
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
-import { addSerializer } from 'jest-specific-snapshot'
+import { addSerializer } from 'jest-specific-snapshot';
 
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
 addSerializer(styleSheetSerializer);
+
+// Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
   configPath: path.resolve(__dirname, './../.storybook'),
   test: multiSnapshotWithOptions({}),

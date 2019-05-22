@@ -5,9 +5,9 @@
  */
 
 import { Location } from 'history';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 
-export const transaction: Transaction = {
+export const transaction = {
   '@metadata': 'whatever',
   observer: 'whatever',
   agent: {
@@ -77,7 +77,7 @@ export const transaction: Transaction = {
   timestamp: {
     us: 1545092070952472
   }
-};
+} as Transaction;
 
 export const location: Location = {
   state: '',

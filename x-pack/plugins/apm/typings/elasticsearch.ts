@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from './common';
 
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations

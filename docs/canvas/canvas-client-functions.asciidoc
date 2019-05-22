@@ -1,3 +1,4 @@
+[role="xpack"]
 [[canvas-client-functions]]
 === Canvas client functions
 
@@ -17,9 +18,7 @@ Uses Canvas workpad asset objects to provide argument values. Usually images.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |string
@@ -66,9 +65,7 @@ Accesses URL parameters and use them in expressions. This will always return a s
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*  (Aliases: `var`, `variable`)
 |string

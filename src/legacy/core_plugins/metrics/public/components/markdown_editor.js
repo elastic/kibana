@@ -158,7 +158,7 @@ class MarkdownEditor extends Component {
                 {handlebarLink} on the available expressions."
                 values={{
                   handlebarLink: (
-                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK" rel="noreferrer noopener">
                       <FormattedMessage
                         id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.documentationLinkText"
                         defaultMessage="Click here for documentation"
@@ -207,7 +207,7 @@ class MarkdownEditor extends Component {
               <FormattedMessage
                 id="tsvb.markdownEditor.howToAccessEntireTreeDescription"
                 defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
-                creating lists with data from a group by…"
+                creating lists with data from a group by:"
                 values={{ all: (<code>_all</code>) }}
               />
             </p>

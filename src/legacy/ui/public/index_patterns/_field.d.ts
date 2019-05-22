@@ -20,7 +20,12 @@
 export interface Field {
   name: string;
   type: string;
+  // esTypes might be undefined on old index patterns that have not been refreshed since we added
+  // this prop. It is also undefined on scripted fields.
+  esTypes?: string[];
   aggregatable: boolean;
   filterable: boolean;
   searchable: boolean;
+  parent?: string;
+  subType?: string;
 }

@@ -178,7 +178,7 @@ Array [
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
                             <h2
-                              class="euiTitle euiTitle--small"
+                              class="euiTitle euiTitle--medium"
                               id="flyoutTitle"
                             >
                               Unable to fetch report info
@@ -188,9 +188,13 @@ Array [
                             class="euiFlyoutBody"
                           >
                             <div
-                              class="euiText euiText--medium"
+                              class="euiFlyoutBody__overflow"
                             >
-                              Could not fetch the job info
+                              <div
+                                class="euiText euiText--medium"
+                              >
+                                Could not fetch the job info
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -238,7 +242,7 @@ Array [
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                             >
                               <h2
-                                class="euiTitle euiTitle--small"
+                                class="euiTitle euiTitle--medium"
                                 id="flyoutTitle"
                               >
                                 Unable to fetch report info
@@ -248,9 +252,13 @@ Array [
                               class="euiFlyoutBody"
                             >
                               <div
-                                class="euiText euiText--medium"
+                                class="euiFlyoutBody__overflow"
                               >
-                                Could not fetch the job info
+                                <div
+                                  class="euiText euiText--medium"
+                                >
+                                  Could not fetch the job info
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -326,11 +334,10 @@ Array [
                         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                       >
                         <EuiTitle
-                          size="s"
-                          textTransform="none"
+                          size="m"
                         >
                           <h2
-                            className="euiTitle euiTitle--small"
+                            className="euiTitle euiTitle--medium"
                             id="flyoutTitle"
                           >
                             Unable to fetch report info
@@ -342,16 +349,17 @@ Array [
                       <div
                         className="euiFlyoutBody"
                       >
-                        <EuiText
-                          grow={true}
-                          size="m"
+                        <div
+                          className="euiFlyoutBody__overflow"
                         >
-                          <div
-                            className="euiText euiText--medium"
-                          >
-                            Could not fetch the job info
-                          </div>
-                        </EuiText>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              Could not fetch the job info
+                            </div>
+                          </EuiText>
+                        </div>
                       </div>
                     </EuiFlyoutBody>
                   </div>
@@ -443,11 +451,10 @@ Array [
         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
       >
         <EuiTitle
-          size="s"
-          textTransform="none"
+          size="m"
         >
           <h2
-            className="euiTitle euiTitle--small"
+            className="euiTitle euiTitle--medium"
             id="flyoutTitle"
           >
             Unable to fetch report info
@@ -459,16 +466,17 @@ Array [
       <div
         className="euiFlyoutBody"
       >
-        <EuiText
-          grow={true}
-          size="m"
+        <div
+          className="euiFlyoutBody__overflow"
         >
-          <div
-            className="euiText euiText--medium"
-          >
-            Could not fetch the job info
-          </div>
-        </EuiText>
+          <EuiText>
+            <div
+              className="euiText euiText--medium"
+            >
+              Could not fetch the job info
+            </div>
+          </EuiText>
+        </div>
       </div>
     </EuiFlyoutBody>
   </div>,
@@ -609,7 +617,7 @@ Array [
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
                             <h2
-                              class="euiTitle euiTitle--small"
+                              class="euiTitle euiTitle--medium"
                               id="flyoutTitle"
                             >
                               Job Info
@@ -619,8 +627,12 @@ Array [
                             class="euiFlyoutBody"
                           >
                             <div
-                              class="euiText euiText--medium"
-                            />
+                              class="euiFlyoutBody__overflow"
+                            >
+                              <div
+                                class="euiText euiText--medium"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -667,7 +679,7 @@ Array [
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                             >
                               <h2
-                                class="euiTitle euiTitle--small"
+                                class="euiTitle euiTitle--medium"
                                 id="flyoutTitle"
                               >
                                 Job Info
@@ -677,8 +689,12 @@ Array [
                               class="euiFlyoutBody"
                             >
                               <div
-                                class="euiText euiText--medium"
-                              />
+                                class="euiFlyoutBody__overflow"
+                              >
+                                <div
+                                  class="euiText euiText--medium"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -753,11 +769,10 @@ Array [
                         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                       >
                         <EuiTitle
-                          size="s"
-                          textTransform="none"
+                          size="m"
                         >
                           <h2
-                            className="euiTitle euiTitle--small"
+                            className="euiTitle euiTitle--medium"
                             id="flyoutTitle"
                           >
                             Job Info
@@ -769,14 +784,15 @@ Array [
                       <div
                         className="euiFlyoutBody"
                       >
-                        <EuiText
-                          grow={true}
-                          size="m"
+                        <div
+                          className="euiFlyoutBody__overflow"
                         >
-                          <div
-                            className="euiText euiText--medium"
-                          />
-                        </EuiText>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            />
+                          </EuiText>
+                        </div>
                       </div>
                     </EuiFlyoutBody>
                   </div>
@@ -868,11 +884,10 @@ Array [
         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
       >
         <EuiTitle
-          size="s"
-          textTransform="none"
+          size="m"
         >
           <h2
-            className="euiTitle euiTitle--small"
+            className="euiTitle euiTitle--medium"
             id="flyoutTitle"
           >
             Job Info
@@ -884,14 +899,15 @@ Array [
       <div
         className="euiFlyoutBody"
       >
-        <EuiText
-          grow={true}
-          size="m"
+        <div
+          className="euiFlyoutBody__overflow"
         >
-          <div
-            className="euiText euiText--medium"
-          />
-        </EuiText>
+          <EuiText>
+            <div
+              className="euiText euiText--medium"
+            />
+          </EuiText>
+        </div>
       </div>
     </EuiFlyoutBody>
   </div>,

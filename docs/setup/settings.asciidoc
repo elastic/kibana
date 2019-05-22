@@ -80,7 +80,7 @@ requests to check Elasticsearch for an updated list of nodes.
 `elasticsearch.sniffOnStart:`:: *Default: false* Attempt to find other
 Elasticsearch nodes on startup.
 
-`elasticsearch.sniffOnConectionFault:`:: *Default: false* Update the list of
+`elasticsearch.sniffOnConnectionFault:`:: *Default: false* Update the list of
 Elasticsearch nodes immediately following a connection fault.
 
 `elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls
@@ -118,6 +118,9 @@ password that the Kibana server uses to perform maintenance on the Kibana index
 at startup. Your Kibana users still need to authenticate with Elasticsearch,
 which is proxied through the Kibana server.
 
+`interpreter.enableInVisualize`:: *Default: true* Enables use of interpreter in 
+Visualize.
+
 `kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
 
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
@@ -127,6 +130,12 @@ be lowercase, and conform to {es} {ref}/indices-create-index.html[index name lim
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
 stores log output.
+
+`logging.json:`:: *Default: false* Logs output as JSON. When set to `true`, the 
+logs will be formatted as JSON strings that include timestamp, log level, context, message 
+text and any other metadata that may be associated with the log message itself. 
+If `logging.dest.stdout` is set and there is no interactive terminal ("TTY"), this setting
+will default to `true`.
 
 `logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output other than error messages.
@@ -290,10 +299,14 @@ disable the License Management user interface.
 `xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the
 Rollup user interface.
 
+`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`.
+
+
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{docdir}/settings/i18n-settings.asciidoc[]
 include::{docdir}/settings/logs-ui-settings.asciidoc[]
 include::{docdir}/settings/ml-settings.asciidoc[]
 include::{docdir}/settings/monitoring-settings.asciidoc[]

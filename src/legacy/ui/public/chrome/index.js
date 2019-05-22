@@ -19,5 +19,5 @@
 
 import { chrome } from './chrome';
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default chrome;

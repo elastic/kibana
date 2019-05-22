@@ -83,7 +83,7 @@ export default function ({ getService, updateBaselines }) {
 
     // if we want to do multiple different tests using the same data, or reusing a part of expression its
     // possible to retrieve the intermediate result and reuse it in later expressions
-    describe('reusing partial results', () => {
+    describe.skip('reusing partial results', () => {
       it ('does some screenshot comparisons', async () => {
         const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},

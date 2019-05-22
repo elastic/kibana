@@ -1,4 +1,4 @@
-// tslint:disable
+/* eslint-disable */
 
 // Type definitions for expect.js 0.3.1
 // Project: https://github.com/Automattic/expect.js

@@ -6,33 +6,22 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
-import {
-  getTabsFromObject,
-  PropertyTab
-} from '../../../shared/PropertiesTable/tabConfig';
+import { idx } from '@kbn/elastic-idx';
+import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 
-export type ErrorTab = PropertyTab | ExceptionTab | LogTab;
-
-interface LogTab {
-  key: 'log_stacktrace';
+export interface ErrorTab {
+  key: 'log_stacktrace' | 'exception_stacktrace' | 'metadata';
   label: string;
 }
 
-export const logStacktraceTab: LogTab = {
+export const logStacktraceTab: ErrorTab = {
   key: 'log_stacktrace',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
     defaultMessage: 'Log stacktrace'
   })
 };
 
-interface ExceptionTab {
-  key: 'exception_stacktrace';
-  label: string;
-}
-
-export const exceptionStacktraceTab: ExceptionTab = {
+export const exceptionStacktraceTab: ErrorTab = {
   key: 'exception_stacktrace',
   label: i18n.translate(
     'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
@@ -42,11 +31,18 @@ export const exceptionStacktraceTab: ExceptionTab = {
   )
 };
 
+export const metadataTab: ErrorTab = {
+  key: 'metadata',
+  label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+    defaultMessage: 'Metadata'
+  })
+};
+
 export function getTabs(error: APMError) {
   const hasLogStacktrace = !isEmpty(idx(error, _ => _.error.log.stacktrace));
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,
-    ...getTabsFromObject(error)
+    metadataTab
   ];
 }

@@ -85,7 +85,7 @@ export class IndexPatternTable extends React.Component<Props, State> {
 
   public render() {
     return (
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" data-test-subj="indexPatternTable">
         {this.state.showFlyout && (
           <CreateIndexPatternPrompt onClose={() => this.setState({ showFlyout: false })} />
         )}

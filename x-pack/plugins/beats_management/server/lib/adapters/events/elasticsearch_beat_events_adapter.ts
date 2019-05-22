@@ -13,7 +13,7 @@ export class ElasticsearchBeatEventsAdapter implements BeatEventsAdapter {
   // @ts-ignore
   constructor(private readonly database: DatabaseAdapter) {}
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   public bulkInsert = async (user: FrameworkUser, beatId: string, events: BeatEvent[]) => {
     // await this.database.putTemplate(INDEX_NAMES.EVENTS_TODAY, beatsIndexTemplate);
   };

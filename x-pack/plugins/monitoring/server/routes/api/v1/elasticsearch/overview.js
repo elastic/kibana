@@ -13,7 +13,8 @@ import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_overview';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, INDEX_PATTERN_FILEBEAT } from '../../../../../common/constants';
+import { getLogs } from '../../../../lib/logs';
 
 export function esOverviewRoute(server) {
   server.route({
@@ -38,18 +39,24 @@ export function esOverviewRoute(server) {
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, '*');
+
+      const start = req.payload.timeRange.min;
+      const end = req.payload.timeRange.max;
 
       try {
-        const [ clusterStats, metrics, shardActivity ] = await Promise.all([
+        const [ clusterStats, metrics, shardActivity, logs ] = await Promise.all([
           getClusterStats(req, esIndexPattern, clusterUuid),
           getMetrics(req, esIndexPattern, metricSet),
           getLastRecovery(req, esIndexPattern),
+          getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end })
         ]);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
 
         return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           metrics,
+          logs,
           shardActivity,
         };
       } catch (err) {

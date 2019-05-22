@@ -62,7 +62,7 @@ function getRemoveFilter({ entityName, entityValue, filter }) {
 }
 
 /*
- * Component for rendering an entity in the anomalies table, displaying the value
+ * Component for rendering an entity, displaying the value
  * of the entity, such as a partitioning or influencer field value, and optionally links for
  * adding or removing a filter on this entity.
  */

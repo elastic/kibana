@@ -10,6 +10,7 @@ import fs from 'fs';
 import Boom from 'boom';
 import { prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
+import { jobServiceProvider } from '../../models/job_service';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -150,6 +151,20 @@ export class DataRecognizer {
     return (resp.hits.total !== 0);
   }
 
+  async listModules() {
+    const manifestFiles = await this.loadManifestFiles();
+    const ids = manifestFiles
+      .map(({ json }) => json.id)
+      .sort((a, b) => a.localeCompare(b)); // sort as json files are read from disk and could be in any order.
+
+    const modules = [];
+    for (let i = 0; i < ids.length; i++) {
+      const module = await this.getModule(ids[i]);
+      modules.push(module);
+    }
+    return modules;
+  }
+
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
@@ -224,6 +239,7 @@ export class DataRecognizer {
     }
 
     return {
+      ...manifestJSON,
       jobs,
       datafeeds,
       kibana
@@ -252,15 +268,12 @@ export class DataRecognizer {
 
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
-    const manifestFile = await this.getManifestFile(moduleId);
 
-    if (indexPatternName === undefined &&
-      manifestFile && manifestFile.json &&
-      manifestFile.json.defaultIndexPattern === undefined) {
+    if (indexPatternName === undefined && moduleConfig.defaultIndexPattern === undefined) {
 
       throw Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
     }
-    this.indexPatternName = (indexPatternName === undefined) ? manifestFile.json.defaultIndexPattern : indexPatternName;
+    this.indexPatternName = (indexPatternName === undefined) ? moduleConfig.defaultIndexPattern : indexPatternName;
     this.indexPatternId = this.getIndexPatternId(this.indexPatternName);
 
     // create an empty results object
@@ -328,6 +341,47 @@ export class DataRecognizer {
     }
     // merge all the save results
     this.updateResults(results, saveResults);
+    return results;
+  }
+
+  async dataRecognizerJobsExist(moduleId) {
+    const results = {};
+
+    // Load the module with the specified ID and check if the jobs
+    // in the module have been created.
+    const module = await this.getModule(moduleId);
+    if (module && module.jobs) {
+      // Add a wildcard at the front of each of the job IDs in the module,
+      // as a prefix may have been supplied when creating the jobs in the module.
+      const jobIds = module.jobs.map(job => `*${job.id}`);
+      const { jobsExist } = jobServiceProvider(this.callWithRequest);
+      const jobInfo = await jobsExist(jobIds);
+
+      // Check if the value for any of the jobs is false.
+      const doJobsExist = (Object.values(jobInfo).includes(false)) === false;
+      results.jobsExist = doJobsExist;
+
+      if (doJobsExist === true) {
+        // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
+        const jobStats = await this.callWithRequest('ml.jobStats', { jobId: jobIds });
+        const jobStatsJobs = [];
+        if (jobStats.jobs && jobStats.jobs.length > 0) {
+          jobStats.jobs.forEach((job) => {
+            const jobStat = {
+              id: job.job_id
+            };
+
+            if (job.data_counts) {
+              jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp;
+              jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp;
+            }
+            jobStatsJobs.push(jobStat);
+          });
+        }
+        results.jobs = jobStatsJobs;
+      }
+    }
+
     return results;
   }
 
@@ -558,6 +612,12 @@ export class DataRecognizer {
   // listing each job/datafeed/savedObject with a save success boolean
   createResultsTemplate(moduleConfig) {
     const results = {};
+    const reducedConfig = {
+      jobs: moduleConfig.jobs,
+      datafeeds: moduleConfig.datafeeds,
+      kibana: moduleConfig.kibana,
+    };
+
     function createResultsItems(configItems, resultItems, index) {
       resultItems[index] = [];
       configItems.forEach((j) => {
@@ -568,13 +628,13 @@ export class DataRecognizer {
       });
     }
 
-    Object.keys(moduleConfig).forEach((i) => {
-      if (Array.isArray(moduleConfig[i])) {
-        createResultsItems(moduleConfig[i], results, i);
+    Object.keys(reducedConfig).forEach((i) => {
+      if (Array.isArray(reducedConfig[i])) {
+        createResultsItems(reducedConfig[i], results, i);
       } else {
         results[i] = {};
-        Object.keys(moduleConfig[i]).forEach((k) => {
-          createResultsItems(moduleConfig[i][k], results[i], k);
+        Object.keys(reducedConfig[i]).forEach((k) => {
+          createResultsItems(reducedConfig[i][k], results[i], k);
         });
       }
     });

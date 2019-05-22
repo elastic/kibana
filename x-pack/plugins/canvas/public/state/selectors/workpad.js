@@ -116,14 +116,25 @@ export function getElementStats(state) {
 
 export function getGlobalFilterExpression(state) {
   return getAllElements(state)
-    .map(el => el.filter)
-    .filter(str => str != null && str.length)
+    .reduce((acc, el) => {
+      // check that a filter is defined
+      if (el.filter != null && el.filter.length) {
+        return acc.concat(el.filter);
+      }
+
+      return acc;
+    }, [])
     .join(' | ');
 }
 
 // element getters
+export function getSelectedToplevelNodes(state) {
+  return get(state, 'transient.selectedToplevelNodes', []);
+}
+
 export function getSelectedElementId(state) {
-  return get(state, 'transient.selectedElement');
+  const toplevelNodes = getSelectedToplevelNodes(state);
+  return toplevelNodes.length === 1 ? toplevelNodes[0] : null;
 }
 
 export function getSelectedElement(state) {
@@ -164,14 +175,7 @@ const getNodesOfPage = page =>
     .map(augment('element'))
     .concat((get(page, 'groups') || []).map(augment('group')));
 
-// todo unify or DRY up with `getElements`
-export function getNodes(state, pageId, withAst = true) {
-  const id = pageId || getSelectedPage(state);
-  if (!id) {
-    return [];
-  }
-
-  const page = getPageById(state, id);
+export const getNodesForPage = (page, withAst) => {
   const elements = getNodesOfPage(page);
 
   if (!elements) {
@@ -186,6 +190,16 @@ export function getNodes(state, pageId, withAst = true) {
   }
 
   return elements.map(appendAst);
+};
+
+// todo unify or DRY up with `getElements`
+export function getNodes(state, pageId, withAst = true) {
+  const id = pageId || getSelectedPage(state);
+  if (!id) {
+    return [];
+  }
+
+  return getNodesForPage(getPageById(state, id), withAst);
 }
 
 export function getElementById(state, id, pageId) {
@@ -225,4 +239,8 @@ export function getContextForIndex(state, index) {
 
 export function getRefreshInterval(state) {
   return get(state, 'transient.refresh.interval', 0);
+}
+
+export function getAutoplay(state) {
+  return get(state, 'transient.autoplay');
 }

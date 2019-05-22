@@ -23,6 +23,7 @@ import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
+import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(fieldName)) {
@@ -35,19 +36,16 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
   const valueNode = typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
   const isPhraseNode = literal.buildNode(isPhrase);
-
   return {
     arguments: [fieldNode, valueNode, isPhraseNode],
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
-
   const fieldName = ast.toElasticsearchQuery(fieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
-
   if (fieldNameArg.value === null) {
     if (valueArg.type === 'wildcard') {
       return {
@@ -67,7 +65,6 @@ export function toElasticsearchQuery(node, indexPattern) {
   }
 
   const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
-
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
   // fields. If a user queries on a field that exists in one pattern but not the other, the index pattern without the
@@ -116,6 +113,22 @@ export function toElasticsearchQuery(node, indexPattern) {
         }
       }];
     }
+    /*
+      If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
+      dateFormatTZ can have the value of 'Browser', in which case we guess the timezone using moment.tz.guess.
+    */
+    else if (field.type === 'date') {
+      const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
+      return [...accumulator, {
+        range: {
+          [field.name]: {
+            gte: value,
+            lte: value,
+            ...timeZoneParam,
+          },
+        }
+      }];
+    }
     else {
       const queryType = type === 'phrase' ? 'match_phrase' : 'match';
       return [...accumulator, {
@@ -133,4 +146,5 @@ export function toElasticsearchQuery(node, indexPattern) {
     }
   };
 }
+
 

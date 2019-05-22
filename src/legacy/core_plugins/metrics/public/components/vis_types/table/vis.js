@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { fieldFormats } from 'ui/registry/field_formats';
@@ -27,6 +27,8 @@ import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { METRIC_TYPES } from '../../../../common/metric_types';
 
 const DateFormat = fieldFormats.getType('date');
 
@@ -44,12 +46,6 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
-const getPercentileLabel = (metric, item) => {
-  const { value } = _.last(metric.percentiles);
-  const label = calculateLabel(metric, item.metrics);
-  return `${label}, ${value || 0}`;
-};
-
 class TableVis extends Component {
 
   constructor(props) {
@@ -58,9 +54,7 @@ class TableVis extends Component {
   }
 
   get visibleSeries() {
-    return _
-      .get(this.props, 'model.series', [])
-      .filter(series => !series.hidden);
+    return get(this.props, 'model.series', []).filter(series => !series.hidden);
   }
 
   renderRow = row => {
@@ -108,11 +102,23 @@ class TableVis extends Component {
       order: 'asc',
     });
 
+    const calculateHeaderLabel = (metric, item) => {
+      const defaultLabel = item.label || calculateLabel(metric, item.metrics);
+
+      switch (metric.type) {
+        case METRIC_TYPES.PERCENTILE:
+          return `${defaultLabel} (${last(metric.percentiles).value || 0})`;
+        case METRIC_TYPES.PERCENTILE_RANK:
+          return `${defaultLabel} (${last(metric.values) || 0})`;
+        default:
+          return defaultLabel;
+      }
+    };
+
     const columns = this.visibleSeries.map(item => {
-      const metric = _.last(item.metrics);
-      const label = metric.type === 'percentile' ?
-        getPercentileLabel(metric, item) :
-        item.label || calculateLabel(metric, item.metrics);
+      const metric = last(item.metrics);
+      const label = calculateHeaderLabel(metric, item);
+
       const handleClick = () => {
         if (!isSortable(metric)) return;
         let order;
@@ -193,7 +199,7 @@ class TableVis extends Component {
     const header = this.renderHeader();
     let rows;
 
-    if (_.isArray(visData.series) && visData.series.length) {
+    if (isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
     } else {
       const message = model.pivot_id ?

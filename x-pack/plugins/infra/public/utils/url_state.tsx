@@ -53,7 +53,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
     this.handleInitialize(location);
   }
 
-  // tslint:disable-next-line:member-ordering this is really a method despite what tslint thinks
+  // eslint-disable-next-line @typescript-eslint/member-ordering this is really a method despite what eslint thinks
   private replaceStateInLocation = throttle(1000, (urlState: UrlState | undefined) => {
     const { history, location, urlStateKey } = this.props;
 

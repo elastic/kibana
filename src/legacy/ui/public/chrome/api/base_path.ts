@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../../../../../core/public/base_path';
+import { BasePathSetup } from '../../../../../core/public';
 let newPlatformBasePath: BasePathSetup;
 
-export function __newPlatformInit__(instance: BasePathSetup) {
+export function __newPlatformSetup__(instance: BasePathSetup) {
   if (newPlatformBasePath) {
     throw new Error('ui/chrome/api/base_path is already initialized');
   }

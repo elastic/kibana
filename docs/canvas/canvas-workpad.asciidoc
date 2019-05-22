@@ -1,3 +1,4 @@
+[role="xpack"]
 [[canvas-workpad]]
 === Using the workpad
 

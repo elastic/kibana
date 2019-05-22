@@ -10,10 +10,11 @@ export default function ({ getService, loadTestFile }) {
   const es = getService('es');
 
   describe('beats', () => {
-    const cleanup = () => es.indices.delete({
-      index: ES_INDEX_NAME,
-      ignore: [404]
-    });
+    const cleanup = () =>
+      es.indices.delete({
+        index: ES_INDEX_NAME,
+        ignore: [404],
+      });
 
     beforeEach(cleanup);
 

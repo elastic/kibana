@@ -24,8 +24,6 @@ import { SavedObjectsClient } from '../';
 import { getSortedObjectsForExport } from '../export';
 import { Prerequisites } from './types';
 
-const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
-
 interface ExportRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
@@ -36,10 +34,15 @@ interface ExportRequest extends Hapi.Request {
       type: string;
       id: string;
     }>;
+    includeReferencesDeep: boolean;
   };
 }
 
-export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+export const createExportRoute = (
+  prereqs: Prerequisites,
+  server: Hapi.Server,
+  supportedTypes: string[]
+) => ({
   path: '/api/saved_objects/_export',
   method: 'POST',
   config: {
@@ -48,18 +51,19 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
       payload: Joi.object()
         .keys({
           type: Joi.array()
-            .items(Joi.string().valid(ALLOWED_TYPES))
+            .items(Joi.string().valid(supportedTypes))
             .single()
             .optional(),
           objects: Joi.array()
             .items({
               type: Joi.string()
-                .valid(ALLOWED_TYPES)
+                .valid(supportedTypes)
                 .required(),
               id: Joi.string().required(),
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))
             .optional(),
+          includeReferencesDeep: Joi.boolean().default(false),
         })
         .xor('type', 'objects')
         .default(),
@@ -71,6 +75,7 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
         types: request.payload.type,
         objects: request.payload.objects,
         exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
+        includeReferencesDeep: request.payload.includeReferencesDeep,
       });
       return h
         .response(docsToExport.map(doc => stringify(doc)).join('\n'))

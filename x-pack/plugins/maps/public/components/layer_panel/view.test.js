@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./style_tabs', () => ({
-  StyleTabs: () => {
-    return (<div>mockStyleTabs</div>);
+jest.mock('./style_settings', () => ({
+  StyleSettings: () => {
+    return (<div>mockStyleSettings</div>);
   }
 }));
 

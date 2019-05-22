@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import 'ui/filters/moment';
+import '../../directives/moment';
 import { isNumber, forEach, merge } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { TimeBuckets } from 'ui/time_buckets';

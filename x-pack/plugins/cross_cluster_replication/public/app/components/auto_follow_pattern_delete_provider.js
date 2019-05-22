@@ -87,7 +87,7 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
             )
           }
           onMouseOver={this.onMouseOverModal}
-          data-test-subj="ccrAutoFollowPatternDeleteConfirmationModal"
+          data-test-subj="deleteAutoFollowPatternConfirmation"
         >
           {!isSingle && (
             <Fragment>

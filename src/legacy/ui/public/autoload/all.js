@@ -19,6 +19,5 @@
 
 import './accessibility';
 import './modules';
-import './filters';
 import './settings';
 import './styles';

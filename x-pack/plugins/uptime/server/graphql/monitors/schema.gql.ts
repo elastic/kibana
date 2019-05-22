@@ -7,11 +7,19 @@
 import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
+  "The data used to enrich the filter bar."
   type FilterBar {
+    "A series of monitor IDs in the heartbeat indices."
     ids: [MonitorKey!]
+    "The location values users have configured for the agents."
+    locations: [String!]
+    "The names users have configured for the monitors."
     names: [String!]
+    "The ports of the monitored endpoints."
     ports: [Int!]
+    "The schemes used by the monitors."
     schemes: [String!]
+    "The possible status values contained in the indices."
     statuses: [String!]
   }
 
@@ -96,22 +104,33 @@ export const monitorsSchema = gql`
     "Information from the latest document."
     ping: Ping
     "Buckets of recent up count status data."
-    upSeries: [MonitorSeriesPoint]
+    upSeries: [MonitorSeriesPoint!]
     "Buckets of recent down count status data."
-    downSeries: [MonitorSeriesPoint]
+    downSeries: [MonitorSeriesPoint!]
   }
 
   type LatestMonitorsResult {
     monitors: [LatestMonitor!]
   }
 
+  "A representation of an error state for a monitor."
   type ErrorListItem {
+    "The number of times this error has occurred."
+    count: Int!
+    "The most recent message associated with this error type."
     latestMessage: String
+    "The location assigned to the agent reporting this error."
+    location: String
+    "The ID of the monitor reporting the error."
     monitorId: String
-    type: String!
-    count: Int
+    "The name configured for the monitor by the user."
+    name: String
+    "The status code, if available, of the error request."
     statusCode: String
+    "When the most recent error state occurred."
     timestamp: String
+    "What kind of error the monitor reported."
+    type: String!
   }
 
   type MonitorPageTitle {
@@ -133,9 +152,20 @@ export const monitorsSchema = gql`
       monitorId: String!
       dateRangeStart: String!
       dateRangeEnd: String!
+      location: String
     ): MonitorChart
 
-    getLatestMonitors(dateRangeStart: String!, dateRangeEnd: String!, monitorId: String): [Ping!]!
+    "Fetch the most recent event data for a monitor ID, date range, location."
+    getLatestMonitors(
+      "The lower limit of the date range."
+      dateRangeStart: String!
+      "The upper limit of the date range."
+      dateRangeEnd: String!
+      "Optional: a specific monitor ID filter."
+      monitorId: String
+      "Optional: a specific instance location filter."
+      location: String
+    ): [Ping!]!
 
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 

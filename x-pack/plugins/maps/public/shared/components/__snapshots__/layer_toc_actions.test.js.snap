@@ -2,22 +2,37 @@
 
 exports[`LayerTocActions is rendered 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiButtonEmpty
-      color="text"
-      data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-      flush="left"
-      iconSide="left"
-      onClick={[Function]}
-      size="xs"
-      type="button"
+    <EuiToolTip
+      content="simulated tooltip content at zoom: 0"
+      delay="regular"
+      position="top"
+      title="layer 1"
     >
-      <div>
-        icon mock
-      </div>
-    </EuiButtonEmpty>
+      <EuiButtonEmpty
+        className="mapTocEntry__layerName eui-textLeft"
+        color="text"
+        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
+        flush="left"
+        iconSide="left"
+        onClick={[Function]}
+        size="xs"
+        type="button"
+      >
+        <span
+          className="mapTocEntry__layerNameIcon"
+        >
+          <span>
+            mockIcon
+          </span>
+        </span>
+        layer 1
+      </EuiButtonEmpty>
+    </EuiToolTip>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -54,6 +69,24 @@ exports[`LayerTocActions is rendered 1`] = `
               "name": "Hide layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -65,22 +98,37 @@ exports[`LayerTocActions is rendered 1`] = `
 
 exports[`LayerTocActions should disable fit to data when supportsFitToBounds is false 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiButtonEmpty
-      color="text"
-      data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-      flush="left"
-      iconSide="left"
-      onClick={[Function]}
-      size="xs"
-      type="button"
+    <EuiToolTip
+      content="simulated tooltip content at zoom: 0"
+      delay="regular"
+      position="top"
+      title="layer 1"
     >
-      <div>
-        icon mock
-      </div>
-    </EuiButtonEmpty>
+      <EuiButtonEmpty
+        className="mapTocEntry__layerName eui-textLeft"
+        color="text"
+        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
+        flush="left"
+        iconSide="left"
+        onClick={[Function]}
+        size="xs"
+        type="button"
+      >
+        <span
+          className="mapTocEntry__layerNameIcon"
+        >
+          <span>
+            mockIcon
+          </span>
+        </span>
+        layer 1
+      </EuiButtonEmpty>
+    </EuiToolTip>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -117,67 +165,22 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
               "name": "Hide layer",
               "onClick": [Function],
             },
-          ],
-          "title": "Layer actions",
-        },
-      ]
-    }
-  />
-</EuiPopover>
-`;
-
-exports[`LayerTocActions should display spinner when layer is loading 1`] = `
-<EuiPopover
-  anchorPosition="leftUp"
-  button={
-    <EuiButtonEmpty
-      color="text"
-      data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-      flush="left"
-      iconSide="left"
-      onClick={[Function]}
-      size="xs"
-      type="button"
-    >
-      <EuiLoadingSpinner
-        size="m"
-      />
-    </EuiButtonEmpty>
-  }
-  closePopover={[Function]}
-  hasArrow={true}
-  id="contextMenu"
-  isOpen={false}
-  ownFocus={false}
-  panelPaddingSize="none"
-  withTitle={true}
->
-  <EuiContextMenu
-    data-test-subj="layerTocActionsPanellayer1"
-    initialPanelId={0}
-    panels={
-      Array [
-        Object {
-          "id": 0,
-          "items": Array [
             Object {
-              "data-test-subj": "fitToBoundsButton",
-              "disabled": false,
+              "data-test-subj": "editLayerButton",
               "icon": <EuiIcon
                 size="m"
-                type="search"
+                type="pencil"
               />,
-              "name": "Fit to data",
+              "name": "Edit layer",
               "onClick": [Function],
-              "toolTipContent": null,
             },
             Object {
-              "data-test-subj": "layerVisibilityToggleButton",
+              "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
-                type="eye"
+                type="copy"
               />,
-              "name": "Hide layer",
+              "name": "Clone layer",
               "onClick": [Function],
             },
           ],
@@ -189,161 +192,39 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
 </EuiPopover>
 `;
 
-exports[`LayerTocActions should provide feedback when layer is not visible because of current zoom level 1`] = `
+exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiButtonEmpty
-      color="text"
-      data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-      flush="left"
-      iconSide="left"
-      onClick={[Function]}
-      size="xs"
-      type="button"
+    <EuiToolTip
+      content="simulated tooltip content at zoom: 0"
+      delay="regular"
+      position="top"
+      title="layer 1"
     >
-      <EuiToolTip
-        content="Map is at zoom level 0.
-          This layer is only visible between zoom levels 2 to 3."
-        delay="regular"
-        position="top"
+      <EuiButtonEmpty
+        className="mapTocEntry__layerName eui-textLeft"
+        color="text"
+        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
+        flush="left"
+        iconSide="left"
+        onClick={[Function]}
+        size="xs"
+        type="button"
       >
-        <div>
-          icon mock
-        </div>
-      </EuiToolTip>
-    </EuiButtonEmpty>
+        <span
+          className="mapTocEntry__layerNameIcon"
+        >
+          <span>
+            mockIcon
+          </span>
+        </span>
+        layer 1
+      </EuiButtonEmpty>
+    </EuiToolTip>
   }
-  closePopover={[Function]}
-  hasArrow={true}
-  id="contextMenu"
-  isOpen={false}
-  ownFocus={false}
-  panelPaddingSize="none"
-  withTitle={true}
->
-  <EuiContextMenu
-    data-test-subj="layerTocActionsPanellayer1"
-    initialPanelId={0}
-    panels={
-      Array [
-        Object {
-          "id": 0,
-          "items": Array [
-            Object {
-              "data-test-subj": "fitToBoundsButton",
-              "disabled": false,
-              "icon": <EuiIcon
-                size="m"
-                type="search"
-              />,
-              "name": "Fit to data",
-              "onClick": [Function],
-              "toolTipContent": null,
-            },
-            Object {
-              "data-test-subj": "layerVisibilityToggleButton",
-              "icon": <EuiIcon
-                size="m"
-                type="eye"
-              />,
-              "name": "Hide layer",
-              "onClick": [Function],
-            },
-          ],
-          "title": "Layer actions",
-        },
-      ]
-    }
-  />
-</EuiPopover>
-`;
-
-exports[`LayerTocActions should show visible toggle when layer is not visible 1`] = `
-<EuiPopover
-  anchorPosition="leftUp"
-  button={
-    <EuiButtonEmpty
-      color="text"
-      data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-      flush="left"
-      iconSide="left"
-      onClick={[Function]}
-      size="xs"
-      type="button"
-    >
-      <div>
-        icon mock
-      </div>
-    </EuiButtonEmpty>
-  }
-  closePopover={[Function]}
-  hasArrow={true}
-  id="contextMenu"
-  isOpen={false}
-  ownFocus={false}
-  panelPaddingSize="none"
-  withTitle={true}
->
-  <EuiContextMenu
-    data-test-subj="layerTocActionsPanellayer1"
-    initialPanelId={0}
-    panels={
-      Array [
-        Object {
-          "id": 0,
-          "items": Array [
-            Object {
-              "data-test-subj": "fitToBoundsButton",
-              "disabled": false,
-              "icon": <EuiIcon
-                size="m"
-                type="search"
-              />,
-              "name": "Fit to data",
-              "onClick": [Function],
-              "toolTipContent": null,
-            },
-            Object {
-              "data-test-subj": "layerVisibilityToggleButton",
-              "icon": <EuiIcon
-                size="m"
-                type="eyeClosed"
-              />,
-              "name": "Show layer",
-              "onClick": [Function],
-            },
-          ],
-          "title": "Layer actions",
-        },
-      ]
-    }
-  />
-</EuiPopover>
-`;
-
-exports[`LayerTocActions should show warning when layer has errors 1`] = `
-<EuiPopover
-  anchorPosition="leftUp"
-  button={
-    <EuiButtonEmpty
-      color="text"
-      data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-      flush="left"
-      iconSide="left"
-      onClick={[Function]}
-      size="xs"
-      type="button"
-    >
-      <EuiIconTip
-        aria-label="Load warning"
-        color="warning"
-        content="simulated layer error"
-        size="m"
-        type="alert"
-      />
-    </EuiButtonEmpty>
-  }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
