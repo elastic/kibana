@@ -16,12 +16,6 @@ export interface SavedObjectReference {
 }
 
 export interface ActionsPlugin {
-  // create: ActionService['create'];
-  // get: ActionService['get'];
-  // find: ActionService['find'];
-  // delete: ActionService['delete'];
-  // update: ActionService['update'];
-  // fire: ActionService['fire'];
   registerType: ActionTypeService['register'];
   listTypes: ActionTypeService['list'];
 }
