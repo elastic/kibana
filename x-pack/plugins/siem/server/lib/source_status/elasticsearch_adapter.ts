@@ -10,8 +10,7 @@ import { SourceStatusAdapter } from './index';
 
 export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
-
-  public async getIndexNames(request: FrameworkRequest, aliasName: string) {
+  public async getIndexNames(request: FrameworkRequest, aliasName: string | string[]) {
     const indexMaps = await Promise.all([
       this.framework
         .callWithRequest(request, 'indices.getAlias', {
@@ -38,12 +37,13 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
     });
   }
 
-  public async hasIndices(request: FrameworkRequest, indexNames: string) {
+  public async hasIndices(request: FrameworkRequest, indexNames: string | string[]) {
     return await this.framework
       .callWithRequest(request, 'search', {
         index: indexNames,
         size: 0,
         terminate_after: 1,
+        allow_no_indices: true,
       })
       .then(
         response => response._shards.total > 0,

@@ -14,13 +14,13 @@ import { SearchSource } from '../../../../kibana_services';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE } from '../../../../../common/constants';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE, DEFAULT_ES_DOC_LIMIT } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
 import { getTermsFields } from '../../../utils/get_terms_fields';
 
-import { DEFAULT_ES_DOC_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 export class ESSearchSource extends AbstractESSource {
 
@@ -54,7 +54,6 @@ export class ESSearchSource extends AbstractESSource {
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
-      limit: _.get(descriptor, 'limit', DEFAULT_ES_DOC_LIMIT),
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     }, inspectorAdapters);
@@ -129,7 +128,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
-    const searchSource = await this._makeSearchSource(searchFilters, this._descriptor.limit);
+    const searchSource = await this._makeSearchSource(searchFilters, DEFAULT_ES_DOC_LIMIT);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
     // 1) all scripted fields
@@ -234,7 +233,7 @@ export class ESSearchSource extends AbstractESSource {
   async getSupportedShapeTypes() {
     let geoFieldType;
     try {
-      const geoField = this._getGeoField();
+      const geoField = await this._getGeoField();
       geoFieldType = geoField.type;
     } catch(error) {
       // ignore exeception
