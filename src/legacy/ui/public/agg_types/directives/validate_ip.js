@@ -29,7 +29,7 @@ uiModules
       scope: {
         'ngModel': '=',
       },
-      link: function ($scope, elem, attr, ngModel) {
+      link: function (ngModel) {
         function validateIp(ipAddress) {
           if (ipAddress == null || ipAddress === '') {
             ngModel.$setValidity('ipInput', true);
