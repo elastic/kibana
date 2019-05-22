@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 interface Props {
@@ -32,7 +33,13 @@ export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
         </React.Fragment>
       ))}
     >
-      <EuiBadge>{environments.length} environments</EuiBadge>
+      <EuiBadge>
+        {i18n.translate('xpack.apm.servicesTable.environmentCount', {
+          values: { environmentCount: environments.length },
+          defaultMessage:
+            '{environmentCount, plural, one {1 environment} other {# environments}}'
+        })}
+      </EuiBadge>
     </EuiToolTip>
   );
 };
