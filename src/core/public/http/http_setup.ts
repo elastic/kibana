@@ -47,7 +47,7 @@ export const setup = (
   const kibanaVersion = injectedMetadata.getKibanaVersion();
   const basePath = injectedMetadata.getBasePath() || '';
 
-  function appendToBasePath(path: string): string {
+  function prependBasePath(path: string): string {
     return modifyUrl(path, parts => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${basePath}${parts.pathname}`;
@@ -56,7 +56,7 @@ export const setup = (
   }
 
   async function fetch(path: string, options?: HttpFetchOptions): Promise<HttpBody> {
-    const { query, prependBasePath, ...fetchOptions } = merge(
+    const { query, prependBasePath: shouldPrependBasePath, ...fetchOptions } = merge(
       {
         method: 'GET',
         credentials: 'same-origin',
@@ -69,7 +69,7 @@ export const setup = (
       options || {}
     );
     const url = format({
-      pathname: prependBasePath ? appendToBasePath(path) : path,
+      pathname: shouldPrependBasePath ? prependBasePath(path) : path,
       query,
     });
 
@@ -131,7 +131,7 @@ export const setup = (
     return basePath;
   }
 
-  function removeFromBasePath(path: string): string {
+  function removeBasePath(path: string): string {
     if (!basePath) {
       return path;
     }
@@ -187,8 +187,8 @@ export const setup = (
   return {
     stop,
     getBasePath,
-    appendToBasePath,
-    removeFromBasePath,
+    prependBasePath,
+    removeBasePath,
     fetch,
     delete: shorthand('DELETE'),
     get: shorthand('GET'),

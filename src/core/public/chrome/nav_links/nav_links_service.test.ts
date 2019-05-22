@@ -29,7 +29,7 @@ const mockAppService = {
 } as any;
 
 const mockHttp = {
-  appendToBasePath: (url: string) => `wow${url}`,
+  prependBasePath: (url: string) => `wow${url}`,
 } as any;
 
 describe('NavLinksService', () => {

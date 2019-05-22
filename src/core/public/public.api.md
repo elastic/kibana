@@ -171,8 +171,6 @@ export interface HttpServiceBase {
     // (undocumented)
     addLoadingCount(count$: Observable<number>): void;
     // (undocumented)
-    appendToBasePath(path: string): string;
-    // (undocumented)
     delete: HttpHandler;
     // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
     // 
@@ -193,9 +191,11 @@ export interface HttpServiceBase {
     // (undocumented)
     post: HttpHandler;
     // (undocumented)
+    prependBasePath(path: string): string;
+    // (undocumented)
     put: HttpHandler;
     // (undocumented)
-    removeFromBasePath(path: string): string;
+    removeBasePath(path: string): string;
     // (undocumented)
     stop(): void;
 }

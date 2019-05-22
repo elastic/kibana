@@ -31,6 +31,6 @@ export function __newPlatformSetup__(instance: HttpSetup) {
 
 export function initChromeBasePathApi(chrome: { [key: string]: any }) {
   chrome.getBasePath = newPlatformHttp.getBasePath.bind(newPlatformHttp);
-  chrome.addBasePath = newPlatformHttp.appendToBasePath.bind(newPlatformHttp);
-  chrome.removeBasePath = newPlatformHttp.removeFromBasePath.bind(newPlatformHttp);
+  chrome.addBasePath = newPlatformHttp.prependBasePath.bind(newPlatformHttp);
+  chrome.removeBasePath = newPlatformHttp.removeBasePath.bind(newPlatformHttp);
 }

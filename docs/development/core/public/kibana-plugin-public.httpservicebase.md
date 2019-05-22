@@ -29,9 +29,9 @@ export interface HttpServiceBase
 |  Method | Description |
 |  --- | --- |
 |  [addLoadingCount(count$)](./kibana-plugin-public.httpservicebase.addloadingcount.md) |  |
-|  [appendToBasePath(path)](./kibana-plugin-public.httpservicebase.appendtobasepath.md) |  |
 |  [getBasePath()](./kibana-plugin-public.httpservicebase.getbasepath.md) |  |
 |  [getLoadingCount$()](./kibana-plugin-public.httpservicebase.getloadingcount$.md) |  |
-|  [removeFromBasePath(path)](./kibana-plugin-public.httpservicebase.removefrombasepath.md) |  |
+|  [prependBasePath(path)](./kibana-plugin-public.httpservicebase.prependbasepath.md) |  |
+|  [removeBasePath(path)](./kibana-plugin-public.httpservicebase.removebasepath.md) |  |
 |  [stop()](./kibana-plugin-public.httpservicebase.stop.md) |  |
 

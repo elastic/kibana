@@ -25,8 +25,8 @@ import { FatalErrorsSetup } from '../fatal_errors';
 export interface HttpServiceBase {
   stop(): void;
   getBasePath(): string;
-  appendToBasePath(path: string): string;
-  removeFromBasePath(path: string): string;
+  prependBasePath(path: string): string;
+  removeBasePath(path: string): string;
   fetch: HttpHandler;
   delete: HttpHandler;
   get: HttpHandler;
