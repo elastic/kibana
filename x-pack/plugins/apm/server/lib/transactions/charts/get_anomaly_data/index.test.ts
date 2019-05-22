@@ -28,7 +28,8 @@ describe('getAnomalySeries', () => {
         config: {
           get: () => 'myIndex' as any,
           has: () => true
-        }
+        },
+        uiFiltersES: []
       }
     });
   });

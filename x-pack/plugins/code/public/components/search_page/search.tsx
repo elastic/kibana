@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -119,11 +119,22 @@ class SearchPage extends React.PureComponent<Props, State> {
       scope,
       documentSearchResults,
       languages,
+      isLoading,
       repositories,
       repositorySearchResults,
     } = this.props;
 
-    let mainComp = (
+    let mainComp = isLoading ? (
+      <div>
+        <EuiSpacer size="xl" />
+        <EuiSpacer size="xl" />
+        <EuiText textAlign="center">Loading...</EuiText>
+        <EuiSpacer size="m" />
+        <EuiText textAlign="center">
+          <EuiLoadingSpinner size="xl" />
+        </EuiText>
+      </div>
+    ) : (
       <EmptyPlaceholder
         query={query}
         toggleOptionsFlyout={() => {

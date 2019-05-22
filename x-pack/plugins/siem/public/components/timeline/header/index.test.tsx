@@ -22,11 +22,13 @@ describe('Header', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TimelineHeader
+          browserFields={{}}
+          dataProviders={mockDataProviders}
           id="foo"
           indexPattern={indexPattern}
-          dataProviders={mockDataProviders}
           onChangeDataProviderKqlQuery={jest.fn()}
           onChangeDroppableAndProvider={jest.fn()}
+          onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
@@ -44,11 +46,13 @@ describe('Header', () => {
       const wrapper = mount(
         <TestProviders>
           <TimelineHeader
+            browserFields={{}}
+            dataProviders={mockDataProviders}
             id="foo"
             indexPattern={indexPattern}
-            dataProviders={mockDataProviders}
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}

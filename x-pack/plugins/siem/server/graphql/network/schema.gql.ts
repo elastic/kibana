@@ -107,6 +107,7 @@ export const networkSchema = gql`
       pagination: PaginationInput!
       sort: NetworkTopNFlowSortField!
       timerange: TimerangeInput!
+      defaultIndex: [String!]!
     ): NetworkTopNFlowData!
     NetworkDns(
       filterQuery: String
@@ -115,6 +116,7 @@ export const networkSchema = gql`
       pagination: PaginationInput!
       sort: NetworkDnsSortField!
       timerange: TimerangeInput!
+      defaultIndex: [String!]!
     ): NetworkDnsData!
   }
 `;
