@@ -1,4 +1,7 @@
 {
+  "_meta": {
+    "secondsAgo": 30
+  },
   "kibana": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 1,
@@ -16,7 +19,7 @@
     "detected": {
       "mightExist": true
     },
-    "byUuid": null
+    "byUuid": {}
   },
   "apm": {
     "totalUniqueInstanceCount": 0,
@@ -24,7 +27,7 @@
     "detected": {
       "mightExist": false
     },
-    "byUuid": null
+    "byUuid": {}
   },
   "logstash": {
     "totalUniqueInstanceCount": 0,
@@ -32,7 +35,7 @@
     "detected": {
       "mightExist": false
     },
-    "byUuid": null
+    "byUuid": {}
   },
   "elasticsearch": {
     "totalUniqueInstanceCount": 1,

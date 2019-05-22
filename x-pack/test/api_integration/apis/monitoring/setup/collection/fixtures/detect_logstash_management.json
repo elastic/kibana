@@ -1,11 +1,14 @@
 {
+  "_meta": {
+    "secondsAgo": 30
+  },
   "kibana": {
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "detected": {
       "doesExist": true
     },
-    "byUuid": null
+    "byUuid": {}
   },
   "beats": {
     "totalUniqueInstanceCount": 0,
@@ -13,7 +16,7 @@
     "detected": {
       "mightExist": false
     },
-    "byUuid": null
+    "byUuid": {}
   },
   "logstash": {
     "totalUniqueInstanceCount": 0,
@@ -21,7 +24,7 @@
     "detected": {
       "mightExist": true
     },
-    "byUuid": null
+    "byUuid": {}
   },
   "apm": {
     "totalUniqueInstanceCount": 0,
@@ -29,7 +32,7 @@
     "detected": {
       "mightExist": false
     },
-    "byUuid": null
+    "byUuid": {}
   },
   "elasticsearch": {
     "totalUniqueInstanceCount": 0,
@@ -37,6 +40,6 @@
     "detected": {
       "doesExist": true
     },
-    "byUuid": null
+    "byUuid": {}
   }
 }

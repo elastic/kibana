@@ -1,4 +1,7 @@
 {
+  "_meta": {
+    "secondsAgo": 30
+  },
   "kibana": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 1,
