@@ -331,10 +331,14 @@ function createRepoStatusPollingRun(handleStatus: any, pollingStopActionFunction
 function createRepoStatusPollingRunner(
   parseRepoUri: (_: Action<any>) => RepositoryUri,
   pollStatusRun: any,
+  pollingStopActionFunction: any,
   pollingStopActionFunctionPattern: any
 ) {
   return function*(action: Action<any>) {
     const repoUri = parseRepoUri(action);
+
+    // Cancel existing runner to deduplicate the polling
+    yield put(pollingStopActionFunction(repoUri));
 
     // Make a fork to run the repo index status polling
     const task = yield fork(pollStatusRun, repoUri);
@@ -365,17 +369,20 @@ const runPollRepoDeleteStatus = createRepoStatusPollingRun(
 const pollRepoCloneStatusRunner = createRepoStatusPollingRunner(
   parseCloneStatusPollingRequest,
   runPollRepoCloneStatus,
+  pollRepoCloneStatusStop,
   cloneRepoStatusPollingStopPattern
 );
 
 const pollRepoIndexStatusRunner = createRepoStatusPollingRunner(
   parseIndexStatusPollingRequest,
   runPollRepoIndexStatus,
+  pollRepoIndexStatusStop,
   indexRepoStatusPollingStopPattern
 );
 
 const pollRepoDeleteStatusRunner = createRepoStatusPollingRunner(
   parseDeleteStatusPollingRequest,
   runPollRepoDeleteStatus,
+  pollRepoDeleteStatusStop,
   deleteRepoStatusPollingStopPattern
 );
