@@ -17,6 +17,6 @@ export function abbreviateWholeNumber(value, maxDigits) {
   if (Math.abs(value) < Math.pow(10, maxNumDigits)) {
     return value;
   } else {
-    return numeral(value).format('0a');
+    return numeral(value).format('0.0a');
   }
 }
