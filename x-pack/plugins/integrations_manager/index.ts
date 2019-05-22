@@ -43,7 +43,7 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
         id: ID,
         name: pluginTitle,
         icon: ICON,
-        navLinkId: pluginTitle,
+        navLinkId: ID,
         app: [ID, 'kibana'],
         catalogue: [ID],
         privileges: {
