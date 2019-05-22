@@ -114,7 +114,7 @@ export class JobCreator {
     return this._job_config.groups;
   }
 
-  public enableModelPlot(enable: boolean) {
+  public set modelPlot(enable: boolean) {
     if (enable) {
       this._job_config.model_plot_config = {
         enabled: true,
@@ -122,6 +122,13 @@ export class JobCreator {
     } else {
       delete this._job_config.model_plot_config;
     }
+  }
+
+  public get modelPlot() {
+    return (
+      this._job_config.model_plot_config !== undefined &&
+      this._job_config.model_plot_config.enabled === true
+    );
   }
 
   public set useDedicatedIndex(enable: boolean) {
@@ -155,7 +162,7 @@ export class JobCreator {
     }
   }
 
-  public setDuration(start: number, end: number) {
+  public setTimeRange(start: number, end: number) {
     this._start = start;
     this._end = end;
   }
