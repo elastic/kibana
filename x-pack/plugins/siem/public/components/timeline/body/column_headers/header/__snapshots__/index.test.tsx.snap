@@ -15,7 +15,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         <Styled(styled.div) />
       </Styled(EuiFlexItem)>
     }
-    height="100%"
+    height="35px"
     id="@timestamp"
     onResize={[Function]}
     render={[Function]}
