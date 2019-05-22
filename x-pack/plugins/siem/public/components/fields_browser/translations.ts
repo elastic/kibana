@@ -52,7 +52,7 @@ export const NO_FIELDS_MATCH = i18n.translate('xpack.siem.fieldBrowser.noFieldsM
 
 export const NO_FIELDS_MATCH_INPUT = (searchInput: string) =>
   i18n.translate('xpack.siem.fieldBrowser.noFieldsMatchInputLabel', {
-    defaultMessage: `No fields match ${searchInput}`,
+    defaultMessage: 'No fields match {searchInput}',
     values: {
       searchInput,
     },
@@ -68,7 +68,7 @@ export const SELECT_FIELDS = i18n.translate('xpack.siem.fieldBrowser.selectField
 
 export const VIEW_CATEGORY = (categoryId: string) =>
   i18n.translate('xpack.siem.fieldBrowser.viewCategoryTooltip', {
-    defaultMessage: `View all ${categoryId} fields`,
+    defaultMessage: 'View all ${categoryId} fields',
     values: {
       categoryId,
     },
