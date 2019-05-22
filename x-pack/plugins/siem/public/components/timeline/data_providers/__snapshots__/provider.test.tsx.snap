@@ -12,6 +12,7 @@ exports[`Provider rendering renders correctly against snapshot 1`] = `
       "name": "Provider 1",
       "queryMatch": Object {
         "field": "name",
+        "operator": ":",
         "value": "Provider 1",
       },
     }

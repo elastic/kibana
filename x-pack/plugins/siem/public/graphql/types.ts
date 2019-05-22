@@ -31,10 +31,71 @@ export type EsValue = any;
 // ====================================================
 
 export interface Query {
+  getNote: NoteResult;
+
+  getNotesByTimelineId: NoteResult[];
+
+  getNotesByEventId: NoteResult[];
+
+  getAllNotes: ResponseNotes;
+
+  getAllPinnedEventsByTimelineId: PinnedEvent[];
   /** Get a security data source by id */
   source: Source;
   /** Get a list of all security data sources */
   allSources: Source[];
+
+  getOneTimeline: TimelineResult;
+
+  getAllTimeline: ResponseTimelines;
+}
+
+export interface NoteResult {
+  eventId?: string | null;
+
+  note?: string | null;
+
+  timelineId?: string | null;
+
+  noteId: string;
+
+  created?: number | null;
+
+  createdBy?: string | null;
+
+  timelineVersion?: string | null;
+
+  updated?: number | null;
+
+  updatedBy?: string | null;
+
+  version?: string | null;
+}
+
+export interface ResponseNotes {
+  notes: NoteResult[];
+
+  totalCount?: number | null;
+}
+
+export interface PinnedEvent {
+  pinnedEventId: string;
+
+  eventId?: string | null;
+
+  timelineId?: string | null;
+
+  timelineVersion?: string | null;
+
+  created?: number | null;
+
+  createdBy?: string | null;
+
+  updated?: number | null;
+
+  updatedBy?: string | null;
+
+  version?: string | null;
 }
 
 export interface Source {
@@ -1175,6 +1236,187 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface TimelineResult {
+  savedObjectId: string;
+
+  columns?: ColumnHeaderResult[] | null;
+
+  dataProviders?: DataProviderResult[] | null;
+
+  dateRange?: DateRangePickerResult | null;
+
+  description?: string | null;
+
+  eventIdToNoteIds?: NoteResult[] | null;
+
+  favorite?: FavoriteTimelineResult[] | null;
+
+  kqlMode?: string | null;
+
+  kqlQuery?: SerializedFilterQueryResult | null;
+
+  notes?: NoteResult[] | null;
+
+  noteIds?: string[] | null;
+
+  pinnedEventIds?: string[] | null;
+
+  pinnedEventsSaveObject?: PinnedEvent[] | null;
+
+  title?: string | null;
+
+  sort?: SortTimelineResult | null;
+
+  created?: number | null;
+
+  createdBy?: string | null;
+
+  updated?: number | null;
+
+  updatedBy?: string | null;
+
+  version: string;
+}
+
+export interface ColumnHeaderResult {
+  aggregatable?: boolean | null;
+
+  category?: string | null;
+
+  columnHeaderType?: string | null;
+
+  description?: string | null;
+
+  example?: string | null;
+
+  indexes?: string[] | null;
+
+  id?: string | null;
+
+  name?: string | null;
+
+  placeholder?: string | null;
+
+  searchable?: boolean | null;
+
+  type?: string | null;
+}
+
+export interface DataProviderResult {
+  id?: string | null;
+
+  name?: string | null;
+
+  enabled?: boolean | null;
+
+  excluded?: boolean | null;
+
+  kqlQuery?: string | null;
+
+  queryMatch?: QueryMatchResult | null;
+
+  and?: DataProviderResult[] | null;
+}
+
+export interface QueryMatchResult {
+  field?: string | null;
+
+  displayField?: string | null;
+
+  value?: string | null;
+
+  displayValue?: string | null;
+
+  operator?: string | null;
+}
+
+export interface DateRangePickerResult {
+  start?: number | null;
+
+  end?: number | null;
+}
+
+export interface FavoriteTimelineResult {
+  fullName?: string | null;
+
+  userName?: string | null;
+
+  favoriteDate?: number | null;
+}
+
+export interface SerializedFilterQueryResult {
+  filterQuery?: SerializedKueryQueryResult | null;
+}
+
+export interface SerializedKueryQueryResult {
+  kuery?: KueryFilterQueryResult | null;
+
+  serializedQuery?: string | null;
+}
+
+export interface KueryFilterQueryResult {
+  kind?: string | null;
+
+  expression?: string | null;
+}
+
+export interface SortTimelineResult {
+  columnId?: string | null;
+
+  sortDirection?: string | null;
+}
+
+export interface ResponseTimelines {
+  timeline: (TimelineResult | null)[];
+
+  totalCount?: number | null;
+}
+
+export interface Mutation {
+  /** Persists a note */
+  persistNote: ResponseNote;
+
+  deleteNote?: boolean | null;
+
+  deleteNoteByTimelineId?: boolean | null;
+  /** Persists a pinned event in a timeline */
+  persistPinnedEventOnTimeline?: PinnedEvent | null;
+  /** Remove a pinned events in a timeline */
+  deletePinnedEventOnTimeline: boolean;
+  /** Remove all pinned events in a timeline */
+  deleteAllPinnedEventsOnTimeline: boolean;
+  /** Persists a timeline */
+  persistTimeline: ResponseTimeline;
+
+  persistFavorite: ResponseFavoriteTimeline;
+
+  deleteTimeline: boolean;
+}
+
+export interface ResponseNote {
+  code?: number | null;
+
+  message?: string | null;
+
+  note: NoteResult;
+}
+
+export interface ResponseTimeline {
+  code?: number | null;
+
+  message?: string | null;
+
+  timeline: TimelineResult;
+}
+
+export interface ResponseFavoriteTimeline {
+  savedObjectId: string;
+
+  version: string;
+
+  favorite?: FavoriteTimelineResult[] | null;
+}
+
 export interface OsFields {
   platform?: string | null;
 
@@ -1208,6 +1450,18 @@ export interface HostFields {
 // ====================================================
 // InputTypes
 // ====================================================
+
+export interface PageInfoNote {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface SortNote {
+  sortField: SortFieldNote;
+
+  sortOrder: Direction;
+}
 
 export interface TimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
@@ -1275,13 +1529,170 @@ export interface NetworkDnsSortField {
   direction: Direction;
 }
 
+export interface PageInfoTimeline {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface SortTimeline {
+  sortField: SortFieldTimeline;
+
+  sortOrder: Direction;
+}
+
+export interface NoteInput {
+  eventId?: string | null;
+
+  note?: string | null;
+
+  timelineId?: string | null;
+}
+
+export interface TimelineInput {
+  columns?: ColumnHeaderInput[] | null;
+
+  dataProviders?: DataProviderInput[] | null;
+
+  description?: string | null;
+
+  kqlMode?: string | null;
+
+  kqlQuery?: SerializedFilterQueryInput | null;
+
+  title?: string | null;
+
+  dateRange?: DateRangePickerInput | null;
+
+  sort?: SortTimelineInput | null;
+}
+
+export interface ColumnHeaderInput {
+  aggregatable?: boolean | null;
+
+  category?: string | null;
+
+  columnHeaderType?: string | null;
+
+  description?: string | null;
+
+  example?: string | null;
+
+  indexes?: string[] | null;
+
+  id?: string | null;
+
+  name?: string | null;
+
+  placeholder?: string | null;
+
+  searchable?: boolean | null;
+
+  type?: string | null;
+}
+
+export interface DataProviderInput {
+  id?: string | null;
+
+  name?: string | null;
+
+  enabled?: boolean | null;
+
+  excluded?: boolean | null;
+
+  kqlQuery?: string | null;
+
+  queryMatch?: QueryMatchInput | null;
+
+  and?: DataProviderInput[] | null;
+}
+
+export interface QueryMatchInput {
+  field?: string | null;
+
+  displayField?: string | null;
+
+  value?: string | null;
+
+  displayValue?: string | null;
+
+  operator?: string | null;
+}
+
+export interface SerializedFilterQueryInput {
+  filterQuery?: SerializedKueryQueryInput | null;
+}
+
+export interface SerializedKueryQueryInput {
+  kuery?: KueryFilterQueryInput | null;
+
+  serializedQuery?: string | null;
+}
+
+export interface KueryFilterQueryInput {
+  kind?: string | null;
+
+  expression?: string | null;
+}
+
+export interface DateRangePickerInput {
+  start?: number | null;
+
+  end?: number | null;
+}
+
+export interface SortTimelineInput {
+  columnId?: string | null;
+
+  sortDirection?: string | null;
+}
+
+export interface FavoriteTimelineInput {
+  fullName?: string | null;
+
+  userName?: string | null;
+
+  favoriteDate?: number | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
 
+export interface GetNoteQueryArgs {
+  id: string;
+}
+export interface GetNotesByTimelineIdQueryArgs {
+  timelineId: string;
+}
+export interface GetNotesByEventIdQueryArgs {
+  eventId: string;
+}
+export interface GetAllNotesQueryArgs {
+  pageInfo?: PageInfoNote | null;
+
+  search?: string | null;
+
+  sort?: SortNote | null;
+}
+export interface GetAllPinnedEventsByTimelineIdQueryArgs {
+  timelineId: string;
+}
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
+}
+export interface GetOneTimelineQueryArgs {
+  id: string;
+}
+export interface GetAllTimelineQueryArgs {
+  pageInfo?: PageInfoTimeline | null;
+
+  search?: string | null;
+
+  sort?: SortTimeline | null;
+
+  onlyUserFavorite?: boolean | null;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -1517,10 +1928,58 @@ export interface IndicesExistSourceStatusArgs {
 export interface IndexFieldsSourceStatusArgs {
   defaultIndex: string[];
 }
+export interface PersistNoteMutationArgs {
+  noteId?: string | null;
+
+  version?: string | null;
+
+  note: NoteInput;
+}
+export interface DeleteNoteMutationArgs {
+  id: string[];
+
+  version?: string | null;
+}
+export interface DeleteNoteByTimelineIdMutationArgs {
+  timelineId: string;
+
+  version?: string | null;
+}
+export interface PersistPinnedEventOnTimelineMutationArgs {
+  pinnedEventId?: string | null;
+
+  eventId: string;
+
+  timelineId?: string | null;
+}
+export interface DeletePinnedEventOnTimelineMutationArgs {
+  id: string[];
+}
+export interface DeleteAllPinnedEventsOnTimelineMutationArgs {
+  timelineId: string;
+}
+export interface PersistTimelineMutationArgs {
+  id?: string | null;
+
+  version?: string | null;
+
+  timeline: TimelineInput;
+}
+export interface PersistFavoriteMutationArgs {
+  timelineId?: string | null;
+}
+export interface DeleteTimelineMutationArgs {
+  id: string[];
+}
 
 // ====================================================
 // Enums
 // ====================================================
+
+export enum SortFieldNote {
+  updatedBy = 'updatedBy',
+  updated = 'updated',
+}
 
 export enum Direction {
   asc = 'asc',
@@ -1591,6 +2050,13 @@ export enum NetworkDnsFields {
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
+}
+
+export enum SortFieldTimeline {
+  title = 'title',
+  description = 'description',
+  updated = 'updated',
+  created = 'created',
 }
 
 // ====================================================
@@ -2896,6 +3362,129 @@ export namespace SourceQuery {
   };
 }
 
+export namespace GetAllTimeline {
+  export type Variables = {
+    pageInfo: PageInfoTimeline;
+    search?: string | null;
+    sort?: SortTimeline | null;
+    onlyUserFavorite?: boolean | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    getAllTimeline: GetAllTimeline;
+  };
+
+  export type GetAllTimeline = {
+    __typename?: 'ResponseTimelines';
+
+    totalCount?: number | null;
+
+    timeline: (Timeline | null)[];
+  };
+
+  export type Timeline = {
+    __typename?: 'TimelineResult';
+
+    savedObjectId: string;
+
+    description?: string | null;
+
+    favorite?: Favorite[] | null;
+
+    eventIdToNoteIds?: EventIdToNoteIds[] | null;
+
+    notes?: Notes[] | null;
+
+    noteIds?: string[] | null;
+
+    pinnedEventIds?: string[] | null;
+
+    title?: string | null;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version: string;
+  };
+
+  export type Favorite = {
+    __typename?: 'FavoriteTimelineResult';
+
+    fullName?: string | null;
+
+    userName?: string | null;
+
+    favoriteDate?: number | null;
+  };
+
+  export type EventIdToNoteIds = {
+    __typename?: 'NoteResult';
+
+    eventId?: string | null;
+
+    note?: string | null;
+
+    timelineId?: string | null;
+
+    noteId: string;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    timelineVersion?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version?: string | null;
+  };
+
+  export type Notes = {
+    __typename?: 'NoteResult';
+
+    eventId?: string | null;
+
+    note?: string | null;
+
+    timelineId?: string | null;
+
+    timelineVersion?: string | null;
+
+    noteId: string;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version?: string | null;
+  };
+}
+
+export namespace DeleteTimelineMutation {
+  export type Variables = {
+    id: string[];
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    deleteTimeline: boolean;
+  };
+}
+
 export namespace GetTimelineDetailsQuery {
   export type Variables = {
     sourceId: string;
@@ -2940,6 +3529,38 @@ export namespace GetTimelineDetailsQuery {
     values?: ToStringArray | null;
 
     originalValue?: EsValue | null;
+  };
+}
+
+export namespace PersistTimelineFavoriteMutation {
+  export type Variables = {
+    timelineId?: string | null;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    persistFavorite: PersistFavorite;
+  };
+
+  export type PersistFavorite = {
+    __typename?: 'ResponseFavoriteTimeline';
+
+    savedObjectId: string;
+
+    version: string;
+
+    favorite?: Favorite[] | null;
+  };
+
+  export type Favorite = {
+    __typename?: 'FavoriteTimelineResult';
+
+    fullName?: string | null;
+
+    userName?: string | null;
+
+    favoriteDate?: number | null;
   };
 }
 
@@ -3617,6 +4238,540 @@ export namespace GetTimelineQuery {
     resumed?: ToBooleanArray | null;
 
     version?: ToStringArray | null;
+  };
+}
+
+export namespace PersistTimelineNoteMutation {
+  export type Variables = {
+    noteId?: string | null;
+    version?: string | null;
+    note: NoteInput;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    persistNote: PersistNote;
+  };
+
+  export type PersistNote = {
+    __typename?: 'ResponseNote';
+
+    code?: number | null;
+
+    message?: string | null;
+
+    note: Note;
+  };
+
+  export type Note = {
+    __typename?: 'NoteResult';
+
+    eventId?: string | null;
+
+    note?: string | null;
+
+    timelineId?: string | null;
+
+    timelineVersion?: string | null;
+
+    noteId: string;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version?: string | null;
+  };
+}
+
+export namespace GetOneTimeline {
+  export type Variables = {
+    id: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    getOneTimeline: GetOneTimeline;
+  };
+
+  export type GetOneTimeline = {
+    __typename?: 'TimelineResult';
+
+    savedObjectId: string;
+
+    columns?: Columns[] | null;
+
+    dataProviders?: DataProviders[] | null;
+
+    dateRange?: DateRange | null;
+
+    description?: string | null;
+
+    eventIdToNoteIds?: EventIdToNoteIds[] | null;
+
+    favorite?: Favorite[] | null;
+
+    kqlMode?: string | null;
+
+    kqlQuery?: KqlQuery | null;
+
+    notes?: Notes[] | null;
+
+    noteIds?: string[] | null;
+
+    pinnedEventIds?: string[] | null;
+
+    pinnedEventsSaveObject?: PinnedEventsSaveObject[] | null;
+
+    title?: string | null;
+
+    sort?: Sort | null;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version: string;
+  };
+
+  export type Columns = {
+    __typename?: 'ColumnHeaderResult';
+
+    aggregatable?: boolean | null;
+
+    category?: string | null;
+
+    columnHeaderType?: string | null;
+
+    description?: string | null;
+
+    example?: string | null;
+
+    indexes?: string[] | null;
+
+    id?: string | null;
+
+    name?: string | null;
+
+    searchable?: boolean | null;
+
+    type?: string | null;
+  };
+
+  export type DataProviders = {
+    __typename?: 'DataProviderResult';
+
+    id?: string | null;
+
+    name?: string | null;
+
+    enabled?: boolean | null;
+
+    excluded?: boolean | null;
+
+    kqlQuery?: string | null;
+
+    queryMatch?: QueryMatch | null;
+
+    and?: And[] | null;
+  };
+
+  export type QueryMatch = {
+    __typename?: 'QueryMatchResult';
+
+    field?: string | null;
+
+    displayField?: string | null;
+
+    value?: string | null;
+
+    displayValue?: string | null;
+
+    operator?: string | null;
+  };
+
+  export type And = {
+    __typename?: 'DataProviderResult';
+
+    id?: string | null;
+
+    name?: string | null;
+
+    enabled?: boolean | null;
+
+    excluded?: boolean | null;
+
+    kqlQuery?: string | null;
+
+    queryMatch?: _QueryMatch | null;
+  };
+
+  export type _QueryMatch = {
+    __typename?: 'QueryMatchResult';
+
+    field?: string | null;
+
+    displayField?: string | null;
+
+    value?: string | null;
+
+    displayValue?: string | null;
+
+    operator?: string | null;
+  };
+
+  export type DateRange = {
+    __typename?: 'DateRangePickerResult';
+
+    start?: number | null;
+
+    end?: number | null;
+  };
+
+  export type EventIdToNoteIds = {
+    __typename?: 'NoteResult';
+
+    eventId?: string | null;
+
+    note?: string | null;
+
+    timelineId?: string | null;
+
+    noteId: string;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    timelineVersion?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version?: string | null;
+  };
+
+  export type Favorite = {
+    __typename?: 'FavoriteTimelineResult';
+
+    fullName?: string | null;
+
+    userName?: string | null;
+
+    favoriteDate?: number | null;
+  };
+
+  export type KqlQuery = {
+    __typename?: 'SerializedFilterQueryResult';
+
+    filterQuery?: FilterQuery | null;
+  };
+
+  export type FilterQuery = {
+    __typename?: 'SerializedKueryQueryResult';
+
+    kuery?: Kuery | null;
+
+    serializedQuery?: string | null;
+  };
+
+  export type Kuery = {
+    __typename?: 'KueryFilterQueryResult';
+
+    kind?: string | null;
+
+    expression?: string | null;
+  };
+
+  export type Notes = {
+    __typename?: 'NoteResult';
+
+    eventId?: string | null;
+
+    note?: string | null;
+
+    timelineId?: string | null;
+
+    timelineVersion?: string | null;
+
+    noteId: string;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version?: string | null;
+  };
+
+  export type PinnedEventsSaveObject = {
+    __typename?: 'PinnedEvent';
+
+    pinnedEventId: string;
+
+    eventId?: string | null;
+
+    timelineId?: string | null;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version?: string | null;
+  };
+
+  export type Sort = {
+    __typename?: 'SortTimelineResult';
+
+    columnId?: string | null;
+
+    sortDirection?: string | null;
+  };
+}
+
+export namespace PersistTimelineMutation {
+  export type Variables = {
+    timelineId?: string | null;
+    version?: string | null;
+    timeline: TimelineInput;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    persistTimeline: PersistTimeline;
+  };
+
+  export type PersistTimeline = {
+    __typename?: 'ResponseTimeline';
+
+    code?: number | null;
+
+    message?: string | null;
+
+    timeline: Timeline;
+  };
+
+  export type Timeline = {
+    __typename?: 'TimelineResult';
+
+    savedObjectId: string;
+
+    version: string;
+
+    columns?: Columns[] | null;
+
+    dataProviders?: DataProviders[] | null;
+
+    description?: string | null;
+
+    favorite?: Favorite[] | null;
+
+    kqlMode?: string | null;
+
+    kqlQuery?: KqlQuery | null;
+
+    title?: string | null;
+
+    dateRange?: DateRange | null;
+
+    sort?: Sort | null;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+  };
+
+  export type Columns = {
+    __typename?: 'ColumnHeaderResult';
+
+    aggregatable?: boolean | null;
+
+    category?: string | null;
+
+    columnHeaderType?: string | null;
+
+    description?: string | null;
+
+    example?: string | null;
+
+    indexes?: string[] | null;
+
+    id?: string | null;
+
+    name?: string | null;
+
+    searchable?: boolean | null;
+
+    type?: string | null;
+  };
+
+  export type DataProviders = {
+    __typename?: 'DataProviderResult';
+
+    id?: string | null;
+
+    name?: string | null;
+
+    enabled?: boolean | null;
+
+    excluded?: boolean | null;
+
+    kqlQuery?: string | null;
+
+    queryMatch?: QueryMatch | null;
+
+    and?: And[] | null;
+  };
+
+  export type QueryMatch = {
+    __typename?: 'QueryMatchResult';
+
+    field?: string | null;
+
+    displayField?: string | null;
+
+    value?: string | null;
+
+    displayValue?: string | null;
+
+    operator?: string | null;
+  };
+
+  export type And = {
+    __typename?: 'DataProviderResult';
+
+    id?: string | null;
+
+    name?: string | null;
+
+    enabled?: boolean | null;
+
+    excluded?: boolean | null;
+
+    kqlQuery?: string | null;
+
+    queryMatch?: _QueryMatch | null;
+  };
+
+  export type _QueryMatch = {
+    __typename?: 'QueryMatchResult';
+
+    field?: string | null;
+
+    displayField?: string | null;
+
+    value?: string | null;
+
+    displayValue?: string | null;
+
+    operator?: string | null;
+  };
+
+  export type Favorite = {
+    __typename?: 'FavoriteTimelineResult';
+
+    fullName?: string | null;
+
+    userName?: string | null;
+
+    favoriteDate?: number | null;
+  };
+
+  export type KqlQuery = {
+    __typename?: 'SerializedFilterQueryResult';
+
+    filterQuery?: FilterQuery | null;
+  };
+
+  export type FilterQuery = {
+    __typename?: 'SerializedKueryQueryResult';
+
+    kuery?: Kuery | null;
+
+    serializedQuery?: string | null;
+  };
+
+  export type Kuery = {
+    __typename?: 'KueryFilterQueryResult';
+
+    kind?: string | null;
+
+    expression?: string | null;
+  };
+
+  export type DateRange = {
+    __typename?: 'DateRangePickerResult';
+
+    start?: number | null;
+
+    end?: number | null;
+  };
+
+  export type Sort = {
+    __typename?: 'SortTimelineResult';
+
+    columnId?: string | null;
+
+    sortDirection?: string | null;
+  };
+}
+
+export namespace PersistTimelinePinnedEventMutation {
+  export type Variables = {
+    pinnedEventId?: string | null;
+    eventId: string;
+    timelineId?: string | null;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    persistPinnedEventOnTimeline?: PersistPinnedEventOnTimeline | null;
+  };
+
+  export type PersistPinnedEventOnTimeline = {
+    __typename?: 'PinnedEvent';
+
+    pinnedEventId: string;
+
+    eventId?: string | null;
+
+    timelineId?: string | null;
+
+    timelineVersion?: string | null;
+
+    created?: number | null;
+
+    createdBy?: string | null;
+
+    updated?: number | null;
+
+    updatedBy?: string | null;
+
+    version?: string | null;
   };
 }
 

@@ -84,7 +84,7 @@ export const DataProviders = pure<Props>(
   }) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
       <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)}>
-        {dataProviders.length ? (
+        {dataProviders != null && dataProviders.length ? (
           <Providers
             browserFields={browserFields}
             id={id}

@@ -9,9 +9,9 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 
-import { DataProvider, EXISTS_OPERATOR } from './data_providers/data_provider';
+import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
 
-const buildQueryMatch = (dataProvider: DataProvider) =>
+const buildQueryMatch = (dataProvider: DataProvider | DataProvidersAnd) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR
       ? `${dataProvider.queryMatch.field} : ${
@@ -22,7 +22,7 @@ const buildQueryMatch = (dataProvider: DataProvider) =>
       : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
-const buildQueryForAndProvider = (dataAndProviders: DataProvider[]) =>
+const buildQueryForAndProvider = (dataAndProviders: DataProvidersAnd[]) =>
   dataAndProviders
     .reduce((andQuery, andDataProvider) => {
       const prepend = (q: string) => `${q !== '' ? `${q} and ` : ''}`;
@@ -34,7 +34,7 @@ const buildQueryForAndProvider = (dataAndProviders: DataProvider[]) =>
 
 export const buildGlobalQuery = (dataProviders: DataProvider[]) =>
   dataProviders
-    .reduce((query, dataProvider) => {
+    .reduce((query, dataProvider: DataProvider) => {
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       return dataProvider.enabled
         ? `${prepend(query)}(
