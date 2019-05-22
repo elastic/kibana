@@ -26,7 +26,7 @@ import { spacesSavedObjectsClientWrapperFactory } from '../lib/saved_objects_cli
 import { SpacesAuditLogger } from '../lib/audit_logger';
 import { createSpacesTutorialContextFactory } from '../lib/spaces_tutorial_context_factory';
 import { initPrivateApis } from '../routes/api/v1';
-import { initPublicSpacesApi } from '../routes/api/public';
+import { initExternalSpacesApi } from '../routes/api/external';
 import { getSpacesUsageCollector } from '../lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SecurityPlugin } from '../../../security';
@@ -156,7 +156,7 @@ export class Plugin {
       xpackMain: xpackMainPlugin,
     });
 
-    initPublicSpacesApi({
+    initExternalSpacesApi({
       http: core.http,
       log: this.log,
       savedObjects: core.savedObjects,

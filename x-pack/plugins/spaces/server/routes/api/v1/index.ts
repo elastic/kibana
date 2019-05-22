@@ -7,7 +7,7 @@
 import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
-import { initPrivateSpacesApi } from './spaces';
+import { initInternalSpacesApi } from './spaces';
 import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
 import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
 
@@ -33,5 +33,5 @@ export function initPrivateApis({ xpackMain, ...rest }: RouteDeps) {
     routePreCheckLicenseFn,
   };
 
-  initPrivateSpacesApi(deps);
+  initInternalSpacesApi(deps);
 }

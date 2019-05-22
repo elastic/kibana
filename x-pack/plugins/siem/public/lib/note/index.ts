@@ -16,4 +16,7 @@ export interface Note {
   note: string;
   /** The user who created the note */
   user: string;
+  /** SaveObjectID for note */
+  saveObjectId: string | null | undefined;
+  version: string | null | undefined;
 }

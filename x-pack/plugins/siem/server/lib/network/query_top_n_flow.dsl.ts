@@ -85,10 +85,9 @@ export const buildTopNFlowQuery = ({
   flowTarget,
   timerange: { from, to },
   pagination: { limit },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    packetbeatAlias,
   },
 }: NetworkTopNFlowRequestOptions) => {
   const filter = [
@@ -98,7 +97,7 @@ export const buildTopNFlowQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, packetbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

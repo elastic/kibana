@@ -12,7 +12,7 @@ import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 import { getSpaceById } from '../../lib';
 import { PrivateRouteDeps } from '.';
 
-export function initPrivateSpacesApi(deps: PrivateRouteDeps) {
+export function initInternalSpacesApi(deps: PrivateRouteDeps) {
   const { http, config, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
   http.route({

@@ -10,6 +10,7 @@ import React from 'react';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
@@ -45,6 +46,7 @@ export const getRowItemDraggable = ({
             field: attrName,
             value: rowItem,
             displayValue: dragDisplayValue || rowItem,
+            operator: IS_OPERATOR,
           },
         }}
         render={(dataProvider, _, snapshot) =>
@@ -99,6 +101,7 @@ export const getRowItemDraggables = ({
                 field: attrName,
                 value: rowItem,
                 displayValue: dragDisplayValue || rowItem,
+                operator: IS_OPERATOR,
               },
             }}
             render={(dataProvider, _, snapshot) =>

@@ -23,7 +23,7 @@ import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
-function ReactEditorControllerProvider(Private, config) {
+function ReactEditorControllerProvider(config) {
   class ReactEditorController {
     constructor(el, savedObj) {
       this.el = el;

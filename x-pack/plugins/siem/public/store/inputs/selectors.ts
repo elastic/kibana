@@ -22,6 +22,11 @@ export const inputsSelector = () =>
     inputs => inputs
   );
 
+export const timelineTimeRangeSelector = createSelector(
+  selectTimeline,
+  timeline => timeline.timerange
+);
+
 export const globalTimeRangeSelector = createSelector(
   selectGlobal,
   global => global.timerange

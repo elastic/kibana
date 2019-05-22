@@ -53,6 +53,9 @@ export class SavedObjectsManagementBuilder {
       'timelion-sheet',
       'ui-metric',
       'sample-data-telemetry',
+      'siem-ui-timeline',
+      'siem-ui-timeline-note',
+      'siem-ui-timeline-pinned-event',
     ];
   }
 
