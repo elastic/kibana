@@ -60,8 +60,6 @@
       throw new Error(`DOM node "${domTreeRoot}" not found.`);
     }
 
-    const dataTestSubjects = new Set();
-
     const arrayToType = array => (
       array.reduce((string, subject) => {
         return string === '' ? `'${subject}'` : `${string}\n | '${subject}'`;
@@ -82,7 +80,7 @@
         // We probably navigated outside the initial DOM root
         return;
       }
-
+      const { dataTestSubjects } = window.__test_utils__;
       const testSubjectOnNode = node.dataset[datasetKey];
 
       const updatedPath = testSubjectOnNode
@@ -111,6 +109,7 @@
     };
 
     const output = () => {
+      const { dataTestSubjects } = window.__test_utils__;
       const allTestSubjects = Array.from(dataTestSubjects).sort();
 
       console.log(`------------- TEST SUBJECTS (${allTestSubjects.length}) ------------- `);
@@ -125,6 +124,7 @@
     // Handler for the clicks on the document to keep tracking
     // new test subjects
     const documentClicksHandler = () => {
+      const { dataTestSubjects } = window.__test_utils__;
       const total = dataTestSubjects.size;
 
       // Wait to be sure that the DOM has updated
@@ -141,7 +141,7 @@
     };
 
     // Add meta data on the window object
-    window.__test_utils__ = window.__test_utils__ || { documentClicksHandler, isTracking: false };
+    window.__test_utils__ = window.__test_utils__ || { documentClicksHandler, isTracking: false, dataTestSubjects: new Set() };
 
     // Handle "click" event on the document to update our test subjects
     if (!window.__test_utils__.isTracking) {
