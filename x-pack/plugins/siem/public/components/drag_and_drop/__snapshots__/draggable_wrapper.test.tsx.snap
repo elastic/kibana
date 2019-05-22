@@ -385,6 +385,7 @@ exports[`DraggableWrapper rendering it renders against the snapshot 1`] = `
             "name": "Provider 1",
             "queryMatch": Object {
               "field": "name",
+              "operator": ":",
               "value": "Provider 1",
             },
           }

@@ -20,7 +20,6 @@ import {
   OnColumnResized,
   OnColumnSorted,
   OnPinEvent,
-  OnRangeSelected,
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
@@ -74,10 +73,6 @@ interface DispatchProps {
     id: string;
     columns: ColumnHeader[];
   }>;
-  updateRange?: ActionCreator<{
-    id: string;
-    range: string;
-  }>;
   updateSort?: ActionCreator<{
     id: string;
     sort: Sort;
@@ -121,7 +116,6 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         onColumnSorted={this.onColumnSorted}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onPinEvent={this.onPinEvent}
-        onRangeSelected={this.onRangeSelected}
         onUpdateColumns={this.onUpdateColumns}
         onUnPinEvent={this.onUnPinEvent}
         pinnedEventIds={pinnedEventIds!}
@@ -151,9 +145,6 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
 
   private onColumnResized: OnColumnResized = ({ columnId, delta }) =>
     this.props.applyDeltaToColumnWidth!({ id: this.props.id, columnId, delta });
-
-  private onRangeSelected: OnRangeSelected = selectedRange =>
-    this.props.updateRange!({ id: this.props.id, range: selectedRange });
 
   private onPinEvent: OnPinEvent = eventId => this.props.pinEvent!({ id: this.props.id, eventId });
 
@@ -196,7 +187,6 @@ export const StatefulBody = connect(
     applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
     unPinEvent: timelineActions.unPinEvent,
     updateColumns: timelineActions.updateColumns,
-    updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
     pinEvent: timelineActions.pinEvent,
     removeColumn: timelineActions.removeColumn,
