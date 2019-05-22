@@ -44,7 +44,7 @@ function propFilter(prop: string) {
    */
   return function filterByName(
     list: FilterableItem[],
-    filters: string[] | string | FilterFunc
+    filters: string[] | string | FilterFunc = []
   ): FilterableItem[] {
     if (isFunction(filters)) {
       return list.filter(item => (filters as FilterFunc)(item[prop]));
