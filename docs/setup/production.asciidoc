@@ -26,7 +26,7 @@ You can use {stack-ov}/elasticsearch-security.html[{stack} {security-features}]
 to control what {es} data users can access through Kibana.
 
 When {security-features} are enabled, Kibana users have to log in. They need to
-have the role granting <<kibana-privileges, Kibana privileges>> as well as access 
+have a role granting <<kibana-privileges, Kibana privileges>> as well as access 
 to the indices they will be working with in Kibana.
 
 If a user loads a Kibana dashboard that accesses data in an index that they
