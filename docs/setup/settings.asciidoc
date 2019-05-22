@@ -154,7 +154,7 @@ requests. Supported on Elastic Cloud Enterprise.
 `map.includeElasticMapsService:`:: *Default: true*
 Set to false to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
-and tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
+and the tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
 <<tilemap, Coordinate map visualization>>, and <<regionmap, Region map visualization>>
 
 `map.proxyElasticMapsServiceInMaps:`:: *Default: false*
