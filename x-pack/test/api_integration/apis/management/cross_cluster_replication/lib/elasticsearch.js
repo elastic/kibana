@@ -10,7 +10,7 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchIndicesHelpers = (es) => {
+export const registerHelpers = (es) => {
   let indicesCreated = [];
 
   const createIndex = (index = getRandomString()) => {
