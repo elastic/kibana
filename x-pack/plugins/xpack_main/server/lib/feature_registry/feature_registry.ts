@@ -56,18 +56,13 @@ const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'managem
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 
-// These expressions are intentionally identical because they all eventually transform in to UI Capabilities downstream, so must at least confirm to that.
-// Separate variables because that matches the existing convention here.
-const catalogueEntryRegex = /^[a-zA-Z0-9:_-]+$/;
-const managementLinkIdRegex = /^[a-zA-Z0-9:_-]+$/;
-const navLinkIdRegex = /^[a-zA-Z0-9:_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const managementSchema = Joi.object().pattern(
   managementSectionIdRegex,
-  Joi.array().items(Joi.string().regex(managementLinkIdRegex))
+  Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
-const catalogueSchema = Joi.array().items(Joi.string().regex(catalogueEntryRegex));
+const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
 const privilegeSchema = Joi.object({
   management: managementSchema,
@@ -96,7 +91,7 @@ const schema = Joi.object({
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
   icon: Joi.string(),
   description: Joi.string(),
-  navLinkId: Joi.string().regex(navLinkIdRegex),
+  navLinkId: Joi.string().regex(uiCapabilitiesRegex),
   app: Joi.array()
     .items(Joi.string())
     .required(),
