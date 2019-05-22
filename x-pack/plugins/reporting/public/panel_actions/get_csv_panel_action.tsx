@@ -112,14 +112,25 @@ class GetCsvReportPanelAction extends ContextMenuAction {
 
     await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body })
       .then((rawResponse: string) => {
+        this.isDownloading = false;
+
+        const download = `${filename}.csv`;
         const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
+
+        // Hack for IE11 Support
+        if (window.navigator.msSaveOrOpenBlob) {
+          return window.navigator.msSaveOrOpenBlob(blob, download);
+        }
+
         const a = window.document.createElement('a');
         const downloadObject = window.URL.createObjectURL(blob);
+
         a.href = downloadObject;
-        a.download = `${filename}.csv`;
+        a.download = download;
+        document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(downloadObject);
-        this.isDownloading = false;
+        document.body.removeChild(a);
       })
       .catch(this.onGenerationFail.bind(this));
   };
