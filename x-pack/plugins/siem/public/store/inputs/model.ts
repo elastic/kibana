@@ -22,7 +22,11 @@ interface RelativeTimeRange {
 
 export type InputsModelId = 'global' | 'timeline';
 
+export type TimeRangeKinds = 'absolute' | 'relative';
+
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
+
+export type UrlTimeRange = AbsoluteTimeRange & LinkTo | RelativeTimeRange & LinkTo;
 
 export interface Policy {
   kind: 'manual' | 'interval';
@@ -43,7 +47,15 @@ export interface InputsRange {
   linkTo: InputsModelId[];
 }
 
+interface LinkTo {
+  linkTo: InputsModelId[];
+}
+
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+}
+export interface UrlInputsModel {
+  global: TimeRange & LinkTo;
+  timeline: TimeRange & LinkTo;
 }

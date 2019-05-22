@@ -41,16 +41,19 @@ export type HostHits = Hits<number, HostHit>;
 
 export interface HostsRequestOptions extends RequestOptions {
   sort: HostsSortField;
+  defaultIndex: string[];
 }
 
 export interface HostLastFirstSeenRequestOptions {
   hostName: string;
   sourceConfiguration: SourceConfiguration;
+  defaultIndex: string[];
 }
 
 export interface HostOverviewRequestOptions extends HostLastFirstSeenRequestOptions {
   fields: string[];
   timerange: TimerangeInput;
+  defaultIndex: string[];
 }
 
 export interface HostValue {

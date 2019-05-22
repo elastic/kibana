@@ -17,25 +17,25 @@
  * under the License.
  */
 
-import { HttpConfig } from '.';
+import { config } from '.';
 
 test('has defaults for config', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {};
   expect(httpSchema.validate(obj)).toMatchSnapshot();
 });
 
 test('accepts valid hostnames', () => {
-  const { host: host1 } = HttpConfig.schema.validate({ host: 'www.example.com' });
-  const { host: host2 } = HttpConfig.schema.validate({ host: '8.8.8.8' });
-  const { host: host3 } = HttpConfig.schema.validate({ host: '::1' });
-  const { host: host4 } = HttpConfig.schema.validate({ host: 'localhost' });
+  const { host: host1 } = config.schema.validate({ host: 'www.example.com' });
+  const { host: host2 } = config.schema.validate({ host: '8.8.8.8' });
+  const { host: host3 } = config.schema.validate({ host: '::1' });
+  const { host: host4 } = config.schema.validate({ host: 'localhost' });
 
   expect({ host1, host2, host3, host4 }).toMatchSnapshot('valid host names');
 });
 
 test('throws if invalid hostname', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
     host: 'asdf$%^',
   };
@@ -43,16 +43,15 @@ test('throws if invalid hostname', () => {
 });
 
 test('can specify max payload as string', () => {
-  const httpSchema = HttpConfig.schema;
   const obj = {
     maxPayload: '2mb',
   };
-  const config = httpSchema.validate(obj);
-  expect(config.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
+  const configValue = config.schema.validate(obj);
+  expect(configValue.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
 });
 
 test('throws if basepath is missing prepended slash', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
     basePath: 'foo',
   };
@@ -60,7 +59,7 @@ test('throws if basepath is missing prepended slash', () => {
 });
 
 test('throws if basepath appends a slash', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
     basePath: '/foo/',
   };
@@ -68,7 +67,7 @@ test('throws if basepath appends a slash', () => {
 });
 
 test('throws if basepath is not specified, but rewriteBasePath is set', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
     rewriteBasePath: true,
   };
@@ -77,7 +76,7 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
 
 describe('with TLS', () => {
   test('throws if TLS is enabled but `key` is not specified', () => {
-    const httpSchema = HttpConfig.schema;
+    const httpSchema = config.schema;
     const obj = {
       ssl: {
         certificate: '/path/to/certificate',
@@ -88,7 +87,7 @@ describe('with TLS', () => {
   });
 
   test('throws if TLS is enabled but `certificate` is not specified', () => {
-    const httpSchema = HttpConfig.schema;
+    const httpSchema = config.schema;
     const obj = {
       ssl: {
         enabled: true,
@@ -99,7 +98,7 @@ describe('with TLS', () => {
   });
 
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
-    const httpSchema = HttpConfig.schema;
+    const httpSchema = config.schema;
     const obj = {
       port: 1234,
       ssl: {
@@ -113,7 +112,6 @@ describe('with TLS', () => {
   });
 
   test('can specify single `certificateAuthority` as a string', () => {
-    const httpSchema = HttpConfig.schema;
     const obj = {
       ssl: {
         certificate: '/path/to/certificate',
@@ -123,12 +121,11 @@ describe('with TLS', () => {
       },
     };
 
-    const config = httpSchema.validate(obj);
-    expect(config.ssl.certificateAuthorities).toBe('/authority/');
+    const configValue = config.schema.validate(obj);
+    expect(configValue.ssl.certificateAuthorities).toBe('/authority/');
   });
 
   test('can specify several `certificateAuthorities`', () => {
-    const httpSchema = HttpConfig.schema;
     const obj = {
       ssl: {
         certificate: '/path/to/certificate',
@@ -138,12 +135,12 @@ describe('with TLS', () => {
       },
     };
 
-    const config = httpSchema.validate(obj);
-    expect(config.ssl.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
+    const configValue = config.schema.validate(obj);
+    expect(configValue.ssl.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
   });
 
   test('accepts known protocols`', () => {
-    const httpSchema = HttpConfig.schema;
+    const httpSchema = config.schema;
     const singleKnownProtocol = {
       ssl: {
         certificate: '/path/to/certificate',
@@ -170,7 +167,7 @@ describe('with TLS', () => {
   });
 
   test('should accept known protocols`', () => {
-    const httpSchema = HttpConfig.schema;
+    const httpSchema = config.schema;
 
     const singleUnknownProtocol = {
       ssl: {

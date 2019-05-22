@@ -102,14 +102,17 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const addGroupBy = (d: DropDownLabel[]) => {
     const label: AggName = d[0].label;
-    if (groupByList[label] === undefined) {
-      groupByList[label] = groupByOptionsData[label];
+    const config: PivotGroupByConfig = groupByOptionsData[label];
+    const aggName: AggName = config.aggName;
+
+    if (groupByList[aggName] === undefined) {
+      groupByList[aggName] = config;
       setGroupByList({ ...groupByList });
     } else {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.definePivot.groupByExistsErrorMessage', {
-          defaultMessage: `A group by configuration with the name '{label}' already exists.`,
-          values: { label },
+          defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
+          values: { aggName },
         })
       );
     }
@@ -121,8 +124,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setGroupByList({ ...groupByList });
   };
 
-  const deleteGroupBy = (label: AggName) => {
-    delete groupByList[label];
+  const deleteGroupBy = (aggName: AggName) => {
+    delete groupByList[aggName];
     setGroupByList({ ...groupByList });
   };
 
@@ -131,14 +134,17 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const addAggregation = (d: DropDownLabel[]) => {
     const label: AggName = d[0].label;
-    if (aggList[label] === undefined) {
-      aggList[label] = aggOptionsData[label];
+    const config: PivotAggsConfig = aggOptionsData[label];
+    const aggName: AggName = config.aggName;
+
+    if (aggList[aggName] === undefined) {
+      aggList[aggName] = config;
       setAggList({ ...aggList });
     } else {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.definePivot.aggExistsErrorMessage', {
-          defaultMessage: `An aggregation configuration with the name '{label}' already exists.`,
-          values: { label },
+          defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
+          values: { aggName },
         })
       );
     }
@@ -150,8 +156,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setAggList({ ...aggList });
   };
 
-  const deleteAggregation = (label: AggName) => {
-    delete aggList[label];
+  const deleteAggregation = (aggName: AggName) => {
+    delete aggList[aggName];
     setAggList({ ...aggList });
   };
 

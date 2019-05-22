@@ -1,6 +1,5 @@
 {
   "filterBar": {
-    "ports": [9200, 12349],
     "ids": [
       { "key": "auto-tcp-0X81440A68E839814C", "url": "tcp://localhost:9200" },
       { "key": "auto-http-0X3675F89EF0612091", "url": "http://localhost:12349/" },
@@ -13,7 +12,9 @@
       { "key": "auto-http-0XC9CDA429418EDC2B", "url": "https://www.wikipedia.org/" },
       { "key": "auto-http-0XE3B163481423197D", "url": "https://news.google.com/" }
     ],
+    "locations": [],
     "names": [],
+    "ports": [9200, 12349],
     "schemes": ["tcp", "http"]
   }
 }

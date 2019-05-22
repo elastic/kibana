@@ -19,13 +19,15 @@ export function getSetupMock(overrides: Partial<TestSetup> = {}) {
     client: jest.fn(),
     start: 100,
     end: 200,
-    esFilterQuery: {
-      term: { field: 'test.esfilter.query' }
-    },
     config: {
       get: jest.fn(),
       has: () => true
     },
+    uiFiltersES: [
+      {
+        term: { field: 'test.esfilter.query' }
+      }
+    ],
     ...overrides
   };
 }

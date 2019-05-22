@@ -718,7 +718,7 @@ Object {
   });
 
   describe('date histogram custom interval removal', () => {
-    const migrate = doc => migrations.visualization['7.1.0'](doc);
+    const migrate = doc => migrations.visualization['7.2.0'](doc);
     let doc;
     beforeEach(() => {
       doc = {

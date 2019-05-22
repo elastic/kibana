@@ -39,7 +39,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
-  describe('/api/telemetry/v1/clusters/_stats with monitoring disabled', () => {
+  describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
       await new Promise(r => setTimeout(r, 1000));
@@ -52,9 +52,9 @@ export default function ({ getService }) {
       };
 
       const { body } = await supertest
-        .post('/api/telemetry/v1/clusters/_stats')
+        .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
+        .send({ timeRange, unencrypted: true })
         .expect(200);
 
       expect(body.length).to.be(1);
@@ -104,9 +104,9 @@ export default function ({ getService }) {
       };
 
       const { body } = await supertest
-        .post('/api/telemetry/v1/clusters/_stats')
+        .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
+        .send({ timeRange, unencrypted: true })
         .expect(200);
 
       const stats = body[0];
