@@ -28,6 +28,8 @@ const typedFromExpression = fromExpression as (expression: string) => Ast;
 import { RunPipelineHandlers } from 'ui/visualize/loader/pipeline_helpers/run_pipeline';
 import { Registry } from '@kbn/interpreter/common';
 import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
+import { useRef, useEffect } from 'react';
+import React from 'react';
 
 type Ast = unknown;
 type Context = object;
@@ -113,16 +115,37 @@ export class ExpressionExecutorService {
 
   // TODO core won't ever be null once this is switched to the new platform
   public setup(core: CoreSetup | null, plugins: ExpressionExecutorSetupPlugins) {
+    const run = async (expressionOrAst: string | Ast, element: Element) => {
+      if (!this.interpreterInstance) {
+        this.interpreterInstance = (await plugins.interpreter.getInterpreter()).interpreter;
+      }
+      return await runFn(
+        expressionOrAst,
+        element,
+        plugins.interpreter.renderersRegistry,
+        this.interpreterInstance
+      );
+    };
     return {
-      run: async (expressionOrAst: string | Ast, element: Element) => {
-        if (!this.interpreterInstance) {
-          this.interpreterInstance = (await plugins.interpreter.getInterpreter()).interpreter;
-        }
-        return await runFn(
-          expressionOrAst,
-          element,
-          plugins.interpreter.renderersRegistry,
-          this.interpreterInstance
+      run,
+      ExpressionRenderer({ expression }: { expression: string }) {
+        const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
+
+        useEffect(
+          () => {
+            if (mountpoint.current) {
+              run(expression, mountpoint.current);
+            }
+          },
+          [expression, mountpoint.current]
+        );
+
+        return (
+          <div
+            ref={el => {
+              mountpoint.current = el;
+            }}
+          />
         );
       },
     };
