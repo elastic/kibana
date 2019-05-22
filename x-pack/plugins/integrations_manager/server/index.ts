@@ -8,13 +8,9 @@ import { PluginInitializerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { routes } from './routes';
 
-class Plugin {
-  public setup(core: CoreSetup) {
+export class Plugin {
+  public setup(core: CoreSetup, initializerContext: PluginInitializerContext) {
     const { server } = core.http;
     routes.forEach(route => server.route(route));
   }
-}
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin();
 }
