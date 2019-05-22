@@ -80,14 +80,11 @@ export const ml = (kibana) => {
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
         xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
-<<<<<<< HEAD
 
         const isEnabled = xpackMainPlugin.info.feature(thisPlugin.id).isEnabled();
         if (isEnabled === true) {
           addLinksToSampleDatasets(server);
         }
-=======
->>>>>>> removing unrelated files
       });
 
       xpackMainPlugin.registerFeature({
