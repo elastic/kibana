@@ -7,10 +7,12 @@ import { act } from 'react-dom/test-utils';
 
 import { INVALID_NAME_CHARS } from '../../public/app/services/validation/validate_repository';
 import { getRepository } from '../../test/fixtures';
+import { RepositoryType } from '../../common/types';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
 const { setup } = pageHelpers.repositoryAdd;
+const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
 describe('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;
@@ -23,7 +25,7 @@ describe('<RepositoryAdd />', () => {
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(['fs', 'url']);
+      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
 
       testBed = await setup();
     });
@@ -32,6 +34,12 @@ describe('<RepositoryAdd />', () => {
       const { exists, find } = testBed;
       expect(exists('pageTitle')).toBe(true);
       expect(find('pageTitle').text()).toEqual('Register repository');
+    });
+
+    test('should indicate that the repository types are loading', () => {
+      const { exists, find } = testBed;
+      expect(exists('sectionLoading')).toBe(true);
+      expect(find('sectionLoading').text()).toBe('Loading repository types…');
     });
 
     test('should not let the user go to the next step if some fields are missing', () => {
@@ -46,8 +54,61 @@ describe('<RepositoryAdd />', () => {
     });
   });
 
-  describe('form validation (step 1)', () => {
-    describe('name', () => {
+  describe('when no repository types are not found', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRepositoryTypesResponse([]);
+      testBed = await setup();
+      await nextTick();
+      testBed.component.update();
+    });
+
+    test('should show an error callout  ', async () => {
+      const { find, exists } = testBed;
+
+      expect(exists('noRepositoryTypesError')).toBe(true);
+      expect(find('noRepositoryTypesError').text()).toContain('No repository types available');
+    });
+  });
+
+  describe('when repository types are found', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
+      testBed = await setup();
+      await nextTick();
+      testBed.component.update();
+    });
+
+    test('should have 1 card for each repository type', () => {
+      const { exists } = testBed;
+
+      repositoryTypes.forEach(type => {
+        const testSubject: any = `${type}RepositoryType`;
+        try {
+          expect(exists(testSubject)).toBe(true);
+        } catch {
+          throw new Error(`Repository type "${type}" was not found.`);
+        }
+      });
+    });
+  });
+
+  describe('form validations', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
+
+      testBed = await setup();
+      await nextTick();
+      testBed.component.update();
+    });
+
+    describe('name (step 1)', () => {
+      it('should not allow spaces in the name', () => {
+        const { form, actions } = testBed;
+        form.setInputValue('nameInput', 'with space');
+        actions.clickNextButton();
+        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
+      });
+
       it('should not allow invalid characters', () => {
         const { form, actions } = testBed;
 
@@ -67,66 +128,165 @@ describe('<RepositoryAdd />', () => {
         INVALID_NAME_CHARS.forEach(expectErrorForChar);
       });
     });
+
+    describe('settings (step 2)', () => {
+      const typeToErrorMessagesMap: Record<string, string[]> = {
+        fs: ['Location is required.'],
+        url: ['URL is required.'],
+        s3: ['Bucket is required.'],
+        gcs: ['Bucket is required.'],
+        hdfs: ['URI is required.'],
+      };
+
+      test('should validate required repository settings', async () => {
+        const { component, actions, form } = testBed;
+
+        testBed.form.setInputValue('nameInput', 'my-repo');
+
+        const selectRepoTypeAndExpectErrors = async (type: RepositoryType) => {
+          testBed.actions.selectRepositoryType(type);
+          testBed.actions.clickNextButton();
+
+          await act(async () => {
+            actions.clickSubmitButton();
+            await nextTick();
+            component.update();
+          });
+
+          const expectedErrors = typeToErrorMessagesMap[type];
+          const errorsFound = form.getErrorsMessages();
+
+          expectedErrors.forEach(error => {
+            try {
+              expect(errorsFound).toContain(error);
+            } catch {
+              throw new Error(
+                `Expected "${error}" not found in form. Got "${JSON.stringify(errorsFound)}"`
+              );
+            }
+          });
+
+          // Go back for the next test
+          // actions.clickBackButton();
+          // await nextTick();
+          // await nextTick(2000);
+          await act(async () => {
+            actions.clickBackButton();
+            await nextTick(100);
+            component.update();
+          });
+        };
+
+        await selectRepoTypeAndExpectErrors('fs');
+        await selectRepoTypeAndExpectErrors('url');
+        await selectRepoTypeAndExpectErrors('s3');
+        await selectRepoTypeAndExpectErrors('gcs');
+        await selectRepoTypeAndExpectErrors('hdfs');
+      });
+    });
   });
 
-  describe('step 2 form', () => {
+  describe('form payload & api errors', () => {
     const repository = getRepository();
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(['fs', 'url']);
+      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
 
       testBed = await setup();
-
-      // Fill step 1 required fields and go to step 2
-      testBed.form.setInputValue('nameInput', repository.name);
-      testBed.actions.selectRepositoryType(repository.type);
-      testBed.actions.clickNextButton();
     });
 
-    test('should send the correct payload', async () => {
-      const { form, actions } = testBed;
-
-      form.setInputValue('locationInput', repository.settings.location);
-      form.selectCheckBox('compressToggle');
-
-      await act(async () => {
-        actions.clickSubmitButton();
-        await nextTick();
+    describe('not source only', () => {
+      beforeEach(() => {
+        // Fill step 1 required fields and go to step 2
+        testBed.form.setInputValue('nameInput', repository.name);
+        testBed.actions.selectRepositoryType(repository.type);
+        testBed.actions.clickNextButton();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
+      test('should send the correct payload', async () => {
+        const { form, actions } = testBed;
 
-      expect(latestRequest.requestBody).toEqual(
-        JSON.stringify({
-          name: repository.name,
-          type: repository.type,
-          settings: { location: repository.settings.location, compress: true },
-        })
-      );
+        // Fill step 2
+        form.setInputValue('locationInput', repository.settings.location);
+        form.selectCheckBox('compressToggle');
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+        });
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(latestRequest.requestBody).toEqual(
+          JSON.stringify({
+            name: repository.name,
+            type: repository.type,
+            settings: {
+              location: repository.settings.location,
+              compress: true,
+            },
+          })
+        );
+      });
+
+      test('should surface the API errors from the "save" HTTP request', async () => {
+        const { component, form, actions, find, exists } = testBed;
+
+        form.setInputValue('locationInput', repository.settings.location);
+        form.selectCheckBox('compressToggle');
+
+        const error = {
+          statusCode: 400,
+          error: 'Bad request',
+          message: 'Repository payload is invalid',
+        };
+
+        httpRequestsMockHelpers.setSaveRepositoryResponse(undefined, { body: error });
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+          component.update();
+        });
+
+        expect(exists('saveRepositoryApiError')).toBe(true);
+        expect(find('saveRepositoryApiError').text()).toContain(error.message);
+      });
     });
 
-    test('should display API errors if any while saving', async () => {
-      const { component, form, actions, find, exists } = testBed;
-
-      form.setInputValue('locationInput', repository.settings.location);
-      form.selectCheckBox('compressToggle');
-
-      const error = {
-        statusCode: 400,
-        error: 'Bad request',
-        message: 'Repository payload is invalid',
-      };
-
-      httpRequestsMockHelpers.setSaveRepositoryResponse(undefined, { body: error });
-
-      await act(async () => {
-        actions.clickSubmitButton();
-        await nextTick();
-        component.update();
+    describe('source only', () => {
+      beforeEach(() => {
+        // Fill step 1 required fields and go to step 2
+        testBed.form.setInputValue('nameInput', repository.name);
+        testBed.actions.selectRepositoryType(repository.type);
+        testBed.form.selectCheckBox('sourceOnlyToggle'); // toggle source
+        testBed.actions.clickNextButton();
       });
 
-      expect(exists('saveRepositoryApiError')).toBe(true);
-      expect(find('saveRepositoryApiError').text()).toContain(error.message);
+      test('should send the correct payload', async () => {
+        const { form, actions } = testBed;
+
+        // Fill step 2
+        form.setInputValue('locationInput', repository.settings.location);
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+        });
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(latestRequest.requestBody).toEqual(
+          JSON.stringify({
+            name: repository.name,
+            type: 'source',
+            settings: {
+              delegateType: repository.type,
+              location: repository.settings.location,
+            },
+          })
+        );
+      });
     });
   });
 });

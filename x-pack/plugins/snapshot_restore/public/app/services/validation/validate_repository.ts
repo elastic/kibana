@@ -79,11 +79,19 @@ export const validateRepository = (
     ];
   }
 
+  if (name.includes(' ')) {
+    validation.errors.name = [
+      i18n.translate('xpack.snapshotRestore.repositoryValidation.nameValidation.errorSpace', {
+        defaultMessage: 'Spaces are not allowed in the name.',
+      }),
+    ];
+  }
+
   const nameCharValidation = doesStringContainChar(name, INVALID_NAME_CHARS);
 
   if (nameCharValidation.containsChar) {
     validation.errors.name = [
-      i18n.translate('xpack.snapshotRestore.repositoryValidation.nameRequired', {
+      i18n.translate('xpack.snapshotRestore.repositoryValidation.nameValidation.invalidCharacter', {
         defaultMessage: 'Character "{char}" is not allowed in the name.',
         values: { char: nameCharValidation.charFound },
       }),

@@ -118,6 +118,9 @@ export const registerTestBed = <T extends string = string>(
     const setInputValue: TestBed<T>['form']['setInputValue'] = (input, value, isAsync = false) => {
       const formInput = typeof input === 'string' ? find(input) : (input as ReactWrapper);
 
+      if (!formInput.length) {
+        throw new Error(`Input "${input}" was not found.`);
+      }
       formInput.simulate('change', { target: { value } });
       component.update();
 
@@ -128,10 +131,14 @@ export const registerTestBed = <T extends string = string>(
     };
 
     const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
-      dataTestSubject,
+      testSubject,
       isChecked = true
     ) => {
-      find(dataTestSubject).simulate('change', { target: { checked: isChecked } });
+      const checkBox = find(testSubject);
+      if (!checkBox.length) {
+        throw new Error(`"${testSubject}" was not found.`);
+      }
+      checkBox.simulate('change', { target: { checked: isChecked } });
     };
 
     const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = selectCheckBox; // Same API as "selectCheckBox"
