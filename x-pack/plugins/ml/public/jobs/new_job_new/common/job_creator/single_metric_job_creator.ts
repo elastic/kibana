@@ -9,6 +9,7 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation } from '../../../../../common/types/fields';
 import { Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
+import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
 export class SingleMetricJobCreator extends JobCreator {
   private _field: Field | null = null;
@@ -59,7 +60,7 @@ export class SingleMetricJobCreator extends JobCreator {
       const interval = bucketSpanSeconds * 1000;
 
       switch (functionName) {
-        case 'count':
+        case KIBANA_AGGREGATION.COUNT:
           this._job_config.analysis_config.summary_count_field_name = 'doc_count';
 
           this._datafeed_config.aggregations = {
@@ -78,11 +79,11 @@ export class SingleMetricJobCreator extends JobCreator {
             },
           };
           break;
-        case 'avg':
-        case 'median':
-        case 'sum':
-        case 'min':
-        case 'max':
+        case KIBANA_AGGREGATION.AVG:
+        case KIBANA_AGGREGATION.MEDIAN:
+        case KIBANA_AGGREGATION.SUM:
+        case KIBANA_AGGREGATION.MIN:
+        case KIBANA_AGGREGATION.MAX:
           if (this._field !== null) {
             const fieldName = this._field.name;
             this._job_config.analysis_config.summary_count_field_name = 'doc_count';
@@ -109,7 +110,7 @@ export class SingleMetricJobCreator extends JobCreator {
             };
           }
           break;
-        case 'cardinality':
+        case KIBANA_AGGREGATION.CARDINALITY:
           if (this._field !== null) {
             const fieldName = this._field.name;
 

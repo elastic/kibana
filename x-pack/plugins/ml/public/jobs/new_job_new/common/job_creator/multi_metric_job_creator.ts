@@ -10,7 +10,7 @@ import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 
 export class MultiMetricJobCreator extends JobCreator {
-  // a multi metric jobs has one over all partition field
+  // a multi metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
 
