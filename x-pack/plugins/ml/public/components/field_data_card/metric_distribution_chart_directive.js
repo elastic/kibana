@@ -12,6 +12,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 
 import { numTicks } from '../../util/chart_utils';
@@ -21,7 +22,7 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlMetricDistributionChart', function (i18n) {
+module.directive('mlMetricDistributionChart', function () {
 
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
@@ -179,7 +180,7 @@ module.directive('mlMetricDistributionChart', function (i18n) {
         .attr('y', 10)
         .attr('class', 'info-text')
         .attr('transform', `translate(${margin.left}, ${margin.top})`)
-        .text(i18n('xpack.ml.fieldDataCard.metricDistributionChart.displayingPercentilesLabel', {
+        .text(i18n.translate('xpack.ml.fieldDataCard.metricDistributionChart.displayingPercentilesLabel', {
           defaultMessage: 'Displaying {minPercent} - {maxPercent} percentiles',
           values: {
             minPercent,
@@ -256,7 +257,7 @@ module.directive('mlMetricDistributionChart', function (i18n) {
         const minValFormatted =  scope.card.fieldFormat.convert(bar.dataMin, 'text');
         if (bar.dataMax > bar.dataMin) {
           const maxValFormatted =  scope.card.fieldFormat.convert(bar.dataMax, 'text');
-          contents = i18n('xpack.ml.fieldDataCard.metricDistributionChart.documentsBarPercentBetweenValuesDescription', {
+          contents = i18n.translate('xpack.ml.fieldDataCard.metricDistributionChart.documentsBarPercentBetweenValuesDescription', {
             defaultMessage: '{barPercent}% of documents have{br}values between {minValFormatted} and {maxValFormatted}',
             values: {
               barPercent: bar.percent,
@@ -266,7 +267,7 @@ module.directive('mlMetricDistributionChart', function (i18n) {
             },
           });
         } else {
-          contents = i18n('xpack.ml.fieldDataCard.metricDistributionChart.documentsBarPercentValueDescription', {
+          contents = i18n.translate('xpack.ml.fieldDataCard.metricDistributionChart.documentsBarPercentValueDescription', {
             defaultMessage: '{barPercent}% of documents have{br}a value of {minValFormatted}',
             values: {
               barPercent: bar.percent,

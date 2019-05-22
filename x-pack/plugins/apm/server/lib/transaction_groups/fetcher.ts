@@ -38,7 +38,7 @@ interface Aggs {
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
-  const { esFilterQuery, client, config } = setup;
+  const { uiFiltersES, client, config } = setup;
   const params: SearchParams = {
     index: config.get<string>('apm_oss.transactionIndices'),
     body: {
@@ -72,9 +72,18 @@ export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
+  params.body.query = {
+    ...params.body.query,
+    bool: {
+      ...params.body.query.bool,
+      filter: [
+        ...(params.body.query.bool && params.body.query.bool.filter
+          ? params.body.query.bool.filter
+          : []),
+        ...uiFiltersES
+      ]
+    }
+  };
 
   return client<void, Aggs>('search', params);
 }

@@ -40,7 +40,7 @@ const mockKpiNetworkLibs: KpiNetworkResolversDeps = {
 
 const mockSrcLibs: SourcesResolversDeps = {
   sources: new Sources(mockSourcesAdapter),
-  sourceStatus: new SourceStatus(mockSourceStatusAdapter, new Sources(mockSourcesAdapter)),
+  sourceStatus: new SourceStatus(mockSourceStatusAdapter),
 };
 
 const req: FrameworkRequest = {
@@ -64,13 +64,16 @@ describe('Test Source Resolvers', () => {
   test('Make sure that getKpiNetwork have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       {},
-      { id: 'default' },
+      {
+        id: 'default',
+      },
       context,
       {} as GraphQLResolveInfo
     );
     const data = await createKpiNetworkResolvers(mockKpiNetworkLibs).Source.KpiNetwork(
       source as Source,
       {
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         timerange: {
           interval: '12h',
           to: 1514782800000,

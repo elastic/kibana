@@ -32,6 +32,8 @@ export class Workpad extends React.PureComponent {
     previousPage: PropTypes.func.isRequired,
     fetchAllRenderables: PropTypes.func.isRequired,
     css: PropTypes.object,
+    registerLayout: PropTypes.func.isRequired,
+    unregisterLayout: PropTypes.func.isRequired,
   };
 
   keyHandler = action => {
@@ -83,6 +85,8 @@ export class Workpad extends React.PureComponent {
       workpadCss,
       grid,
       isFullscreen,
+      registerLayout,
+      unregisterLayout,
     } = this.props;
 
     const bufferStyle = {
@@ -137,6 +141,8 @@ export class Workpad extends React.PureComponent {
                       isSelected={i + 1 === selectedPageNumber}
                       animation={getAnimation(i + 1)}
                       onAnimationEnd={onTransitionEnd}
+                      registerLayout={registerLayout}
+                      unregisterLayout={unregisterLayout}
                     />
                   ))}
                   <div

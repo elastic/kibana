@@ -26,6 +26,7 @@ import {
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnDataProviderRemoved,
+  OnDataProviderEdited,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';
@@ -64,6 +65,7 @@ interface Props {
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
+  onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
@@ -91,6 +93,7 @@ export const Timeline = pure<Props>(
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
     onChangeItemsPerPage,
+    onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
@@ -118,11 +121,13 @@ export const Timeline = pure<Props>(
           >
             <WrappedByAutoSizer innerRef={measureRef}>
               <TimelineHeader
+                browserFields={browserFields}
                 id={id}
                 indexPattern={indexPattern}
                 dataProviders={dataProviders}
                 onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                 onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+                onDataProviderEdited={onDataProviderEdited}
                 onDataProviderRemoved={onDataProviderRemoved}
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={onToggleDataProviderExcluded}

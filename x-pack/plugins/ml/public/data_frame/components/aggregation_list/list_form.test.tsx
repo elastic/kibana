@@ -16,7 +16,8 @@ describe('Data Frame: <AggListForm />', () => {
     const item: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.AVG,
       field: 'the-field',
-      aggName: 'the-form-row-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const props: ListProps = {
       list: { 'the-agg': item },

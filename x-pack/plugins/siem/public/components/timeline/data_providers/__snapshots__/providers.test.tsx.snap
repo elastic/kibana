@@ -5,6 +5,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
   droppableId="unitTest"
 >
   <pure(Component)
+    browserFields={Object {}}
     dataProviders={
       Array [
         Object {
@@ -132,6 +133,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     id="foo"
     onChangeDataProviderKqlQuery={[MockFunction]}
     onChangeDroppableAndProvider={[MockFunction]}
+    onDataProviderEdited={[MockFunction]}
     onDataProviderRemoved={[MockFunction]}
     onToggleDataProviderEnabled={[MockFunction]}
     onToggleDataProviderExcluded={[MockFunction]}
