@@ -20,11 +20,9 @@
 import { deepFreeze, RecursiveReadonly } from '../../utils/deep_freeze';
 import { MixedApp } from '../application_service';
 import { InjectedMetadataStart } from '../../injected_metadata';
-import { BasePathStart } from '../../base_path';
 
 interface StartDeps {
   apps: ReadonlyArray<MixedApp>;
-  basePath: BasePathStart;
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -74,7 +72,7 @@ export interface CapabilitiesStart {
  * Service that is responsible for UI Capabilities.
  */
 export class CapabilitiesService {
-  public async start({ apps, basePath, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
+  public async start({ apps, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = deepFreeze(injectedMetadata.getCapabilities());
     const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
 
