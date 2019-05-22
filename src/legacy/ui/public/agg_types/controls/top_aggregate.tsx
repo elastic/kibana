@@ -92,10 +92,16 @@ function TopAggregateParamEditor({
         return;
       }
 
+      if (value) {
+        if (aggParam.options.byValue[value.value]) {
+          return;
+        }
+
+        setValue();
+      }
+
       if (filteredOptions.length === 1) {
         setValue(aggParam.options.byValue[filteredOptions[0].value]);
-      } else if (value) {
-        setValue();
       }
     },
     [fieldType, visName]
