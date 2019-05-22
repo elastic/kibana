@@ -70,9 +70,9 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleDescription"
-              defaultMessage={`By default the module will collect Elasticsearch monitoring metrics from {url}.
+              defaultMessage="By default the module will collect Elasticsearch monitoring metrics from {url}.
               If the local Elasticsearch server has a different address,
-              you must specify it via the hosts setting in the {module} file.`}
+              you must specify it via the hosts setting in the {module} file."
               values={{
                 module: (
                   <Monospace>modules.d/elasticsearch-xpack.yml</Monospace>
@@ -108,7 +108,7 @@ output.elasticsearch:
   };
 
   const startMetricbeatStep = {
-    title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatTitle', {
+    title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatTitle', {
       defaultMessage: 'Start Metricbeat'
     }),
     children: (

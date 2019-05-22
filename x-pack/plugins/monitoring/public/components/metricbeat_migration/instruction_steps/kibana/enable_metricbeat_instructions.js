@@ -68,7 +68,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleDescription"
+              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.enableMetricbeatModuleDescription"
               defaultMessage="By default the module will collect Kibana monitoring metrics from http://localhost:5601. If the local Kibana instance has a different address, you must specify it via the {hosts} setting in the {file} file."
               values={{
                 hosts: (
@@ -105,7 +105,7 @@ output.elasticsearch:
   };
 
   const startMetricbeatStep = {
-    title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.configureMetricbeatTitle', {
+    title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatTitle', {
       defaultMessage: 'Start Metricbeat'
     }),
     children: (
