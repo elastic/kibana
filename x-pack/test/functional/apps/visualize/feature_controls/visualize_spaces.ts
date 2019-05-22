@@ -59,7 +59,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('visualizationLoader', 10000);
+        await testSubjects.existOrFail('visualizationLoader', 20000);
       });
     });
 
