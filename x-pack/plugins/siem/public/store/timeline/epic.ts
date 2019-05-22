@@ -62,6 +62,7 @@ import { TimelineById } from './reducer';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
+import { isNotNull } from './helpers';
 import { ManageEpicTimelineId } from './manage_timeline_id';
 
 interface TimelineEpicDependencies<State> {
@@ -257,8 +258,6 @@ export const createTimelineEpic = <State>(): Epic<
     )
   );
 };
-
-const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 const timelineInput: TimelineInput = {
   columns: null,

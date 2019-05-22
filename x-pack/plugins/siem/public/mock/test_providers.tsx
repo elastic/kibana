@@ -63,11 +63,7 @@ export const TestProviders = pure<Props>(
 );
 
 export const TestProviderWithoutDragAndDrop = pure<Props>(
-  ({
-    children,
-    store = createStore(state, apolloClientObservable),
-    mockFramework = mockFrameworks.default_UTC,
-  }) => (
+  ({ children, store = createStore(state, apolloClientObservable) }) => (
     <I18nProvider>
       <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
     </I18nProvider>

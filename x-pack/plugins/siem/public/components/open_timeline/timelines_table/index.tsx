@@ -27,6 +27,7 @@ import * as i18n from '../translations';
 const TimelinesTableContainer = styled.div`
   .euiTableCellContent {
     animation: none;
+    text-align: left;
   }
 
   .euiTableCellContent__text {

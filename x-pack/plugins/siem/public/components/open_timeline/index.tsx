@@ -11,7 +11,10 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 
 import { SortFieldTimeline } from '../../../server/graphql/types';
-import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
+import {
+  defaultHeaders,
+  defaultColumnHeaderType,
+} from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 
@@ -50,6 +53,8 @@ import {
 } from './types';
 import { AllTimelinesQuery } from '../../containers/timeline/all';
 import { Direction } from '../../graphql/types';
+import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 export const DEFAULT_SORT_FIELD = 'updated';
 export const DEFAULT_SORT_DIRECTION = 'desc';
@@ -214,6 +219,8 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
     }
   };
 
+  /* This feature will be implemented in the near future, so we are keeping it to know what to do */
+
   /** Invoked when the user clicks the action to add the selected timelines to favorites */
   // private onAddTimelinesToFavorites: OnAddTimelinesToFavorites = () => {
   // const { addTimelinesToFavorites } = this.props;
@@ -350,6 +357,26 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
           id: 'timeline-1',
           timeline: {
             ...assign(this.props.timeline, timelineModel),
+            columns:
+              timelineModel.columns != null
+                ? timelineModel.columns.map(col => {
+                    const timelineCols: ColumnHeader = {
+                      ...col,
+                      columnHeaderType: defaultColumnHeaderType,
+                      id: col.id != null ? col.id : 'unknown',
+                      placeholder: col.placeholder != null ? col.placeholder : undefined,
+                      category: col.category != null ? col.category : undefined,
+                      description: col.description != null ? col.description : undefined,
+                      example: col.example != null ? col.example : undefined,
+                      type: col.type != null ? col.type : undefined,
+                      width:
+                        col.id === '@timestamp'
+                          ? DEFAULT_DATE_COLUMN_MIN_WIDTH
+                          : DEFAULT_COLUMN_MIN_WIDTH,
+                    };
+                    return timelineCols;
+                  })
+                : defaultHeaders,
             eventIdToNoteIds: duplicate
               ? {}
               : timelineModel.eventIdToNoteIds != null

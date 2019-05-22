@@ -32,12 +32,6 @@ const getStateChildComponent = (
     .childAt(0)
     .instance();
 
-/*
- * For now we will skip test(s) who are using state in the expect
- * because we can not access it
- * with the wrapped component MockedProvided
- */
-
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
 
@@ -106,7 +100,7 @@ describe('StatefulOpenTimeline', () => {
       });
     });
 
-    test('it appends the word "with" to the Showing n Timelines message when the user enters a query', async () => {
+    test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
@@ -194,6 +188,7 @@ describe('StatefulOpenTimeline', () => {
   });
 
   describe('#onAddTimelinesToFavorites', () => {
+    // This functionality is hiding for now and waiting to see the light in the near future
     test.skip('it invokes addTimelinesToFavorites with the selected timelines when the button is clicked', async () => {
       const addTimelinesToFavorites = jest.fn();
 
@@ -238,6 +233,7 @@ describe('StatefulOpenTimeline', () => {
   });
 
   describe('#onDeleteSelected', () => {
+    // TODO - Have been skip because we need to re-implement the test as the component changed
     test.skip('it invokes deleteTimelines with the selected timelines when the button is clicked', async () => {
       const deleteTimelines = jest.fn();
 
@@ -305,7 +301,7 @@ describe('StatefulOpenTimeline', () => {
 
       wrapper.update();
 
-      expect(get('selectedItems', getStateChildComponent(wrapper).state).length).toEqual(13); // 9 selectable timelines are shown on the first page of data
+      expect(get('selectedItems', getStateChildComponent(wrapper).state).length).toEqual(13); // 13 because we did mock 13 timelines in the query
     });
   });
 
@@ -496,7 +492,7 @@ describe('StatefulOpenTimeline', () => {
   });
 
   describe('#resetSelectionState', () => {
-    test.skip('when the user deletes selected timelines, resetSelectionState is invoked to clear the selection state', async () => {
+    test('when the user deletes selected timelines, resetSelectionState is invoked to clear the selection state', async () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
@@ -511,6 +507,8 @@ describe('StatefulOpenTimeline', () => {
       );
 
       await wait();
+
+      wrapper.update();
 
       wrapper
         .find('.euiCheckbox__input')
@@ -555,6 +553,7 @@ describe('StatefulOpenTimeline', () => {
     ).toContain('Showing 11 Timelines ');
   });
 
+  // TODO - Have been skip because we need to re-implement the test as the component changed
   test.skip('it invokes onOpenTimeline with the expected parameters when the hyperlink is clicked', async () => {
     const onOpenTimeline = jest.fn();
 
@@ -589,6 +588,7 @@ describe('StatefulOpenTimeline', () => {
     });
   });
 
+  // TODO - Have been skip because we need to re-implement the test as the component changed
   test.skip('it invokes onOpenTimeline with the expected params when the button is clicked', async () => {
     const onOpenTimeline = jest.fn();
 
