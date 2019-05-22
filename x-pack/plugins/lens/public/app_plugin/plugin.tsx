@@ -9,8 +9,11 @@ import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
 import { App } from './app';
+import { EditorFrameInstance } from '../types';
 
 export class AppPlugin {
+  private instance: EditorFrameInstance | null = null;
+
   constructor() {}
 
   setup() {
@@ -23,10 +26,17 @@ export class AppPlugin {
     editorFrame.registerDatasource('indexpattern', indexPattern);
     editorFrame.registerVisualization('xy', xyVisualization);
 
-    return <App editorFrame={editorFrame} />;
+    this.instance = editorFrame.createInstance({});
+
+    return <App editorFrame={this.instance} />;
   }
 
   stop() {
+    if (this.instance) {
+      this.instance.unmount();
+    }
+
+    // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();
     xyVisualizationStop();
     editorFrameStop();
