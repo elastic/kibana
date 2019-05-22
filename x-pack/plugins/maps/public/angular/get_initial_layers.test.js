@@ -8,6 +8,19 @@ jest.mock('../meta', () => {
   return {};
 });
 
+jest.mock('ui/chrome', () => ({
+  getInjected: (key) => {
+    if (key === 'emsTileLayerId') {
+      return {
+        bright: 'road_map',
+        desaturated: 'road_map_desaturated',
+        dark: 'dark_map',
+      };
+    }
+    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+  }
+}));
+
 import { getInitialLayers } from './get_initial_layers';
 
 const mockKibanaDataSource = {
@@ -75,6 +88,33 @@ describe('Saved object does not have layer list', () => {
       sourceDescriptor: {
         type: 'EMS_TMS',
         id: 'road_map',
+      },
+      style: {
+        properties: {},
+        type: 'TILE',
+      },
+      type: 'TILE',
+      visible: true,
+    }]);
+  });
+
+  it('Should use the default dark EMS layer when Kibana dark theme is set', () => {
+    mockDataSourceResponse();
+    require('../meta').isMetaDataLoaded = () => {
+      return false;
+    };
+    const layers = getInitialLayers(null, true);
+    expect(layers).toEqual([{
+      alpha: 1,
+      __dataRequests: [],
+      id: layers[0].id,
+      applyGlobalQuery: true,
+      label: null,
+      maxZoom: 24,
+      minZoom: 0,
+      sourceDescriptor: {
+        type: 'EMS_TMS',
+        id: 'dark_map',
       },
       style: {
         properties: {},
