@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
 ```

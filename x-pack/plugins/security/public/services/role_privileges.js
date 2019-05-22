@@ -28,6 +28,7 @@ const clusterPrivileges = [
   'manage_token',
   'manage_saml',
   'create_snapshot',
+  'manage_oidc',
 ];
 const indexPrivileges = [
   'all',

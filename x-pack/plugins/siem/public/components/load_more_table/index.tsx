@@ -104,6 +104,7 @@ export interface Columns<T> {
   truncateText?: boolean;
   hideForMobile?: boolean;
   render?: (item: T) => void;
+  width?: string;
 }
 
 export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureComponent<
