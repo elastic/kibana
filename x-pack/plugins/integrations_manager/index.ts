@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 import { resolve } from 'path';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
 import { LegacyPluginInitializer } from 'src/legacy/types';
-import { plugin } from './server';
+import { Plugin } from './server';
 import { ID } from './common/constants';
 
 const ICON = 'merge';
@@ -69,13 +69,13 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
       });
 
       // new Kibana platform shim starts here
-      const initializerContext = {} as PluginInitializerContext;
-      const core = {
+      const pluginSetup = {} as PluginInitializerContext;
+      const coreSetup = {
         http: {
           server,
         },
       } as CoreSetup;
-      plugin(initializerContext).setup(core);
+      new Plugin().setup(coreSetup, pluginSetup);
     },
   });
 };
