@@ -117,12 +117,12 @@ export class Flyout extends Component {
           <EuiForm>
             <EuiFormRow
               fullWidth
-              label={i18n.translate('xpack.monitoring.metricbeat_migration.flyout.step1.monitoringUrlLabel', {
+              label={i18n.translate('xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlLabel', {
                 defaultMessage: 'Monitoring cluster URL'
               })}
-              helpText={i18n.translate('xpack.monitoring.metricbeat_migration.flyout.step1.monitoringUrlHelpText', {
+              helpText={i18n.translate('xpack.monitoring.metricbeatMigration.flyout.step1.monitoringUrlHelpText', {
                 defaultMessage: `This is typically a single instance, but if you have multiple, enter all of instance urls comma-separated.
-                Keep in mind that the running metricbeat instance will need to be able to communicate with these Elasticsearch nodes.`
+                Keep in mind that the running metricbeat instance will need to be able to communicate with these Elasticsearch servers.`
               })}
             >
               <EuiFieldText
@@ -193,7 +193,7 @@ export class Flyout extends Component {
           isDisabled={isDisabled}
           onClick={() => this.setState({ activeStep: nextStep })}
         >
-          {i18n.translate('xpack.monitoring.metricbeat_migration.flyout.nextButtonLabel', {
+          {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.nextButtonLabel', {
             defaultMessage: 'Next'
           })}
         </EuiButton>
@@ -207,7 +207,7 @@ export class Flyout extends Component {
         isDisabled={!product.isFullyMigrated}
         onClick={this.props.onClose}
       >
-        {i18n.translate('xpack.monitoring.metricbeat_migration.flyout.doneButtonLabel', {
+        {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.doneButtonLabel', {
           defaultMessage: 'Done'
         })}
       </EuiButton>
@@ -225,7 +225,7 @@ export class Flyout extends Component {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="flyoutTitle">
-              {i18n.translate('xpack.monitoring.metricbeat_migration.flyout.flyoutTitle', {
+              {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
                 defaultMessage: 'Migrate to Metricbeat'
               })}
             </h2>
@@ -242,7 +242,7 @@ export class Flyout extends Component {
                 onClick={onClose}
                 flush="left"
               >
-                {i18n.translate('xpack.monitoring.metricbeat_migration.flyout.closeButtonLabel', {
+                {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.closeButtonLabel', {
                   defaultMessage: 'Close'
                 })}
               </EuiButtonEmpty>
