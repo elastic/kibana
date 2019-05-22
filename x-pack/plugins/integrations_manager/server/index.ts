@@ -7,25 +7,25 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 
-import http from 'http'
-import https from 'https'
+import http from 'http';
+import https from 'https';
 
-const ID = 'integrations_manager'
-const REGISTRY = process.env.REGISTRY || 'http://localhost:8080'
+const ID = 'integrations_manager';
+const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
 const API_ROOT = `/api/${ID}`;
 
 // Manager public API paths (currently essentially a proxy to registry service)
-const routes = { 
+const routes = {
   reg_info: {
     method: 'GET',
     path: `${API_ROOT}/`,
     options: {
       tags: [`access:${ID}`],
     },
-    handler: async req => {
-      const data = await requestJson(REGISTRY)
-      return data
-    }
+    handler: async (req: any) => {
+      const data = await requestJson(REGISTRY);
+      return data;
+    },
   },
   reg_list: {
     method: 'GET',
@@ -33,10 +33,10 @@ const routes = {
     options: {
       tags: [`access:${ID}`],
     },
-    handler: async req => {
-      const data = await requestJson(`${REGISTRY}/list`)
-      return data
-    }
+    handler: async (req: any) => {
+      const data = await requestJson(`${REGISTRY}/list`);
+      return data;
+    },
   },
   reg_package: {
     method: 'GET',
@@ -44,10 +44,11 @@ const routes = {
     options: {
       tags: [`access:${ID}`],
     },
-    handler: async req => {
-      const data = await requestJson(`${REGISTRY}/package/${req.params.pkgkey}`)
-      return data
-    }
+    handler: async (req: { params: { pkgkey: string } }) => {
+      const { pkgkey } = req.params;
+      const data = await requestJson(`${REGISTRY}/package/${pkgkey}`);
+      return data;
+    },
   },
   reg_package_get: {
     method: 'GET',
@@ -55,44 +56,43 @@ const routes = {
     options: {
       tags: [`access:${ID}`],
     },
-    handler: async req => {
-      const url = `${REGISTRY}/package/${req.params.pkgkey}/get`
-      const data = await request(url)
-      return { meta: { WIP: true, url, length: data.length } }
-    }
-  }
-}
+    handler: async (req: { params: { pkgkey: string } }) => {
+      const { pkgkey } = req.params;
+      const data = await fetchUrl(`${REGISTRY}/package/${pkgkey}/get`);
+      return { meta: { pkgkey, length: data.length } };
+    },
+  },
+};
 
 class Plugin {
   public setup(core: CoreSetup) {
     const { server } = core.http;
-    Object.values(routes).forEach((route) => server.route(route))
+    Object.values(routes).forEach(route => server.route(route));
   }
 }
 
-function request(url) {
+function fetchUrl(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const lib = url.startsWith('https') ? https : http;
 
-    const request = lib.get(url, (response) => {
-      const body = [];
-      response.on('data', (chunk) => body.push(chunk));
+    const request = lib.get(url, response => {
+      const body: string[] = [];
+      response.on('data', (chunk: string) => body.push(chunk));
       response.on('end', () => resolve(body.join('')));
     });
 
-    request.on('error', reject)
-  })
+    request.on('error', reject);
+  });
 }
 
-async function requestJson(url) {
+async function requestJson(url: string) {
   try {
-    const json = await request(url)
-    const data = JSON.parse(json)
-    return data
+    const json = await fetchUrl(url);
+    const data = JSON.parse(json);
+    return data;
   } catch (e) {
-    throw e
+    throw e;
   }
-
 }
 
 export function plugin(initializerContext: PluginInitializerContext) {
