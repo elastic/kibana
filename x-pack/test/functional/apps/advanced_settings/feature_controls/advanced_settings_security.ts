@@ -8,6 +8,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -81,6 +82,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
         const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
         expect(advancedSetting).to.be('America/Phoenix');
+        await browser.refresh();
       });
 
       it(`doesn't show read-only badge`, async () => {
