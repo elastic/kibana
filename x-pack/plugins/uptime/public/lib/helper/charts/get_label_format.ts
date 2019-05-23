@@ -6,16 +6,24 @@
 
 import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
 
-const { HOUR, FOUR_DAYS, WEEK, FOUR_YEARS } = CHART_FORMAT_LIMITS;
+const { FOUR_DAYS, FOUR_MINUTES, FOUR_YEARS, HOUR, THIRTY_SIX_HOURS, WEEK } = CHART_FORMAT_LIMITS;
 
 const array: Array<{ key: number; value: string }> = [
   {
+    key: FOUR_MINUTES,
+    value: 'HH:mm:ss',
+  },
+  {
     key: HOUR,
-    value: 'mm',
+    value: 'HH:mm',
+  },
+  {
+    key: THIRTY_SIX_HOURS,
+    value: 'HH:mm',
   },
   {
     key: FOUR_DAYS,
-    value: 'HH:mm',
+    value: 'MM-dd HH:mm',
   },
   {
     key: WEEK,

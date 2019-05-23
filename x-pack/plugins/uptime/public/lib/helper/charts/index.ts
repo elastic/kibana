@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getChartDateLabel } from './get_chart_label';
+export { getChartDateLabel } from './get_chart_date_label';

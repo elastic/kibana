@@ -23,10 +23,17 @@ import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
  * getChartDateLabel(995200079000, 995565179000); // returns 'MM-dd'
  */
 export const getChartDateLabel = (dateRangeStart: number, dateRangeEnd: number) => {
-  if (dateRangeStart > dateRangeEnd) throw Error('Invalid date range.');
+  if (dateRangeStart > dateRangeEnd) {
+    throw Error(
+      `Invalid date range. Received start value of ${dateRangeStart} and end value of ${dateRangeEnd}.`
+    );
+  }
   const delta = dateRangeEnd - dateRangeStart;
   let formatString = '';
-  if (delta < CHART_FORMAT_LIMITS.FOUR_DAYS && !isWithinCurrentDate(dateRangeStart, dateRangeEnd)) {
+  if (
+    delta < CHART_FORMAT_LIMITS.THIRTY_SIX_HOURS &&
+    !isWithinCurrentDate(dateRangeStart, dateRangeEnd)
+  ) {
     formatString = 'MM-dd ';
   }
   return formatString + getLabelFormat(delta);

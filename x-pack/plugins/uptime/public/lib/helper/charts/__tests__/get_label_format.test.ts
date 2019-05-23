@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getChartDateLabel } from '../get_chart_label';
+import { getChartDateLabel } from '../get_chart_date_label';
 
 describe('getChartLabelFormatter', () => {
   beforeEach(() => {
@@ -20,7 +20,13 @@ describe('getChartLabelFormatter', () => {
   it('creates a format without day/month/hour for range within an hour', () => {
     expect.assertions(1);
     // Thu, 19 Jul 2001 17:50:00 GMT -> Thu, 19 Jul 2001 17:52:59 GMT
-    expect(getChartDateLabel(995565000000, 995565179000)).toBe('mm');
+    expect(getChartDateLabel(995565000000, 995565179000)).toBe('HH:mm:ss');
+  });
+
+  it('creates a label with month/day and hour/minute for time between 36 hours and 4 days', () => {
+    expect.assertions(1);
+    // Sun, 15 Jul 2001 17:53:10 GMT -> Thu, 19 Jul 2001 17:52:59 GMT
+    expect(getChartDateLabel(995219590000, 995565179000)).toBe('MM-dd HH:mm');
   });
 
   it('creates a format without day/month string for delta within same day local time', () => {
