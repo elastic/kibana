@@ -91,6 +91,7 @@ export class EventColumnView extends React.PureComponent<Props> {
               onUnPinEvent,
               pinnedEventIds,
             })}
+            showCheckboxes={false}
             showNotes={showNotes}
             toggleShowNotes={toggleShowNotes}
             updateNote={updateNote}
