@@ -56,9 +56,8 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
-    // Adding @timestamp here as gql doesn't support fields prefixed w/ @ and we've removed the ECS field mappings from query.dsl.ts
     const queryOptions = cloneDeep(options);
-    queryOptions.fields.push('@timestamp');
+    queryOptions.fields = reduceFields(options.fields, eventFieldsMap);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',
