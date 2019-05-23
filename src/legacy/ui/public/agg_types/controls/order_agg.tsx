@@ -46,8 +46,12 @@ function OrderAggParamEditor({
 
   useEffect(() => {
     // setup the initial value of orderBy
-    if (!value && responseValueAggs) {
-      const respAgg = responseValueAggs.filter(isCompatibleAgg)[0] || { id: '_key' };
+    if (!value) {
+      let respAgg = { id: '_key' };
+
+      if (responseValueAggs) {
+        respAgg = responseValueAggs.filter(isCompatibleAgg)[0] || respAgg;
+      }
 
       setValue(respAgg.id);
     }
