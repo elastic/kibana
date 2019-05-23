@@ -2,6 +2,7 @@
 
 exports[`DataProviders rendering renders correctly against snapshot 1`] = `
 <Component
+  browserFields={Object {}}
   dataProviders={
     Array [
       Object {
@@ -129,6 +130,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
   id="foo"
   onChangeDataProviderKqlQuery={[MockFunction]}
   onChangeDroppableAndProvider={[MockFunction]}
+  onDataProviderEdited={[MockFunction]}
   onDataProviderRemoved={[MockFunction]}
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}
