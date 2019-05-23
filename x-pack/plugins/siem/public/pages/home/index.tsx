@@ -19,6 +19,7 @@ import { HelpMenu } from '../../components/help_menu';
 import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { StatefulTimeline } from '../../components/timeline';
+import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
@@ -72,6 +73,7 @@ export const HomePage = pure(() => (
           <WithSource sourceId="default">
             {({ browserFields }) => (
               <DragDropContextWrapper browserFields={browserFields}>
+                <AutoSaveWarningMsg />
                 <Flyout
                   flyoutHeight={calculateFlyoutHeight({
                     globalHeaderSize: globalHeaderHeightPx,

@@ -9,17 +9,22 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { escapeQueryValue } from '../../../lib/keury';
-import { mockGlobalState, TestProviders, mockIndexPattern } from '../../../mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  TestProviders,
+  mockIndexPattern,
+} from '../../../mock';
 import { createStore, hostsModel, networkModel, State } from '../../../store';
 
 import { AddToKql } from '.';
 
 describe('AddToKql Component', async () => {
   const state: State = mockGlobalState;
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   test('Rendering', async () => {
@@ -97,7 +102,7 @@ describe('AddToKql Component', async () => {
         },
       },
       filterQuery: {
-        query: {
+        kuery: {
           kind: 'kuery',
           expression: 'host.name: siem-kibana',
         },
@@ -153,7 +158,7 @@ describe('AddToKql Component', async () => {
         },
       },
       filterQuery: {
-        query: {
+        kuery: {
           kind: 'kuery',
           expression: 'host.name: siem-kibana',
         },

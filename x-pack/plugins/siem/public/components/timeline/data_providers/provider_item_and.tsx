@@ -17,12 +17,12 @@ import {
   OnToggleDataProviderExcluded,
 } from '../events';
 
-import { DataProvider, IS_OPERATOR } from './data_provider';
+import { DataProvidersAnd, IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
 
 interface ProviderItemAndPopoverProps {
   browserFields: BrowserFields;
-  dataProvidersAnd: DataProvider[];
+  dataProvidersAnd: DataProvidersAnd[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -42,7 +42,7 @@ export class ProviderItemAnd extends React.PureComponent<ProviderItemAndPopoverP
       timelineId,
     } = this.props;
 
-    return dataProvidersAnd.map((providerAnd: DataProvider, index: number) => (
+    return dataProvidersAnd.map((providerAnd: DataProvidersAnd, index: number) => (
       <React.Fragment key={`provider-item-and-${providerId}-${providerAnd.id}`}>
         <EuiFlexItem>
           <AndOrBadge type="and" />
