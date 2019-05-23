@@ -94,12 +94,24 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
     }),
     children: (
       <Fragment>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatDescription"
+            defaultMessage="Make these changes in your {file}."
+            values={{
+              file: (
+                <Monospace>metricbeat.yml</Monospace>
+              )
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="s"/>
         <EuiCodeBlock
           isCopyable
         >
           {`
 output.elasticsearch:
-  hosts: ["${esMonitoringUrl}"]
+  hosts: ["${esMonitoringUrl}"] ## Monitoring cluster
 `}
         </EuiCodeBlock>
       </Fragment>
@@ -117,7 +129,7 @@ output.elasticsearch:
           isCopyable
         >
           {`
-./metricbeat -e
+metricbeat -e
 `}
         </EuiCodeBlock>
       </Fragment>
