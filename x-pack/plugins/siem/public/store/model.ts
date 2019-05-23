@@ -21,6 +21,6 @@ export interface KueryFilterQuery {
 }
 
 export interface SerializedFilterQuery {
-  query: KueryFilterQuery | null;
+  kuery: KueryFilterQuery | null;
   serializedQuery: string;
 }

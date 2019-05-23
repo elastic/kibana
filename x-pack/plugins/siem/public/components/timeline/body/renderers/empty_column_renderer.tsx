@@ -12,6 +12,7 @@ import { DraggableWrapper, DragEffects } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { parseQueryValue } from './parse_query_value';
+import { IS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { getEmptyValue } from '../../../empty_value';
@@ -41,7 +42,11 @@ export const emptyColumnRenderer: ColumnRenderer = {
           `id-timeline-column-${columnName}-for-event-${eventId}-${field.id}`
         ),
         name: `${columnName}: ${parseQueryValue(null)}`,
-        queryMatch: { field: field.id, value: escapeQueryValue(parseQueryValue(null)) },
+        queryMatch: {
+          field: field.id,
+          value: escapeQueryValue(parseQueryValue(null)),
+          operator: IS_OPERATOR,
+        },
         excluded: false,
         kqlQuery: '',
         and: [],
