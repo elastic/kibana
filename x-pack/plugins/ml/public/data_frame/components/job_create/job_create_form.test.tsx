@@ -28,6 +28,7 @@ describe('Data Frame: <JobCreateForm />', () => {
     };
 
     const currentIndexPattern = {
+      id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -37,7 +38,14 @@ describe('Data Frame: <JobCreateForm />', () => {
     const wrapper = shallow(
       <div>
         <KibanaContext.Provider
-          value={{ currentIndexPattern, indexPatterns: {}, kbnBaseUrl: 'url', kibanaConfig: {} }}
+          value={{
+            combinedQuery: {},
+            currentIndexPattern,
+            currentSavedSearch: {},
+            indexPatterns: {},
+            kbnBaseUrl: 'url',
+            kibanaConfig: {},
+          }}
         >
           <JobCreateForm {...props} />
         </KibanaContext.Provider>
