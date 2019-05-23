@@ -33,11 +33,11 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
       loadTestFile(require.resolve('./feature_controls/maps_spaces'));
+      loadTestFile(require.resolve('./es_search_source'));
     });
 
     describe('', function () {
       this.tags('ciGroup10');
-      loadTestFile(require.resolve('./es_search_source'));
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./joins'));
       loadTestFile(require.resolve('./add_layer_panel'));
