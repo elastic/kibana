@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText } from '@elastic/eui';
+import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { pure } from 'recompose';
@@ -45,14 +45,16 @@ export const Markdown = pure<{ raw?: string; size?: 'xs' | 's' | 'm' }>(({ raw, 
       <EuiTableRowCell data-test-subj="markdown-table-cell">{children}</EuiTableRowCell>
     ),
     link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
-      <EuiLink
-        href={href}
-        data-test-subj="markdown-link"
-        rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}
-        target="_blank"
-      >
-        {children}
-      </EuiLink>
+      <EuiToolTip content={href}>
+        <EuiLink
+          href={href}
+          data-test-subj="markdown-link"
+          rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}
+          target="_blank"
+        >
+          {children}
+        </EuiLink>
+      </EuiToolTip>
     ),
   };
 

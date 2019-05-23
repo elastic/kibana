@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as React from 'react';
+
+import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnRenderer } from './column_renderer';
+import { DraggableWrapper, DragEffects } from '../../../drag_and_drop/draggable_wrapper';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { escapeQueryValue } from '../../../../lib/keury';
+import { parseQueryValue } from './parse_query_value';
+import { Provider } from '../../data_providers/provider';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { getEmptyValue } from '../../../empty_value';
-import { ColumnRenderer } from './column_renderer';
 
 export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) === -1;
@@ -14,5 +22,40 @@ export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsDa
 export const emptyColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
     dataNotExistsAtColumn(columnName, data),
-  renderColumn: () => getEmptyValue(),
+  renderColumn: ({
+    columnName,
+    eventId,
+    field,
+    width,
+  }: {
+    columnName: string;
+    eventId: string;
+    field: ColumnHeader;
+    width?: string;
+  }) => (
+    <DraggableWrapper
+      key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}`}
+      dataProvider={{
+        enabled: true,
+        id: escapeDataProviderId(
+          `id-timeline-column-${columnName}-for-event-${eventId}-${field.id}`
+        ),
+        name: `${columnName}: ${parseQueryValue(null)}`,
+        queryMatch: { field: field.id, value: escapeQueryValue(parseQueryValue(null)) },
+        excluded: false,
+        kqlQuery: '',
+        and: [],
+      }}
+      render={(dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : (
+          <span>{getEmptyValue()}</span>
+        )
+      }
+      width={width}
+    />
+  ),
 };
