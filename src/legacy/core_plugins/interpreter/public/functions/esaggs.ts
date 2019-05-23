@@ -19,11 +19,15 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
-import { AggConfigs } from 'ui/vis/agg_configs';
+// @ts-ignore
+import { AggConfigs } from 'ui/vis/agg_configs.js';
 
 // need to get rid of angular from these
+// @ts-ignore
 import { IndexPatternsProvider } from 'ui/index_patterns';
+// @ts-ignore
 import { SearchSourceProvider } from 'ui/courier/search_source';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
@@ -32,37 +36,56 @@ import chrome from 'ui/chrome';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
-export const esaggs = () => ({
-  name: 'esaggs',
+import { ExpressionFunction } from '../types';
+import { KibanaContext, KibanaDatatable } from '../../common/types';
+
+const name = 'esaggs';
+
+type Context = KibanaContext | null;
+
+interface Arguments {
+  index: string | null;
+  metricsAtAllLevels: boolean;
+  partialRows: boolean;
+  aggConfigs: string;
+}
+
+type Return = Promise<KibanaDatatable>;
+
+export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name,
   type: 'kibana_datatable',
   context: {
-    types: [
-      'kibana_context',
-      'null',
-    ],
+    types: ['kibana_context', 'null'],
   },
-  help: i18n.translate('interpreter.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
+  help: i18n.translate('interpreter.functions.esaggs.help', {
+    defaultMessage: 'Run AggConfig aggregation',
+  }),
   args: {
     index: {
       types: ['string', 'null'],
       default: null,
+      help: '',
     },
     metricsAtAllLevels: {
       types: ['boolean'],
       default: false,
+      help: '',
     },
     partialRows: {
       types: ['boolean'],
       default: false,
+      help: '',
     },
     aggConfigs: {
       types: ['string'],
       default: '""',
+      help: '',
     },
   },
   async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
+    const Private: Function = $injector.get('Private');
     const indexPatterns = Private(IndexPatternsProvider);
     const SearchSource = Private(SearchSourceProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -76,9 +99,9 @@ export const esaggs = () => ({
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
-    const response = await courierRequestHandler({
-      searchSource: searchSource,
-      aggs: aggs,
+    const response: Pick<KibanaDatatable, 'columns' | 'rows'> = await courierRequestHandler({
+      searchSource,
+      aggs,
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
