@@ -17,22 +17,51 @@
  * under the License.
  */
 import { PriorityCollection } from './priority_collection';
+import { SavedObjectsClient } from '..';
+
+type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+}[keyof T];
+
+type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
+
+export interface SavedObjectsClientWrapperOptions<Request = any> {
+  client: PublicMethodsOf<SavedObjectsClient>;
+  request: Request;
+}
+
+export type SavedObjectsClientWrapperFactory<Request = any> = (
+  options: SavedObjectsClientWrapperOptions<Request>
+) => PublicMethodsOf<SavedObjectsClient>;
+
+export type SavedObjectsClientFactory<Request = any> = (
+  { request }: { request: Request }
+) => PublicMethodsOf<SavedObjectsClient>;
 
 /**
  * Provider for the Scoped Saved Object Client.
  */
-export class ScopedSavedObjectsClientProvider {
-  _wrapperFactories = new PriorityCollection();
+export class ScopedSavedObjectsClientProvider<Request = any> {
+  _wrapperFactories = new PriorityCollection<SavedObjectsClientWrapperFactory<Request>>();
+  private _clientFactory: SavedObjectsClientFactory<Request>;
+  private _originalClientFactory: SavedObjectsClientFactory<Request>;
 
-  constructor({ defaultClientFactory }) {
+  constructor({
+    defaultClientFactory,
+  }: {
+    defaultClientFactory: SavedObjectsClientFactory<Request>;
+  }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 
-  addClientWrapperFactory(priority, wrapperFactory) {
+  addClientWrapperFactory(
+    priority: number,
+    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
+  ): void {
     this._wrapperFactories.add(priority, wrapperFactory);
   }
 
-  setClientFactory(customClientFactory) {
+  setClientFactory(customClientFactory: SavedObjectsClientFactory) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }
@@ -40,7 +69,7 @@ export class ScopedSavedObjectsClientProvider {
     this._clientFactory = customClientFactory;
   }
 
-  getClient(request) {
+  getClient(request: Request): PublicMethodsOf<SavedObjectsClient> {
     const client = this._clientFactory({
       request,
     });

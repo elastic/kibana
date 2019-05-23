@@ -23,7 +23,7 @@ import {
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 
 interface EncryptedSavedObjectsClientOptions {
-  baseClient: SavedObjectsClient;
+  baseClient: PublicMethodsOf<SavedObjectsClient>;
   service: Readonly<EncryptedSavedObjectsService>;
 }
 
@@ -38,7 +38,9 @@ function generateID() {
 export class EncryptedSavedObjectsClientWrapper implements PublicMethodsOf<SavedObjectsClient> {
   constructor(
     private readonly options: EncryptedSavedObjectsClientOptions,
-    public readonly errors: SavedObjectsClient['errors'] = options.baseClient.errors
+    public readonly errors: SavedObjectsClient['errors'] = ((options.baseClient as any) as {
+      errors: SavedObjectsClient['errors'];
+    }).errors // TODO
   ) {}
 
   public async create<T extends SavedObjectAttributes>(
