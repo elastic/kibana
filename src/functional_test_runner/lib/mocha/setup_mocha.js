@@ -62,7 +62,6 @@ export async function setupMocha(lifecycle, log, config, providers) {
     mocha,
     include: config.get('suiteTags.include'),
     exclude: config.get('suiteTags.exclude'),
-
   });
 
   return mocha;
