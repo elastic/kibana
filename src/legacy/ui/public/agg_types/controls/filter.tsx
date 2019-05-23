@@ -107,6 +107,7 @@ function FilterRow({
           onChange={query => onChangeValue(id, query, customLabel)}
           disableAutoFocus={!autoFocus}
           data-test-subj={dataTestSubj}
+          bubbleSubmitEvent={true}
         />
       </EuiFormRow>
       {showCustomLabel ? (

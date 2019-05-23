@@ -55,6 +55,7 @@ interface Props {
   prepend?: any;
   store?: Storage;
   persistedLog?: PersistedLog;
+  bubbleSubmitEvent?: boolean;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
 }
@@ -240,7 +241,9 @@ export class QueryBarInputUI extends Component<Props, State> {
           }
           break;
         case KEY_CODES.ENTER:
-          event.preventDefault();
+          if (!this.props.bubbleSubmitEvent) {
+            event.preventDefault();
+          }
           if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
             this.selectSuggestion(this.state.suggestions[index]);
           } else {
@@ -411,58 +414,56 @@ export class QueryBarInputUI extends Component<Props, State> {
           aria-owns="kbnTypeahead__items"
           aria-controls="kbnTypeahead__items"
         >
-          <form name="queryBarForm">
-            <div role="search">
-              <div className="kuiLocalSearchAssistedInput">
-                <EuiFieldText
-                  placeholder={this.props.intl.formatMessage({
-                    id: 'data.query.queryBar.searchInputPlaceholder',
-                    defaultMessage: 'Search',
-                  })}
-                  value={this.getQueryString()}
-                  onKeyDown={this.onKeyDown}
-                  onKeyUp={this.onKeyUp}
-                  onChange={this.onInputChange}
-                  onClick={this.onClickInput}
-                  fullWidth
-                  autoFocus={!this.props.disableAutoFocus}
-                  inputRef={node => {
-                    if (node) {
-                      this.inputRef = node;
-                    }
-                  }}
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-label={this.props.intl.formatMessage(
-                    {
-                      id: 'data.query.queryBar.searchInputAriaLabel',
-                      defaultMessage:
-                        'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                    },
-                    {
-                      previouslyTranslatedPageTitle: this.props.screenTitle,
-                      pageType: this.props.appName,
-                    }
-                  )}
-                  type="text"
-                  data-test-subj="queryInput"
-                  aria-autocomplete="list"
-                  aria-controls="kbnTypeahead__items"
-                  aria-activedescendant={
-                    this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+          <div role="search">
+            <div className="kuiLocalSearchAssistedInput">
+              <EuiFieldText
+                placeholder={this.props.intl.formatMessage({
+                  id: 'data.query.queryBar.searchInputPlaceholder',
+                  defaultMessage: 'Search',
+                })}
+                value={this.getQueryString()}
+                onKeyDown={this.onKeyDown}
+                onKeyUp={this.onKeyUp}
+                onChange={this.onInputChange}
+                onClick={this.onClickInput}
+                fullWidth
+                autoFocus={!this.props.disableAutoFocus}
+                inputRef={node => {
+                  if (node) {
+                    this.inputRef = node;
                   }
-                  role="textbox"
-                  prepend={this.props.prepend}
-                  append={
-                    <QueryLanguageSwitcher
-                      language={this.props.query.language}
-                      onSelectLanguage={this.onSelectLanguage}
-                    />
+                }}
+                autoComplete="off"
+                spellCheck={false}
+                aria-label={this.props.intl.formatMessage(
+                  {
+                    id: 'data.query.queryBar.searchInputAriaLabel',
+                    defaultMessage:
+                      'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                  },
+                  {
+                    previouslyTranslatedPageTitle: this.props.screenTitle,
+                    pageType: this.props.appName,
                   }
-                />
-              </div>
+                )}
+                type="text"
+                data-test-subj="queryInput"
+                aria-autocomplete="list"
+                aria-controls="kbnTypeahead__items"
+                aria-activedescendant={
+                  this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+                }
+                role="textbox"
+                prepend={this.props.prepend}
+                append={
+                  <QueryLanguageSwitcher
+                    language={this.props.query.language}
+                    onSelectLanguage={this.onSelectLanguage}
+                  />
+                }
+              />
             </div>
-          </form>
+          </div>
 
           <SuggestionsComponent
             show={this.state.isSuggestionsVisible}
