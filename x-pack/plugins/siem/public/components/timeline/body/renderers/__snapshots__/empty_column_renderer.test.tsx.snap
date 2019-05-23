@@ -13,6 +13,7 @@ exports[`empty_column_renderer renders correctly against snapshot 1`] = `
         "name": "source.ip: ",
         "queryMatch": Object {
           "field": "source.ip",
+          "operator": ":",
           "value": "",
         },
       }
