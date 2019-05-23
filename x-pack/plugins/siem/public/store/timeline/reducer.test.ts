@@ -18,7 +18,6 @@ import { defaultHeaders } from '../../mock';
 
 import {
   addNewTimeline,
-  addTimelineColumn,
   addTimelineProvider,
   applyDeltaToTimelineColumnWidth,
   removeTimelineColumn,
@@ -34,6 +33,7 @@ import {
   updateTimelineShowTimeline,
   updateTimelineSort,
   updateTimelineTitle,
+  upsertTimelineColumn,
 } from './helpers';
 import { timelineDefaults } from './model';
 import { TimelineById } from './reducer';
@@ -141,81 +141,184 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#addTimelineColumn', () => {
-    const columnToAdd: ColumnHeader = {
-      category: 'event',
-      columnHeaderType: defaultColumnHeaderType,
-      description:
-        'The action captured by the event.\nThis describes the information in the event. It is more specific than `event.category`. Examples are `group-add`, `process-started`, `file-created`. The value is normally defined by the implementer.',
-      example: 'user-password-change',
-      id: 'event.action',
-      type: 'keyword',
-      width: DEFAULT_COLUMN_MIN_WIDTH,
-    };
+  describe('#upsertTimelineColumn', () => {
+    let timelineById: TimelineById = {};
+    let columns: ColumnHeader[] = [];
+    let columnToAdd: ColumnHeader;
+
+    beforeEach(() => {
+      timelineById = cloneDeep(timelineByIdMock);
+      columns = cloneDeep(columnsMock);
+      columnToAdd = {
+        category: 'event',
+        columnHeaderType: defaultColumnHeaderType,
+        description:
+          'The action captured by the event.\nThis describes the information in the event. It is more specific than `event.category`. Examples are `group-add`, `process-started`, `file-created`. The value is normally defined by the implementer.',
+        example: 'user-password-change',
+        id: 'event.action',
+        type: 'keyword',
+        width: DEFAULT_COLUMN_MIN_WIDTH,
+      };
+    });
 
     test('should return a new reference and not the same reference', () => {
-      const update = addTimelineColumn({
-        id: 'foo',
+      const update = upsertTimelineColumn({
         column: columnToAdd,
-        timelineById: timelineByIdMock,
+        id: 'foo',
+        index: 0,
+        timelineById,
       });
 
-      expect(update).not.toBe(timelineByIdMock);
+      expect(update).not.toBe(timelineById);
     });
 
     test('should add a new column to an empty collection of columns', () => {
-      const update = addTimelineColumn({
-        id: 'foo',
+      const expectedColumns = [columnToAdd];
+      const update = upsertTimelineColumn({
         column: columnToAdd,
-        timelineById: timelineByIdMock,
+        id: 'foo',
+        index: 0,
+        timelineById,
       });
 
-      const addedColumn = timelineByIdMock.foo.columns.concat(columnToAdd);
-      expect(update).toEqual(set('foo.columns', addedColumn, timelineByIdMock));
+      expect(update).toEqual(set('foo.columns', expectedColumns, timelineById));
     });
 
-    test('should add a new column to an existing collection of columns', () => {
-      const expectedColumns = columnsMock.concat(columnToAdd);
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+    test('should add a new column to an existing collection of columns at the beginning of the collection', () => {
+      const expectedColumns = [columnToAdd, ...columns];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
-      const update = addTimelineColumn({
-        id: 'foo',
+      const update = upsertTimelineColumn({
         column: columnToAdd,
+        id: 'foo',
+        index: 0,
         timelineById: mockWithExistingColumns,
       });
 
       expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
     });
 
-    test('should NOT add an additional new column if it already exists', () => {
-      const expectedColumns = cloneDeep(columnsMock);
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-      const preExisting = cloneDeep(mockWithExistingColumns.foo.columns[1]);
+    test('should add a new column to an existing collection of columns in the middle of the collection', () => {
+      const expectedColumns = [columns[0], columnToAdd, columns[1], columns[2]];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
-      const update = addTimelineColumn({
+      const update = upsertTimelineColumn({
+        column: columnToAdd,
         id: 'foo',
-        column: preExisting,
+        index: 1,
         timelineById: mockWithExistingColumns,
       });
 
       expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
     });
 
-    test('should NOT MODIFY an existing column if it already exists', () => {
-      const expectedColumns = cloneDeep(columnsMock);
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+    test('should add a new column to an existing collection of columns at the end of the collection', () => {
+      const expectedColumns = [...columns, columnToAdd];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
-      const differentDescription = {
-        ...mockWithExistingColumns.foo.columns[1],
-        description: 'this is a different description',
-      };
-
-      const update = addTimelineColumn({
+      const update = upsertTimelineColumn({
+        column: columnToAdd,
         id: 'foo',
-        column: differentDescription,
+        index: expectedColumns.length - 1,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    columns.forEach((column, i) => {
+      test(`should upsert (NOT add a new column) a column when already exists at the same index (${i})`, () => {
+        const mockWithExistingColumns = set('foo.columns', columns, timelineById);
+
+        const update = upsertTimelineColumn({
+          column,
+          id: 'foo',
+          index: i,
+          timelineById: mockWithExistingColumns,
+        });
+
+        expect(update).toEqual(set('foo.columns', columns, mockWithExistingColumns));
+      });
+    });
+
+    test('should allow the 1st column to be moved to the 2nd column', () => {
+      const expectedColumns = [columns[1], columns[0], columns[2]];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
+
+      const update = upsertTimelineColumn({
+        column: columns[0],
+        id: 'foo',
+        index: 1,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should allow the 1st column to be moved to the 3rd column', () => {
+      const expectedColumns = [columns[1], columns[2], columns[0]];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
+
+      const update = upsertTimelineColumn({
+        column: columns[0],
+        id: 'foo',
+        index: 2,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should allow the 2nd column to be moved to the 1st column', () => {
+      const expectedColumns = [columns[1], columns[0], columns[2]];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
+
+      const update = upsertTimelineColumn({
+        column: columns[1],
+        id: 'foo',
+        index: 0,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should allow the 2nd column to be moved to the 3rd column', () => {
+      const expectedColumns = [columns[0], columns[2], columns[1]];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
+
+      const update = upsertTimelineColumn({
+        column: columns[1],
+        id: 'foo',
+        index: 2,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should allow the 3rd column to be moved to the 1st column', () => {
+      const expectedColumns = [columns[2], columns[0], columns[1]];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
+
+      const update = upsertTimelineColumn({
+        column: columns[2],
+        id: 'foo',
+        index: 0,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should allow the 3rd column to be moved to the 2nd column', () => {
+      const expectedColumns = [columns[0], columns[2], columns[1]];
+      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
+
+      const update = upsertTimelineColumn({
+        column: columns[2],
+        id: 'foo',
+        index: 1,
         timelineById: mockWithExistingColumns,
       });
 

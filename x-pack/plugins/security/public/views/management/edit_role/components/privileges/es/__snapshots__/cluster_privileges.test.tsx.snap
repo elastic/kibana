@@ -82,6 +82,9 @@ exports[`it renders without crashing 1`] = `
           Object {
             "label": "create_snapshot",
           },
+          Object {
+            "label": "manage_oidc",
+          },
         ]
       }
       selectedOptions={Array []}

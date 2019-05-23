@@ -13,6 +13,7 @@ import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 
 import { mockDataProviders } from './mock/mock_data_providers';
 import { getDraggableId, Providers } from './providers';
+import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 
 describe('Providers', () => {
   describe('rendering', () => {
@@ -20,10 +21,12 @@ describe('Providers', () => {
       const wrapper = shallow(
         <DroppableWrapper droppableId="unitTest">
           <Providers
-            id="foo"
+            browserFields={{}}
             dataProviders={mockDataProviders}
+            id="foo"
             onChangeDataProviderKqlQuery={jest.fn()}
             onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
@@ -38,10 +41,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={mockDataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -65,10 +70,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={mockDataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -89,10 +96,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={mockDataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -106,8 +115,8 @@ describe('Providers', () => {
         .simulate('click');
       wrapper.update();
       wrapper
-        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
-        .at(2)
+        .find(`[data-test-subj="providerActions"] .${DELETE_CLASS_NAME}`)
+        .first()
         .simulate('click');
       expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
     });
@@ -128,10 +137,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={mockDataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
               onToggleDataProviderExcluded={jest.fn()}
@@ -144,9 +155,10 @@ describe('Providers', () => {
         .first()
         .simulate('click');
       wrapper.update();
+
       wrapper
-        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
-        .at(1)
+        .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
+        .first()
         .simulate('click');
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         enabled: false,
@@ -163,10 +175,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={mockDataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={onToggleDataProviderExcluded}
@@ -183,7 +197,7 @@ describe('Providers', () => {
       wrapper.update();
 
       wrapper
-        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
+        .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
         .first()
         .simulate('click');
 
@@ -203,10 +217,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={dataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -234,10 +250,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={mockDataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
@@ -248,7 +266,7 @@ describe('Providers', () => {
 
       wrapper
         .find('[data-test-subj="providerBadge"]')
-        .at(3)
+        .at(4)
         .find('svg')
         .first()
         .simulate('click');
@@ -267,10 +285,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={dataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
               onToggleDataProviderExcluded={jest.fn()}
@@ -281,14 +301,14 @@ describe('Providers', () => {
 
       wrapper
         .find('[data-test-subj="providerBadge"]')
-        .at(3)
+        .at(4)
         .simulate('click');
 
       wrapper.update();
 
       wrapper
-        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
-        .at(1)
+        .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
+        .first()
         .simulate('click');
 
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
@@ -307,10 +327,12 @@ describe('Providers', () => {
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
-              id="foo"
+              browserFields={{}}
               dataProviders={dataProviders}
+              id="foo"
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
@@ -321,13 +343,13 @@ describe('Providers', () => {
 
       wrapper
         .find('[data-test-subj="providerBadge"]')
-        .at(3)
+        .at(4)
         .simulate('click');
 
       wrapper.update();
 
       wrapper
-        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
+        .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
         .first()
         .simulate('click');
 
