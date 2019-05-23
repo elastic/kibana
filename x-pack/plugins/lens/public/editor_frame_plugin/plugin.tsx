@@ -6,9 +6,14 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { DataSetup } from 'plugins/data';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 
 import { EditorFrame } from './editor_frame';
+
+export interface EditorFrameSetupPlugins {
+  data: DataSetup;
+}
 
 export class EditorFramePlugin {
   constructor() {}
