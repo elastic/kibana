@@ -45,11 +45,6 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
           "render": [Function],
         },
         Object {
-          "field": "ping.url.full",
-          "name": "URL",
-          "render": [Function],
-        },
-        Object {
           "align": "right",
           "field": "upSeries",
           "name": "Downtime history",
