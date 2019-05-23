@@ -31,7 +31,7 @@ import {
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
-  SimpleQuery,
+  PivotQuery,
 } from '../../common';
 
 import { getFlattenedFields } from '../source_index_preview/common';
@@ -107,7 +107,7 @@ const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
 interface PivotPreviewProps {
   aggs: PivotAggsConfigDict;
   groupBy: PivotGroupByConfigDict;
-  query: SimpleQuery;
+  query: PivotQuery;
 }
 
 export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
