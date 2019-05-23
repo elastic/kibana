@@ -20,14 +20,14 @@
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 import {
-  ExpressionExecutorService,
+  ExpressionsService,
   RenderFunctionsRegistry,
   RenderFunction,
   Interpreter,
-  ExpressionExecutorSetupPlugins,
+  ExpressionsServiceDependencies,
   Result,
-  ExpressionExecutorSetup,
-} from './expression_executor_service';
+  ExpressionsSetup,
+} from './expressions_service';
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -42,10 +42,10 @@ const waitForInterpreterRun = async () => {
 describe('expression_executor_service', () => {
   let interpreterMock: jest.Mocked<Interpreter>;
   let renderFunctionMock: jest.Mocked<RenderFunction>;
-  let setupPluginsMock: ExpressionExecutorSetupPlugins;
+  let setupPluginsMock: ExpressionsServiceDependencies;
   const expressionResult: Result = { type: 'render', as: 'abc', value: {} };
 
-  let api: ExpressionExecutorSetup;
+  let api: ExpressionsSetup;
   let testExpression: string;
   let testAst: Ast;
 
@@ -62,7 +62,7 @@ describe('expression_executor_service', () => {
         } as unknown) as RenderFunctionsRegistry,
       },
     };
-    api = new ExpressionExecutorService().setup(null, setupPluginsMock);
+    api = new ExpressionsService().setup(setupPluginsMock);
     testExpression = 'test | expression';
     testAst = fromExpression(testExpression);
   });

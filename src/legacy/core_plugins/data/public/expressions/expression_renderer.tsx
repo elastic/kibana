@@ -17,4 +17,34 @@
  * under the License.
  */
 
-export { ExpressionExecutorService, ExpressionExecutorSetup } from './expression_executor_service';
+import { useRef, useEffect } from 'react';
+import React from 'react';
+
+export interface ExpressionRendererProps {
+  expression: string;
+}
+
+export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
+
+export const createRenderer = (
+  run: (expression: string, element: Element) => void
+): ExpressionRenderer => ({ expression }: ExpressionRendererProps) => {
+  const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
+
+  useEffect(
+    () => {
+      if (mountpoint.current) {
+        run(expression, mountpoint.current);
+      }
+    },
+    [expression, mountpoint.current]
+  );
+
+  return (
+    <div
+      ref={el => {
+        mountpoint.current = el;
+      }}
+    />
+  );
+};
