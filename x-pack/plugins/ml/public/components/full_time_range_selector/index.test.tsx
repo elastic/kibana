@@ -9,10 +9,10 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 // Due to https://github.com/elastic/kibana/issues/36900, this is required to
 // get ci to pass
-// @ts-ignore
 import {
   Query,
   QueryLanguageType,
+  // @ts-ignore
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
 import { IndexPattern } from 'ui/index_patterns';
 import { FullTimeRangeSelector } from './index';
