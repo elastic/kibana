@@ -240,3 +240,7 @@ export function getContextForIndex(state, index) {
 export function getRefreshInterval(state) {
   return get(state, 'transient.refresh.interval', 0);
 }
+
+export function getAutoplay(state) {
+  return get(state, 'transient.autoplay');
+}

@@ -4,6 +4,12 @@
 
 ## kibana-plugin-public package
 
+The Kibana Core APIs for client-side plugins.
+
+A plugin's `public/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-public.plugininitializer.md) which returns an object that implements [Plugin](./kibana-plugin-public.plugin.md)<!-- -->.
+
+The plugin integrates with the core system via lifecycle events: `setup`<!-- -->, `start`<!-- -->, and `stop`<!-- -->. In each lifecycle method, the plugin will receive the corresponding core services available (either [CoreSetup](./kibana-plugin-public.coresetup.md) or [CoreStart](./kibana-plugin-public.corestart.md)<!-- -->) and any interfaces returned by dependency plugins' lifecycle method. Anything returned by the plugin's lifecycle method will be exposed to downstream dependencies when their corresponding lifecycle methods are invoked.
+
 ## Classes
 
 |  Class | Description |
@@ -23,20 +29,17 @@
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeNavLink](./kibana-plugin-public.chromenavlink.md) |  |
-|  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the setup lifecycle |
-|  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the start lifecycle |
+|  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
+|  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [I18nSetup](./kibana-plugin-public.i18nsetup.md) | I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
-|  [InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md) | Provides access to the metadata injected by the server into the page |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [OverlayRef](./kibana-plugin-public.overlayref.md) |  |
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
-|  [PluginSetupContext](./kibana-plugin-public.pluginsetupcontext.md) | The available core services passed to a plugin's <code>Plugin#setup</code> method. |
-|  [PluginStartContext](./kibana-plugin-public.pluginstartcontext.md) | The available core services passed to a plugin's <code>Plugin#start</code> method. |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
 
 ## Type Aliases
@@ -50,7 +53,6 @@
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) |  |
-|  [InjectedMetadataStart](./kibana-plugin-public.injectedmetadatastart.md) |  |
 |  [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
