@@ -28,7 +28,7 @@ interface ImportSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
   overwrite: boolean;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: PublicMethodsOf<SavedObjectsClient>;
   supportedTypes: string[];
 }
 

@@ -12,14 +12,13 @@ import {
   BulkGetObjects,
   BulkGetResponse,
   CreateOptions,
-  CreateResponse,
   FindOptions,
   FindResponse,
-  GetResponse,
   SavedObjectAttributes,
   SavedObjectsClient,
   UpdateOptions,
   UpdateResponse,
+  SavedObject,
 } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 
@@ -36,7 +35,7 @@ function generateID() {
   return uuid.v4();
 }
 
-export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
+export class EncryptedSavedObjectsClientWrapper implements PublicMethodsOf<SavedObjectsClient> {
   constructor(
     private readonly options: EncryptedSavedObjectsClientOptions,
     public readonly errors: SavedObjectsClient['errors'] = options.baseClient.errors
@@ -159,9 +158,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
    * registered, response is returned as is.
    * @param response Raw response returned by the underlying base client.
    */
-  private stripEncryptedAttributesFromResponse<
-    T extends UpdateResponse | CreateResponse | GetResponse
-  >(response: T): T {
+  private stripEncryptedAttributesFromResponse<T extends UpdateResponse | SavedObject>(
+    response: T
+  ): T {
     if (this.options.service.isRegistered(response.type)) {
       response.attributes = this.options.service.stripEncryptedAttributes(
         response.type,

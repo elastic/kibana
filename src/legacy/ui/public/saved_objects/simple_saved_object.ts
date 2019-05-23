@@ -70,7 +70,7 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     return has(this.attributes, key);
   }
 
-  public save() {
+  public save(): Promise<SimpleSavedObject<T>> {
     if (this.id) {
       return this.client.update(this.type, this.id, this.attributes, {
         migrationVersion: this.migrationVersion,

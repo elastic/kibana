@@ -22,12 +22,12 @@ import { resolve as resolveUrl } from 'url';
 
 import {
   MigrationVersion,
-  SavedObject as PlainSavedObject,
+  SavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClient as SavedObjectsApi,
 } from '../../../server/saved_objects';
-import { CreateResponse, FindOptions, UpdateResponse } from '../../../server/saved_objects/service';
+import { FindOptions } from '../../../server/saved_objects/service';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
@@ -73,9 +73,7 @@ interface FindResults<T extends SavedObjectAttributes = SavedObjectAttributes>
 interface BatchQueueEntry {
   type: string;
   id: string;
-  resolve: <T extends SavedObjectAttributes>(
-    value: SimpleSavedObject<T> | PlainSavedObject<T>
-  ) => void;
+  resolve: <T extends SavedObjectAttributes>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
 
@@ -165,7 +163,7 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const createRequest: Promise<CreateResponse<T>> = this.request({
+    const createRequest: Promise<SavedObject<T>> = this.request({
       method: 'POST',
       path,
       query,
@@ -334,18 +332,17 @@ export class SavedObjectsClient {
       version,
     };
 
-    const request: Promise<UpdateResponse<T>> = this.request({
+    return this.request({
       method: 'PUT',
       path,
       body,
-    });
-    return request.then(resp => {
+    }).then((resp: SavedObject<T>) => {
       return this.createSavedObject(resp);
     });
   }
 
   private createSavedObject<T extends SavedObjectAttributes>(
-    options: PlainSavedObject<T>
+    options: SavedObject<T>
   ): SimpleSavedObject<T> {
     return new SimpleSavedObject(this, options);
   }

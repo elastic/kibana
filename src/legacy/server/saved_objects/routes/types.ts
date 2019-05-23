@@ -29,7 +29,7 @@ export interface SavedObjectReference {
 export interface Prerequisites {
   getSavedObjectsClient: {
     assign: string;
-    method: (req: Hapi.Request) => SavedObjectsClient;
+    method: (req: Hapi.Request) => PublicMethodsOf<SavedObjectsClient>;
   };
 }
 

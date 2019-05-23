@@ -33,7 +33,7 @@ interface SavedObject {
 
 interface BulkCreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: PublicMethodsOf<SavedObjectsClient>;
   };
   query: {
     overwrite: boolean;

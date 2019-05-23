@@ -38,28 +38,29 @@ import {
   FindResponse,
   BulkGetObject,
   BulkGetResponse,
-  GetResponse,
   UpdateOptions,
-  UpdateResponse,
-  CreateResponse,
   BaseOptions,
   MigrationVersion,
+  UpdateResponse,
 } from '../saved_objects_client';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-interface Left<T> {
-  tag: 'left';
+// eslint-disable-next-line @typescript-eslint/prefer-interface
+type Left<T> = {
+  tag: 'Left';
   error: T;
-}
-interface Right<T> {
-  tag: 'right';
+};
+// eslint-disable-next-line @typescript-eslint/prefer-interface
+type Right<T> = {
+  tag: 'Right';
   value: T;
-}
+};
+
 type Either<L, R> = Left<L> | Right<R>;
 const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
-  return either.tag === 'left';
+  return either.tag === 'Left';
 };
 
 export interface SavedObjectsRepositoryOptions {
@@ -142,7 +143,7 @@ export class SavedObjectsRepository {
     type: string,
     attributes: T,
     options: CreateOptions = { overwrite: false, references: [] }
-  ): Promise<CreateResponse<T>> {
+  ): Promise<SavedObject<T>> {
     const { id, migrationVersion, overwrite, namespace, references } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -207,7 +208,7 @@ export class SavedObjectsRepository {
     const expectedResults: Array<Either<any, any>> = objects.map(object => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
-          tag: 'left',
+          tag: 'Left' as 'Left',
           error: {
             id: object.id,
             type: object.type,
@@ -240,7 +241,7 @@ export class SavedObjectsRepository {
         expectedResult.rawMigratedDoc._source
       );
 
-      return { tag: 'right', value: expectedResult };
+      return { tag: 'Right' as 'Right', value: expectedResult };
     });
 
     const esResponse = await this._writeToCluster('bulk', {
@@ -563,7 +564,7 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     options: BaseOptions = {}
-  ): Promise<GetResponse<T>> {
+  ): Promise<SavedObject<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError(type, id);
     }

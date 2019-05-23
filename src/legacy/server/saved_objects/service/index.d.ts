@@ -34,9 +34,6 @@ export interface SavedObjectsService<Request = any> {
 export { SavedObjectsClientWrapperFactory } from './lib';
 export {
   FindOptions,
-  GetResponse,
-  UpdateResponse,
-  CreateResponse,
   MigrationVersion,
   SavedObject,
   SavedObjectAttributes,

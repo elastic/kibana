@@ -85,6 +85,11 @@ export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
+export interface UpdateResponse<T extends SavedObjectAttributes = any>
+  extends Omit<SavedObject<T>, 'attributes'> {
+  attributes: Partial<T>;
+}
+
 export interface MigrationVersion {
   [pluginName: string]: string;
 }
@@ -115,14 +120,6 @@ export interface SavedObjectReference {
   name: string;
   type: string;
   id: string;
-}
-
-export type GetResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
-export type CreateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
-
-export interface UpdateResponse<T extends SavedObjectAttributes = any>
-  extends Omit<SavedObject<T>, 'attributes'> {
-  attributes: Partial<T>;
 }
 
 export class SavedObjectsClient {
@@ -306,7 +303,7 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     options: BaseOptions = {}
-  ): Promise<GetResponse<T>> {
+  ): Promise<SavedObject<T>> {
     return this._repository.get(type, id, options);
   }
 

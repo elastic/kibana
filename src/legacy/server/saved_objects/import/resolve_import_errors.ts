@@ -29,7 +29,7 @@ import { validateReferences } from './validate_references';
 interface ResolveImportErrorsOptions {
   readStream: Readable;
   objectLimit: number;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: PublicMethodsOf<SavedObjectsClient>;
   retries: Retry[];
   supportedTypes: string[];
 }

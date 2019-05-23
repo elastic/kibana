@@ -18,7 +18,7 @@ import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesService } from '../create_spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
-  baseClient: SavedObjectsClient;
+  baseClient: PublicMethodsOf<SavedObjectsClient>;
   request: any;
   spacesService: SpacesService;
   types: string[];
@@ -59,15 +59,13 @@ const throwErrorIfTypesContainsSpace = (types: string[]) => {
 };
 
 export class SpacesSavedObjectsClient implements PublicMethodsOf<SavedObjectsClient> {
-  public readonly errors: any;
-  private readonly client: SavedObjectsClient;
+  private readonly client: PublicMethodsOf<SavedObjectsClient>;
   private readonly spaceId: string;
   private readonly types: string[];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, spacesService, types } = options;
 
-    this.errors = baseClient.errors;
     this.client = baseClient;
     this.spaceId = spacesService.getSpaceId(request);
     this.types = types;

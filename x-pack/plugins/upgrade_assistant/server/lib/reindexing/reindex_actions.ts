@@ -140,7 +140,7 @@ export const reindexActionsFactory = (
       reindexOp.id,
       { ...reindexOp.attributes, locked: moment().format() },
       { version: reindexOp.version }
-    );
+    ) as Promise<ReindexSavedObject>;
   };
 
   const releaseLock = (reindexOp: ReindexSavedObject) => {
@@ -149,7 +149,7 @@ export const reindexActionsFactory = (
       reindexOp.id,
       { ...reindexOp.attributes, locked: null },
       { version: reindexOp.version }
-    );
+    ) as Promise<ReindexSavedObject>;
   };
 
   // ----- Public interface
@@ -180,7 +180,7 @@ export const reindexActionsFactory = (
       const newAttrs = { ...reindexOp.attributes, locked: moment().format(), ...attrs };
       return client.update<ReindexOperation>(REINDEX_OP_TYPE, reindexOp.id, newAttrs, {
         version: reindexOp.version,
-      });
+      }) as Promise<ReindexSavedObject>;
     },
 
     async runWhileLocked(reindexOp, func) {

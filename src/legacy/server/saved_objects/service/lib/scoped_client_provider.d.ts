@@ -26,7 +26,7 @@ export interface SavedObjectsClientWrapperOptions<Request = any> {
 
 export type SavedObjectsClientWrapperFactory<Request = any> = (
   options: SavedObjectsClientWrapperOptions<Request>
-) => SavedObjectsClient;
+) => PublicMethodsOf<SavedObjectsClient>;
 
 export interface ScopedSavedObjectsClientProvider<Request = any> {
   // ATTENTION: these types are incomplete
@@ -35,5 +35,11 @@ export interface ScopedSavedObjectsClientProvider<Request = any> {
     priority: number,
     wrapperFactory: SavedObjectsClientWrapperFactory<Request>
   ): void;
-  getClient(request: Request): SavedObjectsClient;
+  getClient(request: Request): PublicMethodsOf<SavedObjectsClient>;
 }
+
+type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+}[keyof T];
+
+type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;

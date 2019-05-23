@@ -29,7 +29,7 @@ function filterReferencesToValidate({ type }: { type: string }) {
 
 export async function getNonExistingReferenceAsKeys(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: PublicMethodsOf<SavedObjectsClient>
 ) {
   const collector = new Map();
   // Collect all references within objects
@@ -77,7 +77,7 @@ export async function getNonExistingReferenceAsKeys(
 
 export async function validateReferences(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: PublicMethodsOf<SavedObjectsClient>
 ) {
   const errorMap: { [key: string]: ImportError } = {};
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
