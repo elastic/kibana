@@ -30,6 +30,7 @@ export interface APMQueryParams {
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: string | boolean;

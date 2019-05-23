@@ -28,9 +28,7 @@ let localSource: Array<{
     data: {
       source: {
         status: {
-          auditbeatIndicesExist: boolean;
-          filebeatIndicesExist: boolean;
-          winlogbeatIndicesExist: boolean;
+          indicesExist: boolean;
         };
       };
     };
@@ -44,9 +42,7 @@ describe('Overview', () => {
     });
 
     test('it renders the Setup Instructions text when no index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-      localSource[0].result.data.source.status.filebeatIndicesExist = false;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
+      localSource[0].result.data.source.status.indicesExist = false;
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
@@ -60,44 +56,8 @@ describe('Overview', () => {
       expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
     });
 
-    test('it renders the Setup Instructions text when only filebeat index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-      localSource[0].result.data.source.status.filebeatIndicesExist = true;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <Overview />
-          </MockedProvider>
-        </TestProviders>
-      );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise(resolve => setTimeout(resolve));
-      wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
-    });
-
-    test('it renders the Setup Instructions text when only audit beat index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = true;
-      localSource[0].result.data.source.status.filebeatIndicesExist = false;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <Overview />
-          </MockedProvider>
-        </TestProviders>
-      );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise(resolve => setTimeout(resolve));
-      wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
-    });
-
-    test('it DOES NOT render the Getting started text when both packetbeat and filebeat index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = true;
-      localSource[0].result.data.source.status.filebeatIndicesExist = true;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = true;
+    test('it DOES NOT render the Getting started text when an index is available', async () => {
+      localSource[0].result.data.source.status.indicesExist = true;
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>

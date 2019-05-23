@@ -20,21 +20,22 @@ import {
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { RepositoryDeleteProvider } from '../../../../components';
-import { BASE_PATH } from '../../../../constants';
+import { BASE_PATH, UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
+import { uiMetricService } from '../../../../services/ui_metric';
 
 interface Props extends RouteComponentProps {
   repositories: Repository[];
   reload: () => Promise<void>;
-  openRepositoryDetails: (name: Repository['name']) => void;
+  openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
   reload,
-  openRepositoryDetails,
+  openRepositoryDetailsUrl,
   onRepositoryDeleted,
   history,
 }) => {
@@ -42,6 +43,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
+  const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
   const columns = [
@@ -53,7 +55,14 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (name: Repository['name'], repository: Repository) => {
-        return <EuiLink onClick={() => openRepositoryDetails(name)}>{name}</EuiLink>;
+        return (
+          <EuiLink
+            onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
+            href={openRepositoryDetailsUrl(name)}
+          >
+            {name}
+          </EuiLink>
+        );
       },
     },
     {
