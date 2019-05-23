@@ -69,7 +69,7 @@ class FlyoutUI extends Component {
     services: PropTypes.array.isRequired,
     newIndexPatternUrl: PropTypes.string.isRequired,
     indexPatterns: PropTypes.object.isRequired,
-    confirmModalPromise: PropTypes.function.isRequired,
+    confirmModalPromise: PropTypes.func.isRequired,
   };
 
   constructor(props) {
