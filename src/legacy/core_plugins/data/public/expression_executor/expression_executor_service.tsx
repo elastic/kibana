@@ -112,8 +112,13 @@ export class ExpressionExecutorService {
   // TODO core won't ever be null once this is switched to the new platform
   public setup(_core: CoreSetup | null, plugins: ExpressionExecutorSetupPlugins) {
     /**
+     * **experimential** This API is experimential and might be removed in the future
+     * without notice
+     *
      * Executes the given expression string or ast and renders the result into the
      * given DOM element.
+     *
+     *
      * @param expressionOrAst
      * @param element
      */
@@ -131,6 +136,9 @@ export class ExpressionExecutorService {
     return {
       run,
       /**
+       * **experimential** This API is experimential and might be removed in the future
+       * without notice
+       *
        * Component which executes and renders the given expression in a div element.
        * The expression is re-executed on updating the props.
        *
