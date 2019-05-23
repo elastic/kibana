@@ -64,7 +64,7 @@ export function MetricsVisProvider(Private) {
             fill: 0.5,
             stacked: 'none'
           }],
-        time_field: '@timestamp',
+        time_field: '',
         index_pattern: '',
         interval: 'auto',
         axis_position: 'left',

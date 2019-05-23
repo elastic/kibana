@@ -24,7 +24,7 @@ import { set } from 'lodash';
 
 export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
-    const { timeField, interval } = getIntervalAndTimefield(panel, series);
+    const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
     const { from, to }  = offsetTime(req, series.offset_time);
     const  timezone = capabilities.searchTimezone;

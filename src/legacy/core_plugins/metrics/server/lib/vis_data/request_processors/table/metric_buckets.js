@@ -23,9 +23,9 @@ import { bucketTransform } from '../../helpers/bucket_transform';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
 
-export function metricBuckets(req, panel) {
+export function metricBuckets(req, panel, esQueryConfig, indexPatternObject) {
   return next => doc => {
-    const { interval } = getIntervalAndTimefield(panel);
+    const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval);
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);

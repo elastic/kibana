@@ -17,18 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+export { SearchBar } from './components';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
-
-export function getIntervalAndTimefield(panel, series = {}, indexPatternObject) {
-  const getDefaultTimeField = () => get(indexPatternObject, 'timeFieldName', DEFAULT_TIME_FIELD);
-
-  const timeField = (series.override_index_pattern && series.series_time_field || panel.time_field) || getDefaultTimeField();
-  const interval = series.override_index_pattern && series.series_interval || panel.interval;
-
-  return {
-    timeField,
-    interval,
-  };
-}
+// @ts-ignore
+export { setupDirective } from './directive';

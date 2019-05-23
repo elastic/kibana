@@ -17,6 +17,32 @@
  * under the License.
  */
 
-export { QueryBarService } from './query_bar_service';
+import { once } from 'lodash';
+import { QueryBar, fromUser, toUser, setupDirective as setupQueryBarDirective } from './query_bar';
 
-export { QueryBar } from './components';
+/**
+ * Query Service
+ *
+ * @internal
+ */
+export class QueryService {
+  public setup() {
+    return {
+      loadLegacyDirectives: once(setupQueryBarDirective),
+      helpers: {
+        fromUser,
+        toUser,
+      },
+      ui: {
+        QueryBar,
+      },
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type QuerySetup = ReturnType<QueryService['setup']>;
