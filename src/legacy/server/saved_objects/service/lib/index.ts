@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import * as errors from './errors';
-
-export { errors };
-
 export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
-
 export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   ScopedSavedObjectsClientProvider,
 } from './scoped_client_provider';
+
+import * as errors from './errors';
+export { errors };
