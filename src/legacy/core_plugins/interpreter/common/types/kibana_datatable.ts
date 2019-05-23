@@ -27,7 +27,7 @@ interface Column {
 }
 
 interface Row {
-  [key: string]: object;
+  [key: string]: unknown;
 }
 
 export interface KibanaDatatable {

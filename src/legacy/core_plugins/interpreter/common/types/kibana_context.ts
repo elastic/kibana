@@ -17,14 +17,15 @@
  * under the License.
  */
 
+import { Filters, Query, TimeRange } from 'ui/visualize';
+
 const name = 'kibana_context';
 
-// TODO: Provide better typings for these
 export interface KibanaContext {
   type: typeof name;
-  query: any[];
-  filters: any[];
-  timeRange: any;
+  query?: Query;
+  filters?: Filters;
+  timeRange?: TimeRange;
 }
 
 export const kibanaContext = () => ({

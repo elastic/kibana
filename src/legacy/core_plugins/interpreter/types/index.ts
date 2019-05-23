@@ -20,3 +20,4 @@
 export { ArgumentType, TypeToArgumentString } from './arguments';
 export { UnwrapPromise } from './common';
 export { ExpressionFunction } from './functions';
+export * from '../common/types';
