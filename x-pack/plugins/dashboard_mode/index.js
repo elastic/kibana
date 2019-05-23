@@ -25,7 +25,7 @@ export function dashboardMode(kibana) {
   return new kibana.Plugin({
     id: 'dashboard_mode',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'dashboard_embeddable', 'embeddable_api'],
     uiExports: {
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {
