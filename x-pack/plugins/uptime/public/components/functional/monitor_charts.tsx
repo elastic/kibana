@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import DateMath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
@@ -20,8 +19,6 @@ interface MonitorChartsQueryResult {
 
 interface MonitorChartsProps {
   danger: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
   mean: string;
   range: string;
   success: string;
@@ -30,7 +27,7 @@ interface MonitorChartsProps {
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
 export const MonitorChartsComponent = (props: Props) => {
-  const { danger, data, dateRangeStart, dateRangeEnd, mean, range, success } = props;
+  const { danger, data, mean, range, success } = props;
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { durationArea, durationLine, status },
@@ -48,13 +45,7 @@ export const MonitorChartsComponent = (props: Props) => {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <ChecksChart
-              absoluteStart={DateMath.parse(dateRangeStart)}
-              absoluteEnd={DateMath.parse(dateRangeEnd)}
-              dangerColor={danger}
-              status={status}
-              successColor={success}
-            />
+            <ChecksChart dangerColor={danger} status={status} successColor={success} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

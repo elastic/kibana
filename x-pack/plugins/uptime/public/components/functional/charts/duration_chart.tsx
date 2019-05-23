@@ -18,7 +18,7 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   convertMicrosecondsToMilliseconds as microsToMillis,
   getChartDateLabel,
@@ -27,6 +27,7 @@ import {
   MonitorDurationAreaPoint,
   MonitorDurationAveragePoint,
 } from '../../../../common/graphql/types';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface DurationChartProps {
   /**
@@ -61,6 +62,7 @@ export const DurationChart = ({
   meanColor,
   rangeColor,
 }: DurationChartProps) => {
+  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
   // this id is used for the area chart representing the max/min of check durations
   const areaspecid = getSpecId('area');
   // defines a map for the color series for the max/min duration
@@ -85,15 +87,6 @@ export const DurationChart = ({
     meanColor
   );
 
-  // this specifies the chart's domain, which generates the label formatting string
-  // used on the x-axis
-  const yDomain = durationArea.reduce(
-    ({ max, min }, { x }) => ({ max: Math.max(x, max), min: Math.min(x, min) }),
-    {
-      min: Date.now().valueOf(),
-      max: Date.now().valueOf(),
-    }
-  );
   return (
     <React.Fragment>
       <EuiTitle size="xs">
@@ -106,7 +99,7 @@ export const DurationChart = ({
             title={'timestamp'}
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={timeFormatter(getChartDateLabel(yDomain.min, yDomain.max))}
+            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
           />
           <Axis
             domain={{ min: 0 }}

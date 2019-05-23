@@ -18,23 +18,13 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Moment } from 'moment';
 import { StatusData } from '../../../../common/graphql/types';
 import { getChartDateLabel } from '../../../lib/helper';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface ChecksChartProps {
-  /**
-   * The beginning of the date range used for this data, used to set the custom domain
-   * of the chart.
-   */
-  absoluteStart: Moment | undefined;
-  /**
-   * The end of the date range used for this data, used to set the custom domain
-   * of the chart.
-   */
-  absoluteEnd: Moment | undefined;
   /**
    * The color that will be used for the area series displaying "Down" checks.
    */
@@ -49,15 +39,10 @@ interface ChecksChartProps {
   successColor: string;
 }
 
-export const ChecksChart = ({
-  absoluteStart,
-  absoluteEnd,
-  dangerColor,
-  status,
-  successColor,
-}: ChecksChartProps) => {
+export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartProps) => {
   const checkareaseriesspecid = getSpecId('Up');
   const checkdownseriesspecid = getSpecId('Down');
+  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
 
   const durationColors: CustomSeriesColorsMap = new Map<DataSeriesColorsValues, string>();
   durationColors.set(
@@ -86,14 +71,6 @@ export const ChecksChart = ({
     }
   );
 
-  if (absoluteStart === undefined || absoluteEnd === undefined) {
-    // TODO: create a richer error state
-    return <div>Invalid date range</div>;
-  }
-
-  const min = absoluteStart.valueOf();
-  const max = absoluteEnd.valueOf();
-
   return (
     <React.Fragment>
       <EuiTitle size="xs">
@@ -103,12 +80,16 @@ export const ChecksChart = ({
         <Chart renderer="canvas">
           {
             // @ts-ignore
-            <Settings domain={{ min, max }} legendPosition={Position.Top} showLegend={false} />
+            <Settings
+              domain={{ absoluteStartDate, absoluteEndDate }}
+              legendPosition={Position.Top}
+              showLegend={false}
+            />
           }
           <Axis
             id={getAxisId('checksBottom')}
             position={Position.Bottom}
-            tickFormat={timeFormatter(getChartDateLabel(min, max))}
+            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
             showOverlappingTicks={true}
           />
           <Axis
