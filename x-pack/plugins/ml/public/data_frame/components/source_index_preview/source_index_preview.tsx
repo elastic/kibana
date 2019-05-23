@@ -38,7 +38,7 @@ const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<Expandabl
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { isKibanaContext, KibanaContext, SimpleQuery } from '../../common';
+import { isKibanaContext, KibanaContext, PivotQuery } from '../../common';
 
 import {
   EsDoc,
@@ -87,7 +87,7 @@ const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatt
 );
 
 interface Props {
-  query: SimpleQuery;
+  query: PivotQuery;
   cellClick?(search: string): void;
 }
 

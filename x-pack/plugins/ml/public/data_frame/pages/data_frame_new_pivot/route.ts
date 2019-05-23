@@ -11,7 +11,7 @@ import { checkBasicLicense } from '../../../license/check_license';
 // @ts-ignore
 import { checkCreateDataFrameJobsPrivilege } from '../../../privilege/check_privilege';
 // @ts-ignore
-import { loadCurrentIndexPattern } from '../../../util/index_utils';
+import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../util/index_utils';
 // @ts-ignore
 import { getDataFrameCreateBreadcrumbs } from '../../breadcrumbs';
 
@@ -24,5 +24,6 @@ uiRoutes.when('/data_frames/new_job/step/pivot?', {
     CheckLicense: checkBasicLicense,
     privileges: checkCreateDataFrameJobsPrivilege,
     indexPattern: loadCurrentIndexPattern,
+    savedSearch: loadCurrentSavedSearch,
   },
 });

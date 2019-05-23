@@ -6,14 +6,18 @@
 
 import React from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
-interface KibanaContextValue {
-  currentIndexPattern: StaticIndexPattern;
+export interface KibanaContextValue {
+  combinedQuery: any;
+  currentIndexPattern: IndexPattern;
+  currentSavedSearch: any;
   indexPatterns: any;
   kbnBaseUrl: string;
   kibanaConfig: any;
 }
+
+export type SavedSearchQuery = object;
 
 // Because we're only getting the actual contextvalue within a wrapping angular component,
 // we need to initialize here with `null` because TypeScript doesn't allow createContext()
@@ -24,7 +28,9 @@ export const KibanaContext = React.createContext<NullableKibanaContextValue>(nul
 
 export function isKibanaContext(arg: any): arg is KibanaContextValue {
   return (
+    arg.combinedQuery !== undefined &&
     arg.currentIndexPattern !== undefined &&
+    arg.currentSavedSearch !== undefined &&
     arg.indexPatterns !== undefined &&
     typeof arg.kbnBaseUrl === 'string' &&
     arg.kibanaConfig !== undefined
