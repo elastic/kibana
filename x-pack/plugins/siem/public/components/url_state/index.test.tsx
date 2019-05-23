@@ -198,4 +198,14 @@ describe('UrlStateContainer', () => {
       state: '',
     });
   });
+  describe('handleInitialize', () => {
+    test('handleInitialize', () => {
+      const wrapper = shallow(
+        <UrlStateContainerLifecycle {...mockProps} />
+      );
+      const urlStateComponents = wrapper.find('[data-test-subj="urlStateComponents"]');
+      urlStateComponents.exists();
+     // console.log('WWWWW I', wrapper.instance());
+    });
+  });
 });

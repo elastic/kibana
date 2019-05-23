@@ -7,9 +7,8 @@
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
-import { hostsModel } from '../../store/hosts';
-import { networkModel } from '../../store/network';
-import { KqlQuery } from './types';
+import { KqlQuery, LocationTypes } from './types';
+import { CONSTANTS } from './constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -58,25 +57,34 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
   }
 };
 
-export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
+export const getCurrentLocation = (pathname: string): LocationTypes | null => {
   const trailingPath = pathname.match(/([^\/]+$)/);
   if (trailingPath !== null) {
-    if (
-      (trailingPath[0] === 'hosts' &&
-        kql.model === 'hosts' &&
-        kql.type === hostsModel.HostsType.page) ||
-      (trailingPath[0] === 'network' &&
-        kql.model === 'network' &&
-        kql.type === networkModel.NetworkType.page) ||
-      (pathname.match(/hosts\/.*?/) &&
-        kql.model === 'hosts' &&
-        kql.type === hostsModel.HostsType.details) ||
-      (pathname.match(/network\/ip\/.*?/) &&
-        kql.model === 'network' &&
-        kql.type === networkModel.NetworkType.details)
-    ) {
-      return true;
+    if (trailingPath[0] === 'hosts') {
+      return CONSTANTS.hostsPage;
     }
+    if (trailingPath[0] === 'network') {
+      return CONSTANTS.networkPage;
+    }
+    if (pathname.match(/hosts\/.*?/)) {
+      return CONSTANTS.hostsDetails;
+    }
+    if (pathname.match(/network\/ip\/.*?/)) {
+      return CONSTANTS.networkDetails;
+    }
+  }
+  return null;
+};
+
+export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
+  const currentLocation = getCurrentLocation(pathname);
+  if (
+    (currentLocation === CONSTANTS.hostsPage && kql.queryLocation === CONSTANTS.hostsPage) ||
+    (currentLocation === CONSTANTS.networkPage && kql.queryLocation === CONSTANTS.networkPage) ||
+    (currentLocation === CONSTANTS.hostsDetails && kql.queryLocation === CONSTANTS.hostsDetails) ||
+    (currentLocation === CONSTANTS.networkDetails && kql.queryLocation === CONSTANTS.networkDetails)
+  ) {
+    return true;
   }
   return false;
 };

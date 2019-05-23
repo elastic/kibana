@@ -7,32 +7,55 @@
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
 import { History, Location } from 'history';
-import {
-  hostsModel,
-  KueryFilterModel,
-  KueryFilterQuery,
-  networkModel,
-  SerializedFilterQuery,
-} from '../../store';
+import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { CONSTANTS } from './constants';
 import { InputsModelId, UrlInputsModel } from '../../store/inputs/model';
 
+export type LocationTypes =
+  | CONSTANTS.networkDetails
+  | CONSTANTS.networkPage
+  | CONSTANTS.hostsDetails
+  | CONSTANTS.hostsPage
+  | null;
+
+export interface KqlQueryObject {
+  [CONSTANTS.networkDetails]: KqlQuery;
+  [CONSTANTS.networkPage]: KqlQuery;
+  [CONSTANTS.hostsDetails]: KqlQuery;
+  [CONSTANTS.hostsPage]: KqlQuery;
+}
+
+export interface LocationMappedToModel {
+  [CONSTANTS.networkDetails]: networkModel.NetworkType.details;
+  [CONSTANTS.networkPage]: networkModel.NetworkType.page;
+  [CONSTANTS.hostsDetails]: hostsModel.HostsType.details;
+  [CONSTANTS.hostsPage]: hostsModel.HostsType.page;
+}
+
+export interface LocationMappedToSelf {
+  [CONSTANTS.networkDetails]: string;
+  [CONSTANTS.networkPage]: string;
+  [CONSTANTS.hostsDetails]: string;
+  [CONSTANTS.hostsPage]: string;
+}
+export type KeyKqlQueryObject = keyof LocationMappedToSelf;
+
 export interface KqlQueryHosts {
   filterQuery: KueryFilterQuery | null;
-  model: KueryFilterModel.hosts;
+  queryLocation: LocationTypes;
   type: hostsModel.HostsType;
 }
 
 export interface KqlQueryNetwork {
   filterQuery: KueryFilterQuery | null;
-  model: KueryFilterModel.network;
+  queryLocation: LocationTypes;
   type: networkModel.NetworkType;
 }
 
 export type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
 
 export interface UrlState {
-  [CONSTANTS.kqlQuery]: KqlQuery[];
+  [CONSTANTS.kqlQuery]: KqlQueryObject;
   [CONSTANTS.timerange]: UrlInputsModel;
 }
 export type KeyUrlState = keyof UrlState;

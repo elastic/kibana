@@ -4,11 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KeyUrlState } from './types';
+import { KeyUrlState, KeyKqlQueryObject, LocationMappedToModel } from './types';
+import { networkModel } from '../../store/network';
+import { hostsModel } from '../../store/hosts';
+
+export type timerange = string;
 
 export enum CONSTANTS {
+  hostsDetails = 'hosts.details',
+  hostsPage = 'hosts.page',
   kqlQuery = 'kqlQuery',
+  networkDetails = 'network.details',
+  networkPage = 'network.page',
   timerange = 'timerange',
 }
 
+export const LOCATION_KEYS: KeyKqlQueryObject[] = [
+  CONSTANTS.hostsDetails,
+  CONSTANTS.hostsPage,
+  CONSTANTS.networkDetails,
+  CONSTANTS.networkPage,
+];
+
 export const URL_STATE_KEYS: KeyUrlState[] = [CONSTANTS.kqlQuery, CONSTANTS.timerange];
+
+export const LOCATION_MAPPED_TO_MODEL: LocationMappedToModel = {
+  [CONSTANTS.networkPage]: networkModel.NetworkType.page,
+  [CONSTANTS.networkDetails]: networkModel.NetworkType.details,
+  [CONSTANTS.hostsPage]: hostsModel.HostsType.page,
+  [CONSTANTS.hostsDetails]: hostsModel.HostsType.details,
+};
