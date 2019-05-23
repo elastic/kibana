@@ -63,7 +63,7 @@ describe('fire()', () => {
 }
 `);
     expect(mockEncryptedSavedObjects.getDecryptedAsInternalUser.mock.calls).toEqual([
-      ['action', 'mock-action'],
+      ['action', 'mock-action', { namespace: undefined }],
     ]);
   });
 
