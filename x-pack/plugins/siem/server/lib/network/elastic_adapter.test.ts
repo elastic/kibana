@@ -20,8 +20,9 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and Fl
       version: 'mock',
       callWithRequest: mockCallWithRequest,
       exposeStaticDir: jest.fn(),
-      registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
+      getSavedObjectsService: jest.fn(),
+      registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -49,6 +50,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and Fl
       exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
+      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -83,6 +85,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and Fl
       exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
+      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,

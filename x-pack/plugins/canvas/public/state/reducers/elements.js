@@ -113,6 +113,14 @@ export const elementsReducer = handleActions(
       if (pageIndex < 0) {
         return workpadState;
       }
+      if (
+        // don't add a group that is already persisted
+        workpadState.pages[pageIndex][getLocation(element.position.type)].find(
+          e => e.id === element.id
+        )
+      ) {
+        return workpadState;
+      }
       return push(
         workpadState,
         ['pages', pageIndex, getLocation(element.position.type)],

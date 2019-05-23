@@ -9,7 +9,7 @@ import * as React from 'react';
 import { defaultToEmptyTag } from '../../empty_value';
 
 import * as i18n from '../translations';
-import { TimelineResult } from '../types';
+import { OpenTimelineResult } from '../types';
 
 /**
  * Returns the extended columns that are specific to the `All Timelines` view
@@ -20,9 +20,9 @@ export const getExtendedColumns = () => [
     dataType: 'string',
     field: 'updatedBy',
     name: i18n.MODIFIED_BY,
-    render: (updatedBy: TimelineResult['updatedBy']) => (
+    render: (updatedBy: OpenTimelineResult['updatedBy']) => (
       <div data-test-subj="username">{defaultToEmptyTag(updatedBy)}</div>
     ),
-    sortable: true,
+    sortable: false,
   },
 ];

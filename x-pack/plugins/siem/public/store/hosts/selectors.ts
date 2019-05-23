@@ -43,13 +43,13 @@ export const hostsFilterQueryExpression = () =>
   createSelector(
     selectHosts,
     hosts =>
-      hosts.filterQuery && hosts.filterQuery.query ? hosts.filterQuery.query.expression : null
+      hosts.filterQuery && hosts.filterQuery.kuery ? hosts.filterQuery.kuery.expression : null
   );
 
 export const hostsFilterQueryAsKuery = () =>
   createSelector(
     selectHosts,
-    hosts => (hosts.filterQuery ? hosts.filterQuery.query : null)
+    hosts => (hosts.filterQuery && hosts.filterQuery.kuery ? hosts.filterQuery.kuery : null)
   );
 
 export const hostsFilterQueryAsJson = () =>
