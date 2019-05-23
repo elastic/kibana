@@ -17,37 +17,9 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { QueryBar } from './components/query_bar';
-import { fromUser } from './lib/from_user';
-import { toUser } from './lib/to_user';
+export { QueryBar } from './components';
+export { fromUser } from './lib/from_user';
+export { toUser } from './lib/to_user';
 
 // @ts-ignore
-import { setupDirective } from './directive';
-
-/**
- * Query Bar Service
- *
- * @internal
- */
-export class QueryBarService {
-  public setup() {
-    return {
-      loadLegacyDirectives: once(setupDirective),
-      helpers: {
-        fromUser,
-        toUser,
-      },
-      ui: {
-        QueryBar,
-      },
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
-
-/** @public */
-export type QueryBarSetup = ReturnType<QueryBarService['setup']>;
+export { setupDirective } from './directive';
