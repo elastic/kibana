@@ -5,7 +5,7 @@
     "common/**/*",
     "server/**/*",
     "plugins/**/*",
-    "test_utils/**/*",
+    "test_utils/**/*"
   ],
   "exclude": [
     "test/**/*",
