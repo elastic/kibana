@@ -19,14 +19,32 @@
 
 import { map } from 'lodash';
 
+const name = 'kibana_datatable';
+
+interface Column {
+  id: string;
+  name: string;
+}
+
+interface Row {
+  [key: string]: object;
+}
+
+export interface KibanaDatatable {
+  type: typeof name;
+  columns: Column[];
+  rows: Row[];
+}
+
 export const kibanaDatatable = () => ({
-  name: 'kibana_datatable',
+  name,
   from: {
-    datatable: context => {
+    // TODO: import datatable types here instead of using any
+    datatable: (context: any) => {
       return {
-        type: 'kibana_datatable',
+        type: name,
         rows: context.rows,
-        columns: context.columns.map(column => {
+        columns: context.columns.map((column: any) => {
           return {
             id: column.name,
             name: column.name,
@@ -34,15 +52,16 @@ export const kibanaDatatable = () => ({
         }),
       };
     },
-    pointseries: context => {
-      const columns = map(context.columns, (column, name) => {
-        return { id: name, name, ...column };
+    // TODO: import pointseries types here instead of using any
+    pointseries: (context: any) => {
+      const columns = map(context.columns, (column, n) => {
+        return { id: n, name: n, ...column };
       });
       return {
-        type: 'kibana_datatable',
+        type: name,
         rows: context.rows,
-        columns: columns,
+        columns,
       };
-    }
+    },
   },
 });

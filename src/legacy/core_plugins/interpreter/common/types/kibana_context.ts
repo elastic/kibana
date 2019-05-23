@@ -17,12 +17,22 @@
  * under the License.
  */
 
+const name = 'kibana_context';
+
+// TODO: Provide better typings for these
+export interface KibanaContext {
+  type: typeof name;
+  query: any[];
+  filters: any[];
+  timeRange: any;
+}
+
 export const kibanaContext = () => ({
-  name: 'kibana_context',
+  name,
   from: {
     null: () => {
       return {
-        type: 'kibana_context',
+        type: name,
       };
     },
   },
@@ -32,5 +42,5 @@ export const kibanaContext = () => ({
         type: 'null',
       };
     },
-  }
+  },
 });
