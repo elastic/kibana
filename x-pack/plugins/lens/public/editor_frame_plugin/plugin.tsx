@@ -6,10 +6,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { DataSetup } from 'plugins/data';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
-
+import { DataSetup, data } from 'src/legacy/core_plugins/data/public';
+import { CoreSetup } from 'src/core/public';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
 
@@ -19,9 +18,10 @@ export interface EditorFrameSetupPlugins {
 
 export class EditorFramePlugin {
   constructor() {}
+  private expressionExecutor: DataSetup['expressionExecutor'] | null = null;
 
-  private datasources: Record<string, Datasource> = {};
-  private visualizations: Record<string, Visualization> = {};
+  private readonly datasources: Record<string, Datasource> = {};
+  private readonly visualizations: Record<string, Visualization> = {};
 
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
@@ -47,6 +47,7 @@ export class EditorFramePlugin {
               visualizationMap={this.visualizations}
               initialDatasourceId={firstDatasourceId || null}
               initialVisualizationId={firstVisualizationId || null}
+              ExpressionRenderer={this.expressionExecutor!.ExpressionRenderer}
             />
           </I18nProvider>,
           domElement
@@ -56,7 +57,8 @@ export class EditorFramePlugin {
     };
   }
 
-  public setup(): EditorFrameSetup {
+  public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
+    this.expressionExecutor = plugins.data.expressionExecutor;
     return {
       createInstance: this.createInstance.bind(this),
       registerDatasource: (name, datasource) => {
@@ -75,5 +77,8 @@ export class EditorFramePlugin {
 
 const editorFrame = new EditorFramePlugin();
 
-export const editorFrameSetup = () => editorFrame.setup();
+export const editorFrameSetup = () =>
+  editorFrame.setup(null, {
+    data,
+  });
 export const editorFrameStop = () => editorFrame.stop();
