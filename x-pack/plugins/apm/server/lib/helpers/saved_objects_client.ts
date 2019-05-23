@@ -5,7 +5,6 @@
  */
 
 import { Server } from 'hapi';
-import { SavedObjectsClient as SavedObjectsClientClass } from '../../../../../../src/legacy/server/saved_objects';
 
 export function getSavedObjectsClient(server: Server) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
@@ -13,7 +12,5 @@ export function getSavedObjectsClient(server: Server) {
     'admin'
   );
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-  // return new SavedObjectsClient(internalRepository);
-  //             ^- ERROR: Cannot use 'new' with an expression whose type lacks a call or construct signature.ts(2351)
-  return new SavedObjectsClientClass(internalRepository); // Works!
+  return new SavedObjectsClient(internalRepository);
 }
