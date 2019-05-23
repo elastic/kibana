@@ -258,7 +258,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       expect(response.statusCode).toEqual(302);
       expect(response.headers.location).toEqual(serverBasePath);
-    });
+    }, 30000);
   });
 
   it('when accessing the kibana app it always allows the request to continue', async () => {
@@ -276,7 +276,7 @@ describe('onPostAuthRequestInterceptor', () => {
     const response = await request('/s/a-space/app/kibana', spaces);
 
     expect(response.statusCode).toEqual(200);
-  });
+  }, 30000);
 
   describe('when accessing an API endpoint within a non-existent space', () => {
     it('allows the request to continue', async () => {
@@ -293,7 +293,7 @@ describe('onPostAuthRequestInterceptor', () => {
       const response = await request('/s/not-found/api/test/foo', spaces);
 
       expect(response.statusCode).toEqual(200);
-    });
+    }, 30000);
   });
 
   describe.skip('with a single available space', () => {
