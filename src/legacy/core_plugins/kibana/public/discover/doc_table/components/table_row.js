@@ -52,7 +52,6 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
     scope: {
       columns: '=',
       filter: '=',
-      onRowClick: '=',
       filters: '=?',
       indexPattern: '=',
       row: '=kbnTableRow',
@@ -97,9 +96,6 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $detailsScope.uriEncodedId = encodeURIComponent($detailsScope.row._id);
 
         $compile($detailsTr)($detailsScope);
-        if ($scope.onRowClick) {
-          $scope.onRowClick($scope.row._source);
-        }
       };
 
       $scope.$watchMulti([
