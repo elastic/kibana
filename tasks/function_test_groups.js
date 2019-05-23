@@ -42,6 +42,7 @@ export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
           '--include-tag', tag,
           '--exclude-tag', 'skipFirefox',
           '--config', 'test/functional/config.js',
+          '--config', 'test/functional/config.firefox.js',
           '--bail',
           '--debug',
           '--kibana-install-dir', kibanaInstallDir,
