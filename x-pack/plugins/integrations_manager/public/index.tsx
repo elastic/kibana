@@ -11,7 +11,7 @@ import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+import { HashRouter, Switch } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { routes } from './routes';
 import { ID } from '../common/constants';
@@ -22,11 +22,7 @@ const template = `<div id="${REACT_APP_ROOT_ID}" class="integrationsManagerReact
 function App() {
   return (
     <EuiPage style={{ flexWrap: 'wrap' }}>
-      <Switch>
-        {routes.map((route, i) => (
-          <Route key={i} {...route} />
-        ))}
-      </Switch>
+      <Switch>{routes}</Switch>
     </EuiPage>
   );
 }

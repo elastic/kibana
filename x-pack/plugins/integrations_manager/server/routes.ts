@@ -5,7 +5,7 @@
  */
 
 import { ID, API } from '../common/constants';
-import * as RS from './registry';
+import * as REGISTRY from './registry';
 
 // Manager public API paths (currently essentially a proxy to registry service)
 export const routes = [
@@ -15,7 +15,7 @@ export const routes = [
     options: {
       tags: [`access:${ID}`],
     },
-    handler: RS.fetchList,
+    handler: REGISTRY.fetchList,
   },
   {
     method: 'GET',
@@ -23,7 +23,7 @@ export const routes = [
     options: {
       tags: [`access:${ID}`],
     },
-    handler: async (req: { params: { pkgkey: string } }) => RS.fetchInfo(req.params.pkgkey),
+    handler: async (req: { params: { pkgkey: string } }) => REGISTRY.fetchInfo(req.params.pkgkey),
   },
   {
     method: 'GET',
@@ -33,7 +33,7 @@ export const routes = [
     },
     handler: async (req: { params: { pkgkey: string } }) => {
       const { pkgkey } = req.params;
-      const data = await RS.fetchZip(pkgkey);
+      const data = await REGISTRY.fetchZip(pkgkey);
       return { meta: { pkgkey, size: `${data.length / 1024}kB` } };
     },
   },
