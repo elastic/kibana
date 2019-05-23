@@ -33,7 +33,7 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
         return h.continue;
       }
 
-      const user = auth.credentials;
+      const user = auth.credentials || {};
       const roles = user.roles || [];
 
       const uiSettings = request.getUiSettingsService();
