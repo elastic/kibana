@@ -1355,6 +1355,8 @@ export interface QueryMatchResult {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface DateRangePickerResult {
@@ -1642,6 +1644,8 @@ export interface QueryMatchInput {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface SerializedFilterQueryInput {
@@ -6713,6 +6717,8 @@ export namespace QueryMatchResultResolvers {
     value?: ValueResolver<string | null, TypeParent, Context>;
 
     displayValue?: DisplayValueResolver<string | null, TypeParent, Context>;
+
+    operator?: OperatorResolver<string | null, TypeParent, Context>;
   }
 
   export type FieldResolver<
@@ -6731,6 +6737,11 @@ export namespace QueryMatchResultResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DisplayValueResolver<
+    R = string | null,
+    Parent = QueryMatchResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OperatorResolver<
     R = string | null,
     Parent = QueryMatchResult,
     Context = SiemContext
