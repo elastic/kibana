@@ -2,7 +2,7 @@
 
 exports[`render correctly 1`] = `
 <nav
-  className="euiSideNav euiSideNav-isOpenMobile"
+  className="euiSideNav codeContainer__sideTabTree euiSideNav-isOpenMobile"
 >
   <button
     className="euiSideNav__mobileToggle euiLink"

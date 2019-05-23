@@ -17,13 +17,36 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../base_path';
+import { Observable } from 'rxjs';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 
+/** @public */
+export interface HttpServiceBase {
+  stop(): void;
+  getBasePath(): string;
+  prependBasePath(path: string): string;
+  removeBasePath(path: string): string;
+  fetch: HttpHandler;
+  delete: HttpHandler;
+  get: HttpHandler;
+  head: HttpHandler;
+  options: HttpHandler;
+  patch: HttpHandler;
+  post: HttpHandler;
+  put: HttpHandler;
+  addLoadingCount(count$: Observable<number>): void;
+  getLoadingCount$(): Observable<number>;
+}
+/** @public */
+export type HttpSetup = HttpServiceBase;
+/** @public */
+export type HttpStart = HttpServiceBase;
+/** @public */
 export interface HttpHeadersInit {
   [name: string]: any;
 }
+/** @public */
 export interface HttpRequestInit {
   body?: BodyInit | null;
   cache?: RequestCache;
@@ -39,17 +62,22 @@ export interface HttpRequestInit {
   signal?: AbortSignal | null;
   window?: any;
 }
-export interface Deps {
-  basePath: BasePathSetup;
+/** @public */
+export interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
+  fatalErrors: FatalErrorsSetup | null;
 }
+/** @public */
 export interface HttpFetchQuery {
   [key: string]: string | number | boolean | undefined;
 }
+/** @public */
 export interface HttpFetchOptions extends HttpRequestInit {
   query?: HttpFetchQuery;
   prependBasePath?: boolean;
   headers?: HttpHeadersInit;
 }
+/** @public */
+export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+/** @public */
 export type HttpBody = BodyInit | null;

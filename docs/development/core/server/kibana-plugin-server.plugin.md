@@ -16,7 +16,7 @@ export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<PluginName,
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [setup](./kibana-plugin-server.plugin.setup.md) | <code>(core: PluginSetupContext, plugins: TPluginsSetup) =&gt; TSetup &#124; Promise&lt;TSetup&gt;</code> |  |
-|  [start](./kibana-plugin-server.plugin.start.md) | <code>(core: PluginStartContext, plugins: TPluginsStart) =&gt; TStart &#124; Promise&lt;TStart&gt;</code> |  |
+|  [setup](./kibana-plugin-server.plugin.setup.md) | <code>(core: CoreSetup, plugins: TPluginsSetup) =&gt; TSetup &#124; Promise&lt;TSetup&gt;</code> |  |
+|  [start](./kibana-plugin-server.plugin.start.md) | <code>(core: CoreStart, plugins: TPluginsStart) =&gt; TStart &#124; Promise&lt;TStart&gt;</code> |  |
 |  [stop](./kibana-plugin-server.plugin.stop.md) | <code>() =&gt; void</code> |  |
 

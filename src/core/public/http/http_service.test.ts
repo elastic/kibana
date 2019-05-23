@@ -21,34 +21,97 @@ import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-
-import { BasePathService } from '../base_path/base_path_service';
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { HttpService } from './http_service';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
 
-function setupService() {
-  const httpService = new HttpService();
-  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
-  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+const setupFakeBasePath: SetupTap = injectedMetadata => {
+  injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
+};
 
-  injectedMetadata.getBasePath.mockReturnValueOnce('http://localhost/myBase');
+describe('getBasePath', () => {
+  it('returns an empty string if no basePath is injected', () => {
+    const { http } = setup(injectedMetadata => {
+      injectedMetadata.getBasePath.mockReturnValue('');
+    });
 
-  const basePath = new BasePathService().setup({ injectedMetadata });
-  const http = httpService.setup({ basePath, fatalErrors, injectedMetadata });
+    expect(http.getBasePath()).toBe('');
+  });
 
-  return { httpService, fatalErrors, http };
-}
+  it('returns the injected basePath', () => {
+    const { http } = setup(setupFakeBasePath);
 
-describe('http requests', async () => {
+    expect(http.getBasePath()).toBe('/foo/bar');
+  });
+});
+
+describe('prependBasePath', () => {
+  it('adds the base path to the path if it is relative and starts with a slash', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.prependBasePath('/a/b')).toBe('/foo/bar/a/b');
+  });
+
+  it('leaves the query string and hash of path unchanged', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.prependBasePath('/a/b?x=y#c/d/e')).toBe('/foo/bar/a/b?x=y#c/d/e');
+  });
+
+  it('returns the path unchanged if it does not start with a slash', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.prependBasePath('a/b')).toBe('a/b');
+  });
+
+  it('returns the path unchanged it it has a hostname', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.prependBasePath('http://localhost:5601/a/b')).toBe('http://localhost:5601/a/b');
+  });
+});
+
+describe('removeBasePath', () => {
+  it('removes the basePath if relative path starts with it', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.removeBasePath('/foo/bar/a/b')).toBe('/a/b');
+  });
+
+  it('leaves query string and hash intact', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.removeBasePath('/foo/bar/a/b?c=y#1234')).toBe('/a/b?c=y#1234');
+  });
+
+  it('ignores urls with hostnames', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.removeBasePath('http://localhost:5601/foo/bar/a/b')).toBe(
+      'http://localhost:5601/foo/bar/a/b'
+    );
+  });
+
+  it('returns slash if path is just basePath', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.removeBasePath('/foo/bar')).toBe('/');
+  });
+
+  it('returns full path if basePath is not its own segment', () => {
+    const { http } = setup(setupFakeBasePath);
+
+    expect(http.removeBasePath('/foo/barhop')).toBe('/foo/barhop');
+  });
+});
+
+describe('http requests', () => {
   afterEach(() => {
     fetchMock.restore();
   });
 
   it('should use supplied request method', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.post('*', {});
     await http.fetch('/my/path', { method: 'POST' });
@@ -57,7 +120,7 @@ describe('http requests', async () => {
   });
 
   it('should use supplied Content-Type', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path', { headers: { 'Content-Type': 'CustomContentType' } });
@@ -68,7 +131,7 @@ describe('http requests', async () => {
   });
 
   it('should use supplied pathname and querystring', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path', { query: { a: 'b' } });
@@ -77,7 +140,7 @@ describe('http requests', async () => {
   });
 
   it('should use supplied headers', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path', {
@@ -92,7 +155,7 @@ describe('http requests', async () => {
   });
 
   it('should return response', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', { foo: 'bar' });
 
@@ -102,7 +165,7 @@ describe('http requests', async () => {
   });
 
   it('should prepend url with basepath by default', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path');
@@ -111,7 +174,7 @@ describe('http requests', async () => {
   });
 
   it('should not prepend url with basepath when disabled', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('my/path', { prependBasePath: false });
@@ -120,7 +183,7 @@ describe('http requests', async () => {
   });
 
   it('should make request with defaults', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.fetch('/my/path');
@@ -136,7 +199,7 @@ describe('http requests', async () => {
   });
 
   it('should reject on network error', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     expect.assertions(1);
     fetchMock.get('*', { status: 500 });
@@ -145,7 +208,7 @@ describe('http requests', async () => {
   });
 
   it('should contain error message when throwing response', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', { status: 404, body: { foo: 'bar' } });
 
@@ -162,7 +225,7 @@ describe('http requests', async () => {
   });
 
   it('should support get() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.get('*', {});
     await http.get('/my/path', { method: 'POST' });
@@ -171,7 +234,7 @@ describe('http requests', async () => {
   });
 
   it('should support head() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.head('*', {});
     await http.head('/my/path', { method: 'GET' });
@@ -180,7 +243,7 @@ describe('http requests', async () => {
   });
 
   it('should support post() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.post('*', {});
     await http.post('/my/path', { method: 'GET', body: '{}' });
@@ -189,7 +252,7 @@ describe('http requests', async () => {
   });
 
   it('should support put() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.put('*', {});
     await http.put('/my/path', { method: 'GET', body: '{}' });
@@ -198,7 +261,7 @@ describe('http requests', async () => {
   });
 
   it('should support patch() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.patch('*', {});
     await http.patch('/my/path', { method: 'GET', body: '{}' });
@@ -207,7 +270,7 @@ describe('http requests', async () => {
   });
 
   it('should support delete() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.delete('*', {});
     await http.delete('/my/path', { method: 'GET' });
@@ -216,7 +279,7 @@ describe('http requests', async () => {
   });
 
   it('should support options() helper', async () => {
-    const { http } = setupService();
+    const { http } = setup();
 
     fetchMock.mock('*', { method: 'OPTIONS' });
     await http.options('/my/path', { method: 'GET' });
@@ -225,7 +288,7 @@ describe('http requests', async () => {
   });
 
   it('should make requests for NDJSON content', async () => {
-    const { http } = setupService();
+    const { http } = setup();
     const content = readFileSync(join(__dirname, '_import_objects.ndjson'), { encoding: 'utf-8' });
     const body = new FormData();
 
@@ -250,9 +313,9 @@ describe('http requests', async () => {
   });
 });
 
-describe('addLoadingCount()', async () => {
+describe('addLoadingCount()', () => {
   it('subscribes to passed in sources, unsubscribes on stop', () => {
-    const { httpService, http } = setupService();
+    const { httpService, http } = setup();
 
     const unsubA = jest.fn();
     const subA = jest.fn().mockReturnValue(unsubA);
@@ -275,23 +338,23 @@ describe('addLoadingCount()', async () => {
   });
 
   it('adds a fatal error if source observables emit an error', async () => {
-    const { http, fatalErrors } = setupService();
+    const { http, fatalErrors } = setup();
 
     http.addLoadingCount(Rx.throwError(new Error('foo bar')));
     expect(fatalErrors.add.mock.calls).toMatchSnapshot();
   });
 
   it('adds a fatal error if source observable emits a negative number', async () => {
-    const { http, fatalErrors } = setupService();
+    const { http, fatalErrors } = setup();
 
     http.addLoadingCount(Rx.of(1, 2, 3, 4, -9));
     expect(fatalErrors.add.mock.calls).toMatchSnapshot();
   });
 });
 
-describe('getLoadingCount$()', async () => {
+describe('getLoadingCount$()', () => {
   it('emits 0 initially, the right count when sources emit their own count, and ends with zero', async () => {
-    const { httpService, http } = setupService();
+    const { httpService, http } = setup();
 
     const countA$ = new Rx.Subject<number>();
     const countB$ = new Rx.Subject<number>();
@@ -318,7 +381,7 @@ describe('getLoadingCount$()', async () => {
   });
 
   it('only emits when loading count changes', async () => {
-    const { httpService, http } = setupService();
+    const { httpService, http } = setup();
 
     const count$ = new Rx.Subject<number>();
     const promise = http
