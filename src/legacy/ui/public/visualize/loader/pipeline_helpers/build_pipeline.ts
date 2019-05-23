@@ -237,11 +237,57 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return expr;
   },
   table: (visState, schemas) => {
+    const {
+      perPage,
+      showMetricsAtAllLevels,
+      showPartialRows,
+      showTotal,
+      totalFunc,
+      ...restParams
+    } = visState.params;
+    const {
+      metric: metrics,
+      bucket: buckets = [],
+      split_row: splitRow,
+      split_column: splitColumn,
+    } = schemas;
     const visConfig = {
-      ...visState.params,
-      ...buildVisConfig.table(schemas, visState.params),
+      ...restParams,
+      dimensions:{
+        metrics,
+        buckets,
+        splitRow,
+        splitColumn,
+      },
     };
-    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
+
+    if (showMetricsAtAllLevels === false && showPartialRows === true) {
+      // Handle case where user wants to see partial rows but not metrics at all levels.
+      // This requires calculating how many metrics will come back in the tabified response,
+      // and removing all metrics from the dimensions except the last set.
+      const metricsPerBucket = metrics.length / buckets.length;
+      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
+    }
+
+    let expr = `kibana_table ${prepareJson('visConfig', visConfig).trim()}`;
+
+    if (perPage) {
+      expr += ` perPage=${ perPage }`;
+    }
+    if (showMetricsAtAllLevels !== undefined) {
+      expr += ` showMetricsAtAllLevels=${ showMetricsAtAllLevels }`;
+    }
+    if (showPartialRows !== undefined) {
+      expr += ` showPartialRows=${ showPartialRows }`;
+    }
+    if (showTotal !== undefined) {
+      expr += ` showTotal=${ showTotal }`;
+    }
+    if (totalFunc) {
+      expr += ` totalFunc="${ totalFunc }"`;
+    }
+
+    return expr;
   },
   metric: (visState, schemas) => {
     const visConfig = {
@@ -305,26 +351,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: (schemas, visParams = {}) => {
-    const visConfig = {} as any;
-    const metrics = schemas.metric;
-    const buckets = schemas.bucket || [];
-    visConfig.dimensions = {
-      metrics,
-      buckets,
-      splitRow: schemas.split_row,
-      splitColumn: schemas.split_column,
-    };
-
-    if (visParams.showMetricsAtAllLevels === false && visParams.showPartialRows === true) {
-      // Handle case where user wants to see partial rows but not metrics at all levels.
-      // This requires calculating how many metrics will come back in the tabified response,
-      // and removing all metrics from the dimensions except the last set.
-      const metricsPerBucket = metrics.length / buckets.length;
-      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
-    }
-    return visConfig;
-  },
   metric: schemas => {
     const visConfig = { dimensions: {} } as any;
     visConfig.dimensions.metrics = schemas.metric;

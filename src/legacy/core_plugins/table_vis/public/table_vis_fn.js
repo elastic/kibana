@@ -37,9 +37,67 @@ export const kibanaTable = () => ({
       types: ['string', 'null'],
       default: '"{}"',
     },
+    perPage: {
+      types: ['number'],
+      default: 10,
+    },
+    showPartialRows: {
+      types: ['boolean'],
+      default: false,
+    },
+    showMetricsAtAllLevels: {
+      types: ['boolean'],
+      default: false,
+    },
+    showTotal: {
+      types: ['boolean'],
+      default: false,
+    },
+    totalFunc: {
+      types: ['string'],
+      default: '"sum"',
+    },
+    sort: {
+      types: ['string', 'null'],
+      default: '"{}"',
+      // columnIndex: null,
+      // direction: null
+    },
+    buckets: {
+      types: ['string', 'null'],
+      default: '"{}"',
+    },
+    dimensions: {
+      types: ['string', 'null'],
+      default: '"{}"',
+    },
+    /*
+    "dimensions":{
+      "metrics":[
+        {
+          "accessor":0,
+          "format":{
+            "id":"number"
+          },
+          "params":{},
+          "aggType":"count"
+        }
+      ],
+      "buckets":[]
+    }}'
+    */
   },
   async fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+    const { perPage, showPartialRows, showMetricsAtAllLevels, showTotal, totalFunc } = args;
+    const visConfig = {
+      ...JSON.parse(args.visConfig),
+      perPage,
+      showPartialRows,
+      showMetricsAtAllLevels,
+      showTotal,
+      totalFunc,
+    };
+    console.log('visConfig', visConfig);
 
     const responseHandler = legacyResponseHandlerProvider().handler;
     const convertedData = await responseHandler(context, visConfig.dimensions);
