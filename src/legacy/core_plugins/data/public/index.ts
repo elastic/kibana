@@ -25,7 +25,7 @@
 import { getInterpreter } from 'plugins/interpreter/interpreter';
 // @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
-import { ExpressionExecutorService } from './expression_executor';
+import { ExpressionExecutorService, ExpressionExecutorSetup } from './expression_executor';
 
 import { SearchBarService } from './search_bar';
 import { QueryBarService } from './query_bar';
@@ -76,6 +76,7 @@ export const data = new DataPlugin().setup();
 /** @public */
 export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
+  expressionExecutor: ExpressionExecutorSetup;
 }
 
 export { ExpressionExecutorSetup } from './expression_executor';
