@@ -8,7 +8,7 @@ import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistryProvider,
 } from 'ui/registry/feature_catalogue';
-import { ID } from '../common/constants';
+import { ID, APP } from '../common/constants';
 
 // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
 FeatureCatalogueRegistryProvider.register(() => ({
@@ -16,7 +16,7 @@ FeatureCatalogueRegistryProvider.register(() => ({
   title: 'Integrations Manager',
   description: 'Install and manage your elastic data ingest integrations',
   icon: 'merge',
-  path: `/app/${ID}`,
+  path: APP.ROOT,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));

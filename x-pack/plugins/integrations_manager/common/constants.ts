@@ -5,10 +5,20 @@
  */
 
 export const ID = 'integrations_manager';
+
 export const API_ROOT = `/api/${ID}`;
+
 export const API = {
   ROOT: API_ROOT,
   FETCH_LIST: `${API_ROOT}/list`,
   FETCH_INFO: `${API_ROOT}/package/{pkgkey}`,
   FETCH_FILE: `${API_ROOT}/package/{pkgkey}/get`,
+};
+
+export const APP = {
+  ROOT: `/app/${ID}`,
+  // TODO: why must these be relative (something something React Router)
+  // does it matter that they're different from `API` path style?
+  LIST_VIEW: '/',
+  DETAIL_VIEW: '/detail/:pkgkey',
 };
