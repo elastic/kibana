@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
 export default async function ({ readConfigFile }) {
   const chromeConfig = await readConfigFile(require.resolve('./config'));
 
@@ -35,10 +33,6 @@ export default async function ({ readConfigFile }) {
 
     junit: {
       reportName: 'Firefox UI Functional Tests'
-    },
-
-    screenshots: {
-      directory: resolve(__dirname, 'screenshots_firefox')
     },
   };
 }
