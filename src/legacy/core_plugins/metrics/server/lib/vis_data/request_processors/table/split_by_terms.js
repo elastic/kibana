@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { buildEsQuery } from '@kbn/es-query';
-export function splitByTerm(req, panel, esQueryConfig, indexPattern) {
+export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
   return next => doc => {
     panel.series.filter(c => c.aggregate_by && c.aggregate_function).forEach(column => {
       _.set(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);

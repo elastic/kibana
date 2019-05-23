@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { buildEsQuery } from '@kbn/es-query';
-export function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {
+export function splitByFilters(req, panel, series, esQueryConfig, indexPattern) {
   return next => doc => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach(filter => {

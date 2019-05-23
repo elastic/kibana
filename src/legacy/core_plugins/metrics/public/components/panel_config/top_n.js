@@ -50,7 +50,7 @@ const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
-class TopNPanelConfig extends Component {
+export class TopNPanelConfig extends Component {
 
   constructor(props) {
     super(props);
@@ -94,14 +94,6 @@ class TopNPanelConfig extends Component {
     ) {
       await this.fetchIndexPatternsForQuery();
     }
-  }
-
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern ?
-      this.props.model.index_pattern :
-      this.props.model.default_index_pattern;
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatternForQuery: indexPatternObject });
   }
 
   handleSubmit = query => {

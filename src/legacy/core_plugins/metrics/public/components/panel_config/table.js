@@ -92,14 +92,6 @@ export class TablePanelConfig extends Component {
     }
   }
 
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern ?
-      this.props.model.index_pattern :
-      this.props.model.default_index_pattern;
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatternForQuery: indexPatternObject });
-  }
-
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }

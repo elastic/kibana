@@ -19,9 +19,11 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import chrome from 'ui/chrome';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce, get } from 'lodash';
+import { fromKueryExpression } from '@kbn/es-query';
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';
@@ -31,6 +33,7 @@ import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
+const queryOptions = chrome.getUiSettingsClient().get('query:allowLeadingWildcards');
 
 export class VisEditor extends Component {
   constructor(props) {
@@ -66,17 +69,55 @@ export class VisEditor extends Component {
     this.props.vis.updateState();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
+  isValidKueryQuery = (filterQuery) => {
+    if (filterQuery && filterQuery.language === 'kuery') {
+      try {
+        fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
+      } catch (error) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  isAllValidKueryQuery = (partialModel) => {
+    // checking validity of kuery queries
+    let isParsedKueryValid = true;
+    // panel item filter:
+    isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(partialModel.filter);
+    // panel item annotation items filters:
+    if (partialModel.annotations && partialModel.annotations.length) {
+      partialModel.annotations.forEach((annotationItem) => {
+        isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(annotationItem.query_string);
+      });
+    }
+    // panel item series items filters:
+    if (partialModel.series && partialModel.series.length) {
+      partialModel.series.forEach((seriesItem) => {
+        isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(seriesItem.filter);
+        // panel item series items split_filter items filters:
+        if (seriesItem.split_filters && seriesItem.split_filters.length) {
+          seriesItem.split_filters.forEach((splitFilterItem) => {
+            isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(splitFilterItem.filter);
+          });
+        }
+      });
+    }
+    return isParsedKueryValid;
+  }
+
   handleChange = async partialModel => {
     if (isEmpty(partialModel)) {
       return;
     }
+
     const hasTypeChanged = partialModel.type && this.state.model.type !== partialModel.type;
     const nextModel = {
       ...this.state.model,
       ...partialModel,
     };
     let dirty = true;
-    if (this.state.autoApply || hasTypeChanged) {
+    if ((this.state.autoApply || hasTypeChanged) && this.isAllValidKueryQuery(partialModel)) {
       this.updateVisState();
 
       dirty = false;
