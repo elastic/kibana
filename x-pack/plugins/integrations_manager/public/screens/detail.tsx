@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { getIntegrationInfoByKey } from '../data';
 import { IntegrationInfo } from '../../common/types';
 
@@ -28,8 +28,9 @@ export function Detail({ match }: MatchPackage) {
   return (
     <EuiPanel>
       <EuiTitle>
-        <h2>{`${name} (v${version})`}</h2>
+        <h1>{`${name} (v${version})`}</h1>
       </EuiTitle>
+      <EuiSpacer />
       <p>{description}</p>
     </EuiPanel>
   );
