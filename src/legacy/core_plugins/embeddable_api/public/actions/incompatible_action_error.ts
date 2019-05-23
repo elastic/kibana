@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { trackUiMetric } from '../../../ui_metric/public';
 
 export class IncompatibleActionError extends Error {
   constructor() {
@@ -27,6 +26,5 @@ export class IncompatibleActionError extends Error {
         defaultMessage: 'Action is incompatible',
       })
     );
-    trackUiMetric('EmbeddableAPI', `IncompatibleActionError`);
   }
 }

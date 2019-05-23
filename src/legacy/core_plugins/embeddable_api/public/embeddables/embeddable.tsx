@@ -19,7 +19,6 @@
 import { isEqual, cloneDeep } from 'lodash';
 import { Adapters } from 'ui/inspector';
 import * as Rx from 'rxjs';
-import { trackUiMetric } from '../../../ui_metric/public';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
@@ -140,8 +139,6 @@ export abstract class Embeddable<
   }
 
   public destroy(): void {
-    trackUiMetric('EmbeddableAPI', `destroyed${this.type}`);
-
     this.destoyed = true;
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();

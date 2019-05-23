@@ -25,7 +25,6 @@ import {
   ContextMenuPanel,
 } from '../context_menu_actions';
 import { IEmbeddable } from '../embeddables';
-import { trackUiMetric } from '../../../ui_metric/public';
 import { getActionsForTrigger } from '../get_actions_for_trigger';
 
 export async function executeTriggerActions(
@@ -38,7 +37,6 @@ export async function executeTriggerActions(
     triggerContext: any;
   }
 ) {
-  trackUiMetric('EmbeddableAPI', 'executeTriggerActions');
   const actions = await getActionsForTrigger(actionRegistry, triggerRegistry, triggerId, {
     embeddable,
   });
@@ -63,11 +61,6 @@ export async function executeTriggerActions(
           },
           {
             onClick: () => {
-              trackUiMetric('EmbeddableAPI', [
-                `executeAction`,
-                `executeActionOnTrigger_${triggerId}`,
-                `executeAction_${action.id}`,
-              ]);
               action.execute({ embeddable, triggerContext });
               closeMyContextMenuPanel();
             },

@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { trackUiMetric } from '../../../ui_metric/public';
 import { Container, ContainerInput } from '../containers';
 import { IEmbeddable } from '../embeddables';
 import { APPLY_FILTER_TRIGGER, triggerRegistry } from '../triggers';
@@ -67,7 +66,6 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
     embeddable,
     triggerContext,
   }: ActionContext<IEmbeddable, { filters: Filter[] }>) {
-    trackUiMetric('EmbeddableAPI', 'executeFilterAction');
     if (!triggerContext) {
       throw new Error('Applying a filter requires a filter as context');
     }

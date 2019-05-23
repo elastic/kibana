@@ -30,7 +30,6 @@ import {
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput } from './i_container';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { trackUiMetric } from '../../../ui_metric/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -272,7 +271,6 @@ export abstract class Container<
   }
 
   private onPanelRemoved(id: string) {
-    trackUiMetric('EmbeddableAPI', `onPanelRemoved`);
     // Clean up
     const embeddable = this.getChild(id);
     if (embeddable) {
@@ -292,7 +290,6 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
-    trackUiMetric('EmbeddableAPI', `onPanelAdded`);
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,

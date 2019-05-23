@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { trackUiMetric } from '../../../ui_metric/public';
 
 export class EmbeddableFactoryNotFoundError extends Error {
   constructor(type: string) {
@@ -30,6 +29,5 @@ export class EmbeddableFactoryNotFoundError extends Error {
         },
       })
     );
-    trackUiMetric('EmbeddableAPI', 'EmbeddableFactoryNotFoundError');
   }
 }

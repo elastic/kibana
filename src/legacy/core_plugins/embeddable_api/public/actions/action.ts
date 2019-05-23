@@ -18,7 +18,6 @@
  */
 
 import { EuiContextMenuItemIcon } from '@elastic/eui';
-import { trackUiMetric } from '../../../ui_metric/public';
 
 import { IEmbeddable } from '../embeddables';
 
@@ -41,9 +40,7 @@ export abstract class Action<
   public order: number = 0;
   public abstract readonly type: string;
 
-  constructor(public readonly id: string) {
-    trackUiMetric('EmbeddableAPI', `actionConstructor`);
-  }
+  constructor(public readonly id: string) {}
 
   /**
    * Optional icon that can be displayed along with the title.
