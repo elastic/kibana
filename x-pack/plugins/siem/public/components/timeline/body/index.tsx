@@ -19,7 +19,6 @@ import {
   OnColumnSorted,
   OnFilterChange,
   OnPinEvent,
-  OnRangeSelected,
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
@@ -49,7 +48,6 @@ interface Props {
   onColumnSorted: OnColumnSorted;
   onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
-  onRangeSelected: OnRangeSelected;
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;

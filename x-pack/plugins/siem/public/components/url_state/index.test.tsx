@@ -16,7 +16,7 @@ import {
   UrlStateContainerLifecycle,
   UrlStateContainerLifecycleProps,
 } from './';
-import { mockGlobalState, TestProviders } from '../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
 import {
   createStore,
   hostsModel,
@@ -129,10 +129,10 @@ describe('UrlStateComponents', () => {
   describe('UrlStateContainer', () => {
     const state: State = mockGlobalState;
 
-    let store = createStore(state);
+    let store = createStore(state, apolloClientObservable);
 
     beforeEach(() => {
-      store = createStore(state);
+      store = createStore(state, apolloClientObservable);
     });
     afterEach(() => {
       jest.clearAllMocks();

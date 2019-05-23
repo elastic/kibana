@@ -7,6 +7,7 @@
 import { cloneDeep, set } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
+import { IS_OPERATOR, DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -49,6 +50,7 @@ const timelineByIdMock: TimelineById = {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -61,8 +63,10 @@ const timelineByIdMock: TimelineById = {
     highlightedDropAndProviderId: '',
     historyIds: [],
     id: 'foo',
+    savedObjectId: null,
     isFavorite: false,
     isLive: false,
+    isLoading: false,
     itemsPerPage: 25,
     itemsPerPageOptions: [10, 25, 50],
     kqlMode: 'filter',
@@ -70,13 +74,19 @@ const timelineByIdMock: TimelineById = {
     title: '',
     noteIds: [],
     pinnedEventIds: {},
-    range: '1 Day',
+    pinnedEventsSaveObject: {},
+    dateRange: {
+      start: 0,
+      end: 0,
+    },
     show: true,
     sort: {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
     },
     width: DEFAULT_TIMELINE_WIDTH,
+    isSaving: false,
+    version: null,
   },
 };
 
@@ -338,6 +348,7 @@ describe('Timeline', () => {
           queryMatch: {
             field: '',
             value: '',
+            operator: IS_OPERATOR,
           },
 
           excluded: false,
@@ -349,7 +360,7 @@ describe('Timeline', () => {
     });
 
     test('should add a new timeline provider', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '567',
         name: 'data provider 2',
@@ -357,6 +368,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -372,7 +384,7 @@ describe('Timeline', () => {
     });
 
     test('should NOT add a new timeline provider if it already exists', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '123',
         name: 'data provider 1',
@@ -380,6 +392,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -394,7 +407,7 @@ describe('Timeline', () => {
     });
 
     test('should UPSERT an existing timeline provider if it already exists', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '123',
         name: 'my name changed',
@@ -402,8 +415,8 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
-
         excluded: false,
         kqlQuery: '',
       };
@@ -598,7 +611,7 @@ describe('Timeline', () => {
 
   describe('#addAndProviderToTimelineProvider', () => {
     test('should add a new and provider to an existing timeline provider', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '567',
         name: 'data provider 2',
@@ -606,8 +619,8 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
-
         excluded: false,
         kqlQuery: '',
       };
@@ -620,7 +633,7 @@ describe('Timeline', () => {
 
       newTimeline.foo.highlightedDropAndProviderId = '567';
 
-      const andProviderToAdd = {
+      const andProviderToAdd: DataProvider = {
         and: [],
         id: '568',
         name: 'And Data Provider',
@@ -628,6 +641,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -641,21 +655,22 @@ describe('Timeline', () => {
       });
       const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
       const addedAndDataProvider = update.foo.dataProviders[indexProvider].and[0];
-      expect(addedAndDataProvider).toEqual(andProviderToAdd);
+      const { and, ...expectedResult } = andProviderToAdd;
+      expect(addedAndDataProvider).toEqual(expectedResult);
       newTimeline.foo.highlightedDropAndProviderId = '';
     });
 
     test('should NOT add a new timeline and provider if it already exists', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [
           {
-            and: [],
             id: '568',
             name: 'And Data Provider',
             enabled: true,
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -668,6 +683,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -682,7 +698,7 @@ describe('Timeline', () => {
 
       newTimeline.foo.highlightedDropAndProviderId = '567';
 
-      const andProviderToAdd = {
+      const andProviderToAdd: DataProvider = {
         and: [],
         id: '568',
         name: 'And Data Provider',
@@ -690,6 +706,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -802,6 +819,7 @@ describe('Timeline', () => {
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -814,7 +832,7 @@ describe('Timeline', () => {
     });
 
     test('should add update a timeline with new providers', () => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [],
         id: '567',
         name: 'data provider 2',
@@ -822,6 +840,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -840,7 +859,8 @@ describe('Timeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        range: '1 Month',
+        start: 23,
+        end: 33,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
@@ -849,10 +869,20 @@ describe('Timeline', () => {
     test('should update the timeline range', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        range: '1 Month',
+        start: 23,
+        end: 33,
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.range', '1 Month', timelineByIdMock));
+      expect(update).toEqual(
+        set(
+          'foo.dateRange',
+          {
+            start: 23,
+            end: 33,
+          },
+          timelineByIdMock
+        )
+      );
     });
   });
 
@@ -919,6 +949,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -931,6 +962,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -940,20 +972,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -970,6 +1009,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
@@ -982,6 +1022,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -994,6 +1035,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
             {
@@ -1006,6 +1048,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -1015,20 +1058,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1038,16 +1088,16 @@ describe('Timeline', () => {
   describe('#updateTimelineAndProviderEnabled', () => {
     let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
     beforeEach(() => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [
           {
-            and: [],
             id: '568',
             name: 'And Data Provider',
             enabled: true,
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -1060,6 +1110,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1114,13 +1165,13 @@ describe('Timeline', () => {
       const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
         indexProvider
       ].and.concat({
-        and: [],
         id: '456',
         name: 'new and data provider',
         enabled: true,
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1176,6 +1227,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -1188,6 +1240,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -1197,20 +1250,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1227,6 +1287,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
@@ -1239,6 +1300,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -1251,6 +1313,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
             {
@@ -1263,6 +1326,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
             },
           ],
@@ -1272,20 +1336,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1295,16 +1366,16 @@ describe('Timeline', () => {
   describe('#updateTimelineAndProviderExcluded', () => {
     let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
     beforeEach(() => {
-      const providerToAdd = {
+      const providerToAdd: DataProvider = {
         and: [
           {
-            and: [],
             id: '568',
             name: 'And Data Provider',
             enabled: true,
             queryMatch: {
               field: '',
               value: '',
+              operator: IS_OPERATOR,
             },
 
             excluded: false,
@@ -1317,6 +1388,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1371,13 +1443,13 @@ describe('Timeline', () => {
       const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
         indexProvider
       ].and.concat({
-        and: [],
         id: '456',
         name: 'new and data provider',
         enabled: true,
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1421,6 +1493,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -1431,6 +1504,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
 
               excluded: false,
@@ -1443,20 +1517,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 50,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1491,6 +1572,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
 
               excluded: false,
@@ -1503,21 +1585,29 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           id: 'foo',
+          savedObjectId: null,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [100, 200, 300], // updated
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1552,6 +1642,7 @@ describe('Timeline', () => {
         queryMatch: {
           field: '',
           value: '',
+          operator: IS_OPERATOR,
         },
 
         excluded: false,
@@ -1575,6 +1666,7 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
+                operator: IS_OPERATOR,
               },
 
               excluded: false,
@@ -1586,22 +1678,30 @@ describe('Timeline', () => {
           highlightedDropAndProviderId: '',
           historyIds: [],
           id: 'foo',
+          savedObjectId: null,
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);

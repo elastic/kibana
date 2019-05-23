@@ -13,6 +13,7 @@ exports[`get_column_renderer renders correctly against snapshot 1`] = `
         "name": "event.severity: 3",
         "queryMatch": Object {
           "field": "event.severity",
+          "operator": ":",
           "value": "3",
         },
       }

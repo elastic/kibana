@@ -19,6 +19,7 @@ jest.mock('react', () => {
 describe('Data Frame: <DefinePivotForm />', () => {
   test('Minimal initialization', () => {
     const currentIndexPattern = {
+      id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -28,7 +29,14 @@ describe('Data Frame: <DefinePivotForm />', () => {
     const wrapper = shallow(
       <div>
         <KibanaContext.Provider
-          value={{ currentIndexPattern, indexPatterns: {}, kbnBaseUrl: 'url', kibanaConfig: {} }}
+          value={{
+            combinedQuery: {},
+            currentIndexPattern,
+            currentSavedSearch: {},
+            indexPatterns: {},
+            kbnBaseUrl: 'url',
+            kibanaConfig: {},
+          }}
         >
           <DefinePivotForm onChange={() => {}} />
         </KibanaContext.Provider>
