@@ -9343,7 +9343,6 @@
     "xpack.siem.overview.pageSubtitle": "Elastic Stack 的安全信息和事件管理功能",
     "xpack.siem.overview.pageTitle": "SIEM",
     "xpack.siem.overview.setupInstructions": "设置说明",
-    "xpack.siem.overview.startedText": "欢迎使用安全信息和事件管理 (SIEM)。首先，查看我们的 {docs} 或 {data}。有关即将推出的功能和教程，确保查看我们的 {blog} 和 {videos}。",
     "xpack.siem.overview.startedTitle": "入门",
     "xpack.siem.source.destination.packetsLabel": "pkts",
     "xpack.siem.system.acceptedDescription": "已接受该用户 - 通过",
