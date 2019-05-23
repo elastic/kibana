@@ -5,24 +5,17 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { EuiSpacer } from '@elastic/eui';
 import { chunk as _chunk } from 'lodash/fp';
-import {
-  StatItem,
-  StatItems,
-  StatItemsComponent,
-  StatItemsProps,
-} from '../../../../components/stat_items';
+import { StatItemsComponent, StatItemsProps } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
-import { AreaChartData, BarChartData } from '../../../charts/common';
+import { useKpiMatrixStatus } from '../../hosts/kpi_hosts';
 
 const euiColorVis1 = '#3185FC';
 const euiColorVis2 = '#DB1374';
@@ -33,8 +26,9 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-const fieldTitleChartMapping: Readonly<StatItems[]> = [
+const fieldTitleChartMapping: StatItemsProps[] = [
   {
+    key: 'networkEvents',
     fields: [
       {
         key: 'networkEvents',
@@ -48,6 +42,7 @@ const fieldTitleChartMapping: Readonly<StatItems[]> = [
     grow: 1,
   },
   {
+    key: 'UniqueIps',
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
@@ -73,8 +68,9 @@ const fieldTitleChartMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
+const fieldTitleMatrixMapping: StatItemsProps[] = [
   {
+    key: 'uniqueFlowId',
     fields: [
       {
         key: 'uniqueFlowId',
@@ -84,6 +80,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
     description: i18n.UNIQUE_ID,
   },
   {
+    key: 'activeAgents',
     fields: [
       {
         key: 'activeAgents',
@@ -93,6 +90,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
     description: i18n.ACTIVE_AGENTS,
   },
   {
+    key: 'dnsQueries',
     fields: [
       {
         key: 'dnsQueries',
@@ -102,6 +100,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
     description: i18n.DNS_QUERIES,
   },
   {
+    key: 'tlsHandshakes',
     fields: [
       {
         key: 'tlsHandshakes',
@@ -116,37 +115,16 @@ const FlexGroup = styled(EuiFlexGroup)`
   min-height: 228px;
 `;
 
-export const KpiNetworkBaseComponent = pure<{
-  fieldsMapping: Readonly<StatItems[]>;
+export const KpiNetworkBaseComponent = React.memo<{
+  fieldsMapping: StatItemsProps[];
   data: KpiNetworkData;
 }>(({ fieldsMapping, data }) => {
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
+
   return (
     <EuiFlexGroup wrap>
-      {fieldsMapping.map(stat => {
-        let statItemProps: StatItemsProps = {
-          ...stat,
-          key: `kpi-network-${stat.description}`,
-        };
-
-        if (stat.fields != null)
-          statItemProps = {
-            ...statItemProps,
-            fields: addValueToFields(stat.fields, data),
-          };
-
-        if (stat.enableAreaChart)
-          statItemProps = {
-            ...statItemProps,
-            areaChart: addValueToAreaChart(stat.fields, data),
-          };
-
-        if (stat.enableBarChart != null)
-          statItemProps = {
-            ...statItemProps,
-            barChart: addValueToBarChart(stat.fields, data),
-          };
-
-        return <StatItemsComponent {...statItemProps} />;
+      {statItemsProps.map(mappedStatItemProps => {
+        return <StatItemsComponent {...mappedStatItemProps} />;
       })}
     </EuiFlexGroup>
   );
@@ -154,7 +132,7 @@ export const KpiNetworkBaseComponent = pure<{
 
 const kipsPerRow = 2;
 
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
+export const KpiNetworkComponent = React.memo<KpiNetworkProps>(({ data, loading }) => {
   return loading ? (
     <FlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -177,36 +155,3 @@ export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => 
     </EuiFlexGroup>
   );
 });
-
-const addValueToFields = (fields: StatItem[], data: KpiNetworkData): StatItem[] =>
-  fields.map(field => ({ ...field, value: get(field.key, data) }));
-
-const addValueToAreaChart = (fields: StatItem[], data: KpiNetworkData): AreaChartData[] =>
-  fields
-    .filter(field => get(`${field.key}Histogram`, data) != null)
-    .map(field => ({
-      ...field,
-      value: get(`${field.key}Histogram`, data),
-      key: `${field.key}Histogram`,
-    }));
-
-const addValueToBarChart = (fields: StatItem[], data: KpiNetworkData): BarChartData[] => {
-  if (fields.length === 0) return [];
-  return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
-    const key: string = get('key', field);
-    const x: number | null = getOr(null, key, data);
-    const y: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
-
-    return acc.concat([
-      {
-        ...field,
-        value: [
-          {
-            x,
-            y,
-          },
-        ],
-      },
-    ]);
-  }, []);
-};

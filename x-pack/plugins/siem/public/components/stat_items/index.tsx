@@ -41,6 +41,7 @@ export interface StatItem {
 }
 
 export interface StatItems {
+  key: string;
   fields: StatItem[];
   description?: string;
   enableAreaChart?: boolean;
@@ -49,7 +50,6 @@ export interface StatItems {
 }
 
 export interface StatItemsProps extends StatItems {
-  key: string;
   areaChart?: AreaChartData[];
   barChart?: BarChartData[];
 }
