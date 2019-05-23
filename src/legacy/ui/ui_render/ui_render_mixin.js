@@ -252,6 +252,8 @@ export function uiRenderMixin(kbnServer, server, config) {
         uiPlugins,
 
         legacyMetadata,
+
+        capabilities: await request.getCapabilities(),
       },
     });
 

@@ -7,10 +7,15 @@
 import gql from 'graphql-tag';
 
 export const overviewHostQuery = gql`
-  query GetOverviewHostQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {
+  query GetOverviewHostQuery(
+    $sourceId: ID!
+    $timerange: TimerangeInput!
+    $filterQuery: String
+    $defaultIndex: [String!]!
+  ) {
     source(id: $sourceId) {
       id
-      OverviewHost(timerange: $timerange, filterQuery: $filterQuery) {
+      OverviewHost(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
         auditbeatAuditd
         auditbeatFIM
         auditbeatLogin

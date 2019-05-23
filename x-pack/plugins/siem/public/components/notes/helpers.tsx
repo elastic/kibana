@@ -70,7 +70,9 @@ export const createNote = ({
   id: getNewNoteId(),
   lastEdit: null,
   note: newNote.trim(),
+  saveObjectId: null,
   user: 'elastic', // TODO: get the logged-in Kibana user
+  version: null,
 });
 
 interface UpdateAndAssociateNodeParams {

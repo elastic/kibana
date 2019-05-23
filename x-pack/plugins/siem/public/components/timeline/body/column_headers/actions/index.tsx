@@ -13,12 +13,12 @@ import { OnColumnRemoved } from '../../../events';
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
 import { ColumnHeader } from '../column_header';
-import { getSortDirection, justifyActions } from '../header/helpers';
+import { getSortDirection } from '../header/helpers';
 import * as i18n from '../translations';
 
-const closeButtonSize = 25; // px
-const sortIndicatorSize = 25; // px
-export const ACTIONS_WIDTH = sortIndicatorSize + closeButtonSize; // px
+const CLOSE_BUTTON_SIZE = 25; // px
+const SORT_INDICATOR_SIZE = 25; // px
+export const ACTIONS_WIDTH = SORT_INDICATOR_SIZE + CLOSE_BUTTON_SIZE; // px
 
 const ActionsContainer = styled(EuiFlexGroup)`
   height: 100%;
@@ -57,7 +57,8 @@ export const CloseButton = pure<{
 export const Actions = pure<Props>(({ header, isLoading, onColumnRemoved, show, sort }) => (
   <ActionsContainer
     alignItems="center"
-    justifyContent={justifyActions(isLoading)}
+    data-test-subj="header-actions"
+    justifyContent="center"
     gutterSize="none"
   >
     <EuiFlexItem grow={false}>

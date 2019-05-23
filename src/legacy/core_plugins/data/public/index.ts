@@ -17,33 +17,33 @@
  * under the License.
  */
 
-import { SearchBarService } from './search_bar';
-import { QueryBarService } from './query_bar';
+import { SearchService, SearchSetup } from './search';
+import { QueryService, QuerySetup } from './query';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
-  private readonly searchBar: SearchBarService;
-  private readonly queryBar: QueryBarService;
+  private readonly search: SearchService;
+  private readonly query: QueryService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
-    this.queryBar = new QueryBarService();
-    this.searchBar = new SearchBarService();
+    this.query = new QueryService();
+    this.search = new SearchService();
   }
 
   public setup() {
     return {
       indexPatterns: this.indexPatterns.setup(),
-      search: this.searchBar.setup(),
-      query: this.queryBar.setup(),
+      search: this.search.setup(),
+      query: this.query.setup(),
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
-    this.searchBar.stop();
-    this.queryBar.stop();
+    this.search.stop();
+    this.query.stop();
   }
 }
 
@@ -57,6 +57,8 @@ export const data = new DataPlugin().setup();
 /** @public */
 export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
+  search: SearchSetup;
+  query: QuerySetup;
 }
 
 /** @public types */

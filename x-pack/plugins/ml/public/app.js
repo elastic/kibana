@@ -16,7 +16,6 @@ import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
 
 import 'plugins/ml/access_denied';
-import 'plugins/ml/lib/angular_bootstrap_patch';
 import 'plugins/ml/jobs';
 import 'plugins/ml/services/calendar_service';
 import 'plugins/ml/components/messagebar';

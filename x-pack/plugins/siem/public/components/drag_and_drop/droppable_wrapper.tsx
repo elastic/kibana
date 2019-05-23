@@ -11,13 +11,15 @@ import styled from 'styled-components';
 
 interface Props {
   droppableId: string;
+  height?: string;
   isDropDisabled?: boolean;
+  type?: string;
 }
 
-const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
+const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
   transition: background-color 0.7s ease;
   width: 100%;
-  height: 100%;
+  height: ${({ height }) => height};
   .flyout-overlay {
     .euiPanel {
       background-color: ${props => props.theme.eui.euiFormBackgroundColor};
@@ -69,17 +71,25 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
   }
 `;
 
-export const DroppableWrapper = pure<Props>(({ droppableId, isDropDisabled = false, children }) => (
-  <Droppable isDropDisabled={isDropDisabled} droppableId={droppableId} direction={'horizontal'}>
-    {(provided, snapshot) => (
-      <ReactDndDropTarget
-        innerRef={provided.innerRef}
-        {...provided.droppableProps}
-        isDraggingOver={snapshot.isDraggingOver}
-      >
-        {children}
-        {provided.placeholder}
-      </ReactDndDropTarget>
-    )}
-  </Droppable>
-));
+export const DroppableWrapper = pure<Props>(
+  ({ children, droppableId, height = '100%', isDropDisabled = false, type }) => (
+    <Droppable
+      isDropDisabled={isDropDisabled}
+      droppableId={droppableId}
+      direction={'horizontal'}
+      type={type}
+    >
+      {(provided, snapshot) => (
+        <ReactDndDropTarget
+          height={height}
+          innerRef={provided.innerRef}
+          {...provided.droppableProps}
+          isDraggingOver={snapshot.isDraggingOver}
+        >
+          {children}
+          {provided.placeholder}
+        </ReactDndDropTarget>
+      )}
+    </Droppable>
+  )
+);

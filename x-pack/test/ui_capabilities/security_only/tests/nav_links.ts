@@ -8,7 +8,10 @@ import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import {
+  GetUICapabilitiesFailureReason,
+  UICapabilitiesService,
+} from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
 // eslint-disable-next-line import/no-default-export
@@ -30,34 +33,35 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             username: scenario.username,
             password: scenario.password,
           },
-          navLinks: navLinksBuilder.all(),
         });
-        expect(uiCapabilities.success).to.be(true);
-        expect(uiCapabilities.value).to.have.property('navLinks');
-
         switch (scenario.username) {
           case 'superuser':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'all':
           case 'read':
           case 'dual_privileges_all':
           case 'dual_privileges_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except('ml', 'monitoring')
             );
             break;
           case 'foo_all':
           case 'foo_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.only('management', 'foo')
             );
             break;
-          // these users have no access to any navLinks except management
-          // which is not a navLink that ever gets disabled.
           case 'legacy_all':
           case 'no_kibana_privileges':
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           default:
             throw new UnreachableError(scenario);

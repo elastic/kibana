@@ -155,6 +155,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -305,6 +306,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {

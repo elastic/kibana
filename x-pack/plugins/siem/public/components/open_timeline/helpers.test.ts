@@ -7,10 +7,10 @@ import { cloneDeep, omit } from 'lodash/fp';
 
 import { getNotesCount, getPinnedEventCount, isUntitled } from './helpers';
 import { mockTimelineResults } from '../../mock/timeline_results';
-import { TimelineResult } from './types';
+import { OpenTimelineResult } from './types';
 
 describe('helpers', () => {
-  let mockResults: TimelineResult[];
+  let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);

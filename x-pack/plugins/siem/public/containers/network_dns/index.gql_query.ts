@@ -14,6 +14,7 @@ export const networkDnsQuery = gql`
     $timerange: TimerangeInput!
     $pagination: PaginationInput!
     $filterQuery: String
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
@@ -23,6 +24,7 @@ export const networkDnsQuery = gql`
         timerange: $timerange
         pagination: $pagination
         filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
       ) {
         totalCount
         edges {

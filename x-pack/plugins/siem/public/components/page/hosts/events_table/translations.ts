@@ -16,16 +16,16 @@ export const UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {Event} other {Events}}`,
   });
 
+export const TIMESTAMP = i18n.translate('xpack.siem.eventsTable.timestampTitle', {
+  defaultMessage: 'Timestamp',
+});
+
 export const HOST_NAME = i18n.translate('xpack.siem.eventsTable.hostsNameTitle', {
   defaultMessage: 'Host Name',
 });
 
 export const EVENT_ACTION = i18n.translate('xpack.siem.eventsTable.eventTypeAction', {
   defaultMessage: 'Event Action',
-});
-
-export const EVENT_CATEGORY = i18n.translate('xpack.siem.eventsTable.eventCategoryTitle', {
-  defaultMessage: 'Event Category',
 });
 
 export const SOURCE = i18n.translate('xpack.siem.eventsTable.sourceTitle', {
