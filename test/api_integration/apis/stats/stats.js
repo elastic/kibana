@@ -129,6 +129,16 @@ export default function ({ getService }) {
               expect(body).to.not.have.property('usage');
             });
         });
+
+        it('should exclude usage from the API response even if `legacy` is provided', () => {
+          return supertest
+            .get('/api/stats?extended&exclude_usage&legacy')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).to.not.have.property('usage');
+            });
+        });
       });
     });
   });

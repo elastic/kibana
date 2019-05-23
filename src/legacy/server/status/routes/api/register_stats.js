@@ -88,7 +88,7 @@ export function registerStatsApi(kbnServer, server, config) {
             ]);
 
             let modifiedUsage = usage;
-            if (isLegacy) {
+            if (isLegacy && modifiedUsage) {
               // In an effort to make telemetry more easily augmented, we need to ensure
               // we can passthrough the data without every part of the process needing
               // to know about the change; however, to support legacy use cases where this
