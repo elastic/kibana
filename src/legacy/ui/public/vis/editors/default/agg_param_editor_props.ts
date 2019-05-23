@@ -33,7 +33,7 @@ export interface AggParamEditorProps<T> {
   indexedFields?: FieldParamType[];
   showValidation: boolean;
   value: T;
-  responseValueAggs: any[] | null;
+  responseValueAggs: AggConfig[] | null;
   setValidity(isValid: boolean): void;
   setValue(value?: T): void;
   setTouched(): void;
