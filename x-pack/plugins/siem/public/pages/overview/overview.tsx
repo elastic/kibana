@@ -18,13 +18,10 @@ import { GlobalTime } from '../../containers/global_time';
 import { Summary } from './summary';
 import { EmptyPage } from '../../components/empty_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
-import { IndexType } from '../../graphql/types';
 
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
-
-const indexTypes = [IndexType.FILEBEAT, IndexType.AUDITBEAT, IndexType.PACKETBEAT];
 
 export const OverviewComponent = pure(() => {
   const dateEnd = Date.now();
@@ -32,10 +29,9 @@ export const OverviewComponent = pure(() => {
   const dateStart = dateEnd - dateRange;
 
   return (
-    <WithSource sourceId="default" indexTypes={indexTypes}>
-      {({ auditbeatIndicesExist, filebeatIndicesExist }) =>
-        indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) &&
-        indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
+    <WithSource sourceId="default">
+      {({ indicesExist }) =>
+        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
           <>
             <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE} />
 

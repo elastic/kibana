@@ -41,6 +41,11 @@ Array [
                   },
                 },
               },
+              Object {
+                "term": Object {
+                  "service.environment": "prod",
+                },
+              },
             ],
           },
         },

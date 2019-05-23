@@ -12,10 +12,16 @@ export const uncommonProcessesQuery = gql`
     $timerange: TimerangeInput!
     $pagination: PaginationInput!
     $filterQuery: String
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
-      UncommonProcesses(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+      UncommonProcesses(
+        timerange: $timerange
+        pagination: $pagination
+        filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
+      ) {
         totalCount
         edges {
           node {

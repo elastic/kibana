@@ -20,7 +20,7 @@ export class CreateSourceEditor extends React.Component {
   }
 
   _loadList = async () => {
-    const list = await getKibanaRegionList();
+    const list = getKibanaRegionList();
     if (this._isMounted) {
       this.setState({
         regionmapLayers: list

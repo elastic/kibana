@@ -18,10 +18,6 @@ describe('createOptions', () => {
   beforeEach(() => {
     source = {
       configuration: {
-        logAlias: 'log-alias',
-        auditbeatAlias: 'auditbeat-alias',
-        packetbeatAlias: 'packetbeat-alias',
-        winlogbeatAlias: 'winlogbeat-alias',
         fields: {
           host: 'host-1',
           container: 'container-1',
@@ -33,6 +29,7 @@ describe('createOptions', () => {
       },
     };
     args = {
+      defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       pagination: {
         limit: 5,
       },
@@ -59,11 +56,8 @@ describe('createOptions', () => {
   test('should create options given all input including sort field', () => {
     const options = createOptions(source, args, info);
     const expected: RequestOptions = {
+      defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       sourceConfiguration: {
-        logAlias: 'log-alias',
-        auditbeatAlias: 'auditbeat-alias',
-        packetbeatAlias: 'packetbeat-alias',
-        winlogbeatAlias: 'winlogbeat-alias',
         fields: {
           host: 'host-1',
           container: 'container-1',
@@ -92,11 +86,8 @@ describe('createOptions', () => {
     const argsWithoutSort: Args = omit('sortField', args);
     const options = createOptions(source, argsWithoutSort, info);
     const expected: RequestOptions = {
+      defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       sourceConfiguration: {
-        logAlias: 'log-alias',
-        auditbeatAlias: 'auditbeat-alias',
-        packetbeatAlias: 'packetbeat-alias',
-        winlogbeatAlias: 'winlogbeat-alias',
         fields: {
           host: 'host-1',
           container: 'container-1',

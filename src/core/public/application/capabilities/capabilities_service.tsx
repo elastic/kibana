@@ -19,7 +19,6 @@
 
 import { deepFreeze, RecursiveReadonly } from '../../utils/deep_freeze';
 import { MixedApp } from '../application_service';
-import { mergeCapabilities } from './merge_capabilities';
 import { InjectedMetadataStart } from '../../injected_metadata';
 import { BasePathStart } from '../../base_path';
 
@@ -76,38 +75,7 @@ export interface CapabilitiesStart {
  */
 export class CapabilitiesService {
   public async start({ apps, basePath, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
-    const mergedCapabilities = mergeCapabilities(
-      // Custom capabilites for new platform apps
-      ...apps.filter(app => app.capabilities).map(app => app.capabilities!),
-      // Generate navLink capabilities for all apps
-      ...apps.map(app => ({ navLinks: { [app.id]: true } }))
-    );
-
-    // NOTE: should replace `fetch` with browser HTTP service once it exists
-    const res = await fetch(basePath.addToPath('/api/capabilities'), {
-      method: 'POST',
-      body: JSON.stringify({ capabilities: mergedCapabilities }),
-      headers: {
-        'kbn-xsrf': 'xxx',
-      },
-      credentials: 'same-origin',
-    });
-
-    if (res.status === 401) {
-      return {
-        availableApps: [],
-        capabilities: deepFreeze({
-          navLinks: {},
-          management: {},
-          catalogue: {},
-        }),
-      };
-    } else if (res.status !== 200) {
-      throw new Error(`Capabilities check failed.`);
-    }
-
-    const body = await res.json();
-    const capabilities = deepFreeze(body.capabilities as Capabilities);
+    const capabilities = deepFreeze(injectedMetadata.getCapabilities());
     const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
 
     return {
