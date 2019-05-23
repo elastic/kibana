@@ -32,14 +32,7 @@ import { getNewPlatform } from 'ui/new_platform';
 
 export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState) {
   const queryFilter = {};
-
-  // ui settings handling
-  const uiSettingsClient = getNewPlatform().setup.core.uiSettings;
-  const pinnedByDefault$ = uiSettingsClient.get$('filters:pinnedByDefault');
-  let pinnedByDefault;
-  pinnedByDefault$.subscribe((newValue) => {
-    pinnedByDefault = newValue;
-  });
+  const { uiSettingsClient } = getNewPlatform().setup.core;
 
   const update$ = new Subject();
   const fetch$ = new Subject();
@@ -87,12 +80,12 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
    */
   queryFilter.addFilters = function (filters, addToGlobalState) {
     if (addToGlobalState === undefined) {
-      addToGlobalState = pinnedByDefault;
+      addToGlobalState = uiSettingsClient.get('filters:pinnedByDefault');
     }
 
     // Determine the state for the new filter (whether to pass the filter through other apps or not)
     const appState = getAppState();
-    const filterState = (addToGlobalState) ? globalState : appState;
+    const filterState = addToGlobalState ? globalState : appState;
 
     if (!Array.isArray(filters)) {
       filters = [filters];
