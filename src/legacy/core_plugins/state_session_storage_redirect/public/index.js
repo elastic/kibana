@@ -26,13 +26,13 @@ uiRoutes.enable();
 uiRoutes
   .when('/', {
     resolve: {
-      url: function (AppState, globalState, $window) {
+      url: function (AppState, globalState) {
         const redirectUrl = chrome.getInjected('redirectUrl');
 
         const hashedUrl = hashUrl([new AppState(), globalState], redirectUrl);
         const url = chrome.addBasePath(hashedUrl);
 
-        $window.location = url;
+        window.location = url;
       }
     }
   });

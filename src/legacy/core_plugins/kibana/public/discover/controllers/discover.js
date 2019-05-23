@@ -183,7 +183,6 @@ function discoverController(
   $route,
   $scope,
   $timeout,
-  $window,
   AppState,
   Notifier,
   Private,
@@ -873,7 +872,7 @@ function discoverController(
   };
 
   $scope.scrollToTop = function () {
-    $window.scrollTo(0, 0);
+    window.scrollTo(0, 0);
   };
 
   $scope.scrollToBottom = function () {

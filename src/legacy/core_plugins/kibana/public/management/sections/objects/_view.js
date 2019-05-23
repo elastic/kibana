@@ -48,7 +48,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
   .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {
+      controller: function ($scope, $injector, $routeParams, $location, $rootScope, Private, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -203,7 +203,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
         };
 
         $scope.cancel = function () {
-          $window.history.back();
+          window.history.back();
           return false;
         };
 
