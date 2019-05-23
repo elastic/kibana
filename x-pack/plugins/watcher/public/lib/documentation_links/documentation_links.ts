@@ -7,11 +7,15 @@
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { ACTION_TYPES } from '../../../common/constants';
 
-const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
-const esStackBase = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC_LINK_VERSION}`;
+const elasticDocLinkBase = `${ELASTIC_WEBSITE_URL}guide/en/`;
+
+const esBase = `${elasticDocLinkBase}elasticsearch/reference/${DOC_LINK_VERSION}`;
+const esStackBase = `${elasticDocLinkBase}elastic-stack-overview/${DOC_LINK_VERSION}`;
+const kibanaBase = `${elasticDocLinkBase}kibana/${DOC_LINK_VERSION}`;
 
 export const putWatchApiUrl = `${esBase}/watcher-api-put-watch.html`;
 export const executeWatchApiUrl = `${esBase}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`;
+export const watcherGettingStartedUrl = `${kibanaBase}/watcher-ui.html`;
 
 export const watchActionsConfigurationMap = {
   [ACTION_TYPES.SLACK]: `${esStackBase}/actions-slack.html#configuring-slack`,

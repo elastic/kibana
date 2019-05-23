@@ -58,8 +58,8 @@ export const DeleteWatchesModal = ({
                 'xpack.watcher.sections.watchList.deleteSelectedWatchesSuccessNotification.descriptionText',
                 {
                   defaultMessage:
-                    'Deleted {numWatchesToDelete, plural, one {watch} other {{numSuccesses} out of # selected watches}} ',
-                  values: { numSuccesses, numWatchesToDelete },
+                    'Deleted {numSuccesses, number} {numSuccesses, plural, one {watch} other {watches}}',
+                  values: { numSuccesses },
                 }
               )
             );
@@ -71,8 +71,8 @@ export const DeleteWatchesModal = ({
                 'xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText',
                 {
                   defaultMessage:
-                    "Couldn't delete {numWatchesToDelete, plural, one {watch} other {{numErrors} out of # selected watches}}",
-                  values: { numErrors, numWatchesToDelete },
+                    'Failed to delete {numErrors, number} {numErrors, plural, one {watch} other {watches}}',
+                  values: { numErrors },
                 }
               )
             );
