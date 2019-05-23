@@ -119,7 +119,6 @@ app.controller('timelion', function (
   AppState,
   config,
   confirmModal,
-  courier,
   kbnUrl,
   Notifier,
   Private
