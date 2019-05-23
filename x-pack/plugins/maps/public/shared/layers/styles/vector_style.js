@@ -303,12 +303,8 @@ export class VectorStyle extends AbstractStyle {
     return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  addScaledPropertiesBasedOnStyle(featureCollection) {
-    if (!featureCollection || featureCollection.length === 0) {
-      return false;
-    }
-
-    const scaledFields = this.getDynamicPropertiesArray()
+  _getScaledFields() {
+    return this.getDynamicPropertiesArray()
       .map(({ options }) => {
         const name = options.field.name;
         return {
@@ -318,16 +314,46 @@ export class VectorStyle extends AbstractStyle {
         };
       })
       .filter(({ range }) => {
-        return range;
+        return !!range;
       });
 
-    if (scaledFields.length === 0) {
-      return false;
+  }
+
+  clearFeatureState(featureCollection, mbMap, sourceId) {
+    const tmpFeatureIdentifier = {
+      source: null,
+      id: null
+    };
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      tmpFeatureIdentifier.source = sourceId;
+      tmpFeatureIdentifier.id = feature.id;
+      mbMap.removeFeatureState(tmpFeatureIdentifier);
+    }
+  }
+
+  setFeatureState(featureCollection, mbMap, sourceId) {
+
+    if (!featureCollection) {
+      return;
     }
 
+    const scaledFields  = this._getScaledFields();
+    if (scaledFields.length === 0) {
+      return;
+    }
+
+    const tmpFeatureIdentifier = {
+      source: null,
+      id: null
+    };
+    const tmpFeatureState = {};
+
     //scale to [0,1] domain
-    featureCollection.features.forEach(feature => {
-      scaledFields.forEach(({ name, range, computedName }) => {
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      for (let j = 0; j < scaledFields.length; j++) {
+        const { name, range, computedName } = scaledFields[j];
         const unscaledValue = parseFloat(feature.properties[name]);
         let scaledValue;
         if (isNaN(unscaledValue)) {//cannot scale
@@ -337,11 +363,12 @@ export class VectorStyle extends AbstractStyle {
         } else {
           scaledValue = (feature.properties[name] - range.min) / range.delta;
         }
-        feature.properties[computedName] = scaledValue;
-      });
-    });
-
-    return true;
+        tmpFeatureState[computedName] = scaledValue;
+      }
+      tmpFeatureIdentifier.source = sourceId;
+      tmpFeatureIdentifier.id = feature.id;
+      mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
+    }
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
@@ -354,7 +381,7 @@ export class VectorStyle extends AbstractStyle {
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['get', targetName], -1],
+      ['coalesce', ['feature-state', targetName], -1],
       -1, 'rgba(0,0,0,0)',
       ...colorRange
     ];
@@ -364,7 +391,7 @@ export class VectorStyle extends AbstractStyle {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
     return   ['interpolate',
       ['linear'],
-      ['get', targetName],
+      ['feature-state', targetName],
       0, minSize,
       1, maxSize
     ];
