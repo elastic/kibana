@@ -21,10 +21,6 @@ import chrome from 'ui/chrome';
 // @ts-ignore
 import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
 // @ts-ignore
-import { CONTAINS_SPACES } from 'ui/index_patterns/index';
-// @ts-ignore
-import { ILLEGAL_CHARACTERS } from 'ui/index_patterns/index';
-// @ts-ignore
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns/index';
 // @ts-ignore
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns/index';
@@ -67,8 +63,6 @@ export class IndexPatternsService {
 // static exports
 
 const constants = {
-  ILLEGAL_CHARACTERS,
-  CONTAINS_SPACES,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
 };
@@ -82,12 +76,7 @@ const ui = {
   IndexPatternSelect,
 };
 
-export {
-  validateIndexPattern,
-  constants,
-  fixtures,
-  ui,
-}
+export { validateIndexPattern, constants, fixtures, ui }
 
 /** @public */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;

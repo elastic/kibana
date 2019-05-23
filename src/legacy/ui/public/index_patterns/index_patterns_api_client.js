@@ -21,7 +21,7 @@ import { resolve as resolveUrl, format as formatUrl } from 'url';
 
 import { pick, mapValues } from 'lodash';
 
-import { IndexPatternMissingIndices } from '../errors';
+import { IndexPatternMissingIndices } from './errors';
 
 function join(...uriComponents) {
   return uriComponents.filter(Boolean).map(encodeURIComponent).join('/');
@@ -33,9 +33,9 @@ function request(method, url, body) {
     url,
     data: body,
   })
-    .then(resp => resp.data)
+    .then(resp => resp.json())
     .catch((resp) => {
-      const respBody = resp.data;
+      const respBody = resp.json();
 
       if (resp.status === 404 && respBody.code === 'no_matching_indices') {
         throw new IndexPatternMissingIndices(respBody.message);

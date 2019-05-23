@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function indexPatternsPatternCacheProvider() {
+export function createIndexPatternCache() {
 
   const vals = {};
   const cache = {};

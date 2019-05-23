@@ -18,15 +18,16 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from '../errors';
-import { fieldFormats } from '../registry/field_formats';
-import { mappingSetupService } from '../utils/mapping_setup';
-import { toastNotifications } from '../notify';
-import { findObjectByTitle } from '../saved_objects';
+import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
+import { fieldFormats } from 'ui/registry/field_formats';
+import { mappingSetupService } from 'ui/utils/mapping_setup';
+import { toastNotifications } from 'ui/notify';
+import { findObjectByTitle } from 'ui/saved_objects';
 
+import { IndexPatternMissingIndices } from './errors';
 import { getComputedFields } from './_get_computed_fields';
 import { getRoutes } from './get_routes';
-import { formatHit } from './_format_hit';
+import { formatHitProvider } from './_format_hit';
 import { FieldList } from './_field_list';
 import { flattenHitWrapper } from './_flatten_hit';
 
@@ -38,7 +39,6 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
 
 const type = 'index-pattern';
-const configWatchers = new WeakMap();
 
 function serializeFieldFormatMap(flat, format, field) {
   if (format) {
@@ -92,26 +92,6 @@ function setVersion(indexPattern, version) {
   return version;
 }
 
-function watch(indexPattern, config) {
-  if (configWatchers.has(indexPattern)) {
-    return;
-  }
-  const unwatch = config.watchAll(() => {
-    if (indexPattern.fields) {
-      initFields(indexPattern); // re-init fields when config changes, but only if we already had fields
-    }
-  });
-  configWatchers.set(indexPattern, { unwatch });
-}
-
-function unwatch(indexPattern) {
-  if (!configWatchers.has(indexPattern)) {
-    return;
-  }
-  configWatchers.get(indexPattern).unwatch();
-  configWatchers.delete(indexPattern);
-}
-
 function initFields(indexPattern, input) {
   const oldValue = indexPattern.fields;
   const newValue = input || oldValue || [];
@@ -132,7 +112,7 @@ export class IndexPattern {
     this.getComputedFields = getComputedFields.bind(this);
 
     this.flattenHit = flattenHitWrapper(this);
-    this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
+    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.formatField = this.formatHit.formatField;
 
     this.mapping = mappingSetup.expandShorthand({
@@ -187,7 +167,6 @@ export class IndexPattern {
   }
 
   async init(forceFieldRefresh = false) {
-    watch(this, this.config);
 
     if (!this.id) {
       return this; // no id === no elasticsearch document
@@ -196,14 +175,15 @@ export class IndexPattern {
     const savedObject = await this.savedObjectsClient.get(type, this.id);
     setVersion(this, savedObject._version);
 
-    // Do this before we attempt to update from ES since that call can potentially perform a save
-    this.originalBody = this.prepBody();
-    await this._updateFromElasticSearch(this, {
+    const response = {
       _id: savedObject.id,
       _type: savedObject.type,
       _source: _.cloneDeep(savedObject.attributes),
       found: savedObject._version ? true : false
-    }, forceFieldRefresh);
+    };
+    // Do this before we attempt to update from ES since that call can potentially perform a save
+    this.originalBody = this.prepBody();
+    await this._updateFromElasticSearch(response, forceFieldRefresh);
     // Do it after to ensure we have the most up to date information
     this.originalBody = this.prepBody();
 
@@ -437,7 +417,6 @@ export class IndexPattern {
   }
 
   destroy() {
-    unwatch(this);
     this.patternCache.clear(this.id);
     return this.savedObjectsClient.delete(type, this.id);
   }

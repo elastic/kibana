@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { IndexPatternMissingIndices } from '../errors';
+import { fieldFormats } from '../registry/field_formats';
+
+import { IndexPatternMissingIndices } from './errors';
 import { IndexPattern } from './_index_pattern';
-import { indexPatternsPatternCacheProvider } from './_pattern_cache';
+import { createIndexPatternCache } from './_pattern_cache';
 import { indexPatternsGetProvider } from './_get';
 import { FieldsFetcher } from './fields_fetcher';
-import { fieldFormats } from '../registry/field_formats';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 
 export class IndexPatterns {
@@ -38,7 +39,7 @@ export class IndexPatterns {
     };
 
     this.fieldsFetcher = new FieldsFetcher(apiClient, config);
-    this.cache = indexPatternsPatternCacheProvider();
+    this.cache = createIndexPatternCache();
     this.getIds = getProvider('id');
     this.getTitles = getProvider('attributes.title');
     this.getFields = getProvider.multiple;
@@ -80,3 +81,8 @@ module.service('indexPatterns', function (chrome) {
   if (!_service) _service = new IndexPatterns(chrome.getBasePath(), chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
   return _service;
 });
+
+export const IndexPatternsProvider = (chrome) => {
+  if (!_service) _service = new IndexPatterns(chrome.getBasePath(), chrome.getUiSettingsClient(), chrome.getSavedObjectsClient());
+  return _service;
+};
