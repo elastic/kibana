@@ -349,7 +349,7 @@ Test runner arguments:
  - Where applicable, the optional arguments `-t=regexp` or `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression.
  - `[test path]` is the relative path to the test file.
 
- Examples:
+ Examples
   - Run the entire elasticsearch_service test suite with yarn:
     `node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
   - Run the jest test case whose description matches 'stops both admin and data clients':
