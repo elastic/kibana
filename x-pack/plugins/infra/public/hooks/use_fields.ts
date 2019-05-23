@@ -5,13 +5,22 @@
  */
 
 import { useState, useEffect } from 'react';
+import DateMath from '@elastic/datemath';
 import { AvailableFieldsResponse } from '../../server/routes/available_fields/types';
 import { fetch } from '../utils/fetch';
 
-export function useFields(indexPattern: string, timeField: string) {
+export function useFields(indexPattern: string, timeField: string, from: string, to: string) {
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<AvailableFieldsResponse | null>(null);
+
+  const fromTime = DateMath.parse(from);
+  const toTime = DateMath.parse(to, { roundUp: true });
+
+  if (!toTime || !fromTime) {
+    throw new Error('Unable to parse timerange');
+  }
+
   useEffect(
     () => {
       (async () => {
@@ -19,10 +28,7 @@ export function useFields(indexPattern: string, timeField: string) {
         try {
           const response = await fetch.post<AvailableFieldsResponse>(
             '../api/infra/available_fields',
-            {
-              indexPattern,
-              timeField,
-            }
+            { indexPattern, timeField, to: toTime.valueOf(), from: fromTime.valueOf() }
           );
           setData(response.data);
           setError(null);
@@ -33,7 +39,7 @@ export function useFields(indexPattern: string, timeField: string) {
         setLoading(false);
       })();
     },
-    [indexPattern, timeField]
+    [indexPattern, timeField, from, to]
   );
   return { fields: (data && data.fields) || [], loading, error };
 }

@@ -15,6 +15,8 @@ type AvailableFieldsWrappedRequest = InfraWrappableRequest<AvailableFieldsReques
 const availableFieldsSchema = Joi.object({
   timeField: Joi.string().required(),
   indexPattern: Joi.string().required(),
+  to: Joi.number().required(),
+  from: Joi.number().required(),
 });
 
 export const initAvailableFieldsAPI = ({ framework }: InfraBackendLibs) => {

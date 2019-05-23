@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AvailableFieldsAggregation, AvailableFieldsBucket, AvailableFieldsHit } from '../types';
+import {
+  AvailableFieldsAggregation,
+  AvailableFieldsBucket,
+  AvailableFieldsHit,
+  AvailableFieldsRequest,
+} from '../types';
 import { extractFields } from './extract_fields';
 import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
 
 export const getSampleFieldNames = async (
   search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
-  options: { timeField: string; indexPattern: string }
+  options: AvailableFieldsRequest
 ): Promise<string[]> => {
   const params = {
     index: options.indexPattern,
@@ -18,8 +23,9 @@ export const getSampleFieldNames = async (
       query: {
         range: {
           [options.timeField]: {
-            gte: 'now-5m',
-            lte: 'now',
+            gte: options.from,
+            lte: options.to,
+            format: 'epoch_millis',
           },
         },
       },

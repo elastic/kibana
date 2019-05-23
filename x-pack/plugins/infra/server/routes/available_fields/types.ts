@@ -7,6 +7,8 @@
 export interface AvailableFieldsRequest {
   indexPattern: string;
   timeField: string;
+  to: number;
+  from: number;
 }
 
 export interface AvailableField {

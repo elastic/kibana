@@ -42,7 +42,12 @@ export const MetricsExplorerPage = injectI18n(
       handleLoadMore,
     } = useMetricsExplorerState(source, derivedIndexPattern);
 
-    const { fields } = useFields(source.metricAlias, source.fields.timestamp);
+    const { fields } = useFields(
+      source.metricAlias,
+      source.fields.timestamp,
+      currentTimerange.from,
+      currentTimerange.to
+    );
     const alteredDerivedIndexPattern = {
       ...derivedIndexPattern,
       fields,
