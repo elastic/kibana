@@ -29,7 +29,13 @@ import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import { REFRESH_INTERVALS, PAGINATION } from '../../../../common/constants';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
-import { getPageErrorCode, PageError, DeleteWatchesModal, WatchStatus } from '../../../components';
+import {
+  getPageErrorCode,
+  PageError,
+  DeleteWatchesModal,
+  WatchStatus,
+  SectionError,
+} from '../../../components';
 import { loadWatches } from '../../../lib/api';
 import { watcherGettingStartedUrl } from '../../../lib/documentation_links';
 
@@ -56,7 +62,7 @@ const WatchListUi = () => {
   );
 
   const createWatchButtons = (
-    <EuiFlexGroup gutterSize="m">
+    <EuiFlexGroup gutterSize="m" justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiToolTip
           position="top"
@@ -115,7 +121,19 @@ const WatchListUi = () => {
 
   let content;
 
-  if (availableWatches && availableWatches.length === 0) {
+  if (error) {
+    content = (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.errorTitle"
+            defaultMessage="Error loading watches"
+          />
+        }
+        error={error}
+      />
+    );
+  } else if (availableWatches && availableWatches.length === 0) {
     content = (
       <EuiEmptyPrompt
         iconType="managementApp"
@@ -152,7 +170,7 @@ const WatchListUi = () => {
         render: (id: string) => {
           return (
             <EuiLink
-              className="indTable__link euiTableCellContent"
+              className="euiTableCellContent"
               data-test-subj={`watchIdColumn-${id}`}
               href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
             >
@@ -232,7 +250,7 @@ const WatchListUi = () => {
                     aria-label={i18n.translate(
                       'xpack.watcher.sections.watchList.watchTable.actionEditAriaLabel',
                       {
-                        defaultMessage: 'Edit watch `{name}`',
+                        defaultMessage: "Edit watch '{name}'",
                         values: { name: watch.name },
                       }
                     )}
@@ -257,7 +275,7 @@ const WatchListUi = () => {
                     aria-label={i18n.translate(
                       'xpack.watcher.sections.watchList.watchTable.actionDeleteAriaLabel',
                       {
-                        defaultMessage: 'Delete watch `{name}`',
+                        defaultMessage: "Delete watch '{name}'",
                         values: { name: watch.name },
                       }
                     )}

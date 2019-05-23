@@ -58,7 +58,7 @@ export const DeleteWatchesModal = ({
                 'xpack.watcher.sections.watchList.deleteSelectedWatchesSuccessNotification.descriptionText',
                 {
                   defaultMessage:
-                    'Successfuly deleted {numSuccesses, number} {numSuccesses, plural, one {watch} other {watches}}',
+                    'Deleted {numSuccesses, number} {numSuccesses, plural, one {watch} other {watches}}',
                   values: { numSuccesses },
                 }
               )
