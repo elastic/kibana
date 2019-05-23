@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
 ```

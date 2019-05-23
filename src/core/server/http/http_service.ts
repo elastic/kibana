@@ -18,12 +18,12 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { Logger } from '../logging';
 import { CoreContext } from '../core_context';
-import { HttpConfig } from './http_config';
+import { HttpConfig, HttpConfigType } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
@@ -46,7 +46,9 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('http');
-    this.config$ = this.coreContext.configService.atPath('server', HttpConfig);
+    this.config$ = coreContext.configService
+      .atPath<HttpConfigType>('server')
+      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
 
     this.httpServer = new HttpServer(coreContext.logger.get('http', 'server'));
     this.httpsRedirectServer = new HttpsRedirectServer(

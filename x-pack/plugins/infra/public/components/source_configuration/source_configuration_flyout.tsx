@@ -27,7 +27,7 @@ import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
-import { SourceConfigurationFlyoutState } from './source_configuration_flyout_state';
+import { isValidTabId, SourceConfigurationFlyoutState } from './source_configuration_flyout_state';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 
 const noop = () => undefined;
@@ -39,7 +39,9 @@ interface SourceConfigurationFlyoutProps {
 
 export const SourceConfigurationFlyout = injectI18n(
   ({ intl, shouldAllowEdit }: SourceConfigurationFlyoutProps) => {
-    const { isVisible, hide } = useContext(SourceConfigurationFlyoutState.Context);
+    const { activeTabId, hide, isVisible, setActiveTab } = useContext(
+      SourceConfigurationFlyoutState.Context
+    );
 
     const {
       createSourceConfiguration,
@@ -84,64 +86,97 @@ export const SourceConfigurationFlyout = injectI18n(
       ]
     );
 
+    const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
+      shouldAllowEdit,
+      source,
+    ]);
+
+    const tabs: EuiTabbedContentTab[] = useMemo(
+      () =>
+        isVisible
+          ? [
+              {
+                id: 'indicesAndFieldsTab',
+                name: intl.formatMessage({
+                  id: 'xpack.infra.sourceConfiguration.sourceConfigurationIndicesTabTitle',
+                  defaultMessage: 'Indices and fields',
+                }),
+                content: (
+                  <>
+                    <EuiSpacer />
+                    <NameConfigurationPanel
+                      isLoading={isLoading}
+                      nameFieldProps={indicesConfigurationProps.name}
+                      readOnly={!isWriteable}
+                    />
+                    <EuiSpacer />
+                    <IndicesConfigurationPanel
+                      isLoading={isLoading}
+                      logAliasFieldProps={indicesConfigurationProps.logAlias}
+                      metricAliasFieldProps={indicesConfigurationProps.metricAlias}
+                      readOnly={!isWriteable}
+                    />
+                    <EuiSpacer />
+                    <FieldsConfigurationPanel
+                      containerFieldProps={indicesConfigurationProps.containerField}
+                      hostFieldProps={indicesConfigurationProps.hostField}
+                      isLoading={isLoading}
+                      podFieldProps={indicesConfigurationProps.podField}
+                      readOnly={!isWriteable}
+                      tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
+                      timestampFieldProps={indicesConfigurationProps.timestampField}
+                    />
+                  </>
+                ),
+              },
+              {
+                id: 'logsTab',
+                name: intl.formatMessage({
+                  id: 'xpack.infra.sourceConfiguration.sourceConfigurationLogColumnsTabTitle',
+                  defaultMessage: 'Log Columns',
+                }),
+                content: (
+                  <>
+                    <EuiSpacer />
+                    <LogColumnsConfigurationPanel
+                      addLogColumn={addLogColumn}
+                      availableFields={availableFields}
+                      isLoading={isLoading}
+                      logColumnConfiguration={logColumnConfigurationProps}
+                    />
+                  </>
+                ),
+              },
+            ]
+          : [],
+      [
+        addLogColumn,
+        availableFields,
+        indicesConfigurationProps,
+        intl.formatMessage,
+        isLoading,
+        isVisible,
+        logColumnConfigurationProps,
+        isWriteable,
+      ]
+    );
+    const activeTab = useMemo(() => tabs.filter(tab => tab.id === activeTabId)[0] || tabs[0], [
+      activeTabId,
+      tabs,
+    ]);
+    const activateTab = useCallback(
+      (tab: EuiTabbedContentTab) => {
+        const tabId = tab.id;
+        if (isValidTabId(tabId)) {
+          setActiveTab(tabId);
+        }
+      },
+      [setActiveTab, isValidTabId]
+    );
+
     if (!isVisible || !source || !source.configuration) {
       return null;
     }
-
-    const tabs: EuiTabbedContentTab[] = [
-      {
-        id: 'indicesAndFieldsTab',
-        name: intl.formatMessage({
-          id: 'xpack.infra.sourceConfiguration.sourceConfigurationIndicesTabTitle',
-          defaultMessage: 'Indices and fields',
-        }),
-        content: (
-          <>
-            <EuiSpacer />
-            <NameConfigurationPanel
-              isLoading={isLoading}
-              nameFieldProps={indicesConfigurationProps.name}
-              readOnly={!shouldAllowEdit}
-            />
-            <EuiSpacer />
-            <IndicesConfigurationPanel
-              isLoading={isLoading}
-              logAliasFieldProps={indicesConfigurationProps.logAlias}
-              metricAliasFieldProps={indicesConfigurationProps.metricAlias}
-              readOnly={!shouldAllowEdit}
-            />
-            <EuiSpacer />
-            <FieldsConfigurationPanel
-              containerFieldProps={indicesConfigurationProps.containerField}
-              hostFieldProps={indicesConfigurationProps.hostField}
-              isLoading={isLoading}
-              podFieldProps={indicesConfigurationProps.podField}
-              readOnly={!shouldAllowEdit}
-              tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
-              timestampFieldProps={indicesConfigurationProps.timestampField}
-            />
-          </>
-        ),
-      },
-      {
-        id: 'logsTab',
-        name: intl.formatMessage({
-          id: 'xpack.infra.sourceConfiguration.sourceConfigurationLogColumnsTabTitle',
-          defaultMessage: 'Log Columns',
-        }),
-        content: (
-          <>
-            <EuiSpacer />
-            <LogColumnsConfigurationPanel
-              addLogColumn={addLogColumn}
-              availableFields={availableFields}
-              isLoading={isLoading}
-              logColumnConfiguration={logColumnConfigurationProps}
-            />
-          </>
-        ),
-      },
-    ];
 
     return (
       <EuiFlyout
@@ -153,7 +188,7 @@ export const SourceConfigurationFlyout = injectI18n(
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
             <h2 id="sourceConfigurationTitle">
-              {shouldAllowEdit ? (
+              {isWriteable ? (
                 <FormattedMessage
                   id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
                   defaultMessage="Configure source"
@@ -168,7 +203,7 @@ export const SourceConfigurationFlyout = injectI18n(
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiTabbedContent tabs={tabs} />
+          <EuiTabbedContent onTabClick={activateTab} selectedTab={activeTab} tabs={tabs} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           {errors.length > 0 ? (
@@ -216,7 +251,7 @@ export const SourceConfigurationFlyout = injectI18n(
               )}
             </EuiFlexItem>
             <EuiFlexItem />
-            {shouldAllowEdit && (
+            {isWriteable && (
               <EuiFlexItem grow={false}>
                 {isLoading ? (
                   <EuiButton color="primary" isLoading fill>

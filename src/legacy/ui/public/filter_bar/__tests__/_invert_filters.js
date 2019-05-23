@@ -92,7 +92,16 @@ describe('invert filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      const emitSpy = sinon.spy(queryFilter, 'emit');
+      const updateStub = sinon.stub();
+      const fetchStub = sinon.stub();
+
+      queryFilter.getUpdates$().subscribe({
+        next: updateStub,
+      });
+
+      queryFilter.getFetches$().subscribe({
+        next: fetchStub,
+      });
       appState.filters = filters;
 
       // set up the watchers
@@ -101,9 +110,8 @@ describe('invert filters', function () {
       // trigger the digest loop to fire the watchers
       $rootScope.$digest();
 
-      expect(emitSpy.callCount).to.be(2);
-      expect(emitSpy.firstCall.args[0]).to.be('update');
-      expect(emitSpy.secondCall.args[0]).to.be('fetch');
+      expect(fetchStub.called);
+      expect(updateStub.called);
     });
   });
 

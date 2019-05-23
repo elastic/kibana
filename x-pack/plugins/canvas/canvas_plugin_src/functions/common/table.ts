@@ -5,6 +5,7 @@
  */
 
 import { ContextFunction, Datatable, Render, Style } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   font: Style;
@@ -14,11 +15,13 @@ interface Arguments {
 }
 
 export function table(): ContextFunction<'table', Datatable, Arguments, Render<Arguments>> {
+  const { help, args: argHelp } = getFunctionHelp().table;
+
   return {
     name: 'table',
     aliases: [],
     type: 'render',
-    help: 'Configure a Data Table element',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -26,24 +29,23 @@ export function table(): ContextFunction<'table', Datatable, Arguments, Render<A
       font: {
         types: ['style'],
         default: '{font}',
-        help: 'Font style',
+        help: argHelp.font,
       },
       paginate: {
         types: ['boolean'],
         default: true,
-        help: 'Show pagination controls. If set to false only the first page will be displayed',
+        help: argHelp.paginate,
         options: [true, false],
       },
       perPage: {
         types: ['number'],
         default: 10,
-        help:
-          'Show this many rows per page. You probably want to raise this is disabling pagination',
+        help: argHelp.perPage,
       },
       showHeader: {
         types: ['boolean'],
         default: true,
-        help: 'Show or hide the header row with titles for each column',
+        help: argHelp.showHeader,
         options: [true, false],
       },
     },

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { HttpConfig } from './http_config';
+export { config, HttpConfig, HttpConfigType } from './http_config';
 export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
 export { Router, KibanaRequest } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';

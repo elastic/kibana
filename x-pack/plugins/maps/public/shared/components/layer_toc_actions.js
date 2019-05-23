@@ -11,9 +11,7 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiToolTip,
-  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -40,7 +38,7 @@ export class LayerTocActions extends Component {
     }
   }
 
-  _onClick = () => {
+  _togglePopover = () => {
     this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
@@ -52,73 +50,30 @@ export class LayerTocActions extends Component {
     }));
   };
 
-  _renderButton() {
-    const icon = this._renderIcon();
+  _renderPopoverToggleButton() {
+    const { icon, tooltipContent } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
     return (
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        size="xs"
-        flush="left"
-        color="text"
-        onClick={this._onClick}
-        data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
-        // textProps="mapTocEntry__layerNameText"
+      <EuiToolTip
+        position="top"
+        title={this.props.displayName}
+        content={tooltipContent}
       >
-        <span className="mapTocEntry__layerNameIcon">{icon}</span>
-        {this.props.displayName}
-      </EuiButtonEmpty>);
-  }
-
-
-  _getVisbilityIcon() {
-    const iconType = this.props.layer.isVisible() ? 'eye' : 'eyeClosed';
-    return (
-      <EuiIcon
-        type={iconType}
-        size="m"
-      />);
-  }
-
-  _renderIcon() {
-    const { zoom, layer } = this.props;
-    let smallLegendIcon;
-    if (layer.hasErrors()) {
-      smallLegendIcon = (
-        <EuiIconTip
-          aria-label={i18n.translate('xpack.maps.layerTocActions.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
-          size="m"
-          type="alert"
-          color="warning"
-          content={layer.getErrors()}
-        />
-      );
-    } else if (layer.isLayerLoading()) {
-      smallLegendIcon = <EuiLoadingSpinner size="m"/>;
-    } else if (!layer.showAtZoomLevel(zoom)) {
-      const { minZoom, maxZoom } = layer.getZoomConfig();
-      const icon = layer.getIcon();
-      smallLegendIcon = (
-        <EuiToolTip
-          position="top"
-          content={
-            i18n.translate('xpack.maps.layerTocActions.zoomFeedbackTooltip', {
-              defaultMessage: `Map is at zoom level {zoom}.
-          This layer is only visible between zoom levels {minZoom} to {maxZoom}.`,
-              values: { minZoom, maxZoom, zoom }
-            })}
+        <EuiButtonEmpty
+          className="mapTocEntry__layerName eui-textLeft"
+          size="xs"
+          flush="left"
+          color="text"
+          onClick={this._togglePopover}
+          data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
         >
-          {icon}
-        </EuiToolTip>
-      );
-    } else {
-      smallLegendIcon = layer.getIcon();
-    }
-    return smallLegendIcon;
+          <span className="mapTocEntry__layerNameIcon">{icon}</span>
+          {this.props.displayName}
+        </EuiButtonEmpty>
+      </EuiToolTip>
+    );
   }
 
-  _getPanels() {
-
-    const visibilityToggle = this._getVisbilityIcon();
+  _getActionsPanel() {
     const actionItems = [
       {
         name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
@@ -146,7 +101,12 @@ export class LayerTocActions extends Component {
         }) : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
           defaultMessage: 'Show layer',
         }),
-        icon: visibilityToggle,
+        icon: (
+          <EuiIcon
+            type={this.props.layer.isVisible() ? 'eye' : 'eyeClosed'}
+            size="m"
+          />
+        ),
         'data-test-subj': 'layerVisibilityToggleButton',
         onClick: () => {
           this._closePopover();
@@ -190,15 +150,13 @@ export class LayerTocActions extends Component {
       });
     }
 
-    const actionsPanel = {
+    return {
       id: 0,
       title: i18n.translate('xpack.maps.layerTocActions.layerActionsTitle', {
         defaultMessage: 'Layer actions',
       }),
       items: actionItems,
     };
-
-    return [actionsPanel];
   }
 
   render() {
@@ -206,7 +164,7 @@ export class LayerTocActions extends Component {
       <EuiPopover
         id="contextMenu"
         className="mapLayTocActions"
-        button={this._renderButton()}
+        button={this._renderPopoverToggleButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
@@ -216,7 +174,7 @@ export class LayerTocActions extends Component {
       >
         <EuiContextMenu
           initialPanelId={0}
-          panels={this._getPanels()}
+          panels={[this._getActionsPanel()]}
           data-test-subj={`layerTocActionsPanel${this.props.escapedDisplayName}`}
         />
       </EuiPopover>);

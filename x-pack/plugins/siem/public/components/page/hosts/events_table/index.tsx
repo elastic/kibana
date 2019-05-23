@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has } from 'lodash/fp';
+import { EuiToolTip } from '@elastic/eui';
+import { getOr } from 'lodash/fp';
 import React from 'react';
+import moment from 'moment';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
@@ -13,14 +15,15 @@ import { ActionCreator } from 'typescript-fsa';
 import { hostsActions } from '../../../../store/actions';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyStringTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
-import { IPDetailsLink } from '../../../links';
+import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
+import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
+import { PreferenceFormattedDate } from '../../../formatted_date';
+import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { MoreRowItems } from '../../index';
 
 interface OwnProps {
   data: Ecs[];
@@ -76,7 +79,7 @@ const EventsTableComponent = pure<EventsTableProps>(
     type,
   }) => (
     <LoadMoreTable
-      columns={getEventsColumns()}
+      columns={getEventsColumns(type)}
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
@@ -109,7 +112,12 @@ export const EventsTable = connect(
   }
 )(EventsTableComponent);
 
-const getEventsColumns = (): [
+const getEventsColumns = (
+  pageType: hostsModel.HostsType
+): [
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
   Columns<EcsEdges>,
   Columns<EcsEdges>,
   Columns<EcsEdges>,
@@ -117,92 +125,130 @@ const getEventsColumns = (): [
   Columns<EcsEdges>
 ] => [
   {
-    name: i18n.HOST_NAME,
-    sortable: true,
+    name: i18n.TIMESTAMP,
+    sortable: false,
     truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const hostName: string | null | undefined = get('host.name[0]', node);
-      if (hostName != null) {
-        const id = escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: hostName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'host.name',
-                value: hostName,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                hostName
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      node.timestamp != null ? (
+        <LocalizedDateTooltip date={moment(new Date(node.timestamp)).toDate()}>
+          <PreferenceFormattedDate value={new Date(node.timestamp)} />
+        </LocalizedDateTooltip>
+      ) : (
+        getEmptyTagValue()
+      ),
   },
   {
-    name: i18n.EVENT_ACTION,
-    sortable: true,
-    truncateText: true,
-    hideForMobile: true,
-    render: ({ node }) => getOrEmptyTag('event.action', node),
+    name: i18n.HOST_NAME,
+    sortable: false,
+    truncateText: false,
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'host.name', node),
+        attrName: 'host.name',
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
+        render: item => <HostDetailsLink hostName={item} />,
+      }),
   },
   {
-    name: i18n.SOURCE,
+    name: i18n.EVENT_MODULE_DATASET,
+    sortable: false,
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('source.ip[0]', node)}:{getOrEmptyTag('source.port', node)}
+        {getRowItemDraggables({
+          rowItems: getOr(null, 'event.module', node),
+          attrName: 'event.module',
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
+        })}
+        /
+        {getRowItemDraggables({
+          rowItems: getOr(null, 'event.dataset', node),
+          attrName: 'event.dataset',
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
+        })}
+      </>
+    ),
+  },
+  {
+    name: i18n.EVENT_ACTION,
+    sortable: false,
+    truncateText: true,
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'event.action', node),
+        attrName: 'event.action',
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
+      }),
+  },
+  {
+    name: i18n.USER,
+    sortable: false,
+    truncateText: true,
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'user.name', node),
+        attrName: 'user.name',
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
+      }),
+  },
+  {
+    name: i18n.SOURCE,
+    sortable: false,
+    truncateText: true,
+    render: ({ node }) => (
+      <>
+        {getRowItemDraggable({
+          rowItem: getOr(null, 'source.ip[0]', node),
+          attrName: 'source.ip',
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
+          render: item => <IPDetailsLink ip={item} />,
+        })}
+        :{getOrEmptyTag('source.port', node)}
       </>
     ),
   },
   {
     name: i18n.DESTINATION,
-    sortable: true,
+    sortable: false,
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('destination.ip[0]', node)}:{getOrEmptyTag('destination.port', node)}
+        {getRowItemDraggable({
+          rowItem: getOr(null, 'destination.ip[0]', node),
+          attrName: 'destination.ip',
+          idPrefix: `host-${pageType}-events-table-${node._id}`,
+          render: item => <IPDetailsLink ip={item} />,
+        })}
+        :{getOrEmptyTag('destination.port', node)}
       </>
     ),
   },
   {
-    name: i18n.LOCATION,
-    sortable: true,
+    name: i18n.MESSAGE,
+    sortable: false,
     truncateText: true,
-    render: ({ node }) => (
-      <>
-        {getOrEmptyTag('geo.region_name', node)} : {getOrEmptyTag('geo.country_iso_code', node)}
-      </>
-    ),
+    width: '25%',
+    render: ({ node }) => {
+      const message = getOr(null, 'message[0]', node);
+      const overflowLength = 50;
+      return message != null
+        ? getRowItemDraggable({
+            rowItem: message,
+            attrName: 'message',
+            idPrefix: `host-${pageType}-events-table-${node._id}`,
+            dragDisplayValue: message.substring(0, overflowLength),
+            render: () => (
+              <>
+                {message.substring(0, overflowLength)}
+                {message.length > overflowLength && (
+                  <EuiToolTip content={message}>
+                    <MoreRowItems type="boxesHorizontal" />
+                  </EuiToolTip>
+                )}
+              </>
+            ),
+          })
+        : getEmptyTagValue();
+    },
   },
 ];
-
-export const formatIpSafely = (path: string, data: Ecs): JSX.Element => {
-  if (has(path, data)) {
-    const txt = get(path, data);
-    if (txt === '') {
-      return getEmptyStringTag();
-    } else {
-      const ip = txt && txt.slice ? txt.slice(0, 45) : txt;
-      return <IPDetailsLink ip={ip} />;
-    }
-  }
-  return getEmptyTagValue();
-};
