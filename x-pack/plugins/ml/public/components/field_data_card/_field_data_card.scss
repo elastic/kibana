@@ -68,6 +68,13 @@
     display: inline-block;
   }
 
+  .stat.min.value, .stat.max.value, .stat.median.value {
+    font-size: $euiFontSizeS;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .not-exist-message {
     padding: 50px 30px 0px 30px;
     text-align: center;

@@ -12,11 +12,10 @@
 */
 import numeral from '@elastic/numeral';
 
-export function abbreviateWholeNumber({ value, maxDigits = 3, useDecimalFormat = false }) {
-  const format = (useDecimalFormat ? '0.0a' : '0a');
+export function abbreviateWholeNumber(value, maxDigits = 3) {
   if (Math.abs(value) < Math.pow(10, maxDigits)) {
     return value;
   } else {
-    return numeral(value).format(format);
+    return numeral(value).format('0a');
   }
 }

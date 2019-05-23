@@ -10,20 +10,21 @@ import React from 'react';
 import {
   EuiToolTip
 } from '@elastic/eui';
-import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
 
-const MAX_DIGITS = 9;
+
+const MAX_CHARS = 12;
 
 export function DisplayValue({ value }) {
+  const length = String(value).length;
   let formattedValue;
 
-  if (Math.abs(value) < Math.pow(10, MAX_DIGITS)) {
+  if (length <= MAX_CHARS) {
     formattedValue = value;
   } else {
     formattedValue = (
       <EuiToolTip content={value}>
         <span>
-          {abbreviateWholeNumber({ value, maxDigits: MAX_DIGITS, useDecimalFormat: true })}
+          {value}
         </span>
       </EuiToolTip>
     );

@@ -94,13 +94,13 @@ export function FieldStatsCard({ field }) {
                         </div>
                       </div>
                       <div>
-                        <div className="stat min">
+                        <div className="stat min value">
                           <DisplayValue value={field.min_value}/>
                         </div>
-                        <div className="stat median">
+                        <div className="stat median value">
                           <DisplayValue value={field.median_value}/>
                         </div>
-                        <div className="stat max">
+                        <div className="stat max value">
                           <DisplayValue value={field.max_value}/>
                         </div>
                       </div>
