@@ -6,17 +6,6 @@
 
 import expect from '@kbn/expect';
 import { summarizeCustomElements, CustomElementDocument } from '../custom_element_collector';
-import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
-
-const getMockResponse = (mocks: any[] = []): any => ({
-  hits: {
-    hits: mocks.map(customElement => ({
-      _source: {
-        [CUSTOM_ELEMENT_TYPE]: customElement,
-      },
-    })),
-  },
-});
 
 function mockCustomElement(...nodeExpressions: string[]): CustomElementDocument {
   return {

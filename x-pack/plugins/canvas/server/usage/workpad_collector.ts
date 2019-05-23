@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 // @ts-ignore Library missing definitions
 import { fromExpression } from '@kbn/interpreter/common';
