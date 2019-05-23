@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
 import {
   EsProvider,
   EsSupertestWithoutAuthProvider,
@@ -62,6 +63,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
       ],
     },
     esTestCluster: {

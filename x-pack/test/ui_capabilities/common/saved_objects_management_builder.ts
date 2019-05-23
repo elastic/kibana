@@ -56,6 +56,7 @@ export class SavedObjectsManagementBuilder {
       'siem-ui-timeline',
       'siem-ui-timeline-note',
       'siem-ui-timeline-pinned-event',
+      'action',
     ];
   }
 
