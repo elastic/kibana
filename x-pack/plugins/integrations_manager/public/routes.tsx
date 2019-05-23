@@ -5,8 +5,17 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ID } from '../common/constants';
+import {
+  EuiButtonEmpty,
+  EuiCard,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { generatePath, Link } from 'react-router-dom';
+import { APP } from '../common/constants';
 
 interface IntegrationInfo {
   description: string;
@@ -27,10 +36,6 @@ interface MatchPackage {
     };
   };
 }
-
-const relativeHashPath = (path: string) => `${ID}#${path}`;
-const getDetailPageUrl = ({ name, version }: IntegrationKeySettings) =>
-  relativeHashPath(`/detail/${name}-${version}`);
 
 // TODO: figure how to call Intgerations Manager API (which does fetch or return local/cached)
 // TODO: deal with async data issue (no data -> fetch -> show data)
@@ -70,14 +75,14 @@ const Home = () => {
 const IntegrationCard = ({ description, name, version, icon }: IntegrationInfo) => (
   <EuiCard
     title={name}
-    // { 'how to do a relative link to page/view?' }
-    href={getDetailPageUrl({ name, version })}
     description={description}
-    footer={`Version ${version}`}
-    selectable={{
-      isSelected: false,
-      onClick: () => {},
-    }}
+    footer={
+      <EuiButtonEmpty>
+        <Link to={generatePath(APP.DETAIL_VIEW, { pkgkey: `${name}-${version}` })}>
+          More Details
+        </Link>
+      </EuiButtonEmpty>
+    }
   />
 );
 
@@ -98,10 +103,10 @@ const Detail = ({ match }: MatchPackage) => {
 };
 
 export const routes = [
-  { exact: true, path: '/', component: Home, breadcrumb: 'Home' },
+  { exact: true, path: APP.LIST_VIEW, component: Home, breadcrumb: 'Home' },
   {
     exact: true,
-    path: '/detail/:pkgkey',
+    path: APP.DETAIL_VIEW,
     component: Detail,
     breadcrumb: 'Example Other Page',
   },
