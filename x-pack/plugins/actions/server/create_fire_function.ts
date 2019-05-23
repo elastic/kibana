@@ -15,14 +15,17 @@ interface CreateFireFunctionOptions {
 interface FireOptions {
   id: string;
   params: Record<string, any>;
+  namespace?: string;
 }
 
 export function createFireFunction({
   actionTypeService,
   encryptedSavedObjectsPlugin,
 }: CreateFireFunctionOptions) {
-  return async function fire({ id, params }: FireOptions) {
-    const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', id);
+  return async function fire({ id, params, namespace }: FireOptions) {
+    const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', id, {
+      namespace,
+    });
     const mergedActionTypeConfig = {
       ...action.attributes.actionTypeConfig,
       ...action.attributes.actionTypeConfigSecrets,
