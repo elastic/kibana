@@ -26,29 +26,28 @@ import { getInterpreter } from 'plugins/interpreter/interpreter';
 // @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
 import { ExpressionExecutorService, ExpressionExecutorSetup } from './expression_executor';
-
-import { SearchBarService } from './search_bar';
-import { QueryBarService } from './query_bar';
+import { SearchService, SearchSetup } from './search';
+import { QueryService, QuerySetup } from './query';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
-  private readonly searchBar: SearchBarService;
-  private readonly queryBar: QueryBarService;
+  private readonly search: SearchService;
+  private readonly query: QueryService;
   private readonly expressionExecutor: ExpressionExecutorService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
-    this.queryBar = new QueryBarService();
-    this.searchBar = new SearchBarService();
+    this.query = new QueryService();
+    this.search = new SearchService();
     this.expressionExecutor = new ExpressionExecutorService();
   }
 
   public setup() {
     return {
       indexPatterns: this.indexPatterns.setup(),
-      search: this.searchBar.setup(),
-      query: this.queryBar.setup(),
+      search: this.search.setup(),
+      query: this.query.setup(),
       expressionExecutor: this.expressionExecutor.setup(null, {
         interpreter: {
           getInterpreter,
@@ -60,8 +59,8 @@ class DataPlugin {
 
   public stop() {
     this.indexPatterns.stop();
-    this.searchBar.stop();
-    this.queryBar.stop();
+    this.search.stop();
+    this.query.stop();
     this.expressionExecutor.stop();
   }
 }
@@ -77,6 +76,8 @@ export const data = new DataPlugin().setup();
 export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
   expressionExecutor: ExpressionExecutorSetup;
+  search: SearchSetup;
+  query: QuerySetup;
 }
 
 export { ExpressionExecutorSetup } from './expression_executor';
