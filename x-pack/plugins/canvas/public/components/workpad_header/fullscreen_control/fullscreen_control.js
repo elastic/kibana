@@ -16,6 +16,10 @@ export class FullscreenControl extends React.PureComponent {
     if (enterFullscreen || exitFullscreen) {
       this.toggleFullscreen();
     }
+
+    if (action === 'PAGE_CYCLE_TOGGLE') {
+      this.props.enableAutoplay(!this.props.autoplayEnabled);
+    }
   };
 
   toggleFullscreen = () => {

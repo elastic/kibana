@@ -23,7 +23,8 @@ export default function exploreRepositoryFunctonalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/35944
+  describe.skip('Explore Repository', () => {
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -79,6 +80,27 @@ export default function exploreRepositoryFunctonalTests({
 
         // Enter the first repository from the admin page.
         await testSubjects.click(repositoryListSelector);
+      });
+
+      it('open a file that does not exists should load tree', async () => {
+        // open a file that does not exists
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST`;
+        await browser.get(url);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(
+            currentUrl.indexOf(
+              'github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST'
+            )
+          ).to.greaterThan(0);
+        });
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src-doc')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-test')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-views')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-File-package.json')).ok();
+        });
       });
 
       it('tree should be loaded', async () => {

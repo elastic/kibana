@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { CoreSetup } from 'src/core/server';
+import { InternalCoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getChartsData } from '../lib/transactions/charts';
@@ -19,7 +19,7 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initTransactionGroupsApi(core: CoreSetup) {
+export function initTransactionGroupsApi(core: InternalCoreSetup) {
   const { server } = core.http;
 
   server.route({

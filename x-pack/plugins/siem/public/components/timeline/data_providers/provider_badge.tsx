@@ -10,6 +10,8 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
+
 import * as i18n from './translations';
 
 const ProviderBadgeStyled = styled(EuiBadge)`
@@ -42,10 +44,11 @@ interface ProviderBadgeProps {
   providerId: string;
   togglePopover?: () => void;
   val: string | number;
+  operator: QueryOperator;
 }
 
 export const ProviderBadge = pure<ProviderBadgeProps>(
-  ({ deleteProvider, field, isEnabled, isExcluded, providerId, togglePopover, val }) => {
+  ({ deleteProvider, field, isEnabled, isExcluded, operator, providerId, togglePopover, val }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = (
       event: React.MouseEvent<HTMLButtonElement>
     ) => {
@@ -83,8 +86,16 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         data-test-subj="providerBadge"
       >
         {prefix}
-        <span className="field-value">{field}: </span>
-        <span className="field-value">&quot;{val}&quot;</span>
+        {operator !== EXISTS_OPERATOR ? (
+          <>
+            <span className="field-value">{field}: </span>
+            <span className="field-value">&quot;{val}&quot;</span>
+          </>
+        ) : (
+          <span className="field-value">
+            {field} {i18n.EXISTS_LABEL}
+          </span>
+        )}
       </ProviderBadgeStyled>
     );
   }

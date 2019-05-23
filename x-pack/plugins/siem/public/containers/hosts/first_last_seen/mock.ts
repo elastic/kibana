@@ -30,7 +30,11 @@ export const mockFirstLastSeenHostQuery: MockedProvidedQuery[] = [
   {
     request: {
       query: HostFirstLastSeenGqlQuery,
-      variables: { sourceId: 'default', hostName: 'kibana-siem' },
+      variables: {
+        sourceId: 'default',
+        hostName: 'kibana-siem',
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+      },
     },
     result: {
       data: {

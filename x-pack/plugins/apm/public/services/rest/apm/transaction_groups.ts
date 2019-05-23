@@ -8,27 +8,28 @@ import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/chart
 import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
 import { callApi } from '../callApi';
-import { getEncodedEsQuery } from './apm';
+import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
+import { UIFilters } from '../../../../typings/ui-filters';
 
 export async function loadTransactionList({
   serviceName,
   start,
   end,
-  kuery,
+  uiFilters,
   transactionType
 }: {
   serviceName: string;
   start: string;
   end: string;
   transactionType: string;
-  kuery: string | undefined;
+  uiFilters: UIFilters;
 }) {
   return await callApi<TransactionListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
@@ -41,7 +42,7 @@ export async function loadTransactionDistribution({
   transactionType,
   transactionId,
   traceId,
-  kuery
+  uiFilters
 }: {
   serviceName: string;
   start: string;
@@ -50,7 +51,7 @@ export async function loadTransactionDistribution({
   transactionName: string;
   transactionId?: string;
   traceId?: string;
-  kuery: string | undefined;
+  uiFilters: UIFilters;
 }) {
   return callApi<ITransactionDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
@@ -61,7 +62,7 @@ export async function loadTransactionDistribution({
       end,
       transactionId,
       traceId,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
@@ -70,7 +71,7 @@ export async function loadTransactionDetailsCharts({
   serviceName,
   start,
   end,
-  kuery,
+  uiFilters,
   transactionType,
   transactionName
 }: {
@@ -79,7 +80,7 @@ export async function loadTransactionDetailsCharts({
   end: string;
   transactionType: string;
   transactionName: string;
-  kuery: string | undefined;
+  uiFilters: UIFilters;
 }) {
   return callApi<TimeSeriesAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
@@ -88,7 +89,7 @@ export async function loadTransactionDetailsCharts({
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
@@ -97,14 +98,14 @@ export async function loadTransactionOverviewCharts({
   serviceName,
   start,
   end,
-  kuery,
+  uiFilters,
   transactionType
 }: {
   serviceName: string;
   start: string;
   end: string;
   transactionType?: string;
-  kuery: string | undefined;
+  uiFilters: UIFilters;
 }) {
   const pathname = transactionType
     ? `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/charts`
@@ -115,7 +116,7 @@ export async function loadTransactionOverviewCharts({
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
