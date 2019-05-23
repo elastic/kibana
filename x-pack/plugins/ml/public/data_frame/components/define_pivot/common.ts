@@ -6,7 +6,7 @@
 
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 
@@ -63,7 +63,7 @@ function getDefaultGroupByConfig(
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
-export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
+export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
   const groupByOptionsData: PivotGroupByConfigDict = {};
