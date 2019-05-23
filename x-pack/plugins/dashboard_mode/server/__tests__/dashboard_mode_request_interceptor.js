@@ -6,26 +6,23 @@
 
 import expect from '@kbn/expect';
 import Hapi from 'hapi';
-import Chance from 'chance';
 
 import { createDashboardModeRequestInterceptor } from '../dashboard_mode_request_interceptor';
-import * as constantsNS from '../../common/constants';
 
-const chance = new Chance();
+const DASHBOARD_ONLY_MODE_ROLE = 'test_dashboard_only_mode_role';
 
 function setup() {
-  // randomize AUTH_SCOPE_DASHBORD_ONLY_MODE "constant" to ensure it's being used everywhere
-  const authScope = chance.word({ length: 12 });
-  Object.defineProperty(constantsNS, 'AUTH_SCOPE_DASHBORD_ONLY_MODE', {
-    value: authScope,
-    configurable: true,
-  });
-
   const dashboardViewerApp = {
     name: 'dashboardViewerApp'
   };
 
   const server = new Hapi.Server();
+
+  server.decorate('request', 'getUiSettingsService', () => {
+    return {
+      get: () => Promise.resolve([DASHBOARD_ONLY_MODE_ROLE])
+    };
+  });
 
   // attach the extension
   server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));
@@ -53,7 +50,7 @@ function setup() {
     }
   });
 
-  return { server, authScope };
+  return { server };
 }
 
 describe('DashboardOnlyModeRequestInterceptor', () => {
@@ -72,7 +69,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
         const response = await server.inject({
           url: '/app/kibana',
           credentials: {
-            scope: ['foo', 'bar']
+            roles: ['foo', 'bar']
           }
         });
 
@@ -91,7 +88,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
         const response = await server.inject({
           url: '/foo/bar',
           credentials: {
-            scope: ['foo', 'bar']
+            roles: ['foo', 'bar']
           }
         });
 
@@ -108,11 +105,11 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
   describe('request has correct auth scope scope', () => {
     describe('non-kibana app route', () => {
       it('responds with 404', async () => {
-        const { server, authScope } = setup();
+        const { server } = setup();
         const response = await server.inject({
           url: '/app/foo',
           credentials: {
-            scope: [authScope]
+            roles: [DASHBOARD_ONLY_MODE_ROLE]
           }
         });
 
@@ -124,11 +121,11 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
     function testRendersDashboardViewerApp(url) {
       describe(`requests to url:"${url}"`, () => {
         it('renders the dashboardViewerApp instead', async () => {
-          const { server, authScope } = setup();
+          const { server } = setup();
           const response = await server.inject({
             url: '/app/kibana',
             credentials: {
-              scope: [authScope]
+              roles: [DASHBOARD_ONLY_MODE_ROLE]
             }
           });
 

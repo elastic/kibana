@@ -6,7 +6,6 @@
 
 import { Legacy } from 'kibana';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { AuthScopeService, ScopesGetter } from '../auth_scope_service';
 import { getErrorStatusCode } from '../errors';
 import {
   AuthenticationProviderOptions,
@@ -133,11 +132,7 @@ class Authenticator {
    * @param authScope AuthScopeService instance.
    * @param session Session instance.
    */
-  constructor(
-    private readonly server: Legacy.Server,
-    private readonly authScope: AuthScopeService,
-    private readonly session: Session
-  ) {
+  constructor(private readonly server: Legacy.Server, private readonly session: Session) {
     const config = this.server.config();
     const authProviders = config.get<string[]>('xpack.security.authProviders');
     if (authProviders.length === 0) {
@@ -210,11 +205,7 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
-        return AuthenticationResult.succeeded({
-          ...authenticationResult.user,
-          // Complement user returned from the provider with scopes.
-          scope: await this.authScope.getForRequestAndUser(request, authenticationResult.user!),
-        } as any);
+        return AuthenticationResult.succeeded(authenticationResult.user as any);
       } else if (authenticationResult.redirected()) {
         return authenticationResult;
       }
@@ -295,8 +286,7 @@ class Authenticator {
 
 export async function initAuthenticator(server: Legacy.Server) {
   const session = await Session.create(server);
-  const authScope = new AuthScopeService();
-  const authenticator = new Authenticator(server, authScope, session);
+  const authenticator = new Authenticator(server, session);
 
   const loginAttempts = new WeakMap();
   server.decorate('request', 'loginAttempt', function(this: Legacy.Request) {
@@ -310,9 +300,6 @@ export async function initAuthenticator(server: Legacy.Server) {
   server.expose('authenticate', (request: Legacy.Request) => authenticator.authenticate(request));
   server.expose('deauthenticate', (request: Legacy.Request) =>
     authenticator.deauthenticate(request)
-  );
-  server.expose('registerAuthScopeGetter', (scopeExtender: ScopesGetter) =>
-    authScope.registerGetter(scopeExtender)
   );
 
   server.expose('isAuthenticated', async (request: Legacy.Request) => {
