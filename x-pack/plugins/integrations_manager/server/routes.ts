@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ID } from '../common/constants';
+import { ID, API } from '../common/constants';
 import * as RS from './registry';
-const API_ROOT = `/api/${ID}`;
 
 // Manager public API paths (currently essentially a proxy to registry service)
-export const getInfoUrl = ({ name, version }) => `${API_ROOT}/package/${name}-${version}`;
-
 export const routes = [
   {
     method: 'GET',
-    path: `${API_ROOT}/list`,
+    path: API.FETCH_LIST,
     options: {
       tags: [`access:${ID}`],
     },
@@ -22,7 +19,7 @@ export const routes = [
   },
   {
     method: 'GET',
-    path: `${API_ROOT}/package/{pkgkey}`,
+    path: API.FETCH_INFO,
     options: {
       tags: [`access:${ID}`],
     },
@@ -30,7 +27,7 @@ export const routes = [
   },
   {
     method: 'GET',
-    path: `${API_ROOT}/package/{pkgkey}/get`,
+    path: API.FETCH_FILE,
     options: {
       tags: [`access:${ID}`],
     },

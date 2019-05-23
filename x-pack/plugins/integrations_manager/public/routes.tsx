@@ -5,11 +5,32 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ID } from '../common/constants';
 
+interface IntegrationInfo {
+  description: string;
+  name: string;
+  version: string;
+  icon: string;
+}
+
+interface IntegrationKeySettings {
+  name: string;
+  version: string;
+}
+
+interface MatchPackage {
+  match: {
+    params: {
+      pkgkey: string;
+    };
+  };
+}
+
 const relativeHashPath = (path: string) => `${ID}#${path}`;
-const getDetailPageUrl = ({ name, version }) => relativeHashPath(`/detail/${name}-${version}`);
+const getDetailPageUrl = ({ name, version }: IntegrationKeySettings) =>
+  relativeHashPath(`/detail/${name}-${version}`);
 
 // TODO: figure how to call Intgerations Manager API (which does fetch or return local/cached)
 // TODO: deal with async data issue (no data -> fetch -> show data)
@@ -31,9 +52,13 @@ const listResponse = [
 const Home = () => {
   return (
     <EuiPanel>
+      <EuiTitle>
+        <h1>Elastic Integrations Manager</h1>
+      </EuiTitle>
+      <EuiSpacer />
       <EuiFlexGrid gutterSize="l" columns={3}>
         {listResponse.map(props => (
-          <EuiFlexItem>
+          <EuiFlexItem key={`${props.name}-${props.version}`}>
             <IntegrationCard {...props} />
           </EuiFlexItem>
         ))}
@@ -42,7 +67,7 @@ const Home = () => {
   );
 };
 
-const IntegrationCard = ({ description, name, version, icon }) => (
+const IntegrationCard = ({ description, name, version, icon }: IntegrationInfo) => (
   <EuiCard
     title={name}
     // { 'how to do a relative link to page/view?' }
@@ -56,8 +81,9 @@ const IntegrationCard = ({ description, name, version, icon }) => (
   />
 );
 
-const Detail = ({ match }) => {
-  const isDetail = ({ name, version }) => `${name}-${version}` === match.params.pkgkey;
+const Detail = ({ match }: MatchPackage) => {
+  const isDetail = ({ name, version }: IntegrationKeySettings) =>
+    `${name}-${version}` === match.params.pkgkey;
   const detail = listResponse.filter(isDetail)[0];
   const { description, name, version, icon } = detail;
 
