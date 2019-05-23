@@ -71,37 +71,45 @@ There are two parts to this proposal. The first is the handler interface
 itself, and the second is the interface that a service owner implements to make
 their handlers extensible.
 
-## Handler interface
+## Handler Context
 
 ```ts
-interface HandlerContext {
-  core?: Record<string, unknown>;
-  [serviceName: string]: Record<string, unknown>;
+interface Context {
+  [contextName: string]: unknown;
 }
 
-type Handler = async (HandlerContext, ...args: unknown[]) => unknown;
+type Handler = (context: Partial<Context>, ...args: unknown[]) => Promise<unknown>;
 ```
 
-## Handler creator interface
+- `args` in this example is specific to the handler type, for instance in a
+  http route handler, this would include the incoming request object.
+- The context object is marked as `Partial<Context>` because the contexts
+  available will vary depending on which plugins are enabled.
+
+## Registering new contexts
 
 ```ts
-type CapabilityCreator = async (...args: unknown[]) => Record<string, unknown>;
+type ContextProvider<T extends keyof Context> = (...args: unknown[]) => Promise<Context[T]>;
 
-interface HandlerCreator {
-  registerCapability(serviceName: string, CapabilityCreator);
+interface HandlerService {
+  registerContext<T extends keyof Context>(contextName: T, provider: ContextProvider<T>): void;
 }
 ```
 
-Note: The `HandlerCreator` is defined as a literal interface in this document,
-but in practice this interface is just a guide for the pattern of registering
-capabilities. Certain services may have multiple different types of handlers,
-so they may choose not to use the generic name `registerCapability` in favor of
-something more explicit.
+- `args` in this example is specific to the handler type, for instance in a http
+  route handler, this would include the incoming request object. It would not
+  include the results from the other context providers in order to keep
+  providers from having dependencies on one another.
+- The `HandlerService` is defined as a literal interface in this document, but
+  in practice this interface is just a guide for the pattern of registering
+  context values. Certain services may have multiple different types of
+  handlers, so they may choose not to use the generic name `registerContext` in
+  favor of something more explicit.
 
 ## End to end example
 
 ```js
-http.router.registerRequestCapability('elasticsearch', async request => {
+http.router.registerRequestContext('elasticsearch', async request => {
   const client = await core.elasticsearch.client$.toPromise();
   return client.child({
     headers: { authorization: request.headers.authorization },
@@ -116,12 +124,75 @@ http.router.route({
 });
 ```
 
+## Types
+
+While services that implement this pattern will not be able to define a static
+type, plugins should be able to reopen a type to extend it with whatever context
+it provides. This allows the `registerContext` function to be type-safe.
+For example, if the HTTP service defined a setup type like this:
+
+```ts
+// http_service.ts
+interface RequestContext {
+  [contextName: string]: unknown;
+}
+
+interface HttpSetup {
+  // ...
+
+  registerRequestContext<T extends keyof RequestContext>(
+    contextName: T,
+    provider: (request: Request) => RequestContext[T]
+  ): void;
+
+  // ...
+}
+```
+
+A consuming plugin could extend the `RequestContext` to be type-safe like this:
+
+```ts
+// my_plugin/server/index.ts
+import { RequestContext } from '../../core/server';
+
+// The plugin *has to* add a new property to the RequestContext interface from
+// core to represent whatever type its context provider returns. This will be
+// available to any module that imports this type and will ensure that the
+// registered context provider returns the expected type.
+declare module "../../core/server" {
+  interface RequestContext {
+    myPlugin?: {  // should be optional because this plugin may be disabled.
+      getFoo(): string;
+    }
+  }
+}
+
+class MyPlugin {
+  setup(core) {
+    // This will be type-safe!
+    core.http.registerRequestContext('myPlugin', (request) => ({
+      getFoo() { return 'foo' }
+    }))
+  }
+};
+```
+
 # Drawbacks
 
-- Since the service names are passed as strings but accessed as properties,
-  it's unclear how best to type these context objects. We can expose types at
-  the core and plugin level, but consumers of those types might need to compose
-  them together manually.
+- Since the context properties that are present changes if plugins are disabled,
+  they are all marked as optional properties which makes consuming the context
+  type awkward. We can expose types at the core and plugin level, but consumers
+  of those types might need to define which properties are present manually to
+  match their required plugin dependencies. Example:
+  ```ts
+  type RequiredDependencies = 'elasticsearch';
+  type OptionalDependencies = 'data' | 'telemetry';
+  type KnownContext = Required<Pick<RequestContext, RequiredDependencies>> & Pick<RequestContext, OptionalDependencies>;
+  // => { elasticsearch: ESClient, data?: Data, telemetry?: Telemetry };
+  ```
+- Extending types with `declare module` merging is not a typical pattern for
+  developers and it's not immediately obvious that you need to this to call the
+  `registerContext` function.
 - The longer we wait to implement this, the more refactoring of newer code
   we'll need to do to roll this out.
 - It's a new formal concept and set of terminology that developers will need to
