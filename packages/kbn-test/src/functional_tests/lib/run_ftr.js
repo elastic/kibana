@@ -21,7 +21,7 @@ import { FunctionalTestRunner, readConfigFile } from '../../../../../src/functio
 import { CliError } from './run_cli';
 
 async function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
-  const config = await readConfigFile(configPath);
+  const config = await readConfigFile(log, configPath);
 
   return new FunctionalTestRunner(log, configPath, {
     mochaOpts: {
