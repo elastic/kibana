@@ -80,7 +80,7 @@ export function registerStatsApi(kbnServer, server, config) {
             return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
           }
 
-          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve();
+          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
           try {
             const [ usage, clusterUuid ] = await Promise.all([
               usagePromise,
@@ -88,7 +88,7 @@ export function registerStatsApi(kbnServer, server, config) {
             ]);
 
             let modifiedUsage = usage;
-            if (isLegacy && modifiedUsage) {
+            if (isLegacy) {
               // In an effort to make telemetry more easily augmented, we need to ensure
               // we can passthrough the data without every part of the process needing
               // to know about the change; however, to support legacy use cases where this
