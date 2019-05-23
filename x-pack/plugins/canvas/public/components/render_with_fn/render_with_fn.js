@@ -120,9 +120,11 @@ export class RenderWithFn extends React.Component {
   };
 
   _shouldFullRerender = prevProps => {
-    // TODO: What a shitty hack. None of these props should update when you move the element.
-    // This should be fixed at a higher level.
+    // required to stop re-renders on element move, anything that should
+    // cause a re-render needs to be checked here
+    // TODO: fix props passed in to remove this check
     return (
+      this.props.handlers !== prevProps.handlers ||
       !isEqual(this.props.config, prevProps.config) ||
       !isEqual(this.props.renderFn.toString(), prevProps.renderFn.toString())
     );

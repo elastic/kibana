@@ -106,10 +106,9 @@ const getTlsHandshakesQueryFilter = () => [
 export const buildTlsHandshakeQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    packetbeatAlias,
   },
 }: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
@@ -127,7 +126,7 @@ export const buildTlsHandshakeQuery = ({
 
   const dslQuery = [
     {
-      index: [logAlias, packetbeatAlias],
+      index: defaultIndex,
       allowNoIndices: true,
       ignoreUnavailable: true,
     },

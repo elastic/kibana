@@ -2,7 +2,7 @@
 
 exports[`render symbol tree correctly 1`] = `
 <div
-  className="codeContainer__symbolTree"
+  className="codeContainer__sideTabTree"
 >
   <nav
     className="euiSideNav"

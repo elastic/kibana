@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -126,7 +127,7 @@ export const destroyReact = id => {
 
 uiModules
   .get('apps/management')
-  .directive('kbnManagementApp', function (Private, $location) {
+  .directive('kbnManagementApp', function ($location) {
     return {
       restrict: 'E',
       template: appTemplate,
@@ -171,13 +172,13 @@ uiModules
     };
   });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'management',
-    title: i18n('kbn.management.managementLabel', {
+    title: i18n.translate('kbn.management.managementLabel', {
       defaultMessage: 'Management',
     }),
-    description: i18n('kbn.management.managementDescription', {
+    description: i18n.translate('kbn.management.managementDescription', {
       defaultMessage: 'Your center console for managing the Elastic Stack.',
     }),
     icon: 'managementApp',
