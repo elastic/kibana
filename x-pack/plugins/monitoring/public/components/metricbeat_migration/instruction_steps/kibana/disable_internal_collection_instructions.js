@@ -26,6 +26,35 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
   hasCheckedStatus,
   autoCheckIntervalInMs,
 }) {
+  let restartWarning = null;
+  if (product.isPrimary) {
+    restartWarning = (
+      <Fragment>
+        <EuiSpacer size="s"/>
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.restartWarningTitle',
+            {
+              defaultMessage: 'Warning'
+            }
+          )}
+          color="warning"
+          iconType="help"
+        >
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.restartNote"
+                defaultMessage="This step requires you to restart the Kibana server.
+                Expect to see errors until the server is running again."
+              />
+            </p>
+          </EuiText>
+        </EuiCallOut>
+      </Fragment>
+    );
+  }
+
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.title', {
       defaultMessage: 'Disable the default collection of Kibana monitoring metrics'
@@ -69,27 +98,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
             />
           </p>
         </EuiText>
-        <EuiSpacer size="s"/>
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.restartWarningTitle',
-            {
-              defaultMessage: 'Warning'
-            }
-          )}
-          color="warning"
-          iconType="help"
-        >
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.restartNote"
-                defaultMessage="This step requires you to restart the Kibana server.
-                Expect to see errors until the server is running again."
-              />
-            </p>
-          </EuiText>
-        </EuiCallOut>
+        {restartWarning}
       </Fragment>
     )
   };

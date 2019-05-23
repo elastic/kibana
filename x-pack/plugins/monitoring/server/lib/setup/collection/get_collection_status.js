@@ -248,6 +248,9 @@ function shouldSkipBucket(product, bucket) {
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
  */
 export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
+  const config = req.server.config();
+  const kibanaUuid = config.get('server.uuid');
+
   const PRODUCTS = [
     { name: KIBANA_SYSTEM_ID },
     { name: BEATS_SYSTEM_ID },
@@ -301,6 +304,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
         const { key, by_timestamp: byTimestamp } = bucket;
         if (!map[key]) {
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
+          if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
+            map[key].isPrimary = true;
+          }
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
@@ -337,11 +343,14 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
           const { key, by_timestamp: byTimestamp } = bucket;
           if (!map[key]) {
             if (otherMap[key]) {
-              partiallyMigratedUuidsMap[key] = true;
+              partiallyMigratedUuidsMap[key] = otherMap[key] || {};
               delete otherMap[key];
             }
             else {
-              map[key] = true;
+              map[key] = {};
+              if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
+                map[key].isPrimary = true;
+              }
             }
           }
           if (!isFullyMigrated) {
@@ -359,15 +368,25 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       productStatus.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isInternalCollector: true }
+          [uuid]: {
+            isInternalCollector: true,
+            ...internalCollectorsUuidsMap[uuid]
+          }
         }), {}),
         ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isPartiallyMigrated: true, lastInternallyCollectedTimestamp: internalTimestamps[0] }
+          [uuid]: {
+            isPartiallyMigrated: true,
+            lastInternallyCollectedTimestamp: internalTimestamps[0],
+            ...partiallyMigratedUuidsMap[uuid]
+          }
         }), {}),
         ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isFullyMigrated: true }
+          [uuid]: {
+            isFullyMigrated: true,
+            ...fullyMigratedUuidsMap[uuid]
+          }
         }), {}),
       };
     }
