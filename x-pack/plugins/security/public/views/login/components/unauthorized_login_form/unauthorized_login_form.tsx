@@ -7,7 +7,6 @@ import chrome from 'ui/chrome';
 import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { LoginState } from '../../../../../common/login_state';
 
 interface Props {
   window: any;
@@ -22,7 +21,7 @@ export const UnauthorizedLoginForm = injectI18n((props: Props) => {
   return (
     <EuiPanel>
       <EuiEmptyPrompt
-        iconType="editorStrike"
+        iconType="lock"
         title={
           <h2>
             <FormattedMessage

@@ -6,6 +6,7 @@
 
 import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
+import { initOnPreResponseHandler } from './server/lib/on_pre_response';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
 import { initPublicRolesApi } from './server/routes/api/public/roles';
@@ -33,6 +34,7 @@ import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from './server/lib/optional_plugin';
+import { isAuthorizedKibanaUser } from './server/lib/is_authorized_kibana_user';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -95,6 +97,11 @@ export const security = (kibana) => new kibana.Plugin({
       title: 'Logged out',
       main: 'plugins/security/views/logged_out',
       hidden: true
+    }, {
+      id: 'not_found',
+      title: 'Not found',
+      main: 'plugins/security/views/not_found',
+      hidden: true
     }],
     hacks: [
       'plugins/security/hacks/on_session_timeout',
@@ -108,7 +115,17 @@ export const security = (kibana) => new kibana.Plugin({
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
+        canAccessKibana: true,
       };
+    },
+    replaceInjectedVars: async function (injectedVars, request, server) {
+      if (request.auth && request.auth.credentials) {
+        return {
+          ...injectedVars,
+          canAccessKibana: await isAuthorizedKibanaUser(server.plugins.security.authorization, request),
+        };
+      }
+      return injectedVars;
     }
   },
 
@@ -193,6 +210,8 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     getUserProvider(server);
+
+    initOnPreResponseHandler(server);
 
     await initAuthenticator(server);
     initAuthenticateApi(server);

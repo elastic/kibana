@@ -12,6 +12,14 @@ export const isAuthorizedKibanaUser = async (
   authorizationService: AuthorizationService,
   request: Legacy.Request
 ) => {
+  const { auth } = request;
+  if (auth && auth.credentials) {
+    const { roles = [] } = auth.credentials as Record<string, any>;
+    if (roles.includes('superuser')) {
+      return true;
+    }
+  }
+
   const userPrivileges = await authorizationService.getPrivilegesWithRequest(request);
 
   return userPrivileges.length > 0;

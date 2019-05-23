@@ -21,7 +21,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
   };
 
   const transformRoleFromEs = (role, name) => {
-    const kibanaTransformResult = transformKibanaApplicationsFromEs(role.applications);
+    const kibanaTransformResult = transformKibanaApplicationsFromEs(application, role.applications);
 
     return {
       name,
