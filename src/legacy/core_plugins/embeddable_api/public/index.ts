@@ -21,9 +21,9 @@ export { actionRegistry, Action, ActionContext, IncompatibleActionError } from '
 export {
   APPLY_FILTER_TRIGGER,
   triggerRegistry,
-  Trigger,
   executeTriggerActions,
   CONTEXT_MENU_TRIGGER,
+  attachAction,
 } from './triggers';
 
 export { Container, ContainerInput, ContainerOutput, PanelState, IContainer } from './containers';
@@ -50,6 +50,7 @@ export {
   RefreshConfig,
   ViewMode,
   QueryLanguageType,
+  Trigger,
 } from './types';
 
 export { AddPanelAction, EmbeddablePanel } from './panel';

@@ -74,9 +74,9 @@ test('executeTriggerActions executes a single action mapped to a trigger', async
     title: 'My trigger',
     actionIds: ['test1'],
   };
-  triggerRegistry.registerTrigger(testTrigger);
+  triggerRegistry.set(testTrigger.id, testTrigger);
 
-  actionRegistry.addAction(new TestAction('test1', () => true));
+  actionRegistry.set('test1', new TestAction('test1', () => true));
 
   const context = {
     embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
@@ -95,7 +95,7 @@ test('executeTriggerActions throws an error if the action id does not exist', as
     title: 'My trigger',
     actionIds: ['testaction'],
   };
-  triggerRegistry.registerTrigger(testTrigger);
+  triggerRegistry.set(testTrigger.id, testTrigger);
 
   const context = {
     embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
@@ -110,9 +110,10 @@ test('executeTriggerActions does not execute an incompatible action', async () =
     title: 'My trigger',
     actionIds: ['test1'],
   };
-  triggerRegistry.registerTrigger(testTrigger);
+  triggerRegistry.set(testTrigger.id, testTrigger);
 
-  actionRegistry.addAction(
+  actionRegistry.set(
+    'test1',
     new TestAction('test1', ({ embeddable }) => embeddable.id === 'executeme')
   );
 
@@ -131,10 +132,10 @@ test('executeTriggerActions shows a context menu when more than one action is ma
     title: 'My trigger',
     actionIds: ['test1', 'test2'],
   };
-  triggerRegistry.registerTrigger(testTrigger);
+  triggerRegistry.set(testTrigger.id, testTrigger);
 
-  actionRegistry.addAction(new TestAction('test1', () => true));
-  actionRegistry.addAction(new TestAction('test2', () => true));
+  actionRegistry.set('test1', new TestAction('test1', () => true));
+  actionRegistry.set('test2', new TestAction('test2', () => true));
 
   const context = {
     embeddable: new ContactCardEmbeddable({ id: 'executeme', firstName: 'Stacey', lastName: 'G' }),

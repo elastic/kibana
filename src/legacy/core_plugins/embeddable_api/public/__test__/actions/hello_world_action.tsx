@@ -24,6 +24,7 @@ import { Action, actionRegistry, triggerRegistry } from 'plugins/embeddable_api/
 
 import { EuiFlyout } from '@elastic/eui';
 import { CONTEXT_MENU_TRIGGER } from 'plugins/embeddable_api/index';
+import { attachAction } from '../../triggers/attach_action';
 
 export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
 
@@ -49,11 +50,11 @@ export class HelloWorldAction extends Action {
   }
 }
 
-actionRegistry.addAction(new HelloWorldAction());
+actionRegistry.set(HELLO_WORLD_ACTION_ID, new HelloWorldAction());
 
 // Attaching to CONTEXT_MENU_TRIGGER makes this action appear in the context menu for
 // all embeddables.
-triggerRegistry.attachAction({
+attachAction(triggerRegistry, {
   triggerId: CONTEXT_MENU_TRIGGER,
   actionId: HELLO_WORLD_ACTION_ID,
 });

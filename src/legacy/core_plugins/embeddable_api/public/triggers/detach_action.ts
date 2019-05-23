@@ -17,25 +17,17 @@
  * under the License.
  */
 
-export { attachAction } from './attach_action';
-export { executeTriggerActions } from './execute_trigger_actions';
+import { IRegistry, Trigger } from '../types';
 
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
+export function detachAction(
+  triggerRegistry: IRegistry<Trigger>,
+  { triggerId, actionId }: { triggerId: string; actionId: string }
+) {
+  const trigger = triggerRegistry.get(triggerId);
+  if (!trigger) {
+    throw new Error(`No trigger with is ${triggerId} exists`);
+  }
 
-import { createRegistry } from '../create_registry';
-import { Trigger } from '../types';
-
-export const triggerRegistry = createRegistry<Trigger>();
-
-triggerRegistry.set(CONTEXT_MENU_TRIGGER, {
-  id: CONTEXT_MENU_TRIGGER,
-  title: 'Context menu',
-  actionIds: [],
-});
-
-triggerRegistry.set(APPLY_FILTER_TRIGGER, {
-  id: APPLY_FILTER_TRIGGER,
-  title: 'Filter click',
-  actionIds: [],
-});
+  trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
+  triggerRegistry.set(trigger.id, trigger);
+}

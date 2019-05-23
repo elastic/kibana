@@ -25,6 +25,7 @@ import {
   actionRegistry,
   Action,
   triggerRegistry,
+  attachAction,
   CONTEXT_MENU_TRIGGER,
 } from 'plugins/embeddable_api/index';
 
@@ -61,5 +62,5 @@ class SamplePanelAction extends Action {
   };
 }
 
-actionRegistry.addAction(new SamplePanelAction());
-triggerRegistry.attachAction({ triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelAction' });
+actionRegistry.set('samplePanelAction', new SamplePanelAction());
+attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelAction' });

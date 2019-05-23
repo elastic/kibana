@@ -17,25 +17,24 @@
  * under the License.
  */
 
-export { attachAction } from './attach_action';
-export { executeTriggerActions } from './execute_trigger_actions';
+import { IRegistry } from './types';
 
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
+export const createRegistry = <T>(): IRegistry<T> => {
+  let data = new Map<string, T>();
 
-import { createRegistry } from '../create_registry';
-import { Trigger } from '../types';
+  const get = (id: string) => data.get(id);
+  const set = (id: string, obj: T) => {
+    data.set(id, obj);
+  };
+  const reset = () => {
+    data = new Map<string, T>();
+  };
+  const getAll = () => data;
 
-export const triggerRegistry = createRegistry<Trigger>();
-
-triggerRegistry.set(CONTEXT_MENU_TRIGGER, {
-  id: CONTEXT_MENU_TRIGGER,
-  title: 'Context menu',
-  actionIds: [],
-});
-
-triggerRegistry.set(APPLY_FILTER_TRIGGER, {
-  id: APPLY_FILTER_TRIGGER,
-  title: 'Filter click',
-  actionIds: [],
-});
+  return {
+    get,
+    set,
+    reset,
+    getAll,
+  };
+};

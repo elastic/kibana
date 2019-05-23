@@ -17,6 +17,11 @@
  * under the License.
  */
 
+import { createRegistry } from '../create_registry';
+
 export { Action, ActionContext } from './action';
-export { actionRegistry } from './action_registry';
 export { IncompatibleActionError } from './incompatible_action_error';
+
+import { Action } from './action';
+
+export const actionRegistry = createRegistry<Action>();

@@ -48,10 +48,11 @@ import { EmbeddablePanel } from 'plugins/embeddable_api/panel';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { ContactCardEmbeddableOutput } from '../__test__/embeddables/contact_card';
+import { attachAction } from '../triggers/attach_action';
 
 const editModeAction = new EditModeAction();
-actionRegistry.addAction(editModeAction);
-triggerRegistry.attachAction({
+actionRegistry.set(editModeAction.id, editModeAction);
+attachAction(triggerRegistry, {
   triggerId: CONTEXT_MENU_TRIGGER,
   actionId: editModeAction.id,
 });

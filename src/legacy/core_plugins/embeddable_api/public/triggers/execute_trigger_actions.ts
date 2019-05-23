@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Action, actionRegistry } from '../actions';
+import { triggerRegistry } from '../triggers';
 import { openContextMenu } from '../context_menu_actions';
 import {
   buildEuiContextMenuPanels,
@@ -25,6 +26,7 @@ import {
 } from '../context_menu_actions';
 import { IEmbeddable } from '../embeddables';
 import { trackUiMetric } from '../../../ui_metric/public';
+import { getActionsForTrigger } from '../get_actions_for_trigger';
 
 export async function executeTriggerActions(
   triggerId: string,
@@ -37,7 +39,9 @@ export async function executeTriggerActions(
   }
 ) {
   trackUiMetric('EmbeddableAPI', 'executeTriggerActions');
-  const actions = await actionRegistry.getActionsForTrigger(triggerId, { embeddable });
+  const actions = await getActionsForTrigger(actionRegistry, triggerRegistry, triggerId, {
+    embeddable,
+  });
 
   if (actions.length > 1) {
     const contextMenuPanel = new ContextMenuPanel({

@@ -26,7 +26,7 @@ import {
   buildEuiContextMenuPanels,
 } from '../context_menu_actions';
 
-import { CONTEXT_MENU_TRIGGER } from '../triggers';
+import { CONTEXT_MENU_TRIGGER, triggerRegistry } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import { Action } from '../actions';
 import { ViewMode } from '../types';
@@ -38,6 +38,7 @@ import { PanelHeader } from './panel_header/panel_header';
 import { actionRegistry } from '../actions';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from './panel_header/panel_actions/edit_panel_action';
+import { getActionsForTrigger } from '../get_actions_for_trigger';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
@@ -150,9 +151,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private getPanels = async () => {
     let panels: EuiContextMenuPanelDescriptor[] = [];
 
-    const actions = await actionRegistry.getActionsForTrigger(CONTEXT_MENU_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+    const actions = await getActionsForTrigger(
+      actionRegistry,
+      triggerRegistry,
+      CONTEXT_MENU_TRIGGER,
+      {
+        embeddable: this.props.embeddable,
+      }
+    );
 
     const contextMenuPanel = new ContextMenuPanel({
       title: 'Options',

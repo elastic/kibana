@@ -24,9 +24,10 @@ import { IEmbeddable } from '../embeddables';
 import { APPLY_FILTER_TRIGGER, triggerRegistry } from '../triggers';
 import { Filter } from '../types';
 import { Action, ActionContext } from './action';
-import { actionRegistry } from './action_registry';
+import { actionRegistry } from '../actions';
 import { IncompatibleActionError } from './incompatible_action_error';
 import { IContainer } from '../containers/i_container';
+import { attachAction } from '../triggers/attach_action';
 
 interface ApplyFilterContainerInput extends ContainerInput {
   filters: Filter[];
@@ -86,11 +87,11 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
 }
 
 const applyFilterAction = new ApplyFilterAction();
-if (!actionRegistry.getAction(applyFilterAction.id)) {
-  actionRegistry.addAction(new ApplyFilterAction());
+if (!actionRegistry.get(applyFilterAction.id)) {
+  actionRegistry.set(APPLY_FILTER_ACTION, new ApplyFilterAction());
 }
 
-triggerRegistry.attachAction({
+attachAction(triggerRegistry, {
   triggerId: APPLY_FILTER_TRIGGER,
   actionId: APPLY_FILTER_ACTION,
 });

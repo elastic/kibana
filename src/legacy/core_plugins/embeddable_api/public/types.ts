@@ -17,6 +17,21 @@
  * under the License.
  */
 
+export interface Trigger {
+  id: string;
+  title?: string;
+  description?: string;
+  actionIds: string[];
+}
+
+// TODO: use the official base Registry interface when available
+export interface IRegistry<T> {
+  get(id: string): T | undefined;
+  getAll(): Map<string, T>;
+  set(id: string, item: T): void;
+  reset(): void;
+}
+
 export interface PropertySpec {
   displayName: string;
   accessPath: string;

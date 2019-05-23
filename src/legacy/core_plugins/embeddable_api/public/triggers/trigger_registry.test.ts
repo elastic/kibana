@@ -26,6 +26,8 @@ jest.mock('ui/metadata', () => ({
 
 import { triggerRegistry } from '../triggers';
 import { HELLO_WORLD_ACTION_ID } from '../__test__/';
+import { attachAction } from './attach_action';
+import { detachAction } from './detach_action';
 
 beforeAll(() => {
   triggerRegistry.reset();
@@ -41,14 +43,14 @@ test('TriggerRegistry adding and getting a new trigger', async () => {
     title: 'My trigger',
     actionIds: ['123'],
   };
-  triggerRegistry.registerTrigger(testTrigger);
+  triggerRegistry.set(testTrigger.id, testTrigger);
 
-  expect(triggerRegistry.getTrigger('MYTRIGGER')).toBe(testTrigger);
+  expect(triggerRegistry.get('MYTRIGGER')).toBe(testTrigger);
 });
 
 test('TriggerRegistry attach a trigger to an action', async () => {
-  triggerRegistry.attachAction({ triggerId: 'MYTRIGGER', actionId: HELLO_WORLD_ACTION_ID });
-  const trigger = triggerRegistry.getTrigger('MYTRIGGER');
+  attachAction(triggerRegistry, { triggerId: 'MYTRIGGER', actionId: HELLO_WORLD_ACTION_ID });
+  const trigger = triggerRegistry.get('MYTRIGGER');
   expect(trigger).toBeDefined();
   if (trigger) {
     expect(trigger.actionIds).toEqual(['123', HELLO_WORLD_ACTION_ID]);
@@ -56,8 +58,8 @@ test('TriggerRegistry attach a trigger to an action', async () => {
 });
 
 test('TriggerRegistry dettach a trigger from an action', async () => {
-  triggerRegistry.detachAction({ triggerId: 'MYTRIGGER', actionId: HELLO_WORLD_ACTION_ID });
-  const trigger = triggerRegistry.getTrigger('MYTRIGGER');
+  detachAction(triggerRegistry, { triggerId: 'MYTRIGGER', actionId: HELLO_WORLD_ACTION_ID });
+  const trigger = triggerRegistry.get('MYTRIGGER');
   expect(trigger).toBeDefined();
   if (trigger) {
     expect(trigger.actionIds).toEqual(['123']);
@@ -66,12 +68,12 @@ test('TriggerRegistry dettach a trigger from an action', async () => {
 
 test('TriggerRegistry dettach an invalid trigger from an action throws an error', async () => {
   expect(() =>
-    triggerRegistry.detachAction({ triggerId: 'i do not exist', actionId: HELLO_WORLD_ACTION_ID })
+    detachAction(triggerRegistry, { triggerId: 'i do not exist', actionId: HELLO_WORLD_ACTION_ID })
   ).toThrowError();
 });
 
 test('TriggerRegistry attach an invalid trigger from an action throws an error', async () => {
   expect(() =>
-    triggerRegistry.attachAction({ triggerId: 'i do not exist', actionId: HELLO_WORLD_ACTION_ID })
+    attachAction(triggerRegistry, { triggerId: 'i do not exist', actionId: HELLO_WORLD_ACTION_ID })
   ).toThrowError();
 });

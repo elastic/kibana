@@ -24,7 +24,6 @@ import {
   embeddableFactories,
   EmbeddableFactory,
   ErrorEmbeddable,
-  triggerRegistry,
   Container,
 } from 'plugins/embeddable_api/index';
 import chrome from 'ui/chrome';
@@ -118,11 +117,3 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 }
 
 embeddableFactories.registerFactory(new SearchEmbeddableFactory());
-
-export const SEARCH_ROW_CLICK_TRIGGER = 'SEARCH_ROW_CLICK_TRIGGER';
-
-triggerRegistry.registerTrigger({
-  id: SEARCH_ROW_CLICK_TRIGGER,
-  title: 'On row click',
-  actionIds: [],
-});

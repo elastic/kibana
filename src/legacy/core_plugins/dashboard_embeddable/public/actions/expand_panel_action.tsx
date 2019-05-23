@@ -26,6 +26,7 @@ import {
   CONTEXT_MENU_TRIGGER,
   triggerRegistry,
   ActionContext,
+  attachAction,
 } from 'plugins/embeddable_api/index';
 import React from 'react';
 import { IncompatibleActionError } from 'plugins/embeddable_api/actions';
@@ -92,9 +93,9 @@ export class ExpandPanelAction extends Action {
   }
 }
 
-actionRegistry.addAction(new ExpandPanelAction());
+actionRegistry.set(EXPAND_PANEL_ACTION, new ExpandPanelAction());
 
-triggerRegistry.attachAction({
+attachAction(triggerRegistry, {
   triggerId: CONTEXT_MENU_TRIGGER,
   actionId: EXPAND_PANEL_ACTION,
 });

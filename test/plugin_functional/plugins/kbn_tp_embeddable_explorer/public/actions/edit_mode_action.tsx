@@ -19,14 +19,15 @@
 
 import {
   actionRegistry,
-  triggerRegistry,
+  attachAction,
   CONTEXT_MENU_TRIGGER,
+  triggerRegistry,
 } from 'plugins/embeddable_api/index';
 import { EditModeAction } from 'plugins/embeddable_api/__test__';
 
 const editModeAction = new EditModeAction();
-actionRegistry.addAction(editModeAction);
-triggerRegistry.attachAction({
+actionRegistry.set(editModeAction.id, editModeAction);
+attachAction(triggerRegistry, {
   triggerId: CONTEXT_MENU_TRIGGER,
   actionId: editModeAction.id,
 });

@@ -28,6 +28,7 @@ import {
   CONTEXT_MENU_TRIGGER,
 } from 'plugins/embeddable_api/index';
 import { Embeddable, EmbeddableInput } from 'plugins/embeddable_api/embeddables';
+import { attachAction } from 'plugins/embeddable_api/triggers/attach_action';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
 
@@ -81,5 +82,5 @@ export class SendMessageAction extends Action {
   }
 }
 
-actionRegistry.addAction(new SendMessageAction());
-triggerRegistry.attachAction({ triggerId: CONTEXT_MENU_TRIGGER, actionId: SEND_MESSAGE_ACTION });
+actionRegistry.set(SEND_MESSAGE_ACTION, new SendMessageAction());
+attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: SEND_MESSAGE_ACTION });

@@ -90,7 +90,7 @@ export class ContactCardEmbeddable extends Embeddable<
 
 export const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
 
-triggerRegistry.registerTrigger({
+triggerRegistry.set(CONTACT_USER_TRIGGER, {
   id: CONTACT_USER_TRIGGER,
   actionIds: [SEND_MESSAGE_ACTION],
 });
