@@ -9,6 +9,9 @@ import * as React from 'react';
 
 type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIsOpen'>> & {
   forceExpand?: boolean;
+  onCollapse?: () => void;
+  onExpand?: () => void;
+  renderExpandedContent: (expanded: boolean) => React.ReactNode;
 };
 
 interface State {
@@ -31,21 +34,13 @@ interface State {
  * the real `EuiAccordion`.
  */
 export class LazyAccordion extends React.PureComponent<Props, State> {
-  constructor(props: EuiAccordionProps) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
       expanded: false,
     };
   }
-
-  public onCollapsedClick = () => {
-    this.setState({ expanded: true });
-  };
-
-  public onExpandedClick = () => {
-    this.setState({ expanded: false });
-  };
 
   public render() {
     const {
@@ -54,8 +49,8 @@ export class LazyAccordion extends React.PureComponent<Props, State> {
       buttonContent,
       forceExpand,
       extraAction,
+      renderExpandedContent,
       paddingSize,
-      children,
     } = this.props;
 
     return (
@@ -74,7 +69,7 @@ export class LazyAccordion extends React.PureComponent<Props, State> {
             >
               <></>
             </EuiAccordion>
-            {children}
+            {renderExpandedContent(this.state.expanded)}
           </>
         ) : (
           <EuiAccordion
@@ -85,11 +80,29 @@ export class LazyAccordion extends React.PureComponent<Props, State> {
             id={id}
             onClick={this.onCollapsedClick}
             paddingSize={paddingSize}
-          >
-            <></>
-          </EuiAccordion>
+          />
         )}
       </>
     );
   }
+
+  private onCollapsedClick = () => {
+    const { onExpand } = this.props;
+
+    this.setState({ expanded: true });
+
+    if (onExpand != null) {
+      onExpand();
+    }
+  };
+
+  private onExpandedClick = () => {
+    const { onCollapse } = this.props;
+
+    this.setState({ expanded: false });
+
+    if (onCollapse != null) {
+      onCollapse();
+    }
+  };
 }

@@ -8,7 +8,10 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
+import {
+  DataProvider,
+  QueryOperator,
+} from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode } from './model';
@@ -23,7 +26,9 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export const addColumn = actionCreator<{ id: string; columns: ColumnHeader }>('ADD_COLUMN');
+export const upsertColumn = actionCreator<{ column: ColumnHeader; id: string; index: number }>(
+  'UPSERT_COLUMN'
+);
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
@@ -82,6 +87,16 @@ export const updateDataProviderExcluded = actionCreator<{
   providerId: string;
   andProviderId?: string;
 }>('TOGGLE_PROVIDER_EXCLUDED');
+
+export const dataProviderEdited = actionCreator<{
+  andProviderId?: string;
+  excluded: boolean;
+  field: string;
+  id: string;
+  operator: QueryOperator;
+  providerId: string;
+  value: string | number;
+}>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderKqlQuery = actionCreator<{
   id: string;
