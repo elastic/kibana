@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LastEventTimeRequestOptions } from './types';
 import { LastEventIndexKey } from '../../graphql/types';
 import { assertUnreachable } from '../../../public/lib/helpers';
+
+import { LastEventTimeRequestOptions } from './types';
 
 interface EventIndices {
   [key: string]: string[];

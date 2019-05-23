@@ -8,9 +8,9 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
-
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
+
 import { StatItem, StatItems, StatItemsComponent } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 

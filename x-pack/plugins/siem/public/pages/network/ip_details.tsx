@@ -16,7 +16,7 @@ import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { NetworkComponentProps, getNetworkUrl } from '../../components/link_to/redirect_to_network';
 import { manageQuery } from '../../components/page/manage_query';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { FlowTargetSelectConnected } from '../../components/page/network/flow_target_select_connected';
@@ -24,18 +24,18 @@ import { IpOverview } from '../../components/page/network/ip_overview';
 import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { FlowTarget, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
-import { networkModel, networkSelectors, State } from '../../store';
+import { State, networkModel, networkSelectors } from '../../store';
 import { TlsTable } from '../../components/page/network/tls_table';
-
-import { NetworkKql } from './kql';
-import * as i18n from './translations';
 import { TlsQuery } from '../../containers/tls';
 import { UsersTable } from '../../components/page/network/users_table';
 import { UsersQuery } from '../../containers/users';
 import { UrlStateContainer } from '../../components/url_state';
+
+import * as i18n from './translations';
+import { NetworkKql } from './kql';
 
 const basePath = chrome.getBasePath();
 

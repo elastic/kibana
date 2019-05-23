@@ -17,11 +17,11 @@ import { NoteCards } from '../../../notes/note_cards';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { ColumnHeader } from '../column_headers/column_header';
-
-import { EventColumnView } from './event_column_view';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
+
+import { EventColumnView } from './event_column_view';
 
 interface Props {
   actionsColumnWidth: number;

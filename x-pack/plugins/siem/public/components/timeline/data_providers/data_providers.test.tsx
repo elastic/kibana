@@ -10,9 +10,10 @@ import * as React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
 
-import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
+
+import { DataProviders } from '.';
 
 describe('DataProviders', () => {
   describe('rendering', () => {

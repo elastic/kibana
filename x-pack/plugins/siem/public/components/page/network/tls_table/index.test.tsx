@@ -11,11 +11,12 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
-import { createStore, networkModel, State } from '../../../../store';
+import { TestProviders, apolloClientObservable, mockGlobalState } from '../../../../mock';
+import { State, createStore, networkModel } from '../../../../store';
+
+import { mockTlsData } from './mock';
 
 import { TlsTable } from '.';
-import { mockTlsData } from './mock';
 
 describe('Tls Table Component', () => {
   const loadMore = jest.fn();

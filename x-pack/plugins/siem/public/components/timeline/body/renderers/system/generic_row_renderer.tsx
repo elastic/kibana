@@ -7,9 +7,10 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import * as i18n from './translations';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { Row } from '../helpers';
+
+import * as i18n from './translations';
 import { SystemGenericDetails } from './generic_details';
 import { SystemGenericFileDetails } from './generic_file_details';
 

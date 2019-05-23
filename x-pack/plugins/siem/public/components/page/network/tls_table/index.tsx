@@ -10,9 +10,10 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
 
 import { networkActions } from '../../../../store/network';
-import { TlsEdges, TlsSortField, TlsFields } from '../../../../graphql/types';
-import { networkModel, networkSelectors, State } from '../../../../store';
+import { TlsEdges, TlsFields, TlsSortField } from '../../../../graphql/types';
+import { State, networkModel, networkSelectors } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
+
 import { getTlsColumns } from './columns';
 import * as i18n from './translations';
 

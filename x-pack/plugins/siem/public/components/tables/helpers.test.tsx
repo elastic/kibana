@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRowItemDraggables, getRowItemOverflow, getRowItemDraggable } from './helpers';
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
+
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
+
+import { getRowItemDraggable, getRowItemDraggables, getRowItemOverflow } from './helpers';
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];

@@ -5,6 +5,7 @@
  */
 
 import { getEmptyTagValue } from '../../../empty_value';
+
 import { ColumnRenderer } from './column_renderer';
 
 export const unknownColumnRenderer: ColumnRenderer = {

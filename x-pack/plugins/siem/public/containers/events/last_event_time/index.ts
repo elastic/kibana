@@ -7,8 +7,8 @@
 import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
-
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../../..';
 import { GetLastEventTimeQuery, LastEventIndexKey, LastTimeDetails } from '../../../graphql/types';
 import { inputsModel } from '../../../store';

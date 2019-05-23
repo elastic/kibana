@@ -12,6 +12,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../graphql/types';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
+import { mockData } from '../page/network/ip_overview/mock';
 
 import {
   autonomousSystemRenderer,
@@ -20,7 +21,6 @@ import {
   locationRenderer,
   whoisRenderer,
 } from './field_renderers';
-import { mockData } from '../page/network/ip_overview/mock';
 
 type AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
 

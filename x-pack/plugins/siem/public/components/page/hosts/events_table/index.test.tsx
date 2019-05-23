@@ -11,10 +11,11 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../../../mock';
-import { createStore, hostsModel, State } from '../../../../store';
+import { State, createStore, hostsModel } from '../../../../store';
+
+import { mockData } from './mock';
 
 import { EventsTable } from './index';
-import { mockData } from './mock';
 
 describe('Load More Events Table Component', () => {
   const loadMore = jest.fn();

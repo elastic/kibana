@@ -19,7 +19,7 @@ import { TruncatableText } from '../../../../truncatable_text';
 import { WithHoverActions } from '../../../../with_hover_actions';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
 import { Sort } from '../../sort';
-import { Actions, ACTIONS_WIDTH } from '../actions';
+import { ACTIONS_WIDTH, Actions } from '../actions';
 import { ColumnHeader } from '../column_header';
 import { FullHeightFlexGroup, FullHeightFlexItem } from '../common/styles';
 import { Filter } from '../filter';

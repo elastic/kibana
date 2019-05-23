@@ -7,8 +7,8 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-
 import memoizeOne from 'memoize-one';
+
 import { OpenTimelineResult } from '../../../components/open_timeline/types';
 import {
   GetAllTimeline,
@@ -16,6 +16,7 @@ import {
   SortTimeline,
   TimelineResult,
 } from '../../../graphql/types';
+
 import { allTimelinesQuery } from './index.gql_query';
 
 export interface AllTimelinesArgs {

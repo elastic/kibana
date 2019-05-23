@@ -8,23 +8,24 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
-
 import { FindOptions } from 'src/legacy/server/saved_objects/service';
 
 import { Pick3 } from '../../../common/utility_types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
+import { PageInfoNote, SortNote } from '../../graphql/types';
+import {
+  convertSavedObjectToSavedTimeline,
+  pickSavedTimeline,
+  timelineSavedObjectType,
+} from '../timeline';
+
 import {
   PinnedEventSavedObject,
   PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
 } from './types';
+
 import { pinnedEventSavedObjectType } from '.';
-import { PageInfoNote, SortNote } from '../../graphql/types';
-import {
-  convertSavedObjectToSavedTimeline,
-  timelineSavedObjectType,
-  pickSavedTimeline,
-} from '../timeline';
 
 export class PinnedEvent {
   constructor(

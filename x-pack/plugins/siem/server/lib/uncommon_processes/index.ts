@@ -6,6 +6,7 @@
 
 import { UncommonProcessesData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
+
 export * from './elasticsearch_adapter';
 import { UncommonProcessesAdapter } from './types';
 

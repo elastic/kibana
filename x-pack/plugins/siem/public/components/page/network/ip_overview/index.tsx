@@ -11,7 +11,6 @@ import { pure } from 'recompose';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
-
 import {
   autonomousSystemRenderer,
   dateRenderer,
@@ -21,9 +20,10 @@ import {
   reputationRenderer,
   whoisRenderer,
 } from '../../../field_renderers/field_renderers';
-import * as i18n from './translations';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
+
+import * as i18n from './translations';
 
 interface DescriptionList {
   title: string;

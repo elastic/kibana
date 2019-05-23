@@ -16,8 +16,9 @@ import { CloseButton } from '../actions';
 import { ColumnHeaderType } from '../column_header';
 import { defaultHeaders } from '../default_headers';
 
-import { Header } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
+
+import { Header } from '.';
 
 const filteredColumnHeader: ColumnHeaderType = 'text-filter';
 

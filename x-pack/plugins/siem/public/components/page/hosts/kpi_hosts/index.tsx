@@ -10,6 +10,7 @@ import React from 'react';
 import { pure } from 'recompose';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
+
 import { KpiHostsData } from '../../../../graphql/types';
 import {
   AreaChartData,
@@ -19,6 +20,7 @@ import {
   StatItemsComponent,
   StatItemsProps,
 } from '../../../stat_items';
+
 import * as i18n from './translations';
 
 interface KpiHostsProps {

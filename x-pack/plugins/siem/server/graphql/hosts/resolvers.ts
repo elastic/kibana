@@ -9,10 +9,10 @@ import { getOr } from 'lodash/fp';
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import {
-  Hosts,
-  HostOverviewRequestOptions,
-  HostsRequestOptions,
   HostLastFirstSeenRequestOptions,
+  HostOverviewRequestOptions,
+  Hosts,
+  HostsRequestOptions,
 } from '../../lib/hosts';
 import { getFields } from '../../utils/build_query';
 import { createOptions } from '../../utils/build_query/create_options';

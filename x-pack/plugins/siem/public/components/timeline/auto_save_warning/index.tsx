@@ -15,9 +15,9 @@ import { State, timelineSelectors } from '../../../store';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../store/inputs/actions';
 import { TimelineModel } from '../../../store/timeline/model';
 import { AutoSavedWarningMsg } from '../../../store/timeline/reducer';
+import { timelineActions } from '../../../store/timeline';
 
 import * as i18n from './translations';
-import { timelineActions } from '../../../store/timeline';
 
 interface ReduxProps {
   timelineId: string | null;

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BrowserFields } from '.';
 import { sourceQuery } from './index.gql_query';
+
+import { BrowserFields } from '.';
 
 export const mocksSource = [
   {

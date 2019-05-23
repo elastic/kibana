@@ -9,6 +9,7 @@ import React from 'react';
 
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { Row } from '../helpers';
+
 import { SuricataDetails } from './suricata_details';
 
 export const suricataRowRenderer: RowRenderer = {

@@ -8,13 +8,14 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../../..';
 import { inputsModel } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
+import { GetHostOverviewQuery, HostItem } from '../../../graphql/types';
 
 import { HostOverviewQuery } from './host_overview.gql_query';
-import { GetHostOverviewQuery, HostItem } from '../../../graphql/types';
 
 export interface HostOverviewArgs {
   id: string;

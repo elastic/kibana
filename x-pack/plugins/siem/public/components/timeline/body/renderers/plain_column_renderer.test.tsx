@@ -11,11 +11,11 @@ import moment from 'moment-timezone';
 import * as React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { defaultHeaders, mockFrameworks, mockTimelineData, TestProviders } from '../../../../mock';
+import { TestProviders, defaultHeaders, mockFrameworks, mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
 import { plainColumnRenderer } from './plain_column_renderer';
-import { getValues, deleteItemIdx, findItem } from './helpers';
+import { deleteItemIdx, findItem, getValues } from './helpers';
 
 const mockFramework = mockFrameworks.default_UTC;
 

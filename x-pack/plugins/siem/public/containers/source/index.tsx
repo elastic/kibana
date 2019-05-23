@@ -10,8 +10,8 @@ import { Query } from 'react-apollo';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import chrome from 'ui/chrome';
-
 import memoizeOne from 'memoize-one';
+
 import { DEFAULT_INDEX_KEY } from '../../..';
 import { IndexField, SourceQuery } from '../../graphql/types';
 

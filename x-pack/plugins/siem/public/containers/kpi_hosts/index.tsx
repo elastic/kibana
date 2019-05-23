@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
-
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../..';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
+import { ChartData } from '../../components/stat_items';
 
 import { kpiHostsQuery } from './index.gql_query';
-import { ChartData } from '../../components/stat_items';
 
 export interface KpiHostsArgs {
   id: string;

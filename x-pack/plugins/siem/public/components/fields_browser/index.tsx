@@ -15,13 +15,12 @@ import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
+import { timelineActions } from '../../store/actions';
 
 import { FieldsBrowser } from './field_browser';
 import { FieldBrowserProps } from './types';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
-
 import * as i18n from './translations';
-import { timelineActions } from '../../store/actions';
 
 /** wait this many ms after the user completes typing before applying the filter input */
 const INPUT_TIMEOUT = 250;

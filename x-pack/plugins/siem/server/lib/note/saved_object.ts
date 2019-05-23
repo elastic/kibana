@@ -8,7 +8,6 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
-
 import { FindOptions } from 'src/legacy/server/saved_objects/service';
 
 import { Pick3 } from '../../../common/utility_types';
@@ -16,10 +15,12 @@ import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../graph
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import {
   convertSavedObjectToSavedTimeline,
-  timelineSavedObjectType,
   pickSavedTimeline,
+  timelineSavedObjectType,
 } from '../timeline';
-import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
+
+import { NoteSavedObject, NoteSavedObjectRuntimeType, SavedNote } from './types';
+
 import { noteSavedObjectType } from '.';
 
 export class Note {

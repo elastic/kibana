@@ -9,8 +9,9 @@ import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_q
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap } from '../ecs_fields';
 
-import { HostsRequestOptions } from '.';
 import { buildFieldsTermAggregation } from './helpers';
+
+import { HostsRequestOptions } from '.';
 
 export const buildHostsQuery = ({
   fields,

@@ -7,12 +7,13 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
+
 import {
-  addTimeline,
   addHistory,
   addNote,
   addNoteToEvent,
   addProvider,
+  addTimeline,
   applyDeltaToColumnWidth,
   applyDeltaToWidth,
   applyKqlFilterQuery,
@@ -35,6 +36,7 @@ import {
   updateHighlightedDropAndProviderId,
   updateIsFavorite,
   updateIsLive,
+  updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateKqlMode,
@@ -45,7 +47,6 @@ import {
   updateTimeline,
   updateTitle,
   upsertColumn,
-  updateIsLoading,
 } from './actions';
 import {
   addNewTimeline,
@@ -72,8 +73,8 @@ import {
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
   updateTimelineProviderExcluded,
-  updateTimelineProviderProperties,
   updateTimelineProviderKqlQuery,
+  updateTimelineProviderProperties,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,

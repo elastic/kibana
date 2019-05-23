@@ -10,12 +10,11 @@ import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
+import { dragAndDropActions, timelineActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
-
 import { DataProvider } from '../timeline/data_providers/data_provider';
-import { dragAndDropActions, timelineActions } from '../../store/actions';
 
 export const draggableIdPrefix = 'draggableId';
 

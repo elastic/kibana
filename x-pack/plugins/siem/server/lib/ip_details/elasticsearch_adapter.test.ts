@@ -6,7 +6,6 @@
 import { FlowTarget } from '../../graphql/types';
 
 import { formatDomainsEdges, getIpOverviewAgg, getUsersEdges } from './elasticsearch_adapter';
-
 import {
   formattedDestination,
   formattedEmptySource,

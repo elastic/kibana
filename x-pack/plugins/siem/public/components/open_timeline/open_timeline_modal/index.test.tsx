@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash/fp';
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
@@ -17,7 +17,9 @@ import * as i18n from '../translations';
 import { OpenTimelineModalButton } from '.';
 
 const getStateChildComponent = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): React.Component<{}, {}, any> =>
   wrapper
     .childAt(0)

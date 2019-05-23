@@ -10,8 +10,9 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../mock';
+import { TestProviders, defaultHeaders, mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
 import { deleteItemIdx, findItem } from './helpers';
 import { emptyColumnRenderer } from './empty_column_renderer';
 

@@ -11,8 +11,9 @@ import { MockedProvider } from 'react-apollo/test-utils';
 
 import { wait } from '../../lib/helpers';
 
-import { WithSource } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
+
+import { WithSource } from '.';
 
 describe('Index Fields & Browser Fields', () => {
   test('Index Fields', async () => {

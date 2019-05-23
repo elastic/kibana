@@ -14,11 +14,10 @@ import { HeaderPage } from '../../components/header_page';
 import { OverviewHost } from '../../components/page/overview/overview_host';
 import { OverviewNetwork } from '../../components/page/overview/overview_network';
 import { GlobalTime } from '../../containers/global_time';
-
-import { Summary } from './summary';
 import { EmptyPage } from '../../components/empty_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 
+import { Summary } from './summary';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();

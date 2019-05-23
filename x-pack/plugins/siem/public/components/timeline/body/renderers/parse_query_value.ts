@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isObject, isNumber } from 'lodash/fp';
+import { isNumber, isObject } from 'lodash/fp';
 
 export const parseQueryValue = (
   value: string | number | object | undefined | null

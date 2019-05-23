@@ -25,7 +25,6 @@ import {
 } from '../source_destination/source_destination_arrows';
 import * as i18n from '../timeline/body/renderers/translations';
 
-import { SourceDestination } from '.';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
@@ -46,6 +45,8 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
+
+import { SourceDestination } from '.';
 
 const getSourceDestinationInstance = () => (
   <SourceDestination

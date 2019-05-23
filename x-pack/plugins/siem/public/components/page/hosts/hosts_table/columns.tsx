@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { HostItem, HostFields, OsFields } from '../../../../graphql/types';
+import { HostFields, HostItem, OsFields } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';

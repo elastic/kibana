@@ -15,7 +15,6 @@ import { FlowDirection, FlowTarget } from '../../../../graphql/types';
 import { State } from '../../../../store';
 import { networkActions, networkSelectors } from '../../../../store/network';
 import * as i18nIp from '../ip_overview/translations';
-
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { IpOverviewId } from '../../../field_renderers/field_renderers';
 

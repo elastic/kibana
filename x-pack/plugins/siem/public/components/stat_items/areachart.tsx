@@ -7,9 +7,11 @@
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { EuiSeriesChart, EuiAreaSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
-import { AreaChartData, WrappedByAutoSizer, ChartHolder } from '.';
+import { EuiAreaSeries, EuiSeriesChart, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
+
 import { AutoSizer } from '../auto_sizer';
+
+import { AreaChartData, ChartHolder, WrappedByAutoSizer } from '.';
 
 export const AreaChartBaseComponent = pure<{
   data: AreaChartData[];

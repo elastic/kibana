@@ -14,9 +14,9 @@ import { buildAuthQuery } from './query_authentication.dsl';
 import { buildGeneralQuery } from './query_general.dsl';
 import {
   KpiHostsAdapter,
+  KpiHostsAuthHit,
   KpiHostsESMSearchBody,
   KpiHostsGeneralHit,
-  KpiHostsAuthHit,
 } from './types';
 
 export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {

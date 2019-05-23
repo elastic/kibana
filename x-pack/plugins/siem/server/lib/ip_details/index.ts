@@ -11,8 +11,8 @@ import {
   FlowDirection,
   FlowTarget,
   IpOverviewData,
-  TlsSortField,
   TlsData,
+  TlsSortField,
   UsersData,
   UsersSortField,
 } from '../../graphql/types';

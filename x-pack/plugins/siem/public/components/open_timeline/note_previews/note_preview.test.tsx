@@ -8,9 +8,9 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
 import { getEmptyValue } from '../../empty_value';
-import { NotePreview } from './note_preview';
-
 import * as i18n from '../translations';
+
+import { NotePreview } from './note_preview';
 
 describe('NotePreview', () => {
   describe('Avatar', () => {

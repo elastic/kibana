@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -17,13 +17,13 @@ import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { DraggableFieldBadge } from '../draggables/field_badge';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 import { FieldName } from '../fields_browser/field_name';
-import { getIconFromType, getExampleText, getColumnsWithTimestamp } from './helpers';
-import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
+import { DRAG_TYPE_FIELD, getDraggableFieldId, getDroppableId } from '../drag_and_drop/helpers';
 import { OnUpdateColumns } from '../timeline/events';
 import { SelectableText } from '../selectable_text';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { WithHoverActions } from '../with_hover_actions';
 
+import { getColumnsWithTimestamp, getExampleText, getIconFromType } from './helpers';
 import * as i18n from './translations';
 
 const HoverActionsContainer = styled(EuiPanel)`

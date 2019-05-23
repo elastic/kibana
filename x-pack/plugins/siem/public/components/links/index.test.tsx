@@ -11,15 +11,15 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { encodeIpv6 } from '../../lib/helpers';
 
 import {
+  CertificateFingerprintLink,
   GoogleLink,
   HostDetailsLink,
   IPDetailsLink,
+  Ja3FingerprintLink,
+  PortOrServiceNameLink,
   ReputationLink,
   VirusTotalLink,
   WhoIsLink,
-  CertificateFingerprintLink,
-  Ja3FingerprintLink,
-  PortOrServiceNameLink,
 } from '.';
 
 describe('Custom Links', () => {

@@ -11,7 +11,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
-
 import * as i18n from './translations';
 
 const ProviderBadgeStyled = styled(EuiBadge)`

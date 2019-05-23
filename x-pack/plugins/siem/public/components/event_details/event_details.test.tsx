@@ -8,11 +8,11 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
+import { mockBrowserFields } from '../../containers/source/mock';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
 
 import { EventDetails } from './event_details';
-import { mockBrowserFields } from '../../containers/source/mock';
 
 describe('EventDetails', () => {
   describe('rendering', () => {

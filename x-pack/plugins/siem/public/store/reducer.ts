@@ -6,11 +6,11 @@
 
 import { combineReducers } from 'redux';
 
-import { appReducer, AppState, initialAppState } from './app';
-import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from './drag_and_drop';
-import { hostsReducer, HostsState, initialHostsState } from './hosts';
-import { initialInputsState, inputsReducer, InputsState } from './inputs';
-import { initialNetworkState, networkReducer, NetworkState } from './network';
+import { AppState, appReducer, initialAppState } from './app';
+import { DragAndDropState, dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
+import { HostsState, hostsReducer, initialHostsState } from './hosts';
+import { InputsState, initialInputsState, inputsReducer } from './inputs';
+import { NetworkState, initialNetworkState, networkReducer } from './network';
 import { TimelineState, initialTimelineState, timelineReducer } from './timeline/reducer';
 
 export interface State {

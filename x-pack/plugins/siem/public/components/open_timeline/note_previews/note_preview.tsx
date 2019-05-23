@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { FormattedDate } from '../../formatted_date';
-import { getEmptyValue, defaultToEmptyTag } from '../../empty_value';
+import { defaultToEmptyTag, getEmptyValue } from '../../empty_value';
 import { Markdown } from '../../markdown';
-
 import * as i18n from '../translations';
 import { TimelineResultNote } from '../types';
 

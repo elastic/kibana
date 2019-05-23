@@ -11,7 +11,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
 import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
-import { networkModel, networkSelectors, State } from '../../../../store';
+import { State, networkModel, networkSelectors } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { getNetworkDnsColumns } from './columns';

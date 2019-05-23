@@ -23,12 +23,6 @@ import {
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { SearchHit, TermAggregation } from '../types';
 
-import {
-  DomainsRequestOptions,
-  IpOverviewRequestOptions,
-  TlsRequestOptions,
-  UsersRequestOptions,
-} from './index';
 import { buildDomainsQuery } from './query_domains.dsl';
 import { buildFirstLastSeenDomainQuery } from './query_last_first_seen_domain.dsl';
 import { buildOverviewQuery } from './query_overview.dsl';
@@ -42,10 +36,15 @@ import {
   TlsBuckets,
   UsersBucketsItem,
 } from './types';
-
 import { buildTlsQuery } from './query_tls.dsl';
-
 import { buildUsersQuery } from './query_users.dsl';
+
+import {
+  DomainsRequestOptions,
+  IpOverviewRequestOptions,
+  TlsRequestOptions,
+  UsersRequestOptions,
+} from './index';
 
 export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}

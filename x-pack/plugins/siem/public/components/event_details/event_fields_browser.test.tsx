@@ -9,9 +9,9 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
+import { mockBrowserFields } from '../../containers/source/mock';
 
 import { EventFieldsBrowser } from './event_fields_browser';
-import { mockBrowserFields } from '../../containers/source/mock';
 
 describe('EventFieldsBrowser', () => {
   describe('column headers', () => {

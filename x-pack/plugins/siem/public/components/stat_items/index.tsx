@@ -7,19 +7,20 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiHorizontalRule,
   EuiIcon,
+  EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-
 import { EuiText } from '@elastic/eui';
+
+import { getEmptyTagValue } from '../empty_value';
+
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
-import { getEmptyTagValue } from '../empty_value';
 
 export const WrappedByAutoSizer = styled.div`
   height: 100px;

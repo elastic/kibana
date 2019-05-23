@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { createHashHistory } from 'history';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
-
-import { EuiErrorBoundary } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
+import { ThemeProvider } from 'styled-components';
 import { I18nContext } from 'ui/i18n';
 
 import { ErrorToast } from '../components/error_toast';

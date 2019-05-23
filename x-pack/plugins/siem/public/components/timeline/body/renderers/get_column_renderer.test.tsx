@@ -15,9 +15,10 @@ import { TestProviders } from '../../../../mock/test_providers';
 import { getEmptyValue } from '../../../empty_value';
 import { defaultHeaders } from '../column_headers/default_headers';
 
-import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
-import { getValues, findItem, deleteItemIdx } from './helpers';
+import { deleteItemIdx, findItem, getValues } from './helpers';
+
+import { columnRenderers } from '.';
 
 describe('get_column_renderer', () => {
   let nonSuricata: TimelineNonEcsData[];

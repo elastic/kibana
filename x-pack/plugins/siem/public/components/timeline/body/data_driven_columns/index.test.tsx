@@ -5,10 +5,9 @@
  */
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-
 import * as React from 'react';
 
-import { mockTimelineData, TestProviders } from '../../../../mock';
+import { TestProviders, mockTimelineData } from '../../../../mock';
 import { defaultHeaders } from '../column_headers/default_headers';
 import { columnRenderers } from '../renderers';
 

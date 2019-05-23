@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action, applyMiddleware, compose, createStore as createReduxStore, Store } from 'redux';
-
+import { Action, Store, applyMiddleware, compose, createStore as createReduxStore } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
 
 import { AppApolloClient } from '../lib/lib';
-import { initialState, reducer, State, createRootEpic } from '.';
+
 import { appSelectors } from './app';
 import { timelineSelectors } from './timeline';
 import { inputsSelectors } from './inputs';
+
+import { State, createRootEpic, initialState, reducer } from '.';
 
 declare global {
   interface Window {

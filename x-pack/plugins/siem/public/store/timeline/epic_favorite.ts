@@ -9,20 +9,20 @@ import { ApolloClient } from 'apollo-client';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
-import { from, Observable, empty } from 'rxjs';
-import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
+import { Observable, empty, from } from 'rxjs';
+import { filter, mergeMap, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
 
 import { persistTimelineFavoriteMutation } from '../../containers/timeline/favorite/persist.gql_query';
 import { PersistTimelineFavoriteMutation, ResponseFavoriteTimeline } from '../../graphql/types';
 
 import {
   endTimelineSaving,
+  startTimelineSaving,
   updateIsFavorite,
   updateTimeline,
-  startTimelineSaving,
 } from './actions';
 import { TimelineById } from './reducer';
-import { dispatcherTimelinePersistQueue, refetchQueries, myEpicTimelineId } from './epic';
+import { dispatcherTimelinePersistQueue, myEpicTimelineId, refetchQueries } from './epic';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 

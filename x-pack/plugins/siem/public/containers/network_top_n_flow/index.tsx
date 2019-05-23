@@ -8,8 +8,8 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../..';
 import {
   FlowDirection,
@@ -19,7 +19,7 @@ import {
   NetworkTopNFlowSortField,
   PageInfo,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { State, inputsModel, networkModel, networkSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 

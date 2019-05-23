@@ -23,13 +23,13 @@ import { GlobalTime } from '../../containers/global_time';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { networkModel, networkSelectors, State } from '../../store';
+import { State, networkModel, networkSelectors } from '../../store';
+import { UrlStateContainer } from '../../components/url_state';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
-import { UrlStateContainer } from '../../components/url_state';
 
 const basePath = chrome.getBasePath();
 

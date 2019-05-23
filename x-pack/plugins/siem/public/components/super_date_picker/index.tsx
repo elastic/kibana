@@ -17,7 +17,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { inputsModel, State } from '../../store';
+import { State, inputsModel } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
 
 const MAX_RECENTLY_USED_RANGES = 9;

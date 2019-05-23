@@ -19,7 +19,7 @@ import {
   FlowDirection,
   FlowTarget,
 } from '../../../../graphql/types';
-import { networkModel, networkSelectors, State } from '../../../../store';
+import { State, networkModel, networkSelectors } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
 

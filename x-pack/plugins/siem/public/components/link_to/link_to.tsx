@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, match as RouteMatch, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { RedirectToHostsPage } from './redirect_to_hosts';

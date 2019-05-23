@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, merge as mergeObject, set, omit, getOr } from 'lodash/fp';
+import { get, getOr, has, merge as mergeObject, omit, set } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
-import { from, Observable, Subject, empty, merge } from 'rxjs';
+import { Observable, Subject, empty, from, merge } from 'rxjs';
 import {
+  concatMap,
+  debounceTime,
+  delay,
   filter,
   map,
-  startWith,
-  withLatestFrom,
-  debounceTime,
   mergeMap,
-  concatMap,
-  delay,
+  startWith,
   takeUntil,
+  withLatestFrom,
 } from 'rxjs/operators';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
@@ -25,10 +25,10 @@ import { DEFAULT_SORT_FIELD } from '../../components/open_timeline';
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
-  PersistTimelineMutation,
-  TimelineInput,
-  ResponseTimeline,
   Direction,
+  PersistTimelineMutation,
+  ResponseTimeline,
+  TimelineInput,
   TimelineResult,
 } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
@@ -36,11 +36,16 @@ import { NotesById } from '../app/model';
 import { TimeRange } from '../inputs/model';
 
 import {
-  applyKqlFilterQuery,
   addProvider,
+  addTimeline,
+  applyKqlFilterQuery,
+  createTimeline,
   dataProviderEdited,
+  endTimelineSaving,
   removeColumn,
   removeProvider,
+  startTimelineSaving,
+  updateAutoSaveMsg,
   updateColumns,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
@@ -50,14 +55,9 @@ import {
   updateProviders,
   updateRange,
   updateSort,
-  upsertColumn,
   updateTimeline,
   updateTitle,
-  updateAutoSaveMsg,
-  startTimelineSaving,
-  endTimelineSaving,
-  createTimeline,
-  addTimeline,
+  upsertColumn,
 } from './actions';
 import { TimelineModel } from './model';
 import { TimelineById } from './reducer';

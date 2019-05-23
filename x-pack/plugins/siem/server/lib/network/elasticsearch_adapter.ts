@@ -16,10 +16,11 @@ import {
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
-import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
 import { buildTopNFlowQuery } from './query_top_n_flow.dsl';
 import { NetworkAdapter, NetworkDnsBuckets, NetworkTopNFlowBuckets } from './types';
+
+import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}

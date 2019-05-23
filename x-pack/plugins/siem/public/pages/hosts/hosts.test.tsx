@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
-import { Router } from 'react-router-dom';
-
-import '../../mock/match_media';
-import { Hosts } from './hosts';
-
-import { mocksSource } from '../../containers/source/mock';
-import { TestProviders } from '../../mock';
+import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { Router } from 'react-router-dom';
 import { cloneDeep } from 'lodash/fp';
 
+import { TestProviders } from '../../mock';
+import '../../mock/match_media';
+import { mocksSource } from '../../containers/source/mock';
+
 import * as i18n from './translations';
+import { Hosts } from './hosts';
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {

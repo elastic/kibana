@@ -8,11 +8,11 @@ import { get } from 'lodash/fp';
 
 import { IndexField } from '../../graphql/types';
 import {
+  IndexAlias,
   baseCategoryFields,
   getDocumentation,
   getIndexAlias,
   hasDocumentation,
-  IndexAlias,
 } from '../../utils/beat_schema';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 

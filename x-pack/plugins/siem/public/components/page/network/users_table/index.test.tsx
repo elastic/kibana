@@ -12,11 +12,12 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
-import { createStore, networkModel, State } from '../../../../store';
+import { TestProviders, apolloClientObservable, mockGlobalState } from '../../../../mock';
+import { State, createStore, networkModel } from '../../../../store';
+
+import { mockUsersData } from './mock';
 
 import { UsersTable } from '.';
-import { mockUsersData } from './mock';
 
 describe('Users Table Component', () => {
   const loadMore = jest.fn();

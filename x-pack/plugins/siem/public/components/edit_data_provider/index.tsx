@@ -4,25 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import {
   EuiButton,
   EuiComboBox,
   EuiComboBoxOptionProps,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-import { OnDataProviderEdited } from '../timeline/events';
 import { QueryOperator } from '../timeline/data_providers/data_provider';
+import { OnDataProviderEdited } from '../timeline/events';
 
 import {
   getCategorizedFieldNames,
@@ -31,7 +31,6 @@ import {
   operatorLabels,
   selectionsAreValid,
 } from './helpers';
-
 import * as i18n from './translations';
 
 const EDIT_DATA_PROVIDER_WIDTH = 400;

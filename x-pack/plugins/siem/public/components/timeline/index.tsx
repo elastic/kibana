@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
-import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
+import { State, inputsModel, inputsSelectors, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
 import { KqlMode, TimelineModel } from '../../store/timeline/model';
 
@@ -22,8 +22,8 @@ import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
-  OnDataProviderRemoved,
   OnDataProviderEdited,
+  OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';

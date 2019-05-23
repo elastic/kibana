@@ -11,8 +11,9 @@ import * as React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
 
-import { Footer } from './index';
 import { mockData } from './mock';
+
+import { Footer } from './index';
 
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();

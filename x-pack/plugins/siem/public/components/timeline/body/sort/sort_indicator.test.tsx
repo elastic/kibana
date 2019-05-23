@@ -10,7 +10,7 @@ import * as React from 'react';
 
 import { Direction } from '../../../../graphql/types';
 
-import { getDirection, SortIndicator } from './sort_indicator';
+import { SortIndicator, getDirection } from './sort_indicator';
 
 describe('SortIndicator', () => {
   describe('rendering', () => {

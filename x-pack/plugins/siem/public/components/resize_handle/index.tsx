@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { fromEvent, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, fromEvent } from 'rxjs';
 import { mergeMap, takeUntil } from 'rxjs/operators';
 import styled, { injectGlobal } from 'styled-components';
 

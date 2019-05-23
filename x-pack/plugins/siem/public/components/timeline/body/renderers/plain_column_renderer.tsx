@@ -13,10 +13,11 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { FormattedIp } from '../../../formatted_ip';
-import { IS_OPERATOR, DataProvider } from '../../data_providers/data_provider';
+import { DataProvider, IS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
 import { ColumnHeader } from '../column_headers/column_header';
-import { IP_FIELD_TYPE, FormattedFieldValue } from './formatted_field';
+
+import { FormattedFieldValue, IP_FIELD_TYPE } from './formatted_field';
 import { ColumnRenderer } from './column_renderer';
 import { parseQueryValue } from './parse_query_value';
 import { parseValue } from './parse_value';

@@ -13,9 +13,10 @@ import { Direction } from '../../../graphql/types';
 import { defaultHeaders, mockTimelineData } from '../../../mock';
 import { TestProviders } from '../../../mock/test_providers';
 
-import { Body } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
+
+import { Body } from '.';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];

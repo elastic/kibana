@@ -9,21 +9,21 @@ import { ApolloClient } from 'apollo-client';
 import { get, omit } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
-import { from, Observable, empty } from 'rxjs';
-import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
+import { Observable, empty, from } from 'rxjs';
+import { filter, mergeMap, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
 
 import { persistTimelinePinnedEventMutation } from '../../containers/timeline/pinned_event/persist.gql_query';
 import { PersistTimelinePinnedEventMutation, PinnedEvent } from '../../graphql/types';
 
 import {
-  pinEvent,
   endTimelineSaving,
+  pinEvent,
+  startTimelineSaving,
   unPinEvent,
   updateTimeline,
-  startTimelineSaving,
 } from './actions';
 import { TimelineById } from './reducer';
-import { dispatcherTimelinePersistQueue, refetchQueries, myEpicTimelineId } from './epic';
+import { dispatcherTimelinePersistQueue, myEpicTimelineId, refetchQueries } from './epic';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 

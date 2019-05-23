@@ -14,7 +14,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { hostsActions } from '../../../../store/hosts';
 import { AuthenticationsEdges } from '../../../../graphql/types';
-import { hostsModel, hostsSelectors, State } from '../../../../store';
+import { State, hostsModel, hostsSelectors } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -22,9 +22,9 @@ import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
+import { getRowItemDraggables } from '../../../tables/helpers';
 
 import * as i18n from './translations';
-import { getRowItemDraggables } from '../../../tables/helpers';
 
 interface OwnProps {
   data: AuthenticationsEdges[];

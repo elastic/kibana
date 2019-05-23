@@ -7,11 +7,11 @@
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
-import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 import { DeleteTimelines, OnOpenTimeline, OpenTimelineResult } from '../types';
 import { DeleteTimelineModalButton } from '../delete_timeline_modal';
-
 import * as i18n from '../translations';
+
+import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)

@@ -11,11 +11,10 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 
-import { FieldBrowserProps } from './types';
 import { getCategoryColumns } from './category_columns';
 import { TABLE_HEIGHT } from './helpers';
-
 import * as i18n from './translations';
+import { FieldBrowserProps } from './types';
 
 const CategoryNames = styled.div<{ height: number; width: number }>`
   ${({ height }) => `height: ${height}px`};

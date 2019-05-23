@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
+
+import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 
 import { initServerWithKibana } from './server/kibana.index';

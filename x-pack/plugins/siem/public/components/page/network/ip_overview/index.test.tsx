@@ -10,11 +10,12 @@ import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowTarget } from '../../../../graphql/types';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
-import { createStore, networkModel, State } from '../../../../store';
+import { TestProviders, apolloClientObservable, mockGlobalState } from '../../../../mock';
+import { State, createStore, networkModel } from '../../../../store';
+
+import { mockData } from './mock';
 
 import { IpOverview } from './index';
-import { mockData } from './mock';
 
 describe('IP Overview Component', () => {
   const state: State = mockGlobalState;

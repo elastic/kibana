@@ -6,8 +6,8 @@
 
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
-
 import { pure } from 'recompose';
+
 import { FlowDirection } from '../../graphql/types';
 
 import * as i18n from './translations';

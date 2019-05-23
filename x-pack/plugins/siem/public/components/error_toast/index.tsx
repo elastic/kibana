@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { appModel, appSelectors, State } from '../../store';
+import { State, appModel, appSelectors } from '../../store';
 import { appActions } from '../../store/app';
 
 interface OwnProps {

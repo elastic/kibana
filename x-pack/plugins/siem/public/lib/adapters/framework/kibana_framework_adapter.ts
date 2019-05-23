@@ -8,7 +8,6 @@
 import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
 import { UIRoutes as KibanaUIRoutes } from 'ui/routes';
 
 import {

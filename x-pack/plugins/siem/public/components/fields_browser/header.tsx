@@ -20,8 +20,7 @@ import { BrowserFields } from '../../containers/source';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
 
-import { getFieldBrowserSearchInputClassName, getFieldCount, SEARCH_INPUT_WIDTH } from './helpers';
-
+import { SEARCH_INPUT_WIDTH, getFieldBrowserSearchInputClassName, getFieldCount } from './helpers';
 import * as i18n from './translations';
 
 const CountsFlexGroup = styled(EuiFlexGroup)`

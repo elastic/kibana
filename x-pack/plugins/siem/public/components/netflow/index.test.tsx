@@ -41,21 +41,22 @@ import {
   SOURCE_PACKETS_FIELD_NAME,
 } from '../source_destination/source_destination_arrows';
 import * as i18n from '../timeline/body/renderers/translations';
+import {
+  NETWORK_BYTES_FIELD_NAME,
+  NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_DIRECTION_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
+  NETWORK_TRANSPORT_FIELD_NAME,
+} from '../source_destination/field_names';
 
-import { Netflow } from '.';
 import {
   EVENT_END_FIELD_NAME,
   EVENT_START_FIELD_NAME,
 } from './netflow_columns/duration_event_start_end';
 import { PROCESS_NAME_FIELD_NAME, USER_NAME_FIELD_NAME } from './netflow_columns/user_process';
-import {
-  NETWORK_BYTES_FIELD_NAME,
-  NETWORK_DIRECTION_FIELD_NAME,
-  NETWORK_COMMUNITY_ID_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
-  NETWORK_PROTOCOL_FIELD_NAME,
-  NETWORK_TRANSPORT_FIELD_NAME,
-} from '../source_destination/field_names';
+
+import { Netflow } from '.';
 
 const getNetflowInstance = () => (
   <Netflow

@@ -6,10 +6,10 @@
 
 import React from 'react';
 import moment from 'moment';
+
 import { TlsNode } from '../../../../graphql/types';
 import { Columns } from '../../../load_more_table';
-
-import { getRowItemDraggables, getRowItemDraggable } from '../../../tables/helpers';
+import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 

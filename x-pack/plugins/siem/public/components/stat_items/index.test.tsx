@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
 
-import { StatItemsComponent, StatItemsProps } from '.';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
-import { EuiHorizontalRule } from '@elastic/eui';
+
+import { StatItemsComponent, StatItemsProps } from '.';
 
 describe('Stat Items', () => {
   describe.each([

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiHorizontalRule, EuiIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';

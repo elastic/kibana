@@ -8,15 +8,16 @@ import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
+
 import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
-
-import * as i18n from './translations';
 import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
 import { LoadingPanel } from '../../../loading';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { IPDetailsLink } from '../../../links';
+
+import * as i18n from './translations';
 
 interface DescriptionList {
   title: string;

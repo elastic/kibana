@@ -14,6 +14,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -25,8 +26,8 @@ import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
-  OnDataProviderRemoved,
   OnDataProviderEdited,
+  OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';
@@ -34,7 +35,6 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { KqlMode } from '../../store/timeline/model';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;

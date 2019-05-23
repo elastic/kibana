@@ -8,8 +8,9 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { OverviewNetworkStats } from '.';
 import { mockData } from './mock';
+
+import { OverviewNetworkStats } from '.';
 
 describe('Overview Network Stat Data', () => {
   describe('rendering', () => {

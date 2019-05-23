@@ -8,9 +8,9 @@ import { EuiFilterButtonProps } from '@elastic/eui';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
-import { SearchRow } from '.';
-
 import * as i18n from '../translations';
+
+import { SearchRow } from '.';
 
 describe('SearchRow', () => {
   test('it renders a search input with the expected placeholder when the query is empty', () => {

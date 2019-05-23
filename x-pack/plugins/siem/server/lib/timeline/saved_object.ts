@@ -8,15 +8,14 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
-
 import { FindOptions } from 'src/legacy/server/saved_objects/service';
 
 import { Pick3 } from '../../../common/utility_types';
 import {
-  ResponseTimeline,
   PageInfoTimeline,
-  SortTimeline,
   ResponseFavoriteTimeline,
+  ResponseTimeline,
+  SortTimeline,
 } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import { Note } from '../note';
@@ -24,7 +23,8 @@ import { NoteSavedObject } from '../note/types';
 import { PinnedEvent } from '../pinned_event';
 import { PinnedEventSavedObject } from '../pinned_event/types';
 
-import { SavedTimeline, TimelineSavedObjectRuntimeType, TimelineSavedObject } from './types';
+import { SavedTimeline, TimelineSavedObject, TimelineSavedObjectRuntimeType } from './types';
+
 import { timelineSavedObjectType } from '.';
 
 interface ResponseTimelines {

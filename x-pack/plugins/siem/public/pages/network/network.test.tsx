@@ -7,15 +7,14 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
+import { cloneDeep } from 'lodash/fp';
+import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
-import { Network } from './network';
-
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { cloneDeep } from 'lodash/fp';
 
+import { Network } from './network';
 import * as i18n from './translations';
 
 jest.mock('ui/documentation_links', () => ({

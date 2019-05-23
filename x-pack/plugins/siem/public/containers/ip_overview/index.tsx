@@ -8,8 +8,8 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
-
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../..';
 import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
 import { networkModel } from '../../store';

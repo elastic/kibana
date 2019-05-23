@@ -14,9 +14,9 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
+import { KqlMode } from '../../../store/timeline/model';
 
 import * as i18n from './translations';
-import { KqlMode } from '../../../store/timeline/model';
 
 const AndOrContainer = styled.div`
   position: relative;

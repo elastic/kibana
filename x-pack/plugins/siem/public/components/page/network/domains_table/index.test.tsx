@@ -13,15 +13,16 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
 import {
-  apolloClientObservable,
-  mockIndexPattern,
-  mockGlobalState,
   TestProviders,
+  apolloClientObservable,
+  mockGlobalState,
+  mockIndexPattern,
 } from '../../../../mock';
-import { createStore, networkModel, State } from '../../../../store';
+import { State, createStore, networkModel } from '../../../../store';
+
+import { mockDomainsData } from './mock';
 
 import { DomainsTable } from '.';
-import { mockDomainsData } from './mock';
 
 describe('Domains Table Component', () => {
   const loadMore = jest.fn();

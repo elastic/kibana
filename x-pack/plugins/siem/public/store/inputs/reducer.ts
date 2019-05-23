@@ -14,10 +14,10 @@ import {
   setDuration,
   setQuery,
   setRelativeRangeDatePicker,
+  setTimelineRangeDatePicker,
   startAutoReload,
   stopAutoReload,
   toggleTimelineLinkTo,
-  setTimelineRangeDatePicker,
 } from './actions';
 import { toggleLockTimeline, updateInputTimerange } from './helpers';
 import { InputsModel, TimeRange } from './model';

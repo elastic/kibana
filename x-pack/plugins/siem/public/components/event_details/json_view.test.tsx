@@ -10,7 +10,7 @@ import * as React from 'react';
 
 import { mockDetailItemData } from '../../mock';
 
-import { buildJsonView, JsonView } from './json_view';
+import { JsonView, buildJsonView } from './json_view';
 
 describe('JSON View', () => {
   describe('rendering', () => {

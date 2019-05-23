@@ -9,17 +9,17 @@ import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
 import {
+  HapiGraphQLPluginOptions,
+  HapiGraphiQLPluginOptions,
   graphiqlHapi,
   graphqlHapi,
-  HapiGraphiQLPluginOptions,
-  HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
 import {
   FrameworkAdapter,
   FrameworkIndexPatternsService,
   FrameworkRequest,
-  internalFrameworkRequest,
   WrappableRequest,
+  internalFrameworkRequest,
 } from './types';
 
 interface CallWithRequestParams extends GenericParams {

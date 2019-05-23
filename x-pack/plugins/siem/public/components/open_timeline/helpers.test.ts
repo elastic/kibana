@@ -5,8 +5,9 @@
  */
 import { cloneDeep, omit } from 'lodash/fp';
 
-import { getNotesCount, getPinnedEventCount, isUntitled } from './helpers';
 import { mockTimelineResults } from '../../mock/timeline_results';
+
+import { getNotesCount, getPinnedEventCount, isUntitled } from './helpers';
 import { OpenTimelineResult } from './types';
 
 describe('helpers', () => {

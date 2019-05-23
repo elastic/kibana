@@ -12,9 +12,9 @@ import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timeli
 import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../mock/timeline_results';
-import { OpenTimelineModal } from './open_timeline_modal';
-
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../';
+
+import { OpenTimelineModal } from './open_timeline_modal';
 
 describe('OpenTimelineModal', () => {
   const title = 'All Timelines / Open Timelines';

@@ -9,8 +9,8 @@ import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
-import { from, empty, Observable } from 'rxjs';
-import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
+import { Observable, empty, from } from 'rxjs';
+import { filter, mergeMap, startWith, switchMap, takeUntil, withLatestFrom } from 'rxjs/operators';
 
 import { persistTimelineNoteMutation } from '../../containers/timeline/notes/persist.gql_query';
 import { PersistTimelineNoteMutation, ResponseNote } from '../../graphql/types';
@@ -21,11 +21,11 @@ import {
   addNote,
   addNoteToEvent,
   endTimelineSaving,
-  updateTimeline,
   startTimelineSaving,
+  updateTimeline,
 } from './actions';
 import { TimelineById } from './reducer';
-import { dispatcherTimelinePersistQueue, refetchQueries, myEpicTimelineId } from './epic';
+import { dispatcherTimelinePersistQueue, myEpicTimelineId, refetchQueries } from './epic';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 

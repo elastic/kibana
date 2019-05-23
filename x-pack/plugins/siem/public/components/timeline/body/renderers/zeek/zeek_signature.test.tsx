@@ -11,19 +11,20 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../../graphql/types';
-import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { TestProviders, mockTimelineData } from '../../../../../mock';
+
 import {
-  ZeekSignature,
-  extractStateValue,
-  constructDroppedValue,
-  TotalVirusLinkSha,
-  Link,
   DraggableZeekElement,
-  sha1StringRenderer,
-  md5StringRenderer,
-  droppedStringRenderer,
-  moduleStringRenderer,
+  Link,
+  TotalVirusLinkSha,
+  ZeekSignature,
+  constructDroppedValue,
   defaultStringRenderer,
+  droppedStringRenderer,
+  extractStateValue,
+  md5StringRenderer,
+  moduleStringRenderer,
+  sha1StringRenderer,
 } from './zeek_signature';
 
 describe('ZeekSignature', () => {

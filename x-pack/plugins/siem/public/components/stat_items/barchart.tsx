@@ -11,9 +11,11 @@ import {
 } from '@elastic/eui';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { EuiSeriesChart, EuiBarSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
-import { BarChartData, WrappedByAutoSizer, ChartHolder } from '.';
+import { EuiBarSeries, EuiSeriesChart, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
+
 import { AutoSizer } from '../auto_sizer';
+
+import { BarChartData, ChartHolder, WrappedByAutoSizer } from '.';
 
 const { SCALE, ORIENTATION } = EuiSeriesChartUtils;
 const getYaxis = (value: string | number) => {

@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { inputsModel, inputsSelectors, State } from '../../store';
+import { State, inputsModel, inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 
 interface GlobalTimeArgs {

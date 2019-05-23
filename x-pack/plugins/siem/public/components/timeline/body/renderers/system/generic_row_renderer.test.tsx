@@ -12,11 +12,12 @@ import * as React from 'react';
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
-import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { TestProviders, mockTimelineData } from '../../../../../mock';
 import { RowRenderer } from '../row_renderer';
+
 import {
-  createGenericSystemRowRenderer,
   createGenericFileRowRenderer,
+  createGenericSystemRowRenderer,
 } from './generic_row_renderer';
 
 describe('GenericRowRenderer', () => {

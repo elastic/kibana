@@ -19,7 +19,7 @@ import {
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
 } from '../../../../graphql/types';
-import { networkModel, networkSelectors, State } from '../../../../store';
+import { State, networkModel, networkSelectors } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';

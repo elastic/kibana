@@ -13,7 +13,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
-import { appSelectors, State, timelineSelectors } from '../../../store';
+import { State, appSelectors, timelineSelectors } from '../../../store';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -23,14 +23,15 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
+import { appActions, timelineActions } from '../../../store/actions';
+import { TimelineModel } from '../../../store/timeline/model';
 
 import { ColumnHeader } from './column_headers/column_header';
 import { getColumnHeaders } from './helpers';
-import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
-import { timelineActions, appActions } from '../../../store/actions';
-import { TimelineModel } from '../../../store/timeline/model';
+
+import { Body } from './index';
 
 interface OwnProps {
   browserFields: BrowserFields;

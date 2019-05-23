@@ -16,8 +16,8 @@ import { buildQuery } from './query.dsl';
 import {
   UncommonProcessBucket,
   UncommonProcessData,
-  UncommonProcessesAdapter,
   UncommonProcessHit,
+  UncommonProcessesAdapter,
 } from './types';
 
 export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesAdapter {

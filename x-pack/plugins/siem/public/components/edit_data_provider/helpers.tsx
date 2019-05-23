@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { findIndex } from 'lodash/fp';
 import { EuiComboBoxOptionProps } from '@elastic/eui';
+import { findIndex } from 'lodash/fp';
 
 import { BrowserField, BrowserFields, getAllFieldsByName } from '../../containers/source';
 import {
-  QueryOperator,
   EXISTS_OPERATOR,
   IS_OPERATOR,
+  QueryOperator,
 } from '../timeline/data_providers/data_provider';
 
 import * as i18n from './translations';

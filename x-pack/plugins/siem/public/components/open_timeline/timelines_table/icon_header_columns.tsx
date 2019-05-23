@@ -7,11 +7,11 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
-import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
-
 import * as i18n from '../translations';
+
+import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 
 /**
  * Returns the columns that have icon headers

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import { get } from 'lodash/fp';
 import { MockedProvider } from 'react-apollo/test-utils';
 import * as React from 'react';
@@ -14,12 +14,15 @@ import { TestProviderWithoutDragAndDrop, apolloClient } from '../../mock/test_pr
 import { mockOpenTimelineQueryResults } from '../../mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines/timelines_page';
 
-import { StatefulOpenTimeline } from '.';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
+import { StatefulOpenTimeline } from '.';
+
 const getStateChildComponent = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): React.Component<{}, {}, any> =>
   wrapper
     .childAt(0)

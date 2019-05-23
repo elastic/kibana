@@ -7,11 +7,11 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
-import { createStore, State } from '../../../../store';
+import { TestProviders, apolloClientObservable, mockGlobalState } from '../../../../mock';
+import { State, createStore } from '../../../../store';
+import { IpOverviewId } from '../../../field_renderers/field_renderers';
 
 import { FlowTargetSelectConnected } from './index';
-import { IpOverviewId } from '../../../field_renderers/field_renderers';
 
 describe('Flow Target Select Connected', () => {
   const state: State = mockGlobalState;

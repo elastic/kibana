@@ -7,13 +7,14 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { ThemeProvider } from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 
-import { LoadMoreTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { ThemeProvider } from 'styled-components';
+
+import { LoadMoreTable } from './index';
 
 describe('Load More Table Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });

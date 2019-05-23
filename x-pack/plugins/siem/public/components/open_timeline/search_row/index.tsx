@@ -20,7 +20,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OpenTimelineProps } from '../types';
-
 import * as i18n from '../translations';
 
 const ShowingContainer = styled.div`

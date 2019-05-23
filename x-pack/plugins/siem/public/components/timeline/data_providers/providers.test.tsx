@@ -12,7 +12,7 @@ import { TestProviders } from '../../../mock/test_providers';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 
 import { mockDataProviders } from './mock/mock_data_providers';
-import { getDraggableId, Providers } from './providers';
+import { Providers, getDraggableId } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 
 describe('Providers', () => {

@@ -7,8 +7,9 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
+
+import { SiemNavigationComponent } from './';
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),

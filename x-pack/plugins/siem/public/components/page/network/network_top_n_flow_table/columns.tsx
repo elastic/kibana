@@ -12,8 +12,8 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import {
   FlowDirection,
   FlowTarget,
-  TopNFlowNetworkEcsField,
   NetworkTopNFlowEdges,
+  TopNFlowNetworkEcsField,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
@@ -26,9 +26,9 @@ import { Columns } from '../../../load_more_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
+import { getRowItemDraggables } from '../../../tables/helpers';
 
 import * as i18n from './translations';
-import { getRowItemDraggables } from '../../../tables/helpers';
 
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,

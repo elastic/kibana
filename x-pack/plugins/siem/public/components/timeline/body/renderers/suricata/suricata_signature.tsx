@@ -14,11 +14,11 @@ import { escapeDataProviderId } from '../../../../drag_and_drop/helpers';
 import { ExternalLinkIcon } from '../../../../external_link_icon';
 import { GoogleLink } from '../../../../links';
 import { Provider } from '../../../../timeline/data_providers/provider';
-
 import { TokensFlexItem } from '../helpers';
-import { getBeginningTokens } from './suricata_links';
 import { DefaultDraggable } from '../../../../draggables';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
+
+import { getBeginningTokens } from './suricata_links';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';

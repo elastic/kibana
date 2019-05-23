@@ -13,13 +13,13 @@ import { pure } from 'recompose';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
-
-import * as i18n from './translations';
 import { NetflowRenderer } from '../netflow';
 import { UserHostWorkingDir } from '../user_host_working_dir';
-import { TokensFlexItem, Details } from '../helpers';
+import { Details, TokensFlexItem } from '../helpers';
 import { ProcessDraggableWithNonExistentProcess } from '../process_draggable';
 import { Args } from '../args';
+
+import * as i18n from './translations';
 import { AuthSsh } from './auth_ssh';
 import { Package } from './package';
 

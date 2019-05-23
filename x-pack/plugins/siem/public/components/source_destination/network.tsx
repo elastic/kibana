@@ -16,10 +16,10 @@ import { DefaultDraggable, DraggableBadge } from '../draggables';
 
 import * as i18n from './translations';
 import {
-  NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_BYTES_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
 

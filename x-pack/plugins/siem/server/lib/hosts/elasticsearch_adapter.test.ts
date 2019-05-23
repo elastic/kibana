@@ -9,13 +9,13 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchHostsAdapter, formatHostEdgesData } from './elasticsearch_adapter';
 import {
+  mockGetHostLastFirstSeenOptions,
+  mockGetHostLastFirstSeenRequest,
+  mockGetHostLastFirstSeenResponse,
   mockGetHostOverviewOptions,
   mockGetHostOverviewRequest,
   mockGetHostOverviewResponse,
   mockGetHostOverviewResult,
-  mockGetHostLastFirstSeenOptions,
-  mockGetHostLastFirstSeenRequest,
-  mockGetHostLastFirstSeenResponse,
   mockGetHostsOptions,
   mockGetHostsRequest,
   mockGetHostsResponse,

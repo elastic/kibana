@@ -13,15 +13,16 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowDirection } from '../../../../graphql/types';
 import {
-  apolloClientObservable,
-  mockIndexPattern,
-  mockGlobalState,
   TestProviders,
+  apolloClientObservable,
+  mockGlobalState,
+  mockIndexPattern,
 } from '../../../../mock';
-import { createStore, networkModel, State } from '../../../../store';
+import { State, createStore, networkModel } from '../../../../store';
+
+import { mockData } from './mock';
 
 import { NetworkTopNFlowTable, NetworkTopNFlowTableId } from '.';
-import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {
   const loadMore = jest.fn();

@@ -12,11 +12,11 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import {
-  hostsModel,
-  hostsSelectors,
   KueryFilterQuery,
   SerializedFilterQuery,
   State,
+  hostsModel,
+  hostsSelectors,
 } from '../../store';
 import { hostsActions } from '../../store/actions';
 

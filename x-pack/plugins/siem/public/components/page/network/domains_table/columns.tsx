@@ -12,11 +12,11 @@ import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
+  DomainsEdges,
   DomainsItem,
   DomainsNetworkField,
   FlowDirection,
   FlowTarget,
-  DomainsEdges,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';

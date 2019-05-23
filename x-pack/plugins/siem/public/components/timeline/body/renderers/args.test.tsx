@@ -11,6 +11,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
 import { getEmptyString } from '../../../empty_value';
+
 import { Args } from './args';
 
 describe('Args', () => {

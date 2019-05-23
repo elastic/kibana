@@ -13,10 +13,10 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import {
   KueryFilterQuery,
-  networkModel,
-  networkSelectors,
   SerializedFilterQuery,
   State,
+  networkModel,
+  networkSelectors,
 } from '../../store';
 import { networkActions } from '../../store/actions';
 

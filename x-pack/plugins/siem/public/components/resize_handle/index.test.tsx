@@ -11,14 +11,15 @@ import * as React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
 
+import { CellResizeHandle } from './styled_handles';
+
 import {
+  Resizeable,
   addGlobalResizeCursorStyleToBody,
   globalResizeCursorClassName,
   isResizing,
   removeGlobalResizeCursorStyleFromBody,
-  Resizeable,
 } from '.';
-import { CellResizeHandle } from './styled_handles';
 
 describe('Resizeable', () => {
   afterEach(() => {

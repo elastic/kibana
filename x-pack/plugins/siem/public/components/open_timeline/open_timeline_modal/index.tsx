@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { StatefulOpenTimeline } from '..';
 
 import { ApolloConsumer } from 'react-apollo';
+
 import * as i18n from '../translations';
 
 export interface OpenTimelineModalButtonProps {

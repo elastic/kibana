@@ -9,6 +9,7 @@ import React from 'react';
 
 import { Row } from '../helpers';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
+
 import { ZeekDetails } from './zeek_details';
 
 export const zeekRowRenderer: RowRenderer = {

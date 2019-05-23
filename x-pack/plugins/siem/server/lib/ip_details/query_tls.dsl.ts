@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createQueryFilterClauses, assertUnreachable } from '../../utils/build_query';
+import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
+import { Direction, TlsFields, TlsSortField } from '../../graphql/types';
 
 import { TlsRequestOptions } from './index';
-import { TlsSortField, Direction, TlsFields } from '../../graphql/types';
 
 const getAggs = (limit: number, tlsSortField: TlsSortField) => ({
   count: {

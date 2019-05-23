@@ -10,12 +10,13 @@ import { set } from 'lodash/fp';
 import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import { createStore, State } from '../../store';
+import { TestProviders, apolloClientObservable, mockGlobalState } from '../../mock';
+import { State, createStore } from '../../store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 
-import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
 import { FlyoutButton } from './button';
+
+import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
 
 const testFlyoutHeight = 980;
 const usersViewing = ['elastic'];

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import * as React from 'react';
 
 import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
+
 import { AreaChartData } from '.';
 
 describe('AreaChartBaseComponent', () => {

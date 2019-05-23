@@ -18,7 +18,7 @@ import { Note } from './note';
 import { PinnedEvent } from './pinned_event';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
-import { Sources, SourceConfiguration } from './sources';
+import { SourceConfiguration, Sources } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
 import { Timeline } from './timeline';
 

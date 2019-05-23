@@ -17,12 +17,12 @@ import {
   OnToggleShowNotes,
   OpenTimelineResult,
 } from '../types';
+import * as i18n from '../translations';
+
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-
-import * as i18n from '../translations';
 
 const TimelinesTableContainer = styled.div`
   .euiTableCellContent {

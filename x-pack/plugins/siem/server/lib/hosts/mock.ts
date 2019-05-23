@@ -7,8 +7,8 @@
 import { Direction, HostsFields } from '../../graphql/types';
 
 import {
-  HostOverviewRequestOptions,
   HostLastFirstSeenRequestOptions,
+  HostOverviewRequestOptions,
   HostsRequestOptions,
 } from '.';
 

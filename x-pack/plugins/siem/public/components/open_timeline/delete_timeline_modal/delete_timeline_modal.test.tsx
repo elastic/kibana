@@ -7,9 +7,9 @@
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
-import { DeleteTimelineModal } from './delete_timeline_modal';
-
 import * as i18n from '../translations';
+
+import { DeleteTimelineModal } from './delete_timeline_modal';
 
 describe('DeleteTimelineModal', () => {
   test('it renders the expected title when a title is specified', () => {

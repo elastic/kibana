@@ -14,7 +14,6 @@ import { getEmptyTagValue } from '../../empty_value';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';
 import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
-
 import * as i18n from '../translations';
 
 /** the width of the description column when showing extended columns */

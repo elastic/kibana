@@ -7,8 +7,8 @@
 import React, { PureComponent } from 'react';
 
 import { BrowserFields } from '../../../containers/source';
-
 import { OnDataProviderEdited } from '../events';
+
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 import { QueryOperator } from './data_provider';

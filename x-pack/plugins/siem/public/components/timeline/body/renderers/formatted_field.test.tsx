@@ -11,6 +11,7 @@ import * as React from 'react';
 
 import { mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
 import { FormattedFieldValue } from './formatted_field';
 
 describe('Events', () => {

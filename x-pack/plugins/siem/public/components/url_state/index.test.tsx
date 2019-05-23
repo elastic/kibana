@@ -9,26 +9,27 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { ActionCreator } from 'typescript-fsa';
 
+import { TestProviders, apolloClientObservable, mockGlobalState } from '../../mock';
 import {
-  isKqlForRoute,
-  UrlStateContainer,
-  UrlStateContainerLifecycle,
-  UrlStateContainerLifecycleProps,
-} from './';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import {
+  KueryFilterModel,
+  KueryFilterQuery,
+  SerializedFilterQuery,
+  State,
   createStore,
   hostsModel,
   networkModel,
-  State,
-  KueryFilterQuery,
-  SerializedFilterQuery,
-  KueryFilterModel,
 } from '../../store';
-import { ActionCreator } from 'typescript-fsa';
 import { InputsModelId } from '../../store/inputs/model';
 import { wait } from '../../lib/helpers';
+
+import {
+  UrlStateContainer,
+  UrlStateContainerLifecycle,
+  UrlStateContainerLifecycleProps,
+  isKqlForRoute,
+} from './';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';

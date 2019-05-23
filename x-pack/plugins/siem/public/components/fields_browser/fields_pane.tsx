@@ -16,7 +16,6 @@ import { Category } from './category';
 import { FieldBrowserProps } from './types';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
-
 import * as i18n from './translations';
 
 const NoFieldsPanel = styled.div`

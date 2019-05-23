@@ -13,10 +13,10 @@ import { ActionCreator } from 'typescript-fsa';
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import {
+  State,
   appSelectors,
   inputsModel,
   inputsSelectors,
-  State,
   timelineSelectors,
 } from '../../../store';
 import { UpdateNote } from '../../notes/helpers';

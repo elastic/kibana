@@ -11,6 +11,7 @@ import * as React from 'react';
 
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult, TimelineResultNote } from '../types';
+
 import { NotePreviews } from '.';
 
 describe('NotePreviews', () => {

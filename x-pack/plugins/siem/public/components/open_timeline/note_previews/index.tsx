@@ -9,8 +9,9 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { NotePreview } from './note_preview';
 import { TimelineResultNote } from '../types';
+
+import { NotePreview } from './note_preview';
 
 const NotePreviewsContainer = styled.div<{ paddingLeft: number }>`
   padding-left: ${({ paddingLeft }) => `${paddingLeft}px`};

@@ -9,7 +9,7 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../mock';
-import { createStore, State } from '../../store';
+import { State, createStore } from '../../store';
 
 import { SuperDatePicker } from '.';
 

@@ -7,10 +7,12 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+
 import { TestProviders } from '../../../../mock';
 
-import { HostOverview } from './index';
 import { mockData } from './mock';
+
+import { HostOverview } from './index';
 
 describe('Host Summary Component', () => {
   // this is just a little hack to silence a warning that we'll get until react

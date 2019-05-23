@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { ExternalLinkIcon } from '../../../../external_link_icon';
+
 import { getLinksFromSignature } from './suricata_links';
 
 const LinkEuiFlexItem = styled(EuiFlexItem)`

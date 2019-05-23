@@ -13,10 +13,10 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import { KueryFilterQuery, SerializedFilterQuery, timelineSelectors } from '../../../store';
 import { State } from '../../../store';
-
-import { SearchOrFilter } from './search_or_filter';
 import { timelineActions } from '../../../store/actions';
 import { KqlMode, TimelineModel } from '../../../store/timeline/model';
+
+import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
   indexPattern: StaticIndexPattern;

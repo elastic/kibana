@@ -18,12 +18,12 @@ import {
   HostAggEsData,
   HostAggEsItem,
   HostBuckets,
-  HostOverviewRequestOptions,
   HostEsData,
   HostLastFirstSeenRequestOptions,
+  HostOverviewRequestOptions,
+  HostValue,
   HostsAdapter,
   HostsRequestOptions,
-  HostValue,
 } from './types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {

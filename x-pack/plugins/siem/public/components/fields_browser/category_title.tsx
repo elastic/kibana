@@ -5,15 +5,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { pure } from 'recompose';
 import * as React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
+import { CountBadge } from '../page';
 
 import { getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
-
-import { CountBadge } from '../page';
 
 const CountBadgeContainer = styled.div`
   position: relative;

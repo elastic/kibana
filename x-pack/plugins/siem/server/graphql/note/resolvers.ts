@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
+import { AppResolverOf, AppResolverWithFields } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
 import { Note } from '../../lib/note';
 

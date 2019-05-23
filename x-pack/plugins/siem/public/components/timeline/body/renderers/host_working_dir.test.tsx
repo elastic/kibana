@@ -6,10 +6,10 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-
 import * as React from 'react';
 
-import { mockTimelineData, TestProviders } from '../../../../mock';
+import { TestProviders, mockTimelineData } from '../../../../mock';
+
 import { HostWorkingDir } from './host_working_dir';
 
 describe('HostWorkingDir', () => {

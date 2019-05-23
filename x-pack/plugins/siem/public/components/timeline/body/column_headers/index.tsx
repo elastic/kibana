@@ -15,9 +15,9 @@ import { BrowserFields } from '../../../../containers/source';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../../../drag_and_drop/droppable_wrapper';
 import {
+  DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
   getDraggableFieldId,
-  DRAG_TYPE_FIELD,
 } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
@@ -29,11 +29,11 @@ import {
   OnUpdateColumns,
 } from '../../events';
 import { Sort } from '../sort';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 
 import { ColumnHeader } from './column_header';
 import { EventsSelect } from './events_select';
 import { Header } from './header';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 
 const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
   overflow: hidden;

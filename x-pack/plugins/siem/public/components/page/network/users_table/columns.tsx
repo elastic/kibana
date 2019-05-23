@@ -7,9 +7,9 @@
 import { FlowTarget, UsersItem } from '../../../../graphql/types';
 import { defaultToEmptyTag } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
+import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 
 import * as i18n from './translations';
-import { getRowItemDraggables, getRowItemDraggable } from '../../../tables/helpers';
 
 export const getUsersColumns = (
   flowTarget: FlowTarget,

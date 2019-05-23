@@ -14,7 +14,6 @@ import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_ada
 import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
 import { KpiHosts } from '../kpi_hosts';
 import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter';
-
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { ElasticsearchIpOverviewAdapter, IpDetails } from '../ip_details';
 import { KpiNetwork } from '../kpi_network';

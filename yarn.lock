@@ -10743,6 +10743,14 @@ eslint-import-resolver-webpack@^0.10.1:
     resolve "^1.4.0"
     semver "^5.3.0"
 
+eslint-module-utils@^2.2.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/eslint-module-utils/-/eslint-module-utils-2.4.0.tgz#8b93499e9b00eab80ccb6614e69f03678e84e09a"
+  integrity sha512-14tltLm38Eu3zS+mt0KvILC3q8jyIAH518MlG+HO0p+yK885Lb1UHTY/UgR91eOyGdmxAPb+OLoW4znqIT6Ndw==
+  dependencies:
+    debug "^2.6.8"
+    pkg-dir "^2.0.0"
+
 eslint-module-utils@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/eslint-module-utils/-/eslint-module-utils-2.3.0.tgz#546178dab5e046c8b562bbb50705e2456d7bda49"
@@ -10764,6 +10772,15 @@ eslint-plugin-ban@^1.2.0:
   integrity sha512-UKdGRnKnaTo8dFnLYEgErBBmcDW1p/OtqFDdYz4a1QBduJpJFSNllz06psu53YMBShVK5bLGg798/E9LGf1bog==
   dependencies:
     requireindex "~1.2.0"
+
+eslint-plugin-import-order-alphabetical@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-import-order-alphabetical/-/eslint-plugin-import-order-alphabetical-0.0.2.tgz#301e1a7d7cef3790f417d4dceb4b62291ac5ddff"
+  integrity sha512-9WBxC3RzQrJTAJ/epl64k4pvug/Le1OvhydICoQydK/2M4+36lnAlsn/3dsvXR+1WnRuc2mziNTkFUs+tx+22w==
+  dependencies:
+    eslint-module-utils "^2.2.0"
+    lodash "^4.17.4"
+    resolve "^1.6.0"
 
 eslint-plugin-import@^2.16.0:
   version "2.16.0"
@@ -23137,6 +23154,13 @@ resolve@^1.5.0, resolve@^1.7.1:
   integrity sha512-c7rwLofp8g1U+h1KNyHL/jicrKg1Ek4q+Lr33AL65uZTinUZHe30D5HlyN5V9NW0JX1D5dXQ4jqW5l7Sy/kGfw==
   dependencies:
     path-parse "^1.0.5"
+
+resolve@^1.6.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.11.0.tgz#4014870ba296176b86343d50b60f3b50609ce232"
+  integrity sha512-WL2pBDjqT6pGUNSUzMw00o4T7If+z4H2x3Gz893WoUQ5KW8Vr9txp00ykiP16VBaZF5+j/OcXJHZ9+PCvdiDKw==
+  dependencies:
+    path-parse "^1.0.6"
 
 responselike@1.0.2:
   version "1.0.2"

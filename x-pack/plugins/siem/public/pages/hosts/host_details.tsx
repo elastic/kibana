@@ -18,7 +18,7 @@ import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
+import { HostComponentProps, getHostsUrl } from '../../components/link_to/redirect_to_hosts';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostOverview } from '../../components/page/hosts/host_overview';
@@ -27,15 +27,15 @@ import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { LastEventIndexKey } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
-import { hostsModel, hostsSelectors, State } from '../../store';
+import { State, hostsModel, hostsSelectors } from '../../store';
+import { UrlStateContainer } from '../../components/url_state';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { UrlStateContainer } from '../../components/url_state';
 
 const basePath = chrome.getBasePath();
 const type = hostsModel.HostsType.details;

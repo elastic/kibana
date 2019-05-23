@@ -6,14 +6,13 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
-
 import { isNumber } from 'lodash/fp';
-import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 
+import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
-import { Port, PORT_NAMES } from '../../../port';
+import { PORT_NAMES, Port } from '../../../port';
 
 export const DATE_FIELD_TYPE = 'date';
 export const IP_FIELD_TYPE = 'ip';

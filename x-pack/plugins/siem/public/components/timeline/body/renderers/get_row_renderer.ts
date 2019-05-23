@@ -5,6 +5,7 @@
  */
 
 import { Ecs } from '../../../../graphql/types';
+
 import { RowRenderer } from './row_renderer';
 
 const unhandledRowRenderer = (): never => {

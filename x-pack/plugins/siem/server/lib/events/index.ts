@@ -11,6 +11,7 @@ import {
   TimelineDetailsData,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
+
 export * from './elasticsearch_adapter';
 import {
   EventsAdapter,

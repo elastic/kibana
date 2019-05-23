@@ -6,15 +6,15 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-
-import { Overview } from './index';
-
-import { mocksSource } from '../../containers/source/mock';
-import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 
+import { mocksSource } from '../../containers/source/mock';
+import { TestProviders } from '../../mock';
+
 import * as i18n from './translations';
+
+import { Overview } from './index';
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {

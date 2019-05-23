@@ -5,6 +5,7 @@
  */
 
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
+
 import { SavedPinnedEvent } from './types';
 
 export const pinnedEventSavedObjectType = 'siem-ui-timeline-pinned-event';

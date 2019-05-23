@@ -9,7 +9,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { Note } from '../../lib/note';
 import { TimelineModel } from '../../store/timeline/model';
-import { SerializedFilterQuery, KueryFilterQuery } from '../../store';
+import { KueryFilterQuery, SerializedFilterQuery } from '../../store';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 /** The users who added a timeline to favorites */

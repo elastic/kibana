@@ -6,18 +6,17 @@
 
 import dateMath from '@elastic/datemath';
 import ApolloClient from 'apollo-client';
-import { getOr, assign } from 'lodash/fp';
+import { assign, getOr } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 
 import { SortFieldTimeline } from '../../../server/graphql/types';
 import {
-  defaultHeaders,
   defaultColumnHeaderType,
+  defaultHeaders,
 } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables } from '../../containers/timeline/all';
-
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
 import { DeleteTimelineMutation, GetOneTimeline, TimelineResult } from '../../graphql/types';
@@ -26,37 +25,38 @@ import { State, timelineSelectors } from '../../store';
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
-  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   createTimeline as dispatchCreateNewTimeline,
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
 import { TimelineModel } from '../../store/timeline/model';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { AllTimelinesQuery } from '../../containers/timeline/all';
+import { Direction } from '../../graphql/types';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineModal } from './open_timeline_modal/open_timeline_modal';
 import {
   DeleteTimelines,
   EuiSearchBarQuery,
+  OnDeleteOneTimeline,
   OnDeleteSelected,
   OnOpenTimeline,
   OnQueryChange,
   OnSelectionChange,
   OnTableChange,
   OnTableChangeParams,
-  OpenTimelineProps,
   OnToggleOnlyFavorites,
-  OpenTimelineResult,
   OnToggleShowNotes,
-  OnDeleteOneTimeline,
   OpenTimelineDispatchProps,
+  OpenTimelineProps,
   OpenTimelineReduxProps,
+  OpenTimelineResult,
 } from './types';
-import { AllTimelinesQuery } from '../../containers/timeline/all';
-import { Direction } from '../../graphql/types';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 export const DEFAULT_SORT_FIELD = 'updated';
 export const DEFAULT_SORT_DIRECTION = 'desc';

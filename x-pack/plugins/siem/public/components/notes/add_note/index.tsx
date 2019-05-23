@@ -13,9 +13,9 @@ import { MarkdownHint } from '../../markdown/markdown_hint';
 import {
   AssociateNote,
   GetNewNoteId,
-  updateAndAssociateNode,
   UpdateInternalNewNote,
   UpdateNote,
+  updateAndAssociateNode,
 } from '../helpers';
 import * as i18n from '../translations';
 

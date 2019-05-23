@@ -8,6 +8,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../draggables';
+
 import { TokensFlexItem } from './helpers';
 
 interface Props {

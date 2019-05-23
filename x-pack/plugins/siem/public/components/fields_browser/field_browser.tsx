@@ -15,10 +15,10 @@ import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import {
   CATEGORY_PANE_WIDTH,
   FIELDS_PANE_WIDTH,
+  PANES_FLEX_GROUP_WIDTH,
   getCategoryPaneCategoryClassName,
   getFieldBrowserCategoryTitleClassName,
   getFieldBrowserSearchInputClassName,
-  PANES_FLEX_GROUP_WIDTH,
 } from './helpers';
 import { FieldBrowserProps, OnFieldSelected, OnHideFieldBrowser } from './types';
 import { Header } from './header';

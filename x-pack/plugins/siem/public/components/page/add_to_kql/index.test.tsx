@@ -10,12 +10,12 @@ import * as React from 'react';
 
 import { escapeQueryValue } from '../../../lib/keury';
 import {
+  TestProviders,
   apolloClientObservable,
   mockGlobalState,
-  TestProviders,
   mockIndexPattern,
 } from '../../../mock';
-import { createStore, hostsModel, networkModel, State } from '../../../store';
+import { State, createStore, hostsModel, networkModel } from '../../../store';
 
 import { AddToKql } from '.';
 

@@ -7,7 +7,6 @@
 import * as React from 'react';
 
 import { defaultToEmptyTag } from '../../empty_value';
-
 import * as i18n from '../translations';
 import { OpenTimelineResult } from '../types';
 

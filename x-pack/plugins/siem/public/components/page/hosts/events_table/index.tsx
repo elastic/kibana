@@ -14,16 +14,16 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { hostsActions } from '../../../../store/actions';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
-import { hostsModel, hostsSelectors, State } from '../../../../store';
+import { State, hostsModel, hostsSelectors } from '../../../../store';
 import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-
-import * as i18n from './translations';
 import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { MoreRowItems } from '../../index';
+
+import * as i18n from './translations';
 
 interface OwnProps {
   data: Ecs[];

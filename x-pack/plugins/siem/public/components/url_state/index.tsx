@@ -10,22 +10,22 @@ import React from 'react';
 import { pure } from 'recompose';
 import { connect } from 'react-redux';
 import { Route, RouteProps } from 'react-router-dom';
-import { decode, encode, RisonValue } from 'rison-node';
-
+import { RisonValue, decode, encode } from 'rison-node';
 import { QueryString } from 'ui/utils/query_string';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
+
 import { hostsActions, inputsActions, networkActions } from '../../store/actions';
 import {
+  KueryFilterModel,
+  KueryFilterQuery,
+  SerializedFilterQuery,
+  State,
   hostsModel,
   hostsSelectors,
   inputsSelectors,
-  KueryFilterModel,
-  KueryFilterQuery,
   networkModel,
   networkSelectors,
-  SerializedFilterQuery,
-  State,
 } from '../../store';
 import {
   InputsModelId,
@@ -57,6 +57,7 @@ type KeyUrlState = keyof UrlState;
 
 interface UrlStateProps {
   indexPattern: StaticIndexPattern;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mapToUrlState?: (value: any) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
@@ -394,6 +395,7 @@ export const UrlStateContainer = connect(
   // @ts-ignore
 )(UrlStateComponents);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
   try {
     return value ? decode(value) : undefined;
@@ -405,6 +407,7 @@ export const decodeRisonUrlState = (value: string | undefined): RisonValue | any
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
@@ -414,6 +417,7 @@ export const getParamFromQueryString = (queryString: string, key: string): strin
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined

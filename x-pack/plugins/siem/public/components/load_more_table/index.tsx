@@ -15,7 +15,7 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import { isEmpty, noop, getOr } from 'lodash/fp';
+import { getOr, isEmpty, noop } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 

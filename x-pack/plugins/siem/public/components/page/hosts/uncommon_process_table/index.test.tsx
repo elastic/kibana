@@ -13,8 +13,9 @@ import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 
-import { getArgs, UncommonProcessTable } from '.';
 import { mockData } from './mock';
+
+import { UncommonProcessTable, getArgs } from '.';
 
 describe('UncommonProcess Table Component', () => {
   const loadMore = jest.fn();

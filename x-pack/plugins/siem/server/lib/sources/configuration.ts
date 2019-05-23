@@ -5,8 +5,9 @@
  */
 import { ConfigurationAdapter } from '../configuration';
 
-import { SourcesAdapter, SourceConfiguration } from './index';
 import { PartialSourceConfigurations } from './types';
+
+import { SourceConfiguration, SourcesAdapter } from './index';
 
 interface ConfigurationWithSources {
   sources?: PartialSourceConfigurations;

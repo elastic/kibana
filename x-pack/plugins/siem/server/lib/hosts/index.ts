@@ -8,8 +8,8 @@ import { FirstLastSeenHost, HostItem, HostsData } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 
 import {
-  HostOverviewRequestOptions,
   HostLastFirstSeenRequestOptions,
+  HostOverviewRequestOptions,
   HostsAdapter,
   HostsRequestOptions,
 } from './types';

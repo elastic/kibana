@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
 import { StaticIndexPattern } from 'ui/index_patterns';
 

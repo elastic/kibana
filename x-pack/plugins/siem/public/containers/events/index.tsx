@@ -8,11 +8,11 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../..';
 import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import { State, hostsModel, hostsSelectors, inputsModel } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 

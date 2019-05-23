@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiModal, EuiToolTip, EuiOverlayMask } from '@elastic/eui';
+import { EuiButtonIcon, EuiModal, EuiOverlayMask, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
 import { DeleteTimelines } from '../types';
-import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
-
 import * as i18n from '../translations';
+
+import { DELETE_TIMELINE_MODAL_WIDTH, DeleteTimelineModal } from './delete_timeline_modal';
 
 interface Props {
   deleteTimelines?: DeleteTimelines;

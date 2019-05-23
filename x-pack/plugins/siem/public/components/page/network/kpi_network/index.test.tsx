@@ -10,10 +10,11 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../../../mock';
-import { createStore, State } from '../../../../store';
+import { State, createStore } from '../../../../store';
+
+import { mockData } from './mock';
 
 import { KpiNetworkComponent } from '.';
-import { mockData } from './mock';
 
 describe('KpiNetwork Component', () => {
   const state: State = mockGlobalState;
