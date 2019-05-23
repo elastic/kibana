@@ -8,41 +8,50 @@ import {
   Axis,
   BarSeries,
   Chart,
-  CustomSeriesColorsMap,
   getAxisId,
   getSpecId,
   Position,
   ScaleType,
   timeFormatter,
-  DataSeriesColorsValues,
 } from '@elastic/charts';
+import DateMath from '@elastic/datemath';
 // @ts-ignore Missing typings for series charts
 import { EuiHistogramSeries, EuiSeriesChart, EuiSeriesChartUtils } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { HistogramDataPoint } from '../../../common/graphql/types';
+import { getColorsMap } from './charts/get_colors_map';
+import { getChartDateLabel } from '../../lib/helper';
 
 export interface SnapshotHistogramProps {
+  dateRangeStart: string;
+  dateRangeEnd: string;
   successColor: string;
   dangerColor: string;
   histogram: HistogramDataPoint[];
 }
 
 export const SnapshotHistogram = ({
+  dateRangeStart,
+  dateRangeEnd,
   dangerColor,
   histogram,
   successColor,
 }: SnapshotHistogramProps) => {
+  const min = DateMath.parse(dateRangeStart);
+  const max = DateMath.parse(dateRangeEnd);
+  if (!max || !min) {
+    return null;
+  }
   const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
   });
-  const dangerSpecId = getSpecId(downMonitorsName);
-  const c: CustomSeriesColorsMap = new Map();
-  const dangerColorValues: DataSeriesColorsValues = {
-    colorValues: ['Down Monitors'],
-    specId: dangerSpecId,
-  };
-  c.set(dangerColorValues, dangerColor);
+  const downSpecId = getSpecId(downMonitorsName);
+
+  const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
+    defaultMessage: 'Up',
+  });
+  const upSpecId = getSpecId(upMonitorsId);
   return (
     <Fragment>
       <Chart renderer="canvas">
@@ -53,7 +62,7 @@ export const SnapshotHistogram = ({
             })
           )}
           position={Position.Bottom}
-          tickFormat={timeFormatter('HH:mm')}
+          tickFormat={timeFormatter(getChartDateLabel(min.valueOf(), max.valueOf()))}
           showOverlappingTicks={false}
         />
         <Axis
@@ -67,12 +76,9 @@ export const SnapshotHistogram = ({
           showOverlappingTicks={true}
         />
         <BarSeries
-          customSeriesColors={c}
-          id={getSpecId(
-            i18n.translate('xpack.uptime.snapshotHistogram.upMonitorsId', {
-              defaultMessage: 'Up Monitors',
-            })
-          )}
+          customSeriesColors={getColorsMap(successColor, upSpecId)}
+          id={upSpecId}
+          name={upMonitorsId}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -81,8 +87,11 @@ export const SnapshotHistogram = ({
           data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
         />
         <BarSeries
-          customSeriesColors={c}
-          id={dangerSpecId}
+          customSeriesColors={getColorsMap(dangerColor, downSpecId)}
+          id={downSpecId}
+          name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+            defaultMessage: 'Down',
+          })}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -91,28 +100,6 @@ export const SnapshotHistogram = ({
           data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
         />
       </Chart>
-      {/* <EuiSeriesChart
-      width={windowWidth * windowRatio}
-      height={120}
-      stackBy="y"
-      xType={EuiSeriesChartUtils.SCALE.TIME}
-      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-    >
-      <EuiHistogramSeries
-        data={histogram.map(({ x, x0, upCount }) => ({ x, x0, y: upCount }))}
-        name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
-          defaultMessage: 'Up',
-        })}
-        color={primaryColor}
-      />
-      <EuiHistogramSeries
-        data={histogram.map(({ x, x0, downCount }) => ({ x, x0, y: downCount }))}
-        name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-          defaultMessage: 'Down',
-        })}
-        color={dangerColor}
-      />
-    </EuiSeriesChart> */}
     </Fragment>
   );
 };

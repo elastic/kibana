@@ -31,7 +31,7 @@ const array: Array<{ key: number; value: string }> = [
   },
   {
     key: FOUR_YEARS,
-    value: 'YYYY-MM',
+    value: 'yyyy-MM',
   },
 ];
 
@@ -46,5 +46,5 @@ export const getLabelFormat = (delta: number): string => {
       return value;
     }
   }
-  return 'YYYY';
+  return 'yyyy';
 };

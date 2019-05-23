@@ -35,11 +35,18 @@ interface SnapshotQueryResult {
 
 interface SnapshotProps {
   colors: UptimeAppColors;
+  dateRangeStart: string;
+  dateRangeEnd: string;
 }
 
 type Props = UptimeGraphQLQueryProps<SnapshotQueryResult> & SnapshotProps;
 
-export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) =>
+export const SnapshotComponent = ({
+  colors: { danger, success },
+  data,
+  dateRangeStart,
+  dateRangeEnd,
+}: Props) =>
   data && data.snapshot ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={4}>
@@ -107,6 +114,8 @@ export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) 
           {data.snapshot.histogram && (
             <SnapshotHistogram
               dangerColor={danger}
+              dateRangeStart={dateRangeStart}
+              dateRangeEnd={dateRangeEnd}
               histogram={data.snapshot.histogram}
               successColor={success}
             />

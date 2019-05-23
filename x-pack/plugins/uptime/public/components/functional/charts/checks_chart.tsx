@@ -22,6 +22,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Moment } from 'moment';
 import { StatusData } from '../../../../common/graphql/types';
+import { getChartDateLabel } from '../../../lib/helper';
 
 interface ChecksChartProps {
   /**
@@ -90,6 +91,9 @@ export const ChecksChart = ({
     return <div>Invalid date range</div>;
   }
 
+  const min = absoluteStart.valueOf();
+  const max = absoluteEnd.valueOf();
+
   return (
     <React.Fragment>
       <EuiTitle size="xs">
@@ -99,16 +103,12 @@ export const ChecksChart = ({
         <Chart renderer="canvas">
           {
             // @ts-ignore
-            <Settings
-              domain={{ min: absoluteStart.valueOf(), max: absoluteEnd.valueOf() }}
-              legendPosition={Position.Top}
-              showLegend={false}
-            />
+            <Settings domain={{ min, max }} legendPosition={Position.Top} showLegend={false} />
           }
           <Axis
             id={getAxisId('checksBottom')}
             position={Position.Bottom}
-            tickFormat={timeFormatter('HH:mm')}
+            tickFormat={timeFormatter(getChartDateLabel(min, max))}
             showOverlappingTicks={true}
           />
           <Axis

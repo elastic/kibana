@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BarSeries, Chart, getSpecId, ScaleType } from '@elastic/charts';
 import {
-  // @ts-ignore missing type definition
-  EuiHistogramSeries,
   EuiIcon,
   // @ts-ignore missing type definition
   EuiInMemoryTable,
@@ -27,12 +24,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { get } from 'lodash';
 import moment from 'moment';
-import { LatestMonitor, Ping } from '../../../common/graphql/types';
+import { LatestMonitor, Ping, MonitorSeriesPoint } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
-import { formatSparklineCounts } from './format_sparkline_counts';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
+import { MonitorBarSeries } from './charts';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
@@ -147,54 +144,17 @@ export const MonitorListComponent = ({
             ),
           },
           {
-            field: 'upSeries',
+            field: 'downSeries',
             width: '180px',
             align: 'right',
             name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
               defaultMessage: 'Downtime history',
             }),
-            // @ts-ignore TODO fix typing
-            render: (upSeries, monitor) => {
-              const { downSeries } = monitor;
-              return (
-                <div style={{ height: 50, width: '100%' }}>
-                  <Chart renderer="canvas">
-                    <BarSeries
-                      id={getSpecId('Down Monitors Sparkline')}
-                      xScaleType={ScaleType.Time}
-                      yScaleType={ScaleType.Linear}
-                      xAccessor={0}
-                      yAccessors={[1]}
-                      data={formatSparklineCounts(downSeries).map(({ x, y }) => [x, y])}
-                    />
-                  </Chart>
-                </div>
-                // <EuiSeriesChart
-                //   showDefaultAxis={false}
-                //   width={180}
-                //   height={70}
-                //   stackBy="y"
-                //   // TODO: style hack
-                //   style={{ marginBottom: '-20px' }}
-                //   xType={EuiSeriesChartUtils.SCALE.TIME}
-                //   xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-                // >
-                //   <EuiHistogramSeries
-                //     data={formatSparklineCounts(downSeries)}
-                //     name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
-                //       defaultMessage: 'Down',
-                //     })}
-                //     color={dangerColor}
-                //   />
-                //   <EuiHistogramSeries
-                //     data={formatSparklineCounts(upSeries)}
-                //     name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
-                //       defaultMessage: 'Up',
-                //     })}
-                //     color={primaryColor}
-                //   />
-                // </EuiSeriesChart>
-              );
+            render: (downSeries: MonitorSeriesPoint[] | undefined | null) => {
+              if (!downSeries) {
+                return null;
+              }
+              return <MonitorBarSeries dangerColor={dangerColor} downSeries={downSeries} />;
             },
           },
           {

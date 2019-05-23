@@ -91,7 +91,7 @@ export const DurationChart = ({
     ({ max, min }, { x }) => ({ max: Math.max(x, max), min: Math.min(x, min) }),
     {
       min: Date.now().valueOf(),
-      max: 0,
+      max: Date.now().valueOf(),
     }
   );
   return (
