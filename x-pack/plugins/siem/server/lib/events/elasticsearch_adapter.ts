@@ -56,10 +56,12 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
+    const queryOptions = cloneDeep(options);
+    queryOptions.fields = reduceFields(options.fields, eventFieldsMap);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      buildQuery(queryOptions)
     );
 
     const kpiEventType: KpiItem[] =
