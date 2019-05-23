@@ -37,33 +37,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
     });
 
-    describe('Time Series', () => {
-      beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage();
-      });
-
-      it('should show the correct count in the legend', async () => {
-        await retry.try(async () => {
-          const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-          expect(actualCount).to.be('156');
-        });
-      });
-
-      it('should show the correct count in the legend with 2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
-      });
-
-      it('should show the correct count in the legend with -2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
-      });
-    });
-
     describe('metric', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
