@@ -18,26 +18,23 @@
  */
 
 import { CoreSetup } from 'kibana/public';
+import { useRef, useEffect } from 'react';
+import React from 'react';
 
-// @ts-ignore
-import { fromExpression } from '@kbn/interpreter/common';
-const typedFromExpression = fromExpression as (expression: string) => Ast;
+import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 // this type import and the types below them should be switched to the types of
 // the interpreter plugin itself once they are ready
 import { RunPipelineHandlers } from 'ui/visualize/loader/pipeline_helpers/run_pipeline';
 import { Registry } from '@kbn/interpreter/common';
 import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
-import { useRef, useEffect } from 'react';
-import React from 'react';
 
-type Ast = unknown;
 type Context = object;
 type Handlers = RunPipelineHandlers;
-interface Result {
+export interface Result {
   type: string;
   as?: string;
-  value: unknown;
+  value?: unknown;
 }
 
 interface RenderHandlers {
@@ -45,7 +42,7 @@ interface RenderHandlers {
   onDestroy: (fn: () => void) => void;
 }
 
-interface RenderFunction {
+export interface RenderFunction {
   name: string;
   displayName: string;
   help: string;
@@ -54,15 +51,13 @@ interface RenderFunction {
   render: (domNode: Element, data: unknown, handlers: RenderHandlers) => void;
 }
 
-type RenderFunctionsRegistry = Registry<unknown, RenderFunction>;
+export type RenderFunctionsRegistry = Registry<unknown, RenderFunction>;
 
-interface Interpreter {
+export interface Interpreter {
   interpretAst(ast: Ast, context: Context, handlers: Handlers): Promise<Result>;
 }
 
-interface ExpressionExecutorSetupPlugins {
-  // TODO this types will be provided by the interpreter plugin itself
-  // once it's ready
+export interface ExpressionExecutorSetupPlugins {
   interpreter: {
     renderersRegistry: RenderFunctionsRegistry;
     getInterpreter: () => Promise<{ interpreter: Interpreter }>;
@@ -76,13 +71,14 @@ async function runFn(
   interpreter: Interpreter
 ) {
   const ast =
-    typeof expressionOrAst === 'string' ? typedFromExpression(expressionOrAst) : expressionOrAst;
+    typeof expressionOrAst === 'string' ? fromExpression(expressionOrAst) : expressionOrAst;
   const response = await interpreter.interpretAst(
     ast,
     { type: 'null' },
     {
       getInitialContext: () => ({}),
       inspectorAdapters: {
+        // TODO connect real adapters
         requests: new RequestAdapter(),
         data: new DataAdapter(),
       },
@@ -114,7 +110,13 @@ export class ExpressionExecutorService {
   private interpreterInstance: Interpreter | null = null;
 
   // TODO core won't ever be null once this is switched to the new platform
-  public setup(core: CoreSetup | null, plugins: ExpressionExecutorSetupPlugins) {
+  public setup(_core: CoreSetup | null, plugins: ExpressionExecutorSetupPlugins) {
+    /**
+     * Executes the given expression string or ast and renders the result into the
+     * given DOM element.
+     * @param expressionOrAst
+     * @param element
+     */
     const run = async (expressionOrAst: string | Ast, element: Element) => {
       if (!this.interpreterInstance) {
         this.interpreterInstance = (await plugins.interpreter.getInterpreter()).interpreter;
@@ -128,6 +130,13 @@ export class ExpressionExecutorService {
     };
     return {
       run,
+      /**
+       * Component which executes and renders the given expression in a div element.
+       * The expression is re-executed on updating the props.
+       *
+       * This is a React bridge of the `run` method
+       * @param props
+       */
       ExpressionRenderer({ expression }: { expression: string }) {
         const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
