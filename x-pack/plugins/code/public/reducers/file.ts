@@ -29,6 +29,8 @@ import {
   resetRepoTree,
   routeChange,
   setNotFound,
+  fetchRootRepoTreeSuccess,
+  fetchRootRepoTreeFailed,
 } from '../actions';
 
 export interface FileState {
@@ -132,6 +134,15 @@ export const file = handleActions(
             }
           }
         }
+      }),
+    [String(fetchRootRepoTreeSuccess)]: (state: FileState, action: Action<any>) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.rootFileTreeLoading = false;
+        draft.tree = mergeNode(draft.tree, action.payload!);
+      }),
+    [String(fetchRootRepoTreeFailed)]: (state: FileState, action: Action<any>) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.rootFileTreeLoading = false;
       }),
     [String(resetRepoTree)]: (state: FileState) =>
       produce<FileState>(state, (draft: FileState) => {
