@@ -708,3 +708,46 @@ test('#setBasePathFor() cannot be set twice for one request', async () => {
     `"Request basePath was previously set. Setting multiple times is not supported."`
   );
 });
+const cookieOptions = {
+  name: 'sid',
+  encryptionKey: 'something_at_least_32_characters',
+  validate: () => true,
+  isSecure: false,
+};
+
+test('Should enable auth for a route by default if registerAuth has been called', async () => {
+  const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('');
+  router.get({ path: '/', validate: false }, async (req, res) => res.ok({}));
+  registerRouter(router);
+
+  const authenticate = jest
+    .fn()
+    .mockImplementation((req, sessionStorage, t) => t.authenticated({}));
+  await registerAuth(authenticate, cookieOptions);
+
+  await server.start(config);
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200);
+
+  expect(authenticate).toHaveBeenCalledTimes(1);
+});
+
+test('Should support disabling auth for a route', async () => {
+  const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('');
+  router.get({ path: '/', validate: false, authRequired: false }, async (req, res) => res.ok({}));
+  registerRouter(router);
+  const authenticate = jest.fn();
+  await registerAuth(authenticate, cookieOptions);
+
+  await server.start(config);
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200);
+
+  expect(authenticate).not.toHaveBeenCalled();
+});
