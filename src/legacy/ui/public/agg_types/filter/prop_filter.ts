@@ -19,19 +19,16 @@
 
 import { isFunction } from 'lodash';
 
-interface FilterableItem {
-  [prop: string]: string;
-}
-type FilterFunc = (item: string) => boolean;
+type FilterFunc<P extends keyof T, T> = (item: T[P]) => boolean;
 
 /**
  * Filters out a list by a given filter. This is currently used to implement:
  *   - fieldType filters a list of fields by their type property
  *   - aggFilter filters a list of aggs by their name property
  *
- * @returns {function} - the filter function which can be registered with angular
+ * @returns the filter function which can be registered with angular
  */
-function propFilter(prop: string) {
+function propFilter<P extends string>(prop: P) {
   /**
    * List filtering function which accepts an array or list of values that a property
    * must contain
@@ -42,12 +39,12 @@ function propFilter(prop: string) {
    *   - Can be also an array, a single value as a string, or a comma-separated list of items
    * @return {array} - the filtered list
    */
-  return function filterByName(
-    list: FilterableItem[],
-    filters: string[] | string | FilterFunc = []
-  ): FilterableItem[] {
+  return function filterByName<T extends { [key in P]: T[P] }>(
+    list: T[],
+    filters: string[] | string | FilterFunc<P, T> = []
+  ): T[] {
     if (isFunction(filters)) {
-      return list.filter(item => (filters as FilterFunc)(item[prop]));
+      return list.filter(item => (filters as FilterFunc<P, T>)(item[prop]));
     }
 
     if (!Array.isArray(filters)) {
