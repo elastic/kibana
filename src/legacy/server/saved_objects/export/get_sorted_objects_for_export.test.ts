@@ -187,15 +187,18 @@ Array [
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "name",
         "type": "index-pattern",
       },
     ],
@@ -271,15 +274,18 @@ Array [
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "name",
         "type": "index-pattern",
       },
     ],
