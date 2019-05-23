@@ -133,7 +133,7 @@ export class InjectedMetadataService {
 /**
  * Provides access to the metadata injected by the server into the page
  *
- * @public
+ * @internal
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
@@ -173,5 +173,5 @@ export interface InjectedMetadataSetup {
   };
 }
 
-/** @public */
+/** @internal */
 export type InjectedMetadataStart = InjectedMetadataSetup;

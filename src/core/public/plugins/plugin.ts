@@ -18,8 +18,9 @@
  */
 
 import { DiscoveredPlugin, PluginName } from '../../server';
-import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
+import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
+import { CoreStart, CoreSetup } from '..';
 
 /**
  * The interface that should be returned by a `PluginInitializer`.
@@ -32,8 +33,8 @@ export interface Plugin<
   TPluginsSetup extends Record<string, unknown> = {},
   TPluginsStart extends Record<string, unknown> = {}
 > {
-  setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
-  start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+  setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+  start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
   stop?: () => void;
 }
 
@@ -98,7 +99,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: PluginSetupContext, plugins: TPluginsSetup) {
+  public async setup(setupContext: CoreSetup, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
     return await this.instance.setup(setupContext, plugins);
@@ -111,7 +112,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public async start(startContext: PluginStartContext, plugins: TPluginsStart) {
+  public async start(startContext: CoreStart, plugins: TPluginsStart) {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }

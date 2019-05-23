@@ -8,17 +8,18 @@ import React from 'react';
 import { EuiButton, EuiInMemoryTable, EuiLink, Query, EuiLoadingSpinner } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
-import { SNAPSHOT_STATE } from '../../../../constants';
+import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
+import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder } from '../../../../components';
 
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
   reload: () => Promise<void>;
-  openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
+  openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
 }
 
@@ -26,7 +27,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
   repositories,
   reload,
-  openSnapshotDetails,
+  openSnapshotDetailsUrl,
   repositoryFilter,
 }) => {
   const {
@@ -34,6 +35,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       i18n: { FormattedMessage, translate },
     },
   } = useAppDependencies();
+  const { trackUiMetric } = uiMetricService;
 
   const columns = [
     {
@@ -44,7 +46,10 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
-        <EuiLink onClick={() => openSnapshotDetails(snapshot.repository, snapshotId)}>
+        <EuiLink
+          onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
+          href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
+        >
           {snapshotId}
         </EuiLink>
       ),
