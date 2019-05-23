@@ -19,7 +19,7 @@
 
 import './core.css';
 
-import { CoreSetup, CoreStart } from '.';
+import { InternalCoreSetup, InternalCoreStart } from '.';
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -134,7 +134,7 @@ export class CoreSystem {
         notifications,
       });
 
-      const core: CoreSetup = {
+      const core: InternalCoreSetup = {
         application,
         basePath,
         chrome,
@@ -188,7 +188,7 @@ export class CoreSystem {
       });
       const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
 
-      const core: CoreStart = {
+      const core: InternalCoreStart = {
         application,
         basePath,
         chrome,
