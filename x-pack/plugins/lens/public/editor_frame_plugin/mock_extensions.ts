@@ -8,7 +8,6 @@ import { DatasourcePublicAPI, Visualization, Datasource } from '../types';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
-    getMappingOfTableToRoles: jest.fn((_state, _datasource) => []),
     getPersistableState: jest.fn(_state => ({})),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn(_state => ({})),

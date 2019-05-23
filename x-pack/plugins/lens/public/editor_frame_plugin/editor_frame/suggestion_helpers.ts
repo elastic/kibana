@@ -30,12 +30,6 @@ export function getSuggestions(
   visualizationState: unknown,
   datasourcePublicAPI: DatasourcePublicAPI
 ): Suggestion[] {
-  const roleMapping = activeVisualizationId
-    ? visualizationMap[activeVisualizationId].getMappingOfTableToRoles(
-        visualizationState,
-        datasourcePublicAPI
-      )
-    : [];
   const datasourceTableMetas: Record<string, TableColumn[]> = {};
   datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
     datasourceTableMetas[datasourceSuggestionId] = tableColumns;
@@ -47,7 +41,6 @@ export function getSuggestions(
         return visualization
           .getSuggestions({
             tableColumns: datasourceTableMetas,
-            roles: roleMapping,
             state: visualizationId === activeVisualizationId ? visualizationState : undefined,
           })
           .map(({ datasourceSuggestionId, ...suggestion }) => ({

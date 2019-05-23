@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Visualization, DimensionRole } from '../types';
+import { Visualization } from '../types';
 
 export interface XyVisualizationState {
-  roles: DimensionRole[];
+  roles: string[];
 }
 
 export type XyVisualizationPersistedState = XyVisualizationState;
@@ -30,8 +30,6 @@ export const xyVisualization: Visualization<XyVisualizationState, XyVisualizatio
   },
 
   getSuggestions: options => [],
-
-  getMappingOfTableToRoles: (state, datasource) => [],
 
   toExpression: state => '',
 };
