@@ -7,8 +7,10 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { DataSetup } from 'plugins/data';
+import { I18nProvider } from '@kbn/i18n/react';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 
+import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
 
 export interface EditorFrameSetupPlugins {
@@ -34,13 +36,19 @@ export class EditorFramePlugin {
       mount: element => {
         unmount();
         domElement = element;
+
+        const firstDatasourceId = Object.keys(this.datasources)[0];
+        const firstVisualizationId = Object.keys(this.visualizations)[0];
+
         render(
-          <EditorFrame
-            datasourceMap={this.datasources}
-            visualizationMap={this.visualizations}
-            initialDatasourceId={Object.keys(this.datasources)[0]}
-            initialVisualizationId={Object.keys(this.visualizations)[0]}
-          />,
+          <I18nProvider>
+            <EditorFrame
+              datasourceMap={this.datasources}
+              visualizationMap={this.visualizations}
+              initialDatasourceId={firstDatasourceId || null}
+              initialVisualizationId={firstVisualizationId || null}
+            />
+          </I18nProvider>,
           domElement
         );
       },

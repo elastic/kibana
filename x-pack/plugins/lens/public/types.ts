@@ -31,14 +31,14 @@ export type DimensionRole =
   | 'size'
   | string; // Some visualizations will use custom names that have other meaning
 
-export interface TableColumns {
+export interface TableColumn {
   columnId: string;
   operation: Operation;
 }
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
-  tableColumns: TableColumns[];
+  tableColumns: TableColumn[];
 }
 
 /**
@@ -132,9 +132,9 @@ export interface VisualizationProps<T = unknown> {
 
 export interface SuggestionRequest<T = unknown> {
   // Roles currently being used
-  roles: DimensionRole[];
+  roles?: DimensionRole[];
   // It is up to the Visualization to rank these tables
-  tableColumns: { [datasourceSuggestionId: string]: TableColumns };
+  tableColumns: Record<number, TableColumn[]>;
   state?: T; // State is only passed if the visualization is active
 }
 
@@ -142,7 +142,7 @@ export interface VisualizationSuggestion<T = unknown> {
   score: number;
   title: string;
   state: T;
-  datasourceSuggestionId: string;
+  datasourceSuggestionId: number;
 }
 
 export interface Visualization<T = unknown, P = unknown> {

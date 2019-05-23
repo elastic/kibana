@@ -117,6 +117,34 @@ describe('editor_frame state management', () => {
       expect(newState.visualization.state).toBe(newVisState);
     });
 
+    it('should should switch active visualization and update datasource state', () => {
+      const testVisState = {};
+      const newVisState = {};
+      const newDatasourceState = {};
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'testDatasource',
+            state: {},
+            isLoading: false,
+          },
+          visualization: {
+            activeId: 'testVis',
+            state: testVisState,
+          },
+        },
+        {
+          type: 'SWITCH_VISUALIZATION',
+          newVisualizationId: 'testVis2',
+          initialState: newVisState,
+          datasourceState: newDatasourceState,
+        }
+      );
+
+      expect(newState.visualization.state).toBe(newVisState);
+      expect(newState.datasource.state).toBe(newDatasourceState);
+    });
+
     it('should should switch active datasource and purge visualization state', () => {
       const newState = reducer(
         {
