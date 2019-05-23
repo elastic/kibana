@@ -114,19 +114,19 @@ export function EditorFrame(props: EditorFrameProps) {
         }
       />
     );
-  } else {
-    return (
-      <FrameLayout
-        dataPanel={
-          <DataPanelWrapper
-            activeDatasource={state.datasource.activeId}
-            datasourceIsLoading={state.datasource.isLoading}
-            datasourceState={state.datasource.state}
-            datasourceMap={props.datasourceMap}
-            dispatch={dispatch}
-          />
-        }
-      />
-    );
   }
+
+  return (
+    <FrameLayout
+      dataPanel={
+        <DataPanelWrapper
+          activeDatasource={state.datasource.activeId}
+          datasourceIsLoading={state.datasource.isLoading}
+          datasourceState={state.datasource.state}
+          datasourceMap={props.datasourceMap}
+          dispatch={dispatch}
+        />
+      }
+    />
+  );
 }

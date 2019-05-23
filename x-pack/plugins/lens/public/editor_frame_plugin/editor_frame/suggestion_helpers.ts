@@ -16,7 +16,7 @@ export interface Suggestion {
 }
 
 /**
- * This function takes a list of available data tables and a list of viusalization
+ * This function takes a list of available data tables and a list of visualization
  * extensions and creates a ranked list of suggestions which contain a pair of a data table
  * and a visualization.
  *
