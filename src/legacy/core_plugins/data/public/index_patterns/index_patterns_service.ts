@@ -34,8 +34,6 @@ import { IndexPatternSelect } from 'ui/index_patterns/index';
 import { IndexPatterns } from 'ui/index_patterns/index';
 // @ts-ignore
 import { validateIndexPattern } from 'ui/index_patterns/index';
-// @ts-ignore
-import setupRouteWithDefaultPattern from 'ui/index_patterns/route_setup/load_default';
 
 // IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
 import * as types from 'ui/index_patterns';
@@ -58,7 +56,6 @@ export class IndexPatternsService {
   public setup() {
     return {
       indexPatterns: new IndexPatterns(basePath, config, savedObjectsClient),
-      setupRouteWithDefaultPattern, // only used in kibana/management
       validateIndexPattern,
       constants: {
         ILLEGAL_CHARACTERS,

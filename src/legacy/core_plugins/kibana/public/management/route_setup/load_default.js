@@ -19,10 +19,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { banners } from '../../notify';
-import { NoDefaultIndexPattern } from '../../errors';
-import { indexPatternsGetProvider } from '../_get';
-import uiRoutes from '../../routes';
+import { banners } from 'ui/notify';
+import { NoDefaultIndexPattern } from 'ui/errors';
+import uiRoutes from 'ui/routes';
 import {
   EuiCallOut,
 } from '@elastic/eui';
@@ -65,15 +64,14 @@ export default function (opts) {
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
 
   uiRoutes
-    .addSetupWork(function loadDefaultIndexPattern($route, config, chrome) {
-      const getIds = indexPatternsGetProvider(chrome.getSavedObjectsClient())('id');
+    .addSetupWork(function loadDefaultIndexPattern(Promise, $route, config, indexPatterns) {
       const route = _.get($route, 'current.$$route');
 
       if (!route.requireDefaultIndex) {
         return;
       }
 
-      return getIds()
+      return indexPatterns.getIds()
         .then(function (patterns) {
           let defaultId = config.get('defaultIndex');
           let defined = !!defaultId;
