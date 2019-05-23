@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 
-const getSortHandler = (type) => (item) => _.get(item, `${type}.summary.lastVal`);
+const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = showCgroupMetricsElasticsearch => {
   const cols = [];
 
