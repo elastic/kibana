@@ -103,7 +103,6 @@ function FilterRow({
           query={value}
           indexPatterns={[agg.getIndexPattern()]}
           appName="filtersAgg"
-          screenTitle="foo"
           onChange={query => onChangeValue(id, query, customLabel)}
           disableAutoFocus={!autoFocus}
           data-test-subj={dataTestSubj}

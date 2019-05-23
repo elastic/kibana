@@ -50,8 +50,9 @@ interface Props {
   intl: InjectedIntl;
   query: Query;
   appName: string;
+  id?: string;
   disableAutoFocus?: boolean;
-  screenTitle: string;
+  screenTitle?: string;
   prepend?: any;
   store?: Storage;
   persistedLog?: PersistedLog;
@@ -417,6 +418,7 @@ export class QueryBarInputUI extends Component<Props, State> {
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
+                id={this.props.id}
                 placeholder={this.props.intl.formatMessage({
                   id: 'data.query.queryBar.searchInputPlaceholder',
                   defaultMessage: 'Search',
@@ -435,17 +437,21 @@ export class QueryBarInputUI extends Component<Props, State> {
                 }}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={this.props.intl.formatMessage(
-                  {
-                    id: 'data.query.queryBar.searchInputAriaLabel',
-                    defaultMessage:
-                      'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                  },
-                  {
-                    previouslyTranslatedPageTitle: this.props.screenTitle,
-                    pageType: this.props.appName,
-                  }
-                )}
+                aria-label={
+                  this.props.screenTitle
+                    ? this.props.intl.formatMessage(
+                        {
+                          id: 'data.query.queryBar.searchInputAriaLabel',
+                          defaultMessage:
+                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                        },
+                        {
+                          previouslyTranslatedPageTitle: this.props.screenTitle,
+                          pageType: this.props.appName,
+                        }
+                      )
+                    : undefined
+                }
                 type="text"
                 data-test-subj="queryInput"
                 aria-autocomplete="list"
