@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import JoiNamespace from 'joi';
+import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
-import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
+import { initServerWithKibana } from './server/kibana.index';
+import { savedObjectMappings } from './server/saved_objects';
 
-const APP_ID = 'siem';
+export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
+export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -22,7 +24,9 @@ export function siem(kibana: any) {
     require: ['kibana', 'elasticsearch'],
     uiExports: {
       app: {
-        description: 'Explore your SIEM App',
+        description: i18n.translate('xpack.siem.securityDescription', {
+          defaultMessage: 'Explore your SIEM App',
+        }),
         main: 'plugins/siem/app',
         euiIconType: 'securityAnalyticsApp',
         title: APP_NAME,
@@ -32,7 +36,9 @@ export function siem(kibana: any) {
       home: ['plugins/siem/register_feature'],
       links: [
         {
-          description: 'Explore your SIEM App',
+          description: i18n.translate('xpack.siem.linkSecurityDescription', {
+            defaultMessage: 'Explore your SIEM App',
+          }),
           euiIconType: 'securityAnalyticsApp',
           id: 'siem',
           order: 9000,
@@ -40,9 +46,20 @@ export function siem(kibana: any) {
           url: `/app/${APP_ID}`,
         },
       ],
-    },
-    config(Joi: typeof JoiNamespace) {
-      return getConfigSchema(Joi);
+      uiSettingDefaults: {
+        [DEFAULT_INDEX_KEY]: {
+          name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
+            defaultMessage: 'Default index',
+          }),
+          value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
+            defaultMessage: 'Default Elasticsearch index to search',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+      },
+      mappings: savedObjectMappings,
     },
     init(server: Server) {
       initServerWithKibana(server);

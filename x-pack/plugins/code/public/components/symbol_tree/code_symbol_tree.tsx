@@ -145,7 +145,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
       { name: '', id: '', items: this.symbolsToSideNavItems(this.props.structureTree) },
     ];
     return (
-      <div className="codeContainer__symbolTree">
+      <div className="codeContainer__sideTabTree">
         <EuiSideNav items={items} />
       </div>
     );

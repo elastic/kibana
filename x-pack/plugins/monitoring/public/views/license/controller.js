@@ -5,6 +5,7 @@
  */
 
 import { get, find } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
@@ -17,7 +18,7 @@ import { I18nContext } from 'ui/i18n';
 const REACT_NODE_ID = 'licenseReact';
 
 export class LicenseViewController {
-  constructor($injector, $scope, i18n) {
+  constructor($injector, $scope) {
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
 
@@ -28,14 +29,14 @@ export class LicenseViewController {
     this.init($injector, $scope, i18n);
   }
 
-  init($injector, $scope, i18n) {
+  init($injector, $scope) {
     const globalState = $injector.get('globalState');
     const title = $injector.get('title');
     const $route = $injector.get('$route');
 
     const cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
     $scope.cluster = cluster;
-    const routeTitle = i18n('xpack.monitoring.license.licenseRouteTitle', {
+    const routeTitle = i18n.translate('xpack.monitoring.license.licenseRouteTitle', {
       defaultMessage: 'License'
     });
     title($scope.cluster, routeTitle);

@@ -53,6 +53,15 @@ Array [
           },
         },
         "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "service.environment": "test",
+                },
+              },
+            ],
+          },
           "my": "bodyQuery",
         },
         "size": 0,

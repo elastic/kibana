@@ -17,9 +17,6 @@ describe('the ConfigurationSourcesAdapter', () => {
 
     expect(await sourcesAdapter.getAll()).toMatchObject({
       default: {
-        metricAlias: expect.any(String),
-        logAlias: expect.any(String),
-        auditbeatAlias: expect.any(String),
         fields: {
           container: expect.any(String),
           host: expect.any(String),
@@ -42,10 +39,7 @@ describe('the ConfigurationSourcesAdapter', () => {
     );
 
     expect(await sourcesAdapter.getAll()).toMatchObject({
-      default: {
-        metricAlias: expect.any(String),
-        logAlias: expect.any(String),
-      },
+      default: {},
     });
   });
 
@@ -54,9 +48,6 @@ describe('the ConfigurationSourcesAdapter', () => {
       new InmemoryConfigurationAdapter({
         sources: {
           default: {
-            metricAlias: 'METRIC_ALIAS',
-            logAlias: 'LOG_ALIAS',
-            auditbeatAlias: 'AUDITBEAT_ALIAS',
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },
@@ -67,9 +58,6 @@ describe('the ConfigurationSourcesAdapter', () => {
 
     expect(await sourcesAdapter.getAll()).toMatchObject({
       default: {
-        metricAlias: 'METRIC_ALIAS',
-        logAlias: 'LOG_ALIAS',
-        auditbeatAlias: 'AUDITBEAT_ALIAS',
         fields: {
           container: 'DIFFERENT_CONTAINER_FIELD',
           host: expect.any(String),
@@ -87,11 +75,7 @@ describe('the ConfigurationSourcesAdapter', () => {
       new InmemoryConfigurationAdapter({
         sources: {
           sourceOne: {
-            metricAlias: 'METRIC_ALIAS',
-            logAlias: 'LOG_ALIAS',
-            auditbeatAlias: 'AUDITBEAT_ALIAS',
-            packetbeatAlias: 'PACKETBEAT_ALIAS',
-            winlogbeatAlias: 'WINLOGBEAT_ALIAS',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },
@@ -102,9 +86,6 @@ describe('the ConfigurationSourcesAdapter', () => {
 
     expect(await sourcesAdapter.getAll()).toMatchObject({
       sourceOne: {
-        metricAlias: 'METRIC_ALIAS',
-        logAlias: 'LOG_ALIAS',
-        auditbeatAlias: 'AUDITBEAT_ALIAS',
         fields: {
           container: 'DIFFERENT_CONTAINER_FIELD',
           host: expect.any(String),

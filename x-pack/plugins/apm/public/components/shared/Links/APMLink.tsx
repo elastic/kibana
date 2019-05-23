@@ -23,7 +23,8 @@ export const PERSISTENT_APM_PARAMS = [
   'rangeFrom',
   'rangeTo',
   'refreshPaused',
-  'refreshInterval'
+  'refreshInterval',
+  'environment'
 ];
 
 export function getAPMHref(

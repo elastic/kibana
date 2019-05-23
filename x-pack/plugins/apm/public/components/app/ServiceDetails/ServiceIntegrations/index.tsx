@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiPopover
@@ -113,7 +113,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiButton
+      <EuiButtonEmpty
         iconType="arrowDown"
         iconSide="right"
         onClick={this.openPopover}
@@ -124,7 +124,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
             defaultMessage: 'Integrations'
           }
         )}
-      </EuiButton>
+      </EuiButtonEmpty>
     );
 
     return (

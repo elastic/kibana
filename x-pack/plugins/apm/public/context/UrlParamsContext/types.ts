@@ -10,6 +10,7 @@ export interface IUrlParams {
   errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
   refreshInterval?: number;
