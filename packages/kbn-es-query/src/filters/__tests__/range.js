@@ -63,8 +63,8 @@ describe('Filter Manager', function () {
 
     it('should wrap painless scripts in comparator lambdas', function () {
       const field = getField(indexPattern, 'script date');
-      const expected = `boolean gte(Supplier s, def v) {return s.get() >= v} ` +
-              `boolean lte(Supplier s, def v) {return s.get() <= v}` +
+      const expected = `boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))} ` +
+              `boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}` +
               `gte(() -> { ${field.script} }, params.gte) && ` +
               `lte(() -> { ${field.script} }, params.lte)`;
 
