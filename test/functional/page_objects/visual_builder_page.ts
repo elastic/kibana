@@ -50,6 +50,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await this.checkTabIsLoaded('tvbVisEditor', 'Time Series');
     }
 
+    public async checkTimeSeriesChartIsPresent() {
+      await testSubjects.existOrFail('timeseriesChart');
+    }
+
+    public async checkTimeSeriesLegendIsPresent() {
+      const isPresent = await find.existsByCssSelector('.tvbLegend');
+      if (!isPresent) {
+        throw new Error(`TimeSeries legend is not loaded`);
+      }
+    }
+
     public async checkMetricTabIsPresent() {
       await this.checkTabIsLoaded('tsvbMetricValue', 'Metric');
     }
@@ -195,7 +206,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async enterSeriesTemplate(template: string) {
       const el = await testSubjects.find('tsvb_series_value');
-      await el.clearValueWithKeyboard();
+      await el.clearValue();
       await el.type(template);
     }
 

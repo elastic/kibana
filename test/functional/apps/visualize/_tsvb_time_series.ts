@@ -36,6 +36,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.resetPage();
       });
 
+      it('should render all necessary components', async () => {
+        await visualBuilder.checkTimeSeriesChartIsPresent();
+        await visualBuilder.checkTimeSeriesLegendIsPresent();
+      });
+
       it('should show the correct count in the legend', async () => {
         await retry.try(async () => {
           const actualCount = await visualBuilder.getRhythmChartLegendValue();
@@ -57,17 +62,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be('53');
       });
 
-      it('should show the correct count in the legend with custom template', async () => {
+      it('should show the correct count in the legend with custom numeric template', async () => {
         const expectedLegendValue = '$ 156';
 
         await visualBuilder.clickSeriesOption();
-        await visualBuilder.toggleAutoApplyChanges(); // turn off
-
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
-        await visualBuilder.applyChanges();
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
-
-        await visualBuilder.toggleAutoApplyChanges(); // turn on
         expect(actualCount).to.be(expectedLegendValue);
       });
     });
