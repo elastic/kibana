@@ -26,16 +26,16 @@ interface RouteDeps {
   log: Logger;
 }
 
-export interface PublicRouteDeps extends Omit<RouteDeps, 'xpackMain'> {
+export interface ExternalRouteDeps extends Omit<RouteDeps, 'xpackMain'> {
   routePreCheckLicenseFn: any;
 }
 
-export type PublicRouteRequestFacade = Legacy.Request;
+export type ExternalRouteRequestFacade = Legacy.Request;
 
 export function initExternalSpacesApi({ xpackMain, ...rest }: RouteDeps) {
   const routePreCheckLicenseFn = routePreCheckLicense({ xpackMain });
 
-  const deps: PublicRouteDeps = {
+  const deps: ExternalRouteDeps = {
     ...rest,
     routePreCheckLicenseFn,
   };

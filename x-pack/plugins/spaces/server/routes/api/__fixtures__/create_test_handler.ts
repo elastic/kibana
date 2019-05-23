@@ -12,10 +12,10 @@ import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks
 import { SecurityPlugin } from '../../../../../security';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
-import { PublicRouteDeps } from '../external';
+import { ExternalRouteDeps } from '../external';
 import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
-import { PrivateRouteDeps } from '../v1';
+import { InternalRouteDeps } from '../v1';
 import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
 import { SpacesConfig } from '../../../new_platform/config';
 
@@ -55,7 +55,9 @@ const baseConfig: TestConfig = {
   'server.basePath': '',
 };
 
-export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRouteDeps) => void) {
+export function createTestHandler(
+  initApiFn: (deps: ExternalRouteDeps & InternalRouteDeps) => void
+) {
   const teardowns: TeardownFn[] = [];
 
   const spaces = createSpaces();

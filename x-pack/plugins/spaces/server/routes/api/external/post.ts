@@ -9,15 +9,15 @@ import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { PublicRouteDeps, PublicRouteRequestFacade } from '.';
+import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
-export function initPostSpacesApi(deps: PublicRouteDeps) {
+export function initPostSpacesApi(deps: ExternalRouteDeps) {
   const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
   http.route({
     method: 'POST',
     path: '/api/spaces/space',
-    async handler(request: PublicRouteRequestFacade) {
+    async handler(request: ExternalRouteRequestFacade) {
       log.debug(`Inside POST /api/spaces/space`);
       const { SavedObjectsClient } = savedObjects;
       const spacesClient: SpacesClient = spacesService.scopedClient(request);

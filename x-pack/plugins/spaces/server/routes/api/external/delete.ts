@@ -7,15 +7,15 @@
 import Boom from 'boom';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { PublicRouteDeps, PublicRouteRequestFacade } from '.';
+import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
-export function initDeleteSpacesApi(deps: PublicRouteDeps) {
+export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
   const { http, savedObjects, spacesService, routePreCheckLicenseFn } = deps;
 
   http.route({
     method: 'DELETE',
     path: '/api/spaces/space/{id}',
-    async handler(request: PublicRouteRequestFacade, h: any) {
+    async handler(request: ExternalRouteRequestFacade, h: any) {
       const { SavedObjectsClient } = savedObjects;
       const spacesClient: SpacesClient = spacesService.scopedClient(request);
 

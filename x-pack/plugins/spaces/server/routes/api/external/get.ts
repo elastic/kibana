@@ -8,15 +8,15 @@ import Boom from 'boom';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { PublicRouteDeps, PublicRouteRequestFacade } from '.';
+import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
-export function initGetSpacesApi(deps: PublicRouteDeps) {
+export function initGetSpacesApi(deps: ExternalRouteDeps) {
   const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
   http.route({
     method: 'GET',
     path: '/api/spaces/space',
-    async handler(request: PublicRouteRequestFacade) {
+    async handler(request: ExternalRouteRequestFacade) {
       log.debug(`Inside GET /api/spaces/space`);
 
       const spacesClient: SpacesClient = spacesService.scopedClient(request);
@@ -42,7 +42,7 @@ export function initGetSpacesApi(deps: PublicRouteDeps) {
   http.route({
     method: 'GET',
     path: '/api/spaces/space/{id}',
-    async handler(request: PublicRouteRequestFacade) {
+    async handler(request: ExternalRouteRequestFacade) {
       const spaceId = request.params.id;
 
       const { SavedObjectsClient } = savedObjects;

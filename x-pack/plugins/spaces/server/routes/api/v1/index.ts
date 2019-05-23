@@ -21,14 +21,14 @@ interface RouteDeps {
   config: KibanaConfig;
 }
 
-export interface PrivateRouteDeps extends Omit<RouteDeps, 'xpackMain'> {
+export interface InternalRouteDeps extends Omit<RouteDeps, 'xpackMain'> {
   routePreCheckLicenseFn: any;
 }
 
-export function initPrivateApis({ xpackMain, ...rest }: RouteDeps) {
+export function initInternalApis({ xpackMain, ...rest }: RouteDeps) {
   const routePreCheckLicenseFn = routePreCheckLicense({ xpackMain });
 
-  const deps: PrivateRouteDeps = {
+  const deps: InternalRouteDeps = {
     ...rest,
     routePreCheckLicenseFn,
   };

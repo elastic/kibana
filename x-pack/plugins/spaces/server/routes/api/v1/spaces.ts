@@ -10,9 +10,9 @@ import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 import { getSpaceById } from '../../lib';
-import { PrivateRouteDeps } from '.';
+import { InternalRouteDeps } from '.';
 
-export function initInternalSpacesApi(deps: PrivateRouteDeps) {
+export function initInternalSpacesApi(deps: InternalRouteDeps) {
   const { http, config, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
   http.route({
