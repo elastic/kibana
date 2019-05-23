@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { Registry } from './lib/registry';
-
-export { fromExpression, Ast } from './lib/ast';
+export { ExpressionExecutorService, ExpressionExecutorSetup } from './expression_executor_service';

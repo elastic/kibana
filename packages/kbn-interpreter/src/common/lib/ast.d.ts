@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { Registry } from './lib/registry';
+export type Ast = unknown;
 
-export { fromExpression, Ast } from './lib/ast';
+export declare function fromExpression(expression: string): Ast;

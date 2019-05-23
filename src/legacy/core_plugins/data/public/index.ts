@@ -17,6 +17,16 @@
  * under the License.
  */
 
+// TODO these are imports from the old plugin world.
+// Once the new platform is ready, they can get removed
+// and handled by the platform itself in the setup method
+// of the ExpressionExectorService
+// @ts-ignore
+import { getInterpreter } from 'plugins/interpreter/interpreter';
+// @ts-ignore
+import { renderersRegistry } from 'plugins/interpreter/registries';
+import { ExpressionExecutorService } from './expression_executor';
+
 import { SearchBarService } from './search_bar';
 import { QueryBarService } from './query_bar';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
@@ -25,11 +35,13 @@ class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
   private readonly searchBar: SearchBarService;
   private readonly queryBar: QueryBarService;
+  private readonly expressionExecutor: ExpressionExecutorService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
     this.queryBar = new QueryBarService();
     this.searchBar = new SearchBarService();
+    this.expressionExecutor = new ExpressionExecutorService();
   }
 
   public setup() {
@@ -37,6 +49,12 @@ class DataPlugin {
       indexPatterns: this.indexPatterns.setup(),
       search: this.searchBar.setup(),
       query: this.queryBar.setup(),
+      expressionExecutor: this.expressionExecutor.setup(null, {
+        interpreter: {
+          getInterpreter,
+          renderersRegistry,
+        },
+      }),
     };
   }
 
@@ -44,6 +62,7 @@ class DataPlugin {
     this.indexPatterns.stop();
     this.searchBar.stop();
     this.queryBar.stop();
+    this.expressionExecutor.stop();
   }
 }
 
@@ -58,6 +77,8 @@ export const data = new DataPlugin().setup();
 export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
 }
+
+export { ExpressionExecutorSetup } from './expression_executor';
 
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
