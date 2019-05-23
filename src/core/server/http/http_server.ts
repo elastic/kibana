@@ -32,6 +32,12 @@ import {
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 
+enum AuthStatus {
+  authenticated = 'authenticated',
+  unauthenticated = 'unauthenticated',
+  unknown = 'unknown',
+}
+
 export interface HttpServerSetup {
   server: Server;
   options: ServerOptions;
@@ -43,7 +49,7 @@ export interface HttpServerSetup {
   registerAuth: <T>(
     authenticationHandler: AuthenticationHandler<T>,
     cookieOptions: SessionStorageCookieOptions<T>
-  ) => void;
+  ) => Promise<void>;
   /**
    * Define custom logic to perform for incoming requests.
    * Applied to all resources by default.
@@ -53,6 +59,15 @@ export interface HttpServerSetup {
   registerOnPostAuth: (requestHandler: OnPostAuthHandler) => void;
   getBasePathFor: (request: KibanaRequest | Request) => string;
   setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
+  auth: {
+    get: (
+      request: KibanaRequest | Request
+    ) => {
+      status: AuthStatus;
+      state: unknown;
+    };
+    isAuthenticated: (request: KibanaRequest | Request) => boolean;
+  };
 }
 
 export class HttpServer {
@@ -62,6 +77,11 @@ export class HttpServer {
   private basePathCache = new WeakMap<
     ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
     string
+  >();
+
+  private authState = new WeakMap<
+    ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
+    unknown
   >();
 
   constructor(private readonly log: Logger) {}
@@ -118,6 +138,10 @@ export class HttpServer {
       ) => this.registerAuth(fn, cookieOptions, config.basePath),
       getBasePathFor: this.getBasePathFor.bind(this, config),
       setBasePathFor: this.setBasePathFor.bind(this),
+      auth: {
+        get: this.getAuthData.bind(this),
+        isAuthenticated: this.isAuthenticated.bind(this),
+      },
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.
@@ -133,10 +157,14 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
+        const isAuthRequired = Boolean(this.authRegistered && route.authRequired);
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: this.getRouteFullPath(router.path, route.path),
+          options: {
+            auth: isAuthRequired ? undefined : false,
+          },
         });
       }
     }
@@ -226,7 +254,9 @@ export class HttpServer {
     );
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, sessionStorage),
+      authenticate: adoptToHapiAuthFormat(fn, sessionStorage, (req, state) => {
+        this.authState.set(req.raw.req, state);
+      }),
     }));
     this.server.auth.strategy('session', 'login');
 
@@ -235,5 +265,22 @@ export class HttpServer {
     // should be applied for all routes if they don't specify auth strategy in route declaration
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
+  }
+  private getAuthData(request: KibanaRequest | Request) {
+    const incomingMessage =
+      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+
+    const hasState = this.authState.has(incomingMessage);
+    const state = this.authState.get(incomingMessage);
+    const status: AuthStatus = hasState
+      ? AuthStatus.authenticated
+      : this.authRegistered
+      ? AuthStatus.unauthenticated
+      : AuthStatus.unknown;
+
+    return { status, state };
+  }
+  private isAuthenticated(request: KibanaRequest | Request) {
+    return this.getAuthData(request).status === AuthStatus.authenticated;
   }
 }
