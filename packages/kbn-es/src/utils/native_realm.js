@@ -94,11 +94,13 @@ exports.NativeRealm = class NativeRealm {
     try {
       return await fn(attempt);
     } catch (error) {
-      if (attempt >= 3 || !error.meta || error.meta.statusCode !== 401) {
+      if (attempt >= 3) {
         throw error;
       }
 
-      this._log.warning('[elastic] user not available yet, waiting 1.5 seconds and trying again');
+      this._log.warning(
+        'assuming [elastic] user not available yet, waiting 1.5 seconds and trying again'
+      );
       await new Promise(resolve => setTimeout(resolve, 1500));
       return await this._autoRetry(fn, attempt + 1);
     }
