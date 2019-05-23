@@ -400,10 +400,35 @@ module.exports = {
      * SIEM overrides
      */
     {
-      files: ['x-pack/plugins/siem/**/*.ts'],
+      files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
+      plugins: ['eslint-plugin-import-order-alphabetical'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
-        'import/order': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        // '@typescript-eslint/no-unused-vars': 'error',
+        'no-shadow': 'error',
+        'no-bitwise': 'error',
+        // module importing
+        //'import-order-alphabetical/order': [
+        'import/order': 'off',
+        'import-order-alphabetical/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+          },
+        ],
+        // 'import-order-alphabetical/order': 'error',
+        // 'import-order-alphabetical/order': 'error',
+        /*
+        // module importing
+        'sort-imports': [
+          'error',
+          {
+            memberSyntaxSortOrder: ['all', 'single', 'multiple', 'none'],
+          },
+        ],
+        */
       },
     },
 
