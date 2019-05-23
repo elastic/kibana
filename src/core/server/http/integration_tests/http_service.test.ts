@@ -61,14 +61,14 @@ describe('http service', () => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated({ credentials: user });
+            return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         http.registerRouter(router);
         await root.start();
 
@@ -94,14 +94,14 @@ describe('http service', () => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated({ credentials: user });
+            return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         await kbnTestServer.request
@@ -117,7 +117,7 @@ describe('http service', () => {
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         const response = await kbnTestServer.request.get(root, '/').expect(302);
@@ -129,14 +129,14 @@ describe('http service', () => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated({ credentials: user });
+            return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -154,13 +154,43 @@ describe('http service', () => {
         expect(response.header['set-cookie']).toBe(undefined);
       });
 
+      it('Should pass associated auth state to Legacy platform', async () => {
+        const user = { id: '42' };
+        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+          if (req.headers.authorization) {
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated(user);
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        };
+
+        const { http } = await root.setup();
+        await http.registerAuth(authenticate, cookieOptions);
+        await root.start();
+
+        const legacyUrl = '/legacy';
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: legacyUrl,
+          handler: kbnServer.newPlatform.setup.core.http.auth.get,
+        });
+
+        const response = await kbnTestServer.request.get(root, legacyUrl).expect(200);
+        expect(response.body.state).toEqual(user);
+        expect(response.body.status).toEqual('authenticated');
+
+        expect(response.header['set-cookie']).toBe(undefined);
+      });
+
       it(`Shouldn't expose internal error details`, async () => {
         const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
           throw new Error('sensitive info');
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         await kbnTestServer.request.get(root, '/').expect({

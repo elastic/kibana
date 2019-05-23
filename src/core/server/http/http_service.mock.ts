@@ -31,6 +31,10 @@ const createSetupContractMock = () => {
     setBasePathFor: jest.fn(),
     // we can mock some hapi server method when we need it
     server: {} as Server,
+    auth: {
+      get: jest.fn(),
+      isAuthenticated: jest.fn(),
+    },
   };
   return setupContract;
 };
