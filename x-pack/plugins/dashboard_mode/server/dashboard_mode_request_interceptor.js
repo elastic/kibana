@@ -34,12 +34,13 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
       }
 
       const user = auth.credentials;
+      const roles = user.roles || [];
 
       const uiSettings = request.getUiSettingsService();
 
       const dashboardOnlyModeRoles = await uiSettings.get(CONFIG_DASHBOARD_ONLY_MODE_ROLES);
 
-      if (!dashboardOnlyModeRoles || user.roles.length === 0) {
+      if (!dashboardOnlyModeRoles || roles.length === 0) {
         return;
       }
 
