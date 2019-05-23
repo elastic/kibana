@@ -56,26 +56,37 @@ export class IndexPatternsService {
   public setup() {
     return {
       indexPatterns: new IndexPatterns(basePath, config, savedObjectsClient),
-      validateIndexPattern,
-      constants: {
-        ILLEGAL_CHARACTERS,
-        CONTAINS_SPACES,
-        INDEX_PATTERN_ILLEGAL_CHARACTERS,
-        INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-      },
-      fixtures: {
-        mockFields,
-        mockIndexPattern,
-      },
-      ui: {
-        IndexPatternSelect,
-      },
     };
   }
 
   public stop() {
     // nothing to do here yet
   }
+}
+
+// static exports
+
+const constants = {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+};
+
+const fixtures = {
+  mockFields,
+  mockIndexPattern,
+};
+
+const ui = {
+  IndexPatternSelect,
+};
+
+export {
+  validateIndexPattern,
+  constants,
+  fixtures,
+  ui,
 }
 
 /** @public */
