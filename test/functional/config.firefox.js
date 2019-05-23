@@ -18,10 +18,10 @@
  */
 
 export default async function ({ readConfigFile }) {
-  const chromeConfig = await readConfigFile(require.resolve('./config'));
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
 
   return {
-    ...chromeConfig.getAll(),
+    ...defaultConfig.getAll(),
 
     browser: {
       type: 'firefox',
