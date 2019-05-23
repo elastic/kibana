@@ -13,6 +13,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
 import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
@@ -87,8 +88,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   AppState,
   config,
-  globalState,
-  i18n) {
+  globalState) {
 
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectSeverityService');
@@ -151,7 +151,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
       selectedJobIds = _.without(selectedJobIds, ...invalidIds);
       if (invalidIds.length > 0) {
-        let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+        let warningText = i18n.translate('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
           defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
           values: {
             invalidIdsCount: invalidIds.length,
@@ -159,7 +159,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           }
         });
         if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-          warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+          warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
             defaultMessage: ', auto selecting first job'
           });
         }
@@ -171,7 +171,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         if (selectedJobIds.length > 1) {
         // if more than one job, select the first job from the selection.
           toastNotifications.addWarning(
-            i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+            i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
               defaultMessage: 'You can only view one job at a time in this dashboard'
             })
           );
@@ -183,7 +183,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           if (selectedJobIds.length > 0) {
           // if the group contains valid jobs, select the first
             toastNotifications.addWarning(
-              i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+              i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
                 defaultMessage: 'You can only view one job at a time in this dashboard'
               })
             );
@@ -775,7 +775,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     const appStateDtrIdx = $scope.appState.mlTimeSeriesExplorer.detectorIndex;
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
-      const warningText = i18n('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
+      const warningText = i18n.translate('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
         defaultMessage: 'Requested detector index {detectorIndex} is not valid for job {jobId}',
         values: {
           detectorIndex,
