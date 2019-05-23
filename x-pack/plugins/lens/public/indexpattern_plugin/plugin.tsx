@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternDatasource } from './indexpattern';
+import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
+import { getIndexPatternDatasource } from './indexpattern';
 
 class IndexPatternDatasourcePlugin {
   constructor() {}
 
   setup() {
-    return indexPatternDatasource;
+    return getIndexPatternDatasource(chrome, toastNotifications);
   }
 
   stop() {}

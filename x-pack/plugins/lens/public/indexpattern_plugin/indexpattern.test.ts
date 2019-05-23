@@ -4,15 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternDatasource, IndexPatternPersistedState } from './indexpattern';
-import { DatasourcePublicAPI, Operation } from '../types';
+import {
+  getIndexPatternDatasource,
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+} from './indexpattern';
+import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+
+jest.mock('./loader');
+
+const expectedIndexPatterns = {
+  1: {
+    id: '1',
+    title: 'Fake Index Pattern',
+    timeFieldName: 'timestamp',
+    fields: [
+      {
+        name: 'timestamp',
+        type: 'date',
+        aggregatable: true,
+        searchable: true,
+      },
+      {
+        name: 'bytes',
+        type: 'number',
+        aggregatable: true,
+        searchable: true,
+      },
+      {
+        name: 'source',
+        type: 'string',
+        aggregatable: true,
+        searchable: true,
+      },
+    ],
+  },
+  2: {
+    id: '2',
+    title: 'Fake Rollup Pattern',
+    timeFieldName: 'timestamp',
+    fields: [
+      {
+        name: 'timestamp',
+        type: 'date',
+        aggregatable: true,
+        searchable: true,
+      },
+      {
+        name: 'bytes',
+        type: 'number',
+        aggregatable: true,
+        searchable: true,
+      },
+      {
+        name: 'source',
+        type: 'string',
+        aggregatable: true,
+        searchable: true,
+      },
+    ],
+  },
+};
 
 describe('IndexPattern Data Source', () => {
   let persistedState: IndexPatternPersistedState;
+  let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
 
   beforeEach(() => {
+    // @ts-ignore
+    indexPatternDatasource = getIndexPatternDatasource();
+
     persistedState = {
-      currentIndexPattern: '',
+      currentIndexPattern: '1',
       columnOrder: ['col1'],
       columns: {
         col1: {
@@ -32,8 +95,8 @@ describe('IndexPattern Data Source', () => {
     it('should load a default state', async () => {
       const state = await indexPatternDatasource.initialize();
       expect(state).toEqual({
-        currentIndexPattern: '',
-        indexPatterns: {},
+        currentIndexPattern: '1',
+        indexPatterns: expectedIndexPatterns,
         columns: {},
         columnOrder: [],
       });
@@ -44,7 +107,7 @@ describe('IndexPattern Data Source', () => {
 
       expect(state).toEqual({
         ...persistedState,
-        indexPatterns: {},
+        indexPatterns: expectedIndexPatterns,
       });
     });
   });

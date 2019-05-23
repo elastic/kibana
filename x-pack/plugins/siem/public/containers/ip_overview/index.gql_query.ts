@@ -7,10 +7,15 @@
 import gql from 'graphql-tag';
 
 export const ipOverviewQuery = gql`
-  query GetIpOverviewQuery($sourceId: ID!, $filterQuery: String, $ip: String!) {
+  query GetIpOverviewQuery(
+    $sourceId: ID!
+    $filterQuery: String
+    $ip: String!
+    $defaultIndex: [String!]!
+  ) {
     source(id: $sourceId) {
       id
-      IpOverview(filterQuery: $filterQuery, ip: $ip) {
+      IpOverview(filterQuery: $filterQuery, ip: $ip, defaultIndex: $defaultIndex) {
         source {
           firstSeen
           lastSeen

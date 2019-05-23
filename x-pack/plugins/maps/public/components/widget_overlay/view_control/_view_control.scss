@@ -5,7 +5,7 @@
  */
 
 .mapViewControl__coordinates {
-  padding: $euiSizeXS $euiSizeS;
+  @include mapOverlayIsTextOnly;
   justify-content: center;
   pointer-events: none;
 }

@@ -19,7 +19,7 @@ exports[`Data Frame: Aggregation <PopoverForm /> Minimal initialization 1`] = `
   >
     <EuiFieldText
       compressed={false}
-      defaultValue="the-agg-name"
+      defaultValue="the-group-by-agg-name"
       fullWidth={false}
       isInvalid={false}
       isLoading={false}

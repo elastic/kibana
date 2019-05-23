@@ -21,7 +21,7 @@ import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
 import { Config, Env } from '../config';
-import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
+import { Logger, LoggerFactory, LoggingConfigType, LoggingService } from '../logging';
 import { Server } from '../server';
 
 /**
@@ -98,7 +98,7 @@ export class Root {
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
-      switchMap(() => configService.atPath('logging', LoggingConfig)),
+      switchMap(() => configService.atPath<LoggingConfigType>('logging')),
       map(config => this.loggingService.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console

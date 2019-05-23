@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line
+export interface EditorFrameOptions {}
+
+export interface EditorFrameInstance {
+  mount: (element: Element) => void;
+  unmount: () => void;
+}
 export interface EditorFrameSetup {
-  render: (domElement: Element) => void;
+  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
   registerVisualization: <T, P>(name: string, visualization: Visualization<T, P>) => void;
@@ -147,12 +154,9 @@ export interface VisualizationSuggestion<T = unknown> {
 }
 
 export interface Visualization<T = unknown, P = unknown> {
-  // For initializing, either from an empty state or from persisted state
-  // Because this will be called at runtime, state might have a type of `any` and
-  // visualizations should validate their arguments
+  // For initializing from saved object
   initialize: (state?: P) => T;
 
-  // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => P;
 
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;

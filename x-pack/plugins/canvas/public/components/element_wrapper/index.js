@@ -67,7 +67,7 @@ export const ElementWrapper = compose(
     }
   ),
   mapProps(props => {
-    // remove elements and createHandlers from props passed to component
+    // remove element and createHandlers from props passed to component
     // eslint-disable-next-line no-unused-vars
     const { element, createHandlers, selectedPage, ...restProps } = props;
     return restProps;

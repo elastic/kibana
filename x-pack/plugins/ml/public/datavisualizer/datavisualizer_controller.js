@@ -12,6 +12,7 @@
   */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 
 import 'plugins/ml/components/form_filter_input';
@@ -51,14 +52,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlDataVisualizerViewFields', function (
-    $scope,
-    $timeout,
-    $window,
-    Private,
-    AppState,
-    config,
-    i18n) {
+  .controller('MlDataVisualizerViewFields', function ($scope, $timeout, $window, Private, AppState, config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -112,13 +106,13 @@ module
       $scope.searchQueryText = _.get(queryBarQry, 'query', '');
     } else {
       toastNotifications.addWarning({
-        title: i18n('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningTitle', {
+        title: i18n.translate('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningTitle', {
           defaultMessage: '{language} syntax not supported',
           values: {
             language: (queryBarQry.language !== undefined) ? queryBarQry.language : '',
           }
         }),
-        text: i18n('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningDescription', {
+        text: i18n.translate('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningDescription', {
           defaultMessage: 'The Data Visualizer currently only supports queries using the lucene query syntax.',
         }),
       });
@@ -513,7 +507,7 @@ module
           console.log('DataVisualizer - error getting stats for metric cards from elasticsearch:', err);
           if (err.statusCode === 500) {
             notify.error(
-              i18n('xpack.ml.datavisualizer.metricInternalServerErrorTitle', {
+              i18n.translate('xpack.ml.datavisualizer.metricInternalServerErrorTitle', {
                 defaultMessage: 'Error loading data for metrics in index {index}. {message}. ' +
                   'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
                 values: {
@@ -525,7 +519,7 @@ module
             );
           } else {
             notify.error(
-              i18n('xpack.ml.datavisualizer.loadingMetricDataErrorTitle', {
+              i18n.translate('xpack.ml.datavisualizer.loadingMetricDataErrorTitle', {
                 defaultMessage: 'Error loading data for metrics in index {index}. {message}',
                 values: {
                   index: indexPattern.title,
@@ -583,7 +577,7 @@ module
             console.log('DataVisualizer - error getting non metric field stats from elasticsearch:', err);
             if (err.statusCode === 500) {
               notify.error(
-                i18n('xpack.ml.datavisualizer.fieldsInternalServerErrorTitle', {
+                i18n.translate('xpack.ml.datavisualizer.fieldsInternalServerErrorTitle', {
                   defaultMessage: 'Error loading data for fields in index {index}. {message}. ' +
                     'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
                   values: {
@@ -595,7 +589,7 @@ module
               );
             } else {
               notify.error(
-                i18n('xpack.ml.datavisualizer.loadingFieldsDataErrorTitle', {
+                i18n.translate('xpack.ml.datavisualizer.loadingFieldsDataErrorTitle', {
                   defaultMessage: 'Error loading data for fields in index {index}. {message}',
                   values: {
                     index: indexPattern.title,
@@ -652,7 +646,7 @@ module
           console.log('DataVisualizer - error getting overall stats from elasticsearch:', err);
           if (err.statusCode === 500) {
             notify.error(
-              i18n('xpack.ml.datavisualizer.overallFieldsInternalServerErrorTitle', {
+              i18n.translate('xpack.ml.datavisualizer.overallFieldsInternalServerErrorTitle', {
                 defaultMessage: 'Error loading data for fields in index {index}. {message}. ' +
                   'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
                 values: {
@@ -664,7 +658,7 @@ module
             );
           } else {
             notify.error(
-              i18n('xpack.ml.datavisualizer.loadingOverallFieldsDataErrorTitle', {
+              i18n.translate('xpack.ml.datavisualizer.loadingOverallFieldsDataErrorTitle', {
                 defaultMessage: 'Error loading data for fields in index {index}. {message}',
                 values: {
                   index: indexPattern.title,

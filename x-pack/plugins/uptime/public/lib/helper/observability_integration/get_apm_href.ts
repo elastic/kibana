@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { addBasePath } from './add_base_path';
 import { LatestMonitor } from '../../../../common/graphql/types';
 
 export const getApmHref = (
@@ -13,6 +14,9 @@ export const getApmHref = (
   dateRangeStart: string,
   dateRangeEnd: string
 ) =>
-  `${basePath && basePath.length ? `/${basePath}` : ''}/app/apm#/services?kuery=${encodeURI(
-    `url.domain: "${get(monitor, 'ping.url.domain')}"`
-  )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`;
+  addBasePath(
+    basePath,
+    `/app/apm#/services?kuery=${encodeURI(
+      `url.domain: "${get(monitor, 'ping.url.domain')}"`
+    )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
+  );

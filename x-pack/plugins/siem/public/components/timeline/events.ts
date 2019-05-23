@@ -7,6 +7,7 @@
 import { ColumnHeader } from './body/column_headers/column_header';
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
+import { QueryOperator } from './data_providers/data_provider';
 
 /** Invoked when a user clicks the close button to remove a data provider */
 export type OnDataProviderRemoved = (providerId: string, andProviderId?: string) => void;
@@ -26,6 +27,27 @@ export type OnToggleDataProviderExcluded = (
     providerId: string;
     excluded: boolean;
     andProviderId?: string;
+  }
+) => void;
+
+/** Invoked when a user edits the properties of a data provider */
+export type OnDataProviderEdited = (
+  {
+    andProviderId,
+    excluded,
+    field,
+    id,
+    operator,
+    providerId,
+    value,
+  }: {
+    andProviderId?: string;
+    excluded: boolean;
+    field: string;
+    id: string;
+    operator: QueryOperator;
+    providerId: string;
+    value: string | number;
   }
 ) => void;
 
