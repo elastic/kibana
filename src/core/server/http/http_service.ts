@@ -29,7 +29,9 @@ import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
-export type HttpServiceSetup = HttpServerSetup;
+export type HttpServiceSetup = HttpServerSetup & {
+  createNewServer?: (cfg: HttpConfig) => Promise<HttpServerSetup>;
+};
 /** @public */
 export interface HttpServiceStart {
   /** Indicates if http server is listening on a port */
@@ -73,8 +75,9 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const setup = this.httpServer.setup(config);
-    return { ...setup, ...{ createNewServer: (cfg: HttpConfig) => this.createServer(cfg) } };
+    const setup = this.httpServer.setup(config) as HttpServiceSetup;
+    setup.createNewServer = (cfg: HttpConfig) => this.createServer(cfg);
+    return setup;
   }
 
   public async start() {
@@ -99,10 +102,14 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     };
   }
 
-  private async createServer(config: HttpConfig) {
+  private async createServer(config: Partial<HttpConfig>) {
     const { port } = config;
 
-    if (!port || this.secondaryServers.has(port)) {
+    if (!port) {
+      throw new Error('port must be defined');
+    }
+
+    if (this.secondaryServers.has(port)) {
       throw new Error(`port ${port} is already in use`);
     }
 
