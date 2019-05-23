@@ -46,6 +46,17 @@ export default function ({ getService }) {
           },
           listing: [
             {
+              uuid: '2736e08b-5830-409b-8169-32aac39c5e55',
+              name: 'spicy.local',
+              type: 'Filebeat',
+              output: 'Elasticsearch',
+              total_events_rate: 0.018032786885245903,
+              bytes_sent_rate: 24135.450546448086,
+              errors: 0,
+              memory: 30680648,
+              version: '7.0.0-alpha1',
+            },
+            {
               uuid: '60599a4f-8139-4251-b0b9-15866df34221',
               name: 'spicy.local',
               type: 'Metricbeat',
@@ -55,21 +66,9 @@ export default function ({ getService }) {
               errors: 0,
               memory: 7598304,
               version: '7.0.0-alpha1',
-            },
-            {
-              uuid: '2736e08b-5830-409b-8169-32aac39c5e55',
-              name: 'spicy.local',
-              type: 'Filebeat',
-              output: 'Elasticsearch',
-              total_events_rate: 0.35437158469945357,
-              bytes_sent_rate: 530713.5601092896,
-              errors: 0,
-              memory: 27209376,
-              version: '7.0.0-alpha1',
             }
           ]
         };
-
         expect(body).to.eql(expected);
       });
     });

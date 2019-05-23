@@ -29,7 +29,6 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
-      description: 'this is a rather boring feature description !@#$%^&*()_+-=\\[]{}|;\':"/.,<>?',
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
       app: ['app1', 'app2'],
@@ -40,7 +39,6 @@ describe('FeatureRegistry', () => {
       },
       privileges: {
         all: {
-          grantWithBaseRead: true,
           catalogue: ['foo'],
           management: {
             foo: ['bar'],
@@ -222,6 +220,49 @@ describe('FeatureRegistry', () => {
     expect(() => featureRegistry.register(duplicateFeature)).toThrowErrorMatchingInlineSnapshot(
       `"Feature with id test-feature is already registered."`
     );
+  });
+
+  ['contains space', 'contains_invalid()_chars', ''].forEach(prohibitedChars => {
+    it(`prevents features from being registered with a navLinkId of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          navLinkId: prohibitedChars,
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it(`prevents features from being registered with a management id of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          management: {
+            kibana: [prohibitedChars],
+          },
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it(`prevents features from being registered with a catalogue entry of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          catalogue: [prohibitedChars],
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
   });
 
   ['catalogue', 'management', 'navLinks', `doesn't match valid regex`].forEach(prohibitedId => {

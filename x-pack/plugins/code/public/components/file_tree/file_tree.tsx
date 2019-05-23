@@ -122,7 +122,7 @@ export class CodeFileTree extends React.Component<Props> {
               />
               <span className="codeFileTree__directory">
                 <EuiText size="xs" grow={false} className="eui-displayInlineBlock">
-                  {`${node.name}/`}
+                  {node.name}
                 </EuiText>
               </span>
             </div>
@@ -253,7 +253,7 @@ export class CodeFileTree extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   node: state.file.tree,
   openedPaths: state.file.openedPaths,
-  treeLoading: state.file.loading,
+  treeLoading: state.file.rootFileTreeLoading,
 });
 
 const mapDispatchToProps = {

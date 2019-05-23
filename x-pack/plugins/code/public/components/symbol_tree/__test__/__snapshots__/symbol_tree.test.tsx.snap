@@ -78,7 +78,7 @@ exports[`render symbol tree correctly 1`] = `
             className="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems"
           >
             <div
-              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              className="code-symbol-container"
             >
               <div
                 className="codeSymbol"
@@ -105,46 +105,42 @@ exports[`render symbol tree correctly 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <div
-                  className="euiFlexItem euiFlexItem--flexGrow1"
+                <a
+                  className="code-symbol-link"
+                  href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?tab=structure"
+                  onClick={[Function]}
                 >
-                  <a
-                    className="code-symbol-link"
-                    href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?tab=structure"
-                    onClick={[Function]}
+                  <div
+                    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                      className="euiToken euiToken--tokenTint09 euiToken--square euiToken--small"
                     >
-                      <div
-                        className="euiToken euiToken--tokenTint09 euiToken--square euiToken--small"
+                      <svg
+                        className="euiIcon euiIcon--medium"
+                        focusable="false"
+                        height="16"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <svg
-                          className="euiIcon euiIcon--medium"
-                          focusable="false"
-                          height="16"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M8 2l5.196 3v.178l-.866.468V5.5L8 3 3.67 5.5v5L8 13l4.33-2.5V5.77l.866-.474V11L8 14l-5.196-3V5L8 2z"
-                          />
-                          <path
-                            d="M5.243 4.429L9.597 7.04 8 7.928 3.743 5.563a.5.5 0 1 0-.486.874L7.5 8.794V13.5h1V8.794l4.243-2.357a.508.508 0 0 0 .06-.04l.392-.202V5.047l-.917.505a.573.573 0 0 0-.02.01l-.106.06-.191.105-1.355.753-4.849-2.909-.514.858z"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        className="euiText euiText--small"
-                        data-test-subj="codeStructureTreeNode-\\"stack-control\\""
-                      >
-                        "stack-control"
-                      </div>
+                        <path
+                          d="M8 2l5.196 3v.178l-.866.468V5.5L8 3 3.67 5.5v5L8 13l4.33-2.5V5.77l.866-.474V11L8 14l-5.196-3V5L8 2z"
+                        />
+                        <path
+                          d="M5.243 4.429L9.597 7.04 8 7.928 3.743 5.563a.5.5 0 1 0-.486.874L7.5 8.794V13.5h1V8.794l4.243-2.357a.508.508 0 0 0 .06-.04l.392-.202V5.047l-.917.505a.573.573 0 0 0-.02.01l-.106.06-.191.105-1.355.753-4.849-2.909-.514.858z"
+                        />
+                      </svg>
                     </div>
-                  </a>
-                </div>
+                    <div
+                      className="euiText euiText--small"
+                      data-test-subj="codeStructureTreeNode-\\"stack-control\\""
+                    >
+                      "stack-control"
+                    </div>
+                  </div>
+                </a>
               </div>
             </div>
             <div
@@ -154,49 +150,45 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiSideNavItem euiSideNavItem--branch"
               >
                 <div
-                  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  className="code-symbol-container"
                 >
                   <div
                     className="codeSymbol codeSymbol--nested"
                   >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrow1"
+                    <a
+                      className="code-symbol-link"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?tab=structure"
+                      onClick={[Function]}
                     >
-                      <a
-                        className="code-symbol-link"
-                        href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?tab=structure"
-                        onClick={[Function]}
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
                         >
-                          <div
-                            className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
+                          <svg
+                            className="euiIcon euiIcon--medium"
+                            focusable="false"
+                            height="16"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              className="euiIcon euiIcon--medium"
-                              focusable="false"
-                              height="16"
-                              style={null}
-                              viewBox="0 0 16 16"
-                              width="16"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M6.649 4.667l1.326 4.7h.05l1.326-4.7h1.982l-2.134 6.666H6.801L4.667 4.667z"
-                                fillRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-EventEmitter"
-                          >
-                            EventEmitter
-                          </div>
+                            <path
+                              d="M6.649 4.667l1.326 4.7h.05l1.326-4.7h1.982l-2.134 6.666H6.801L4.667 4.667z"
+                              fillRule="evenodd"
+                            />
+                          </svg>
                         </div>
-                      </a>
-                    </div>
+                        <div
+                          className="euiText euiText--small"
+                          data-test-subj="codeStructureTreeNode-EventEmitter"
+                        >
+                          EventEmitter
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -204,49 +196,45 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiSideNavItem euiSideNavItem--branch"
               >
                 <div
-                  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  className="code-symbol-container"
                 >
                   <div
                     className="codeSymbol codeSymbol--nested"
                   >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrow1"
+                    <a
+                      className="code-symbol-link"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?tab=structure"
+                      onClick={[Function]}
                     >
-                      <a
-                        className="code-symbol-link"
-                        href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?tab=structure"
-                        onClick={[Function]}
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
                         >
-                          <div
-                            className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
+                          <svg
+                            className="euiIcon euiIcon--medium"
+                            focusable="false"
+                            height="16"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              className="euiIcon euiIcon--medium"
-                              focusable="false"
-                              height="16"
-                              style={null}
-                              viewBox="0 0 16 16"
-                              width="16"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M6.649 4.667l1.326 4.7h.05l1.326-4.7h1.982l-2.134 6.666H6.801L4.667 4.667z"
-                                fillRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-ClrStackView"
-                          >
-                            ClrStackView
-                          </div>
+                            <path
+                              d="M6.649 4.667l1.326 4.7h.05l1.326-4.7h1.982l-2.134 6.666H6.801L4.667 4.667z"
+                              fillRule="evenodd"
+                            />
+                          </svg>
                         </div>
-                      </a>
-                    </div>
+                        <div
+                          className="euiText euiText--small"
+                          data-test-subj="codeStructureTreeNode-ClrStackView"
+                        >
+                          ClrStackView
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -254,7 +242,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
               >
                 <div
-                  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  className="code-symbol-container"
                 >
                   <div
                     className="codeSymbol"
@@ -281,44 +269,40 @@ exports[`render symbol tree correctly 1`] = `
                         xlinkHref="#arrow_down-a"
                       />
                     </svg>
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrow1"
+                    <a
+                      className="code-symbol-link"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?tab=structure"
+                      onClick={[Function]}
                     >
-                      <a
-                        className="code-symbol-link"
-                        href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?tab=structure"
-                        onClick={[Function]}
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
                         >
-                          <div
-                            className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
+                          <svg
+                            className="euiIcon euiIcon--medium"
+                            focusable="false"
+                            height="16"
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              className="euiIcon euiIcon--medium"
-                              focusable="false"
-                              height="16"
-                              style={null}
-                              viewBox="0 0 16 16"
-                              width="16"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M11.333 7.027H9.375c-.056-.708-.48-1.187-1.222-1.187-.972 0-1.5.806-1.5 2.16 0 1.43.545 2.16 1.486 2.16.708 0 1.139-.415 1.236-1.08l1.958.015C11.236 10.418 10.181 12 8.097 12c-1.958 0-3.43-1.41-3.43-4 0-2.6 1.514-4 3.43-4 1.792 0 3.084 1.095 3.236 3.027z"
-                                fillRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-StackControl"
-                          >
-                            StackControl
-                          </div>
+                            <path
+                              d="M11.333 7.027H9.375c-.056-.708-.48-1.187-1.222-1.187-.972 0-1.5.806-1.5 2.16 0 1.43.545 2.16 1.486 2.16.708 0 1.139-.415 1.236-1.08l1.958.015C11.236 10.418 10.181 12 8.097 12c-1.958 0-3.43-1.41-3.43-4 0-2.6 1.514-4 3.43-4 1.792 0 3.084 1.095 3.236 3.027z"
+                              fillRule="evenodd"
+                            />
+                          </svg>
                         </div>
-                      </a>
-                    </div>
+                        <div
+                          className="euiText euiText--small"
+                          data-test-subj="codeStructureTreeNode-StackControl"
+                        >
+                          StackControl
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </div>
                 <div
@@ -328,49 +312,45 @@ exports[`render symbol tree correctly 1`] = `
                     className="euiSideNavItem euiSideNavItem--branch"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="code-symbol-container"
                     >
                       <div
                         className="codeSymbol codeSymbol--nested"
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?tab=structure"
+                          onClick={[Function]}
                         >
-                          <a
-                            className="code-symbol-link"
-                            href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?tab=structure"
-                            onClick={[Function]}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                           >
                             <div
-                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                              className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
                             >
-                              <div
-                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
+                              <svg
+                                className="euiIcon euiIcon--medium"
+                                focusable="false"
+                                height="16"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  className="euiIcon euiIcon--medium"
-                                  focusable="false"
-                                  height="16"
-                                  style={null}
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M4.889 12V4h3.304c1.797 0 2.922 1.117 2.918 2.77.004 1.652-1.144 2.746-2.976 2.746H6.822V12H4.89zm1.933-4.008h.953c.868 0 1.336-.472 1.332-1.222.004-.73-.464-1.211-1.332-1.211h-.953v2.433z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                              <div
-                                className="euiText euiText--small"
-                                data-test-subj="codeStructureTreeNode-model"
-                              >
-                                model
-                              </div>
+                                <path
+                                  d="M4.889 12V4h3.304c1.797 0 2.922 1.117 2.918 2.77.004 1.652-1.144 2.746-2.976 2.746H6.822V12H4.89zm1.933-4.008h.953c.868 0 1.336-.472 1.332-1.222.004-.73-.464-1.211-1.332-1.211h-.953v2.433z"
+                                  fillRule="evenodd"
+                                />
+                              </svg>
                             </div>
-                          </a>
-                        </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-model"
+                            >
+                              model
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -378,49 +358,45 @@ exports[`render symbol tree correctly 1`] = `
                     className="euiSideNavItem euiSideNavItem--branch"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="code-symbol-container"
                     >
                       <div
                         className="codeSymbol codeSymbol--nested"
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?tab=structure"
+                          onClick={[Function]}
                         >
-                          <a
-                            className="code-symbol-link"
-                            href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?tab=structure"
-                            onClick={[Function]}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                           >
                             <div
-                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                              className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
                             >
-                              <div
-                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
+                              <svg
+                                className="euiIcon euiIcon--medium"
+                                focusable="false"
+                                height="16"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  className="euiIcon euiIcon--medium"
-                                  focusable="false"
-                                  height="16"
-                                  style={null}
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M4.889 12V4h3.304c1.797 0 2.922 1.117 2.918 2.77.004 1.652-1.144 2.746-2.976 2.746H6.822V12H4.89zm1.933-4.008h.953c.868 0 1.336-.472 1.332-1.222.004-.73-.464-1.211-1.332-1.211h-.953v2.433z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                              <div
-                                className="euiText euiText--small"
-                                data-test-subj="codeStructureTreeNode-modelChange"
-                              >
-                                modelChange
-                              </div>
+                                <path
+                                  d="M4.889 12V4h3.304c1.797 0 2.922 1.117 2.918 2.77.004 1.652-1.144 2.746-2.976 2.746H6.822V12H4.89zm1.933-4.008h.953c.868 0 1.336-.472 1.332-1.222.004-.73-.464-1.211-1.332-1.211h-.953v2.433z"
+                                  fillRule="evenodd"
+                                />
+                              </svg>
                             </div>
-                          </a>
-                        </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-modelChange"
+                            >
+                              modelChange
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -428,49 +404,45 @@ exports[`render symbol tree correctly 1`] = `
                     className="euiSideNavItem euiSideNavItem--branch"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="code-symbol-container"
                     >
                       <div
                         className="codeSymbol codeSymbol--nested"
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?tab=structure"
+                          onClick={[Function]}
                         >
-                          <a
-                            className="code-symbol-link"
-                            href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?tab=structure"
-                            onClick={[Function]}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                           >
                             <div
-                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                              className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
                             >
-                              <div
-                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
+                              <svg
+                                className="euiIcon euiIcon--medium"
+                                focusable="false"
+                                height="16"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  className="euiIcon euiIcon--medium"
-                                  focusable="false"
-                                  height="16"
-                                  style={null}
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M4.889 12V4h3.304c1.797 0 2.922 1.117 2.918 2.77.004 1.652-1.144 2.746-2.976 2.746H6.822V12H4.89zm1.933-4.008h.953c.868 0 1.336-.472 1.332-1.222.004-.73-.464-1.211-1.332-1.211h-.953v2.433z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                              <div
-                                className="euiText euiText--small"
-                                data-test-subj="codeStructureTreeNode-stackView"
-                              >
-                                stackView
-                              </div>
+                                <path
+                                  d="M4.889 12V4h3.304c1.797 0 2.922 1.117 2.918 2.77.004 1.652-1.144 2.746-2.976 2.746H6.822V12H4.89zm1.933-4.008h.953c.868 0 1.336-.472 1.332-1.222.004-.73-.464-1.211-1.332-1.211h-.953v2.433z"
+                                  fillRule="evenodd"
+                                />
+                              </svg>
                             </div>
-                          </a>
-                        </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-stackView"
+                            >
+                              stackView
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -478,49 +450,45 @@ exports[`render symbol tree correctly 1`] = `
                     className="euiSideNavItem euiSideNavItem--branch"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="code-symbol-container"
                     >
                       <div
                         className="codeSymbol codeSymbol--nested"
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?tab=structure"
+                          onClick={[Function]}
                         >
-                          <a
-                            className="code-symbol-link"
-                            href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?tab=structure"
-                            onClick={[Function]}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                           >
                             <div
-                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                              className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
                             >
-                              <div
-                                className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
+                              <svg
+                                className="euiIcon euiIcon--medium"
+                                focusable="false"
+                                height="16"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  className="euiIcon euiIcon--medium"
-                                  focusable="false"
-                                  height="16"
-                                  style={null}
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M6.649 4.667l1.326 4.7h.05l1.326-4.7h1.982l-2.134 6.666H6.801L4.667 4.667z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                              <div
-                                className="euiText euiText--small"
-                                data-test-subj="codeStructureTreeNode-Unit"
-                              >
-                                Unit
-                              </div>
+                                <path
+                                  d="M6.649 4.667l1.326 4.7h.05l1.326-4.7h1.982l-2.134 6.666H6.801L4.667 4.667z"
+                                  fillRule="evenodd"
+                                />
+                              </svg>
                             </div>
-                          </a>
-                        </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-Unit"
+                            >
+                              Unit
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -528,49 +496,45 @@ exports[`render symbol tree correctly 1`] = `
                     className="euiSideNavItem euiSideNavItem--branch"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="code-symbol-container"
                     >
                       <div
                         className="codeSymbol codeSymbol--nested"
                       >
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?tab=structure"
+                          onClick={[Function]}
                         >
-                          <a
-                            className="code-symbol-link"
-                            href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?tab=structure"
-                            onClick={[Function]}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                           >
                             <div
-                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                              className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small"
                             >
-                              <div
-                                className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small"
+                              <svg
+                                className="euiIcon euiIcon--medium"
+                                focusable="false"
+                                height="16"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  className="euiIcon euiIcon--medium"
-                                  focusable="false"
-                                  height="16"
-                                  style={null}
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M9.414 3.757l2.829 2.829a2 2 0 0 1 0 2.828l-2.829 2.829a2 2 0 0 1-2.828 0L3.757 9.414a2 2 0 0 1 0-2.828l2.829-2.829a2 2 0 0 1 2.828 0zm-1.747 2.91a1 1 0 0 0-1 1v.666a1 1 0 0 0 1 1h.666a1 1 0 0 0 1-1v-.666a1 1 0 0 0-1-1h-.666z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                              <div
-                                className="euiText euiText--small"
-                                data-test-subj="codeStructureTreeNode-datemath"
-                              >
-                                datemath
-                              </div>
+                                <path
+                                  d="M9.414 3.757l2.829 2.829a2 2 0 0 1 0 2.828l-2.829 2.829a2 2 0 0 1-2.828 0L3.757 9.414a2 2 0 0 1 0-2.828l2.829-2.829a2 2 0 0 1 2.828 0zm-1.747 2.91a1 1 0 0 0-1 1v.666a1 1 0 0 0 1 1h.666a1 1 0 0 0 1-1v-.666a1 1 0 0 0-1-1h-.666z"
+                                  fillRule="evenodd"
+                                />
+                              </svg>
                             </div>
-                          </a>
-                        </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-datemath"
+                            >
+                              datemath
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -578,7 +542,7 @@ exports[`render symbol tree correctly 1`] = `
                     className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
                   >
                     <div
-                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      className="code-symbol-container"
                     >
                       <div
                         className="codeSymbol"
@@ -605,44 +569,40 @@ exports[`render symbol tree correctly 1`] = `
                             xlinkHref="#arrow_down-a"
                           />
                         </svg>
-                        <div
-                          className="euiFlexItem euiFlexItem--flexGrow1"
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?tab=structure"
+                          onClick={[Function]}
                         >
-                          <a
-                            className="code-symbol-link"
-                            href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?tab=structure"
-                            onClick={[Function]}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                           >
                             <div
-                              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                              className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
                             >
-                              <div
-                                className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
+                              <svg
+                                className="euiIcon euiIcon--medium"
+                                focusable="false"
+                                height="16"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  className="euiIcon euiIcon--medium"
-                                  focusable="false"
-                                  height="16"
-                                  style={null}
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M11.333 7.027H9.375c-.056-.708-.48-1.187-1.222-1.187-.972 0-1.5.806-1.5 2.16 0 1.43.545 2.16 1.486 2.16.708 0 1.139-.415 1.236-1.08l1.958.015C11.236 10.418 10.181 12 8.097 12c-1.958 0-3.43-1.41-3.43-4 0-2.6 1.514-4 3.43-4 1.792 0 3.084 1.095 3.236 3.027z"
-                                    fillRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                              <div
-                                className="euiText euiText--small"
-                                data-test-subj="codeStructureTreeNode-HashMap<K, V>"
-                              >
-                                HashMap&lt;K, V&gt;
-                              </div>
+                                <path
+                                  d="M11.333 7.027H9.375c-.056-.708-.48-1.187-1.222-1.187-.972 0-1.5.806-1.5 2.16 0 1.43.545 2.16 1.486 2.16.708 0 1.139-.415 1.236-1.08l1.958.015C11.236 10.418 10.181 12 8.097 12c-1.958 0-3.43-1.41-3.43-4 0-2.6 1.514-4 3.43-4 1.792 0 3.084 1.095 3.236 3.027z"
+                                  fillRule="evenodd"
+                                />
+                              </svg>
                             </div>
-                          </a>
-                        </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-HashMap<K, V>"
+                            >
+                              HashMap&lt;K, V&gt;
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     </div>
                     <div
@@ -652,49 +612,45 @@ exports[`render symbol tree correctly 1`] = `
                         className="euiSideNavItem euiSideNavItem--branch"
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="code-symbol-container"
                         >
                           <div
                             className="codeSymbol codeSymbol--nested"
                           >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrow1"
+                            <a
+                              className="code-symbol-link"
+                              href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?tab=structure"
+                              onClick={[Function]}
                             >
-                              <a
-                                className="code-symbol-link"
-                                href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?tab=structure"
-                                onClick={[Function]}
+                              <div
+                                className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                               >
                                 <div
-                                  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                                  className="euiToken euiToken--tokenTint10 euiToken--circle euiToken--small"
                                 >
-                                  <div
-                                    className="euiToken euiToken--tokenTint10 euiToken--circle euiToken--small"
+                                  <svg
+                                    className="euiIcon euiIcon--medium"
+                                    focusable="false"
+                                    height="16"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
                                   >
-                                    <svg
-                                      className="euiIcon euiIcon--medium"
-                                      focusable="false"
-                                      height="16"
-                                      style={null}
-                                      viewBox="0 0 16 16"
-                                      width="16"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        d="M5.27 12V4h5.46v1.57H7.203v1.641h3.18v1.574h-3.18V12z"
-                                        fillRule="evenodd"
-                                      />
-                                    </svg>
-                                  </div>
-                                  <div
-                                    className="euiText euiText--small"
-                                    data-test-subj="codeStructureTreeNode-serialVersionUID"
-                                  >
-                                    serialVersionUID
-                                  </div>
+                                    <path
+                                      d="M5.27 12V4h5.46v1.57H7.203v1.641h3.18v1.574h-3.18V12z"
+                                      fillRule="evenodd"
+                                    />
+                                  </svg>
                                 </div>
-                              </a>
-                            </div>
+                                <div
+                                  className="euiText euiText--small"
+                                  data-test-subj="codeStructureTreeNode-serialVersionUID"
+                                >
+                                  serialVersionUID
+                                </div>
+                              </div>
+                            </a>
                           </div>
                         </div>
                       </div>

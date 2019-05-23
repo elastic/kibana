@@ -110,7 +110,7 @@ function parseInitialFields(initialFields) {
 }
 
 function isIndexPattern(val) {
-  return Boolean(val && typeof val.toIndexList === 'function');
+  return Boolean(val && typeof val.getIndex === 'function');
 }
 
 export function SearchSourceProvider(Promise, Private, config) {

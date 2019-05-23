@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 
 import { SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { Request, Server } from 'hapi';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
@@ -43,6 +44,14 @@ export const spaces = (kibana: Record<string, any>) =>
       }).default();
     },
 
+    uiCapabilities() {
+      return {
+        spaces: {
+          manage: true,
+        },
+      };
+    },
+
     uiExports: {
       chromeNavControls: ['plugins/spaces/views/nav_control'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -74,11 +83,6 @@ export const spaces = (kibana: Record<string, any>) =>
           spaces: [],
           activeSpace: null,
           spaceSelectorURL: getSpaceSelectorUrl(server.config()),
-          uiCapabilities: {
-            spaces: {
-              manage: true,
-            },
-          },
         };
       },
       async replaceInjectedVars(
@@ -103,20 +107,11 @@ export const spaces = (kibana: Record<string, any>) =>
           };
         }
 
-        if (vars.activeSpace.space) {
-          const features = server.plugins.xpack_main.getFeatures();
-          vars.uiCapabilities = toggleUICapabilities(
-            features,
-            vars.uiCapabilities,
-            vars.activeSpace.space
-          );
-        }
-
         return vars;
       },
     },
 
-    async init(server: any) {
+    async init(server: Server) {
       const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
 
@@ -135,13 +130,15 @@ export const spaces = (kibana: Record<string, any>) =>
 
       const config = server.config();
 
-      const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
+      const spacesAuditLogger = new SpacesAuditLogger(
+        new AuditLogger(server, 'spaces', config, xpackMainPlugin.info)
+      );
 
       server.expose('spacesClient', {
-        getScopedClient: (request: Record<string, any>) => {
+        getScopedClient: (request: Request) => {
           const adminCluster = server.plugins.elasticsearch.getCluster('admin');
           const { callWithRequest, callWithInternalUser } = adminCluster;
-          const callCluster = (...args: any[]) => callWithRequest(request, ...args);
+          const callCluster = callWithRequest.bind(adminCluster, request);
           const { savedObjects } = server;
           const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
           const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
@@ -167,7 +164,7 @@ export const spaces = (kibana: Record<string, any>) =>
         types,
       } = server.savedObjects as SavedObjectsService;
       addScopedSavedObjectsClientWrapperFactory(
-        Number.MAX_VALUE,
+        Number.MAX_SAFE_INTEGER - 1,
         spacesSavedObjectsClientWrapperFactory(spacesService, types)
       );
 
@@ -180,5 +177,21 @@ export const spaces = (kibana: Record<string, any>) =>
 
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getSpacesUsageCollector(server));
+
+      server.registerCapabilitiesModifier(async (request, uiCapabilities) => {
+        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+        try {
+          const activeSpace = await getActiveSpace(
+            spacesClient,
+            request.getBasePath(),
+            server.config().get('server.basePath')
+          );
+
+          const features = server.plugins.xpack_main.getFeatures();
+          return toggleUICapabilities(features, uiCapabilities, activeSpace);
+        } catch (e) {
+          return uiCapabilities;
+        }
+      });
     },
   });

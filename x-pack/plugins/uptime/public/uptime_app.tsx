@@ -46,6 +46,9 @@ export interface UptimeAppProps {
   basePath: string;
   darkMode: boolean;
   client: UMGraphQLClient;
+  isApmAvailable: boolean;
+  isInfraAvailable: boolean;
+  isLogsAvailable: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
@@ -159,7 +162,7 @@ const Application = (props: UptimeAppProps) => {
                             )}
                           />
                           <Route
-                            path="/monitor/:id"
+                            path="/monitor/:id/:location?"
                             render={routerProps => (
                               <MonitorPage
                                 query={client.query}

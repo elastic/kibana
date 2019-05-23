@@ -44,7 +44,7 @@ async function asyncInjectBanner($injector) {
   if (await shouldShowBanner(telemetryOptInProvider, config)) {
     const $http = $injector.get('$http');
 
-    renderBanner(telemetryOptInProvider, () => fetchTelemetry($http));
+    renderBanner(telemetryOptInProvider, () => fetchTelemetry($http, { unencrypted: true }));
   }
 }
 

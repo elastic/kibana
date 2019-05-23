@@ -52,6 +52,7 @@ export const LICENSE_WHITELIST = [
   'CC-BY-3.0',
   'CC-BY-4.0',
   'Eclipse Distribution License - v 1.0',
+  'FreeBSD',
   'ISC',
   'ISC*',
   'MIT OR GPL-2.0',

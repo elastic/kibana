@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Clone, Commit, Error as GitError, Repository, Reset, TreeEntry } from '@elastic/nodegit';
+import {
+  Commit,
+  Error as GitError,
+  Repository,
+  Reset,
+  TreeEntry,
+  // @ts-ignore
+  Worktree,
+} from '@elastic/nodegit';
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
@@ -85,10 +93,10 @@ export class WorkspaceHandler {
       revision = defaultBranch;
     }
     let workspaceRepo: Repository;
-    if (await this.workspaceExists(repositoryUri, revision)) {
+    if (await this.workspaceExists(bareRepo, repositoryUri, revision)) {
       workspaceRepo = await this.updateWorkspace(repositoryUri, revision, targetCommit);
     } else {
-      workspaceRepo = await this.cloneWorkspace(bareRepo, repositoryUri, revision);
+      workspaceRepo = await this.cloneWorkspace(bareRepo, repositoryUri, revision, targetCommit);
     }
 
     const workspaceHeadCommit = await workspaceRepo.getHeadCommit();
@@ -114,13 +122,9 @@ export class WorkspaceHandler {
       .filter(isDir);
   }
 
-  public async clearWorkspace(repoUri: string, revision?: string) {
+  public async clearWorkspace(repoUri: string) {
     const workspaceDir = await this.workspaceDir(repoUri);
-    if (revision) {
-      await del([await this.revisionDir(repoUri, revision)], { force: true });
-    } else {
-      await del([workspaceDir], { force: true });
-    }
+    await del([workspaceDir], { force: true });
   }
 
   public async handleRequest(request: LspRequest): Promise<void> {
@@ -333,9 +337,14 @@ export class WorkspaceHandler {
     }
   }
 
-  private async workspaceExists(repositoryUri: string, revision: string) {
-    const workspaceDir = await this.revisionDir(repositoryUri, revision);
-    return fs.existsSync(workspaceDir);
+  private async workspaceExists(bareRepo: Repository, repositoryUri: string, revision: string) {
+    const workTreeName = this.workspaceWorktreeBranchName(revision);
+    const wt = this.getWorktree(bareRepo, workTreeName);
+    if (wt) {
+      const workspaceDir = await this.revisionDir(repositoryUri, revision);
+      return fs.existsSync(workspaceDir);
+    }
+    return false;
   }
 
   private async revisionDir(repositoryUri: string, revision: string) {
@@ -353,6 +362,10 @@ export class WorkspaceHandler {
     }
   }
 
+  private workspaceWorktreeBranchName(repoName: string): string {
+    return `workspace-${repoName}`;
+  }
+
   private async updateWorkspace(
     repositoryUri: string,
     revision: string,
@@ -362,8 +375,13 @@ export class WorkspaceHandler {
     const workspaceRepo = await Repository.open(workspaceDir);
     const workspaceHead = await workspaceRepo.getHeadCommit();
     if (workspaceHead.sha() !== targetCommit.sha()) {
-      this.log.info(`fetch workspace ${workspaceDir} from origin`);
-      await workspaceRepo.fetch('origin');
+      const commit = await workspaceRepo.getCommit(targetCommit.sha());
+      this.log.info(`Checkout workspace ${workspaceDir} to ${targetCommit.sha()}`);
+      // @ts-ignore
+      const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
+      if (result !== undefined && result !== GitError.CODE.OK) {
+        throw Boom.internal(`Reset workspace to commit ${targetCommit.sha()} failed.`);
+      }
     }
     return workspaceRepo;
   }
@@ -371,10 +389,11 @@ export class WorkspaceHandler {
   private async cloneWorkspace(
     bareRepo: Repository,
     repositoryUri: string,
-    revision: string
+    revision: string,
+    targetCommit: Commit
   ): Promise<Repository> {
     const workspaceDir = await this.revisionDir(repositoryUri, revision);
-    this.log.info(`clone workspace ${workspaceDir} from url ${bareRepo.path()}`);
+    this.log.info(`Create workspace ${workspaceDir} from url ${bareRepo.path()}`);
     const parentDir = path.dirname(workspaceDir);
     // on windows, git clone will failed if parent folder is not exists;
     await new Promise((resolve, reject) =>
@@ -386,7 +405,47 @@ export class WorkspaceHandler {
         }
       })
     );
-    return await Clone.clone(bareRepo.path(), workspaceDir);
+    const workTreeName = this.workspaceWorktreeBranchName(revision);
+    await this.pruneWorktree(bareRepo, workTreeName);
+    // Create the worktree and open it as Repository.
+    const wt = await Worktree.add(bareRepo, workTreeName, workspaceDir, { lock: 0, version: 1 });
+    // @ts-ignore
+    const workspaceRepo = await Repository.openFromWorktree(wt);
+    const workspaceHeadCommit = await workspaceRepo.getHeadCommit();
+    // when we start supporting multi-revision, targetCommit may not be head
+    if (workspaceHeadCommit.sha() !== targetCommit.sha()) {
+      const commit = await workspaceRepo.getCommit(targetCommit.sha());
+      this.log.info(`checkout ${workspaceRepo.workdir()} to commit ${targetCommit.sha()}`);
+      // @ts-ignore
+      const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
+      if (result !== undefined && result !== GitError.CODE.OK) {
+        throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
+      }
+    }
+    return workspaceRepo;
+  }
+
+  private async getWorktree(bareRepo: Repository, workTreeName: string) {
+    try {
+      const wt: Worktree = await Worktree.lookup(bareRepo, workTreeName);
+      return wt;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  private async pruneWorktree(bareRepo: Repository, workTreeName: string) {
+    const wt = await this.getWorktree(bareRepo, workTreeName);
+    if (wt) {
+      wt.prune({ flags: 1 });
+      try {
+        // try delete the worktree branch
+        const ref = await bareRepo.getReference(`refs/heads/${workTreeName}`);
+        ref.delete();
+      } catch (e) {
+        // it doesn't matter if branch is not exists
+      }
+    }
   }
 
   private setWorkspaceRevision(workspaceRepo: Repository, headCommit: Commit) {

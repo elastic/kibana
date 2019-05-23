@@ -102,6 +102,18 @@
             "deprecationReason": null
           },
           {
+            "name": "origin",
+            "description": "The origin of the source (one of 'fallback', 'internal', 'stored')",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "configuration",
             "description": "The raw configuration of the source",
             "args": [],
@@ -323,8 +335,8 @@
             "deprecationReason": null
           },
           {
-            "name": "map",
-            "description": "A hierarchy of hosts, pods, containers, services or arbitrary groups",
+            "name": "snapshot",
+            "description": "A snapshot of nodes",
             "args": [
               {
                 "name": "timerange",
@@ -347,7 +359,7 @@
                 "defaultValue": null
               }
             ],
-            "type": { "kind": "OBJECT", "name": "InfraResponse", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "InfraSnapshotResponse", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -514,6 +526,26 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "logColumns",
+            "description": "The columns to use for log display",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "UNION", "name": "InfraSourceLogColumn", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -597,6 +629,182 @@
           {
             "name": "timestamp",
             "description": "The field to use as a timestamp for metrics and logs",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "UNION",
+        "name": "InfraSourceLogColumn",
+        "description": "All known log column types",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": [
+          { "kind": "OBJECT", "name": "InfraSourceTimestampLogColumn", "ofType": null },
+          { "kind": "OBJECT", "name": "InfraSourceMessageLogColumn", "ofType": null },
+          { "kind": "OBJECT", "name": "InfraSourceFieldLogColumn", "ofType": null }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceTimestampLogColumn",
+        "description": "The built-in timestamp log column",
+        "fields": [
+          {
+            "name": "timestampColumn",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "InfraSourceTimestampLogColumnAttributes",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceTimestampLogColumnAttributes",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "A unique id for the column",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceMessageLogColumn",
+        "description": "The built-in message log column",
+        "fields": [
+          {
+            "name": "messageColumn",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "InfraSourceMessageLogColumnAttributes",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceMessageLogColumnAttributes",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "A unique id for the column",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceFieldLogColumn",
+        "description": "A log column containing a field value",
+        "fields": [
+          {
+            "name": "fieldColumn",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "InfraSourceFieldLogColumnAttributes",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraSourceFieldLogColumnAttributes",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "A unique id for the column",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "field",
+            "description": "The field name this column refers to",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1135,6 +1343,74 @@
             "deprecationReason": null
           },
           {
+            "name": "columns",
+            "description": "The columns used for rendering the log entry",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "UNION", "name": "InfraLogEntryColumn", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "UNION",
+        "name": "InfraLogEntryColumn",
+        "description": "A column of a log entry",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": [
+          { "kind": "OBJECT", "name": "InfraLogEntryTimestampColumn", "ofType": null },
+          { "kind": "OBJECT", "name": "InfraLogEntryMessageColumn", "ofType": null },
+          { "kind": "OBJECT", "name": "InfraLogEntryFieldColumn", "ofType": null }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraLogEntryTimestampColumn",
+        "description": "A special built-in column that contains the log entry's timestamp",
+        "fields": [
+          {
+            "name": "timestamp",
+            "description": "The timestamp",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraLogEntryMessageColumn",
+        "description": "A special built-in column that contains the log entry's constructed message",
+        "fields": [
+          {
             "name": "message",
             "description": "A list of the formatted log entry segments",
             "args": [],
@@ -1231,11 +1507,46 @@
       {
         "kind": "OBJECT",
         "name": "InfraLogMessageConstantSegment",
-        "description": "A segment of the log entry message that was derived from a field",
+        "description": "A segment of the log entry message that was derived from a string literal",
         "fields": [
           {
             "name": "constant",
             "description": "The segment's message",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraLogEntryFieldColumn",
+        "description": "A column that contains the value of a field of the log entry",
+        "fields": [
+          {
+            "name": "field",
+            "description": "The field name of the column",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "value",
+            "description": "The value of the field in the log entry",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1383,6 +1694,18 @@
             "deprecationReason": null
           },
           {
+            "name": "key",
+            "description": "Time key for the document - derived from the source configuration timestamp and tiebreaker settings",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "InfraTimeKey", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fields",
             "description": "An array of flattened fields and values",
             "args": [],
@@ -1486,15 +1809,25 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraResponse",
+        "name": "InfraSnapshotResponse",
         "description": "",
         "fields": [
           {
             "name": "nodes",
-            "description": "",
+            "description": "Nodes of type host, container or pod grouped by 0, 1 or 2 terms",
             "args": [
               {
-                "name": "path",
+                "name": "type",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "ENUM", "name": "InfraNodeType", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "groupBy",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
@@ -1505,7 +1838,11 @@
                     "ofType": {
                       "kind": "NON_NULL",
                       "name": null,
-                      "ofType": { "kind": "INPUT_OBJECT", "name": "InfraPathInput", "ofType": null }
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "InfraSnapshotGroupbyInput",
+                        "ofType": null
+                      }
                     }
                   }
                 },
@@ -1517,7 +1854,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "InfraMetricInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "InfraSnapshotMetricInput",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               }
@@ -1531,7 +1872,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "InfraNode", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "InfraSnapshotNode", "ofType": null }
                 }
               }
             },
@@ -1546,20 +1887,10 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "InfraPathInput",
+        "name": "InfraSnapshotGroupbyInput",
         "description": "",
         "fields": null,
         "inputFields": [
-          {
-            "name": "type",
-            "description": "The type of path",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraPathType", "ofType": null }
-            },
-            "defaultValue": null
-          },
           {
             "name": "label",
             "description": "The label to use in the results for the group by for the terms group by",
@@ -1571,78 +1902,6 @@
             "description": "The field to group by from a terms aggregation, this is ignored by the filter type",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
-          },
-          {
-            "name": "filters",
-            "description": "The fitlers for the filter group by",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "INPUT_OBJECT", "name": "InfraPathFilterInput", "ofType": null }
-              }
-            },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraPathType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "terms", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "filters",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "hosts", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "pods", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "containers",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "InfraPathFilterInput",
-        "description": "A group by filter",
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "label",
-            "description": "The label for the filter, this will be used as the group name in the final results",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "query",
-            "description": "The query string query",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -1651,7 +1910,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "InfraMetricInput",
+        "name": "InfraSnapshotMetricInput",
         "description": "",
         "fields": null,
         "inputFields": [
@@ -1661,7 +1920,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraMetricType", "ofType": null }
+              "ofType": { "kind": "ENUM", "name": "InfraSnapshotMetricType", "ofType": null }
             },
             "defaultValue": null
           }
@@ -1672,7 +1931,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "InfraMetricType",
+        "name": "InfraSnapshotMetricType",
         "description": "",
         "fields": null,
         "inputFields": null,
@@ -1690,7 +1949,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraNode",
+        "name": "InfraSnapshotNode",
         "description": "",
         "fields": [
           {
@@ -1706,7 +1965,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "InfraNodePath", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "InfraSnapshotNodePath", "ofType": null }
                 }
               }
             },
@@ -1720,7 +1979,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "InfraNodeMetric", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "InfraSnapshotNodeMetric", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1733,7 +1992,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraNodePath",
+        "name": "InfraSnapshotNodePath",
         "description": "",
         "fields": [
           {
@@ -1759,6 +2018,14 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "ip",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -1768,7 +2035,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraNodeMetric",
+        "name": "InfraSnapshotNodeMetric",
         "description": "",
         "fields": [
           {
@@ -1778,7 +2045,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraMetricType", "ofType": null }
+              "ofType": { "kind": "ENUM", "name": "InfraSnapshotMetricType", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1787,11 +2054,7 @@
             "name": "value",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1799,11 +2062,7 @@
             "name": "avg",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1811,11 +2070,7 @@
             "name": "max",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -2131,12 +2386,12 @@
                 "defaultValue": null
               },
               {
-                "name": "source",
+                "name": "sourceProperties",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "CreateSourceInput", "ofType": null }
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "UpdateSourceInput", "ofType": null }
                 },
                 "defaultValue": null
               }
@@ -2144,14 +2399,14 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "CreateSourceResult", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "UpdateSourceResult", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "updateSource",
-            "description": "Modify an existing source using the given sequence of update operations",
+            "description": "Modify an existing source",
             "args": [
               {
                 "name": "id",
@@ -2164,24 +2419,12 @@
                 "defaultValue": null
               },
               {
-                "name": "changes",
-                "description": "A sequence of update operations",
+                "name": "sourceProperties",
+                "description": "The properties to update the source with",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "UpdateSourceInput",
-                        "ofType": null
-                      }
-                    }
-                  }
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "UpdateSourceInput", "ofType": null }
                 },
                 "defaultValue": null
               }
@@ -2225,18 +2468,14 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "CreateSourceInput",
-        "description": "The source to be created",
+        "name": "UpdateSourceInput",
+        "description": "The properties to update the source with",
         "fields": null,
         "inputFields": [
           {
             "name": "name",
             "description": "The name of the data source",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {
@@ -2260,7 +2499,25 @@
           {
             "name": "fields",
             "description": "The field mapping to use for this source",
-            "type": { "kind": "INPUT_OBJECT", "name": "CreateSourceFieldsInput", "ofType": null },
+            "type": { "kind": "INPUT_OBJECT", "name": "UpdateSourceFieldsInput", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "logColumns",
+            "description": "The log columns to display for this source",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "UpdateSourceLogColumnInput",
+                  "ofType": null
+                }
+              }
+            },
             "defaultValue": null
           }
         ],
@@ -2270,7 +2527,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "CreateSourceFieldsInput",
+        "name": "UpdateSourceFieldsInput",
         "description": "The mapping of semantic fields of the source to be created",
         "fields": null,
         "inputFields": [
@@ -2310,60 +2567,39 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "CreateSourceResult",
-        "description": "The result of a successful source creation",
-        "fields": [
-          {
-            "name": "source",
-            "description": "The source that was created",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "InfraSource", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "INPUT_OBJECT",
-        "name": "UpdateSourceInput",
-        "description": "The update operations to be performed",
+        "name": "UpdateSourceLogColumnInput",
+        "description": "One of the log column types to display for this source",
         "fields": null,
         "inputFields": [
           {
-            "name": "setName",
-            "description": "The name update operation to be performed",
-            "type": { "kind": "INPUT_OBJECT", "name": "UpdateSourceNameInput", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "setDescription",
-            "description": "The description update operation to be performed",
+            "name": "fieldColumn",
+            "description": "A custom field log column",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UpdateSourceDescriptionInput",
+              "name": "UpdateSourceFieldLogColumnInput",
               "ofType": null
             },
             "defaultValue": null
           },
           {
-            "name": "setAliases",
-            "description": "The alias update operation to be performed",
-            "type": { "kind": "INPUT_OBJECT", "name": "UpdateSourceAliasInput", "ofType": null },
+            "name": "messageColumn",
+            "description": "A built-in message log column",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UpdateSourceMessageLogColumnInput",
+              "ofType": null
+            },
             "defaultValue": null
           },
           {
-            "name": "setFields",
-            "description": "The field update operation to be performed",
-            "type": { "kind": "INPUT_OBJECT", "name": "UpdateSourceFieldsInput", "ofType": null },
+            "name": "timestampColumn",
+            "description": "A built-in timestamp log column",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UpdateSourceTimestampLogColumnInput",
+              "ofType": null
+            },
             "defaultValue": null
           }
         ],
@@ -2373,13 +2609,23 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "UpdateSourceNameInput",
-        "description": "A name update operation",
+        "name": "UpdateSourceFieldLogColumnInput",
+        "description": "",
         "fields": null,
         "inputFields": [
           {
-            "name": "name",
-            "description": "The new name to be set",
+            "name": "id",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "field",
+            "description": "",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -2394,17 +2640,17 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "UpdateSourceDescriptionInput",
-        "description": "A description update operation",
+        "name": "UpdateSourceMessageLogColumnInput",
+        "description": "",
         "fields": null,
         "inputFields": [
           {
-            "name": "description",
-            "description": "The new description to be set",
+            "name": "id",
+            "description": "",
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
             },
             "defaultValue": null
           }
@@ -2415,61 +2661,18 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "UpdateSourceAliasInput",
-        "description": "An alias update operation",
+        "name": "UpdateSourceTimestampLogColumnInput",
+        "description": "",
         "fields": null,
         "inputFields": [
           {
-            "name": "logAlias",
-            "description": "The new log index pattern or alias to bet set",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "metricAlias",
-            "description": "The new metric index pattern or alias to bet set",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "UpdateSourceFieldsInput",
-        "description": "A field update operations",
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "container",
-            "description": "The new container field to be set",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "host",
-            "description": "The new host field to be set",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "pod",
-            "description": "The new pod field to be set",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "tiebreaker",
-            "description": "The new tiebreaker field to be set",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "timestamp",
-            "description": "The new timestamp field to be set",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "name": "id",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
             "defaultValue": null
           }
         ],
@@ -2480,11 +2683,11 @@
       {
         "kind": "OBJECT",
         "name": "UpdateSourceResult",
-        "description": "The result of a sequence of source update operations",
+        "description": "The result of a successful source update",
         "fields": [
           {
             "name": "source",
-            "description": "The source after the operations were performed",
+            "description": "The source that was updated",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -3210,22 +3413,6 @@
             "isDeprecated": false,
             "deprecationReason": null
           }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraOperator",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "gt", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "gte", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "lt", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "lte", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "eq", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       }

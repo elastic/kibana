@@ -59,6 +59,7 @@ import {
   UserMenuProvider,
   UptimeProvider,
   InfraSourceConfigurationFlyoutProvider,
+  InfraLogStreamProvider,
 } from './services';
 
 import {
@@ -148,6 +149,7 @@ export default async function ({ readConfigFile }) {
       uptime: UptimeProvider,
       rollup: RollupPageProvider,
       infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
+      infraLogStream: InfraLogStreamProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -179,7 +181,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['xpack.license.self_generated.type=trial', 'xpack.security.enabled=true'],
+      serverArgs: [],
     },
 
     kbnTestServer: {
@@ -190,6 +192,7 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
+        '--stats.maximumWaitTimeForAllCollectorsInS=0',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
         '--timelion.ui.enabled=true',

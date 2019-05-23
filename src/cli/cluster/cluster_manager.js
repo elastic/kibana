@@ -252,9 +252,13 @@ export default class ClusterManager {
   }
 
   shouldRedirectFromOldBasePath(path) {
+    // strip `s/{id}` prefix when checking for need to redirect
+    if (path.startsWith('s/')) {
+      path = path.split('/').slice(2).join('/');
+    }
+
     const isApp = path.startsWith('app/');
     const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
-
     return isApp || isKnownShortPath;
   }
 

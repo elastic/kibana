@@ -16,11 +16,14 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p>
+          <p
+            id="generated-id"
+          >
             Status
           </p>
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           Status: 
@@ -47,9 +50,12 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p />
+          <p
+            id="generated-id"
+          />
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           127.0.0.1:9300
@@ -66,11 +72,14 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p>
+          <p
+            id="generated-id"
+          >
             Documents
           </p>
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           24.8k
@@ -98,11 +107,14 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p>
+          <p
+            id="generated-id"
+          >
             Free Disk Space
           </p>
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           173.9 GB
@@ -119,11 +131,14 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p>
+          <p
+            id="generated-id"
+          >
             Documents
           </p>
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           24.8k
@@ -150,11 +165,14 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p>
+          <p
+            id="generated-id"
+          >
             Status
           </p>
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           Status: 
@@ -181,11 +199,14 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p>
+          <p
+            id="generated-id"
+          >
             Free Disk Space
           </p>
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           173.9 GB
@@ -202,11 +223,14 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         <div
           class="euiText euiText--small euiStat__description"
         >
-          <p>
+          <p
+            id="generated-id"
+          >
             Documents
           </p>
         </div>
         <p
+          aria-labelledby="generated-id"
           class="euiTitle euiTitle--small euiStat__title"
         >
           24.8k

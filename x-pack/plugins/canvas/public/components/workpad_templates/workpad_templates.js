@@ -12,13 +12,14 @@ import {
   EuiBasicTable,
   EuiPagination,
   EuiSpacer,
-  EuiHealth,
   EuiButtonEmpty,
   EuiSearchBar,
 } from '@elastic/eui';
-import { get, sortByOrder } from 'lodash';
-import { getId } from '../../lib/get_id';
+import { sortByOrder } from 'lodash';
 import { Paginate } from '../paginate';
+import { TagList } from '../tag_list';
+import { getTagsFilter } from '../../lib/get_tags_filter';
+import { extractSearch } from '../../lib/extract_search';
 
 export class WorkpadTemplates extends React.PureComponent {
   static propTypes = {
@@ -35,6 +36,8 @@ export class WorkpadTemplates extends React.PureComponent {
     filterTags: [],
   };
 
+  tagType = 'health';
+
   onTableChange = ({ sort = {} }) => {
     const { field: sortField, direction: sortDirection } = sort;
     this.setState({
@@ -43,31 +46,11 @@ export class WorkpadTemplates extends React.PureComponent {
     });
   };
 
-  onSearch = ({ query }) => {
-    const clauses = get(query, 'ast._clauses', []);
-
-    const filterTags = [];
-    const searchTerms = [];
-
-    clauses.forEach(clause => {
-      const { type, field, value } = clause;
-      // extract terms from the query AST
-      if (type === 'term') {
-        searchTerms.push(value);
-      }
-      // extracts tags from the query AST
-      else if (field === 'tags') {
-        filterTags.push(value);
-      }
-    });
-
-    this.setState({ searchTerm: searchTerms.join(' '), filterTags });
-  };
+  onSearch = ({ queryText }) => this.setState(extractSearch(queryText));
 
   cloneTemplate = template => this.props.cloneWorkpad(template).then(() => this.props.onClose());
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
-    const { uniqueTags } = this.props;
     const { sortField, sortDirection } = this.state;
 
     const columns = [
@@ -104,16 +87,7 @@ export class WorkpadTemplates extends React.PureComponent {
         sortable: false,
         dataType: 'string',
         width: '30%',
-        render: tags => {
-          if (!tags) {
-            return 'No tags';
-          }
-          return tags.map(tag => (
-            <EuiHealth key={getId('tag')} color={get(uniqueTags, `${tag}.color`, '#666666')}>
-              {tag}
-            </EuiHealth>
-          ));
-        },
+        render: tags => <TagList tags={tags} tagType={this.tagType} />,
       },
     ];
 
@@ -146,28 +120,8 @@ export class WorkpadTemplates extends React.PureComponent {
   };
 
   renderSearch = () => {
-    let { uniqueTags } = this.props;
     const { searchTerm } = this.state;
-
-    uniqueTags = Object.values(uniqueTags);
-
-    const filters = [
-      {
-        type: 'field_value_selection',
-        field: 'tags',
-        name: 'Tags',
-        multiSelect: true,
-        options: uniqueTags.map(({ name, color }) => ({
-          value: name,
-          name: name,
-          view: (
-            <EuiHealth key={getId('tag')} color={color}>
-              {name}
-            </EuiHealth>
-          ),
-        })),
-      },
-    ];
+    const filters = [getTagsFilter(this.tagType)];
 
     return (
       <EuiSearchBar

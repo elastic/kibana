@@ -68,9 +68,3 @@ export function checkLicense(xpackLicenseInfo) {
     hasExpired: false,
   };
 }
-
-export function isBasicLicense(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
-  const xpackInfo = (xpackMainPlugin && xpackMainPlugin.info);
-  return (xpackInfo.license.getType() === 'basic');
-}

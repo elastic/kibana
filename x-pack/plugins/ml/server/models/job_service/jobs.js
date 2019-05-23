@@ -6,6 +6,7 @@
 
 
 import { i18n } from '@kbn/i18n';
+import { ML_CONFIG_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -138,6 +139,35 @@ export function jobsProvider(callWithRequest) {
     });
 
     return jobs;
+  }
+
+  async function jobsWithTimerange() {
+    const fullJobsList = await createFullJobsList();
+    const jobsMap = {};
+
+    const jobs = fullJobsList.map((job) => {
+      jobsMap[job.job_id] = job.groups || [];
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
+      const timeRange = {};
+
+      if (job.data_counts !== undefined) {
+        timeRange.to = job.data_counts.latest_record_timestamp;
+        timeRange.from = job.data_counts.earliest_record_timestamp;
+      }
+
+      const tempJob = {
+        id: job.job_id,
+        job_id: job.job_id,
+        groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
+        isRunning: (hasDatafeed && job.datafeed_config.state === 'started'),
+        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        timeRange
+      };
+
+      return tempJob;
+    });
+
+    return { jobs, jobsMap };
   }
 
   async function createFullJobsList(jobIds = []) {
@@ -293,12 +323,50 @@ export function jobsProvider(callWithRequest) {
     return { jobIds };
   }
 
+  // Checks if each of the jobs in the specified list of IDs exist.
+  // Job IDs in supplied array may contain wildcard '*' characters
+  // e.g. *_low_request_rate_ecs
+  async function jobsExist(jobIds = []) {
+    // Get the list of job IDs.
+    // Use size of 10000, matching anomaly_detectors endpoint.
+    const maxJobsSize = 10000;
+    const resp = await callWithRequest('search', {
+      index: ML_CONFIG_INDEX_PATTERN,
+      size: maxJobsSize,
+      body: {
+        _source: 'job_id',
+        query: {
+          term: { job_type: 'anomaly_detector' }
+        }
+      }
+    });
+
+    const results = {};
+    let allJobIds = [];
+    if (resp.hits.total.value > 0) {
+      const hits = resp.hits.hits;
+      allJobIds = hits.map(hit => hit._source.job_id);
+
+      // Check if each of the supplied IDs match existing jobs.
+      jobIds.forEach((jobId) => {
+        // Create a Regex for each supplied ID as wildcard * is allowed.
+        const regexp = new RegExp(`^${jobId.replace(/\*+/g, '.*')}$`);
+        const exists = allJobIds.some(existsJobId => regexp.test(existsJobId));
+        results[jobId] = exists;
+      });
+    }
+
+    return results;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
     jobsSummary,
+    jobsWithTimerange,
     createFullJobsList,
     deletingJobTasks,
+    jobsExist,
   };
 }

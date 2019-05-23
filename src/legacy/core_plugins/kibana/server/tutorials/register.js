@@ -57,6 +57,7 @@ import { memcachedMetricsSpecProvider } from './memcached_metrics';
 import { muninMetricsSpecProvider } from './munin_metrics';
 import { vSphereMetricsSpecProvider } from './vsphere_metrics';
 import { windowsMetricsSpecProvider } from './windows_metrics';
+import { windowsEventLogsSpecProvider } from './windows_event_logs';
 import { golangMetricsSpecProvider } from './golang_metrics';
 import { logstashMetricsSpecProvider } from './logstash_metrics';
 import { prometheusMetricsSpecProvider } from './prometheus_metrics';
@@ -68,6 +69,8 @@ import { mssqlMetricsSpecProvider } from './mssql_metrics';
 import { zeekLogsSpecProvider } from './zeek_logs';
 import { natsLogsSpecProvider } from './nats_logs';
 import { corednsMetricsSpecProvider } from './coredns_metrics';
+import { corednsLogsSpecProvider } from './coredns_logs';
+import { auditbeatSpecProvider } from './auditbeat';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -110,6 +113,7 @@ export function registerTutorials(server) {
   server.registerTutorial(muninMetricsSpecProvider);
   server.registerTutorial(vSphereMetricsSpecProvider);
   server.registerTutorial(windowsMetricsSpecProvider);
+  server.registerTutorial(windowsEventLogsSpecProvider);
   server.registerTutorial(golangMetricsSpecProvider);
   server.registerTutorial(logstashMetricsSpecProvider);
   server.registerTutorial(prometheusMetricsSpecProvider);
@@ -121,4 +125,6 @@ export function registerTutorials(server) {
   server.registerTutorial(zeekLogsSpecProvider);
   server.registerTutorial(natsLogsSpecProvider);
   server.registerTutorial(corednsMetricsSpecProvider);
+  server.registerTutorial(corednsLogsSpecProvider);
+  server.registerTutorial(auditbeatSpecProvider);
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart } from '..';
+import { InternalCoreSetup, InternalCoreStart } from '..';
 import { PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -29,12 +29,16 @@ import {
 } from './plugin_context';
 
 /** @internal */
-export type PluginsServiceSetupDeps = CoreSetup;
+export type PluginsServiceSetupDeps = InternalCoreSetup;
 /** @internal */
-export type PluginsServiceStartDeps = CoreStart;
+export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
 export interface PluginsServiceSetup {
+  contracts: Map<string, unknown>;
+}
+/** @internal */
+export interface PluginsServiceStart {
   contracts: Map<string, unknown>;
 }
 
@@ -44,7 +48,7 @@ export interface PluginsServiceSetup {
  *
  * @internal
  */
-export class PluginsService implements CoreService<PluginsServiceSetup> {
+export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   /** Plugin wrappers in topological order. */
   private readonly plugins: Map<
     PluginName,

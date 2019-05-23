@@ -17,7 +17,11 @@ export default function exploreRepositoryFunctonalTests({
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
+  const find = getService('find');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
+
+  const FIND_TIME = config.get('timeouts.find');
 
   describe('Code', () => {
     describe('Explore a repository', () => {
@@ -119,6 +123,16 @@ export default function exploreRepositoryFunctonalTests({
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
         });
+
+        // Click breadcrumb does not affect file tree
+        await testSubjects.click('codeFileBreadcrumb-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
+        });
+
         // open another folder
         await testSubjects.click('codeFileTreeNode-Directory-src-doc');
         await retry.tryForTime(5000, async () => {
@@ -139,6 +153,53 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
         log.info('src folder closed');
+      });
+
+      it('highlight only one symbol', async () => {
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).ok();
+        });
+        await testSubjects.click('codeFileTreeNode-Directory-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src/config')).ok();
+        });
+        await testSubjects.click('codeFileTreeNode-Directory-src/config');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-File-src/config/passport.ts')).ok();
+        });
+        await testSubjects.click('codeFileTreeNode-File-src/config/passport.ts');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeStructureTreeTab')).ok();
+        });
+        await testSubjects.click('codeStructureTreeTab');
+        await retry.try(async () => {
+          expect(
+            await testSubjects.exists('"codeStructureTreeNode-User.findById() callback"')
+          ).ok();
+        });
+        await testSubjects.click('"codeStructureTreeNode-User.findById() callback"');
+
+        await retry.try(async () => {
+          const highlightSymbols = await find.allByCssSelector('.code-full-width-node', FIND_TIME);
+          expect(highlightSymbols).to.have.length(1);
+        });
+      });
+
+      it('click a breadcrumb should not affect the file tree', async () => {
+        log.debug('it goes to a deep node of file tree');
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
+        await browser.get(url);
+        // Click breadcrumb does not affect file tree
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileBreadcrumb-src')).ok();
+        });
+        await testSubjects.click('codeFileBreadcrumb-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
+        });
       });
 
       it('Click file/directory on the right panel', async () => {

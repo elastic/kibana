@@ -198,6 +198,16 @@ uiModules.get('apps/management')
       updateScriptedFieldsTable($scope, $state);
     });
 
+    $scope.migration = {
+      isMigrating: false,
+      newTitle: $scope.indexPattern.getIndex()
+    };
+    $scope.migrate = async function () {
+      $scope.migration.isMigrating = true;
+      await $scope.indexPattern.migrate($scope.migration.newTitle);
+      $scope.migration.isMigrating = false;
+    };
+
     $scope.refreshFilters = function () {
       const indexedFieldTypes = [];
       const scriptedFieldLanguages = [];

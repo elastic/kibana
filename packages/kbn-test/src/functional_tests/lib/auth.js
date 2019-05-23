@@ -22,7 +22,7 @@ import { format as formatUrl } from 'url';
 import request from 'request';
 import { delay } from 'bluebird';
 
-export const DEFAULT_SUPERUSER_PASS = 'iamsuperuser';
+export const DEFAULT_SUPERUSER_PASS = 'changeme';
 
 async function updateCredentials(port, auth, username, password, retries = 10) {
   const result = await new Promise((resolve, reject) =>

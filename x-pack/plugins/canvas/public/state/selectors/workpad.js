@@ -128,8 +128,12 @@ export function getGlobalFilterExpression(state) {
 }
 
 // element getters
-function getSelectedElementId(state) {
-  const toplevelNodes = get(state, 'transient.selectedToplevelNodes') || [];
+export function getSelectedToplevelNodes(state) {
+  return get(state, 'transient.selectedToplevelNodes', []);
+}
+
+export function getSelectedElementId(state) {
+  const toplevelNodes = getSelectedToplevelNodes(state);
   return toplevelNodes.length === 1 ? toplevelNodes[0] : null;
 }
 
@@ -235,4 +239,8 @@ export function getContextForIndex(state, index) {
 
 export function getRefreshInterval(state) {
   return get(state, 'transient.refresh.interval', 0);
+}
+
+export function getAutoplay(state) {
+  return get(state, 'transient.autoplay');
 }

@@ -71,14 +71,12 @@ class CodeSideTabs extends React.PureComponent<Props> {
         id: Tabs.file,
         name: 'File',
         content: fileTabContent,
-        isSelected: Tabs.file === this.sideTab,
         'data-test-subj': 'codeFileTreeTab',
       },
       {
         id: Tabs.structure,
         name: 'Structure',
         content: structureTabContent,
-        isSelected: Tabs.structure === this.sideTab,
         disabled: this.props.match.params.pathType === PathTypes.tree || !this.props.hasStructure,
         'data-test-subj': 'codeStructureTreeTab',
       },
@@ -93,15 +91,16 @@ class CodeSideTabs extends React.PureComponent<Props> {
   };
 
   public render() {
+    const tabs = this.tabs;
+    const selectedTab = tabs.find(t => t.id === this.sideTab);
     return (
       <div>
         <EuiTabbedContent
           className="code-navigation__sidebar"
-          tabs={this.tabs}
-          initialSelectedTab={this.tabs.find(t => t.id === this.sideTab)}
+          tabs={tabs}
           onTabClick={tab => this.switchTab(tab.id as Tabs)}
           expand={true}
-          selectedTab={this.tabs.find(t => t.id === this.sideTab)}
+          selectedTab={selectedTab}
         />
         <Shortcut
           keyCode="t"

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import url from 'url';
 import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
+import { isEqual } from 'lodash';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem } from '../../common/types';
@@ -31,11 +32,16 @@ const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
   }
 };
 
-export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: string }> {
-  public state = { activePath: undefined };
+interface ActiveSymbol {
+  name: string;
+  location: Location;
+}
 
-  public getClickHandler = (path: string) => () => {
-    this.setState({ activePath: path });
+export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: ActiveSymbol }> {
+  public state: { activeSymbol?: ActiveSymbol } = {};
+
+  public getClickHandler = (symbol: ActiveSymbol) => () => {
+    this.setState({ activeSymbol: symbol });
   };
 
   public getStructureTreeItemRenderer = (
@@ -51,11 +57,16 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
     // @ts-ignore
     tokenType = `token${Object.keys(SymbolKind).find(k => SymbolKind[k] === kind)}`;
     let bg = null;
-    if (this.state.activePath === path) {
+    if (
+      this.state.activeSymbol &&
+      this.state.activeSymbol.name === name &&
+      isEqual(this.state.activeSymbol.location, location)
+    ) {
       bg = <div className="code-full-width-node" />;
     }
     return (
-      <EuiFlexGroup gutterSize="none" alignItems="center">
+      <div className="code-symbol-container">
+        {bg}
         <div className={isContainer ? 'codeSymbol' : 'codeSymbol codeSymbol--nested'}>
           {isContainer &&
             (forceOpen ? (
@@ -75,26 +86,23 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
                 onClick={() => this.props.openSymbolPath(path)}
               />
             ))}
-          <EuiFlexItem grow={1}>
-            <Link
-              to={url.format({
-                pathname: RepositoryUtils.locationToUrl(location),
-                query: { tab: 'structure' },
-              })}
-              className="code-symbol-link"
-              onClick={this.getClickHandler(path)}
-            >
-              <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
-                <EuiToken iconType={tokenType as IconType} />
-                <EuiText data-test-subj={`codeStructureTreeNode-${name}`} size="s">
-                  {name}
-                </EuiText>
-              </EuiFlexGroup>
-            </Link>
-          </EuiFlexItem>
+          <Link
+            to={url.format({
+              pathname: RepositoryUtils.locationToUrl(location),
+              query: { tab: 'structure' },
+            })}
+            className="code-symbol-link"
+            onClick={this.getClickHandler({ name, location })}
+          >
+            <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
+              <EuiToken iconType={tokenType as IconType} />
+              <EuiText data-test-subj={`codeStructureTreeNode-${name}`} size="s">
+                {name}
+              </EuiText>
+            </EuiFlexGroup>
+          </Link>
         </div>
-        {bg}
-      </EuiFlexGroup>
+      </div>
     );
   };
 

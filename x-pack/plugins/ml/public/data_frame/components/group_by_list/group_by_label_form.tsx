@@ -4,80 +4,83 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
-import { groupByConfigHasInterval, PivotGroupByConfig } from '../../common';
+import {
+  AggName,
+  groupByConfigHasInterval,
+  PivotGroupByConfig,
+  PivotGroupByConfigDict,
+} from '../../common';
 
 import { PopoverForm } from './popover_form';
 
 interface Props {
   item: PivotGroupByConfig;
-  optionsDataId: string;
+  otherAggNames: AggName[];
+  options: PivotGroupByConfigDict;
   deleteHandler(l: string): void;
-  onChange(id: string, item: PivotGroupByConfig): void;
+  onChange(item: PivotGroupByConfig): void;
 }
 
 export const GroupByLabelForm: React.SFC<Props> = ({
   deleteHandler,
   item,
+  otherAggNames,
   onChange,
-  optionsDataId,
+  options,
 }) => {
   const [isPopoverVisible, setPopoverVisibility] = useState(false);
 
-  function updateInterval(interval: string) {
-    if (groupByConfigHasInterval(item)) {
-      item.interval = interval;
-      onChange(optionsDataId, item);
-      setPopoverVisibility(false);
-    }
+  function update(updateItem: PivotGroupByConfig) {
+    onChange({ ...updateItem });
+    setPopoverVisibility(false);
   }
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem className="mlGroupByLabel--text">
-        <span className="mlGroupByLabel__text">{optionsDataId}</span>
+        <span className="mlGroupByLabel__text">{item.aggName}</span>
       </EuiFlexItem>
       {groupByConfigHasInterval(item) && (
-        <Fragment>
-          <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
-            <EuiTextColor color="subdued" className="mlGroupByLabel__text">
-              {item.interval}
-            </EuiTextColor>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className="mlGroupByLabel--button">
-            <EuiPopover
-              id="mlIntervalFormPopover"
-              ownFocus
-              button={
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.ml.dataframe.groupByLabelForm.editIntervalAriaLabel',
-                    {
-                      defaultMessage: 'Edit interval',
-                    }
-                  )}
-                  size="s"
-                  iconType="pencil"
-                  onClick={() => setPopoverVisibility(!isPopoverVisible)}
-                />
-              }
-              isOpen={isPopoverVisible}
-              closePopover={() => setPopoverVisibility(false)}
-            >
-              <PopoverForm
-                defaultInterval={item.interval}
-                intervalType={item.agg}
-                onChange={updateInterval}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
-        </Fragment>
+        <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
+          <EuiTextColor color="subdued" className="mlGroupByLabel__text">
+            {item.interval}
+          </EuiTextColor>
+        </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false} className="mlGroupByLabel--button">
+        <EuiPopover
+          id="mlIntervalFormPopover"
+          ownFocus
+          button={
+            <EuiButtonIcon
+              aria-label={i18n.translate(
+                'xpack.ml.dataframe.groupByLabelForm.editIntervalAriaLabel',
+                {
+                  defaultMessage: 'Edit interval',
+                }
+              )}
+              size="s"
+              iconType="pencil"
+              onClick={() => setPopoverVisibility(!isPopoverVisible)}
+            />
+          }
+          isOpen={isPopoverVisible}
+          closePopover={() => setPopoverVisibility(false)}
+        >
+          <PopoverForm
+            defaultData={item}
+            onChange={update}
+            otherAggNames={otherAggNames}
+            options={options}
+          />
+        </EuiPopover>
+      </EuiFlexItem>
       <EuiFlexItem grow={false} className="mlGroupByLabel--button">
         <EuiButtonIcon
           aria-label={i18n.translate('xpack.ml.dataframe.groupByLabelForm.deleteItemAriaLabel', {
@@ -85,7 +88,7 @@ export const GroupByLabelForm: React.SFC<Props> = ({
           })}
           size="s"
           iconType="cross"
-          onClick={() => deleteHandler(optionsDataId)}
+          onClick={() => deleteHandler(item.aggName)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

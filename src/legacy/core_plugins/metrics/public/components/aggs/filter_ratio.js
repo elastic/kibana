@@ -35,6 +35,8 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
+import { METRIC_TYPES } from '../../../common/metric_types';
 
 export const FilterRatioAgg = props => {
   const {
@@ -57,7 +59,7 @@ export const FilterRatioAgg = props => {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
 
-  const restrictMode = model.metric_agg === 'cardinality' ? 'none' : 'numeric';
+  const restrictFields = model.metric_agg === METRIC_TYPES.CARDINALITY ? [] : [ES_TYPES.NUMBER];
 
   return (
     <AggRow
@@ -66,6 +68,7 @@ export const FilterRatioAgg = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
 
@@ -149,7 +152,7 @@ export const FilterRatioAgg = props => {
               <FieldSelect
                 fields={fields}
                 type={model.metric_agg}
-                restrict={restrictMode}
+                restrict={restrictFields}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -47,27 +48,22 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiModalHeaderTitle,
-  EuiText,
+  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem
 } from '@elastic/eui';
 import {
   parseQuery,
-  getSavedObjectIcon,
   getSavedObjectCounts,
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
   fetchExportByType,
+  findObjects,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const POSSIBLE_TYPES = [
-  'index-pattern',
-  'visualization',
-  'dashboard',
-  'search',
-];
+export const POSSIBLE_TYPES = chrome.getInjected('importAndExportableTypes');
 
 class ObjectsTableUI extends Component {
   static propTypes = {
@@ -78,10 +74,9 @@ class ObjectsTableUI extends Component {
     perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
-    getEditUrl: PropTypes.func.isRequired,
-    canGoInApp: PropTypes.func.isRequired,
-    goInApp: PropTypes.func.isRequired,
     uiCapabilities: PropTypes.object.isRequired,
+    goInspectObject: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -105,9 +100,7 @@ class ObjectsTableUI extends Component {
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
-      relationshipId: undefined,
-      relationshipType: undefined,
-      relationshipTitle: undefined,
+      relationshipObject: undefined,
       isShowingDeleteConfirmModal: false,
       isShowingExportAllOptionsModal: false,
       isDeleting: false,
@@ -179,15 +172,16 @@ class ObjectsTableUI extends Component {
   }
 
   debouncedFetch = debounce(async () => {
-    const { intl, savedObjectsClient } = this.props;
+    const { intl } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
+    // "searchFields" is missing from the "findOptions" but gets injected via the API.
+    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
-      fields: ['title', 'id'],
-      searchFields: ['title'],
+      fields: ['id'],
       type: this.savedObjectTypes.filter(
         type => !visibleTypes || visibleTypes.includes(type)
       ),
@@ -198,7 +192,7 @@ class ObjectsTableUI extends Component {
 
     let resp;
     try {
-      resp = await savedObjectsClient.find(findOptions);
+      resp = await findObjects(findOptions);
     } catch (error) {
       if (this._isMounted) {
         this.setState({
@@ -226,12 +220,7 @@ class ObjectsTableUI extends Component {
       }
 
       return {
-        savedObjects: resp.savedObjects.map(savedObject => ({
-          title: savedObject.attributes.title,
-          type: savedObject.type,
-          id: savedObject.id,
-          icon: getSavedObjectIcon(savedObject.type),
-        })),
+        savedObjects: resp.savedObjects,
         filteredItemCount: resp.total,
         isSearching: false,
       };
@@ -243,12 +232,7 @@ class ObjectsTableUI extends Component {
   };
 
   onSelectionChanged = selection => {
-    const selectedSavedObjects = selection.map(item => ({
-      id: item.id,
-      type: item.type,
-      title: item.title,
-    }));
-    this.setState({ selectedSavedObjects });
+    this.setState({ selectedSavedObjects: selection });
   };
 
   onQueryChange = ({ query }) => {
@@ -277,21 +261,17 @@ class ObjectsTableUI extends Component {
     }, this.fetchSavedObjects);
   };
 
-  onShowRelationships = (id, type, title) => {
+  onShowRelationships = (object) => {
     this.setState({
       isShowingRelationships: true,
-      relationshipId: id,
-      relationshipType: type,
-      relationshipTitle: title,
+      relationshipObject: object,
     });
   };
 
   onHideRelationships = () => {
     this.setState({
       isShowingRelationships: false,
-      relationshipId: undefined,
-      relationshipType: undefined,
-      relationshipTitle: undefined,
+      relationshipObject: undefined,
     });
   };
 
@@ -299,7 +279,20 @@ class ObjectsTableUI extends Component {
     const { intl } = this.props;
     const { selectedSavedObjects } = this.state;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
-    const blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
+
+    let blob;
+    try {
+      blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.export.dangerNotification',
+          defaultMessage: 'Unable to generate export',
+        }),
+      });
+      throw e;
+    }
+
     saveAs(blob, 'export.ndjson');
     toastNotifications.addSuccess({
       title: intl.formatMessage({
@@ -321,7 +314,20 @@ class ObjectsTableUI extends Component {
       },
       []
     );
-    const blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+
+    let blob;
+    try {
+      blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.exportAll.dangerNotification',
+          defaultMessage: 'Unable to generate export',
+        }),
+      });
+      throw e;
+    }
+
     saveAs(blob, 'export.ndjson');
     toastNotifications.addSuccess({
       title: intl.formatMessage({
@@ -423,15 +429,12 @@ class ObjectsTableUI extends Component {
 
     return (
       <Relationships
-        id={this.state.relationshipId}
-        type={this.state.relationshipType}
-        title={this.state.relationshipTitle}
+        savedObject={this.state.relationshipObject}
         getRelationships={this.getRelationships}
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
-        getEditUrl={this.props.getEditUrl}
+        goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
-        goInApp={this.props.goInApp}
       />
     );
   }
@@ -474,6 +477,7 @@ class ObjectsTableUI extends Component {
           }
           onCancel={onCancel}
           onConfirm={onConfirm}
+          buttonColor="danger"
           cancelButtonText={(
             <FormattedMessage
               id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
@@ -508,12 +512,12 @@ class ObjectsTableUI extends Component {
                   id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName', defaultMessage: 'Type'
                 }),
                 width: '50px',
-                render: type => (
+                render: (type, object) => (
                   <EuiToolTip
                     position="top"
                     content={getSavedObjectLabel(type)}
                   >
-                    <EuiIcon type={getSavedObjectIcon(type)} />
+                    <EuiIcon type={object.meta.icon || 'apps'} />
                   </EuiToolTip>
                 ),
               },
@@ -524,7 +528,7 @@ class ObjectsTableUI extends Component {
                 }),
               },
               {
-                field: 'title',
+                field: 'meta.title',
                 name: intl.formatMessage({
                   id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
                   defaultMessage: 'Title',
@@ -585,13 +589,13 @@ class ObjectsTableUI extends Component {
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-                  defaultMessage="Select which types to export."
-                />
-              </p>
+            <EuiFormRow
+              label={<FormattedMessage
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                defaultMessage="Select which types to export"
+              />}
+              labelType="legend"
+            >
               <EuiCheckboxGroup
                 options={exportAllOptions}
                 idToSelectedMap={exportAllSelectedOptions}
@@ -608,23 +612,21 @@ class ObjectsTableUI extends Component {
                   });
                 }}
               />
-            </EuiText>
+            </EuiFormRow>
+            <EuiSwitch
+              name="includeReferencesDeep"
+              label={(
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  defaultMessage="Include related objects"
+                />
+              )}
+              checked={isIncludeReferencesDeepChecked}
+              onChange={this.changeIncludeReferencesDeep}
+            />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiSwitch
-                  name="includeReferencesDeep"
-                  label={(
-                    <FormattedMessage
-                      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include related objects"
-                    />
-                  )}
-                  checked={isIncludeReferencesDeepChecked}
-                  onChange={this.changeIncludeReferencesDeep}
-                />
-              </EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
@@ -704,15 +706,14 @@ class ObjectsTableUI extends Component {
           onExport={this.onExport}
           canDeleteSavedObjectTypes={canDeleteSavedObjectTypes}
           onDelete={this.onDelete}
-          getEditUrl={this.props.getEditUrl}
-          canGoInApp={this.props.canGoInApp}
-          goInApp={this.props.goInApp}
+          goInspectObject={this.props.goInspectObject}
           pageIndex={page}
           pageSize={perPage}
           items={savedObjects}
           totalItemCount={filteredItemCount}
           isSearching={isSearching}
           onShowRelationships={this.onShowRelationships}
+          canGoInApp={this.props.canGoInApp}
         />
       </EuiPageContent>
     );
