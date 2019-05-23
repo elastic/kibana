@@ -13,12 +13,11 @@ import { TelemetryCollector } from './collector';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {
-  // Making this a string instead of importing from constants because
-  // typescript can't recognize the type from a JS file, and switching constants
-  // to TS causes eslint problems elsewhere.
-  [CUSTOM_ELEMENT_TYPE]: {
-    content: string;
-  };
+  [CUSTOM_ELEMENT_TYPE]: CustomElementDocument;
+}
+
+export interface CustomElementDocument {
+  content: string;
 }
 
 interface CustomElementTelemetry {
@@ -33,7 +32,7 @@ interface CustomElementTelemetry {
   };
 }
 
-interface CustomElement {
+export interface CustomElement {
   selectedNodes: Array<{
     expression: string;
   }>;
@@ -58,18 +57,18 @@ function parseJsonOrNull(maybeJson: string) {
 }
 
 /**
-  Transform a CustomElementSearch type into CustomElementTelemetry
+  Calculate statistics about a collection of CustomElement Documents
 
-  @param response - ES Response for CustomElements
+  @param customElements - Array of CustomElement documents
   @returns Statistics about how Custom Elements are being used
 */
-export function handleResponse(
-  response: SearchResponse<CustomElementSearch>
+export function summarizeCustomElements(
+  customElements: CustomElementDocument[]
 ): CustomElementTelemetry {
-  const customElements = response.hits.hits.map(hit => hit._source[CUSTOM_ELEMENT_TYPE].content);
   const functionSet = new Set<string>();
 
   const parsedContents: CustomElement[] = customElements
+    .map(element => element.content)
     .map(parseJsonOrNull)
     .filter(isCustomElement);
 
@@ -87,7 +86,7 @@ export function handleResponse(
 
   parsedContents.map(contents => {
     contents.selectedNodes.map(node => {
-      const ast: AST = fromExpression(node.expression) as AST;
+      const ast: AST = fromExpression(node.expression);
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
       });
@@ -125,7 +124,8 @@ const customElementCollector: TelemetryCollector = async function customElementC
   const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
-    return handleResponse(esResponse);
+    const customElements = esResponse.hits.hits.map(hit => hit._source[CUSTOM_ELEMENT_TYPE]);
+    return summarizeCustomElements(customElements);
   }
 
   return {};

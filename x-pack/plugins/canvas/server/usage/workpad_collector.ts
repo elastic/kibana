@@ -20,8 +20,9 @@ interface Page {
   elements: Element[];
 }
 
-export interface Workpad {
+interface Workpad {
   pages: Page[];
+  [s: string]: any; // Only concerned with the pages here, but allow workpads to have any values
 }
 
 interface WorkpadSearch {
@@ -60,20 +61,20 @@ interface WorkpadTelemetry {
 }
 
 /**
-  Transform a WorkpadSearch into WorkpadTelemetry
+  Gather statistic about the given workpads
+
+  @param workpadDocs a collection of workpad documents
+  @returns Workpad Telemetry Data
 */
-export function handleResponse(response: SearchResponse<WorkpadSearch>): WorkpadTelemetry {
-  const workpadDocs = response.hits.hits;
-  if (workpadDocs === null || workpadDocs === undefined) {
+export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
+  const functionSet = new Set();
+
+  if (workpadDocs.length === 0) {
     return {};
   }
 
-  const functionSet = new Set();
-
   // make a summary of info about each workpad
-  const workpadsInfo = workpadDocs.map(hit => {
-    const workpad = hit._source[CANVAS_TYPE];
-
+  const workpadsInfo = workpadDocs.map(workpad => {
     let pages = { count: 0 };
     try {
       pages = { count: workpad.pages.length };
@@ -81,28 +82,31 @@ export function handleResponse(response: SearchResponse<WorkpadSearch>): Workpad
       // eslint-disable-next-line
       console.warn(err, workpad);
     }
-    const elementCounts = workpad.pages.reduce(
+    const elementCounts = workpad.pages.reduce<number[]>(
       (accum, page) => accum.concat(page.elements.length),
-      [] as number[]
+      []
     );
-    const functionCounts = workpad.pages.reduce(
-      (accum, page) => {
-        return page.elements.map(element => {
-          const ast = fromExpression(element.expression) as AST;
-          collectFns(ast, cFunction => {
-            functionSet.add(cFunction);
-          });
-          return ast.chain.length; // get the number of parts in the expression
+    const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
+      return page.elements.map(element => {
+        const ast: AST = fromExpression(element.expression);
+        collectFns(ast, cFunction => {
+          functionSet.add(cFunction);
         });
-      },
-      [] as number[]
-    );
+        return ast.chain.length; // get the number of parts in the expression
+      });
+    }, []);
 
     return { pages, elementCounts, functionCounts };
   });
 
   // combine together info from across the workpads
-  const combinedWorkpadsInfo = workpadsInfo.reduce(
+  const combinedWorkpadsInfo = workpadsInfo.reduce<{
+    pageMin: number;
+    pageMax: number;
+    pageCounts: number[];
+    elementCounts: number[];
+    functionCounts: number[];
+  }>(
     (accum, pageInfo) => {
       const { pages, elementCounts, functionCounts } = pageInfo;
 
@@ -117,9 +121,9 @@ export function handleResponse(response: SearchResponse<WorkpadSearch>): Workpad
     {
       pageMin: Infinity,
       pageMax: -Infinity,
-      pageCounts: [] as number[],
-      elementCounts: [] as number[],
-      functionCounts: [] as number[],
+      pageCounts: [],
+      elementCounts: [],
+      functionCounts: [],
     }
   );
   const { pageCounts, pageMin, pageMax, elementCounts, functionCounts } = combinedWorkpadsInfo;
@@ -184,8 +188,10 @@ const workpadCollector: TelemetryCollector = async function customElementCollect
   };
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
+
   if (get(esResponse, 'hits.hits.length') > 0) {
-    return handleResponse(esResponse);
+    const workpads = esResponse.hits.hits.map(hit => hit._source[CANVAS_TYPE]);
+    return summarizeWorkpads(workpads);
   }
 
   return {};

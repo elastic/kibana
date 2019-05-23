@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { handleResponse } from '../custom_element_collector';
+import { summarizeCustomElements, CustomElementDocument } from '../custom_element_collector';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 
 const getMockResponse = (mocks: any[] = []): any => ({
@@ -18,7 +18,7 @@ const getMockResponse = (mocks: any[] = []): any => ({
   },
 });
 
-function mockCustomElement(...nodeExpressions: string[]) {
+function mockCustomElement(...nodeExpressions: string[]): CustomElementDocument {
   return {
     content: JSON.stringify({
       selectedNodes: nodeExpressions.map(expression => ({
@@ -31,27 +31,24 @@ function mockCustomElement(...nodeExpressions: string[]) {
 describe('custom_element_collector.handleResponse', () => {
   describe('invalid responses', () => {
     it('returns nothing if no valid hits', () => {
-      const response = getMockResponse();
-      expect(handleResponse(response)).to.eql({});
+      expect(summarizeCustomElements([])).to.eql({});
     });
 
     it('returns nothing if no valid elements', () => {
-      const response = getMockResponse([
+      const customElements = [
         {
-          contents: 'invalid json',
+          content: 'invalid json',
         },
-      ]);
+      ];
 
-      expect(handleResponse(response)).to.eql({});
+      expect(summarizeCustomElements(customElements)).to.eql({});
     });
   });
 
   it('counts total custom elements', () => {
     const elements = [mockCustomElement(''), mockCustomElement('')];
 
-    const response = getMockResponse(elements);
-
-    const data = handleResponse(response);
+    const data = summarizeCustomElements(elements);
     expect(data.custom_elements).to.not.be(null);
 
     if (data.custom_elements) {
@@ -65,9 +62,8 @@ describe('custom_element_collector.handleResponse', () => {
     const expectedFunctions = Array.from(new Set([...functions1, ...functions2]));
 
     const elements = [mockCustomElement(functions1.join('|')), mockCustomElement(...functions2)];
-    const response = getMockResponse(elements);
 
-    const data = handleResponse(response);
+    const data = summarizeCustomElements(elements);
     expect(data.custom_elements).to.not.be(null);
 
     if (data.custom_elements) {
@@ -87,9 +83,7 @@ describe('custom_element_collector.handleResponse', () => {
       mockCustomElement(...functionsOther),
     ];
 
-    const response = getMockResponse(elements);
-
-    const result = handleResponse(response);
+    const result = summarizeCustomElements(elements);
     expect(result.custom_elements).to.not.be(null);
 
     if (result.custom_elements) {
