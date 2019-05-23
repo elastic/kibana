@@ -7,8 +7,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DataSetup, data } from 'src/legacy/core_plugins/data/public';
 import { CoreSetup } from 'src/core/public';
+import { DataSetup, data } from '../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
 
