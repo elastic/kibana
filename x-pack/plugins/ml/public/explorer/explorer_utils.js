@@ -191,6 +191,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
 export function getSelectionInfluencers(selectedCells, fieldName) {
   if (
     selectedCells !== null &&
+    selectedCells.type !== 'overall' &&
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
   ) {
