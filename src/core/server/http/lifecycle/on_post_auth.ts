@@ -27,50 +27,51 @@ enum ResultType {
   rejected = 'rejected',
 }
 
-interface NextParams {
+interface Next {
   type: ResultType.next;
 }
 
-interface RedirectedParams {
+interface Redirected {
   type: ResultType.redirected;
   url: string;
 }
 
-interface RejectedParams {
+interface Rejected {
   type: ResultType.rejected;
   error: Error;
   statusCode?: number;
 }
 
-/** @internal */
-class OnPostAuthResult {
-  public static next() {
-    return new OnPostAuthResult({ type: ResultType.next });
-  }
-  public static redirected(url: string) {
-    return new OnPostAuthResult({ type: ResultType.redirected, url });
-  }
-  public static rejected(error: Error, options: { statusCode?: number } = {}) {
-    return new OnPostAuthResult({
-      type: ResultType.rejected,
-      error,
-      statusCode: options.statusCode,
-    });
-  }
-  public static isValidResult(candidate: any) {
-    return candidate instanceof OnPostAuthResult;
-  }
-  constructor(public readonly params: NextParams | RejectedParams | RedirectedParams) {}
-  public isNext() {
-    return this.params.type === ResultType.next;
-  }
-  public isRedirected() {
-    return this.params.type === ResultType.redirected;
-  }
-  public isRejected() {
-    return this.params.type === ResultType.rejected;
-  }
-}
+type OnPostAuthResult = Next | Rejected | Redirected;
+
+const postAuthResult = {
+  next(): OnPostAuthResult {
+    return { type: ResultType.next };
+  },
+  redirected(url: string): OnPostAuthResult {
+    return { type: ResultType.redirected, url };
+  },
+  rejected(error: Error, options: { statusCode?: number } = {}): OnPostAuthResult {
+    return { type: ResultType.rejected, error, statusCode: options.statusCode };
+  },
+  isValid(candidate: any): candidate is OnPostAuthResult {
+    return (
+      candidate &&
+      (candidate.type === ResultType.next ||
+        candidate.type === ResultType.rejected ||
+        candidate.type === ResultType.redirected)
+    );
+  },
+  isNext(result: OnPostAuthResult): result is Next {
+    return result.type === ResultType.next;
+  },
+  isRedirected(result: OnPostAuthResult): result is Redirected {
+    return result.type === ResultType.redirected;
+  },
+  isRejected(result: OnPostAuthResult): result is Rejected {
+    return result.type === ResultType.rejected;
+  },
+};
 
 /**
  * @public
@@ -92,9 +93,9 @@ export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (
 ) => OnPostAuthResult | Promise<OnPostAuthResult>;
 
 const toolkit: OnPostAuthToolkit = {
-  next: OnPostAuthResult.next,
-  redirected: OnPostAuthResult.redirected,
-  rejected: OnPostAuthResult.rejected,
+  next: postAuthResult.next,
+  redirected: postAuthResult.redirected,
+  rejected: postAuthResult.rejected,
 };
 /**
  * @public
@@ -109,16 +110,15 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler) {
   ): Promise<Lifecycle.ReturnValue> {
     try {
       const result = await fn(KibanaRequest.from(request, undefined), toolkit);
-      if (OnPostAuthResult.isValidResult(result)) {
-        if (result.isNext()) {
+      if (postAuthResult.isValid(result)) {
+        if (postAuthResult.isNext(result)) {
           return h.continue;
         }
-        if (result.isRedirected()) {
-          const { url } = result.params as RedirectedParams;
-          return h.redirect(url).takeover();
+        if (postAuthResult.isRedirected(result)) {
+          return h.redirect(result.url).takeover();
         }
-        if (result.isRejected()) {
-          const { error, statusCode } = result.params as RejectedParams;
+        if (postAuthResult.isRejected(result)) {
+          const { error, statusCode } = result;
           return Boom.boomify(error, { statusCode });
         }
       }

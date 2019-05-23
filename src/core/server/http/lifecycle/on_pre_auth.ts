@@ -27,51 +27,52 @@ enum ResultType {
   rejected = 'rejected',
 }
 
-interface NextParams {
+interface Next {
   type: ResultType.next;
 }
 
-interface RedirectedParams {
+interface Redirected {
   type: ResultType.redirected;
   url: string;
   forward?: boolean;
 }
 
-interface RejectedParams {
+interface Rejected {
   type: ResultType.rejected;
   error: Error;
   statusCode?: number;
 }
 
-/** @internal */
-class OnPreAuthResult {
-  public static next() {
-    return new OnPreAuthResult({ type: ResultType.next });
-  }
-  public static redirected(url: string, options: { forward?: boolean } = {}) {
-    return new OnPreAuthResult({ type: ResultType.redirected, url, forward: options.forward });
-  }
-  public static rejected(error: Error, options: { statusCode?: number } = {}) {
-    return new OnPreAuthResult({
-      type: ResultType.rejected,
-      error,
-      statusCode: options.statusCode,
-    });
-  }
-  public static isValidResult(candidate: any) {
-    return candidate instanceof OnPreAuthResult;
-  }
-  constructor(public readonly params: NextParams | RejectedParams | RedirectedParams) {}
-  public isNext() {
-    return this.params.type === ResultType.next;
-  }
-  public isRedirected() {
-    return this.params.type === ResultType.redirected;
-  }
-  public isRejected() {
-    return this.params.type === ResultType.rejected;
-  }
-}
+type OnPreAuthResult = Next | Rejected | Redirected;
+
+const preAuthResult = {
+  next(): OnPreAuthResult {
+    return { type: ResultType.next };
+  },
+  redirected(url: string, options: { forward?: boolean } = {}): OnPreAuthResult {
+    return { type: ResultType.redirected, url, forward: options.forward };
+  },
+  rejected(error: Error, options: { statusCode?: number } = {}): OnPreAuthResult {
+    return { type: ResultType.rejected, error, statusCode: options.statusCode };
+  },
+  isValid(candidate: any): candidate is OnPreAuthResult {
+    return (
+      candidate &&
+      (candidate.type === ResultType.next ||
+        candidate.type === ResultType.rejected ||
+        candidate.type === ResultType.redirected)
+    );
+  },
+  isNext(result: OnPreAuthResult): result is Next {
+    return result.type === ResultType.next;
+  },
+  isRedirected(result: OnPreAuthResult): result is Redirected {
+    return result.type === ResultType.redirected;
+  },
+  isRejected(result: OnPreAuthResult): result is Rejected {
+    return result.type === ResultType.rejected;
+  },
+};
 
 /**
  * @public
@@ -90,9 +91,9 @@ export interface OnPreAuthToolkit {
 }
 
 const toolkit: OnPreAuthToolkit = {
-  next: OnPreAuthResult.next,
-  redirected: OnPreAuthResult.redirected,
-  rejected: OnPreAuthResult.rejected,
+  next: preAuthResult.next,
+  redirected: preAuthResult.redirected,
+  rejected: preAuthResult.rejected,
 };
 
 /** @public */
@@ -115,24 +116,24 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler) {
     try {
       const result = await fn(KibanaRequest.from(request, undefined), toolkit);
 
-      if (OnPreAuthResult.isValidResult(result)) {
-        if (result.isNext()) {
+      if (preAuthResult.isValid(result)) {
+        if (preAuthResult.isNext(result)) {
           return h.continue;
         }
 
-        if (result.isRedirected()) {
-          const { url, forward } = result.params as RedirectedParams;
+        if (preAuthResult.isRedirected(result)) {
+          const { url, forward } = result;
           if (forward) {
             request.setUrl(url);
             // We should update raw request as well since it can be proxied to the old platform
-            request.raw.req.url = request.url.href;
+            request.raw.req.url = url;
             return h.continue;
           }
           return h.redirect(url).takeover();
         }
 
-        if (result.isRejected()) {
-          const { error, statusCode } = result.params as RejectedParams;
+        if (preAuthResult.isRejected(result)) {
+          const { error, statusCode } = result;
           return Boom.boomify(error, { statusCode });
         }
       }
