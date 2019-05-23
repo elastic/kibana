@@ -5,3 +5,10 @@
  */
 
 export const ID = 'integrations_manager';
+export const API_ROOT = `/api/${ID}`;
+export const API = {
+  ROOT: API_ROOT,
+  FETCH_LIST: `${API_ROOT}/list`,
+  FETCH_INFO: `${API_ROOT}/package/{pkgkey}`,
+  FETCH_FILE: `${API_ROOT}/package/{pkgkey}/get`,
+};
