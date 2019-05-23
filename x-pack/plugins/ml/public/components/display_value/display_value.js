@@ -18,12 +18,12 @@ export function DisplayValue({ value }) {
   let formattedValue;
 
   if (Math.abs(value) < Math.pow(10, MAX_DIGITS)) {
-    formattedValue = abbreviateWholeNumber(value, MAX_DIGITS);
+    formattedValue = value;
   } else {
     formattedValue = (
       <EuiToolTip content={value}>
         <span>
-          {abbreviateWholeNumber(value, MAX_DIGITS)}
+          {abbreviateWholeNumber({ value, maxDigits: MAX_DIGITS, useDecimalFormat: true })}
         </span>
       </EuiToolTip>
     );

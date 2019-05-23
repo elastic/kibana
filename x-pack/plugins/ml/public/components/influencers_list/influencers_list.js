@@ -99,7 +99,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
           title={`${influencerFieldName}: ${valueData.influencerFieldValue}`}
           content={tooltipContent}
         >
-          <span>{(totalScore > 0) ? abbreviateWholeNumber(totalScore, 4) : totalScoreLabel}</span>
+          <span>{(totalScore > 0) ? abbreviateWholeNumber({ value: totalScore, maxDigits: 4 }) : totalScoreLabel}</span>
         </EuiToolTip>
       </div>
     </div>
