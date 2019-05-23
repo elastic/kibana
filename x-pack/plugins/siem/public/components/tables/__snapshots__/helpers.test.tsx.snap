@@ -14,6 +14,7 @@ exports[`Table Helpers #getRowItemDraggable it returns correctly against snapsho
         "queryMatch": Object {
           "displayValue": "item1",
           "field": "attrName",
+          "operator": ":",
           "value": "item1",
         },
       }
@@ -38,6 +39,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "queryMatch": Object {
           "displayValue": "item1",
           "field": "attrName",
+          "operator": ":",
           "value": "item1",
         },
       }
@@ -58,6 +60,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "queryMatch": Object {
           "displayValue": "item2",
           "field": "attrName",
+          "operator": ":",
           "value": "item2",
         },
       }
@@ -78,6 +81,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "queryMatch": Object {
           "displayValue": "item3",
           "field": "attrName",
+          "operator": ":",
           "value": "item3",
         },
       }

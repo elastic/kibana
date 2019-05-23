@@ -266,7 +266,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
             const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
             if (isKqlForRoute(location.pathname, kqlQueryStateData)) {
               const filterQuery = {
-                query: kqlQueryStateData.filterQuery,
+                kuery: kqlQueryStateData.filterQuery,
                 serializedQuery: convertKueryToElasticSearchQuery(
                   kqlQueryStateData.filterQuery ? kqlQueryStateData.filterQuery.expression : '',
                   this.props.indexPattern

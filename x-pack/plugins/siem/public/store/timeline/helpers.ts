@@ -19,8 +19,14 @@ import { TimelineById, TimelineState } from './reducer';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
+export const isNotNull = <T>(value: T | null): value is T => value !== null;
+
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
+  autoSavedWarningMsg: {
+    timelineId: null,
+    newTimelineModel: null,
+  },
 };
 
 interface AddTimelineHistoryParams {
@@ -114,6 +120,10 @@ export const addNewTimeline = ({
     ...timelineDefaults,
     columns,
     show,
+    savedObjectId: null,
+    version: null,
+    isSaving: false,
+    isLoading: false,
   },
 });
 
@@ -208,6 +218,7 @@ const addAndToProviderInTimeline = (
   );
   const newProvider = timeline.dataProviders[alreadyExistsProviderIndex];
   const alreadyExistsAndProviderIndex = newProvider.and.findIndex(p => p.id === provider.id);
+  const { and, ...andProvider } = provider;
 
   const dataProviders = [
     ...timeline.dataProviders.slice(0, alreadyExistsProviderIndex),
@@ -217,10 +228,10 @@ const addAndToProviderInTimeline = (
         alreadyExistsAndProviderIndex > -1
           ? [
               ...newProvider.and.slice(0, alreadyExistsAndProviderIndex),
-              provider,
+              andProvider,
               ...newProvider.and.slice(alreadyExistsAndProviderIndex + 1),
             ]
-          : [...newProvider.and, provider],
+          : [...newProvider.and, andProvider],
     },
     ...timeline.dataProviders.slice(alreadyExistsProviderIndex + 1),
   ];
@@ -605,13 +616,15 @@ export const updateTimelineProviders = ({
 
 interface UpdateTimelineRangeParams {
   id: string;
-  range: string;
+  start: number;
+  end: number;
   timelineById: TimelineById;
 }
 
 export const updateTimelineRange = ({
   id,
-  range,
+  start,
+  end,
   timelineById,
 }: UpdateTimelineRangeParams): TimelineById => {
   const timeline = timelineById[id];
@@ -619,7 +632,10 @@ export const updateTimelineRange = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      range,
+      dateRange: {
+        start,
+        end,
+      },
     },
   };
 };
