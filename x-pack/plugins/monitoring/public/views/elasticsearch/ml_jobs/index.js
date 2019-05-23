@@ -39,6 +39,7 @@ uiRoutes.when('/elasticsearch/ml_jobs', {
       this.data = $route.current.locals.pageData;
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      this.isCcrEnabled = Boolean($scope.cluster && $scope.cluster.isCcrEnabled);
     }
   }
 });
