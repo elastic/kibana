@@ -1,0 +1,35 @@
+[role="xpack"]
+[[metrics-explorer]]
+== Using the Metrics Explorer
+
+[role="screenshot"]
+image::infrastructure/images/metrics-explorer-screenshot.png[Metrics Explorer in Kibana]
+
+In this tutorial we are going to use the Metrics Explorer to create system load charts for each host we are monitoring with Metricbeat. Once we've explored the system load metrics, we will show you how to filter down to a specific host and start exploring outbound network traffic for each interface. Before we get started, if you don't have an Metricbeat data will need to head over to our link:metricbeat-docs-link:[Metricbeat documentation] to learn how to install and start collection data.
+
+1. Open Kibana and navigate to the Infrastructure UI in the side navigation
+2. At the top of the page, click on the "Metrics Explorer" tab
+3. The initial screen should be empty with the metric field selection open. Start typing `system.load.1` and select the field.
+4. Once you've selected the field you can add aditional metrics for `system.load.5` and `system.load.15`
+5. You will notice that you have a chart with 3 different series for each metric. By default the metric explorer is taking the average of each field. To the left of the metric dropdown you will see the aggration dropdown. You can use that to change the aggregation. For now let's leave it as `Average` but take some time to play around with the different aggrgations.
+6. To the right of the metric input field you will see a label with "graph per" and a dropdown, enter `host.name` in the group by dropdown and select the field. This input will create a chart a chart for every value it finds in that field.
+7. The UI should look similar to the screenshot above. If you only have one host, then it will display the chart across the entire screen. For multiple hosts, the metric explorer divides the screen in to three columns.
+8. Configurations! You've explorered your first metric. Let's go for some bonus points, click on the `Actions` dropdown in the upper right hand corner of one of the charts.
+9. Click on "Add Filter", this will add a filter for that specific host.
+10. From here we can start exploring other metrics specific to this host. Delete each of the system load metrics by clickng the little `X` icon next to each of them.
+11. Now enter `system.network.out.bytes` for the metric.
+12. Because `system.network.out.bytes` is a monotomicly increasing number we need to change the aggregation to `Rate`
+13. While this chart might appear correct there is one critical problem, hosts have multiple interfaces. We can fix this by setting the group by dropdown to `system.network.name`
+14. You should now see a chart per network interface. Let's imagine you want to put one of these charts on a dashboard. Click the `Actions` menu next one of the interface charts and select "Open In Visualize". This will open the same chart in Time Series Visual Builder from there you can save the chart and add it to a dashboard.
+15. Who's the Metrics Explorer Now? YOU ARE!
+
+
+=== Requirements and considerations for the Metric Explorer
+
+- The Metric Explorer assumes you have data collected by link:metricbeat[Metricbeat].
+- You will need read permissions on `metricbeat-*` OR the metric index in the Infrasructure configuartion UI.
+- Metric Explorer uses the timestamp field set in the Infrastructure configuration UI. By default that is set to `@timestmap`.
+- Interval for the X Axis is set to `auto`, the bucket size is determined by the time range.
+- The "Open in Visualize" requires the user to have access to the Visualize app, otherwise it will not be available.
+
+
