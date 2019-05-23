@@ -21,6 +21,7 @@ import {
   OnPinEvent,
   OnRangeSelected,
   OnUnPinEvent,
+  OnUpdateColumns,
 } from '../events';
 import { footerHeight } from '../footer';
 
@@ -49,6 +50,7 @@ interface Props {
   onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
   onRangeSelected: OnRangeSelected;
+  onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   range: string;
@@ -63,8 +65,8 @@ const HorizontalScroll = styled.div<{
 }>`
   display: block;
   height: ${({ height }) => `${height}px`};
+  overflow: hidden;
   overflow-x: auto;
-  overflow-y: hidden;
   min-height: 0px;
 `;
 
@@ -74,7 +76,7 @@ const VerticalScrollContainer = styled.div<{
 }>`
   display: block;
   height: ${({ height }) => `${height - footerHeight - 12}px`};
-  overflow-x: hidden;
+  overflow: hidden;
   overflow-y: auto;
   min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
@@ -97,6 +99,7 @@ export const Body = pure<Props>(
     onColumnSorted,
     onFilterChange,
     onPinEvent,
+    onUpdateColumns,
     onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
@@ -114,12 +117,15 @@ export const Body = pure<Props>(
         <EuiText size="s">
           <ColumnHeaders
             actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+            browserFields={browserFields}
             columnHeaders={columnHeaders}
             isLoading={isLoading}
             onColumnRemoved={onColumnRemoved}
             onColumnResized={onColumnResized}
             onColumnSorted={onColumnSorted}
             onFilterChange={onFilterChange}
+            onUpdateColumns={onUpdateColumns}
+            showEventsSelect={false}
             sort={sort}
             timelineId={id}
             minWidth={columnWidths}
@@ -140,8 +146,10 @@ export const Body = pure<Props>(
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
+              isLoading={isLoading}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
+              onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
