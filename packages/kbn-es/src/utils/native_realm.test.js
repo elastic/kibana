@@ -22,6 +22,7 @@ const { NativeRealm } = require('./native_realm');
 jest.genMockFromModule('@elastic/elasticsearch');
 jest.mock('@elastic/elasticsearch');
 
+const { ToolingLog } = require('@kbn/dev-utils');
 const { Client } = require('@elastic/elasticsearch');
 
 const mockClient = {
@@ -35,11 +36,7 @@ const mockClient = {
 };
 Client.mockImplementation(() => mockClient);
 
-const log = {
-  error: jest.fn(),
-  info: jest.fn(),
-};
-
+const log = new ToolingLog();
 let nativeRealm;
 
 beforeEach(() => {

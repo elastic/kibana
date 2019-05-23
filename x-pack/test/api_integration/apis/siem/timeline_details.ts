@@ -655,6 +655,7 @@ const timelineDetailsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             indexName: INDEX_NAME,
             eventId: ID,
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {

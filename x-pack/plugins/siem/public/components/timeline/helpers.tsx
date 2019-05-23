@@ -9,17 +9,17 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 
-import { DataProvider } from './data_providers/data_provider';
+import { DataProvider, EXISTS_OPERATOR } from './data_providers/data_provider';
 
 const buildQueryMatch = (dataProvider: DataProvider) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch
+    dataProvider.queryMatch.operator !== EXISTS_OPERATOR
       ? `${dataProvider.queryMatch.field} : ${
           isNumber(dataProvider.queryMatch.value)
             ? dataProvider.queryMatch.value
             : escapeQueryValue(dataProvider.queryMatch.value)
         }`
-      : ''
+      : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
 const buildQueryForAndProvider = (dataAndProviders: DataProvider[]) =>

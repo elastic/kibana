@@ -17,6 +17,7 @@ import { SearchItemsProvider, addNewJobToRecentlyAccessed } from 'plugins/ml/job
 
 
 import uiRoutes from 'ui/routes';
+import { checkViewOrCreateJobs } from '../check_module';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from 'plugins/ml/util/index_utils';
@@ -41,6 +42,15 @@ uiRoutes
       checkMlNodesAvailable,
     }
   });
+
+uiRoutes
+  .when('/modules/check_view_or_create', {
+    template,
+    resolve: {
+      checkViewOrCreateJobs
+    }
+  });
+
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');

@@ -687,6 +687,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
   onChangeDataProviderKqlQuery={[MockFunction]}
   onChangeDroppableAndProvider={[MockFunction]}
   onChangeItemsPerPage={[MockFunction]}
+  onDataProviderEdited={[MockFunction]}
   onDataProviderRemoved={[MockFunction]}
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}

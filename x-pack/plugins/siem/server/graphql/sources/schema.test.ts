@@ -18,7 +18,7 @@ import { getSourceQueryMock, mockSourceData } from './source.mock';
 const testCaseSource = {
   id: 'Test case to query basic information from source',
   query: `
-		query SourceQuery($sourceId: ID!) {
+		query SourceQuery($sourceId: ID!, $defaultIndex: [String!]!) {
 			source(id: $sourceId) {
 				id
 				configuration {
@@ -27,13 +27,8 @@ const testCaseSource = {
 					}
         }
         status {
-          auditbeatIndicesExist
-          auditbeatAliasExists
-          auditbeatIndices
-          winlogbeatIndicesExist
-          winlogbeatAliasExists
-          winlogbeatIndices
-          indexFields {
+          indicesExist(defaultIndex: $defaultIndex)
+          indexFields(defaultIndex: $defaultIndex) {
             name
             searchable
             type
@@ -43,7 +38,10 @@ const testCaseSource = {
 			}
 		}
 	`,
-  variables: { sourceId: 'default' },
+  variables: {
+    sourceId: 'default',
+    defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  },
   context: {
     req: {
       payload: {
