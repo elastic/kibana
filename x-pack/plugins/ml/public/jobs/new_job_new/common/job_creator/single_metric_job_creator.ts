@@ -92,7 +92,7 @@ export class SingleMetricJobCreator extends JobCreator {
               buckets: {
                 date_histogram: {
                   field: timeField,
-                  interval: `${(interval / 100) * 10}ms`, // use 10% of bucketSpan to allow for better sampling
+                  interval: `${interval * 0.1}ms`, // use 10% of bucketSpan to allow for better sampling
                 },
                 aggregations: {
                   [fieldName]: {

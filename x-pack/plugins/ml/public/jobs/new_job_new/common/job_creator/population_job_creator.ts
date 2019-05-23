@@ -87,7 +87,7 @@ export class PopulationJobCreator extends JobCreator {
     this._editDetector(dtr, index);
   }
 
-  // create a detector object, adding the current over field and
+  // create a detector object, adding the current over field
   private _createDetector(agg: Aggregation, field: Field | null) {
     const dtr: Detector = createBasicDetector(agg, field);
 
