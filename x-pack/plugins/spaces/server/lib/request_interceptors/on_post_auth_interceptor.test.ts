@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
-import sinon from 'sinon';
 import * as Rx from 'rxjs';
-import { SavedObject } from 'src/legacy/server/saved_objects';
+import { SavedObject, SavedObjectsService } from 'src/legacy/server/saved_objects';
 import { Feature } from '../../../../xpack_main/types';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
@@ -18,29 +16,74 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 import { elasticsearchServiceMock, httpServiceMock } from '../../../../../../src/core/server/mocks';
 import { SpacesConfig } from '../../new_platform/config';
+import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
+import { HttpServiceSetup } from 'src/core/server';
+import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
+import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 
 // TODO: re-implement on NP
-describe.skip('onPostAuthRequestInterceptor', () => {
-  const sandbox = sinon.sandbox.create();
-  const teardowns: Array<() => void> = [];
+describe('onPostAuthRequestInterceptor', () => {
   const headers = {
     authorization: 'foo',
   };
-  let server: any;
   let request: any;
   let spacesService: SpacesServiceSetup;
 
   const serverBasePath = '/';
   const defaultRoute = '/app/custom-app';
 
+  let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+  function initKbnServer(http: HttpServiceSetup) {
+    const kbnServer = kbnTestServer.getKbnServer(root);
+
+    kbnServer.server.route([
+      {
+        method: 'GET',
+        path: '/foo',
+        handler: (req: any) => {
+          return { path: req.path, basePath: http.getBasePathFor(req) };
+        },
+      },
+      {
+        method: 'GET',
+        path: '/app/kibana',
+        handler: (req: any) => {
+          return { path: req.path, basePath: http.getBasePathFor(req) };
+        },
+      },
+      {
+        method: 'GET',
+        path: '/app/app-1',
+        handler: (req: any) => {
+          return { path: req.path, basePath: http.getBasePathFor(req) };
+        },
+      },
+      {
+        method: 'GET',
+        path: '/app/app-2',
+        handler: (req: any) => {
+          return { path: req.path, basePath: http.getBasePathFor(req) };
+        },
+      },
+      {
+        method: 'GET',
+        path: '/api/test/foo',
+        handler: (req: any) => {
+          return { path: req.path, basePath: http.getBasePathFor(req) };
+        },
+      },
+    ]);
+  }
+
   beforeEach(() => {
-    teardowns.push(() => sandbox.restore());
+    root = kbnTestServer.createRoot();
     request = async (
       path: string,
       spaces: SavedObject[],
       setupFn: (server: Server) => null = () => null
     ) => {
-      server = new Server();
+      const { http } = await root.setup();
 
       interface Config {
         [key: string]: any;
@@ -50,19 +93,15 @@ describe.skip('onPostAuthRequestInterceptor', () => {
         'server.defaultRoute': defaultRoute,
       };
 
-      server.decorate(
-        'server',
-        'config',
-        jest.fn(() => {
-          return {
-            get: jest.fn(key => {
-              return config[key];
-            }),
-          };
-        })
-      );
+      const configFn = jest.fn(() => {
+        return {
+          get: jest.fn(key => {
+            return config[key];
+          }),
+        };
+      });
 
-      server.savedObjects = {
+      const savedObjectsService = {
         SavedObjectsClient: {
           errors: {
             isNotFoundError: (e: Error) => e.message === 'space not found',
@@ -84,7 +123,7 @@ describe.skip('onPostAuthRequestInterceptor', () => {
         }),
       };
 
-      server.plugins = {
+      const plugins = {
         elasticsearch: {
           getCluster: jest.fn().mockReturnValue({
             callWithInternalUser: jest.fn(),
@@ -137,16 +176,27 @@ describe.skip('onPostAuthRequestInterceptor', () => {
 
       const httpMock = httpServiceMock.createSetupContract();
 
-      httpMock.getBasePathFor = jest.fn().mockReturnValue(basePath);
-      httpMock.setBasePathFor = jest.fn().mockImplementation((newPath: string) => {
+      httpMock.getBasePathFor = jest.fn().mockImplementation(() => basePath);
+      httpMock.setBasePathFor = jest.fn().mockImplementation((req: any, newPath: string) => {
         basePath = newPath;
       });
+      httpMock.registerOnRequest = jest.fn().mockImplementation(async handler => {
+        await handler(
+          { path },
+          {
+            setUrl: jest.fn().mockImplementation(url => {
+              path = url;
+            }),
+            next: jest.fn(),
+          }
+        );
+      });
 
-      const service = new SpacesService(log, server.config());
+      const service = new SpacesService(log, configFn().get('server.basePath'));
       spacesService = await service.setup({
         http: httpMock,
         elasticsearch: elasticsearchServiceMock.createSetupContract(),
-        savedObjects: server.savedObjects,
+        savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
         getSecurity: () => ({} as SecurityPlugin),
         spacesAuditLogger: {} as SpacesAuditLogger,
         config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
@@ -169,57 +219,28 @@ describe.skip('onPostAuthRequestInterceptor', () => {
       // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
       // we are including the already tested interceptor here in the test chain.
       initSpacesOnRequestInterceptor({
-        config: server.config(),
+        config: (configFn() as unknown) as KibanaConfig,
         http: httpMock,
       });
+
+      await root.start();
+
       initSpacesOnPostAuthRequestInterceptor({
-        config: server.config(),
-        legacyServer: server,
+        config: (configFn() as unknown) as KibanaConfig,
+        legacyServer: kbnTestServer.getKbnServer(root).server,
         http: httpMock,
         log,
-        xpackMain: server.plugins.xpack_main,
+        xpackMain: plugins.xpack_main as XPackMainPlugin,
         spacesService,
       });
 
-      server.route([
-        {
-          method: 'GET',
-          path: '/',
-          handler: (req: any) => {
-            return { path: req.path, url: req.url, basePath: httpMock.getBasePathFor(req) };
-          },
-        },
-        {
-          method: 'GET',
-          path: '/app/{appId}',
-          handler: (req: any) => {
-            return { path: req.path, url: req.url, basePath: httpMock.getBasePathFor(req) };
-          },
-        },
-        {
-          method: 'GET',
-          path: '/api/foo',
-          handler: (req: any) => {
-            return { path: req.path, url: req.url, basePath: httpMock.getBasePathFor(req) };
-          },
-        },
-      ]);
+      initKbnServer(http);
 
-      teardowns.push(() => server.stop());
-
-      await setupFn(server);
-
-      return await server.inject({
-        method: 'GET',
-        url: path,
-        headers,
-      });
+      return await kbnTestServer.request.get(root, path);
     };
-  });
+  }, 30000);
 
-  afterEach(async () => {
-    await Promise.all(teardowns.splice(0).map(fn => fn()));
-  });
+  afterEach(async () => await root.shutdown());
 
   describe('when accessing an app within a non-existent space', () => {
     it('redirects to the space selector screen', async () => {
@@ -269,13 +290,13 @@ describe.skip('onPostAuthRequestInterceptor', () => {
         },
       ];
 
-      const response = await request('/s/not-found/api/foo', spaces);
+      const response = await request('/s/not-found/api/test/foo', spaces);
 
       expect(response.statusCode).toEqual(200);
     });
   });
 
-  describe('with a single available space', () => {
+  describe.skip('with a single available space', () => {
     test('it redirects to the defaultRoute within the context of the single Space when navigating to Kibana root', async () => {
       const spaces = [
         {
@@ -405,7 +426,7 @@ describe.skip('onPostAuthRequestInterceptor', () => {
     });
   });
 
-  describe('with multiple available spaces', () => {
+  describe.skip('with multiple available spaces', () => {
     test('it redirects to the Space Selector App when navigating to Kibana root', async () => {
       const spaces = [
         {
@@ -427,11 +448,11 @@ describe.skip('onPostAuthRequestInterceptor', () => {
       const getHiddenUiAppHandler = jest.fn(() => '<div>space selector</div>');
 
       const response = await request('/', spaces, function setupFn() {
-        server.decorate('server', 'getHiddenUiAppById', getHiddenUiAppHandler);
-        server.decorate('toolkit', 'renderApp', function renderAppHandler(app: any) {
-          // @ts-ignore
-          return this.response(app);
-        });
+        // server.decorate('server', 'getHiddenUiAppById', getHiddenUiAppHandler);
+        // server.decorate('toolkit', 'renderApp', function renderAppHandler(app: any) {
+        //   // @ts-ignore
+        //   return this.response(app);
+        // });
       });
 
       expect(response.statusCode).toEqual(200);
