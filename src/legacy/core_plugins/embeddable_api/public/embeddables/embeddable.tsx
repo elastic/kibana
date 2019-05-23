@@ -150,10 +150,10 @@ export abstract class Embeddable<
   }
 
   protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
-    const newOutput = cloneDeep({
+    const newOutput = {
       ...this.output,
       ...outputChanges,
-    });
+    };
     if (!isEqual(this.output, newOutput)) {
       this.output = newOutput;
       this.output$.next(this.output);

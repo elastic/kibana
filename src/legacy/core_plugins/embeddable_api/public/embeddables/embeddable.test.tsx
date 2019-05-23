@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 jest.mock('ui/metadata', () => ({
   metadata: {
     branch: 'my-metadata-branch',
@@ -26,6 +28,34 @@ jest.mock('ui/metadata', () => ({
 
 import { skip } from 'rxjs/operators';
 import { ContactCardEmbeddable, FilterableEmbeddable } from '../__test__/index';
+import { Embeddable } from './embeddable';
+import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
+import { ViewMode } from '../types';
+
+class TestClass {
+  constructor() {}
+}
+
+interface Output extends EmbeddableOutput {
+  testClass: TestClass;
+  inputUpdatedTimes: number;
+}
+
+class OutputTestEmbeddable extends Embeddable<EmbeddableInput, Output> {
+  public readonly type = 'test';
+  constructor() {
+    super(
+      { id: 'test', viewMode: ViewMode.VIEW },
+      { testClass: new TestClass(), inputUpdatedTimes: 0 }
+    );
+
+    this.getInput$().subscribe(() => {
+      this.updateOutput({ inputUpdatedTimes: this.getOutput().inputUpdatedTimes + 1 });
+    });
+  }
+
+  reload() {}
+}
 
 test('Embeddable calls input subscribers when changed', async done => {
   const hello = new ContactCardEmbeddable({ id: '123', firstName: 'Brienne', lastName: 'Tarth' });
@@ -60,4 +90,13 @@ test('Embeddable reload is not called if lastReloadRequest input time does not c
   hello.updateInput({ lastReloadRequestTime: 1 });
 
   expect(hello.reload).toBeCalledTimes(0);
+});
+
+test('updating output state retains instance information', async () => {
+  const outputTest = new OutputTestEmbeddable();
+  expect(outputTest.getOutput().testClass).toBeInstanceOf(TestClass);
+  expect(outputTest.getOutput().inputUpdatedTimes).toBe(1);
+  outputTest.updateInput({ viewMode: ViewMode.EDIT });
+  expect(outputTest.getOutput().inputUpdatedTimes).toBe(2);
+  expect(outputTest.getOutput().testClass).toBeInstanceOf(TestClass);
 });
