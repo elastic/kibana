@@ -17,5 +17,19 @@
  * under the License.
  */
 
-export { SavedObjectsClient } from './saved_objects_client';
-export { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
+// Importing directly from ./saved_objects_mixin to ease ts migration
+// export { savedObjectsMixin } from './saved_objects_mixin';
+
+export {
+  MigrationVersion,
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsClient,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectReference,
+  SavedObjectsService,
+} from './service';
+
+export { SavedObjectsSchema } from './schema';
+
+export { SavedObjectsManagement } from './management';
