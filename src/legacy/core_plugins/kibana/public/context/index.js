@@ -62,7 +62,6 @@ function ContextAppRouteController(
   $routeParams,
   $scope,
   AppState,
-  chrome,
   config,
   indexPattern,
   Private,

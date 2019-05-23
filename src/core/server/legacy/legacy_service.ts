@@ -21,7 +21,7 @@ import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
-import { CoreSetup, CoreStart } from '../../server';
+import { InternalCoreSetup, InternalCoreStart } from '../../server';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig, DevConfigType } from '../dev';
@@ -55,7 +55,7 @@ export class LegacyService implements CoreService {
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
-  private setupDeps?: CoreSetup;
+  private setupDeps?: InternalCoreSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
@@ -66,10 +66,10 @@ export class LegacyService implements CoreService {
       .atPath<HttpConfigType>('server')
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
   }
-  public async setup(setupDeps: CoreSetup) {
+  public async setup(setupDeps: InternalCoreSetup) {
     this.setupDeps = setupDeps;
   }
-  public async start(startDeps: CoreStart) {
+  public async start(startDeps: InternalCoreStart) {
     const { setupDeps } = this;
     if (!setupDeps) {
       throw new Error('Legacy service is not setup yet.');
@@ -135,7 +135,11 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, setupDeps: CoreSetup, startDeps: CoreStart) {
+  private async createKbnServer(
+    config: Config,
+    setupDeps: InternalCoreSetup,
+    startDeps: InternalCoreStart
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
