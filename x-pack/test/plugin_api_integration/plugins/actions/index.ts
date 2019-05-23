@@ -31,8 +31,7 @@ export default function actionsPlugin(kibana: any) {
           },
         },
         async handler(request: any) {
-          const actionsClient = request.getActionsClient();
-          return await actionsClient.fire({
+          return await request.server.plugins.actions.fire({
             id: request.params.id,
             params: request.payload.params,
           });

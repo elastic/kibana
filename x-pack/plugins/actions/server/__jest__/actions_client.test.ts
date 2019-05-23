@@ -21,12 +21,6 @@ const savedObjectsClient = {
 
 beforeEach(() => jest.resetAllMocks());
 
-const mockEncryptedSavedObjects = {
-  isEncryptionError: jest.fn(),
-  registerType: jest.fn(),
-  getDecryptedAsInternalUser: jest.fn(),
-};
-
 describe('create()', () => {
   test('creates an action with all given properties', async () => {
     const expectedResult = Symbol();
@@ -38,7 +32,6 @@ describe('create()', () => {
     });
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
@@ -85,7 +78,6 @@ describe('create()', () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     actionTypeService.register({
@@ -117,7 +109,6 @@ describe('create()', () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     await expect(
@@ -144,7 +135,6 @@ describe('create()', () => {
     });
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
@@ -196,7 +186,6 @@ describe('get()', () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     savedObjectsClient.get.mockResolvedValueOnce(expectedResult);
@@ -227,7 +216,6 @@ describe('find()', () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
@@ -259,7 +247,6 @@ describe('delete()', () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
@@ -295,7 +282,6 @@ describe('update()', () => {
     });
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
@@ -338,7 +324,6 @@ describe('update()', () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     actionTypeService.register({
@@ -372,7 +357,6 @@ describe('update()', () => {
     const actionTypeService = new ActionTypeService();
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     await expect(
@@ -401,7 +385,6 @@ describe('update()', () => {
     });
     const actionService = new ActionsClient({
       actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
       savedObjectsClient,
     });
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
@@ -437,143 +420,6 @@ describe('update()', () => {
         "description": "my description",
       },
       Object {},
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
-  });
-});
-
-describe('fire()', () => {
-  test('fires an action with all given parameters', async () => {
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
-      savedObjectsClient,
-    });
-    const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
-    actionTypeService.register({
-      id: 'mock',
-      name: 'Mock',
-      executor: mockActionType,
-    });
-    mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: 'mock-action',
-      attributes: {
-        actionTypeId: 'mock',
-        actionTypeConfigSecrets: {
-          foo: true,
-        },
-      },
-    });
-    const result = await actionService.fire({
-      id: 'mock-action',
-      params: { baz: false },
-    });
-    expect(result).toEqual({ success: true });
-    expect(mockActionType).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "actionTypeConfig": Object {
-          "foo": true,
-        },
-        "params": Object {
-          "baz": false,
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
-    expect(mockEncryptedSavedObjects.getDecryptedAsInternalUser.mock.calls).toEqual([
-      ['action', 'mock-action'],
-    ]);
-  });
-
-  test(`throws an error when the action type isn't registered`, async () => {
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
-      savedObjectsClient,
-    });
-    mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: 'mock-action',
-      attributes: {
-        actionTypeId: 'non-registered-action-type',
-        actionTypeConfigSecrets: {
-          foo: true,
-        },
-      },
-    });
-    await expect(
-      actionService.fire({ id: 'mock-action', params: { baz: false } })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"non-registered-action-type\\" is not registered."`
-    );
-  });
-
-  test('merges encrypted and unencrypted attributes', async () => {
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
-      savedObjectsClient,
-    });
-    const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
-    actionTypeService.register({
-      id: 'mock',
-      name: 'Mock',
-      unencryptedAttributes: ['a', 'c'],
-      executor: mockActionType,
-    });
-    mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: 'mock-action',
-      attributes: {
-        actionTypeId: 'mock',
-        actionTypeConfig: {
-          a: true,
-          c: true,
-        },
-        actionTypeConfigSecrets: {
-          b: true,
-        },
-      },
-    });
-    const result = await actionService.fire({
-      id: 'mock-action',
-      params: { baz: false },
-    });
-    expect(result).toEqual({ success: true });
-    expect(mockActionType).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "actionTypeConfig": Object {
-          "a": true,
-          "b": true,
-          "c": true,
-        },
-        "params": Object {
-          "baz": false,
-        },
-      },
     ],
   ],
   "results": Array [

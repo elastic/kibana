@@ -44,7 +44,7 @@ export class ActionTypeService {
    */
   public register(actionType: ActionType) {
     if (this.has(actionType.id)) {
-      throw Boom.badRequest(
+      throw new Error(
         i18n.translate('xpack.actions.actionTypeService.register.duplicateActionTypeError', {
           defaultMessage: 'Action type "{id}" is already registered.',
           values: {
