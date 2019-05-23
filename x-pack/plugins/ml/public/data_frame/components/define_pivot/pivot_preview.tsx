@@ -18,6 +18,7 @@ import {
   EuiInMemoryTableProps,
   EuiPanel,
   EuiProgress,
+  EuiText,
   EuiTitle,
   SortDirection,
 } from '@elastic/eui';
@@ -157,6 +158,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   }
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
+    const error = JSON.parse(errorMessage);
     return (
       <EuiPanel grow={false}>
         <PreviewTitle previewRequest={previewRequest} />
@@ -167,7 +169,9 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
           color="danger"
           iconType="cross"
         >
-          <p>{errorMessage}</p>
+          <EuiText size="xs">
+            <pre>{error.message || errorMessage}</pre>
+          </EuiText>
         </EuiCallOut>
       </EuiPanel>
     );
