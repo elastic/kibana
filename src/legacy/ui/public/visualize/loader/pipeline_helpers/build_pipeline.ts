@@ -435,7 +435,7 @@ export const buildPipeline = async (
   const uiState = vis.getUiState();
 
   // context
-  let pipeline = `kibana | kibana_context `;
+  let pipeline = `kibana\n| kibana_context `;
   if (query) {
     pipeline += prepareJson('query', query);
   }
@@ -445,7 +445,7 @@ export const buildPipeline = async (
   if (vis.savedSearchId) {
     pipeline += prepareString('savedSearchId', vis.savedSearchId);
   }
-  pipeline += '| ';
+  pipeline += '\n| ';
 
   // request handler
   if (vis.type.requestHandler === 'courier') {
@@ -453,7 +453,7 @@ export const buildPipeline = async (
     ${prepareString('index', indexPattern.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
-    ${prepareJson('aggConfigs', visState.aggs)} | `;
+    ${prepareJson('aggConfigs', visState.aggs)}\n| `;
   }
 
   const schemas = getSchemas(vis, params.timeRange);
