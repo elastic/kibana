@@ -29,6 +29,7 @@ import {
   fetchRepos,
   turnOnDefaultRepoScope,
   openTreePath,
+  fetchRootRepoTree,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
@@ -188,6 +189,7 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (currentTree.repoUri !== repoUri) {
     yield put(resetRepoTree());
     yield put(fetchRepoCommits({ uri: repoUri, revision }));
+    yield put(fetchRootRepoTree({ uri: repoUri, revision }));
   }
   const tree = yield select(getTree);
   const isDir = pathType === PathTypes.tree;
