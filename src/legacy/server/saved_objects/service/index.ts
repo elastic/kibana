@@ -26,7 +26,7 @@ export interface SavedObjectsService<Request = any> {
     Request
   >['addClientWrapperFactory'];
   getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
-  SavedObjectsClient: SavedObjectsClient;
+  SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
   getSavedObjectsRepository(...rest: any[]): any;
 }
