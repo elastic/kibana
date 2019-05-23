@@ -1034,10 +1034,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@6.10.7":
-  version "6.10.7"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.10.7.tgz#4698f1c35c1a57e074ac3e3063b5d290822a2f96"
-  integrity sha512-/OJZfeDpLBB6wZzynIrkkjQxvuhuETu8trFxzqU49fQaRK1rAbszvNWi5Q0uTuxJUonP9KSRVPXYUrL3uJLwAQ==
+"@elastic/eui@6.10.8":
+  version "6.10.8"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.10.8.tgz#00a2d8e32d003255a4275a1fca364fde483c274a"
+  integrity sha512-Ap4oehML2p87W8YCF/9abRucyrfRaoa4DlsAMHQApa9833Y16QMGI6LzX+0za1KzuTTy/5CXxbujJjNsRrqy3g==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
