@@ -23,10 +23,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { EuiIconTip, } from '@elastic/eui';
-import Picker from './custom_color_picker';
+import { CustomColorPickerUI as Picker } from './custom_color_picker';
 import { injectI18n } from '@kbn/i18n/react';
 
-class ColorPicker extends Component {
+class ColorPickerUI extends Component {
 
   constructor(props) {
     super(props);
@@ -133,11 +133,11 @@ class ColorPicker extends Component {
 
 }
 
-ColorPicker.propTypes = {
+ColorPickerUI.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   disableTrash: PropTypes.bool,
   onChange: PropTypes.func
 };
 
-export default injectI18n(ColorPicker);
+export const ColorPicker = injectI18n(ColorPickerUI);

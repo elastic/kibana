@@ -8,8 +8,8 @@ import { leastCommonInterval, isCalendarInterval } from './lib/interval_helper';
 
 export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
-    constructor(req, batchRequestsSupport, fieldsCapabilities, rollupIndex) {
-      super(req, batchRequestsSupport, fieldsCapabilities);
+    constructor(req, fieldsCapabilities, rollupIndex) {
+      super(req, fieldsCapabilities);
 
       this.rollupIndex = rollupIndex;
       this.availableMetrics = get(fieldsCapabilities, `${rollupIndex}.aggs`, {});

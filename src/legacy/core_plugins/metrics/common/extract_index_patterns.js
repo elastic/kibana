@@ -16,9 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { uniq } from 'lodash';
 
-type FilterFunc = <I>(item: I) => boolean;
+export function extractIndexPatterns(panel, excludedFields = {}) {
+  const patterns = [];
 
-export const propFilter: (
-  prop: string
-) => <T>(list: T[], filters: string[] | string | FilterFunc) => T[];
+  if (!excludedFields[panel.index_pattern]) {
+    patterns.push(panel.index_pattern);
+  }
+
+  panel.series.forEach(series => {
+    const indexPattern = series.series_index_pattern;
+    if (indexPattern && series.override_index_pattern && !excludedFields[indexPattern]) {
+      patterns.push(indexPattern);
+    }
+  });
+
+  if (panel.annotations) {
+    panel.annotations.forEach(item => {
+      const indexPattern = item.index_pattern;
+      if (indexPattern && !excludedFields[indexPattern]) {
+        patterns.push(indexPattern);
+      }
+    });
+  }
+
+  if (patterns.length === 0) {
+    patterns.push('');
+  }
+
+  return uniq(patterns).sort();
+}
