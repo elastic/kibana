@@ -27,20 +27,19 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
     type: 'onPostAuth',
     async method(request, h) {
       const { auth, url } = request;
-      const isAppRequest = url.path.startsWith('/app/');
+      const user = auth.credentials;
+      const roles = user ? user.roles : [];
 
-      if (!isAppRequest) {
+      if (!user) {
         return h.continue;
       }
 
-      const user = auth.credentials || {};
-      const roles = user.roles || [];
+      const isAppRequest = url.path.startsWith('/app/');
 
       const uiSettings = request.getUiSettingsService();
-
       const dashboardOnlyModeRoles = await uiSettings.get(CONFIG_DASHBOARD_ONLY_MODE_ROLES);
 
-      if (!dashboardOnlyModeRoles || roles.length === 0) {
+      if (!isAppRequest || !dashboardOnlyModeRoles || roles.length === 0) {
         return h.continue;
       }
 
