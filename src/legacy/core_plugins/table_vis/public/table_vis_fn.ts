@@ -17,7 +17,9 @@
  * under the License.
  */
 
+ // @ts-ignore
 import { functionsRegistry } from 'plugins/interpreter/registries';
+// @ts-ignore
 import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { i18n } from '@kbn/i18n';
 
@@ -101,6 +103,7 @@ export const kibanaTable = () => ({
 
     const responseHandler = legacyResponseHandlerProvider().handler;
     const convertedData = await responseHandler(context, visConfig.dimensions);
+    console.log(2)
 
     return {
       type: 'render',
