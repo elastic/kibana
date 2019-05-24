@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { UrlStateContainer, UrlStateContainerLifecycle } from './';
 import { UrlStateContainerPropTypes } from './types';
@@ -30,23 +31,23 @@ import { wait } from '../../lib/helpers';
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {
+  hash: '',
   pathname: '/network',
   search: '',
   state: '',
-  hash: '',
 };
 const mockHistory = {
-  length: 2,
-  location,
   action: pop,
-  push: jest.fn(),
-  replace: jest.fn(),
+  block: jest.fn(),
+  createHref: jest.fn(),
   go: jest.fn(),
   goBack: jest.fn(),
   goForward: jest.fn(),
-  block: jest.fn(),
-  createHref: jest.fn(),
+  length: 2,
   listen: jest.fn(),
+  location,
+  push: jest.fn(),
+  replace: jest.fn(),
 };
 
 const filterQuery: KueryFilterQuery = {
@@ -55,15 +56,21 @@ const filterQuery: KueryFilterQuery = {
 };
 
 const mockProps: UrlStateContainerPropTypes = {
+  match: {
+    isExact: true,
+    params: '',
+    path: '',
+    url: '',
+  },
   history: mockHistory,
   location,
   indexPattern: {
     fields: [
       {
+        aggregatable: true,
         name: '@timestamp',
         searchable: true,
         type: 'date',
-        aggregatable: true,
       },
     ],
     title: 'filebeat-*,packetbeat-*',
@@ -71,20 +78,20 @@ const mockProps: UrlStateContainerPropTypes = {
   urlState: {
     [CONSTANTS.timerange]: {
       global: {
-        kind: 'relative',
-        fromStr: 'now-24h',
-        toStr: 'now',
         from: 1558048243696,
-        to: 1558134643697,
+        fromStr: 'now-24h',
+        kind: 'relative',
         linkTo: ['timeline'],
+        to: 1558134643697,
+        toStr: 'now',
       },
       timeline: {
-        kind: 'relative',
-        fromStr: 'now-24h',
-        toStr: 'now',
         from: 1558048243696,
-        to: 1558134643697,
+        fromStr: 'now-24h',
+        kind: 'relative',
         linkTo: ['global'],
+        to: 1558134643697,
+        toStr: 'now',
       },
     },
     [CONSTANTS.kqlQuery]: {
@@ -137,6 +144,18 @@ const mockProps: UrlStateContainerPropTypes = {
   }>,
 };
 
+const indexPattern: StaticIndexPattern = {
+  title: 'logstash-*',
+  fields: [
+    {
+      name: 'response',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+    },
+  ],
+};
+
 describe('UrlStateContainer', () => {
   const state: State = mockGlobalState;
 
@@ -153,7 +172,7 @@ describe('UrlStateContainer', () => {
       <MockedProvider>
         <TestProviders store={store}>
           <Router history={mockHistory}>
-            <UrlStateContainer />
+            <UrlStateContainer indexPattern={indexPattern} />
           </Router>
         </TestProviders>
       </MockedProvider>

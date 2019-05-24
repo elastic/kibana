@@ -7,6 +7,7 @@
 import { Location } from 'history';
 import { get, throttle } from 'lodash/fp';
 import React from 'react';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
@@ -31,19 +32,20 @@ import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { URL_STATE_KEYS, CONSTANTS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './constants';
 import {
   decodeRisonUrlState,
-  getQueryStringFromLocation,
-  getParamFromQueryString,
-  replaceStateKeyInQueryString,
-  replaceQueryStringInLocation,
-  isKqlForRoute,
   getCurrentLocation,
+  getParamFromQueryString,
+  getQueryStringFromLocation,
+  isKqlForRoute,
+  replaceQueryStringInLocation,
+  replaceStateKeyInQueryString,
 } from './helpers';
 import {
   KeyUrlState,
   KqlQuery,
-  UrlStateContainerPropTypes,
-  LocationTypes,
   KqlQueryObject,
+  LocationTypes,
+  UrlStateContainerPropTypes,
+  UrlStateProps,
 } from './types';
 
 export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerPropTypes> {
@@ -266,14 +268,17 @@ const makeMapStateToProps = () => {
 
   return mapStateToProps;
 };
-export const UrlStateContainer = connect(
-  makeMapStateToProps,
-  {
-    setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
-    setHostsKql: hostsActions.applyHostsFilterQuery,
-    setNetworkKql: networkActions.applyNetworkFilterQuery,
-    setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
-    toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
-  }
-  // @ts-ignore
-)(withRouter(UrlStateContainerLifecycle)) as typeof UrlStateContainerPropTypes;
+
+export const UrlStateContainer = compose<React.ComponentClass<UrlStateProps>>(
+  withRouter,
+  connect(
+    makeMapStateToProps,
+    {
+      setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
+      setHostsKql: hostsActions.applyHostsFilterQuery,
+      setNetworkKql: networkActions.applyNetworkFilterQuery,
+      setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
+      toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
+    }
+  )
+)(UrlStateContainerLifecycle);

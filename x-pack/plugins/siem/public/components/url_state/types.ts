@@ -6,7 +6,7 @@
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
-import { History, Location } from 'history';
+import { RouteComponentProps } from 'react-router';
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { CONSTANTS } from './constants';
 import { InputsModelId, UrlInputsModel } from '../../store/inputs/model';
@@ -33,33 +33,13 @@ export interface LocationMappedToModel {
   [CONSTANTS.networkPage]: networkModel.NetworkType.page;
 }
 
-export interface LocationMappedToSelf {
-  [CONSTANTS.networkDetails]: string;
-  [CONSTANTS.networkPage]: string;
-  [CONSTANTS.hostsDetails]: string;
-  [CONSTANTS.hostsPage]: string;
-}
 export type LocationKeysType = keyof LocationMappedToModel;
-
-export interface KqlQueryHosts {
-  filterQuery: KueryFilterQuery | null;
-  queryLocation: LocationTypes;
-  type: hostsModel.HostsType;
-}
-
-export interface KqlQueryNetwork {
-  filterQuery: KueryFilterQuery | null;
-  queryLocation: LocationTypes;
-  type: networkModel.NetworkType;
-}
 
 export interface KqlQuery {
   filterQuery: KueryFilterQuery | null;
   queryLocation: LocationTypes;
   type: networkModel.NetworkType | hostsModel.HostsType;
 }
-
-// export type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
 
 export interface UrlState {
   [CONSTANTS.kqlQuery]: KqlQueryObject;
@@ -72,10 +52,13 @@ export interface UrlStateProps {
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
+}
+
+export interface UrlStateStateToPropsType {
   urlState: UrlState;
 }
 
-export interface UrlStateDispatchProps {
+export interface UrlStateDispatchToPropsType {
   setHostsKql: ActionCreator<{
     filterQuery: SerializedFilterQuery;
     hostsType: hostsModel.HostsType;
@@ -103,11 +86,7 @@ export interface UrlStateDispatchProps {
   }>;
 }
 
-export interface UrlStateRouterProps {
-  history: History;
-  location: Location;
-}
-
-export type UrlStateContainerPropTypes = UrlStateRouterProps &
-  UrlStateProps &
-  UrlStateDispatchProps;
+export type UrlStateContainerPropTypes = RouteComponentProps &
+  UrlStateStateToPropsType &
+  UrlStateDispatchToPropsType &
+  UrlStateProps;
