@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import { parse as parseKuery } from './kuery';
-import { parse as parseLegacyKuery } from './legacy_kuery';
+import { KQLSyntaxError } from '../errors';
 
 export function fromLiteralExpression(expression, parseOptions) {
   parseOptions = {
@@ -31,12 +31,16 @@ export function fromLiteralExpression(expression, parseOptions) {
   return fromExpression(expression, parseOptions, parseKuery);
 }
 
-export function fromLegacyKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, parseLegacyKuery);
-}
-
 export function fromKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, parseKuery);
+  try {
+    return fromExpression(expression, parseOptions, parseKuery);
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      throw new KQLSyntaxError(error, expression);
+    } else {
+      throw error;
+    }
+  }
 }
 
 function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
@@ -46,11 +50,12 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
 
   parseOptions = {
     ...parseOptions,
-    helpers: { nodeTypes }
+    helpers: { nodeTypes },
   };
 
   return parse(expression, parseOptions);
 }
+
 /**
  * @params {String} indexPattern
  * @params {Object} config - contains the dateFormatTZ

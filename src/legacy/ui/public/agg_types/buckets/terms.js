@@ -24,12 +24,15 @@ import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
 import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
-import orderAndSizeTemplate from '../controls/order_and_size.html';
-import otherBucketTemplate from '../controls/other_bucket.html';
+import { OrderParamEditor } from '../controls/order';
+import { SizeParamEditor } from '../controls/size';
+import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import { i18n } from '@kbn/i18n';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
+import { MissingBucketParamEditor } from '../controls/missing_bucket';
+import { OtherBucketParamEditor } from '../controls/other_bucket';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 const aggFilter = [
@@ -56,7 +59,7 @@ export const termsBucketAgg = new BucketAggType({
   }),
   makeLabel: function (agg) {
     const params = agg.params;
-    return agg.getFieldDisplayName() + ': ' + params.order.display;
+    return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
   getFormat: function (bucket) {
     return {
@@ -116,10 +119,6 @@ export const termsBucketAgg = new BucketAggType({
       name: 'field',
       type: 'field',
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
-    },
-    {
-      name: 'size',
-      default: 5
     },
     {
       name: 'orderAgg',
@@ -203,7 +202,7 @@ export const termsBucketAgg = new BucketAggType({
         }
       },
       write: function (agg, output, aggs) {
-        const dir = agg.params.order.val;
+        const dir = agg.params.order.value;
         const order = output.params.order = {};
 
         let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
@@ -240,24 +239,29 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'order',
-      type: 'optioned',
+      type: 'select',
       default: 'desc',
-      editor: orderAndSizeTemplate,
+      editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
             defaultMessage: 'Descending',
           }),
-          val: 'desc'
+          value: 'desc'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
             defaultMessage: 'Ascending',
           }),
-          val: 'asc'
+          value: 'asc'
         }
       ],
       write: _.noop // prevent default write, it's handled by orderAgg
+    },
+    {
+      name: 'size',
+      editorComponent: wrapWithInlineComp(SizeParamEditor),
+      default: 5
     },
     {
       name: 'orderBy',
@@ -266,27 +270,40 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'otherBucket',
       default: false,
-      editor: otherBucketTemplate,
-      write: _.noop
-    }, {
+      editorComponent: OtherBucketParamEditor,
+      write: _.noop,
+    },
+    {
       name: 'otherBucketLabel',
+      type: 'string',
       default: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketLabel', {
         defaultMessage: 'Other',
       }),
-      write: _.noop
-    }, {
+      displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
+        defaultMessage: 'Label for other bucket',
+      }),
+      shouldShow: agg => agg.params.otherBucket,
+      write: _.noop,
+    },
+    {
       name: 'missingBucket',
       default: false,
-      write: _.noop
-    }, {
+      editorComponent: MissingBucketParamEditor,
+      write: _.noop,
+    },
+    {
       name: 'missingBucketLabel',
       default: i18n.translate('common.ui.aggTypes.buckets.terms.missingBucketLabel', {
         defaultMessage: 'Missing',
-        description: `Default label used inside of charts for documents missing a specific field.
-          Can be seen when creating a chart with a terms aggregation and select the "Show missing values"
-          checkbox.`
+        description: `Default label used in charts when documents are missing a field.
+          Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
       }),
-      write: _.noop
+      type: 'string',
+      displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
+        defaultMessage: 'Label for missing values',
+      }),
+      shouldShow: agg => agg.params.missingBucket,
+      write: _.noop,
     },
     {
       name: 'exclude',

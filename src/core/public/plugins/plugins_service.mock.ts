@@ -20,25 +20,36 @@
 import { PluginsService, PluginsServiceSetup } from './plugins_service';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PublicMethodsOf<PluginsServiceSetup>> = {
-    pluginSetups: new Map(),
+  const setupContract: jest.Mocked<PluginsServiceSetup> = {
+    contracts: new Map(),
   };
   // we have to suppress type errors until decide how to mock es6 class
-  return (setupContract as unknown) as PluginsServiceSetup;
+  return setupContract as PluginsServiceSetup;
+};
+
+const createStartContractMock = () => {
+  const startContract: jest.Mocked<PluginsServiceSetup> = {
+    contracts: new Map(),
+  };
+  // we have to suppress type errors until decide how to mock es6 class
+  return startContract as PluginsServiceSetup;
 };
 
 type PluginsServiceContract = PublicMethodsOf<PluginsService>;
 const createMock = () => {
   const mocked: jest.Mocked<PluginsServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
 
   mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 
 export const pluginsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

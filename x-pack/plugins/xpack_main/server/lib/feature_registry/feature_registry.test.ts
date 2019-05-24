@@ -29,7 +29,6 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
-      description: 'this is a rather boring feature description !@#$%^&*()_+-=\\[]{}|;\':"/.,<>?',
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
       app: ['app1', 'app2'],
@@ -40,15 +39,14 @@ describe('FeatureRegistry', () => {
       },
       privileges: {
         all: {
-          grantWithBaseRead: true,
           catalogue: ['foo'],
           management: {
             foo: ['bar'],
           },
           app: ['app1'],
           savedObject: {
-            all: ['config', 'space', 'etc'],
-            read: ['canvas'],
+            all: ['space', 'etc', 'telemetry'],
+            read: ['canvas', 'config'],
           },
           api: ['someApiEndpointTag', 'anotherEndpointTag'],
           ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -63,8 +61,8 @@ describe('FeatureRegistry', () => {
           },
           app: ['app1'],
           savedObject: {
-            all: ['config', 'space', 'etc'],
-            read: ['canvas'],
+            all: ['space', 'etc', 'telemetry'],
+            read: ['canvas', 'config'],
           },
           api: ['someApiEndpointTag', 'anotherEndpointTag'],
           ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -81,6 +79,124 @@ describe('FeatureRegistry', () => {
     // Should be the equal, but not the same instance (i.e., a defensive copy)
     expect(result[0]).not.toBe(feature);
     expect(result[0]).toEqual(feature);
+  });
+
+  it(`automatically grants 'all' access to telemetry saved objects for the 'all' privilege`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: {
+        all: {
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    featureRegistry.register(feature);
+    const result = featureRegistry.getAll();
+
+    const allPrivilege = result[0].privileges.all;
+    expect(allPrivilege.savedObject.all).toEqual(['telemetry']);
+  });
+
+  it(`automatically grants 'read' access to config saved objects for both privileges`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: {
+        all: {
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+        read: {
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    featureRegistry.register(feature);
+    const result = featureRegistry.getAll();
+
+    const allPrivilege = result[0].privileges.all;
+    const readPrivilege = result[0].privileges.read;
+    expect(allPrivilege.savedObject.read).toEqual(['config']);
+    expect(readPrivilege.savedObject.read).toEqual(['config']);
+  });
+
+  it(`automatically grants 'all' access to telemetry and 'read' to config saved objects for the reserved privilege`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: {},
+      reserved: {
+        description: 'foo',
+        privilege: {
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    featureRegistry.register(feature);
+    const result = featureRegistry.getAll();
+
+    const reservedPrivilege = result[0]!.reserved!.privilege;
+    expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
+    expect(reservedPrivilege.savedObject.read).toEqual(['config']);
+  });
+
+  it(`does not duplicate the automatic grants if specified on the incoming feature`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: {
+        all: {
+          ui: [],
+          savedObject: {
+            all: ['telemetry'],
+            read: ['config'],
+          },
+        },
+        read: {
+          ui: [],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    featureRegistry.register(feature);
+    const result = featureRegistry.getAll();
+
+    const allPrivilege = result[0].privileges.all;
+    const readPrivilege = result[0].privileges.read;
+    expect(allPrivilege.savedObject.all).toEqual(['telemetry']);
+    expect(allPrivilege.savedObject.read).toEqual(['config']);
+    expect(readPrivilege.savedObject.read).toEqual(['config']);
   });
 
   it(`does not allow duplicate features to be registered`, () => {
@@ -104,6 +220,49 @@ describe('FeatureRegistry', () => {
     expect(() => featureRegistry.register(duplicateFeature)).toThrowErrorMatchingInlineSnapshot(
       `"Feature with id test-feature is already registered."`
     );
+  });
+
+  ['contains space', 'contains_invalid()_chars', ''].forEach(prohibitedChars => {
+    it(`prevents features from being registered with a navLinkId of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          navLinkId: prohibitedChars,
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it(`prevents features from being registered with a management id of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          management: {
+            kibana: [prohibitedChars],
+          },
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it(`prevents features from being registered with a catalogue entry of "${prohibitedChars}"`, () => {
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.register({
+          id: 'foo',
+          name: 'some feature',
+          catalogue: [prohibitedChars],
+          app: [],
+          privileges: {},
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
   });
 
   ['catalogue', 'management', 'navLinks', `doesn't match valid regex`].forEach(prohibitedId => {

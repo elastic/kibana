@@ -30,9 +30,6 @@ describe('when simulating race condition', () => {
 
   beforeEach(async () => {
     jest.useFakeTimers();
-    jest
-      .spyOn(window, 'requestAnimationFrame')
-      .mockImplementation(cb => cb(0) as any);
 
     renderSpy = jest.fn();
     requestCallOrder = [];

@@ -8,6 +8,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
 export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProviders) => {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   return {
     async assertExists(key: string) {
       if (!(await testSubjects.exists(key))) {
@@ -22,6 +23,11 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
     },
     async getMonitorNameDisplayedOnPageTitle() {
       return await testSubjects.getVisibleText('monitor-page-title');
+    },
+    async setFilterText(filterQuery: string) {
+      await testSubjects.click('xpack.uptime.filterBar');
+      await testSubjects.setValue('xpack.uptime.filterBar', filterQuery);
+      await browser.pressKeys(browser.keys.ENTER);
     },
   };
 };

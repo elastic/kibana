@@ -33,9 +33,10 @@ import * as Rx from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreSetup } from 'kibana/public';
+import { InternalCoreSetup } from 'kibana/public';
 
 import { fatalError } from 'ui/notify';
+import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
 // @ts-ignore
@@ -65,18 +66,20 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .value('serverName', legacyMetadata.serverName)
     .value('sessionId', Date.now())
     .value('esUrl', getEsUrl(newPlatform))
+    .value('uiCapabilities', capabilities.get())
     .config(setupCompileProvider(newPlatform))
     .config(setupLocationProvider(newPlatform))
     .config($setupXsrfRequestInterceptor(newPlatform))
     .run(capture$httpLoadingCount(newPlatform))
     .run($setupBreadcrumbsAutoClear(newPlatform))
+    .run($setupBadgeAutoClear(newPlatform))
     .run($setupHelpExtensionAutoClear(newPlatform))
     .run($setupUrlOverflowHandling(newPlatform));
 };
 
-const getEsUrl = (newPlatform: CoreSetup) => {
+const getEsUrl = (newPlatform: InternalCoreSetup) => {
   const a = document.createElement('a');
-  a.href = newPlatform.basePath.addToPath('/elasticsearch');
+  a.href = newPlatform.http.prependBasePath('/elasticsearch');
   const protocolPort = /https/.test(a.protocol) ? 443 : 80;
   const port = a.port || protocolPort;
   return {
@@ -87,13 +90,15 @@ const getEsUrl = (newPlatform: CoreSetup) => {
   };
 };
 
-const setupCompileProvider = (newPlatform: CoreSetup) => ($compileProvider: ICompileProvider) => {
+const setupCompileProvider = (newPlatform: InternalCoreSetup) => (
+  $compileProvider: ICompileProvider
+) => {
   if (!newPlatform.injectedMetadata.getLegacyMetadata().devMode) {
     $compileProvider.debugInfoEnabled(false);
   }
 };
 
-const setupLocationProvider = (newPlatform: CoreSetup) => (
+const setupLocationProvider = (newPlatform: InternalCoreSetup) => (
   $locationProvider: ILocationProvider
 ) => {
   $locationProvider.html5Mode({
@@ -105,7 +110,7 @@ const setupLocationProvider = (newPlatform: CoreSetup) => (
   $locationProvider.hashPrefix('');
 };
 
-export const $setupXsrfRequestInterceptor = (newPlatform: CoreSetup) => {
+export const $setupXsrfRequestInterceptor = (newPlatform: InternalCoreSetup) => {
   const version = newPlatform.injectedMetadata.getLegacyMetadata().version;
 
   // Configure jQuery prefilter
@@ -140,7 +145,7 @@ export const $setupXsrfRequestInterceptor = (newPlatform: CoreSetup) => {
  * @param  {HttpService} $http
  * @return {undefined}
  */
-const capture$httpLoadingCount = (newPlatform: CoreSetup) => (
+const capture$httpLoadingCount = (newPlatform: InternalCoreSetup) => (
   $rootScope: IRootScopeService,
   $http: IHttpService
 ) => {
@@ -161,7 +166,7 @@ const capture$httpLoadingCount = (newPlatform: CoreSetup) => (
  * lets us integrate with the angular router so that we can automatically clear
  * the breadcrumbs if we switch to a Kibana app that does not use breadcrumbs correctly
  */
-const $setupBreadcrumbsAutoClear = (newPlatform: CoreSetup) => (
+const $setupBreadcrumbsAutoClear = (newPlatform: InternalCoreSetup) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -206,10 +211,49 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreSetup) => (
 /**
  * internal angular run function that will be called when angular bootstraps and
  * lets us integrate with the angular router so that we can automatically clear
+ * the badge if we switch to a Kibana app that does not use the badge correctly
+ */
+const $setupBadgeAutoClear = (newPlatform: InternalCoreSetup) => (
+  $rootScope: IRootScopeService,
+  $injector: any
+) => {
+  // A flag used to determine if we should automatically
+  // clear the badge between angular route changes.
+  let badgeSetSinceRouteChange = false;
+  const $route = $injector.has('$route') ? $injector.get('$route') : {};
+
+  $rootScope.$on('$routeChangeStart', () => {
+    badgeSetSinceRouteChange = false;
+  });
+
+  $rootScope.$on('$routeChangeSuccess', () => {
+    const current = $route.current || {};
+
+    if (badgeSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
+      return;
+    }
+
+    const badgeProvider = current.badge;
+    if (!badgeProvider) {
+      newPlatform.chrome.setBadge(undefined);
+      return;
+    }
+
+    try {
+      newPlatform.chrome.setBadge($injector.invoke(badgeProvider));
+    } catch (error) {
+      fatalError(error);
+    }
+  });
+};
+
+/**
+ * internal angular run function that will be called when angular bootstraps and
+ * lets us integrate with the angular router so that we can automatically clear
  * the helpExtension if we switch to a Kibana app that does not set its own
  * helpExtension
  */
-const $setupHelpExtensionAutoClear = (newPlatform: CoreSetup) => (
+const $setupHelpExtensionAutoClear = (newPlatform: InternalCoreSetup) => (
   $rootScope: IRootScopeService,
   $injector: any
 ) => {
@@ -241,7 +285,7 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreSetup) => (
   });
 };
 
-const $setupUrlOverflowHandling = (newPlatform: CoreSetup) => (
+const $setupUrlOverflowHandling = (newPlatform: InternalCoreSetup) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
   Private: any,

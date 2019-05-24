@@ -18,6 +18,7 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
-import { CorePluginAPlugin, CorePluginAPluginSetup } from './plugin';
+import { CorePluginAPlugin, CorePluginAPluginSetup, CorePluginAPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<CorePluginAPluginSetup> = () => new CorePluginAPlugin();
+export const plugin: PluginInitializer<CorePluginAPluginSetup, CorePluginAPluginStart> = () =>
+  new CorePluginAPlugin();

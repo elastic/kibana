@@ -7,28 +7,30 @@
 import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
 import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
-import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
-import { getEncodedEsQuery } from './apm';
+import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
+import { UIFilters } from '../../../../typings/ui-filters';
 
 export async function loadTransactionList({
   serviceName,
   start,
   end,
-  kuery,
+  uiFilters,
   transactionType
-}: IUrlParams) {
-  if (!(serviceName && transactionType && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionType: string;
+  uiFilters: UIFilters;
+}) {
   return await callApi<TransactionListAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}`,
+    pathname: `/api/apm/services/${serviceName}/transaction_groups`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      transactionType,
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
@@ -41,71 +43,54 @@ export async function loadTransactionDistribution({
   transactionType,
   transactionId,
   traceId,
-  kuery
-}: IUrlParams) {
-  if (!(serviceName && transactionName && transactionType && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+  uiFilters
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionType: string;
+  transactionName: string;
+  transactionId?: string;
+  traceId?: string;
+  uiFilters: UIFilters;
+}) {
   return callApi<ITransactionDistributionAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
-      transactionName
-    )}/distribution`,
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/distribution`,
     query: {
       start,
       end,
+      transactionType,
+      transactionName,
       transactionId,
       traceId,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
 
-export async function loadTransactionDetailsCharts({
+export async function loadTransactionCharts({
   serviceName,
   start,
   end,
-  kuery,
+  uiFilters,
   transactionType,
   transactionName
-}: IUrlParams) {
-  if (!(serviceName && transactionName && transactionType && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionType?: string;
+  transactionName?: string;
+  uiFilters: UIFilters;
+}) {
   return callApi<TimeSeriesAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
-      transactionName
-    )}/charts`,
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/charts`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
-    }
-  });
-}
-
-export async function loadTransactionOverviewCharts({
-  serviceName,
-  start,
-  end,
-  kuery,
-  transactionType
-}: IUrlParams) {
-  if (!(serviceName && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
-  const pathname = transactionType
-    ? `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/charts`
-    : `/api/apm/services/${serviceName}/transaction_groups/charts`;
-
-  return callApi<TimeSeriesAPIResponse>({
-    pathname,
-    query: {
-      start,
-      end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      transactionType,
+      transactionName,
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }

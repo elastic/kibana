@@ -22,7 +22,7 @@ import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { idx } from '../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { IStackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 

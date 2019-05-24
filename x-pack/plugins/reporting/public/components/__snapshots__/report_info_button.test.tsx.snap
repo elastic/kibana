@@ -178,7 +178,7 @@ Array [
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
                             <h2
-                              class="euiTitle euiTitle--small"
+                              class="euiTitle euiTitle--medium"
                               id="flyoutTitle"
                             >
                               Unable to fetch report info
@@ -242,7 +242,7 @@ Array [
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                             >
                               <h2
-                                class="euiTitle euiTitle--small"
+                                class="euiTitle euiTitle--medium"
                                 id="flyoutTitle"
                               >
                                 Unable to fetch report info
@@ -334,10 +334,10 @@ Array [
                         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                       >
                         <EuiTitle
-                          size="s"
+                          size="m"
                         >
                           <h2
-                            className="euiTitle euiTitle--small"
+                            className="euiTitle euiTitle--medium"
                             id="flyoutTitle"
                           >
                             Unable to fetch report info
@@ -451,10 +451,10 @@ Array [
         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
       >
         <EuiTitle
-          size="s"
+          size="m"
         >
           <h2
-            className="euiTitle euiTitle--small"
+            className="euiTitle euiTitle--medium"
             id="flyoutTitle"
           >
             Unable to fetch report info
@@ -617,7 +617,7 @@ Array [
                             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                           >
                             <h2
-                              class="euiTitle euiTitle--small"
+                              class="euiTitle euiTitle--medium"
                               id="flyoutTitle"
                             >
                               Job Info
@@ -679,7 +679,7 @@ Array [
                               class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                             >
                               <h2
-                                class="euiTitle euiTitle--small"
+                                class="euiTitle euiTitle--medium"
                                 id="flyoutTitle"
                               >
                                 Job Info
@@ -769,10 +769,10 @@ Array [
                         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
                       >
                         <EuiTitle
-                          size="s"
+                          size="m"
                         >
                           <h2
-                            className="euiTitle euiTitle--small"
+                            className="euiTitle euiTitle--medium"
                             id="flyoutTitle"
                           >
                             Job Info
@@ -884,10 +884,10 @@ Array [
         className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
       >
         <EuiTitle
-          size="s"
+          size="m"
         >
           <h2
-            className="euiTitle euiTitle--small"
+            className="euiTitle euiTitle--medium"
             id="flyoutTitle"
           >
             Job Info

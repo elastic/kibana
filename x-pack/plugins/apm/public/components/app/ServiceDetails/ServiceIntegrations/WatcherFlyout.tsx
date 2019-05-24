@@ -32,7 +32,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';

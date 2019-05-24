@@ -62,6 +62,8 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
         if (i18nError) {
           coreSetup.fatalErrors.add(i18nError);
         }
+
+        return coreSystem.start();
       });
   });
 `;

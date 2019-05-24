@@ -198,6 +198,14 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
           </EuiModalBody>
 
           <EuiModalFooter>
+            <EuiButtonEmpty
+              onClick={closeImportModal}
+            >
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
             <EuiButton
               onClick={this.handleEventsAdd}
               fill
@@ -208,14 +216,6 @@ export const ImportModal = injectI18n(class ImportModal extends Component {
                 defaultMessage="Import"
               />
             </EuiButton>
-            <EuiButtonEmpty
-              onClick={closeImportModal}
-            >
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
           </EuiModalFooter>
         </EuiModal>
       </Fragment>

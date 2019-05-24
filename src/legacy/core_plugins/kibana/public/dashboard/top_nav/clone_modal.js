@@ -23,6 +23,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldText,
   EuiModal,
   EuiModalBody,
@@ -90,10 +91,12 @@ class DashboardCloneModalUi extends React.Component {
 
     return (
       <Fragment>
+        <EuiSpacer />
         <EuiCallOut
+          size="s"
           title={this.props.intl.formatMessage({
             id: 'kbn.dashboard.topNav.cloneModal.dashboardExistsTitle',
-            defaultMessage: 'A Dashboard with the title {newDashboardName} already exists.',
+            defaultMessage: 'A dashboard with the title {newDashboardName} already exists.',
           }, {
             newDashboardName: `'${this.state.newDashboardName}'`,
           })}
@@ -117,7 +120,6 @@ class DashboardCloneModalUi extends React.Component {
             />
           </p>
         </EuiCallOut>
-        <EuiSpacer />
       </Fragment>
     );
   }
@@ -134,7 +136,7 @@ class DashboardCloneModalUi extends React.Component {
             <EuiModalHeaderTitle>
               <FormattedMessage
                 id="kbn.dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
-                defaultMessage="Clone Dashboard"
+                defaultMessage="Clone dashboard"
               />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -151,8 +153,6 @@ class DashboardCloneModalUi extends React.Component {
 
             <EuiSpacer />
 
-            {this.renderDuplicateTitleCallout()}
-
             <EuiFieldText
               autoFocus
               data-test-subj="clonedDashboardTitle"
@@ -161,10 +161,12 @@ class DashboardCloneModalUi extends React.Component {
               isInvalid={this.state.hasTitleDuplicate}
             />
 
+            {this.renderDuplicateTitleCallout()}
+
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton
+            <EuiButtonEmpty
               data-test-subj="cloneCancelButton"
               onClick={this.props.onClose}
             >
@@ -172,7 +174,7 @@ class DashboardCloneModalUi extends React.Component {
                 id="kbn.dashboard.topNav.cloneModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
 
             <EuiButton
               fill

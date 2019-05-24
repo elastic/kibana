@@ -28,7 +28,7 @@ describe('Date Format', function () {
   let off;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, config, $rootScope) {
+  beforeEach(ngMock.inject(function (config, $rootScope) {
     $scope = $rootScope;
     settings = config;
 

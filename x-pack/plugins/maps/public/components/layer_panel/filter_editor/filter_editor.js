@@ -19,9 +19,11 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { QueryBar } from 'ui/query_bar';
 import { indexPatternService } from '../../../kibana_services';
 import { Storage } from 'ui/storage';
+
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
 
 const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
@@ -128,6 +130,7 @@ export class FilterEditor extends Component {
             </EuiTextColor>
           </p>
         </EuiText>
+
       );
     }
 
@@ -174,8 +177,13 @@ export class FilterEditor extends Component {
             />
           </h5>
         </EuiTitle>
+
+        <EuiSpacer size="m"/>
+
         {this._renderQuery()}
+
         {this._renderQueryPopover()}
+
       </Fragment>
     );
   }

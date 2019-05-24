@@ -19,18 +19,12 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapExistsProvider } from '../map_exists';
+import { mapExists } from '../map_exists';
 
 describe('Filter Bar Directive', function () {
   describe('mapExists()', function () {
 
-    let mapExists;
-    let $rootScope;
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
-      mapExists = Private(FilterBarLibMapExistsProvider);
-    }));
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { exists: { field: '_type' } };
@@ -39,7 +33,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.have.property('value', 'exists');
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should return undefined for none matching', function (done) {
@@ -48,7 +41,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.be(filter);
         done();
       });
-      $rootScope.$apply();
     });
 
   });

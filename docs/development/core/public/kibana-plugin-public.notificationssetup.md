@@ -2,11 +2,18 @@
 
 [Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [NotificationsSetup](./kibana-plugin-public.notificationssetup.md)
 
-## NotificationsSetup type
+## NotificationsSetup interface
 
 
 <b>Signature:</b>
 
 ```typescript
-export declare type NotificationsSetup = ReturnType<NotificationsService['setup']>;
+export interface NotificationsSetup 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [toasts](./kibana-plugin-public.notificationssetup.toasts.md) | <code>ToastsApi</code> |  |
+

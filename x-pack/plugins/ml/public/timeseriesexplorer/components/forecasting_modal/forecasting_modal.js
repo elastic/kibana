@@ -37,7 +37,6 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
 const FORECASTS_VIEW_MAX = 5;       // Display links to a maximum of 5 forecasts.
-const FORECAST_DURATION_MAX_MS = 4838400000; // Max forecast duration of 8 weeks.
 const WARN_NUM_PARTITIONS = 100;    // Warn about running a forecast with this number of field values.
 const FORECAST_STATS_POLL_FREQUENCY = 250;  // Frequency in ms at which to poll for forecast request stats.
 const WARN_NO_PROGRESS_MS = 120000; // If no progress in forecast request, abort check and warn.
@@ -102,14 +101,6 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
           id: 'xpack.ml.timeSeriesExplorer.forecastingModal.invalidDurationFormatErrorMessage',
           defaultMessage: 'Invalid duration format',
         })
-      );
-    } else if (duration.asMilliseconds() > FORECAST_DURATION_MAX_MS) {
-      isNewForecastDurationValid = false;
-      newForecastDurationErrors.push(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeGreaterThanMaximumErrorMessage',
-          defaultMessage: 'Forecast duration must not be greater than {maximumForecastDurationValue} weeks',
-        }, { maximumForecastDurationValue: 8 })
       );
     } else if (duration.asMilliseconds() === 0) {
       isNewForecastDurationValid = false;

@@ -45,6 +45,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
               "kibana_sample_data_flights": Array [
                 Object {
                   "aggregatable": true,
+                  "esTypes": Array [
+                    "keyword",
+                  ],
                   "name": "OriginCityName",
                   "readFromDocValues": true,
                   "searchable": true,

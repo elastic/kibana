@@ -142,6 +142,7 @@ exports[`it renders without crashing 1`] = `
             checked={false}
             compressed={true}
             data-test-subj="restrictDocumentsQuery0"
+            disabled={false}
             label={
               <FormattedMessage
                 defaultMessage="Grant read privileges to specific documents"

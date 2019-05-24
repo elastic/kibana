@@ -22,10 +22,10 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
-        const uiCapabilities = await uiCapabilitiesService.get(
-          { username: user.username, password: user.password },
-          space.id
-        );
+        const uiCapabilities = await uiCapabilitiesService.get({
+          credentials: { username: user.username, password: user.password },
+          spaceId: space.id,
+        });
         switch (scenario.id) {
           case 'superuser at everything_space': {
             expect(uiCapabilities.success).to.be(true);

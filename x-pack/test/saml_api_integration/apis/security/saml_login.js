@@ -504,7 +504,7 @@ export default function ({ getService }) {
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({
-          index: '.security',
+          index: '.security-tokens',
           q: 'doc_type:token',
           refresh: true,
         });

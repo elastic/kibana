@@ -6,7 +6,7 @@
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 
 class DefaultSearchCapabilities {
-  constructor(request, batchRequestsSupport, fieldsCapabilities = {}) {
+  constructor(request, fieldsCapabilities = {}) {
     this.fieldsCapabilities = fieldsCapabilities;
     this.parseInterval = jest.fn((interval) => interval);
   }
@@ -16,7 +16,6 @@ describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';
   const testInterval = '10s';
   const rollupIndex = 'rollupIndex';
-  const batchRequestsSupport = true;
   const request = {};
 
   let RollupSearchCapabilities;
@@ -38,7 +37,7 @@ describe('Rollup Search Capabilities', () => {
       },
     };
 
-    rollupSearchCaps = new RollupSearchCapabilities(request, batchRequestsSupport, fieldsCapabilities, rollupIndex);
+    rollupSearchCaps = new RollupSearchCapabilities(request, fieldsCapabilities, rollupIndex);
   });
 
   test('should create instance of RollupSearchRequest', () => {
@@ -56,60 +55,70 @@ describe('Rollup Search Capabilities', () => {
   });
 
   describe('getValidTimeInterval', () => {
-    let parsedDefaultInterval;
-    let parsedUserIntervalString;
-    let convertedIntervalIntoDefaultUnit;
+    let rollupJobInterval;
+    let userInterval;
+    let getSuitableUnit;
 
     beforeEach(() => {
-      convertedIntervalIntoDefaultUnit = null;
-
       rollupSearchCaps.parseInterval = jest.fn()
-        .mockImplementationOnce(() => parsedDefaultInterval)
-        .mockImplementationOnce(() => parsedUserIntervalString);
-      rollupSearchCaps.convertIntervalToUnit = jest
-        .fn(() => convertedIntervalIntoDefaultUnit || parsedUserIntervalString);
+        .mockImplementationOnce(() => rollupJobInterval)
+        .mockImplementationOnce(() => userInterval);
+
+      rollupSearchCaps.convertIntervalToUnit = jest.fn(() => userInterval);
+      rollupSearchCaps.getSuitableUnit = jest.fn(() => getSuitableUnit);
     });
 
-    test('should return 1w as common interval for 1w(user interval) and 1d(rollup interval) - calendar intervals', () => {
-      parsedDefaultInterval = {
+    test('should return 1d as common interval for 5d(user interval) and 1d(rollup interval) - calendar intervals', () => {
+      rollupJobInterval = {
         value: 1,
         unit: 'd',
       };
-      parsedUserIntervalString = {
-        value: 1,
-        unit: 'w',
+      userInterval = {
+        value: 5,
+        unit: 'd',
       };
-      convertedIntervalIntoDefaultUnit = {
+
+      getSuitableUnit = 'd';
+
+      expect(rollupSearchCaps.getValidTimeInterval()).toBe('1d');
+    });
+
+    test('should return 1w as common interval for 7d(user interval) and 1d(rollup interval) - calendar intervals', () => {
+      rollupJobInterval = {
+        value: 1,
+        unit: 'd',
+      };
+      userInterval = {
         value: 7,
         unit: 'd',
       };
+
+      getSuitableUnit = 'w';
 
       expect(rollupSearchCaps.getValidTimeInterval()).toBe('1w');
     });
 
     test('should return 1w as common interval for 1d(user interval) and 1w(rollup interval) - calendar intervals', () => {
-      parsedDefaultInterval = {
+      rollupJobInterval = {
         value: 1,
         unit: 'w',
       };
-      parsedUserIntervalString = {
+      userInterval = {
         value: 1,
         unit: 'd',
       };
-      convertedIntervalIntoDefaultUnit = {
-        value: 1 / 7,
-        unit: 'w',
-      };
+
+      getSuitableUnit = 'w';
 
       expect(rollupSearchCaps.getValidTimeInterval()).toBe('1w');
     });
 
     test('should return 2y as common interval for 0.1y(user interval) and 2y(rollup interval) - fixed intervals', () => {
-      parsedDefaultInterval = {
+      rollupJobInterval = {
         value: 2,
         unit: 'y',
       };
-      parsedUserIntervalString = {
+      userInterval = {
         value: 0.1,
         unit: 'y',
       };
@@ -118,11 +127,11 @@ describe('Rollup Search Capabilities', () => {
     });
 
     test('should return 3h as common interval for 2h(user interval) and 3h(rollup interval) - fixed intervals', () => {
-      parsedDefaultInterval = {
+      rollupJobInterval = {
         value: 3,
         unit: 'h',
       };
-      parsedUserIntervalString = {
+      userInterval = {
         value: 2,
         unit: 'h',
       };
@@ -131,11 +140,11 @@ describe('Rollup Search Capabilities', () => {
     });
 
     test('should return 6m as common interval for 4m(user interval) and 3m(rollup interval) - fixed intervals', () => {
-      parsedDefaultInterval = {
+      rollupJobInterval = {
         value: 3,
         unit: 'm',
       };
-      parsedUserIntervalString = {
+      userInterval = {
         value: 4,
         unit: 'm',
       };

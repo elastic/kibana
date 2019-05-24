@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { ReactNode } from 'react';
-import { uiCapabilities, UICapabilities } from '../..';
+import { capabilities, UICapabilities } from '../..';
 
 interface Props {
   children: ReactNode;
@@ -38,7 +38,7 @@ export class UICapabilitiesProvider extends React.Component<Props, {}> {
 
   public getChildContext(): ProviderContext {
     return {
-      uiCapabilities,
+      uiCapabilities: capabilities.get(),
     };
   }
 
