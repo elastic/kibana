@@ -87,6 +87,7 @@ beforeEach(async () => {
     // @ts-ignore
     installManager,
     new ConsoleLoggerFactory(),
+    // @ts-ignore
     repoConfigController
   );
 });

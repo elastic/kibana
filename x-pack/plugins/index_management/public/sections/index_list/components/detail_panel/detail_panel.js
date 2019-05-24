@@ -167,7 +167,7 @@ export class DetailPanel extends Component {
         aria-labelledby="indexDetailsFlyoutTitle"
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="l" id="indexDetailsFlyoutTitle">
+          <EuiTitle id="indexDetailsFlyoutTitle">
             <h2>{indexName}{renderBadges(index)}</h2>
           </EuiTitle>
           {index ? <EuiTabs>{this.renderTabs()}</EuiTabs> : null }

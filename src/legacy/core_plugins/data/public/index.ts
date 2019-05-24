@@ -17,33 +17,71 @@
  * under the License.
  */
 
-import { IndexPatternsService } from './index_patterns';
+// TODO these are imports from the old plugin world.
+// Once the new platform is ready, they can get removed
+// and handled by the platform itself in the setup method
+// of the ExpressionExectorService
+// @ts-ignore
+import { getInterpreter } from 'plugins/interpreter/interpreter';
+// @ts-ignore
+import { renderersRegistry } from 'plugins/interpreter/registries';
+import { ExpressionsService, ExpressionsSetup } from './expressions';
+import { SearchService, SearchSetup } from './search';
+import { QueryService, QuerySetup } from './query';
+import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
-class DataService {
+class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
+  private readonly search: SearchService;
+  private readonly query: QueryService;
+  private readonly expressions: ExpressionsService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
+    this.query = new QueryService();
+    this.search = new SearchService();
+    this.expressions = new ExpressionsService();
   }
 
-  public setup() {
+  public setup(): DataSetup {
     return {
       indexPatterns: this.indexPatterns.setup(),
+      search: this.search.setup(),
+      query: this.query.setup(),
+      expressions: this.expressions.setup({
+        interpreter: {
+          getInterpreter,
+          renderersRegistry,
+        },
+      }),
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
+    this.search.stop();
+    this.query.stop();
+    this.expressions.stop();
   }
 }
 
 /**
- * We temporarily export default here so that users importing from 'plugins/data'
+ * We export data here so that users importing from 'plugins/data'
  * will automatically receive the response value of the `setup` contract, mimicking
  * the data that will eventually be injected by the new platform.
  */
-// eslint-disable-next-line import/no-default-export
-export default new DataService().setup();
+export const data = new DataPlugin().setup();
 
 /** @public */
-export type DataSetup = ReturnType<DataService['setup']>;
+export interface DataSetup {
+  indexPatterns: IndexPatternsSetup;
+  expressions: ExpressionsSetup;
+  search: SearchSetup;
+  query: QuerySetup;
+}
+
+/** @public types */
+export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+
+/** @public types */
+export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';

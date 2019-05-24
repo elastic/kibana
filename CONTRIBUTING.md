@@ -221,7 +221,7 @@ Start the development server.
 yarn start
 ```
 
-> On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
+> On Windows, you'll need to use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
 
@@ -356,7 +356,7 @@ Test runner arguments:
     `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
   - Run the api integration test case whose description matches the given string:
     `node scripts/functional_tests_server --config test/api_integration/config.js`
-    `node scripts/functional_tests_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
+    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
 
 ### Debugging Unit Tests
 

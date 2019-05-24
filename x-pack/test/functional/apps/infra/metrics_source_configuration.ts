@@ -39,6 +39,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
       it('can change the metric indices to a pattern that matches nothing', async () => {
         await pageObjects.infraHome.openSourceConfigurationFlyout();
+        await infraSourceConfigurationFlyout.switchToIndicesAndFieldsTab();
 
         const nameInput = await infraSourceConfigurationFlyout.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
@@ -58,6 +59,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
       it('can change the log indices back to a pattern that matches something', async () => {
         await pageObjects.infraHome.openSourceConfigurationFlyout();
+        await infraSourceConfigurationFlyout.switchToIndicesAndFieldsTab();
 
         const metricIndicesInput = await infraSourceConfigurationFlyout.getMetricIndicesInput();
         await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });

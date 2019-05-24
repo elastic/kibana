@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Host Summary Component rendering it renders the default Host Summary 1`] = `
+<Component>
+  <pure(Component)
+    data={
+      Object {
+        "_id": "yneHlmgBjVl2VqDlAjPR",
+        "cloud": Object {
+          "instance": Object {
+            "id": Array [
+              "423232333829362673777",
+            ],
+          },
+          "machine": Object {
+            "type": Array [
+              "custom-4-16384",
+            ],
+          },
+          "provider": Array [
+            "gce",
+          ],
+          "region": Array [
+            "us-east-1",
+          ],
+        },
+        "host": Object {
+          "architecture": Array [
+            "x86_64",
+          ],
+          "id": Array [
+            "aa7ca589f1b8220002f2fc61c64cfbf1",
+          ],
+          "ip": Array [
+            "10.142.0.7",
+            "fe80::4001:aff:fe8e:7",
+          ],
+          "mac": Array [
+            "42:01:0a:8e:00:07",
+          ],
+          "name": Array [
+            "siem-kibana",
+          ],
+          "os": Object {
+            "family": Array [
+              "debian",
+            ],
+            "name": Array [
+              "Debian GNU/Linux",
+            ],
+            "platform": Array [
+              "debian",
+            ],
+            "version": Array [
+              "9 (stretch)",
+            ],
+          },
+        },
+      }
+    }
+    loading={false}
+  />
+</Component>
+`;

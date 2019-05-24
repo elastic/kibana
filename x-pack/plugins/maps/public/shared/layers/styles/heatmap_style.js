@@ -17,10 +17,6 @@ export class HeatmapStyle extends AbstractStyle {
     this._descriptor = HeatmapStyle.createDescriptor();
   }
 
-  static canEdit(styleInstance) {
-    return styleInstance.constructor === HeatmapStyle;
-  }
-
   static createDescriptor() {
     return {
       type: HeatmapStyle.type,
@@ -31,10 +27,6 @@ export class HeatmapStyle extends AbstractStyle {
     return i18n.translate('xpack.maps.style.heatmap.displayNameLabel', {
       defaultMessage: 'Heatmap style'
     });
-  }
-
-  static renderEditor() {
-    return null;
   }
 
   setMBPaintProperties({ mbMap, layerId, propertyName, resolution }) {

@@ -217,7 +217,7 @@ export class ReportInfoButton extends Component<Props, State> {
             data-test-subj="reportInfoFlyout"
           >
             <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="s">
+              <EuiTitle size="m">
                 <h2 id="flyoutTitle">{this.state.calloutTitle}</h2>
               </EuiTitle>
             </EuiFlyoutHeader>

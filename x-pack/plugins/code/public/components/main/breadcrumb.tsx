@@ -18,7 +18,12 @@ export class Breadcrumb extends React.PureComponent<Props> {
     const { resource, org, repo, revision, path } = this.props.routeParams;
     const repoUri = `${resource}/${org}/${repo}`;
 
-    const breadcrumbs: Array<{ text: string; href: string; className?: string }> = [];
+    const breadcrumbs: Array<{
+      text: string;
+      href: string;
+      className?: string;
+      ['data-test-subj']: string;
+    }> = [];
     const pathSegments = path ? path.split('/') : [];
 
     pathSegments.forEach((p, index) => {
@@ -28,6 +33,7 @@ export class Breadcrumb extends React.PureComponent<Props> {
         text: p,
         href,
         className: 'codeNoMinWidth',
+        ['data-test-subj']: `codeFileBreadcrumb-${p}`,
       });
     });
     return <EuiBreadcrumbs max={Number.MAX_VALUE} breadcrumbs={breadcrumbs} />;

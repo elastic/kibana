@@ -30,6 +30,7 @@ exports[`TelemetryForm renders as expected 1`] = `
       />
       <InjectIntl(FieldUI)
         clear={[Function]}
+        enableSaving={true}
         save={[Function]}
         setting={
           Object {

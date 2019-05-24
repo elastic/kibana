@@ -11,6 +11,7 @@ export const areaChart: ElementFactory = () => ({
   name: 'areaChart',
   displayName: 'Area chart',
   help: 'A line chart with a filled body',
+  tags: ['chart'],
   image: header,
   expression: `filters
   | demodata

@@ -7,6 +7,7 @@
 import React from 'react';
 
 import chrome from 'ui/chrome';
+import { Badge } from 'ui/chrome/api/badge';
 import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 import { RendererFunction } from '../utils/typed_react';
 
@@ -14,6 +15,7 @@ interface WithKibanaChromeProps {
   children: RendererFunction<
     {
       setBreadcrumbs: (newBreadcrumbs: Breadcrumb[]) => void;
+      setBadge: (badge: Badge | undefined) => void;
     } & WithKibanaChromeState
   >;
 }
@@ -34,6 +36,7 @@ export class WithKibanaChrome extends React.Component<
     return this.props.children({
       ...this.state,
       setBreadcrumbs: chrome.breadcrumbs.set,
+      setBadge: chrome.badge.set,
     });
   }
 }

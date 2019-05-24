@@ -5,3 +5,5 @@
  */
 
 export { convertMicrosecondsToMilliseconds } from './convert_measurements';
+export * from './observability_integration';
+export { UptimeUrlParams, getSupportedUrlParams } from './url_params';

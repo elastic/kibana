@@ -19,7 +19,7 @@ import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
-  const style = createStyleInstance(layerDescriptor.style);
+  const style = createStyleInstance(layerDescriptor.style, source);
   switch (layerDescriptor.type) {
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source, style });
@@ -43,7 +43,7 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
 }
 
 
-function createStyleInstance(styleDescriptor) {
+function createStyleInstance(styleDescriptor, source) {
 
   if (!styleDescriptor || !styleDescriptor.type) {
     return null;
@@ -51,7 +51,7 @@ function createStyleInstance(styleDescriptor) {
 
   switch (styleDescriptor.type) {
     case VectorStyle.type:
-      return new VectorStyle(styleDescriptor);
+      return new VectorStyle(styleDescriptor, source);
     case TileStyle.type:
       return new TileStyle(styleDescriptor);
     case HeatmapStyle.type:
@@ -67,6 +67,8 @@ export const getTooltipState = ({ map }) => {
 
 export const getMapReady = ({ map }) => map && map.ready;
 
+export const getMapInitError = ({ map }) => map.mapInitError;
+
 export const getGoto = ({ map }) => map && map.goto;
 
 export const getSelectedLayerId = ({ map }) => {
@@ -80,6 +82,8 @@ export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapReadyLayerList
   ? map.waitingForMapReadyLayerList
   : [];
+
+export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
 
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
@@ -110,6 +114,8 @@ export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
 export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
+
+export const getDrawState = ({ map }) => map.mapState.drawState;
 
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
@@ -146,7 +152,6 @@ export const getDataFilters = createSelector(
   }
 );
 
-
 export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
@@ -170,12 +175,25 @@ export const getSelectedLayerJoinDescriptors = createSelector(
     });
   });
 
+// Get list of unique index patterns used by all layers
 export const getUniqueIndexPatternIds = createSelector(
   getLayerList,
   (layerList) => {
     const indexPatternIds = [];
     layerList.forEach(layer => {
       indexPatternIds.push(...layer.getIndexPatternIds());
+    });
+    return _.uniq(indexPatternIds);
+  }
+);
+
+// Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  (layerList) => {
+    const indexPatternIds = [];
+    layerList.forEach(layer => {
+      indexPatternIds.push(...layer.getQueryableIndexPatternIds());
     });
     return _.uniq(indexPatternIds);
   }

@@ -18,18 +18,10 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import { FilterBarLibMapQueryStringProvider } from '../map_query_string';
+import { mapQueryString } from '../map_query_string';
 
 describe('Filter Bar Directive', function () {
   describe('mapQueryString()', function () {
-    let mapQueryString;
-    let $rootScope;
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
-      mapQueryString = Private(FilterBarLibMapQueryStringProvider);
-    }));
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { query: { query_string: { query: 'foo:bar' } } };
@@ -38,7 +30,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.have.property('value', 'foo:bar');
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should return undefined for none matching', function (done) {
@@ -47,7 +38,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.be(filter);
         done();
       });
-      $rootScope.$apply();
     });
 
   });

@@ -1,0 +1,210 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
+<EuiTabbedContent
+  expand={false}
+  initialSelectedTab={
+    Object {
+      "content": <JobDetailsPane
+        sections={
+          Array [
+            Object {
+              "items": Array [
+                Object {
+                  "description": "stopped",
+                  "title": "task_state",
+                },
+                Object {
+                  "description": "stopped",
+                  "title": "indexer_state",
+                },
+                Object {
+                  "description": "{\\"date_histogram(@timestamp)\\":1549929540000}",
+                  "title": "current_position",
+                },
+                Object {
+                  "description": "1",
+                  "title": "checkpoint",
+                },
+              ],
+              "position": "left",
+              "title": "State",
+            },
+            Object {
+              "items": Array [
+                Object {
+                  "description": "0",
+                  "title": "pages_processed",
+                },
+                Object {
+                  "description": "0",
+                  "title": "documents_processed",
+                },
+                Object {
+                  "description": "0",
+                  "title": "documents_indexed",
+                },
+                Object {
+                  "description": "0",
+                  "title": "trigger_count",
+                },
+                Object {
+                  "description": "0",
+                  "title": "index_time_in_ms",
+                },
+                Object {
+                  "description": "0",
+                  "title": "index_total",
+                },
+                Object {
+                  "description": "0",
+                  "title": "index_failures",
+                },
+                Object {
+                  "description": "0",
+                  "title": "search_time_in_ms",
+                },
+                Object {
+                  "description": "0",
+                  "title": "search_total",
+                },
+                Object {
+                  "description": "0",
+                  "title": "search_failures",
+                },
+              ],
+              "position": "right",
+              "title": "Stats",
+            },
+          ]
+        }
+      />,
+      "id": "job-details",
+      "name": "Job details",
+    }
+  }
+  onTabClick={[Function]}
+  size="s"
+  tabs={
+    Array [
+      Object {
+        "content": <JobDetailsPane
+          sections={
+            Array [
+              Object {
+                "items": Array [
+                  Object {
+                    "description": "stopped",
+                    "title": "task_state",
+                  },
+                  Object {
+                    "description": "stopped",
+                    "title": "indexer_state",
+                  },
+                  Object {
+                    "description": "{\\"date_histogram(@timestamp)\\":1549929540000}",
+                    "title": "current_position",
+                  },
+                  Object {
+                    "description": "1",
+                    "title": "checkpoint",
+                  },
+                ],
+                "position": "left",
+                "title": "State",
+              },
+              Object {
+                "items": Array [
+                  Object {
+                    "description": "0",
+                    "title": "pages_processed",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "documents_processed",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "documents_indexed",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "trigger_count",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "index_time_in_ms",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "index_total",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "index_failures",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "search_time_in_ms",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "search_total",
+                  },
+                  Object {
+                    "description": "0",
+                    "title": "search_failures",
+                  },
+                ],
+                "position": "right",
+                "title": "Stats",
+              },
+            ]
+          }
+        />,
+        "id": "job-details",
+        "name": "Job details",
+      },
+      Object {
+        "content": <JobJsonPane
+          json={
+            Object {
+              "dest": Object {
+                "index": "fq_data_histogram_1m_1441",
+              },
+              "id": "fq_date_histogram_1m_1441",
+              "pivot": Object {
+                "aggregations": Object {
+                  "avg(response)": Object {
+                    "avg": Object {
+                      "field": "responsetime",
+                    },
+                  },
+                },
+                "group_by": Object {
+                  "date_histogram(@timestamp)": Object {
+                    "date_histogram": Object {
+                      "field": "@timestamp",
+                      "interval": "1m",
+                    },
+                  },
+                },
+              },
+              "source": Object {
+                "index": Array [
+                  "farequote-2019",
+                ],
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+            }
+          }
+        />,
+        "id": "job-json",
+        "name": "JSON",
+      },
+    ]
+  }
+/>
+`;

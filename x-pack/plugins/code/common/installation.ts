@@ -6,21 +6,5 @@
 
 export enum InstallationType {
   Embed,
-  Download,
   Plugin,
-}
-
-export enum InstallEventType {
-  DOWNLOADING,
-  UNPACKING,
-  DONE,
-  FAIL,
-}
-
-export interface InstallEvent {
-  langServerName: string;
-  eventType: InstallEventType;
-  progress?: number;
-  message?: string;
-  params?: any;
 }

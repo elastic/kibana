@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useReducer, useEffect } from 'react';
+import React, { createContext, useReducer, useEffect, useMemo } from 'react';
 import { Location } from 'history';
 import { useLocation } from '../../hooks/useLocation';
 import { IUrlParams } from './types';
 import { LOCATION_UPDATE, TIME_RANGE_REFRESH } from './constants';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
+import { UIFilters } from '../../../typings/ui-filters';
 
 interface TimeRange {
   rangeFrom: string;
@@ -27,6 +28,16 @@ interface TimeRangeRefreshAction {
   time: TimeRange;
 }
 
+function useUiFilters(urlParams: IUrlParams): UIFilters {
+  return useMemo(
+    () => ({
+      kuery: urlParams.kuery,
+      environment: urlParams.environment
+    }),
+    [urlParams]
+  );
+}
+
 const defaultRefresh = (time: TimeRange) => {};
 
 export function urlParamsReducer(
@@ -35,7 +46,7 @@ export function urlParamsReducer(
 ): IUrlParams {
   switch (action.type) {
     case LOCATION_UPDATE: {
-      return resolveUrlParams(action.location);
+      return resolveUrlParams(action.location, state);
     }
 
     case TIME_RANGE_REFRESH:
@@ -52,15 +63,17 @@ export function urlParamsReducer(
 
 const UrlParamsContext = createContext({
   urlParams: {} as IUrlParams,
-  refreshTimeRange: defaultRefresh
+  refreshTimeRange: defaultRefresh,
+  uiFilters: {} as UIFilters
 });
 
 const UrlParamsProvider: React.FC<{}> = ({ children }) => {
   const location = useLocation();
   const [urlParams, dispatch] = useReducer(
     urlParamsReducer,
-    resolveUrlParams(location)
+    resolveUrlParams(location, {})
   );
+  const uiFilters = useUiFilters(urlParams);
 
   function refreshTimeRange(time: TimeRange) {
     dispatch({ type: TIME_RANGE_REFRESH, time });
@@ -76,9 +89,9 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
   return (
     <UrlParamsContext.Provider
       children={children}
-      value={{ urlParams, refreshTimeRange }}
+      value={{ urlParams, refreshTimeRange, uiFilters }}
     />
   );
 };
 
-export { UrlParamsContext, UrlParamsProvider };
+export { UrlParamsContext, UrlParamsProvider, useUiFilters };
