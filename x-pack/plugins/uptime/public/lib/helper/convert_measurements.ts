@@ -12,4 +12,4 @@ const NUM_MICROSECONDS_IN_MILLISECOND = 1000;
  */
 export const convertMicrosecondsToMilliseconds = (
   microseconds: number | null | undefined
-): number => (microseconds ? Math.round(microseconds / NUM_MICROSECONDS_IN_MILLISECOND) : 0);
+): number => (microseconds ? Math.floor(microseconds / NUM_MICROSECONDS_IN_MILLISECOND) : 0);
