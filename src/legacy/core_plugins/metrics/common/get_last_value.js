@@ -22,7 +22,7 @@ import { isArray, last } from 'lodash';
 const DEFAULT_VALUE = 0;
 const extractValue = data => data && data[1] || null;
 
-export default (data, defaultValue = DEFAULT_VALUE) => {
+export const getLastValue = (data, defaultValue = DEFAULT_VALUE) => {
   if (!isArray(data)) {
     return data || defaultValue;
   }
