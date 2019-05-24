@@ -18,7 +18,13 @@
  */
 
 import { once } from 'lodash';
-import { QueryBar, QueryBarInput, fromUser, toUser, setupDirective as setupQueryBarDirective } from './query_bar';
+import {
+  QueryBar,
+  QueryBarInput,
+  fromUser,
+  toUser,
+  setupDirective as setupQueryBarDirective,
+} from './query_bar';
 
 /**
  * Query Service
