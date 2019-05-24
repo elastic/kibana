@@ -5,7 +5,6 @@
  */
 
 import { Legacy } from 'kibana';
-import _ from 'lodash';
 import { AuthorizationService } from './authorization/service';
 
 export const isAuthorizedKibanaUser = async (
