@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.1.1>>
 * <<release-notes-7.1.0>>
 * <<release-notes-7.0.1>>
 * <<release-notes-7.0.0>>
@@ -21,6 +22,10 @@ This section summarizes the changes in each release.
 
 --
 
+[[release-notes-7.1.1]]
+== {kib} 7.1.1
+
+coming[7.1.1]
 
 [[release-notes-7.1.0]]
 == {kib} 7.1.0
