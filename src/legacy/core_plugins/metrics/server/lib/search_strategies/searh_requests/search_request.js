@@ -23,7 +23,7 @@ import { SingleSearchRequest } from './single_search_request';
 
 export class SearchRequest extends AbstractSearchRequest {
   getSearchRequestType(searches) {
-    const isMultiSearch = searches && searches.length > 1;
+    const isMultiSearch = Array.isArray(searches) && searches.length > 1;
     const SearchRequest = isMultiSearch ? MultiSearchRequest : SingleSearchRequest;
 
     return new SearchRequest(this.req, this.callWithRequest);

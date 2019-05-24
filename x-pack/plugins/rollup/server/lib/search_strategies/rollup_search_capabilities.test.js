@@ -68,7 +68,7 @@ describe('Rollup Search Capabilities', () => {
       rollupSearchCaps.getSuitableUnit = jest.fn(() => getSuitableUnit);
     });
 
-    test('should return 1w as common interval for 5d(user interval) and 1d(rollup interval) - calendar intervals', () => {
+    test('should return 1d as common interval for 5d(user interval) and 1d(rollup interval) - calendar intervals', () => {
       rollupJobInterval = {
         value: 1,
         unit: 'd',

@@ -71,7 +71,7 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return a search request', () => {
-    const searchRequest = abstractSearchStrategy.getSearchRequest(req, indexPattern);
+    const searchRequest = abstractSearchStrategy.getSearchRequest(req);
 
     expect(searchRequest instanceof SearchRequest).toBe(true);
     expect(searchRequest.callWithRequest).toBe('callWithRequest');
