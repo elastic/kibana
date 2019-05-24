@@ -45,7 +45,9 @@ export async function fetchIndexPatterns(indexPatternStrings: string[]) {
       ? exactMatches
       : [...exactMatches, await fetchDefaultIndexPattern()];
 
-  return allMatches.map(getFromSavedObject);
+  // return allMatches.map(getFromSavedObject);
+  const result = allMatches.map(getFromSavedObject);
+  return result;
 }
 
 const fetchDefaultIndexPattern = async () => {
