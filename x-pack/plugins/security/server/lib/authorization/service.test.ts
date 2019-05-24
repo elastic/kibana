@@ -9,6 +9,7 @@ import {
   mockAuthorizationModeFactory,
   mockCheckPrivilegesDynamicallyWithRequestFactory,
   mockCheckPrivilegesWithRequestFactory,
+  mockGetPrivilegesWithRequestFactory,
   mockGetClient,
   mockPrivilegesFactory,
 } from './service.test.mocks';
@@ -64,6 +65,9 @@ test(`returns exposed services`, () => {
   mockAuthorizationModeFactory.mockReturnValue(mockAuthorizationMode);
   const mockSpaces = Symbol();
 
+  const mockGetPrivilegesWithRequest = Symbol();
+  mockGetPrivilegesWithRequestFactory.mockReturnValue(mockGetPrivilegesWithRequest);
+
   const authorization = createAuthorizationService(
     mockServer as any,
     mockXpackInfoFeature as any,
@@ -91,6 +95,7 @@ test(`returns exposed services`, () => {
     application,
     checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
     checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+    getPrivilegesWithRequest: mockGetPrivilegesWithRequest,
     mode: mockAuthorizationMode,
     privileges: mockPrivilegesService,
   });

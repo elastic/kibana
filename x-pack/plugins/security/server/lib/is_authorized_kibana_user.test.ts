@@ -57,17 +57,6 @@ function buildUser(roles: string[] = []): AuthenticatedUser {
   } as AuthenticatedUser;
 }
 
-function buildSerializedPrivilege(name: string) {
-  return {
-    [name]: {
-      application: 'kibana-.kibana',
-      actions: [],
-      name,
-      metadata: {},
-    },
-  };
-}
-
 describe('isAuthorizedKibanaUser', () => {
   it('returns true for superusers', async () => {
     const request = buildRequest(['some role', 'superuser']);

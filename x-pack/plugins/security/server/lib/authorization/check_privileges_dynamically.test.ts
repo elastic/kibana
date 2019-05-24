@@ -15,10 +15,10 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
     atSpace: jest.fn().mockReturnValue(expectedResult),
   };
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-  const mockSpaces = {
+  const mockSpaces = ({
     isEnabled: true,
     getSpaceId: jest.fn().mockReturnValue(spaceId),
-  } as OptionalPlugin<SpacesPlugin>;
+  } as unknown) as OptionalPlugin<SpacesPlugin>;
   const request = Symbol();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
