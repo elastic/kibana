@@ -60,7 +60,7 @@ chrome
                   <EuiFlexItem grow={false}>
                     <EuiButton href={chrome.getBasePath()}>
                       <FormattedMessage
-                        id="xpack.xpack_main.unavailable.goHome"
+                        id="xpack.main.unavailable.goHome"
                         defaultMessage="Kibana home"
                       />
                     </EuiButton>
@@ -68,10 +68,7 @@ chrome
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiButton href={chrome.addBasePath('/logout')}>
-                    <FormattedMessage
-                      id="xpack.xpack_main.unavailable.logout"
-                      defaultMessage="Logout"
-                    />
+                    <FormattedMessage id="xpack.main.unavailable.logout" defaultMessage="Logout" />
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -87,20 +84,17 @@ function getMessaging(canAccessKibana: boolean) {
   if (canAccessKibana) {
     return {
       title: (
-        <FormattedMessage
-          id="xpack.xpack_main.unavailable.notFound.title"
-          defaultMessage="Not found"
-        />
+        <FormattedMessage id="xpack.main.unavailable.notFound.title" defaultMessage="Not found" />
       ),
       message: (
         <FormattedMessage
-          id="xpack.xpack_main.unavailable.notFound.notFoundMessage"
+          id="xpack.main.unavailable.notFound.notFoundMessage"
           defaultMessage="Sorry, the requested resource was not found."
         />
       ),
       help: (
         <FormattedMessage
-          id="xpack.xpack_main.unavailable.notFound.helpMessage"
+          id="xpack.main.unavailable.notFound.helpMessage"
           defaultMessage="It might be missing, or you might not have access. Contact your administrator for assistance."
         />
       ),
@@ -110,19 +104,19 @@ function getMessaging(canAccessKibana: boolean) {
   return {
     title: (
       <FormattedMessage
-        id="xpack.xpack_main.unavailable.unauthorized.title"
+        id="xpack.main.unavailable.unauthorized.title"
         defaultMessage="No access to Kibana"
       />
     ),
     message: (
       <FormattedMessage
-        id="xpack.xpack_main.unavailable.unauthorized.notFoundMessage"
+        id="xpack.main.unavailable.unauthorized.notFoundMessage"
         defaultMessage="Your account does not have access to Kibana."
       />
     ),
     help: (
       <FormattedMessage
-        id="xpack.xpack_main.unavailable.unauthorized.helpMessage"
+        id="xpack.main.unavailable.unauthorized.helpMessage"
         defaultMessage="Contact your administrator for assistance."
       />
     ),
