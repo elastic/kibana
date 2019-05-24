@@ -6,7 +6,6 @@
 
 import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { Request, Server } from 'hapi';
 import { Legacy } from 'kibana';
 
 import {
@@ -29,14 +28,11 @@ interface CallWithRequestParams extends GenericParams {
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
-  private server: Server;
 
-  constructor(hapiServer: Server) {
-    this.server = hapiServer;
-    this.version = hapiServer.plugins.kibana.status.plugin.version;
+  constructor(private server: Legacy.Server) {
+    this.version = server.config().get('pkg.version');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async callWithRequest(
     req: FrameworkRequest<Legacy.Request>,
     endpoint: string,
@@ -81,7 +77,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
     this.server.register<HapiGraphQLPluginOptions>({
       options: {
-        graphqlOptions: (req: Request) => ({
+        graphqlOptions: (req: Legacy.Request) => ({
           context: { req: wrapRequest(req) },
           schema,
         }),
@@ -109,11 +105,8 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public getIndexPatternsService(
-    request: FrameworkRequest<Request>
+    request: FrameworkRequest<Legacy.Request>
   ): FrameworkIndexPatternsService {
-    if (!isServerWithIndexPatternsServiceFactory(this.server)) {
-      throw new Error('Failed to access indexPatternsService for the request');
-    }
     return this.server.indexPatternsServiceFactory({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
@@ -127,30 +120,22 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       },
     });
   }
+
+  public getSavedObjectsService() {
+    return this.server.savedObjects;
+  }
 }
 
 export function wrapRequest<InternalRequest extends WrappableRequest>(
   req: InternalRequest
 ): FrameworkRequest<InternalRequest> {
-  const { params, payload, query } = req;
+  const { auth, params, payload, query } = req;
 
   return {
     [internalFrameworkRequest]: req,
+    auth,
     params,
     payload,
     query,
   };
 }
-
-interface ServerWithIndexPatternsServiceFactory extends Server {
-  indexPatternsServiceFactory(options: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callCluster: (...args: any[]) => any;
-  }): FrameworkIndexPatternsService;
-}
-
-const isServerWithIndexPatternsServiceFactory = (
-  server: Server
-): server is ServerWithIndexPatternsServiceFactory =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  typeof (server as any).indexPatternsServiceFactory === 'function';

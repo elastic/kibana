@@ -381,7 +381,7 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
   })}
 # ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.usedExecutableNameComment', {
     defaultMessage:
-       'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
+        'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
   })}
 export ELASTIC_APM_SERVICE_NAME=
 
@@ -462,6 +462,71 @@ Do **not** add the agent as a dependency to your application.',
       defaultMessage: 'See the [documentation]({documentationLink}) for configuration options and advanced \
 usage.',
       values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html' },
+    }),
+  },
+];
+
+export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '') => [
+  {
+    title: i18n.translate('kbn.server.tutorials.apm.dotNetClient.download.title', {
+      defaultMessage: 'Download the APM agent',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.download.textPre', {
+      defaultMessage: '**Warning: The .NET agent is currently in Beta and not meant for production use.** \n\n \
+      Add the the agent package(s) from [NuGet]({allNuGetPacakgesLink}) to your .NET application. There are multiple \
+      NuGet packages available for different use cases. \n\n  For an ASP.NET Core application with Entity Framework \
+      Core download the [Elastic.Apm.All]({allApmPackageLink}) package. This package will automatically add every agent component to \
+      your application. \n\n In case you would like to to minimize the dependencies, you can use the \
+      [Elastic.Apm.AspNetCore]({aspNetCorePackageLink}) package for just \
+      ASP.NET Core monitoring or the [Elastic.Apm.EfCore]({efCorePackageLink}) package for just Entity Framework Core monitoring. \n\n \
+      In case you only want to use the public Agent API for manual instrumentation use the [Elastic.Apm]({elasticApmPackageLink}) package.',
+      values: {
+        allNuGetPacakgesLink: 'https://www.nuget.org/packages?q=Elastic.apm',
+        allApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm.All',
+        aspNetCorePackageLink: 'https://www.nuget.org/packages/Elastic.Apm.AspNetCore',
+        efCorePackageLink: 'https://www.nuget.org/packages/Elastic.Apm.EntityFrameworkCore',
+        elasticApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm',
+      },
+    }),
+  },
+  {
+    title: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureApplication.title', {
+      defaultMessage: 'Add the agent to the application',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureApplication.textPre', {
+      defaultMessage: 'In case of ASP.NET Core, call the `UseElasticApm` method in the `Configure` method within the `Startup.cs` file.'
+    }),
+    commands: `public class Startup
+{curlyOpen}
+  public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+  {curlyOpen}
+    app.UseElasticApm(Configuration);
+    //…rest of the method
+  {curlyClose}
+  //…rest of the class
+{curlyClose}`.split('\n'),
+    textPost: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureApplication.textPost', {
+      defaultMessage: 'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
+      `IConfiguration` instance (e.g. from the `appsettings.json` file).',
+    }),
+  },
+  {
+    title: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureAgent.title', {
+      defaultMessage: 'Sample appsettings.json file:',
+    }),
+    commands: `{curlyOpen}
+  "ElasticApm": {curlyOpen}
+    "LogLevel": "Error",
+    "SecretToken": "${secretToken}",
+    "ServerUrls": "${apmServerUrl || 'http://localhost:8200'}", //Set custom APM Server URL (default: http://localhost:8200)
+    "ServiceName" : "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
+  {curlyClose}
+{curlyClose}`.split('\n'),
+    textPost: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureAgent.textPost', {
+      defaultMessage: 'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
+      you can also configure the agent through environment variables. \n \
+      See [the documentation]({documentationLink}) for advanced usage.',
+      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/dotnet/current/configuration.html' },
     }),
   },
 ];

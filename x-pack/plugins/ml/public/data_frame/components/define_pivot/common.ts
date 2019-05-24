@@ -6,7 +6,7 @@
 
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 
@@ -17,6 +17,7 @@ import {
   FieldName,
   PivotAggsConfigDict,
   pivotAggsFieldSupport,
+  PivotGroupByConfig,
   PivotGroupByConfigDict,
   pivotGroupByFieldSupport,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
@@ -29,20 +30,23 @@ export interface Field {
 
 function getDefaultGroupByConfig(
   aggName: string,
+  dropDownName: string,
   fieldName: FieldName,
   groupByAgg: PIVOT_SUPPORTED_GROUP_BY_AGGS
-) {
+): PivotGroupByConfig {
   switch (groupByAgg) {
     case PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS:
       return {
         agg: groupByAgg,
         aggName,
+        dropDownName,
         field: fieldName,
       };
     case PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM:
       return {
         agg: groupByAgg,
         aggName,
+        dropDownName,
         field: fieldName,
         interval: '10',
       };
@@ -50,13 +54,16 @@ function getDefaultGroupByConfig(
       return {
         agg: groupByAgg,
         aggName,
+        dropDownName,
         field: fieldName,
         interval: '1m',
       };
   }
 }
 
-export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
+const illegalEsAggNameChars = /[[\]>]/g;
+
+export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
   const groupByOptionsData: PivotGroupByConfigDict = {};
@@ -74,19 +81,30 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
     // Group by
     const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
     availableGroupByAggs.forEach(groupByAgg => {
-      const aggName = `${groupByAgg}(${field.name})`;
-      const groupByOption: DropDownLabel = { label: aggName };
+      // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
+      const aggName = field.name.replace(illegalEsAggNameChars, '');
+      // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
+      const dropDownName = `${groupByAgg}(${field.name})`;
+      const groupByOption: DropDownLabel = { label: dropDownName };
       groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = getDefaultGroupByConfig(aggName, field.name, groupByAgg);
+      groupByOptionsData[dropDownName] = getDefaultGroupByConfig(
+        aggName,
+        dropDownName,
+        field.name,
+        groupByAgg
+      );
     });
 
     // Aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
     const availableAggs = pivotAggsFieldSupport[field.type];
     availableAggs.forEach(agg => {
-      const aggName = `${agg}(${field.name})`;
-      aggOption.options.push({ label: aggName });
-      aggOptionsData[aggName] = { agg, field: field.name, aggName };
+      // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
+      const aggName = `${field.name.replace(illegalEsAggNameChars, '')}.${agg}`;
+      // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
+      const dropDownName = `${agg}(${field.name})`;
+      aggOption.options.push({ label: dropDownName });
+      aggOptionsData[dropDownName] = { agg, field: field.name, aggName, dropDownName };
     });
     aggOptions.push(aggOption);
   });

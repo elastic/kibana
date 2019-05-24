@@ -17,46 +17,65 @@
  * under the License.
  */
 
-import path from 'path';
 import { parse } from 'url';
 
 import request from 'request';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import Boom from 'boom';
+
+import { AuthenticationHandler } from '../../../../core/server';
 import { Router } from '../router';
-import { url as authUrl } from './__fixtures__/plugins/dummy_security/server/plugin';
-import { url as onReqUrl } from './__fixtures__/plugins/dummy_on_request/server/plugin';
+
+import * as kbnTestServer from '../../../../test_utils/kbn_server';
+
+interface User {
+  id: string;
+  roles?: string[];
+}
+
+interface Storage {
+  value: User;
+  expires: number;
+}
 
 describe('http service', () => {
   describe('setup contract', () => {
     describe('#registerAuth()', () => {
-      const plugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_security');
+      const sessionDurationMs = 1000;
+      const cookieOptions = {
+        name: 'sid',
+        encryptionKey: 'something_at_least_32_characters',
+        validate: (session: Storage) => true,
+        isSecure: false,
+        path: '/',
+      };
+
       let root: ReturnType<typeof kbnTestServer.createRoot>;
-      beforeAll(async () => {
-        root = kbnTestServer.createRoot(
-          {
-            plugins: { paths: [plugin] },
-          },
-          {
-            dev: true,
-          }
-        );
-
-        const router = new Router('');
-        router.get({ path: authUrl.auth, validate: false }, async (req, res) =>
-          res.ok({ content: 'ok' })
-        );
-
-        const { http } = await root.setup();
-        http.registerRouter(router);
-        await root.start();
+      beforeEach(async () => {
+        root = kbnTestServer.createRoot();
       }, 30000);
 
-      afterAll(async () => await root.shutdown());
+      afterEach(async () => await root.shutdown());
 
       it('Should support implementing custom authentication logic', async () => {
-        const response = await kbnTestServer.request
-          .get(root, authUrl.auth)
-          .expect(200, { content: 'ok' });
+        const router = new Router('');
+        router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+
+        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+          if (req.headers.authorization) {
+            const user = { id: '42' };
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated({ credentials: user });
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        };
+
+        const { http } = await root.setup();
+        http.registerAuth(authenticate, cookieOptions);
+        http.registerRouter(router);
+        await root.start();
+
+        const response = await kbnTestServer.request.get(root, '/').expect(200, { content: 'ok' });
 
         expect(response.header['set-cookie']).toBeDefined();
         const cookies = response.header['set-cookie'];
@@ -74,18 +93,55 @@ describe('http service', () => {
       });
 
       it('Should support rejecting a request from an unauthenticated user', async () => {
+        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+          if (req.headers.authorization) {
+            const user = { id: '42' };
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated({ credentials: user });
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        };
+
+        const { http } = await root.setup();
+        http.registerAuth(authenticate, cookieOptions);
+        await root.start();
+
         await kbnTestServer.request
-          .get(root, authUrl.auth)
+          .get(root, '/')
           .unset('Authorization')
           .expect(401);
       });
 
       it('Should support redirecting', async () => {
-        const response = await kbnTestServer.request.get(root, authUrl.authRedirect).expect(302);
-        expect(response.header.location).toBe(authUrl.redirectTo);
+        const redirectTo = '/redirect-url';
+        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+          return t.redirected(redirectTo);
+        };
+
+        const { http } = await root.setup();
+        http.registerAuth(authenticate, cookieOptions);
+        await root.start();
+
+        const response = await kbnTestServer.request.get(root, '/').expect(302);
+        expect(response.header.location).toBe(redirectTo);
       });
 
       it('Should run auth for legacy routes and proxy request to legacy server route handlers', async () => {
+        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+          if (req.headers.authorization) {
+            const user = { id: '42' };
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated({ credentials: user });
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        };
+
+        const { http } = await root.setup();
+        http.registerAuth(authenticate, cookieOptions);
+        await root.start();
+
         const legacyUrl = '/legacy';
         const kbnServer = kbnTestServer.getKbnServer(root);
         kbnServer.server.route({
@@ -102,7 +158,15 @@ describe('http service', () => {
       });
 
       it(`Shouldn't expose internal error details`, async () => {
-        await kbnTestServer.request.get(root, authUrl.exception).expect({
+        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+          throw new Error('sensitive info');
+        };
+
+        const { http } = await root.setup();
+        http.registerAuth(authenticate, cookieOptions);
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/').expect({
           statusCode: 500,
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
@@ -111,52 +175,87 @@ describe('http service', () => {
     });
 
     describe('#registerOnRequest()', () => {
-      const plugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_on_request');
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
-        root = kbnTestServer.createRoot(
-          {
-            plugins: { paths: [plugin] },
-          },
-          {
-            dev: true,
-          }
-        );
+        root = kbnTestServer.createRoot();
+      }, 30000);
+      afterEach(async () => await root.shutdown());
 
+      it('Should support passing request through to the route handler', async () => {
         const router = new Router('');
-        // routes with expected success status response should have handlers
-        [onReqUrl.root, onReqUrl.independentReq].forEach(url =>
-          router.get({ path: url, validate: false }, async (req, res) => res.ok({ content: 'ok' }))
-        );
+        router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
         const { http } = await root.setup();
+        http.registerOnRequest((req, t) => t.next());
+        http.registerOnRequest(async (req, t) => {
+          await Promise.resolve();
+          return t.next();
+        });
         http.registerRouter(router);
-
         await root.start();
-      }, 30000);
 
-      afterEach(async () => await root.shutdown());
-      it('Should support passing request through to the route handler', async () => {
-        await kbnTestServer.request.get(root, onReqUrl.root).expect(200, { content: 'ok' });
+        await kbnTestServer.request.get(root, '/').expect(200, { content: 'ok' });
       });
+
       it('Should support redirecting to configured url', async () => {
-        const response = await kbnTestServer.request.get(root, onReqUrl.redirect).expect(302);
-        expect(response.header.location).toBe(onReqUrl.redirectTo);
+        const redirectTo = '/redirect-url';
+        const { http } = await root.setup();
+        http.registerOnRequest(async (req, t) => t.redirected(redirectTo));
+        await root.start();
+
+        const response = await kbnTestServer.request.get(root, '/').expect(302);
+        expect(response.header.location).toBe(redirectTo);
       });
+
       it('Should failing a request with configured error and status code', async () => {
+        const { http } = await root.setup();
+        http.registerOnRequest(async (req, t) =>
+          t.rejected(new Error('unexpected error'), { statusCode: 400 })
+        );
+        await root.start();
+
         await kbnTestServer.request
-          .get(root, onReqUrl.failed)
+          .get(root, '/')
           .expect(400, { statusCode: 400, error: 'Bad Request', message: 'unexpected error' });
       });
+
       it(`Shouldn't expose internal error details`, async () => {
-        await kbnTestServer.request.get(root, onReqUrl.exception).expect({
+        const { http } = await root.setup();
+        http.registerOnRequest(async (req, t) => {
+          throw new Error('sensitive info');
+        });
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/').expect({
           statusCode: 500,
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
         });
       });
+
       it(`Shouldn't share request object between interceptors`, async () => {
-        await kbnTestServer.request.get(root, onReqUrl.independentReq).expect(200);
+        const { http } = await root.setup();
+        http.registerOnRequest(async (req, t) => {
+          // @ts-ignore. don't complain customField is not defined on Request type
+          req.customField = { value: 42 };
+          return t.next();
+        });
+        http.registerOnRequest((req, t) => {
+          // @ts-ignore don't complain customField is not defined on Request type
+          if (typeof req.customField !== 'undefined') {
+            throw new Error('Request object was mutated');
+          }
+          return t.next();
+        });
+        const router = new Router('');
+        router.get({ path: '/', validate: false }, async (req, res) =>
+          // @ts-ignore. don't complain customField is not defined on Request type
+          res.ok({ customField: String(req.customField) })
+        );
+        http.registerRouter(router);
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/').expect(200, { customField: 'undefined' });
       });
     });
 

@@ -109,8 +109,14 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms/{jobId}/_stop',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { jobId } = request.params;
-      return callWithRequest('ml.stopDataFrameTransformsJob', { jobId })
+      const options = {
+        jobId: request.params.jobId
+      };
+      const force = request.query.force;
+      if (force !== undefined) {
+        options.force = force;
+      }
+      return callWithRequest('ml.stopDataFrameTransformsJob', options)
         .catch(resp => wrapError(resp));
     },
     config: {

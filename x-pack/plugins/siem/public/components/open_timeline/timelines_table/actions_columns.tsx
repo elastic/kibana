@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
 import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
-import { DeleteTimelines, OnOpenTimeline, TimelineResult } from '../types';
+import { DeleteTimelines, OnOpenTimeline, OpenTimelineResult } from '../types';
 import { DeleteTimelineModalButton } from '../delete_timeline_modal';
 
 import * as i18n from '../translations';
@@ -28,7 +28,7 @@ export const getActionsColumns = ({
   const deleteTimelineColumn = {
     align: 'center',
     field: 'savedObjectId',
-    render: (savedObjectId: string, { title }: TimelineResult) => (
+    render: (savedObjectId: string, { title }: OpenTimelineResult) => (
       <PositionedIcon>
         <DeleteTimelineModalButton
           deleteTimelines={deleteTimelines}
@@ -44,7 +44,7 @@ export const getActionsColumns = ({
   const openAsDuplicateColumn = {
     align: 'center',
     field: 'savedObjectId',
-    render: (savedObjectId: string, timelineResult: TimelineResult) => (
+    render: (savedObjectId: string, timelineResult: OpenTimelineResult) => (
       <PositionedIcon>
         <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
           <EuiButtonIcon

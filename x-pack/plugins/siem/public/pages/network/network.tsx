@@ -24,11 +24,12 @@ import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { IndexType, LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
+import { UrlStateContainer } from '../../components/url_state';
 
 const basePath = chrome.getBasePath();
 
@@ -39,16 +40,15 @@ interface NetworkComponentReduxProps {
   filterQuery: string;
 }
 
-const indexTypes = [IndexType.FILEBEAT, IndexType.PACKETBEAT];
-
 type NetworkComponentProps = NetworkComponentReduxProps;
 const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={indexTypes}>
-    {({ filebeatIndicesExist, indexPattern }) =>
-      indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
+  <WithSource sourceId="default">
+    {({ indicesExist, indexPattern }) =>
+      indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
         <StickyContainer>
           <FiltersGlobal>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+            <UrlStateContainer indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <HeaderPage
