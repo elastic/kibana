@@ -20,11 +20,10 @@
 import { Observable } from 'rxjs';
 import { EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
-import { ClusterClient } from '../elasticsearch';
-import { HttpServiceSetup } from '../http';
 import { LoggerFactory } from '../logging';
 import { PluginWrapper, PluginManifest } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * Context that's available to plugins during initialization stage.
@@ -39,32 +38,6 @@ export interface PluginInitializerContext {
     createIfExists: <Schema>() => Observable<Schema | undefined>;
   };
 }
-
-/**
- * Context passed to the plugins `setup` method.
- *
- * @public
- */
-export interface PluginSetupContext {
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-  };
-  http: {
-    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    getBasePathFor: HttpServiceSetup['getBasePathFor'];
-    setBasePathFor: HttpServiceSetup['setBasePathFor'];
-  };
-}
-
-/**
- * Context passed to the plugins `start` method.
- *
- * @public
- */
-export interface PluginStartContext {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -137,7 +110,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): PluginSetupContext {
+): CoreSetup {
   return {
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
@@ -169,6 +142,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): PluginStartContext {
+): CoreStart {
   return {};
 }

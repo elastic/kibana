@@ -74,22 +74,25 @@ export class ConfigService {
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
     }
 
-// @public (undocumented)
+// @public
 export interface CoreSetup {
     // (undocumented)
-    elasticsearch: ElasticsearchServiceSetup;
+    elasticsearch: {
+        adminClient$: Observable<ClusterClient>;
+        dataClient$: Observable<ClusterClient>;
+    };
     // (undocumented)
-    http: HttpServiceSetup;
-    // (undocumented)
-    plugins: PluginsServiceSetup;
+    http: {
+        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
+        registerAuth: HttpServiceSetup['registerAuth'];
+        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+        getBasePathFor: HttpServiceSetup['getBasePathFor'];
+        setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    };
 }
 
-// @public (undocumented)
+// @public
 export interface CoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
-    // (undocumented)
-    plugins: PluginsServiceStart;
 }
 
 // @public
@@ -135,6 +138,24 @@ export type HttpServiceSetup = HttpServerSetup;
 // @public (undocumented)
 export interface HttpServiceStart {
     isListening: () => boolean;
+}
+
+// @internal (undocumented)
+export interface InternalCoreSetup {
+    // (undocumented)
+    elasticsearch: ElasticsearchServiceSetup;
+    // (undocumented)
+    http: HttpServiceSetup;
+    // (undocumented)
+    plugins: PluginsServiceSetup;
+}
+
+// @public (undocumented)
+export interface InternalCoreStart {
+    // (undocumented)
+    http: HttpServiceStart;
+    // (undocumented)
+    plugins: PluginsServiceStart;
 }
 
 // @public (undocumented)
@@ -262,9 +283,9 @@ export interface OnPreAuthToolkit {
 // @public
 export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> {
     // (undocumented)
-    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
     // (undocumented)
-    start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
@@ -290,23 +311,6 @@ export interface PluginInitializerContext {
 // @public
 export type PluginName = string;
 
-// @public
-export interface PluginSetupContext {
-    // (undocumented)
-    elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-    };
-    // (undocumented)
-    http: {
-        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-        registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        getBasePathFor: HttpServiceSetup['getBasePathFor'];
-        setBasePathFor: HttpServiceSetup['setBasePathFor'];
-    };
-}
-
 // @public (undocumented)
 export interface PluginsServiceSetup {
     // (undocumented)
@@ -322,10 +326,6 @@ export interface PluginsServiceSetup {
 export interface PluginsServiceStart {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
-}
-
-// @public
-export interface PluginStartContext {
 }
 
 // @public (undocumented)
@@ -356,9 +356,7 @@ export class ScopedClusterClient {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/server/plugins/plugin_context.ts:35:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-
-// (No @packageDocumentation comment for this package)
 
 ```

@@ -40,6 +40,7 @@ function updateObjectsTable($scope, $injector) {
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
+  const confirmModalPromise = $injector.get('confirmModalPromise');
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
@@ -55,6 +56,7 @@ function updateObjectsTable($scope, $injector) {
       <I18nContext>
         <ObjectsTable
           savedObjectsClient={savedObjectsClient}
+          confirmModalPromise={confirmModalPromise}
           services={services}
           indexPatterns={indexPatterns}
           $http={$http}
