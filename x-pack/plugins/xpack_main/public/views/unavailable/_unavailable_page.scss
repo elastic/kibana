@@ -1,0 +1,25 @@
+.xpkUnavailablePage {
+  @include kibanaFullScreenGraphics;
+}
+
+.xpkUnavailablePage__header {
+  position: relative;
+  padding: $euiSizeXL;
+  z-index: 10;
+}
+
+.xpkUnavailablePage__logo {
+  @include kibanaCircleLogo;
+  @include euiBottomShadowMedium;
+
+  margin-bottom: $euiSizeXL;
+}
+
+.xpkUnavailablePage__content {
+  position: relative;
+  margin: auto;
+  max-width: 460px;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  z-index: 10;
+}

@@ -6,7 +6,6 @@
 
 import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
-import { initOnPreResponseHandler } from './server/lib/on_pre_response';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
 import { initExternalRolesApi } from './server/routes/api/external/roles';
@@ -110,11 +109,6 @@ export const security = (kibana) => new kibana.Plugin({
       title: 'Logged out',
       main: 'plugins/security/views/logged_out',
       hidden: true
-    }, {
-      id: 'unavailable',
-      title: 'Unavailable',
-      main: 'plugins/security/views/unavailable',
-      hidden: true
     }],
     hacks: [
       'plugins/security/hacks/on_session_timeout',
@@ -128,7 +122,6 @@ export const security = (kibana) => new kibana.Plugin({
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
-        canAccessKibana: true,
       };
     },
     replaceInjectedVars: async function (injectedVars, request, server) {
@@ -223,8 +216,6 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     getUserProvider(server);
-
-    initOnPreResponseHandler(server);
 
     await initAuthenticator(server);
     initAuthenticateApi(server);

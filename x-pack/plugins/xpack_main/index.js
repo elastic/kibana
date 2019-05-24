@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 import { registerOssFeatures } from './server/lib/register_oss_features';
+import { initOnPreResponseHandler } from './server/lib/on_pre_response';
 
 /**
  * Determine if Telemetry is enabled.
@@ -71,6 +72,13 @@ export const xpackMain = (kibana) => {
 
     uiExports: {
       managementSections: ['plugins/xpack_main/views/management'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      apps: [{
+        id: 'unavailable',
+        title: 'Unavailable',
+        main: 'plugins/xpack_main/views/unavailable',
+        hidden: true
+      }],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
           name: i18n.translate('xpack.main.telemetry.telemetryConfigTitle', {
@@ -107,6 +115,7 @@ export const xpackMain = (kibana) => {
           telemetryOptedIn: null,
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
+          canAccessKibana: true,
         };
       },
       hacks: [
@@ -133,6 +142,8 @@ export const xpackMain = (kibana) => {
       setupXPackMain(server);
       const { types: savedObjectTypes } = server.savedObjects;
       registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes);
+
+      initOnPreResponseHandler(server);
 
       // register routes
       xpackInfoRoute(server);
