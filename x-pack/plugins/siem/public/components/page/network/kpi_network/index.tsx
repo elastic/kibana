@@ -11,11 +11,14 @@ import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 import { EuiSpacer } from '@elastic/eui';
 import { chunk as _chunk } from 'lodash/fp';
-import { StatItemsComponent, StatItemsProps } from '../../../../components/stat_items';
+import {
+  StatItemsComponent,
+  StatItemsProps,
+  useKpiMatrixStatus,
+} from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
-import { useKpiMatrixStatus } from '../../hosts/kpi_hosts';
 
 const euiColorVis1 = '#3185FC';
 const euiColorVis2 = '#DB1374';

@@ -13,13 +13,15 @@ import {
   EuiTitle,
   IconType,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { get, getOr } from 'lodash/fp';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
 import { AreaChartData, BarChartData } from '../charts/common';
+import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -31,7 +33,7 @@ const StatValue = styled(EuiTitle)`
   white-space: nowrap;
 `;
 
-export interface StatItem {
+interface StatItem {
   key: string;
   description?: string;
   value: number | undefined | null;
@@ -40,7 +42,7 @@ export interface StatItem {
   name?: string;
 }
 
-export interface StatItems {
+interface StatItems {
   key: string;
   fields: StatItem[];
   description?: string;
@@ -53,6 +55,90 @@ export interface StatItemsProps extends StatItems {
   areaChart?: AreaChartData[];
   barChart?: BarChartData[];
 }
+
+export const useKpiMatrixStatus = (
+  mappings: StatItemsProps[],
+  data: KpiHostsData | KpiNetworkData
+) => {
+  const [statItemsProps, setStatItemsProps] = useState(mappings);
+
+  const addValueToFields = (
+    fields: StatItem[],
+    kpiHostData: KpiHostsData | KpiNetworkData
+  ): StatItem[] => fields.map(field => ({ ...field, value: get(field.key, kpiHostData) }));
+
+  const addValueToAreaChart = (
+    fields: StatItem[],
+    kpiHostData: KpiHostsData | KpiNetworkData
+  ): AreaChartData[] =>
+    fields
+      .filter(field => get(`${field.key}Histogram`, kpiHostData) != null)
+      .map(field => ({
+        ...field,
+        value: get(`${field.key}Histogram`, kpiHostData),
+        key: `${field.key}Histogram`,
+      }));
+
+  const addValueToBarChart = (
+    fields: StatItem[],
+    kpiHostData: KpiHostsData | KpiNetworkData
+  ): BarChartData[] => {
+    if (fields.length === 0) return [];
+    return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
+      const key: string = get('key', field);
+      const x: number | null = getOr(null, key, kpiHostData);
+      const y: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
+
+      return acc.concat([
+        {
+          ...field,
+          value: [
+            {
+              x,
+              y,
+            },
+          ],
+        },
+      ]);
+    }, []);
+  };
+  useEffect(
+    () => {
+      let temp: StatItemsProps;
+      setStatItemsProps(
+        mappings.map(stat => {
+          temp = {
+            ...stat,
+            key: `kpi-summary-${stat.key}`,
+          };
+
+          if (stat.fields != null)
+            temp = {
+              ...temp,
+              fields: addValueToFields(stat.fields, data),
+            };
+
+          if (stat.enableAreaChart)
+            temp = {
+              ...temp,
+              areaChart: addValueToAreaChart(stat.fields, data),
+            };
+
+          if (stat.enableBarChart != null)
+            temp = {
+              ...temp,
+              barChart: addValueToBarChart(stat.fields, data),
+            };
+
+          return temp;
+        })
+      );
+    },
+    [data]
+  );
+
+  return statItemsProps;
+};
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
   ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {

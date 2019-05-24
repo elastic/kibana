@@ -17,7 +17,7 @@ import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiNetworkQuery } from './index.gql_query';
-import { ChartData } from '../../components/stat_items';
+import { ChartData } from '../../components/charts/common';
 
 export interface KpiNetworkArgs {
   id: string;
