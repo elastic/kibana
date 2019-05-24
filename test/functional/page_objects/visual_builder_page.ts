@@ -223,7 +223,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async enterSeriesTemplate(template: string) {
       const el = await testSubjects.find('tsvb_series_value');
-      await el.clearValue();
+      await el.clearValueWithKeyboard();
       await el.type(template);
     }
 
