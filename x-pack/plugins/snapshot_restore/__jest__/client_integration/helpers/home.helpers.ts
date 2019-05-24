@@ -415,6 +415,7 @@ export type TestSubjects =
   | 'snapshotDetail.srSnapshotDetailsVersionItem.versionId'
   | 'snapshotDetail.startTime'
   | 'snapshotDetail.state'
+  | 'snapshotDetail.tab'
   | 'snapshotDetail.title'
   | 'snapshotDetail.uuid'
   | 'snapshotDetail.versionId'

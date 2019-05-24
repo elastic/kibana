@@ -112,7 +112,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
               }}
               isSelected={tab.id === activeTab}
               key={tab.id}
-              data-test-subject="tab"
+              data-test-subj="tab"
             >
               {tab.name}
             </EuiTab>

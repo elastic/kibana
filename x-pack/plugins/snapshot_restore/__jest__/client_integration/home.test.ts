@@ -460,7 +460,7 @@ describe('<SnapshotRestoreHome />', () => {
       });
 
       describe('detail panel', () => {
-        beforeAll(async () => {
+        beforeEach(async () => {
           httpRequestsMockHelpers.setGetSnapshotResponse(snapshot1);
         });
 
@@ -512,6 +512,50 @@ describe('<SnapshotRestoreHome />', () => {
             expect(exists('snapshotList')).toBe(false);
             expect(exists('repositoryList')).toBe(true);
             expect(exists('repositoryDetail')).toBe(true);
+          });
+
+          test('should have a button to close the detail panel', () => {
+            const { find, exists } = testBed;
+            expect(exists('snapshotDetail.closeButton')).toBe(true);
+
+            find('snapshotDetail.closeButton').simulate('click');
+
+            expect(exists('snapshotDetail')).toBe(false);
+          });
+
+          describe('tabs', () => {
+            test('should have 2 tabs', () => {
+              const { find } = testBed;
+              const tabs = find('snapshotDetail.tab');
+
+              expect(tabs.length).toBe(2);
+              expect(tabs.map(t => t.text())).toEqual(['Summary', 'Failed indices (0)']);
+            });
+
+            test('should have the default tab set on "Summary"', () => {
+              const { find } = testBed;
+
+              const detailPanel = find('snapshotDetail');
+              const tabs = find('snapshotDetail.tab');
+              const selectedTab = detailPanel.find('.euiTab-isSelected');
+
+              expect(selectedTab.instance()).toBe(tabs.at(0).instance());
+            });
+
+            describe('summary tab', () => {
+              test('should set the correct summary values', () => {
+                const { find } = testBed;
+
+                expect(find('snapshotDetail.version.value').text()).toBe(
+                  `${snapshot1.version} / ${snapshot1.versionId}`
+                );
+                expect(find('snapshotDetail.uuid.value').text()).toBe(snapshot1.uuid);
+                expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
+                expect(find('snapshotDetail.includeGlobalState.value').text()).toBe('Yes');
+                expect(find('snapshotDetail.startTime.value').text()).toBe('23 May 2019 14:25:15');
+                expect(find('snapshotDetail.endTime.value').text()).toBe('23 May 2019 14:25:16');
+              });
+            });
           });
         });
       });
