@@ -33,6 +33,7 @@ export function requestFixture({
     auth,
     headers,
     params,
+    path,
     url: { path, search },
     cookieAuth,
     getBasePath: () => basePath,
