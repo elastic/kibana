@@ -33,6 +33,10 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
       loadTestFile(require.resolve('./feature_controls/maps_spaces'));
+    });
+
+    describe('', function () {
+      this.tags('ciGroup7');
       loadTestFile(require.resolve('./es_search_source'));
     });
 
