@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { AlertInstance } from './alert_instance';
+import { ConcreteTaskInstance } from '../../task_manager';
+
+export interface AlertServices {
+  alertInstanceFactory: (id: string) => AlertInstance;
+}
+
+export interface AlertDefinition {
+  id: string;
+  description: string;
+  execute: (services: AlertServices, params: any) => Promise<Record<string, any> | void>;
+}
+
+export interface ScheduledAlert {
+  alertId: string;
+  actionGroups: Record<
+    string,
+    Array<{
+      id: string;
+      params: Record<string, any>;
+    }>
+  >;
+  checkParams: Record<string, any>;
+}
+
+export interface AlertingPlugin {
+  register: (alert: AlertDefinition) => void;
+  schedule: (scheduledAlert: ScheduledAlert) => Promise<ConcreteTaskInstance>;
+}
