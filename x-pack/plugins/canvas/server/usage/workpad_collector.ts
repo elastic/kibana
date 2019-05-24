@@ -6,7 +6,6 @@
 
 import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
-// @ts-ignore Library missing definitions
 import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { AST, collectFns } from './collector_helpers';
@@ -88,7 +87,7 @@ export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
     );
     const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
       return page.elements.map(element => {
-        const ast: AST = fromExpression(element.expression);
+        const ast: AST = fromExpression(element.expression) as AST; // TODO: Remove once fromExpression is properly typed
         collectFns(ast, cFunction => {
           functionSet.add(cFunction);
         });

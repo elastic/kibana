@@ -6,7 +6,6 @@
 
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
-// @ts-ignore Library missing definitions
 import { fromExpression } from '@kbn/interpreter/common';
 import { AST, collectFns } from './collector_helpers';
 import { TelemetryCollector } from './collector';
@@ -86,7 +85,7 @@ export function summarizeCustomElements(
 
   parsedContents.map(contents => {
     contents.selectedNodes.map(node => {
-      const ast: AST = fromExpression(node.expression);
+      const ast: AST = fromExpression(node.expression) as AST; // TODO: Remove once fromExpression is properly typed
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
       });
