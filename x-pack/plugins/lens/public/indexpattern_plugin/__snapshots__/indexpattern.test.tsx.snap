@@ -3,6 +3,35 @@
 exports[`IndexPattern Data Source #getPublicAPI renderDimensionPanel should render a dimension panel 1`] = `
 <div>
   Dimension Panel
+  <EuiComboBox
+    compressed={false}
+    data-test-subj="indexPattern-dimension"
+    fullWidth={false}
+    isClearable={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "label": "Value of timestamp",
+          "value": "0",
+        },
+        Object {
+          "label": "Value of bytes",
+          "value": "1",
+        },
+        Object {
+          "label": "Value of source",
+          "value": "2",
+        },
+      ]
+    }
+    selectedOptions={Array []}
+    singleSelection={
+      Object {
+        "asPlainText": true,
+      }
+    }
+  />
 </div>
 `;
 

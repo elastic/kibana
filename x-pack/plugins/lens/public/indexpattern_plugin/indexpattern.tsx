@@ -10,7 +10,7 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import { Datasource, DataType } from '..';
-import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
+import { DatasourceDimensionPanelProps, DatasourceDataPanelProps, Operation } from '../types';
 import { getIndexPatterns } from './loader';
 
 type OperationType = 'value' | 'terms' | 'date_histogram';
@@ -99,7 +99,76 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
 };
 
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
-  return <div>Dimension Panel</div>;
+  const fields = props.state.indexPatterns[props.state.currentIndexPatternId].fields;
+  const columns: IndexPatternColumn[] = fields.map((field, index) => ({
+    operationId: `${index}`,
+    label: `Value of ${field.name}`,
+    dataType: field.type as DataType,
+    isBucketed: false,
+
+    operationType: 'value',
+  }));
+
+  const filteredColumns = columns.filter(col => {
+    const { operationId, label, dataType, isBucketed } = col;
+
+    return props.filterOperations({
+      id: operationId,
+      label,
+      dataType,
+      isBucketed,
+    });
+  });
+
+  let selectedColumn: IndexPatternColumn | null = null;
+  if (props.columnId && props.state.columns[props.columnId]) {
+    selectedColumn = props.state.columns[props.columnId];
+  }
+
+  return (
+    <div>
+      Dimension Panel
+      <EuiComboBox
+        data-test-subj="indexPattern-dimension"
+        options={filteredColumns.map(col => ({
+          label: col.label,
+          value: col.operationId,
+        }))}
+        selectedOptions={
+          selectedColumn
+            ? [
+                {
+                  label: selectedColumn.label,
+                  value: selectedColumn.operationId,
+                },
+              ]
+            : []
+        }
+        singleSelection={{ asPlainText: true }}
+        isClearable={false}
+        onChange={choices => {
+          if (!props.columnId) {
+            return;
+          }
+
+          const column: IndexPatternColumn = columns.find(
+            ({ operationId }) => operationId === choices[0].value
+          )!;
+          const newColumns: IndexPatternPrivateState['columns'] = {
+            ...props.state.columns,
+            [props.columnId]: column,
+          };
+
+          props.setState({
+            ...props.state,
+            columns: newColumns,
+            // Order is not meaningful until we aggregate
+            columnOrder: Object.keys(newColumns),
+          });
+        }}
+      />
+    </div>
+  );
 }
 
 export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
