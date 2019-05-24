@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../../common/types/common';
 import { ml } from '../../../services/ml_api_service';
@@ -19,7 +19,7 @@ import {
   isGroupByHistogram,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
-  SimpleQuery,
+  PivotQuery,
 } from '../../common';
 
 export enum PIVOT_PREVIEW_STATUS {
@@ -37,8 +37,8 @@ export interface UsePivotPreviewDataReturnType {
 }
 
 export const usePivotPreviewData = (
-  indexPattern: StaticIndexPattern,
-  query: SimpleQuery,
+  indexPattern: IndexPattern,
+  query: PivotQuery,
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
 ): UsePivotPreviewDataReturnType => {
@@ -86,7 +86,7 @@ export const usePivotPreviewData = (
             } ${isGroupByHistogram(g) ? g.interval : ''}`
         )
         .join(' '),
-      query.query_string.query,
+      JSON.stringify(query),
     ]
   );
   return { errorMessage, status, dataFramePreviewData, previewRequest };

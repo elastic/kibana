@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-export default function splitByFilter(req, panel, series) {
+
+export function splitByFilters(req, panel, series) {
   return next => doc => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach(filter => {

@@ -35,10 +35,12 @@ import {
   isGroupByHistogram,
   isKibanaContext,
   KibanaContext,
+  KibanaContextValue,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
+  SavedSearchQuery,
 } from '../../common';
 
 import { getPivotDropdownOptions } from './common';
@@ -46,18 +48,21 @@ import { getPivotDropdownOptions } from './common';
 export interface DefinePivotExposedState {
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict;
-  search: string;
+  search: string | SavedSearchQuery;
   valid: boolean;
 }
 
 const defaultSearch = '*';
 const emptySearch = '';
 
-export function getDefaultPivotState(): DefinePivotExposedState {
+export function getDefaultPivotState(kibanaContext: KibanaContextValue): DefinePivotExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
-    search: defaultSearch,
+    search:
+      kibanaContext.currentSavedSearch.id !== undefined
+        ? kibanaContext.combinedQuery
+        : defaultSearch,
     valid: false,
   };
 }
@@ -68,8 +73,6 @@ interface Props {
 }
 
 export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const defaults = { ...getDefaultPivotState(), ...overrides };
-
   const kibanaContext = useContext(KibanaContext);
 
   if (!isKibanaContext(kibanaContext)) {
@@ -77,6 +80,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   }
 
   const indexPattern = kibanaContext.currentIndexPattern;
+
+  const defaults = { ...getDefaultPivotState(kibanaContext), ...overrides };
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
@@ -186,25 +191,50 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     ]
   );
 
-  const displaySearch = search === defaultSearch ? emptySearch : search;
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.definePivotForm.queryLabel', {
-              defaultMessage: 'Query',
-            })}
-          >
-            <EuiFieldSearch
-              placeholder={i18n.translate('xpack.ml.dataframe.definePivotForm.queryPlaceholder', {
-                defaultMessage: 'Search...',
+          {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
+            <Fragment>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.definePivotForm.indexPatternLabel', {
+                  defaultMessage: 'Index pattern',
+                })}
+              >
+                <span>{kibanaContext.currentIndexPattern.title}</span>
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.definePivotForm.queryLabel', {
+                  defaultMessage: 'Query',
+                })}
+                helpText={i18n.translate('xpack.ml.dataframe.definePivotForm.queryHelpText', {
+                  defaultMessage: 'Use a query string to filter the source data (optional).',
+                })}
+              >
+                <EuiFieldSearch
+                  placeholder={i18n.translate(
+                    'xpack.ml.dataframe.definePivotForm.queryPlaceholder',
+                    {
+                      defaultMessage: 'Search...',
+                    }
+                  )}
+                  onChange={searchHandler}
+                  value={search === defaultSearch ? emptySearch : search}
+                />
+              </EuiFormRow>
+            </Fragment>
+          )}
+
+          {kibanaContext.currentSavedSearch.id !== undefined && (
+            <EuiFormRow
+              label={i18n.translate('xpack.ml.dataframe.definePivotForm.savedSearchLabel', {
+                defaultMessage: 'Saved search',
               })}
-              onChange={searchHandler}
-              value={displaySearch}
-            />
-          </EuiFormRow>
+            >
+              <span>{kibanaContext.currentSavedSearch.title}</span>
+            </EuiFormRow>
+          )}
 
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.definePivotForm.groupByLabel', {

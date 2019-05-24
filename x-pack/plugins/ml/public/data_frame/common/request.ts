@@ -6,7 +6,7 @@
 
 import { DefaultOperator } from 'elasticsearch';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../common/types/common';
 
@@ -23,6 +23,7 @@ import {
 
 import { PivotAggDict, PivotAggsConfig } from './pivot_aggs';
 import { DateHistogramAgg, HistogramAgg, PivotGroupByDict, TermsAgg } from './pivot_group_by';
+import { SavedSearchQuery } from './kibana_context';
 
 export interface DataFramePreviewRequest {
   pivot: {
@@ -52,18 +53,24 @@ export interface SimpleQuery {
   };
 }
 
-export function getPivotQuery(search: string): SimpleQuery {
-  return {
-    query_string: {
-      query: search,
-      default_operator: 'AND',
-    },
-  };
+export type PivotQuery = SimpleQuery | SavedSearchQuery;
+
+export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
+  if (typeof search === 'string') {
+    return {
+      query_string: {
+        query: search,
+        default_operator: 'AND',
+      },
+    };
+  }
+
+  return search;
 }
 
 export function getDataFramePreviewRequest(
-  indexPatternTitle: StaticIndexPattern['title'],
-  query: SimpleQuery,
+  indexPatternTitle: IndexPattern['title'],
+  query: PivotQuery,
   groupBy: PivotGroupByConfig[],
   aggs: PivotAggsConfig[]
 ): DataFramePreviewRequest {
@@ -132,7 +139,7 @@ export function getDataFramePreviewRequest(
 }
 
 export function getDataFrameRequest(
-  indexPatternTitle: StaticIndexPattern['title'],
+  indexPatternTitle: IndexPattern['title'],
   pivotState: DefinePivotExposedState,
   jobDetailsState: JobDetailsExposedState
 ): DataFrameRequest {

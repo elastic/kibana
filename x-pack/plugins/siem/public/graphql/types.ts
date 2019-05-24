@@ -1326,6 +1326,8 @@ export interface QueryMatchResult {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface DateRangePickerResult {
@@ -1613,6 +1615,8 @@ export interface QueryMatchInput {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface SerializedFilterQueryInput {
@@ -4392,6 +4396,8 @@ export namespace GetOneTimeline {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type And = {
@@ -4420,6 +4426,8 @@ export namespace GetOneTimeline {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type DateRange = {
@@ -4648,6 +4656,8 @@ export namespace PersistTimelineMutation {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type And = {
@@ -4676,6 +4686,8 @@ export namespace PersistTimelineMutation {
     value?: string | null;
 
     displayValue?: string | null;
+
+    operator?: string | null;
   };
 
   export type Favorite = {
