@@ -19,6 +19,7 @@ export interface AlertType {
 
 export interface Alert {
   alertTypeId: string;
+  interval: number;
   actionGroups: Record<
     string,
     Array<{

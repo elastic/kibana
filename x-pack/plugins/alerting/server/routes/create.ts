@@ -10,6 +10,7 @@ import Joi from 'joi';
 interface ScheduleRequest extends Hapi.Request {
   payload: {
     alertTypeId: string;
+    interval: number;
     actionGroups: Record<
       string,
       Array<{
@@ -33,6 +34,7 @@ export function createAlertRoute(server: Hapi.Server) {
         payload: Joi.object()
           .keys({
             alertTypeId: Joi.string().required(),
+            interval: Joi.number().required(),
             actionGroups: Joi.object().required(),
             checkParams: Joi.object().required(),
           })

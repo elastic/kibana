@@ -9,7 +9,6 @@ import { AlertType } from './types';
 import { TaskInstance } from '../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
-import { AlertInstance } from './alert_instance';
 
 interface TaskRunnerOptions {
   taskInstance: TaskInstance;
@@ -23,10 +22,8 @@ export function getCreateTaskRunnerFunction(
     const fireHandler = createFireHandler(alertType, taskInstance, fireAction);
     return {
       run: async () => {
-        const alertInstances = (taskInstance.state.alertInstances || {}) as Record<
-          string,
-          AlertInstance
-        >;
+        const alertInstances = taskInstance.state.alertInstances || {};
+        const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
         const services = {
           alertInstanceFactory: createAlertInstanceFactory(alertInstances),
@@ -35,7 +32,7 @@ export function getCreateTaskRunnerFunction(
         const updatedState = await alertType.execute(services, taskInstance.params.checkParams);
 
         for (const alertInstanceId of Object.keys(alertInstances)) {
-          const alertInstance = alertInstances[alertInstanceId];
+          const alertInstance = alertInstanceFactory(alertInstanceId);
 
           // Unpersist any alert instances that were not explicitly fired in this alert execution
           if (!alertInstance.getFireOptions()) {
@@ -60,7 +57,7 @@ export function getCreateTaskRunnerFunction(
           },
           // TODO: Should it be now + interval or previous runAt + interval
           runAt: taskInstance.params.interval
-            ? Date.now() + taskInstance.params.interval
+            ? new Date(Date.now() + taskInstance.params.interval * 1000)
             : undefined,
         };
       },

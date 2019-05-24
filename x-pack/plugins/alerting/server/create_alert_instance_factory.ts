@@ -4,13 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertInstance } from './alert_instance';
-
 export function createAlertInstanceFactory(alertInstances: Record<string, any>) {
   return (id: string) => {
     if (!alertInstances[id]) {
-      alertInstances[id] = new AlertInstance();
+      alertInstances[id] = {
+        fireOptions: null,
+        previousState: {},
+      };
     }
-    return alertInstances[id];
+
+    const alertInstanceData = alertInstances[id];
+
+    const instance = {
+      getFireOptions() {
+        return alertInstanceData.fireOptions;
+      },
+      clearFireOptions() {
+        delete alertInstanceData.fireOptions;
+      },
+      getPreviousState() {
+        return alertInstanceData.previousState;
+      },
+      fire(actionGroupId: string, context: Record<string, any>, state: Record<string, any>) {
+        alertInstanceData.fireOptions = { actionGroupId, context, state };
+      },
+      replaceState(state: Record<string, any>) {
+        alertInstanceData.previousState = state;
+      },
+    };
+
+    return instance;
   };
 }
