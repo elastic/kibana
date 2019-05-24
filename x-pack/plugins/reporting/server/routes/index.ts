@@ -12,6 +12,7 @@ import { KbnServer } from '../../types';
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerate } from './generate';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
+import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerJobs } from './jobs';
 import { registerLegacy } from './legacy';
 
@@ -63,8 +64,10 @@ export function registerRoutes(server: KbnServer) {
   registerGenerate(server, handler, handleError);
   registerLegacy(server, handler, handleError);
 
+  // Register beta panel-action download-related API's
   if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
     registerGenerateCsvFromSavedObject(server, handler, handleError);
+    registerGenerateCsvFromSavedObjectImmediate(server);
   }
 
   registerJobs(server);
