@@ -7,7 +7,7 @@
 import { EnvironmentUIFilterAPIResponse } from '../../../../server/lib/ui_filters/get_environments';
 import { callApi } from '../callApi';
 
-export async function loadServiceEnvironments({
+export async function loadEnvironmentsFilter({
   serviceName,
   start,
   end

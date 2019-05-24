@@ -8,7 +8,7 @@ import { EuiSelect, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { loadServiceEnvironments } from '../../../services/rest/apm/ui_filters';
+import { loadEnvironmentsFilter } from '../../../services/rest/apm/ui_filters';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
@@ -88,7 +88,7 @@ export const EnvironmentFilter: React.FC = () => {
   const { data: environments = [], status = 'loading' } = useFetcher(
     () => {
       if (start && end) {
-        return loadServiceEnvironments({
+        return loadEnvironmentsFilter({
           start,
           end,
           serviceName: realServiceName
