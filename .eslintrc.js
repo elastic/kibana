@@ -535,10 +535,10 @@ module.exports = {
      */
     {
       files: ['src/legacy/core_plugins/metrics/**/*.js'],
+      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
       rules: {
         'import/no-default-export': 'error',
       },
-      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
     },
   ],
 };
