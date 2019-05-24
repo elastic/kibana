@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import dateHistogram from '../date_histogram';
+import { dateHistogram } from '../date_histogram';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { DefaultSearchCapabilities } from '../../../../search_strategies/default_search_capabilities';
@@ -52,7 +52,7 @@ describe('dateHistogram(req, panel, series)', () => {
       queryStringOptions: {},
     };
     indexPatternObject = {};
-    capabilities = new DefaultSearchCapabilities(req, true);
+    capabilities = new DefaultSearchCapabilities(req);
   });
 
   it('calls next when finished', () => {

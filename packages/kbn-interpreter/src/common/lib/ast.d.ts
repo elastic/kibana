@@ -17,8 +17,6 @@
  * under the License.
  */
 
-type FilterFunc = <I>(item: I) => boolean;
+export type Ast = unknown;
 
-export const propFilter: (
-  prop: string
-) => <T>(list: T[], filters: string[] | string | FilterFunc) => T[];
+export declare function fromExpression(expression: string): Ast;
