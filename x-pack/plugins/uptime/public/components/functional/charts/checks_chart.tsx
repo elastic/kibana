@@ -79,7 +79,13 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
   return (
     <React.Fragment>
       <EuiTitle size="xs">
-        <h4>Check status</h4>
+        <h4>
+          {i18n.translate('xpack.uptime.monitorCharts.checkStatus.heading', {
+            defaultMessage: 'Check status',
+            description:
+              'A "check" is a record of Heartbeat pinging a website to see if it is available.',
+          })}
+        </h4>
       </EuiTitle>
       <EuiPanel>
         <Chart renderer="canvas">
