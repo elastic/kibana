@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineResult } from '../../server/graphql/types';
 import { OpenTimelineResult } from '../components/open_timeline/types';
+import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
 import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
-import { Direction, GetAllTimeline, SortFieldTimeline } from '../graphql/types';
 
 export interface MockedProvidedQuery {
   request: {

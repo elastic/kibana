@@ -10,7 +10,6 @@ import { assign, getOr } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 
-import { SortFieldTimeline } from '../../../server/graphql/types';
 import {
   defaultColumnHeaderType,
   defaultHeaders,
@@ -21,9 +20,10 @@ import { deleteTimelineMutation } from '../../containers/timeline/delete/persist
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
 import {
   DeleteTimelineMutation,
-  Direction,
   GetOneTimeline,
   TimelineResult,
+  SortFieldTimeline,
+  Direction,
 } from '../../graphql/types';
 import { Note } from '../../lib/note';
 import { State, timelineSelectors } from '../../store';

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { assertUnreachable } from '../../../public/lib/helpers';
 import { LastEventIndexKey } from '../../graphql/types';
+import { assertUnreachable } from '../../utils/build_query';
 
 import { LastEventTimeRequestOptions } from './types';
 
