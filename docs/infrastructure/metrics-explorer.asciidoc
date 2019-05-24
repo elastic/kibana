@@ -1,6 +1,5 @@
 [role="xpack"]
 [[metrics-explorer]]
-== Using the Metrics explorer
 
 The metrics explorer allows you to create system load charts for each host you're monitoring with Metricbeat.
 
@@ -44,7 +43,7 @@ If you only have one host, then it will display the chart across the entire scre
 For multiple hosts, the metric explorer divides the screen into three columns.
 Configurations, you've explored your first metric!
 6. Let's go for some bonus points. Select the **Actions** dropdown in the upper right hand corner of one of the charts.
-Select **Add Filter** to add a filter for that specific host.
+Select **Add Filter** to change the KQL expression to filter for that specific host.
 From here we can start exploring other metrics specific to this host.
 7. Let's delete each of the system load metrics by clicking the little **X** icon next to each of them.
 8. Set `system.network.out.bytes` as the metric.
