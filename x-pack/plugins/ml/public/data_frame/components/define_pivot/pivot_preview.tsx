@@ -112,12 +112,16 @@ interface ErrorMessageProps {
 const ErrorMessage: SFC<ErrorMessageProps> = ({ message }) => {
   const error = JSON.parse(message);
 
+  const statusCodeLabel = i18n.translate('xpack.ml.dataframe.pivotPreview.statusCodeLabel', {
+    defaultMessage: 'Status code',
+  });
+
   return (
     <EuiText size="xs">
       <pre>
         {(error.message &&
           error.statusCode &&
-          `Status code: ${error.statusCode}\n${error.message}`) ||
+          `${statusCodeLabel}: ${error.statusCode}\n${error.message}`) ||
           message}
       </pre>
     </EuiText>
