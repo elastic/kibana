@@ -1,0 +1,245 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/SidebarHeader/ default 1`] = `
+<div
+  style={
+    Object {
+      "width": "300px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive canvasLayout__sidebarHeader"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <h3
+        className="euiTitle euiTitle--xsmall"
+      >
+        Selected layer
+      </h3>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <button
+              aria-describedby="generated-id"
+              aria-label="Save as new element"
+              className="euiButtonIcon euiButtonIcon--text"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                focusable="false"
+                height="16"
+                style={null}
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2H2v11h6v1H1V1h12v6h-1V2zM5 5h5.999V4H5v1zM3 5V4h1v1H3zm2 3V7h3v1H5zM3 8V7h1v1H3zm2 3v-1h2v1H5zm5-1H8v1h2v2h1v-2h2v-1h-2V8h-1v2zm-7 1v-1h1v1H3zm7.5-5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9z"
+                />
+              </svg>
+            </button>
+          </span>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter canvasContextMenu"
+            container={null}
+            id="sidebar-context-menu-popover"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <span
+                className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <button
+                  aria-describedby="generated-id"
+                  aria-label="Element options"
+                  className="euiButtonIcon euiButtonIcon--text"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                  >
+                    <defs>
+                      <path
+                        d="M7 1v2h2V1H7zM6 0h4v4H6V0zm0 6h4v4H6V6zm1 1v2h2V7H7zm-1 5h4v4H6v-4zm1 1v2h2v-2H7z"
+                        id="boxes_vertical-a"
+                      />
+                    </defs>
+                    <use
+                      xlinkHref="#boxes_vertical-a"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/SidebarHeader/ without layer controls 1`] = `
+<div
+  style={
+    Object {
+      "width": "300px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive canvasLayout__sidebarHeader"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <h3
+        className="euiTitle euiTitle--xsmall"
+      >
+        Grouped element
+      </h3>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <button
+              aria-describedby="generated-id"
+              aria-label="Save as new element"
+              className="euiButtonIcon euiButtonIcon--text"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                focusable="false"
+                height="16"
+                style={null}
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2H2v11h6v1H1V1h12v6h-1V2zM5 5h5.999V4H5v1zM3 5V4h1v1H3zm2 3V7h3v1H5zM3 8V7h1v1H3zm2 3v-1h2v1H5zm5-1H8v1h2v2h1v-2h2v-1h-2V8h-1v2zm-7 1v-1h1v1H3zm7.5-5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9z"
+                />
+              </svg>
+            </button>
+          </span>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter canvasContextMenu"
+            container={null}
+            id="sidebar-context-menu-popover"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <span
+                className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <button
+                  aria-describedby="generated-id"
+                  aria-label="Element options"
+                  className="euiButtonIcon euiButtonIcon--text"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                  >
+                    <defs>
+                      <path
+                        d="M7 1v2h2V1H7zM6 0h4v4H6V0zm0 6h4v4H6V6zm1 1v2h2V7H7zm-1 5h4v4H6v-4zm1 1v2h2v-2H7z"
+                        id="boxes_vertical-a"
+                      />
+                    </defs>
+                    <use
+                      xlinkHref="#boxes_vertical-a"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

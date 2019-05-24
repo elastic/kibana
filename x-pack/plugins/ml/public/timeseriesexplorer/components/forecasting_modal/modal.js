@@ -37,7 +37,7 @@ export function Modal(props) {
     <EuiOverlayMask>
       <EuiModal
         onClose={props.close}
-        maxWidth="860px"
+        maxWidth={860}
       >
 
         <EuiModalHeader>

@@ -20,6 +20,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingFileTree: boolean;
   loadingStructureTree: boolean;
   hasStructure: boolean;
+  languageServerInitializing: boolean;
 }
 
 class CodeMain extends React.Component<Props> {
@@ -28,21 +29,31 @@ class CodeMain extends React.Component<Props> {
   }
 
   public componentDidUpdate() {
-    chrome.breadcrumbs.pop();
     this.setBreadcrumbs();
   }
 
   public setBreadcrumbs() {
-    const { org, repo } = this.props.match.params;
-    chrome.breadcrumbs.push({ text: `${org} → ${repo}` });
+    const { resource, org, repo } = this.props.match.params;
+    chrome.breadcrumbs.set([
+      { text: 'Code', href: '#/' },
+      {
+        text: `${org} → ${repo}`,
+        href: `#/${resource}/${org}/${repo}`,
+      },
+    ]);
   }
 
   public componentWillUnmount() {
-    chrome.breadcrumbs.pop();
+    chrome.breadcrumbs.set([{ text: 'Code', href: '#/' }]);
   }
 
   public render() {
-    const { loadingFileTree, loadingStructureTree, hasStructure } = this.props;
+    const {
+      loadingFileTree,
+      loadingStructureTree,
+      hasStructure,
+      languageServerInitializing,
+    } = this.props;
     return (
       <div className="codeContainer__root">
         <div className="codeContainer__rootInner">
@@ -51,6 +62,7 @@ class CodeMain extends React.Component<Props> {
               loadingFileTree={loadingFileTree}
               loadingStructureTree={loadingStructureTree}
               hasStructure={hasStructure}
+              languageServerInitializing={languageServerInitializing}
             />
             <Content />
           </React.Fragment>
@@ -62,9 +74,10 @@ class CodeMain extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  loadingFileTree: state.file.loading,
+  loadingFileTree: state.file.rootFileTreeLoading,
   loadingStructureTree: state.symbol.loading,
   hasStructure: structureSelector(state).length > 0 && !state.symbol.error,
+  languageServerInitializing: state.symbol.languageServerInitializing,
 });
 
 export const Main = connect(mapStateToProps)(CodeMain);

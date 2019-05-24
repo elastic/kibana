@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "combinedQuery": Object {},
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "id": "the-index-pattern-id",
+          "title": "the-index-pattern-title",
+        },
+        "currentSavedSearch": Object {},
+        "indexPatterns": Object {},
+        "kbnBaseUrl": "url",
+        "kibanaConfig": Object {},
+      }
+    }
+  >
+    <DefinePivotSummary
+      aggList={
+        Object {
+          "the-agg-name": Object {
+            "agg": "avg",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-agg-field",
+          },
+        }
+      }
+      groupByList={
+        Object {
+          "the-group-by-name": Object {
+            "agg": "terms",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-group-by-field",
+          },
+        }
+      }
+      search="the-query"
+      valid={true}
+    />
+  </ContextProvider>
+</div>
+`;

@@ -10,6 +10,10 @@ import { Annotation } from '../../../common/types/annotations';
 // It just satisfies needs for other parts of the code area which use
 // TypeScript and rely on the methods typed in here.
 // This allows the import of `ml` into TypeScript code.
+interface EsIndex {
+  name: string;
+}
+
 declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
@@ -18,14 +22,17 @@ declare interface Ml {
 
   dataFrame: {
     getDataFrameTransforms(): Promise<any>;
-    getDataFrameTransformsStats(): Promise<any>;
+    getDataFrameTransformsStats(jobId?: string): Promise<any>;
     createDataFrameTransformsJob(jobId: string, jobConfig: any): Promise<any>;
     deleteDataFrameTransformsJob(jobId: string): Promise<any>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
     startDataFrameTransformsJob(jobId: string): Promise<any>;
     stopDataFrameTransformsJob(jobId: string): Promise<any>;
   };
+
+  checkPrivilege(obj: object): Promise<any>;
   esSearch: any;
+  getIndices(): Promise<EsIndex[]>;
 
   getTimeFieldRange(obj: object): Promise<any>;
 }

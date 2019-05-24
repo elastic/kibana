@@ -29,11 +29,14 @@ import {
   resetRepoTree,
   routeChange,
   setNotFound,
+  fetchRootRepoTreeSuccess,
+  fetchRootRepoTreeFailed,
 } from '../actions';
 
 export interface FileState {
   tree: FileTree;
-  loading: boolean;
+  fileTreeLoading: boolean;
+  rootFileTreeLoading: boolean;
   openedPaths: string[];
   branches: ReferenceInfo[];
   tags: ReferenceInfo[];
@@ -55,7 +58,8 @@ const initialState: FileState = {
     type: FileTreeItemType.Directory,
   },
   openedPaths: [],
-  loading: true,
+  rootFileTreeLoading: true,
+  fileTreeLoading: false,
   branches: [],
   tags: [],
   commits: [],
@@ -107,10 +111,12 @@ export const file = handleActions(
     [String(fetchRepoTree)]: (state: FileState, action: any) =>
       produce(state, draft => {
         draft.currentPath = action.payload.path;
+        draft.fileTreeLoading = true;
       }),
     [String(fetchRepoTreeSuccess)]: (state: FileState, action: Action<RepoTreePayload>) =>
       produce<FileState>(state, (draft: FileState) => {
-        draft.loading = false;
+        draft.fileTreeLoading = false;
+        draft.rootFileTreeLoading = false;
         const { tree, path, withParents } = action.payload!;
         if (withParents || path === '/' || path === '') {
           draft.tree = mergeNode(draft.tree, tree);
@@ -129,6 +135,15 @@ export const file = handleActions(
           }
         }
       }),
+    [String(fetchRootRepoTreeSuccess)]: (state: FileState, action: Action<any>) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.rootFileTreeLoading = false;
+        draft.tree = mergeNode(draft.tree, action.payload!);
+      }),
+    [String(fetchRootRepoTreeFailed)]: (state: FileState, action: Action<any>) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.rootFileTreeLoading = false;
+      }),
     [String(resetRepoTree)]: (state: FileState) =>
       produce<FileState>(state, (draft: FileState) => {
         draft.tree = initialState.tree;
@@ -136,7 +151,8 @@ export const file = handleActions(
       }),
     [String(fetchRepoTreeFailed)]: (state: FileState) =>
       produce(state, draft => {
-        draft.loading = false;
+        draft.fileTreeLoading = false;
+        draft.rootFileTreeLoading = false;
       }),
     [String(openTreePath)]: (state: FileState, action: Action<any>) =>
       produce<FileState>(state, (draft: FileState) => {

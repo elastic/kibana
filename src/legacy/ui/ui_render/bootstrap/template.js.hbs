@@ -39,6 +39,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
       dom.addEventListener('error', failure);
       dom.setAttribute('rel', 'stylesheet');
+      dom.setAttribute('type', 'text/css');
       dom.setAttribute('href', path);
       document.head.appendChild(dom);
     }

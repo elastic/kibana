@@ -26,15 +26,12 @@ import { DuplicateField } from '../../errors';
 import { IndexedArray } from '../../indexed_array';
 import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
 import { FixturesStubbedSavedObjectIndexPatternProvider } from 'fixtures/stubbed_saved_object_index_pattern';
-import { IndexPatternsIntervalsProvider } from '../_intervals';
 import { IndexPatternProvider } from '../_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
-import { toastNotifications } from '../../notify';
 
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
 import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
-import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
 import { SavedObjectsClientProvider } from '../../saved_objects';
 
 describe('index pattern', function () {
@@ -47,34 +44,18 @@ describe('index pattern', function () {
   let savedObjectsResponse;
   const indexPatternId = 'test-pattern';
   let indexPattern;
-  let intervals;
   let indexPatternsApiClient;
-  let defaultTimeField;
-  let isUserAwareOfUnsupportedTimePattern;
 
-  beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule, (PrivateProvider) => {
-    isUserAwareOfUnsupportedTimePattern = sinon.stub().returns(false);
-    PrivateProvider.swap(IsUserAwareOfUnsupportedTimePatternProvider, () => {
-      return isUserAwareOfUnsupportedTimePattern;
-    });
-  }));
+  beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule));
 
   beforeEach(ngMock.inject(function (Private) {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
-    defaultTimeField = mockLogstashFields.find(f => f.type === 'date');
     savedObjectsResponse = Private(FixturesStubbedSavedObjectIndexPatternProvider);
 
     savedObjectsClient = Private(SavedObjectsClientProvider);
     sinon.stub(savedObjectsClient, 'create');
     sinon.stub(savedObjectsClient, 'get');
     sinon.stub(savedObjectsClient, 'update');
-
-    // spy on intervals
-    intervals = Private(IndexPatternsIntervalsProvider);
-    sinon.stub(intervals, 'toIndexList').returns([
-      { index: 'foo', max: Infinity, min: -Infinity },
-      { index: 'bar', max: Infinity, min: -Infinity }
-    ]);
 
     IndexPattern = Private(IndexPatternProvider);
     fieldsFetcher = Private(FieldsFetcherProvider);
@@ -112,7 +93,6 @@ describe('index pattern', function () {
         expect(indexPattern).to.have.property('popularizeField');
         expect(indexPattern).to.have.property('getScriptedFields');
         expect(indexPattern).to.have.property('getNonScriptedFields');
-        expect(indexPattern).to.have.property('getInterval');
         expect(indexPattern).to.have.property('addScriptedField');
         expect(indexPattern).to.have.property('removeScriptedField');
         expect(indexPattern).to.have.property('toString');
@@ -280,208 +260,6 @@ describe('index pattern', function () {
         indexPattern.popularizeField(field.name, decrementAmount);
         expect(field.count).to.equal(0);
       });
-    });
-  });
-
-  describe('#toDetailedIndexList', function () {
-    describe('when index pattern is an interval', function () {
-      let interval;
-      beforeEach(function () {
-        interval = 'result:getInterval';
-        sinon.stub(indexPattern, 'getInterval').returns(interval);
-        sinon.stub(indexPattern, 'isTimeBasedInterval').returns(true);
-      });
-
-      it('invokes interval toDetailedIndexList with given start/stop times', async function () {
-        await indexPattern.toDetailedIndexList(1, 2);
-        sinon.assert.calledWith(intervals.toIndexList, indexPattern.title, interval, 1, 2);
-      });
-
-      it('is fulfilled by the result of interval toDetailedIndexList', async function () {
-        const indexList = await indexPattern.toDetailedIndexList();
-        expect(indexList.map(i => i.index)).to.eql(['foo', 'bar']);
-      });
-
-      describe('with sort order', function () {
-        it('passes the sort order to the intervals module', async function () {
-          await indexPattern.toDetailedIndexList(1, 2, 'SORT_DIRECTION');
-          sinon.assert.calledOnce(intervals.toIndexList);
-          expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
-        });
-      });
-    });
-
-    describe('when index pattern is a time-base wildcard', function () {
-      beforeEach(function () {
-        indexPattern.id = 'randomID';
-        indexPattern.title = 'logstash-*';
-        indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
-        indexPattern.notExpandable = true;
-      });
-
-      it('is fulfilled by title', async function () {
-        const indexList = await indexPattern.toDetailedIndexList();
-        expect(indexList.map(i => i.index)).to.eql([indexPattern.title]);
-      });
-    });
-
-    describe('when index pattern is neither an interval nor a time-based wildcard', function () {
-      beforeEach(function () {
-        indexPattern.id = 'randomID';
-        indexPattern.title = 'logstash-0';
-        indexPattern.timeFieldName = null;
-        indexPattern.intervalName = null;
-        indexPattern.notExpandable = true;
-      });
-
-      it('is fulfilled by title', async function () {
-        const indexList = await indexPattern.toDetailedIndexList();
-        expect(indexList.map(i => i.index)).to.eql([indexPattern.title]);
-      });
-    });
-  });
-
-  describe('#toIndexList', function () {
-    describe('when index pattern is an interval', function () {
-
-      let interval;
-      beforeEach(function () {
-        indexPattern.id = 'randomID';
-        indexPattern.title = '[logstash-]YYYY';
-        indexPattern.timeFieldName = defaultTimeField.name;
-        interval = intervals.byName.years;
-        indexPattern.intervalName = interval.name;
-        indexPattern.notExpandable = true;
-      });
-
-      it('invokes interval toIndexList with given start/stop times', async function () {
-        await indexPattern.toIndexList(1, 2);
-        const { title } = indexPattern;
-        sinon.assert.calledWith(intervals.toIndexList, title, interval, 1, 2);
-      });
-
-      it('is fulfilled by the result of interval toIndexList', async function () {
-        const indexList = await indexPattern.toIndexList();
-        expect(indexList).to.equal('foo,bar');
-      });
-
-      describe('with sort order', function () {
-        it('passes the sort order to the intervals module', function () {
-          return indexPattern.toIndexList(1, 2, 'SORT_DIRECTION')
-            .then(function () {
-              expect(intervals.toIndexList.callCount).to.be(1);
-              expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
-            });
-        });
-      });
-    });
-
-    describe('when index pattern is a time-base wildcard', function () {
-      beforeEach(function () {
-        indexPattern.id = 'randomID';
-        indexPattern.title = 'logstash-*';
-        indexPattern.timeFieldName = defaultTimeField.name;
-        indexPattern.intervalName = null;
-        indexPattern.notExpandable = true;
-      });
-
-      it('is fulfilled using the id', async function () {
-        const indexList = await indexPattern.toIndexList();
-        expect(indexList).to.eql(indexPattern.title);
-      });
-    });
-
-    describe('when index pattern is neither an interval nor a time-based wildcard', function () {
-      beforeEach(function () {
-        indexPattern.id = 'randomID';
-        indexPattern.title = 'logstash-0';
-        indexPattern.timeFieldName = null;
-        indexPattern.intervalName = null;
-        indexPattern.notExpandable = true;
-      });
-
-      it('is fulfilled by id', async function () {
-        const indexList = await indexPattern.toIndexList();
-        expect(indexList).to.eql(indexPattern.title);
-      });
-    });
-  });
-
-  describe('#isTimeBased()', function () {
-    beforeEach(function () {
-      // for the sake of these tests, it doesn't much matter what type of field
-      // this is so long as it exists
-      indexPattern.timeFieldName = 'bytes';
-    });
-    it('returns false if no time field', function () {
-      delete indexPattern.timeFieldName;
-      expect(indexPattern.isTimeBased()).to.be(false);
-    });
-    it('returns false if time field does not actually exist in fields', function () {
-      indexPattern.timeFieldName = 'does not exist';
-      expect(indexPattern.isTimeBased()).to.be(false);
-    });
-    it('returns true if fields are not loaded yet', () => {
-      indexPattern.fields = null;
-      expect(indexPattern.isTimeBased()).to.be(true);
-    });
-    it('returns true if valid time field is configured', function () {
-      expect(indexPattern.isTimeBased()).to.be(true);
-    });
-  });
-
-  describe('#isWildcard()', function () {
-    it('returns true if id has an *', function () {
-      indexPattern.title = 'foo*';
-      expect(indexPattern.isWildcard()).to.be(true);
-    });
-    it('returns false if id has no *', function () {
-      indexPattern.title = 'foo';
-      expect(indexPattern.isWildcard()).to.be(false);
-    });
-  });
-
-  describe('#isUnsupportedTimePattern()', () => {
-    it('returns true when intervalName is set', () => {
-      indexPattern.intervalName = 'something';
-      expect(indexPattern.isUnsupportedTimePattern()).to.be(true);
-    });
-    it('returns false otherwise', () => {
-      delete indexPattern.intervalName;
-      expect(indexPattern.isUnsupportedTimePattern()).to.be(false);
-    });
-  });
-
-  describe('unsupported time pattern warning', () => {
-    async function createUnsupportedTimePattern() {
-      return await create('randomID', {
-        attributes: {
-          title: 'pattern-id',
-          timeFieldName: '@timestamp',
-          intervalName: 'days',
-          fields: '[]'
-        }
-      });
-    }
-
-    it('logs a warning when the index pattern source includes `intervalName`', async () => {
-      await createUnsupportedTimePattern();
-      expect(toastNotifications.list).to.have.length(1);
-    });
-
-    it('does not notify if isUserAwareOfUnsupportedTimePattern() returns true', async () => {
-      // Ideally, _index_pattern.js shouldn't be tightly coupled to toastNotifications. Instead, it
-      // should notify its consumer of this state and the consumer should be responsible for
-      // notifying the user. This test verifies the side effect of the state until we can remove
-      // this coupling.
-
-      // Clear existing toasts.
-      toastNotifications.list.splice(0);
-
-      isUserAwareOfUnsupportedTimePattern.returns(true);
-      await createUnsupportedTimePattern();
-      expect(toastNotifications.list).to.have.length(0);
     });
   });
 });

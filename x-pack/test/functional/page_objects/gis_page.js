@@ -17,6 +17,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
 
+  function escapeLayerName(layerName) {
+    return layerName.split(' ').join('_');
+  }
+
   class GisPage {
 
     constructor() {
@@ -91,8 +95,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayerDeleted(layerName) {
       log.debug('Wait for layer deleted');
-      await retry.try(async () => {
-        await !this.doesLayerExist(layerName);
+      await retry.waitFor('Layer to be deleted', async () => {
+        const doesLayerExist = await this.doesLayerExist(layerName);
+        return !doesLayerExist;
       });
     }
 
@@ -247,22 +252,41 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openLayerTocActionsPanel(layerName) {
-      const cleanLayerName = layerName.split(' ').join('');
-      const isOpen = await testSubjects.exists(`layerTocActionsPanel${cleanLayerName}`);
+      const escapedDisplayName = escapeLayerName(layerName);
+      const isOpen = await testSubjects.exists(`layerTocActionsPanel${escapedDisplayName}`);
       if (!isOpen) {
-        await testSubjects.click(`layerTocActionsPanelToggleButton${cleanLayerName}`);
+        await testSubjects.click(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
       }
     }
 
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
-      await testSubjects.click(`mapOpenLayerButton${layerName}`);
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('editLayerButton');
+    }
+
+    async getLayerTOCDetails(layerName) {
+      return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapeLayerName(layerName)}`);
+    }
+
+    async disableApplyGlobalQuery() {
+      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
+      const isSelected = await element.isSelected();
+      if(isSelected) {
+        await retry.try(async () => {
+          log.debug(`disabling applyGlobalQuery`);
+          await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
+          const isStillSelected = await element.isSelected();
+          if (isStillSelected) {
+            throw new Error('applyGlobalQuery not disabled');
+          }
+        });
+        await this.waitForLayersToLoad();
+      }
     }
 
     async doesLayerExist(layerName) {
-      layerName = layerName.replace(' ', '_');
-      log.debug(`Open layer panel, layer: ${layerName}`);
-      return await testSubjects.exists(`mapOpenLayerButton${layerName}`);
+      return await testSubjects.exists(`layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`);
     }
 
     /*
@@ -314,6 +338,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
       await testSubjects.click(`mapRemoveLayerButton`);
+      await this.waitForLayerDeleted(layerName);
     }
 
     async getLayerErrorText(layerName) {

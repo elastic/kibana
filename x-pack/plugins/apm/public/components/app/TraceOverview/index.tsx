@@ -12,11 +12,15 @@ import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 
 export function TraceOverview() {
-  const { urlParams } = useUrlParams();
-  const { start, end, kuery } = urlParams;
+  const { urlParams, uiFilters } = useUrlParams();
+  const { start, end } = urlParams;
   const { status, data = [] } = useFetcher(
-    () => loadTraceList({ start, end, kuery }),
-    [start, end, kuery]
+    () => {
+      if (start && end) {
+        return loadTraceList({ start, end, uiFilters });
+      }
+    },
+    [start, end, uiFilters]
   );
 
   return (

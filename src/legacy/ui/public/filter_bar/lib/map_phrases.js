@@ -17,13 +17,11 @@
  * under the License.
  */
 
-export function FilterBarLibMapPhrasesProvider(Promise) {
-  return function (filter) {
-    const { type, key, value, params } = filter.meta;
-    if (type !== 'phrases') {
-      return Promise.reject(filter);
-    } else {
-      return Promise.resolve({ type, key, value, params });
-    }
-  };
+export async function mapPhrases(filter) {
+  const { type, key, value, params } = filter.meta;
+  if (type !== 'phrases') {
+    throw filter;
+  } else {
+    return { type, key, value, params };
+  }
 }

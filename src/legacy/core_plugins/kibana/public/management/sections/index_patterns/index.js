@@ -86,6 +86,21 @@ uiRoutes
   .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
     resolve: indexPatternsResolutions,
     requireUICapability: 'management.kibana.index_patterns',
+    badge: uiCapabilities => {
+      if (uiCapabilities.indexPatterns.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n.translate('kbn.management.indexPatterns.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n.translate('kbn.management.indexPatterns.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save index patterns',
+        }),
+        iconType: 'glasses'
+      };
+    }
   });
 
 uiRoutes

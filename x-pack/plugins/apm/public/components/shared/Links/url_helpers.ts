@@ -12,7 +12,11 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 }
 
 export function fromQuery(query: StringMap<any>) {
-  return qs.stringify(query);
+  return qs.stringify(query, undefined, undefined, {
+    encodeURIComponent: (value: string) => {
+      return encodeURIComponent(value).replace(/%3A/g, ':');
+    }
+  });
 }
 
 export interface APMQueryParams {
@@ -26,6 +30,7 @@ export interface APMQueryParams {
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: string | boolean;
@@ -39,7 +44,7 @@ type APMQueryParamsRaw = StringifyAll<APMQueryParams>;
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes problems when path params contains forward slashes
 // This was originally fixed in Angular, but roled back to avoid breaking backwards compatability: https://github.com/angular/angular.js/commit/2bdf7126878c87474bb7588ce093d0a3c57b0026
-export function legacyEncodeURIComponent(rawUrl?: string) {
+export function legacyEncodeURIComponent(rawUrl: string | undefined) {
   return (
     rawUrl &&
     encodeURIComponent(rawUrl)
@@ -48,6 +53,6 @@ export function legacyEncodeURIComponent(rawUrl?: string) {
   );
 }
 
-export function legacyDecodeURIComponent(encodedUrl?: string) {
+export function legacyDecodeURIComponent(encodedUrl: string | undefined) {
   return encodedUrl && decodeURIComponent(encodedUrl.replace(/~/g, '%'));
 }

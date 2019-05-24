@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="mlGroupByLabel__text"
+    >
+      the-options-data-id
+    </span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    grow={false}
+  >
+    <EuiTextColor
+      className="mlGroupByLabel__text"
+      color="subdued"
+    >
+      10m
+    </EuiTextColor>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelSummary /> Histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="mlGroupByLabel__text"
+    >
+      the-options-data-id
+    </span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mlGroupByLabel--text mlGroupByLabel--interval"
+    grow={false}
+  >
+    <EuiTextColor
+      className="mlGroupByLabel__text"
+      color="subdued"
+    >
+      100
+    </EuiTextColor>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelSummary /> Terms aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="mlGroupByLabel__text"
+    >
+      the-options-data-id
+    </span>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

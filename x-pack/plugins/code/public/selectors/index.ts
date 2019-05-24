@@ -86,6 +86,13 @@ export const currentTreeSelector = (state: RootState) => {
   return find(tree, path.split('/'));
 };
 
+export const createTreeSelector = (path: string) => (state: RootState) => {
+  const tree = getTree(state);
+  return find(tree, path.split('/'));
+};
+
 export const currentRepoSelector = (state: RootState) => state.repository.currentRepository;
 
 export const repoScopeSelector = (state: RootState) => state.search.searchOptions.repoScope;
+
+export const urlQueryStringSelector = (state: RootState) => state.route.match.location.search;

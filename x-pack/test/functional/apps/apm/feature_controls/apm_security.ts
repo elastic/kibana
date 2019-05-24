@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'error', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('security', () => {
     before(async () => {
@@ -71,6 +72,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('apm');
         await testSubjects.existOrFail('apmMainContainer', 10000);
       });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
     });
 
     describe('global apm read-only privileges', () => {
@@ -115,6 +120,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
         await testSubjects.existOrFail('apmMainContainer', 10000);
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
     });
 

@@ -8,7 +8,7 @@ import { extractReferences } from './common/migrations/references';
 
 export const migrations = {
   'map': {
-    '7.1.0': (doc) => {
+    '7.2.0': (doc) => {
       const { attributes, references } = extractReferences(doc);
 
       return {

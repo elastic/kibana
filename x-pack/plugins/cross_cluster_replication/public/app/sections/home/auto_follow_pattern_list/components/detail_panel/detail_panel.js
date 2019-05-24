@@ -48,7 +48,7 @@ export class DetailPanel extends Component {
     return (
       <section
         aria-labelledby="ccrAutoFollowPatternDetailSettingsTitle"
-        data-test-subj="ccrAutoFollowPatternDetailPanelSettingsSection"
+        data-test-subj="settingsSection"
       >
         <EuiTitle size="s">
           <h3 id="ccrAutoFollowPatternDetailSettingsTitle">
@@ -61,7 +61,7 @@ export class DetailPanel extends Component {
 
         <EuiSpacer size="s" />
 
-        <EuiDescriptionList data-test-subj="ccrAutoFollowPatternDetailPanelSettingsValues">
+        <EuiDescriptionList data-test-subj="settingsValues">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiDescriptionListTitle>
@@ -73,7 +73,7 @@ export class DetailPanel extends Component {
                 </EuiTitle>
               </EuiDescriptionListTitle>
 
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailRemoteCluster">
+              <EuiDescriptionListDescription data-test-subj="remoteCluster">
                 {remoteCluster}
               </EuiDescriptionListDescription>
             </EuiFlexItem>
@@ -88,7 +88,7 @@ export class DetailPanel extends Component {
                 </EuiTitle>
               </EuiDescriptionListTitle>
 
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailLeaderIndexPatterns">
+              <EuiDescriptionListDescription data-test-subj="leaderIndexPatterns">
                 {leaderIndexPatterns.join(', ')}
               </EuiDescriptionListDescription>
             </EuiFlexItem>
@@ -107,7 +107,7 @@ export class DetailPanel extends Component {
                 </EuiTitle>
               </EuiDescriptionListTitle>
 
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailPatternPrefix">
+              <EuiDescriptionListDescription data-test-subj="patternPrefix">
                 {followIndexPatternPrefix || (
                   <em>
                     <FormattedMessage
@@ -129,7 +129,7 @@ export class DetailPanel extends Component {
                 </EuiTitle>
               </EuiDescriptionListTitle>
 
-              <EuiDescriptionListDescription data-test-subj="ccrAutoFollowPatternDetailPatternSuffix">
+              <EuiDescriptionListDescription data-test-subj="patternSuffix">
                 {followIndexPatternSuffix || (
                   <em>
                     <FormattedMessage
@@ -148,7 +148,7 @@ export class DetailPanel extends Component {
 
   renderIndicesPreview(prefix, suffix, leaderIndexPatterns) {
     return (
-      <section data-test-subj="ccrAutoFollowPatternDetailPanelIndicesPreviewSection">
+      <section data-test-subj="indicesPreviewSection">
         <AutoFollowPatternIndicesPreview
           prefix={prefix}
           suffix={suffix}
@@ -191,7 +191,7 @@ export class DetailPanel extends Component {
     }
 
     return (
-      <section data-test-subj="ccrAutoFollowPatternDetailErrors">
+      <section data-test-subj="errors">
         <EuiFlexGroup
           justifyContent="flexStart"
           alignItems="center"
@@ -202,7 +202,7 @@ export class DetailPanel extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj="ccrAutoFollowPatternDetailsTitleErrors">
+            <EuiTitle size="s" data-test-subj="titleErrors">
               <h3>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.recentErrorsTitle"
@@ -218,7 +218,7 @@ export class DetailPanel extends Component {
             {autoFollowPattern.errors.map((error, i) => (
               <li
                 key={i}
-                data-test-subj="ccrAutoFollowPatternDetailRecentError"
+                data-test-subj="recentError"
               >
                 {error.autoFollowException.reason}
               </li>
@@ -264,7 +264,7 @@ export class DetailPanel extends Component {
 
         <EuiLink
           href={indexManagementUri}
-          data-test-subj="ccrAutoFollowPatternDetailsViewIndexManagementButton"
+          data-test-subj="viewIndexManagementLink"
         >
           <FormattedMessage
             id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
@@ -294,7 +294,7 @@ export class DetailPanel extends Component {
               iconType="cross"
               flush="left"
               onClick={closeDetailPanel}
-              data-test-subj="ccrAutoFollowPatternDetailsFlyoutCloseButton"
+              data-test-subj="closeFlyoutButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.closeButtonLabel"
@@ -312,7 +312,7 @@ export class DetailPanel extends Component {
                       <EuiButtonEmpty
                         color="danger"
                         onClick={() => deleteAutoFollowPattern(autoFollowPattern.name)}
-                        data-test-subj="ccrAutoFollowPatternDetailsDeleteActionButton"
+                        data-test-subj="deleteButton"
                       >
                         <FormattedMessage
                           id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
@@ -328,7 +328,7 @@ export class DetailPanel extends Component {
                     fill
                     color="primary"
                     href={routing.getAutoFollowPatternPath(autoFollowPattern.name)}
-                    data-test-subj="ccrAutoFollowPatternDetailsEditActionButton"
+                    data-test-subj="editButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
@@ -349,18 +349,17 @@ export class DetailPanel extends Component {
 
     return (
       <EuiFlyout
-        data-test-subj="ccrAutoFollowPatternDetailsFlyout"
+        data-test-subj="autoFollowPatternDetail"
         onClose={closeDetailPanel}
         aria-labelledby="autoFollowPatternDetailsFlyoutTitle"
         size="m"
         maxWidth={400}
       >
-
         <EuiFlyoutHeader>
           <EuiTitle
             size="m"
             id="autoFollowPatternDetailsFlyoutTitle"
-            data-test-subj="autoFollowPatternDetailsFlyoutTitle"
+            data-test-subj="title"
           >
             <h2>{autoFollowPatternId}</h2>
           </EuiTitle>

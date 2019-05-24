@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import offsetTime from '../../offset_time';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import { offsetTime } from '../../offset_time';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { buildEsQuery } from '@kbn/es-query';
 
-export default function query(req, panel, series, esQueryConfig, indexPattern) {
+export function query(req, panel, series, esQueryConfig, indexPatternObject) {
   return next => doc => {
-    const { timeField } = getIntervalAndTimefield(panel, series);
+    const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { from, to } = offsetTime(req, series.offset_time);
 
     doc.size = 0;
     const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
-    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+    doc.query = buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {

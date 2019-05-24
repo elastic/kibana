@@ -8,6 +8,7 @@ import queryString from 'querystring';
 import { Action } from 'redux-actions';
 import { kfetch } from 'ui/kfetch';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
+import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import { FileTree } from '../../model';
@@ -28,6 +29,8 @@ import {
   revealPosition,
   fetchRepos,
   turnOnDefaultRepoScope,
+  openTreePath,
+  fetchRootRepoTree,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
@@ -39,6 +42,7 @@ import {
   lastRequestPathSelector,
   refUrlSelector,
   repoScopeSelector,
+  urlQueryStringSelector,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -66,10 +70,11 @@ export function* watchLspMethods() {
   yield takeLatest(String(findReferences), handleReferences);
 }
 
-function handleCloseReferences(action: Action<boolean>) {
+function* handleCloseReferences(action: Action<boolean>) {
   if (action.payload) {
-    const { pathname, search } = history.location;
-    const queryParams = queryString.parse(search);
+    const search = yield select(urlQueryStringSelector);
+    const { pathname } = history.location;
+    const queryParams = Url.parse(search, true).query;
     if (queryParams.tab) {
       delete queryParams.tab;
     }
@@ -135,6 +140,12 @@ function* loadRepoSaga(action: any) {
   try {
     const repo = yield call(fetchRepo, action.payload);
     yield put(loadRepoSuccess(repo));
+
+    // turn on defaultRepoScope if there's no repo scope specified when enter a source view page
+    const repoScope = yield select(repoScopeSelector);
+    if (repoScope.length === 0) {
+      yield put(turnOnDefaultRepoScope(repo));
+    }
   } catch (e) {
     yield put(loadRepoFailed(e));
   }
@@ -147,11 +158,7 @@ export function* watchLoadRepo() {
 function* handleMainRouteChange(action: Action<Match>) {
   // in source view page, we need repos as default repo scope options when no query input
   yield put(fetchRepos());
-  // turn on defaultRepoScope if there's no repo scope specified when enter a source view page
-  const repoScope = yield select(repoScopeSelector);
-  if (repoScope.length === 0) {
-    yield put(turnOnDefaultRepoScope());
-  }
+
   const { location } = action.payload!;
   const search = location.search.startsWith('?') ? location.search.substring(1) : location.search;
   const queryParams = queryString.parse(search);
@@ -185,15 +192,24 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (currentTree.repoUri !== repoUri) {
     yield put(resetRepoTree());
     yield put(fetchRepoCommits({ uri: repoUri, revision }));
+    yield put(fetchRootRepoTree({ uri: repoUri, revision }));
   }
   const tree = yield select(getTree);
+  const isDir = pathType === PathTypes.tree;
+  const openPath = isDir
+    ? file
+    : (file || '')
+        .split('/')
+        .slice(0, -1)
+        .join('/');
+  yield put(openTreePath(openPath));
   yield put(
     fetchRepoTree({
       uri: repoUri,
       revision,
       path: file || '',
       parents: getPathOfTree(tree, (file || '').split('/')) === null,
-      isDir: pathType === PathTypes.tree,
+      isDir,
     })
   );
   const uri = toCanonicalUrl({

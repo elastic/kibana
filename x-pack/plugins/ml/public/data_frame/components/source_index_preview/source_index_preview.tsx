@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useContext, useEffect, useState } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
-import { SearchResponse } from 'elasticsearch';
 
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiCheckbox,
-  EuiEmptyPrompt,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -30,29 +29,31 @@ import {
 
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
+  compressed: boolean;
   itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
   isExpandable: boolean;
 }
 
 const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
 
-import { ml } from '../../../services/ml_api_service';
-
 import { Dictionary } from '../../../../common/types/common';
 
-import { IndexPatternContext, SimpleQuery } from '../../common';
+import { isKibanaContext, KibanaContext, PivotQuery } from '../../common';
 
 import {
   EsDoc,
   EsFieldName,
-  getDefaultSelectableFields,
+  getSourceIndexDevConsoleStatement,
   getSelectableFields,
   MAX_COLUMNS,
   toggleSelectedField,
 } from './common';
 import { ExpandedRow } from './expanded_row';
+import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
+
+const CELL_CLICK_ENABLED = false;
 
 // Defining our own ENUM here.
 // EUI's SortDirection wasn't usable as a union type
@@ -71,25 +72,50 @@ interface Sorting {
 
 type TableSorting = Sorting | boolean;
 
+interface SourceIndexPreviewTitle {
+  indexPatternTitle: string;
+}
+const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
+  <EuiTitle size="xs">
+    <span>
+      {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
+        defaultMessage: 'Source index {indexPatternTitle}',
+        values: { indexPatternTitle },
+      })}
+    </span>
+  </EuiTitle>
+);
+
 interface Props {
-  query: SimpleQuery;
+  query: PivotQuery;
   cellClick?(search: string): void;
 }
 
-const SEARCH_SIZE = 1000;
-
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
-  const indexPattern = useContext(IndexPatternContext);
+  const [clearTable, setClearTable] = useState(false);
 
-  if (indexPattern === null) {
+  const kibanaContext = useContext(KibanaContext);
+
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 
-  const [loading, setLoading] = useState(false);
+  const indexPattern = kibanaContext.currentIndexPattern;
 
-  const [tableItems, setTableItems] = useState([] as EsDoc[]);
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
+
+  // EuiInMemoryTable has an issue with dynamic sortable columns
+  // and will trigger a full page Kibana error in such a case.
+  // The following is a workaround until this is solved upstream:
+  // - If the sortable/columns config changes,
+  //   the table will be unmounted/not rendered.
+  //   This is what setClearTable(true) in toggleColumn() does.
+  // - After that on next render it gets re-enabled. To make sure React
+  //   doesn't consolidate the state updates, setTimeout is used.
+  if (clearTable) {
+    setTimeout(() => setClearTable(false), 0);
+  }
 
   function toggleColumnsPopover() {
     setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -101,15 +127,8 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   function toggleColumn(column: EsFieldName) {
     // spread to a new array otherwise the component wouldn't re-render
+    setClearTable(true);
     setSelectedFields([...toggleSelectedField(selectedFields, column)]);
-  }
-
-  let docFields: EsFieldName[] = [];
-  let docFieldsCount = 0;
-  if (tableItems.length > 0) {
-    docFields = getSelectableFields(tableItems);
-    docFields.sort();
-    docFieldsCount = docFields.length;
   }
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState(
@@ -126,34 +145,64 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     setItemIdToExpandedRowMap({ ...itemIdToExpandedRowMap });
   }
 
-  useEffect(
-    () => {
-      setLoading(true);
-
-      ml.esSearch({
-        index: indexPattern.title,
-        rest_total_hits_as_int: true,
-        size: SEARCH_SIZE,
-        body: { query },
-      })
-        .then((resp: SearchResponse<any>) => {
-          const docs = resp.hits.hits;
-
-          if (selectedFields.length === 0) {
-            const newSelectedFields = getDefaultSelectableFields(docs);
-            setSelectedFields(newSelectedFields);
-          }
-
-          setTableItems(docs as EsDoc[]);
-          setLoading(false);
-        })
-        .catch((resp: any) => {
-          setTableItems([] as EsDoc[]);
-          setLoading(false);
-        });
-    },
-    [indexPattern.title, query.query_string.query]
+  const { errorMessage, status, tableItems } = useSourceIndexData(
+    indexPattern,
+    query,
+    selectedFields,
+    setSelectedFields
   );
+
+  if (status === SOURCE_INDEX_STATUS.ERROR) {
+    return (
+      <EuiPanel grow={false}>
+        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternError', {
+            defaultMessage: 'An error occurred loading the source index data.',
+          })}
+          color="danger"
+          iconType="cross"
+        >
+          <p>{errorMessage}</p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
+
+  if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
+    return (
+      <EuiPanel grow={false}>
+        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutTitle',
+            {
+              defaultMessage: 'Empty source index query result.',
+            }
+          )}
+          color="primary"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutBody',
+              {
+                defaultMessage:
+                  'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+              }
+            )}
+          </p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
+
+  let docFields: EsFieldName[] = [];
+  let docFieldsCount = 0;
+  if (tableItems.length > 0) {
+    docFields = getSelectableFields(tableItems);
+    docFields.sort();
+    docFieldsCount = docFields.length;
+  }
 
   const columns = selectedFields.map(k => {
     const column = {
@@ -164,7 +213,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       truncateText: true,
     } as Dictionary<any>;
 
-    if (cellClick) {
+    if (CELL_CLICK_ENABLED && cellClick) {
       column.render = (d: string) => (
         <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
           {d}
@@ -209,27 +258,18 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     });
   }
 
-  if (!loading && tableItems.length === 0) {
-    return (
-      <EuiEmptyPrompt title={<h2>No results</h2>} body={<p>Check the syntax of your query.</p>} />
-    );
-  }
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
+  });
 
   return (
-    <EuiPanel>
+    <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <span>
-              {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
-                defaultMessage: 'Source Index {indexPatternTitle}',
-                values: { indexPatternTitle: indexPattern.title },
-              })}
-            </span>
-          </EuiTitle>
+          <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -284,22 +324,40 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                 </EuiPopover>
               </EuiText>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy
+                beforeMessage={euiCopyText}
+                textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
+              >
+                {(copy: () => void) => (
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {loading && <EuiProgress size="xs" color="accent" />}
-      {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
-      <ExpandableTable
-        items={tableItems}
-        columns={columns}
-        pagination={true}
-        hasActions={false}
-        isSelectable={false}
-        itemId="_id"
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isExpandable={true}
-        sorting={sorting}
-      />
+      {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+      {status !== SOURCE_INDEX_STATUS.LOADING && (
+        <EuiProgress size="xs" color="accent" max={1} value={0} />
+      )}
+      {clearTable === false && (
+        <ExpandableTable
+          compressed
+          items={tableItems}
+          columns={columns}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
+          hasActions={false}
+          isSelectable={false}
+          itemId="_id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable={true}
+          sorting={sorting}
+        />
+      )}
     </EuiPanel>
   );
 });

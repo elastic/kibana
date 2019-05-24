@@ -8,10 +8,10 @@ import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  InfraMetricInput,
-  InfraMetricType,
+  InfraSnapshotMetricInput,
+  InfraSnapshotMetricType,
   InfraNodeType,
-  InfraPathInput,
+  InfraSnapshotGroupbyInput,
 } from '../../../graphql/types';
 import { InfraGroupByOptions, InfraWaffleMapBounds } from '../../../lib/lib';
 import {
@@ -25,8 +25,8 @@ import {
 } from './actions';
 
 export interface WaffleOptionsState {
-  metric: InfraMetricInput;
-  groupBy: InfraPathInput[];
+  metric: InfraSnapshotMetricInput;
+  groupBy: InfraSnapshotGroupbyInput[];
   nodeType: InfraNodeType;
   view: string;
   customOptions: InfraGroupByOptions[];
@@ -35,7 +35,7 @@ export interface WaffleOptionsState {
 }
 
 export const initialWaffleOptionsState: WaffleOptionsState = {
-  metric: { type: InfraMetricType.cpu },
+  metric: { type: InfraSnapshotMetricType.cpu },
   groupBy: [],
   nodeType: InfraNodeType.host,
   view: 'map',

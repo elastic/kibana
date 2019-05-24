@@ -258,7 +258,7 @@ describe('waterfall_helpers', () => {
       expect(getClockSkew(child, parent)).toBe(130);
     });
 
-    it('should adjust when child starts after parent has ended', () => {
+    it('should not adjust when child starts after parent has ended', () => {
       const child = {
         docType: 'transaction',
         timestamp: 250,
@@ -271,7 +271,7 @@ describe('waterfall_helpers', () => {
         skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(child, parent)).toBe(-120);
+      expect(getClockSkew(child, parent)).toBe(0);
     });
 
     it('should not adjust when child starts within parent duration', () => {

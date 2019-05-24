@@ -47,6 +47,7 @@ jest.mock('../../../../../lib/resolve_import_errors', () => ({
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
+  getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
 }));
 
 jest.mock('../../../../../lib/import_legacy_file', () => ({
@@ -68,6 +69,7 @@ const defaultProps = {
   services: [],
   newIndexPatternUrl: '',
   getConflictResolutions: jest.fn(),
+  confirmModalPromise: jest.fn(),
   indexPatterns: {
     getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
   },
@@ -312,6 +314,75 @@ describe('Flyout', () => {
     });
   });
 
+  describe('errors', () => {
+    const { importFile } = require('../../../../../lib/import_file');
+    const { resolveImportErrors } = require('../../../../../lib/resolve_import_errors');
+
+    it('should display unsupported type errors properly', async () => {
+      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+
+      // Ensure all promises resolve
+      await Promise.resolve();
+      // Ensure the state changes are reflected
+      component.update();
+
+      importFile.mockImplementation(() => ({
+        success: false,
+        successCount: 0,
+        errors: [
+          {
+            id: '1',
+            type: 'wigwags',
+            title: 'My Title',
+            error: {
+              type: 'unsupported_type',
+            }
+          },
+        ],
+      }));
+      resolveImportErrors.mockImplementation(() => ({
+        status: 'success',
+        importCount: 0,
+        failedImports: [
+          {
+            error: {
+              type: 'unsupported_type',
+            },
+            obj: {
+              id: '1',
+              type: 'wigwags',
+              title: 'My Title',
+            },
+          },
+        ],
+      }));
+
+      component.setState({ file: mockFile, isLegacyFile: false });
+
+      // Go through the import flow
+      await component.instance().import();
+      component.update();
+
+      // Ensure all promises resolve
+      await Promise.resolve();
+
+      expect(component.state('status')).toBe('success');
+      expect(component.state('failedImports')).toEqual([
+        {
+          error: {
+            type: 'unsupported_type',
+          },
+          obj: {
+            id: '1',
+            type: 'wigwags',
+            title: 'My Title',
+          },
+        },
+      ]);
+      expect(component.find('EuiFlyout EuiCallOut')).toMatchSnapshot();
+    });
+  });
+
   describe('legacy conflicts', () => {
     const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
     const {
@@ -363,6 +434,7 @@ describe('Flyout', () => {
         conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
         importedObjectCount: 2,
+        confirmModalPromise: () => {},
       }));
     });
 
@@ -383,7 +455,8 @@ describe('Flyout', () => {
         mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
         true,
         defaultProps.services,
-        defaultProps.indexPatterns
+        defaultProps.indexPatterns,
+        defaultProps.confirmModalPromise,
       );
 
       expect(component.state()).toMatchObject({

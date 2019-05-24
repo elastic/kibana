@@ -1,15 +1,25 @@
 [[console-kibana]]
 == Console
 
-The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*,
-where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
+Console enables you to interact with the REST API of {es}. *Note:* You cannot 
+interact with {kib} API endpoints via Console.
 
-NOTE: You cannot interact with Kibana API endpoints via the Console.
+Go to *Dev Tools > Console* to get started. 
 
-.The Console UI
-image::dev-tools/console/images/introduction_screen.png[Screenshot]
+Console has two main areas: 
 
-Console understands commands in a cURL-like syntax. For example the following Console command
+* The *editor*, where you compose requests to send to {es}.
+* The *response* pane, which displays the responses to the request.
+
+[role="screenshot"]
+image::dev-tools/console/images/console.png["Console"]
+
+[float]
+[[console-api]]
+=== Writing requests
+
+Console understands commands in a cURL-like syntax. 
+For example, the following is a `GET` request to the {es} `_search` API. 
 
 [source,js]
 ----------------------------------
@@ -21,7 +31,7 @@ GET /_search
 }
 ----------------------------------
 
-is a simple `GET` request to Elasticsearch's `_search API`. Here is the equivalent command in cURL.
+Here is the equivalent command in cURL:
 
 [source,bash]
 ----------------------------------
@@ -33,38 +43,55 @@ curl -XGET "http://localhost:9200/_search" -d'
 }'
 ----------------------------------
 
-In fact, you can paste the above command into Console and it will automatically be converted into the Console syntax.
+If you paste the above command into Console, {kib} automatically converts it
+to Console syntax.  Alternatively, if you want to want to see Console syntax in cURL, 
+click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*. 
 
-When typing a command, Console will make context sensitive <<suggestions,suggestions>>. These suggestions can help
-you explore parameters for each API, or to just speed up typing. Console will suggest APIs, indexes and field
-names.
+For help with formatting requests, you can use Console's <<auto-formatting, auto formatting>> 
+feature.
 
-[[suggestions]]
-.API suggestions
-image::dev-tools/console/images/introduction_suggestion.png["Suggestions",width=400,align="center"]
 
-Once you have typed a command in to the left pane, you can submit it to Elasticsearch by clicking the little green
-triangle that appears next to the URL line of the request. Notice that as you move the cursor around, the little
- triangle and wrench icons follow you around. We call this the <<action_menu,Action Menu>>. You can also select
- multiple requests and submit them all at once.
+[float]
+[[console-request]]
+=== Submitting requests 
 
-[[action_menu]]
-.The Action Menu
-image::dev-tools/console/images/introduction_action_menu.png["The Action Menu",width=400,align="center"]
+Once you enter a command in the editor, click the 
+green triangle to submit the request to {es}.
 
-When the response come back, you should see it in the right hand panel:
+You can select multiple requests and submit them together.
+Console sends the requests to {es} one by one and shows the output 
+in the response pane. Submitting multiple request is helpful when you're debugging an issue or trying query 
+combinations in multiple scenarios.
 
-.The Output Pane
-image::dev-tools/console/images/introduction_output.png[Screenshot]
+[float]
+[[console-autocomplete]]
+=== Using autocomplete
 
-include::multi-requests.asciidoc[]
+When typing a command, Console makes context-sensitive suggestions.
+These suggestions can help you explore parameters for each API and speed up typing. 
+To configure your preferences for autocomplete, go to 
+<<configuring-console, Settings>>. 
+
+[float]
+[[console-view-api]]
+=== Viewing API docs
+
+You can view the documentation for an API endpoint by clicking
+the action icon (image:dev-tools/console/images/wrench.png[]) and selecting
+*Open documentation*.
+
+[float]
+[[console-history]]
+=== Getting your request history
+
+Console maintains a list of the last 500 requests that {es} successfully executed. 
+To view your most recent requests, click *History*. If you select a request
+and click *Apply*, {kib} adds it to the editor at the current cursor position.
+
+
 
 include::auto-formatting.asciidoc[]
 
 include::keyboard-shortcuts.asciidoc[]
-
-include::history.asciidoc[]
-
-include::settings.asciidoc[]
 
 include::configuring-console.asciidoc[]

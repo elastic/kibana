@@ -48,3 +48,7 @@ export {
 export {
   readDirectory
 } from './directory';
+
+export {
+  Progress
+} from './progress';

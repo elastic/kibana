@@ -13,3 +13,6 @@ export interface RectCoordinate {
   x: number;
   x0: number;
 }
+
+export type ChartType = 'area' | 'linemark';
+export type YUnit = 'percent' | 'bytes' | 'number';

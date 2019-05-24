@@ -18,8 +18,9 @@
  */
 
 import { findDOMNode } from 'react-dom';
-import calcDimensions from './calc_dimensions';
-export default function calculateCoordinates(innerRef, resizeRef, state) {
+import { calcDimensions } from './calc_dimensions';
+
+export function calculateCoordinates(innerRef, resizeRef, state) {
   const inner = findDOMNode(innerRef);
   const resize = findDOMNode(resizeRef);
   let scale = state.scale;
