@@ -1000,6 +1000,13 @@ const removeProvider = (providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
+    ...((timeline.dataProviders[providerIndex].and.length && [
+      {
+        ...timeline.dataProviders[providerIndex].and.slice(0, 1)[0],
+        and: [...timeline.dataProviders[providerIndex].and.slice(1)],
+      },
+    ]) ||
+      []),
     ...timeline.dataProviders.slice(providerIndex + 1),
   ];
 };

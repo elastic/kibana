@@ -7,7 +7,11 @@
 import { cloneDeep, set } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
-import { IS_OPERATOR, DataProvider } from '../../components/timeline/data_providers/data_provider';
+import {
+  IS_OPERATOR,
+  DataProvider,
+  DataProvidersAnd,
+} from '../../components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -1705,6 +1709,59 @@ describe('Timeline', () => {
         },
       };
       expect(update).toEqual(expected);
+    });
+
+    test('should remove only first provider and not nested andProvider', () => {
+      const secondDataProvider: DataProvider = {
+        and: [],
+        id: '789',
+        name: 'data provider 2',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+          operator: IS_OPERATOR,
+        },
+
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      const multiDataProvider = timelineByIdMock.foo.dataProviders.concat(secondDataProvider);
+      const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
+
+      const andDataProvider: DataProvidersAnd = {
+        id: '568',
+        name: 'And Data Provider',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+          operator: IS_OPERATOR,
+        },
+
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      const nestedMultiAndDataProviderMock = set(
+        'foo.dataProviders[0].and',
+        [andDataProvider],
+        multiDataProviderMock
+      );
+
+      const update = removeTimelineProvider({
+        id: 'foo',
+        providerId: '123',
+        timelineById: nestedMultiAndDataProviderMock,
+      });
+      expect(update).toEqual(
+        set(
+          'foo.dataProviders',
+          [{ ...andDataProvider, and: [] }, secondDataProvider],
+          timelineByIdMock
+        )
+      );
     });
   });
 });
