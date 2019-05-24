@@ -23,8 +23,8 @@ import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
+import { Query } from 'plugins/data';
 import { FilterRow } from './filter';
-import { Query } from '../../../../core_plugins/data/public/query_bar';
 
 const generateId = htmlIdGenerator();
 const config = chrome.getUiSettingsClient();
