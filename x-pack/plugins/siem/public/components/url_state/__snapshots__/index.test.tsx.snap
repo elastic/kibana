@@ -274,7 +274,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                 Object {
                                   "hash": "",
                                   "pathname": "/network",
-                                  "search": "?kqlQuery=!((filterQuery:!n,model:hosts,type:details),(filterQuery:!n,model:hosts,type:page),(filterQuery:!n,model:network,type:details),(filterQuery:!n,model:network,type:page))",
+                                  "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
                                   "state": "",
                                 },
                               ],
@@ -298,28 +298,28 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                           toggleTimelineLinkTo={[Function]}
                           urlState={
                             Object {
-                              "kqlQuery": Array [
-                                Object {
+                              "kqlQuery": Object {
+                                "hosts.details": Object {
                                   "filterQuery": null,
-                                  "model": "hosts",
+                                  "queryLocation": "hosts.details",
                                   "type": "details",
                                 },
-                                Object {
+                                "hosts.page": Object {
                                   "filterQuery": null,
-                                  "model": "hosts",
+                                  "queryLocation": "hosts.page",
                                   "type": "page",
                                 },
-                                Object {
+                                "network.details": Object {
                                   "filterQuery": null,
-                                  "model": "network",
+                                  "queryLocation": "network.details",
                                   "type": "details",
                                 },
-                                Object {
+                                "network.page": Object {
                                   "filterQuery": null,
-                                  "model": "network",
+                                  "queryLocation": "network.page",
                                   "type": "page",
                                 },
-                              ],
+                              },
                               "timerange": Object {
                                 "global": Object {
                                   "linkTo": Array [
@@ -386,7 +386,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                         Object {
                                           "hash": "",
                                           "pathname": "/network",
-                                          "search": "?kqlQuery=!((filterQuery:!n,model:hosts,type:details),(filterQuery:!n,model:hosts,type:page),(filterQuery:!n,model:network,type:details),(filterQuery:!n,model:network,type:page))",
+                                          "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
                                           "state": "",
                                         },
                                       ],
@@ -423,28 +423,28 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                               toggleTimelineLinkTo={[Function]}
                               urlState={
                                 Object {
-                                  "kqlQuery": Array [
-                                    Object {
+                                  "kqlQuery": Object {
+                                    "hosts.details": Object {
                                       "filterQuery": null,
-                                      "model": "hosts",
+                                      "queryLocation": "hosts.details",
                                       "type": "details",
                                     },
-                                    Object {
+                                    "hosts.page": Object {
                                       "filterQuery": null,
-                                      "model": "hosts",
+                                      "queryLocation": "hosts.page",
                                       "type": "page",
                                     },
-                                    Object {
+                                    "network.details": Object {
                                       "filterQuery": null,
-                                      "model": "network",
+                                      "queryLocation": "network.details",
                                       "type": "details",
                                     },
-                                    Object {
+                                    "network.page": Object {
                                       "filterQuery": null,
-                                      "model": "network",
+                                      "queryLocation": "network.page",
                                       "type": "page",
                                     },
-                                  ],
+                                  },
                                   "timerange": Object {
                                     "global": Object {
                                       "linkTo": Array [

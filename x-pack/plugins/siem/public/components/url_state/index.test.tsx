@@ -88,6 +88,21 @@ const mockProps: UrlStateContainerPropTypes = {
       },
     },
     [CONSTANTS.kqlQuery]: {
+      [CONSTANTS.hostsDetails]: {
+        filterQuery: null,
+        queryLocation: CONSTANTS.hostsDetails,
+        type: hostsModel.HostsType.details,
+      },
+      [CONSTANTS.hostsPage]: {
+        filterQuery: null,
+        queryLocation: CONSTANTS.hostsPage,
+        type: hostsModel.HostsType.page,
+      },
+      [CONSTANTS.networkDetails]: {
+        filterQuery: null,
+        queryLocation: CONSTANTS.networkDetails,
+        type: networkModel.NetworkType.details,
+      },
       [CONSTANTS.networkPage]: {
         filterQuery,
         queryLocation: CONSTANTS.networkPage,

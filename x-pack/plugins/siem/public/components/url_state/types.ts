@@ -19,10 +19,10 @@ export type LocationTypes =
   | null;
 
 export interface KqlQueryObject {
-  [CONSTANTS.networkDetails]?: KqlQuery;
-  [CONSTANTS.networkPage]?: KqlQuery;
-  [CONSTANTS.hostsDetails]?: KqlQuery;
-  [CONSTANTS.hostsPage]?: KqlQuery;
+  [CONSTANTS.networkDetails]: KqlQuery;
+  [CONSTANTS.networkPage]: KqlQuery;
+  [CONSTANTS.hostsDetails]: KqlQuery;
+  [CONSTANTS.hostsPage]: KqlQuery;
   [key: string]: KqlQuery;
 }
 

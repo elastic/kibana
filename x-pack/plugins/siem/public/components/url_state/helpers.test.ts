@@ -5,7 +5,9 @@
  */
 
 import { isKqlForRoute } from './helpers';
-import { hostsModel, networkModel, KueryFilterModel } from '../../store';
+import { hostsModel, networkModel } from '../../store';
+import { CONSTANTS } from './constants';
+
 describe('isKqlForRoute', () => {
   test('host page and host page kuery', () => {
     const result = isKqlForRoute('/hosts', {
@@ -13,7 +15,7 @@ describe('isKqlForRoute', () => {
         expression: 'host.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.hosts,
+      queryLocation: CONSTANTS.hostsPage,
       type: hostsModel.HostsType.page,
     });
     expect(result).toBeTruthy();
@@ -24,7 +26,7 @@ describe('isKqlForRoute', () => {
         expression: 'host.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.hosts,
+      queryLocation: CONSTANTS.hostsDetails,
       type: hostsModel.HostsType.details,
     });
     expect(result).toBeFalsy();
@@ -35,7 +37,7 @@ describe('isKqlForRoute', () => {
         expression: 'host.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.hosts,
+      queryLocation: CONSTANTS.hostsDetails,
       type: hostsModel.HostsType.details,
     });
     expect(result).toBeTruthy();
@@ -46,7 +48,7 @@ describe('isKqlForRoute', () => {
         expression: 'host.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.hosts,
+      queryLocation: CONSTANTS.hostsPage,
       type: hostsModel.HostsType.page,
     });
     expect(result).toBeFalsy();
@@ -57,7 +59,7 @@ describe('isKqlForRoute', () => {
         expression: 'network.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.network,
+      queryLocation: CONSTANTS.networkPage,
       type: networkModel.NetworkType.page,
     });
     expect(result).toBeTruthy();
@@ -68,7 +70,7 @@ describe('isKqlForRoute', () => {
         expression: 'network.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.network,
+      queryLocation: CONSTANTS.networkDetails,
       type: networkModel.NetworkType.details,
     });
     expect(result).toBeFalsy();
@@ -79,7 +81,7 @@ describe('isKqlForRoute', () => {
         expression: 'network.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.network,
+      queryLocation: CONSTANTS.networkDetails,
       type: networkModel.NetworkType.details,
     });
     expect(result).toBeTruthy();
@@ -90,7 +92,7 @@ describe('isKqlForRoute', () => {
         expression: 'network.name:"siem-kibana"',
         kind: 'kuery',
       },
-      model: KueryFilterModel.network,
+      queryLocation: CONSTANTS.networkPage,
       type: networkModel.NetworkType.page,
     });
     expect(result).toBeFalsy();
