@@ -40,15 +40,21 @@ export class MBMapContainer extends React.Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const nextIsDrawingFilter = nextProps.drawState !== null;
-    const nextLayerList = nextProps.layerList;
-    if (nextIsDrawingFilter === prevState.isDrawingFilter && nextLayerList === prevState.prevLayerList) {
-      return null;
+    if (nextIsDrawingFilter !== prevState.isDrawingFilter) {
+      return {
+        isDrawingFilter: nextIsDrawingFilter,
+      };
     }
-    return {
-      isDrawingFilter: nextIsDrawingFilter,
-      prevLayerList: nextLayerList,
-      hasSyncedLayerList: false,
-    };
+
+    const nextLayerList = nextProps.layerList;
+    if (nextLayerList !== prevState.prevLayerList) {
+      return {
+        prevLayerList: nextLayerList,
+        hasSyncedLayerList: false,
+      };
+    }
+
+    return null;
   }
 
   constructor() {
