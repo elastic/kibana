@@ -312,11 +312,7 @@ export class VectorStyle extends AbstractStyle {
           range: this._getFieldRange(name),
           computedName: VectorStyle.getComputedFieldName(name),
         };
-      })
-      .filter(({ range }) => {
-        return !!range;
       });
-
   }
 
   clearFeatureState(featureCollection, mbMap, sourceId) {
@@ -352,11 +348,12 @@ export class VectorStyle extends AbstractStyle {
     //scale to [0,1] domain
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
+
       for (let j = 0; j < scaledFields.length; j++) {
         const { name, range, computedName } = scaledFields[j];
         const unscaledValue = parseFloat(feature.properties[name]);
         let scaledValue;
-        if (isNaN(unscaledValue)) {//cannot scale
+        if (isNaN(unscaledValue) || !range) {//cannot scale
           scaledValue = -1;//put outside range
         } else if (range.delta === 0) {//values are identical
           scaledValue = 1;//snap to end of color range
@@ -372,24 +369,28 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
-    const colorRange = getHexColorRangeStrings(color, 8)
-      .reduce((accu, curColor, idx, srcArr) => {
-        accu = [ ...accu, idx / srcArr.length, curColor ];
-        return accu;
+    // colorStops is an array of color stops
+    // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
+    const colorStops = getHexColorRangeStrings(color, 8)
+      .reduce((accu, stopColor, idx, srcArr) => {
+        const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
+        return [ ...accu, stopNumber, stopColor ];
       }, []);
-    const targetName = VectorStyle.getComputedFieldName(fieldName);
+    const computedName = VectorStyle.getComputedFieldName(fieldName);
+
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['feature-state', targetName], -1],
-      -1, 'rgba(0,0,0,0)',
-      ...colorRange
+      ['coalesce', ['feature-state', computedName], -1], // extract value from feature state, default to -1 if no value provided
+      -1, 'rgba(0,0,0,0)',  // define stop with no data, color is irrelevant since opacity is set to zero
+      ...colorStops
     ];
   }
 
   _getMbDataDrivenSize({ fieldName, minSize, maxSize }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
-    return   ['interpolate',
+    return   [
+      'interpolate',
       ['linear'],
       ['feature-state', targetName],
       0, minSize,
