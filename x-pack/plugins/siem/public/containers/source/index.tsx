@@ -12,7 +12,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import chrome from 'ui/chrome';
 
 import memoizeOne from 'memoize-one';
-import { DEFAULT_INDEX_KEY } from '../../..';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IndexField, SourceQuery } from '../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';
