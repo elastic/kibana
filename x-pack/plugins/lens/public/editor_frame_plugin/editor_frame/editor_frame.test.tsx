@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
 import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 import { act } from 'react-dom/test-utils';
@@ -474,13 +475,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.5,
                   state: {},
                   title: 'Suggestion2',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.8,
                   state: {},
                   title: 'Suggestion1',
@@ -491,13 +492,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.4,
                   state: {},
                   title: 'Suggestion4',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.45,
                   state: {},
                   title: 'Suggestion3',
@@ -539,7 +540,7 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion1',
@@ -594,13 +595,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion2',
@@ -647,13 +648,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.6,
                   state: {},
                   title: 'Suggestion2',
@@ -664,7 +665,7 @@ describe('editor_frame', () => {
               ...mockVisualization2,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  tableIndex: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion3',

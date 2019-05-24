@@ -5,13 +5,12 @@
  */
 
 import { getSuggestions } from './suggestion_helpers';
-import { createMockVisualization, createMockDatasource } from '../mock_extensions';
+import { createMockVisualization } from '../mock_extensions';
 import { TableColumn } from '../../types';
 
 describe('suggestion helpers', () => {
   it('should return suggestions array', () => {
     const mockVisualization = createMockVisualization();
-    const mockDatasource = createMockDatasource();
     const suggestedState = {};
     const suggestions = getSuggestions(
       [{ state: {}, tableColumns: [] }],
@@ -19,13 +18,12 @@ describe('suggestion helpers', () => {
         vis1: {
           ...mockVisualization,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test', state: suggestedState },
+            { tableIndex: 0, score: 0.5, title: 'Test', state: suggestedState },
           ],
         },
       },
       'vis1',
-      {},
-      mockDatasource.publicAPIMock
+      {}
     );
     expect(suggestions.length).toBe(1);
     expect(suggestions[0].state).toBe(suggestedState);
@@ -34,27 +32,23 @@ describe('suggestion helpers', () => {
   it('should concatenate suggestions from all visualizations', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const mockDatasource = createMockDatasource();
     const suggestions = getSuggestions(
       [{ state: {}, tableColumns: [] }],
       {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test', state: {} },
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test2', state: {} },
+            { tableIndex: 0, score: 0.5, title: 'Test', state: {} },
+            { tableIndex: 0, score: 0.5, title: 'Test2', state: {} },
           ],
         },
         vis2: {
           ...mockVisualization2,
-          getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test3', state: {} },
-          ],
+          getSuggestions: () => [{ tableIndex: 0, score: 0.5, title: 'Test3', state: {} }],
         },
       },
       'vis1',
-      {},
-      mockDatasource.publicAPIMock
+      {}
     );
     expect(suggestions.length).toBe(3);
   });
@@ -62,27 +56,23 @@ describe('suggestion helpers', () => {
   it('should rank the visualizations by score', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const mockDatasource = createMockDatasource();
     const suggestions = getSuggestions(
       [{ state: {}, tableColumns: [] }],
       {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.2, title: 'Test', state: {} },
-            { datasourceSuggestionId: 0, score: 0.8, title: 'Test2', state: {} },
+            { tableIndex: 0, score: 0.2, title: 'Test', state: {} },
+            { tableIndex: 0, score: 0.8, title: 'Test2', state: {} },
           ],
         },
         vis2: {
           ...mockVisualization2,
-          getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.6, title: 'Test3', state: {} },
-          ],
+          getSuggestions: () => [{ tableIndex: 0, score: 0.6, title: 'Test3', state: {} }],
         },
       },
       'vis1',
-      {},
-      mockDatasource.publicAPIMock
+      {}
     );
     expect(suggestions[0].score).toBe(0.8);
     expect(suggestions[1].score).toBe(0.6);
@@ -92,7 +82,6 @@ describe('suggestion helpers', () => {
   it('should call all suggestion getters with all available data tables', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const mockDatasource = createMockDatasource();
     const table1: TableColumn[] = [];
     const table2: TableColumn[] = [];
     getSuggestions(
@@ -102,19 +91,17 @@ describe('suggestion helpers', () => {
         vis2: mockVisualization2,
       },
       'vis1',
-      {},
-      mockDatasource.publicAPIMock
+      {}
     );
-    expect(mockVisualization1.getSuggestions.mock.calls[0][0].tableColumns[0]).toBe(table1);
-    expect(mockVisualization1.getSuggestions.mock.calls[0][0].tableColumns[1]).toBe(table2);
-    expect(mockVisualization2.getSuggestions.mock.calls[0][0].tableColumns[0]).toBe(table1);
-    expect(mockVisualization2.getSuggestions.mock.calls[0][0].tableColumns[1]).toBe(table2);
+    expect(mockVisualization1.getSuggestions.mock.calls[0][0].tables[0]).toBe(table1);
+    expect(mockVisualization1.getSuggestions.mock.calls[0][0].tables[1]).toBe(table2);
+    expect(mockVisualization2.getSuggestions.mock.calls[0][0].tables[0]).toBe(table1);
+    expect(mockVisualization2.getSuggestions.mock.calls[0][0].tables[1]).toBe(table2);
   });
 
   it('should map the suggestion ids back to the correct datasource states', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const mockDatasource = createMockDatasource();
     const tableState1 = {};
     const tableState2 = {};
     const suggestions = getSuggestions(
@@ -123,20 +110,17 @@ describe('suggestion helpers', () => {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.3, title: 'Test', state: {} },
-            { datasourceSuggestionId: 1, score: 0.2, title: 'Test2', state: {} },
+            { tableIndex: 0, score: 0.3, title: 'Test', state: {} },
+            { tableIndex: 1, score: 0.2, title: 'Test2', state: {} },
           ],
         },
         vis2: {
           ...mockVisualization2,
-          getSuggestions: () => [
-            { datasourceSuggestionId: 1, score: 0.1, title: 'Test3', state: {} },
-          ],
+          getSuggestions: () => [{ tableIndex: 1, score: 0.1, title: 'Test3', state: {} }],
         },
       },
       'vis1',
-      {},
-      mockDatasource.publicAPIMock
+      {}
     );
     expect(suggestions[0].datasourceState).toBe(tableState1);
     expect(suggestions[1].datasourceState).toBe(tableState2);
@@ -146,7 +130,6 @@ describe('suggestion helpers', () => {
   it('should pass the state of the currently active visualization to getSuggestions', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const mockDatasource = createMockDatasource();
     const currentState = {};
     getSuggestions(
       [{ state: {}, tableColumns: [] }, { state: {}, tableColumns: [] }],
@@ -155,8 +138,7 @@ describe('suggestion helpers', () => {
         vis2: mockVisualization2,
       },
       'vis1',
-      currentState,
-      mockDatasource.publicAPIMock
+      currentState
     );
     expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({

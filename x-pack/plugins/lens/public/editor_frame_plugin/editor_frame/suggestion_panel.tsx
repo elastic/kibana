@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Action } from './state_management';
-import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
+import { Datasource, Visualization } from '../../types';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 
 export interface SuggestionPanelProps {
@@ -17,7 +17,6 @@ export interface SuggestionPanelProps {
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  datasourcePublicAPI: DatasourcePublicAPI;
   dispatch: (action: Action) => void;
 }
 
@@ -27,7 +26,6 @@ export function SuggestionPanel({
   activeVisualizationId,
   visualizationMap,
   visualizationState,
-  datasourcePublicAPI,
   dispatch,
 }: SuggestionPanelProps) {
   const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsFromCurrentState(
@@ -38,8 +36,7 @@ export function SuggestionPanel({
     datasourceSuggestions,
     visualizationMap,
     activeVisualizationId,
-    visualizationState,
-    datasourcePublicAPI
+    visualizationState
   );
 
   return (

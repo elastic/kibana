@@ -122,7 +122,7 @@ export interface VisualizationProps<T = unknown> {
 
 export interface SuggestionRequest<T = unknown> {
   // It is up to the Visualization to rank these tables
-  tableColumns: Record<number, TableColumn[]>;
+  tables: TableColumn[][];
   state?: T; // State is only passed if the visualization is active
 }
 
@@ -130,7 +130,7 @@ export interface VisualizationSuggestion<T = unknown> {
   score: number;
   title: string;
   state: T;
-  datasourceSuggestionId: number;
+  tableIndex: number;
 }
 
 export interface Visualization<T = unknown, P = unknown> {
