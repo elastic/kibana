@@ -16,7 +16,6 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [basePath](./kibana-plugin-public.coresetup.basepath.md) | <code>BasePathSetup</code> | [BasePathSetup](./kibana-plugin-public.basepathsetup.md) |
 |  [chrome](./kibana-plugin-public.coresetup.chrome.md) | <code>ChromeSetup</code> | [ChromeSetup](./kibana-plugin-public.chromesetup.md) |
 |  [fatalErrors](./kibana-plugin-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> | [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |
 |  [http](./kibana-plugin-public.coresetup.http.md) | <code>HttpSetup</code> | [HttpSetup](./kibana-plugin-public.httpsetup.md) |

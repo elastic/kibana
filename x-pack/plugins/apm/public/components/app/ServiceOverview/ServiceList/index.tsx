@@ -14,7 +14,7 @@ import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { APMLink } from '../../../shared/Links/APMLink';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
-import { TruncatedAnchorEuiToolTip } from './TruncatedAnchorEuiToolTip';
+import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 
 interface Props {
   items?: ServiceListAPIResponse['items'];
@@ -66,17 +66,7 @@ export const SERVICE_COLUMNS: Array<
     width: '20%',
     sortable: true,
     render: (environments: string[]) => (
-      <TruncatedAnchorEuiToolTip
-        id="service-environments-tooltip"
-        content={environments.map(env => (
-          <React.Fragment key={env}>
-            {env}
-            <br />
-          </React.Fragment>
-        ))}
-      >
-        <>{environments.join(', ')}</>
-      </TruncatedAnchorEuiToolTip>
+      <EnvironmentBadge environments={environments} />
     )
   },
   {
