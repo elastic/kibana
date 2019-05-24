@@ -65,7 +65,6 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
   const hostName = idx(transaction, _ => _.host.hostname);
   const podId = idx(transaction, _ => _.kubernetes.pod.uid);
   const containerId = idx(transaction, _ => _.container.id);
-  const traceId = idx(transaction, _ => _.trace.id);
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
@@ -107,9 +106,9 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
         { defaultMessage: 'Show trace logs' }
       ),
-      condition: traceId,
+      condition: true,
       hash: `/link-to/logs`,
-      query: { time, filter: `trace.id:${traceId}` }
+      query: { time, filter: `trace.id:${transaction.trace.id}` }
     },
     {
       icon: 'infraApp',
@@ -167,7 +166,6 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
   });
 
   const menuItems = [
-    ...infraItems,
     {
       icon: 'discoverApp',
       key: 'discover-transaction',
@@ -183,6 +181,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         </DiscoverTransactionLink>
       )
     },
+    ...infraItems,
     {
       icon: 'uptimeApp',
       key: 'uptime',
