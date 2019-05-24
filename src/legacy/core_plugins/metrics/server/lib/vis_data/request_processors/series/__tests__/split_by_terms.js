@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import splitByTerms from '../split_by_terms';
+import { splitByTerms } from '../split_by_terms';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
