@@ -50,12 +50,12 @@ describe('getChartLabelFormatter', () => {
   it('creates a format with the year/month for range exceeding a week', () => {
     expect.assertions(1);
     // Sun, 15 Jul 2001 12:27:59 GMT -> Fri, 28 Dec 2001 18:46:19 GMT
-    expect(getChartDateLabel(995200079000, 1009565179000)).toBe('YYYY-MM');
+    expect(getChartDateLabel(995200079000, 1009565179000)).toBe('yyyy-MM');
   });
 
   it('creates a format of only year for timespan > 4 years', () => {
     expect.assertions(1);
     // Tue, 07 Jan 1986 03:59:39 GMT -> Sat, 22 Jun 1996 14:39:39 GMT
-    expect(getChartDateLabel(505454379000, 835454379000)).toBe('YYYY');
+    expect(getChartDateLabel(505454379000, 835454379000)).toBe('yyyy');
   });
 });
