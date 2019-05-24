@@ -43,7 +43,7 @@ class DataPlugin {
     this.expressions = new ExpressionsService();
   }
 
-  public setup() {
+  public setup(): DataSetup {
     return {
       indexPatterns: this.indexPatterns.setup(),
       search: this.search.setup(),
@@ -75,7 +75,7 @@ export const data = new DataPlugin().setup();
 /** @public */
 export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
-  expressionExecutor: ExpressionsSetup;
+  expressions: ExpressionsSetup;
   search: SearchSetup;
   query: QuerySetup;
 }
