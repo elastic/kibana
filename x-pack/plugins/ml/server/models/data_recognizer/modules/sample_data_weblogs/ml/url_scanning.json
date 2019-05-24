@@ -5,7 +5,7 @@
     "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "High distinct count of urls for a client IPs",
+        "detector_description": "High distinct count of URLs for a client IPs",
         "function": "high_distinct_count",
         "field_name": "url.keyword",
         "over_field_name": "clientip"
