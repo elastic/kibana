@@ -19,8 +19,9 @@
 
 import uuid from 'uuid';
 import _ from 'lodash';
-import newMetricAggFn from './new_metric_agg_fn';
-export default (obj = {}) => {
+import { newMetricAggFn } from './new_metric_agg_fn';
+
+export const newSeriesFn = (obj = {}) => {
   return _.assign({
     id: uuid.v1(),
     color: '#68BC00',
