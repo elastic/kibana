@@ -19,4 +19,4 @@
 
 export { QueryBarService } from './query_bar_service';
 
-export { QueryBar } from './components';
+export { QueryBar, QueryBarInput } from './components';
