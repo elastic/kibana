@@ -28,7 +28,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const expectSpaceSelector = options.expectSpaceSelector || false;
       const expectSuccess = options.expectSuccess;
       const expectForbidden = options.expectForbidden || false;
-      const rawDataTabLocator = 'a[id=rawdata-tab]';
+      const expectNotFound = options.expectNotFound || false;
 
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
@@ -40,12 +40,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectForbidden) {
-        if (await find.existsByCssSelector(rawDataTabLocator)) {
-          // Firefox has 3 tabs and requires navigation to see Raw output
-          await find.clickByCssSelector(rawDataTabLocator);
-        }
         await retry.try(async () => {
           await PageObjects.error.expectForbidden();
+        });
+        log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
+      } else if (expectNotFound) {
+        await retry.try(async () => {
+          await PageObjects.error.expectNotFound();
         });
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectSuccess) {
@@ -84,7 +85,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async login(username, password, options = {}) {
       await this.loginPage.login(username, password, options);
 
-      if (options.expectSpaceSelector || options.expectForbidden) {
+      if (options.expectSpaceSelector || options.expectForbidden || options.expectNotFound) {
         return;
       }
 

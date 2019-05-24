@@ -10,7 +10,14 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects([
+    'common',
+    'error',
+    'timelion',
+    'header',
+    'security',
+    'spaceSelector',
+  ]);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
@@ -174,14 +181,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        await PageObjects.error.expectNotFound();
       });
     });
   });

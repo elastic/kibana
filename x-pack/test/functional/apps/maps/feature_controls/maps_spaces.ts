@@ -11,7 +11,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'maps', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
 
   describe('spaces feature controls', () => {
@@ -87,14 +87,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        await PageObjects.error.expectNotFound();
       });
     });
   });

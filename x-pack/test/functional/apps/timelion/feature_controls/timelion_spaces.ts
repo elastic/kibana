@@ -11,7 +11,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'error', 'timelion', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
 
   describe('timelion', () => {
@@ -86,14 +86,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        await PageObjects.error.expectNotFound();
       });
 
       it(`edit timelion sheet which doesn't exist returns a 404`, async () => {
@@ -103,14 +96,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        await PageObjects.error.expectNotFound();
       });
 
       it(`edit timelion sheet which exists returns a 404`, async () => {
@@ -120,14 +106,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        await PageObjects.error.expectNotFound();
       });
     });
   });

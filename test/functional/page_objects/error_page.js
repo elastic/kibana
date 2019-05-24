@@ -18,29 +18,23 @@
  */
 import expect from '@kbn/expect';
 
-export function ErrorPageProvider({ getPageObjects }) {
-  const PageObjects = getPageObjects(['common']);
+export function ErrorPageProvider({ getService }) {
+  const testSubjects = getService('testSubjects');
 
   class ErrorPage {
     async expectForbidden() {
-      const messageText = await PageObjects.common.getBodyText();
-      expect(messageText).to.eql(
-        JSON.stringify({
-          statusCode: 403,
-          error: 'Forbidden',
-          message: 'Forbidden'
-        })
-      );
+      const title = await testSubjects.getVisibleText('unavailable-unauthorized-title');
+      const message = await testSubjects.getVisibleText('unavailable-unauthorized-message');
+
+      expect(title).to.eql('No access to Kibana');
+      expect(message).to.eql('Your account does not have access to Kibana.');
     }
     async expectNotFound() {
-      const messageText = await PageObjects.common.getBodyText();
-      expect(messageText).to.eql(
-        JSON.stringify({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Not Found',
-        })
-      );
+      const title = await testSubjects.getVisibleText('unavailable-notFound-title');
+      const message = await testSubjects.getVisibleText('unavailable-notFound-message');
+
+      expect(title).to.eql('Not found');
+      expect(message).to.eql('Sorry, the requested resource was not found.');
     }
   }
 
