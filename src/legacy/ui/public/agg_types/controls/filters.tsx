@@ -30,7 +30,7 @@ const generateId = htmlIdGenerator();
 const config = chrome.getUiSettingsClient();
 
 interface FilterValue {
-  input: any;
+  input: Query;
   label: string;
   id: string;
 }
