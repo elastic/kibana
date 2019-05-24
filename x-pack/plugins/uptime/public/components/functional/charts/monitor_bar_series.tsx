@@ -21,7 +21,7 @@ import React, { useContext } from 'react';
 import { MonitorSeriesPoint } from '../../../../common/graphql/types';
 import { formatSparklineCounts } from '../format_sparkline_counts';
 import { getColorsMap } from './get_colors_map';
-import { getChartDateLabel } from '../../../lib/helper';
+import { getChartDateLabel, seriesHasYValues } from '../../../lib/helper';
 import { UptimeSettingsContext } from '../../../contexts';
 
 export interface MonitorBarSeriesProps {
@@ -35,10 +35,6 @@ export interface MonitorBarSeriesProps {
   downSeries: MonitorSeriesPoint[];
 }
 
-const seriesHasCounts = (series: MonitorSeriesPoint[]) => {
-  return series.some(point => !!point.y);
-};
-
 /**
  * There is a specific focus on the monitor's down count, the up series is not shown,
  * so we will only render the series component if there are down counts for the selected monitor.
@@ -48,7 +44,7 @@ export const MonitorBarSeries = ({ dangerColor, downSeries }: MonitorBarSeriesPr
   const id = getSpecId('downSeries');
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
 
-  return seriesHasCounts(downSeries) ? (
+  return seriesHasYValues(downSeries) ? (
     <div style={{ height: 50, width: '100%' }}>
       <Chart renderer="canvas">
         <Settings tooltipType={TooltipType.VerticalCursor} />
