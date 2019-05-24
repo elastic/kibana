@@ -14,10 +14,9 @@ import { TestProviderWithoutDragAndDrop, apolloClient } from '../../mock/test_pr
 import { mockOpenTimelineQueryResults } from '../../mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines/timelines_page';
 
+import { StatefulOpenTimeline } from '.';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-
-import { StatefulOpenTimeline } from '.';
 
 const getStateChildComponent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
