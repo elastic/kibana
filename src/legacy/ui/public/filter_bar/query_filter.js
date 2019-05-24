@@ -18,19 +18,32 @@
  */
 
 import _ from 'lodash';
+import { Subject } from 'rxjs';
+
 import { onlyDisabled } from './lib/only_disabled';
 import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';
 import { compareFilters } from './lib/compare_filters';
-import { EventsProvider } from '../events';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $rootScope, getAppState, globalState, config) {
-  const EventEmitter = Private(EventsProvider);
+import { getNewPlatform } from 'ui/new_platform';
 
-  const queryFilter = new EventEmitter();
+export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState) {
+  const queryFilter = {};
+  const { uiSettings } = getNewPlatform().setup.core;
+
+  const update$ = new Subject();
+  const fetch$ = new Subject();
+
+  queryFilter.getUpdates$ = function () {
+    return update$.asObservable();
+  };
+
+  queryFilter.getFetches$ = function () {
+    return fetch$.asObservable();
+  };
 
   queryFilter.getFilters = function () {
     const compareOptions = { disabled: true, negate: true };
@@ -65,19 +78,14 @@ export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $r
    * @param {bool} global Whether the filter should be added to global state
    * @returns {Promise} filter map promise
    */
-  queryFilter.addFilters = function (filters, global) {
-
-    if (global === undefined) {
-      const configDefault = config.get('filters:pinnedByDefault');
-
-      if (configDefault === false || configDefault === true) {
-        global = configDefault;
-      }
+  queryFilter.addFilters = function (filters, addToGlobalState) {
+    if (addToGlobalState === undefined) {
+      addToGlobalState = uiSettings.get('filters:pinnedByDefault');
     }
 
     // Determine the state for the new filter (whether to pass the filter through other apps or not)
     const appState = getAppState();
-    const filterState = (global) ? globalState : appState;
+    const filterState = addToGlobalState ? globalState : appState;
 
     if (!Array.isArray(filters)) {
       filters = [filters];
@@ -366,15 +374,15 @@ export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $r
 
         // check for actions, bail if we're done
         getActions();
-        if (!doUpdate) return;
+        if (doUpdate) {
+          // save states and emit the required events
+          saveState();
+          update$.next();
 
-        // save states and emit the required events
-        saveState();
-        queryFilter.emit('update')
-          .then(function () {
-            if (!doFetch) return;
-            queryFilter.emit('fetch');
-          });
+          if (doFetch) {
+            fetch$.next();
+          }
+        }
 
         // iterate over each state type, checking for changes
         function getActions() {

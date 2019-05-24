@@ -8,19 +8,13 @@ import { HostLastFirstSeenRequestOptions } from './types';
 
 export const buildLastFirstSeenHostQuery = ({
   hostName,
-  sourceConfiguration: {
-    fields: { timestamp },
-    logAlias,
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
-  },
+  defaultIndex,
 }: HostLastFirstSeenRequestOptions) => {
   const filter = [{ term: { 'host.name': hostName } }];
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

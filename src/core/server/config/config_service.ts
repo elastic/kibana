@@ -22,8 +22,9 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
-import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
+import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
+import { hasConfigPathIntersection } from './config';
 
 /** @internal */
 export class ConfigService {
@@ -73,14 +74,9 @@ export class ConfigService {
    * against the static `schema` on the given `ConfigClass`.
    *
    * @param path - The path to the desired subset of the config.
-   * @param ConfigClass - A class (not an instance of a class) that contains a
-   * static `schema` that we validate the config at the given `path` against.
    */
-  public atPath<TSchema extends Type<unknown>, TConfig>(
-    path: ConfigPath,
-    ConfigClass: ConfigWithSchema<TSchema, TConfig>
-  ) {
-    return this.validateConfig(path).pipe(map(config => this.createConfig(config, ConfigClass)));
+  public atPath<TSchema>(path: ConfigPath) {
+    return this.validateConfig(path) as Observable<TSchema>;
   }
 
   /**
@@ -89,15 +85,11 @@ export class ConfigService {
    *
    * {@link ConfigService.atPath}
    */
-  public optionalAtPath<TSchema extends Type<any>, TConfig>(
-    path: ConfigPath,
-    ConfigClass: ConfigWithSchema<TSchema, TConfig>
-  ) {
+  public optionalAtPath<TSchema>(path: ConfigPath) {
     return this.getDistinctConfig(path).pipe(
       map(config => {
         if (config === undefined) return undefined;
-        const validatedConfig = this.validate(path, config);
-        return this.createConfig(validatedConfig, ConfigClass);
+        return this.validate(path, config) as TSchema;
       })
     );
   }
@@ -156,13 +148,6 @@ export class ConfigService {
     );
   }
 
-  private createConfig<TSchema extends Type<unknown>, TConfig>(
-    validatedConfig: unknown,
-    ConfigClass: ConfigWithSchema<TSchema, TConfig>
-  ) {
-    return new ConfigClass(validatedConfig, this.env);
-  }
-
   private validateConfig(path: ConfigPath) {
     return this.getDistinctConfig(path).pipe(map(config => this.validate(path, config)));
   }
@@ -196,4 +181,4 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  * handled paths.
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
-  handledPaths.some(handledPath => path.startsWith(handledPath));
+  handledPaths.some(handledPath => hasConfigPathIntersection(path, handledPath));

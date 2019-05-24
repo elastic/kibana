@@ -69,7 +69,6 @@ export function IndexPatternsProvider(Private, config) {
   self.getFields = getProvider.multiple;
   self.fieldsFetcher = Private(FieldsFetcherProvider);
   self.fieldFormats = fieldFormats;
-  self.IndexPattern = IndexPattern;
 }
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));

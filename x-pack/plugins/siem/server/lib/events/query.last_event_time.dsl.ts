@@ -6,7 +6,7 @@
 
 import { LastEventTimeRequestOptions } from './types';
 import { LastEventIndexKey } from '../../graphql/types';
-import { assertUnreachable } from '../../../public/lib/helpers';
+import { assertUnreachable } from '../../utils/build_query';
 
 interface EventIndices {
   [key: string]: string[];
@@ -15,17 +15,11 @@ interface EventIndices {
 export const buildLastEventTimeQuery = ({
   indexKey,
   details,
-  sourceConfiguration: {
-    fields: { timestamp },
-    logAlias,
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
-  },
+  defaultIndex,
 }: LastEventTimeRequestOptions) => {
   const indicesToQuery: EventIndices = {
-    hosts: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
-    network: [logAlias, packetbeatAlias],
+    hosts: defaultIndex,
+    network: defaultIndex,
   };
   const getHostDetailsFilter = (hostName: string) => [{ term: { 'host.name': hostName } }];
   const getIpDetailsFilter = (ip: string) => [

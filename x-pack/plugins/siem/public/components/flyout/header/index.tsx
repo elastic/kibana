@@ -171,7 +171,13 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
     );
   },
   createTimeline: ({ id, show }: { id: string; show?: boolean }) => {
-    dispatch(timelineActions.createTimeline({ id, columns: defaultHeaders, show }));
+    dispatch(
+      timelineActions.createTimeline({
+        id,
+        columns: defaultHeaders,
+        show,
+      })
+    );
   },
   updateDescription: ({ id, description }: { id: string; description: string }) => {
     dispatch(timelineActions.updateDescription({ id, description }));

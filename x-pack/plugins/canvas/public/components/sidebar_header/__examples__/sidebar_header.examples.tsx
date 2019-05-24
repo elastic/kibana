@@ -20,6 +20,8 @@ const handlers = {
   sendBackward: action('sendBackward'),
   sendToBack: action('sendToBack'),
   createCustomElement: action('createCustomElement'),
+  groupNodes: action('groupNodes'),
+  ungroupNodes: action('ungroupNodes'),
 };
 storiesOf('components/SidebarHeader/', module)
   .addDecorator(story => <div style={{ width: '300px' }}>{story()}</div>)

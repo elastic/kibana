@@ -24,7 +24,12 @@ describe('timeseriesFetcher', () => {
         config: {
           get: () => 'myIndex' as any,
           has: () => true
-        }
+        },
+        uiFiltersES: [
+          {
+            term: { 'service.environment': 'test' }
+          }
+        ]
       }
     });
   });
