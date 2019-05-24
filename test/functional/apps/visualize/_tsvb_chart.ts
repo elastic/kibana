@@ -122,25 +122,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('table', () => {
-      beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-22 06:00:00.000',
-          '2015-09-22 11:00:00.000'
-        );
-        await PageObjects.visualBuilder.clickTable();
-      });
-
-      it('should display correct values on changing group by field and column name', async () => {
-        await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
-        await PageObjects.visualBuilder.setLabelValue('OS');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-        const tableData = await PageObjects.visualBuilder.getViewTable();
-        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
-        expect(tableData).to.be(expectedData);
-      });
-    });
-
     describe.skip('switch index patterns', () => {
       before(async () => {
         log.debug('Load kibana_sample_data_flights data');
