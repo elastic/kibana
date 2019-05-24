@@ -46,7 +46,7 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
         },
         Object {
           "align": "right",
-          "field": "upSeries",
+          "field": "downSeries",
           "name": "Downtime history",
           "render": [Function],
           "width": "180px",
