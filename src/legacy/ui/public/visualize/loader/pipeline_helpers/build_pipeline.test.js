@@ -183,6 +183,14 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
+
+      it('with boolean param showLabel', () => {
+        const schemas = { metric: [{ accessor: 0 }] };
+        const params = { showLabel: false };
+        const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
+        expect(actual).toMatchSnapshot();
+      });
+
     });
 
     describe('handles region_map function', () => {
