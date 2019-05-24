@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import getBucketsPath from './get_buckets_path';
+import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
 import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';

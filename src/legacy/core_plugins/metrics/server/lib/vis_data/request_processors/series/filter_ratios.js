@@ -21,7 +21,8 @@
 const filter = metric => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import _ from 'lodash';
-export default function ratios(req, panel, series) {
+
+export function ratios(req, panel, series) {
   return next => doc => {
     if (series.metrics.some(filter)) {
       series.metrics.filter(filter).forEach(metric => {
