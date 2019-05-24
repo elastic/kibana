@@ -31,6 +31,8 @@ export type TypeOf<RT extends Type<any>> = RT['type'];
 export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeOf<P[K]> }>;
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
+  private props: Record<string, AnySchema>;
+
   constructor(props: P, options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
@@ -44,6 +46,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .default();
 
     super(schema, options);
+    this.props = schemaKeys;
   }
 
   protected handleError(type: string, { reason, value }: Record<string, any>) {
@@ -56,5 +59,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.child':
         return reason[0];
     }
+  }
+
+  reach(key: string) {
+    if (!this.props[key]) throw new Error(`${key} is not a valid part of this schema`);
+    return this.props[key];
   }
 }

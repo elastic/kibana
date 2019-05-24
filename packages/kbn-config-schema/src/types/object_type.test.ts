@@ -199,3 +199,19 @@ test('includes namespace in failure when wrong value type', () => {
 
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
+
+test('reach returns a valid schema component', () => {
+  const type = schema.object({
+    foo: schema.boolean(),
+  });
+
+  const fooSchema = type.reach('foo');
+  const value = false;
+  expect(() => fooSchema.validate(value)).toBeTruthy();
+
+  try {
+    type.reach('bar');
+  } catch (err) {
+    expect(err.message).toBe('bar is not a valid part of this schema');
+  }
+});
