@@ -23,3 +23,10 @@ export { toUser } from './lib/to_user';
 
 // @ts-ignore
 export { setupDirective } from './directive';
+
+export { getQueryLog } from './lib/get_query_log';
+
+export interface Query {
+  query: string;
+  language: string;
+}
