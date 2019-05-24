@@ -37,7 +37,8 @@ const createSetupContractMock = () => {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
     },
-    createNewServer: async (cfg: HttpConfig): Promise<HttpServerSetup> => ({} as HttpServerSetup),
+    createNewServer: async (cfg: Partial<HttpConfig>): Promise<HttpServerSetup> =>
+      ({} as HttpServerSetup),
   };
   return setupContract;
 };

@@ -24,7 +24,7 @@ import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
 import { Logger } from '../logging';
 import { CoreContext } from '../core_context';
-import { HttpConfig, HttpConfigType } from './http_config';
+import { HttpConfig, HttpConfigType, config } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
@@ -114,6 +114,11 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     if (this.secondaryServers.has(port)) {
       throw new Error(`port ${port} is already in use`);
+    }
+
+    for (let [key, val] of Object.entries(cfg)) {
+      const schema = config.schema.reach(key);
+      schema.validate(val);
     }
 
     const baseConfig = await this.config$.pipe(first()).toPromise();
