@@ -30,7 +30,7 @@ import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
 export type HttpServiceSetup = HttpServerSetup & {
-  createNewServer?: (cfg: HttpConfig) => Promise<HttpServerSetup>;
+  createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
 };
 /** @public */
 export interface HttpServiceStart {
@@ -75,8 +75,11 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const setup = this.httpServer.setup(config) as HttpServiceSetup;
-    setup.createNewServer = (cfg: HttpConfig) => this.createServer(cfg);
+    const httpSetup = (this.httpServer.setup(config) || {}) as HttpServiceSetup;
+    const setup = {
+      ...httpSetup,
+      ...{ createNewServer: (cfg: Partial<HttpConfig>) => this.createServer(cfg) },
+    };
     return setup;
   }
 
@@ -102,8 +105,8 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     };
   }
 
-  private async createServer(config: Partial<HttpConfig>) {
-    const { port } = config;
+  private async createServer(cfg: Partial<HttpConfig>) {
+    const { port } = cfg;
 
     if (!port) {
       throw new Error('port must be defined');
@@ -114,11 +117,11 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     }
 
     const baseConfig = await this.config$.pipe(first()).toPromise();
-    const cfg = { ...baseConfig, ...config };
+    const finalConfig = { ...baseConfig, ...cfg };
     const log = this.logger.get('http', `server:${port}`);
 
     const httpServer = new HttpServer(log);
-    const httpSetup = await httpServer.setup(cfg);
+    const httpSetup = await httpServer.setup(finalConfig);
     this.secondaryServers.set(port, httpServer);
     return httpSetup;
   }

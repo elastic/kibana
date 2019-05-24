@@ -111,6 +111,12 @@ test('creates and sets up second http server', async () => {
   } catch (err) {
     expect(err.message).toBe('port 2345 is already in use');
   }
+
+  try {
+    await serverSetup.createNewServer({ host: 'example.org' });
+  } catch (err) {
+    expect(err.message).toBe('port must be defined');
+  }
 });
 
 test('logs error if already set up', async () => {
