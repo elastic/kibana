@@ -69,6 +69,7 @@ class FlyoutUI extends Component {
     services: PropTypes.array.isRequired,
     newIndexPatternUrl: PropTypes.string.isRequired,
     indexPatterns: PropTypes.object.isRequired,
+    confirmModalPromise: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -213,7 +214,7 @@ class FlyoutUI extends Component {
   }
 
   legacyImport = async () => {
-    const { services, indexPatterns, intl } = this.props;
+    const { services, indexPatterns, intl, confirmModalPromise } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
 
     this.setState({ status: 'loading', error: undefined });
@@ -268,7 +269,8 @@ class FlyoutUI extends Component {
       contents,
       isOverwriteAllChecked,
       services,
-      indexPatterns
+      indexPatterns,
+      confirmModalPromise
     );
 
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
