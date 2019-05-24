@@ -19,14 +19,14 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesEditor from '../series_editor';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import 'brace/mode/less';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import ColorPicker from '../color_picker';
-import YesNo from '../yes_no';
-import MarkdownEditor from '../markdown_editor';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorPicker } from '../color_picker';
+import { YesNo } from '../yes_no';
+import { MarkdownEditor } from '../markdown_editor';
 import less from 'less/lib/less-browser';
 import {
   htmlIdGenerator,
@@ -320,5 +320,4 @@ MarkdownPanelConfigUi.propTypes = {
   visData$: PropTypes.object,
 };
 
-const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);
-export default MarkdownPanelConfig;
+export const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);

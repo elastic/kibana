@@ -10,9 +10,14 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
-import { DEFAULT_INDEX_KEY } from '../../..';
-import { FlowTarget } from '../../../server/graphql/types';
-import { GetUsersQuery, PageInfo, UsersEdges, UsersSortField } from '../../graphql/types';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import {
+  GetUsersQuery,
+  FlowTarget,
+  PageInfo,
+  UsersEdges,
+  UsersSortField,
+} from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
