@@ -49,7 +49,7 @@ export function getRoutes() {
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export function IndexPatternProvider(Private, config, Promise) {
+export function IndexPatternProvider(Private, config, Promise, kbnUrl) {
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
