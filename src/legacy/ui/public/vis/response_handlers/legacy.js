@@ -19,6 +19,55 @@
 
 import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
+export const convert = (table, dimensions) => {
+  const converted = { tables: [] };
+  const split = (dimensions.splitColumn || dimensions.splitRow);
+
+  if (split) {
+    converted.direction = dimensions.splitRow ? 'row' : 'column';
+    const splitColumnIndex = split[0].accessor;
+    const splitColumnFormatter = getFormat(split[0].format);
+    const splitColumn = table.columns[splitColumnIndex];
+    const splitMap = {};
+    let splitIndex = 0;
+
+    table.rows.forEach((row, rowIndex) => {
+      const splitValue = row[splitColumn.id];
+
+      if (!splitMap.hasOwnProperty(splitValue)) {
+        splitMap[splitValue] = splitIndex++;
+        const tableGroup = {
+          $parent: converted,
+          title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
+          name: splitColumn.name,
+          key: splitValue,
+          column: splitColumnIndex,
+          row: rowIndex,
+          table: table,
+          tables: []
+        };
+        tableGroup.tables.push({
+          $parent: tableGroup,
+          columns: table.columns,
+          rows: []
+        });
+
+        converted.tables.push(tableGroup);
+      }
+
+      const tableIndex = splitMap[splitValue];
+      converted.tables[tableIndex].tables[0].rows.push(row);
+    });
+  } else {
+    converted.tables.push({
+      columns: table.columns,
+      rows: table.rows
+    });
+  }
+
+  return converted;
+};
+
 /**
  * The LegacyResponseHandler is not registered as a response handler and can't be used
  * as such anymore. Since the function itself is still used as a utility in the table
@@ -28,63 +77,7 @@ import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
  * function.
  */
 
-const LegacyResponseHandlerProvider = function () {
-
-  return {
-    name: 'legacy',
-    handler: function (table, dimensions) {
-      return new Promise((resolve) => {
-        const converted = { tables: [] };
-
-        const split = (dimensions.splitColumn || dimensions.splitRow);
-
-        if (split) {
-          converted.direction = dimensions.splitRow ? 'row' : 'column';
-          const splitColumnIndex = split[0].accessor;
-          const splitColumnFormatter = getFormat(split[0].format);
-          const splitColumn = table.columns[splitColumnIndex];
-          const splitMap = {};
-          let splitIndex = 0;
-
-          table.rows.forEach((row, rowIndex) => {
-            const splitValue = row[splitColumn.id];
-
-            if (!splitMap.hasOwnProperty(splitValue)) {
-              splitMap[splitValue] = splitIndex++;
-              const tableGroup = {
-                $parent: converted,
-                title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
-                name: splitColumn.name,
-                key: splitValue,
-                column: splitColumnIndex,
-                row: rowIndex,
-                table: table,
-                tables: []
-              };
-              tableGroup.tables.push({
-                $parent: tableGroup,
-                columns: table.columns,
-                rows: []
-              });
-
-              converted.tables.push(tableGroup);
-            }
-
-            const tableIndex = splitMap[splitValue];
-            converted.tables[tableIndex].tables[0].rows.push(row);
-          });
-        } else {
-
-          converted.tables.push({
-            columns: table.columns,
-            rows: table.rows
-          });
-        }
-
-        resolve(converted);
-      });
-    }
-  };
-};
-
-export { LegacyResponseHandlerProvider };
+export const LegacyResponseHandlerProvider = () => ({
+  name: 'legacy',
+  handler: async (table, dimensions) => convert(table, dimensions),
+});
