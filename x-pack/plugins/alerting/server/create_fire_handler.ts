@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from './types';
+import { AlertType, State, Context } from './types';
 import { TaskInstance } from '../../task_manager';
 import { ActionsPlugin } from '../../actions';
 
@@ -13,7 +13,7 @@ export function createFireHandler(
   taskInstance: TaskInstance,
   fireAction: ActionsPlugin['fire']
 ) {
-  return async (actionGroupId: string, context: any, state: any) => {
+  return async (actionGroupId: string, context: Context, state: State) => {
     const actions =
       taskInstance.params.actionGroups[actionGroupId] ||
       taskInstance.params.actionGroups.default ||

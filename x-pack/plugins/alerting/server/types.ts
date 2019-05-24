@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertInstance } from './alert_instance';
 import { AlertService } from './alert_service';
+
+export type State = Record<string, any>;
+export type Context = Record<string, any>;
 
 export interface AlertServices {
   alertInstanceFactory: (id: string) => AlertInstance;
@@ -14,7 +16,7 @@ export interface AlertServices {
 export interface AlertType {
   id: string;
   description: string;
-  execute: (services: AlertServices, params: any) => Promise<Record<string, any> | void>;
+  execute: (services: AlertServices, params: any) => Promise<State | void>;
 }
 
 export interface Alert {
@@ -28,6 +30,29 @@ export interface Alert {
     }>
   >;
   checkParams: Record<string, any>;
+}
+
+export interface AlertInstanceData {
+  fireOptions?: {
+    actionGroupId: string;
+    context: Context;
+    state: State;
+  };
+  previousState: State;
+}
+
+export interface AlertInstance {
+  getFireOptions: () =>
+    | undefined
+    | {
+        actionGroupId: string;
+        context: Context;
+        state: State;
+      };
+  clearFireOptions: () => void;
+  getPreviousState: () => State;
+  fire: (actionGroupId: string, context: Context, state: State) => void;
+  replaceState: (state: State) => void;
 }
 
 export interface AlertingPlugin {

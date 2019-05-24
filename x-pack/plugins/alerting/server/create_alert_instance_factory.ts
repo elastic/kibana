@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function createAlertInstanceFactory(alertInstances: Record<string, any>) {
-  return (id: string) => {
+import { AlertInstance, AlertInstanceData, State, Context } from './types';
+
+export function createAlertInstanceFactory(alertInstances: Record<string, AlertInstanceData>) {
+  return (id: string): AlertInstance => {
     if (!alertInstances[id]) {
       alertInstances[id] = {
-        fireOptions: null,
+        fireOptions: undefined,
         previousState: {},
       };
     }
@@ -25,10 +27,10 @@ export function createAlertInstanceFactory(alertInstances: Record<string, any>) 
       getPreviousState() {
         return alertInstanceData.previousState;
       },
-      fire(actionGroupId: string, context: Record<string, any>, state: Record<string, any>) {
+      fire(actionGroupId: string, context: Context, state: State) {
         alertInstanceData.fireOptions = { actionGroupId, context, state };
       },
-      replaceState(state: Record<string, any>) {
+      replaceState(state: State) {
         alertInstanceData.previousState = state;
       },
     };

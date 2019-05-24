@@ -5,7 +5,7 @@
  */
 
 import { ActionsPlugin } from '../../actions';
-import { AlertType } from './types';
+import { AlertType, AlertInstanceData } from './types';
 import { TaskInstance } from '../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -22,7 +22,10 @@ export function getCreateTaskRunnerFunction(
     const fireHandler = createFireHandler(alertType, taskInstance, fireAction);
     return {
       run: async () => {
-        const alertInstances = taskInstance.state.alertInstances || {};
+        const alertInstances = (taskInstance.state.alertInstances || {}) as Record<
+          string,
+          AlertInstanceData
+        >;
         const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
         const services = {
