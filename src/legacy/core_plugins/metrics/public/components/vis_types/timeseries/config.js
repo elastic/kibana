@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import DataFormatPicker from '../../data_format_picker';
-import createSelectHandler from '../../lib/create_select_handler';
-import YesNo from '../../yes_no';
-import createTextHandler from '../../lib/create_text_handler';
+import { DataFormatPicker } from '../../data_format_picker';
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { YesNo } from '../../yes_no';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
 import {
   htmlIdGenerator,
@@ -39,7 +39,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-const TimeseriesConfig = injectI18n(function (props) {
+export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
 
@@ -494,5 +494,3 @@ TimeseriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func
 };
-
-export default TimeseriesConfig;
