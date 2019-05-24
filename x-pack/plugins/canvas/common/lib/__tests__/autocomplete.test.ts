@@ -10,7 +10,7 @@ import { getAutocompleteSuggestions } from '../autocomplete';
 
 function getFunctionSpec(functionName: string): AvailableFunctions {
   const fn = functionSpecs.find(spec => spec.name === functionName);
-  if (!fn || fn.name !== functionName) {
+  if (!fn) {
     throw new Error(`Could not find function ${functionName}`);
   } else {
     return fn;
