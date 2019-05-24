@@ -5,4 +5,4 @@
  */
 
 export { registerTestBed } from './testbed';
-export { TestBed } from './types';
+export { TestBed, TestBedConfig } from './types';

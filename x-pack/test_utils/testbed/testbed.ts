@@ -49,6 +49,18 @@ export const registerTestBed = <T extends string = string>(
     memoryRouter = defaultConfig.memoryRouter!,
     store = defaultConfig.store,
   } = config || {};
+
+  // Keep a reference to the React Router
+  let router: any;
+
+  const onRouter = (_router: any) => {
+    router = _router;
+
+    if (memoryRouter.onRouter) {
+      memoryRouter.onRouter(_router);
+    }
+  };
+
   /**
    * In some cases, component have some logic that interacts with the react router
    * _before_ the component is mounted.(Class constructor() I'm looking at you :)
@@ -56,18 +68,22 @@ export const registerTestBed = <T extends string = string>(
    * By adding the following lines, we make sure there is always a router available
    * when instantiating the Component.
    */
-  if (memoryRouter.onRouter) {
-    memoryRouter.onRouter(reactRouterMock);
-  }
+  onRouter(reactRouterMock);
 
   const setup: SetupFunc<T> = async props => {
     // If a function is provided we execute it
     const storeToMount = typeof store === 'function' ? store() : store!;
 
-    const component = await mountComponent(Component, memoryRouter, storeToMount, {
-      ...defaultProps,
-      ...props,
-    });
+    const component = await mountComponent(
+      Component,
+      memoryRouter,
+      storeToMount,
+      {
+        ...defaultProps,
+        ...props,
+      },
+      onRouter
+    );
 
     /**
      * ----------------------------------------------------------------
@@ -197,6 +213,14 @@ export const registerTestBed = <T extends string = string>(
       return { rows, tableCellsValues };
     };
 
+    const navigateTo = (_url: string) => {
+      const url =
+        _url[0] === '#'
+          ? _url.replace('#', '') // remove the begging hash as the memory router does not understand them
+          : _url;
+      router.history.push(url);
+    };
+
     return {
       component,
       exists,
@@ -211,6 +235,9 @@ export const registerTestBed = <T extends string = string>(
         toggleEuiSwitch,
         setComboBoxValue,
         getErrorsMessages,
+      },
+      router: {
+        navigateTo,
       },
     };
   };

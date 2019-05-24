@@ -18,14 +18,15 @@ export const mountComponent = async (
   Component: ComponentType,
   memoryRouter: MemoryRouterConfig,
   store: Store | null,
-  props: any
+  props: any,
+  onRouter: (router: any) => void
 ): Promise<ReactWrapper> => {
   const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
   let Comp: ComponentType;
 
   if (wrapWithRouter) {
-    const { componentRoutePath, onRouter, initialEntries, initialIndex } = memoryRouter!;
+    const { componentRoutePath, initialEntries, initialIndex } = memoryRouter!;
 
     // Wrap the componenet with a MemoryRouter and attach it to a react-router <Route />
     Comp = WithMemoryRouter(initialEntries, initialIndex)(

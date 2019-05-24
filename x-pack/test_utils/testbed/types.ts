@@ -102,6 +102,12 @@ export interface TestBed<T = string> {
   table: {
     getMetaData: (tableTestSubject: T) => EuiTableMetaData;
   };
+  router: {
+    /**
+     * Navigate to another React router <Route />
+     */
+    navigateTo: (url: string) => void;
+  };
 }
 
 export interface TestBedConfig {

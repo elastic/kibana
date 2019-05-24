@@ -5,8 +5,7 @@
  */
 
 import React, { Component, ComponentType } from 'react';
-import PropTypes from 'prop-types';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter, Route, withRouter } from 'react-router-dom';
 import * as H from 'history';
 
 export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex: number = 0) => (
@@ -17,28 +16,26 @@ export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex:
   </MemoryRouter>
 );
 
-export const WithRoute = (componentRoutePath = '/', onRouter = (router: MemoryRouter) => {}) => (
+export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => {}) => (
   WrappedComponent: ComponentType
 ) => {
-  return class extends Component {
-    static contextTypes = {
-      router: PropTypes.object,
-    };
+  return withRouter(
+    class extends Component<any> {
+      componentDidMount() {
+        const { match, location, history } = this.props;
+        onRouter({ match, location, history });
+      }
 
-    componentDidMount() {
-      const { router } = this.context;
-      onRouter(router);
+      render() {
+        return (
+          <Route
+            path={componentRoutePath}
+            render={props => <WrappedComponent {...props} {...this.props} />}
+          />
+        );
+      }
     }
-
-    render() {
-      return (
-        <Route
-          path={componentRoutePath}
-          render={props => <WrappedComponent {...props} {...this.props} />}
-        />
-      );
-    }
-  };
+  );
 };
 
 interface Router {
