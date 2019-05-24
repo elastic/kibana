@@ -6,3 +6,4 @@
 
 export { DurationChart } from './duration_chart';
 export { MonitorBarSeries } from './monitor_bar_series';
+export { SnapshotHistogram } from './snapshot_histogram';

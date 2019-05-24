@@ -14,35 +14,34 @@ import {
   ScaleType,
   timeFormatter,
 } from '@elastic/charts';
-import DateMath from '@elastic/datemath';
-// @ts-ignore Missing typings for series charts
-import { EuiHistogramSeries, EuiSeriesChart, EuiSeriesChartUtils } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
-import { HistogramDataPoint } from '../../../common/graphql/types';
-import { getColorsMap } from './charts/get_colors_map';
-import { getChartDateLabel } from '../../lib/helper';
+import React, { Fragment, useContext } from 'react';
+import { HistogramDataPoint } from '../../../../common/graphql/types';
+import { getColorsMap } from './get_colors_map';
+import { getChartDateLabel } from '../../../lib/helper';
+import { UptimeSettingsContext } from '../../../contexts';
 
 export interface SnapshotHistogramProps {
-  dateRangeStart: string;
-  dateRangeEnd: string;
+  /**
+   * The color value that is used to represent up checks.
+   */
   successColor: string;
+  /**
+   * The color value that is used to represent down checks.
+   */
   dangerColor: string;
+  /**
+   * The data the histogram will visualize.
+   */
   histogram: HistogramDataPoint[];
 }
 
 export const SnapshotHistogram = ({
-  dateRangeStart,
-  dateRangeEnd,
   dangerColor,
   histogram,
   successColor,
 }: SnapshotHistogramProps) => {
-  const min = DateMath.parse(dateRangeStart);
-  const max = DateMath.parse(dateRangeEnd);
-  if (!max || !min) {
-    return null;
-  }
+  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
   const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
   });
@@ -62,7 +61,7 @@ export const SnapshotHistogram = ({
             })
           )}
           position={Position.Bottom}
-          tickFormat={timeFormatter(getChartDateLabel(min.valueOf(), max.valueOf()))}
+          tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
           showOverlappingTicks={false}
         />
         <Axis

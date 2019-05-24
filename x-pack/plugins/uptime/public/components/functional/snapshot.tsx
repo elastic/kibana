@@ -26,7 +26,7 @@ import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { UptimeAppColors } from '../../uptime_app';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { snapshotQuery } from '../../queries';
-import { SnapshotHistogram } from './snapshot_histogram';
+import { SnapshotHistogram } from './charts';
 import { SnapshotLoading } from './snapshot_loading';
 
 interface SnapshotQueryResult {
@@ -114,8 +114,6 @@ export const SnapshotComponent = ({
           {data.snapshot.histogram && (
             <SnapshotHistogram
               dangerColor={danger}
-              dateRangeStart={dateRangeStart}
-              dateRangeEnd={dateRangeEnd}
               histogram={data.snapshot.histogram}
               successColor={success}
             />
