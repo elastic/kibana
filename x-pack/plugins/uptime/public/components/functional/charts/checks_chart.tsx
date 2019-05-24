@@ -48,9 +48,6 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
   const downSeriesSpecId = getSpecId('Down');
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
 
-  const durationColors = getColorsMap(successColor, upSeriesSpecId);
-  const durationDown = getColorsMap(dangerColor, downSeriesSpecId);
-
   const upString = i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
     defaultMessage: 'Up count',
   });
@@ -94,7 +91,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             tickFormat={d => Number(d).toFixed(0)}
           />
           <AreaSeries
-            customSeriesColors={durationColors}
+            customSeriesColors={getColorsMap(successColor, upSeriesSpecId)}
             id={upSeriesSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
@@ -108,7 +105,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             }))}
           />
           <AreaSeries
-            customSeriesColors={durationDown}
+            customSeriesColors={getColorsMap(dangerColor, downSeriesSpecId)}
             id={downSeriesSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
