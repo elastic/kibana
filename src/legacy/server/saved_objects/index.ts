@@ -17,17 +17,25 @@
  * under the License.
  */
 
-// Importing directly from ./saved_objects_mixin to ease ts migration
-// export { savedObjectsMixin } from './saved_objects_mixin';
-
 export {
   MigrationVersion,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsClient,
+  SavedObjectsClientContract,
   SavedObjectsClientWrapperFactory,
   SavedObjectReference,
   SavedObjectsService,
+  BaseOptions,
+  BulkCreateObject,
+  BulkGetObjects,
+  CreateOptions,
+  FindOptions,
+  FindResponse,
+  UpdateOptions,
+  UpdateResponse,
+  BulkCreateResponse,
+  BulkGetResponse,
 } from './service';
 
 export { SavedObjectsSchema } from './schema';

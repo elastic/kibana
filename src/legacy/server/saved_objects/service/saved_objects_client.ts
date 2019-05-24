@@ -26,7 +26,9 @@ export interface BaseOptions {
 }
 
 export interface CreateOptions extends BaseOptions {
+  /** (not recommended) Specify an id for the document */
   id?: string;
+  /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
   migrationVersion?: MigrationVersion;
   references?: SavedObjectReference[];
@@ -121,6 +123,44 @@ export interface SavedObjectReference {
   type: string;
   id: string;
 }
+
+// export interface SavedObjectsClientInterface {
+//   errors: any;
+//   /**
+//    * Persists a SavedObject
+//    *
+//    * @param type
+//    * @param attributes
+//    * @param options
+//    */
+//   create<T extends SavedObjectAttributes = any>(
+//     type: string,
+//     attributes: T,
+//     options?: CreateOptions
+//   ): Promise<SavedObject>;
+
+//   /**
+//    * Creates multiple documents at once
+//    *
+//    * @param objects
+//    * @param options
+//    */
+//   bulkCreate<T extends SavedObjectAttributes = any>(
+//     objects: Array<BulkCreateObject<T>>,
+//     options?: CreateOptions
+//   ): Promise<BulkCreateResponse>;
+
+//   /**
+//    * Deletes a SavedObject
+//    *
+//    * @param type
+//    * @param id
+//    * @param options
+//    */
+//   delete(type: string, id: string, options: BaseOptions): Promise<void>;
+// }
+
+export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 export class SavedObjectsClient {
   /**

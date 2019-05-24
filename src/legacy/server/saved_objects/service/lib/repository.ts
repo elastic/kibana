@@ -308,7 +308,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type: string, id: string, options: BaseOptions = {}): Promise<{}> {
+  async delete(type: string, id: string, options: BaseOptions = {}): Promise<void> {
     if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError();
     }
@@ -324,7 +324,7 @@ export class SavedObjectsRepository {
 
     const deleted = response.result === 'deleted';
     if (deleted) {
-      return {};
+      return;
     }
 
     const docNotFound = response.result === 'not_found';

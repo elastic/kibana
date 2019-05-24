@@ -10,10 +10,10 @@ import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_cl
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { createEncryptedSavedObjectsServiceMock } from './encrypted_saved_objects_service.mock';
 import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
-let mockBaseClient: jest.Mocked<PublicMethodsOf<SavedObjectsClient>>;
+let mockBaseClient: jest.Mocked<SavedObjectsClientContract>;
 let encryptedSavedObjectsServiceMock: jest.Mocked<EncryptedSavedObjectsService>;
 beforeEach(() => {
   mockBaseClient = SavedObjectsClientMock.create();

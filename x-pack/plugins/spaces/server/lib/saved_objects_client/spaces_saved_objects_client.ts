@@ -11,14 +11,14 @@ import {
   CreateOptions,
   FindOptions,
   SavedObjectAttributes,
-  SavedObjectsClient,
+  SavedObjectsClientContract,
   UpdateOptions,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+} from 'src/legacy/server/saved_objects';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesService } from '../create_spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
-  baseClient: PublicMethodsOf<SavedObjectsClient>;
+  baseClient: SavedObjectsClientContract;
   request: any;
   spacesService: SpacesService;
   types: string[];
@@ -58,10 +58,11 @@ const throwErrorIfTypesContainsSpace = (types: string[]) => {
   }
 };
 
-export class SpacesSavedObjectsClient implements PublicMethodsOf<SavedObjectsClient> {
-  private readonly client: PublicMethodsOf<SavedObjectsClient>;
+export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
+  private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
   private readonly types: string[];
+  public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, spacesService, types } = options;
@@ -69,6 +70,7 @@ export class SpacesSavedObjectsClient implements PublicMethodsOf<SavedObjectsCli
     this.client = baseClient;
     this.spaceId = spacesService.getSpaceId(request);
     this.types = types;
+    this.errors = baseClient.errors;
   }
 
   /**

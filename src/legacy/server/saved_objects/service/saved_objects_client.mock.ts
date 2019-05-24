@@ -17,10 +17,34 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from './saved_objects_client';
+import { SavedObjectsClientContract } from './saved_objects_client';
 
 const create = () => {
-  const mock: jest.Mocked<PublicMethodsOf<SavedObjectsClient>> = {
+  const mock: jest.Mocked<SavedObjectsClientContract> = {
+    errors: {
+      isSavedObjectsClientError: jest.fn(),
+      decorateBadRequestError: jest.fn(),
+      createBadRequestError: jest.fn(),
+      createUnsupportedTypeError: jest.fn(),
+      isBadRequestError: jest.fn(),
+      createInvalidVersionError: jest.fn(),
+      isInvalidVersionError: jest.fn(),
+      decorateNotAuthorizedError: jest.fn(),
+      isNotAuthorizedError: jest.fn(),
+      decorateForbiddenError: jest.fn(),
+      isForbiddenError: jest.fn(),
+      decorateRequestEntityTooLargeError: jest.fn(),
+      isRequestEntityTooLargeError: jest.fn(),
+      createGenericNotFoundError: jest.fn(),
+      isNotFoundError: jest.fn(),
+      decorateConflictError: jest.fn(),
+      isConflictError: jest.fn(),
+      decorateEsUnavailableError: jest.fn(),
+      isEsUnavailableError: jest.fn(),
+      createEsAutoCreateIndexError: jest.fn(),
+      isEsAutoCreateIndexError: jest.fn(),
+      decorateGeneralError: jest.fn(),
+    },
     create: jest.fn(),
     bulkCreate: jest.fn(),
     delete: jest.fn(),

@@ -38,10 +38,20 @@ export {
 } from './lib';
 
 export {
-  FindOptions,
   MigrationVersion,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsClient,
+  SavedObjectsClientContract,
   SavedObjectReference,
+  BaseOptions,
+  BulkCreateObject,
+  BulkGetObjects,
+  CreateOptions,
+  FindOptions,
+  FindResponse,
+  UpdateOptions,
+  UpdateResponse,
+  BulkCreateResponse,
+  BulkGetResponse,
 } from './saved_objects_client';

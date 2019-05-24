@@ -17,26 +17,20 @@
  * under the License.
  */
 import { PriorityCollection } from './priority_collection';
-import { SavedObjectsClient } from '..';
-
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
+import { SavedObjectsClientContract } from '..';
 
 export interface SavedObjectsClientWrapperOptions<Request = any> {
-  client: PublicMethodsOf<SavedObjectsClient>;
+  client: SavedObjectsClientContract;
   request: Request;
 }
 
 export type SavedObjectsClientWrapperFactory<Request = any> = (
   options: SavedObjectsClientWrapperOptions<Request>
-) => PublicMethodsOf<SavedObjectsClient>;
+) => SavedObjectsClientContract;
 
 export type SavedObjectsClientFactory<Request = any> = (
   { request }: { request: Request }
-) => PublicMethodsOf<SavedObjectsClient>;
+) => SavedObjectsClientContract;
 
 /**
  * Provider for the Scoped Saved Object Client.
@@ -69,7 +63,7 @@ export class ScopedSavedObjectsClientProvider<Request = any> {
     this._clientFactory = customClientFactory;
   }
 
-  getClient(request: Request): PublicMethodsOf<SavedObjectsClient> {
+  getClient(request: Request): SavedObjectsClientContract {
     const client = this._clientFactory({
       request,
     });

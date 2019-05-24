@@ -15,15 +15,15 @@ import {
   FindOptions,
   FindResponse,
   SavedObjectAttributes,
-  SavedObjectsClient,
+  SavedObjectsClientContract,
   UpdateOptions,
   UpdateResponse,
   SavedObject,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+} from 'src/legacy/server/saved_objects';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 
 interface EncryptedSavedObjectsClientOptions {
-  baseClient: PublicMethodsOf<SavedObjectsClient>;
+  baseClient: SavedObjectsClientContract;
   service: Readonly<EncryptedSavedObjectsService>;
 }
 
@@ -35,12 +35,10 @@ function generateID() {
   return uuid.v4();
 }
 
-export class EncryptedSavedObjectsClientWrapper implements PublicMethodsOf<SavedObjectsClient> {
+export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientContract {
   constructor(
     private readonly options: EncryptedSavedObjectsClientOptions,
-    public readonly errors: SavedObjectsClient['errors'] = ((options.baseClient as any) as {
-      errors: SavedObjectsClient['errors'];
-    }).errors // TODO
+    public readonly errors = options.baseClient.errors
   ) {}
 
   public async create<T extends SavedObjectAttributes>(
