@@ -17,7 +17,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from '../breadcrumbs';
 
-const renderReact = (elem, httpClient, changeUrl, username) => {
+const renderReact = (elem, httpClient, changeUrl, username) => { // eslint-disable-line no-unused-vars
   render(
     <I18nContext>
       <EditUserPage
