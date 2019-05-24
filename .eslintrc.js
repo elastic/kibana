@@ -448,7 +448,7 @@ module.exports = {
         ],
       },
     },
-    // typescript specific rules that shouldn't run on JS files
+    // typescript specific rules for everything including tests
     {
       files: ['x-pack/plugins/siem/**/*.{ts,tsx}'],
       rules: {
@@ -464,10 +464,10 @@ module.exports = {
         // are fixed in the next release or two
         // '@typescript-eslint/explicit-function-return-type': 'warn',
 
-        // These rules cannot be turned on at the moment until the parser is upgraded and once that happens
-        // uncomment these and fix any errors from them
+        // These rules cannot be turned on and tested at the moment until this issue is resolved:
+        // https://github.com/prettier/prettier-eslint/issues/201
         // '@typescript-eslint/await-thenable': 'error',
-        // '@typescript-eslint/no-non-null-assertion': 'error',
+        // '@typescript-eslint/no-non-null-assertion': 'error'
         // '@typescript-eslint/no-unnecessary-type-assertion': 'error',
         // '@typescript-eslint/no-unused-vars': 'error',
         // '@typescript-eslint/prefer-includes': 'error',
@@ -483,7 +483,10 @@ module.exports = {
     // rules that can be run for all files and front end code as well as backend code
     {
       files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
+      plugins: ['react'],
       rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
         'no-array-constructor': 'error',
         'arrow-body-style': ['error', 'as-needed'],
         complexity: ['error', 20],
@@ -502,15 +505,24 @@ module.exports = {
         'no-duplicate-case': 'error',
         'no-duplicate-imports': 'error',
         'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-floating-decimal': 'error',
         'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
         'no-invalid-regexp': 'error',
         'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
         'no-multi-assign': 'error',
         'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
+        'no-param-reassign': 'warn',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
         'no-return-await': 'error',
@@ -521,14 +533,57 @@ module.exports = {
         'no-undef': 'error',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        'no-useless-catch': 'warn',
+        'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
+        'no-useless-escape': 'warn',
         'no-useless-rename': 'error',
+        'no-useless-return': 'warn',
+        'no-void': 'warn',
         'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
         'prefer-template': 'error',
         quotes: ['error', 'single', { avoidEscape: true }],
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'warn',
+        'react/no-children-prop': 'warn',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'warn',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'warn',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        // Too noisy right now, but will introduced after the other warns are fixed
+        // 'react/sort-comp': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        // Too noisy right now, but will introduced after the other warns are fixed
+        // 'react/jsx-boolean-value': ['error', 'always'],
+        // Too noisy right now, but will introduced after the other warns are fixed
+        // 'react/jsx-no-bind': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        // Although off right now, this will be turned on soon to check for missing i18n keys
+        // 'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'react/jsx-sort-default-props': 'error',
+        // Too noisy right now, but will be introduced after the other warns are fixed
+        // 'react/jsx-sort-props': 'error',
+        'react/jsx-tag-spacing': 'error',
         'require-atomic-updates': 'error',
         'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',
@@ -536,6 +591,7 @@ module.exports = {
         'vars-on-top': 'error',
       },
     },
+
     /**
      * disable jsx-a11y for kbn-ui-framework
      */
