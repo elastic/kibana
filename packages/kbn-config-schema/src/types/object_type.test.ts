@@ -206,7 +206,7 @@ test('reach returns a valid schema component', () => {
   });
 
   const value = false;
-  expect(() => type.validateKey('foo', value)).toBeTruthy();
+  expect(() => type.validateKey('foo', value)).not.toThrowError();
   expect(() => type.validateKey('bar', '')).toThrowErrorMatchingInlineSnapshot(
     `"bar is not a valid part of this schema"`
   );

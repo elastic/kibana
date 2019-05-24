@@ -20,6 +20,7 @@
 import typeDetect from 'type-detect';
 import { AnySchema, internals } from '../internals';
 import { Type, TypeOptions } from './type';
+import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
 
@@ -65,6 +66,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     if (!this.props[key]) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
-    return this.props[key].validate(value);
+    const { value: validatedValue, error } = this.props[key].validate(value);
+    if (error) {
+      throw new ValidationError(error as any, key);
+    }
+    return validatedValue;
   }
 }
