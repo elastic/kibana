@@ -8,8 +8,6 @@ import {
   AreaSeries,
   Axis,
   Chart,
-  CustomSeriesColorsMap,
-  DataSeriesColorsValues,
   getAxisId,
   getSpecId,
   Position,
@@ -23,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { StatusData } from '../../../../common/graphql/types';
 import { getChartDateLabel } from '../../../lib/helper';
 import { UptimeSettingsContext } from '../../../contexts';
+import { getColorsMap } from './get_colors_map';
 
 interface ChecksChartProps {
   /**
@@ -45,26 +44,12 @@ interface ChecksChartProps {
  * @param props The props values required by this component.
  */
 export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartProps) => {
-  const checkareaseriesspecid = getSpecId('Up');
-  const checkdownseriesspecid = getSpecId('Down');
+  const upSeriesSpecId = getSpecId('Up');
+  const downSeriesSpecId = getSpecId('Down');
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
 
-  const durationColors: CustomSeriesColorsMap = new Map<DataSeriesColorsValues, string>();
-  durationColors.set(
-    {
-      colorValues: [],
-      specId: checkareaseriesspecid,
-    },
-    successColor
-  );
-  const durationDown: CustomSeriesColorsMap = new Map<DataSeriesColorsValues, string>();
-  durationDown.set(
-    {
-      colorValues: [],
-      specId: checkdownseriesspecid,
-    },
-    dangerColor
-  );
+  const durationColors = getColorsMap(successColor, upSeriesSpecId);
+  const durationDown = getColorsMap(dangerColor, downSeriesSpecId);
 
   const upString = i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
     defaultMessage: 'Up count',
@@ -110,7 +95,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
           />
           <AreaSeries
             customSeriesColors={durationColors}
-            id={checkareaseriesspecid}
+            id={upSeriesSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
@@ -124,7 +109,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
           />
           <AreaSeries
             customSeriesColors={durationDown}
-            id={checkdownseriesspecid}
+            id={downSeriesSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
