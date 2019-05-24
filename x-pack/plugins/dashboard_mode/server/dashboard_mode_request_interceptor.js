@@ -39,7 +39,7 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
       const uiSettings = request.getUiSettingsService();
       const dashboardOnlyModeRoles = await uiSettings.get(CONFIG_DASHBOARD_ONLY_MODE_ROLES);
 
-      if (!isAppRequest || !dashboardOnlyModeRoles || roles.length === 0) {
+      if (!isAppRequest || !dashboardOnlyModeRoles || !roles || roles.length === 0) {
         return h.continue;
       }
 
