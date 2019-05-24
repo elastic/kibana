@@ -39,7 +39,7 @@ const waitForInterpreterRun = async () => {
   await new Promise(resolve => setTimeout(resolve));
 };
 
-describe('expression_executor_service', () => {
+describe('expressions_service', () => {
   let interpreterMock: jest.Mocked<Interpreter>;
   let renderFunctionMock: jest.Mocked<RenderFunction>;
   let setupPluginsMock: ExpressionsServiceDependencies;

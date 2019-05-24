@@ -65,7 +65,7 @@ export interface ExpressionsServiceDependencies {
 }
 
 /**
- * Expression Executor Service
+ * Expressions Service
  * @internal
  */
 export class ExpressionsService {
