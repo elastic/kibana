@@ -117,14 +117,11 @@ export const DurationChart = ({
             xAccessor={'x'}
             yAccessors={['Max']}
             y0Accessors={['Min']}
-            data={durationArea.map(({ x, yMin, yMax }) => {
-              const v = {
-                x,
-                Min: microsToMillis(yMin),
-                Max: microsToMillis(yMax),
-              };
-              return v;
-            })}
+            data={durationArea.map(({ x, yMin, yMax }) => ({
+              x,
+              Min: microsToMillis(yMin),
+              Max: microsToMillis(yMax),
+            }))}
             yScaleToDataExtent={false}
             curve={CurveType.CURVE_MONOTONE_X}
           />
