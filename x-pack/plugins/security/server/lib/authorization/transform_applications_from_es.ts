@@ -25,7 +25,8 @@ interface TransformResult {
 
 export const transformKibanaApplicationsFromEs = (
   application: string,
-  esApplications: EsApplication[]
+  esApplications: EsApplication[],
+  transformOptions: { allowDuplicateResources: boolean } = { allowDuplicateResources: false }
 ): TransformResult => {
   const roleKibanaApplications = esApplications.filter(
     roleApplication =>
@@ -148,7 +149,10 @@ export const transformKibanaApplicationsFromEs = (
   }
 
   // if we have resources duplicated in entries, we won't transform these
-  if (allResources.length !== _.uniq(allResources).length) {
+  if (
+    !transformOptions.allowDuplicateResources &&
+    allResources.length !== _.uniq(allResources).length
+  ) {
     return {
       success: false,
     };

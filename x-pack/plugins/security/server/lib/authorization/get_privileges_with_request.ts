@@ -22,7 +22,8 @@ export function getPrivilegesWithRequestFactory(
     const userPrivilegesResponse = await callWithRequest(request, 'shield.userPrivileges');
     const { value = [] } = transformKibanaApplicationsFromEs(
       application,
-      userPrivilegesResponse.applications
+      userPrivilegesResponse.applications,
+      { allowDuplicateResources: true }
     );
 
     return value;

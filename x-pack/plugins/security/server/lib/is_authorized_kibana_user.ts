@@ -6,20 +6,31 @@
 
 import { Legacy } from 'kibana';
 import { AuthorizationService } from './authorization/service';
+import { AuthenticatedUser } from '../../common/model';
 
 export const isAuthorizedKibanaUser = async (
   authorizationService: AuthorizationService,
-  request: Legacy.Request
+  request: Legacy.Request,
+  user?: AuthenticatedUser
 ) => {
-  const { auth } = request;
-  if (auth && auth.credentials) {
-    const { roles = [] } = auth.credentials as Record<string, any>;
-    if (roles.includes('superuser')) {
-      return true;
-    }
+  const roles = getUserRoles(request, user);
+  if (roles.includes('superuser')) {
+    return true;
   }
 
   const userPrivileges = await authorizationService.getPrivilegesWithRequest(request);
 
-  return userPrivileges.length > 0;
+  // Reserved privileges on their own do not grant access to kibana.; rather, they augment existing kibana access.
+  // Therefore, a user is said to be an authorized Kibana user iff they have at least one privilege that isn't reserved.
+  return userPrivileges.some(privilege => !privilege._reserved);
 };
+
+function getUserRoles(request: Legacy.Request, user?: AuthenticatedUser) {
+  if (user) {
+    return user.roles;
+  }
+  if (request.auth && request.auth.credentials) {
+    return (request.auth.credentials as AuthenticatedUser).roles;
+  }
+  return [];
+}

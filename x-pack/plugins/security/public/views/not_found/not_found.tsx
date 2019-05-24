@@ -21,26 +21,14 @@ chrome
   .setRootController('logout', ($scope: any, canAccessKibana: boolean) => {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('reactNotFoundRoot');
+      const { title, message, help } = getMessaging(canAccessKibana);
+
       render(
         <I18nContext>
-          <AuthenticationStatePage
-            title={
-              <FormattedMessage id="xpack.security.notFound.title" defaultMessage="Not found" />
-            }
-          >
+          <AuthenticationStatePage title={title}>
             <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.security.notFound.notFoundMessage"
-                  defaultMessage="Sorry, the requested resource was not found."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.security.notFound.helpMessage"
-                  defaultMessage="It might be missing, or you might not have access. Contact your administrator for assistance."
-                />
-              </p>
+              <p>{message}</p>
+              <p>{help}</p>
             </EuiText>
 
             <EuiSpacer />
@@ -68,3 +56,44 @@ chrome
       );
     });
   });
+
+function getMessaging(canAccessKibana: boolean) {
+  if (canAccessKibana) {
+    return {
+      title: <FormattedMessage id="xpack.security.notFound.title" defaultMessage="Not found" />,
+      message: (
+        <FormattedMessage
+          id="xpack.security.notFound.notFoundMessage"
+          defaultMessage="Sorry, the requested resource was not found."
+        />
+      ),
+      help: (
+        <FormattedMessage
+          id="xpack.security.notFound.helpMessage"
+          defaultMessage="It might be missing, or you might not have access. Contact your administrator for assistance."
+        />
+      ),
+    };
+  }
+
+  return {
+    title: (
+      <FormattedMessage
+        id="xpack.security.unauthorized.title"
+        defaultMessage="No access to Kibana"
+      />
+    ),
+    message: (
+      <FormattedMessage
+        id="xpack.security.unauthorized.notFoundMessage"
+        defaultMessage="Your account does not have access to Kibana."
+      />
+    ),
+    help: (
+      <FormattedMessage
+        id="xpack.security.unauthorized.helpMessage"
+        defaultMessage="Contact your administrator for assistance."
+      />
+    ),
+  };
+}

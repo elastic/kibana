@@ -40,9 +40,8 @@ export function initAuthenticateApi(server) {
           throw Boom.unauthorized(authenticationResult.error);
         }
 
-        const isAllowed = await isAuthorizedKibanaUser(authorization, request);
+        const isAllowed = await isAuthorizedKibanaUser(authorization, request, authenticationResult.user);
         if (!isAllowed) {
-          request.response.header('set-cookie', null);
           throw Boom.forbidden('unauthorized for Kibana');
         }
 
