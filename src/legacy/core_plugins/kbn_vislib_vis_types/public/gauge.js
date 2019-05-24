@@ -89,15 +89,15 @@ export default function GaugeVisType(Private) {
         alignments: [
           {
             id: 'automatic',
-            label: i18n('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
+            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
           },
           {
             id: 'horizontal',
-            label: i18n('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
+            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
           },
           {
             id: 'vertical',
-            label: i18n('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
+            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
         ],
         scales: ['linear', 'log', 'square root'],
         colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
