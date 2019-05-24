@@ -18,6 +18,7 @@ import {
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/target/types/react';
 import { StatusData } from '../../../../common/graphql/types';
 import { getChartDateLabel } from '../../../lib/helper';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -62,11 +63,10 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
     <React.Fragment>
       <EuiTitle size="xs">
         <h4>
-          {i18n.translate('xpack.uptime.monitorCharts.checkStatus.heading', {
-            defaultMessage: 'Check status',
-            description:
-              'A "check" is a record of Heartbeat pinging a website to see if it is available.',
-          })}
+          <FormattedMessage
+            id="xpack.uptime.monitorCharts.checkStatus.title"
+            defaultMessage="Check status"
+          />
         </h4>
       </EuiTitle>
       <EuiPanel>

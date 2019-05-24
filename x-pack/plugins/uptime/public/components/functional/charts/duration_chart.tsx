@@ -19,6 +19,7 @@ import {
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/target/types/react';
 import {
   convertMicrosecondsToMilliseconds as microsToMillis,
   getChartDateLabel,
@@ -74,9 +75,11 @@ export const DurationChart = ({
     <React.Fragment>
       <EuiTitle size="xs">
         <h4>
-          {i18n.translate('xpack.uptime.monitorCharts.durationChart.title', {
-            defaultMessage: 'Monitor Duration ms',
-          })}
+          <FormattedMessage
+            id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+            defaultMessage="Monitor duration"
+            description="The 'ms' is an abbreviation for milliseconds."
+          />
         </h4>
       </EuiTitle>
       <EuiPanel>
@@ -108,6 +111,12 @@ export const DurationChart = ({
               Max: microsToMillis(yMax),
             }))}
             id={areaSpecId}
+            name={i18n.translate(
+              'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
+              {
+                defaultMessage: 'Duration range',
+              }
+            )}
             xAccessor={'x'}
             xScaleType={ScaleType.Time}
             yAccessors={['Max']}
@@ -120,6 +129,12 @@ export const DurationChart = ({
             customSeriesColors={getColorsMap(meanColor, averageSpecId)}
             data={durationLine.map(({ x, y }) => [x || 0, microsToMillis(y)])}
             id={averageSpecId}
+            name={i18n.translate(
+              'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
+              {
+                defaultMessage: 'Mean duration',
+              }
+            )}
             xAccessor={0}
             xScaleType={ScaleType.Time}
             yAccessors={[1]}
