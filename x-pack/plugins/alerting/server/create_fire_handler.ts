@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertDefinition } from './types';
+import { AlertType } from './types';
 import { TaskInstance } from '../../task_manager';
 import { ActionsPlugin } from '../../actions';
 
 export function createFireHandler(
-  alert: AlertDefinition,
+  alertType: AlertType,
   taskInstance: TaskInstance,
   fireAction: ActionsPlugin['fire']
 ) {

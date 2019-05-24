@@ -6,7 +6,7 @@
 
 import { ActionsPlugin } from '../../actions';
 import { TaskManager } from '../../task_manager';
-import { AlertDefinition, ScheduledAlert } from './types';
+import { AlertType, Alert } from './types';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
 const taskManagerNamespace = 'alerting';
@@ -25,20 +25,20 @@ export class AlertService {
     this.fireAction = fireAction;
   }
 
-  public register(alert: AlertDefinition) {
+  public registerType(alertType: AlertType) {
     this.taskManager.registerTaskDefinitions({
-      [`${taskManagerNamespace}:${alert.id}`]: {
-        title: alert.description,
-        type: `${taskManagerNamespace}:${alert.id}`,
-        createTaskRunner: getCreateTaskRunnerFunction(alert, this.fireAction),
+      [`${taskManagerNamespace}:${alertType.id}`]: {
+        title: alertType.description,
+        type: `${taskManagerNamespace}:${alertType.id}`,
+        createTaskRunner: getCreateTaskRunnerFunction(alertType, this.fireAction),
       },
     });
   }
 
-  public async schedule(scheduledAlert: ScheduledAlert) {
+  public async create(alert: Alert) {
     await this.taskManager.schedule({
-      taskType: `${taskManagerNamespace}:${scheduledAlert.alertId}`,
-      params: scheduledAlert,
+      taskType: `${taskManagerNamespace}:${alert.alertTypeId}`,
+      params: alert,
       state: {},
     });
   }

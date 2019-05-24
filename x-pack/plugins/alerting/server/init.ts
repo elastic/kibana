@@ -6,7 +6,8 @@
 
 import { Legacy } from 'kibana';
 import { AlertService } from './alert_service';
-import { createScheduleRoute } from './routes';
+import { createAlertRoute } from './routes';
+import { AlertingPlugin } from './types';
 
 export function init(server: Legacy.Server) {
   const alertingEnabled = server.config().get('xpack.alerting.enabled');
@@ -23,9 +24,12 @@ export function init(server: Legacy.Server) {
   });
 
   // Register routes
-  createScheduleRoute(server);
+  createAlertRoute(server);
 
   // Expose functions
-  server.expose('register', alertService.register.bind(alertService));
-  server.expose('schedule', alertService.schedule.bind(alertService));
+  const exposedFunctions: AlertingPlugin = {
+    registerType: alertService.registerType.bind(alertService),
+    create: alertService.create.bind(alertService),
+  };
+  server.expose(exposedFunctions);
 }

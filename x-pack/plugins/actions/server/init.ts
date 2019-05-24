@@ -8,6 +8,7 @@ import { Legacy } from 'kibana';
 import { ActionsClient } from './actions_client';
 import { ActionTypeService } from './action_type_service';
 import { createFireFunction } from './create_fire_function';
+import { ActionsPlugin } from './types';
 import {
   createRoute,
   deleteRoute,
@@ -56,7 +57,10 @@ export function init(server: Legacy.Server) {
     });
     return actionsClient;
   });
-  server.expose('fire', fireFn);
-  server.expose('registerType', actionTypeService.register.bind(actionTypeService));
-  server.expose('listTypes', actionTypeService.list.bind(actionTypeService));
+  const exposedFunctions: ActionsPlugin = {
+    fire: fireFn,
+    registerType: actionTypeService.register.bind(actionTypeService),
+    listTypes: actionTypeService.list.bind(actionTypeService),
+  };
+  server.expose(exposedFunctions);
 }

@@ -5,20 +5,20 @@
  */
 
 import { AlertInstance } from './alert_instance';
-import { ConcreteTaskInstance } from '../../task_manager';
+import { AlertService } from './alert_service';
 
 export interface AlertServices {
   alertInstanceFactory: (id: string) => AlertInstance;
 }
 
-export interface AlertDefinition {
+export interface AlertType {
   id: string;
   description: string;
   execute: (services: AlertServices, params: any) => Promise<Record<string, any> | void>;
 }
 
-export interface ScheduledAlert {
-  alertId: string;
+export interface Alert {
+  alertTypeId: string;
   actionGroups: Record<
     string,
     Array<{
@@ -30,6 +30,6 @@ export interface ScheduledAlert {
 }
 
 export interface AlertingPlugin {
-  register: (alert: AlertDefinition) => void;
-  schedule: (scheduledAlert: ScheduledAlert) => Promise<ConcreteTaskInstance>;
+  registerType: AlertService['registerType'];
+  create: AlertService['create'];
 }

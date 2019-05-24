@@ -9,7 +9,7 @@ import Joi from 'joi';
 
 interface ScheduleRequest extends Hapi.Request {
   payload: {
-    alertId: string;
+    alertTypeId: string;
     actionGroups: Record<
       string,
       Array<{
@@ -21,10 +21,10 @@ interface ScheduleRequest extends Hapi.Request {
   };
 }
 
-export function createScheduleRoute(server: Hapi.Server) {
+export function createAlertRoute(server: Hapi.Server) {
   server.route({
     method: 'POST',
-    path: '/api/alerting/schedule',
+    path: '/api/alert',
     options: {
       validate: {
         options: {
@@ -32,7 +32,7 @@ export function createScheduleRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
-            alertId: Joi.string().required(),
+            alertTypeId: Joi.string().required(),
             actionGroups: Joi.object().required(),
             checkParams: Joi.object().required(),
           })
@@ -40,7 +40,7 @@ export function createScheduleRoute(server: Hapi.Server) {
       },
     },
     async handler(request: ScheduleRequest) {
-      await server.plugins.alerting!.schedule(request.payload);
+      await server.plugins.alerting!.create(request.payload);
     },
   });
 }
