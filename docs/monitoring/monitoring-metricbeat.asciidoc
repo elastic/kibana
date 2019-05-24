@@ -15,9 +15,12 @@ image::monitoring/images/metricbeat.png[Example monitoring architecture]
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
+//NOTE: The tagged regions are re-used in the Stack Overview.
+
 . Disable the default collection of {kib} monitoring metrics. +
 +
 --
+// tag::disable-kibana-collection[]
 Add the following setting in the {kib} configuration file (`kibana.yml`): 
 
 [source,yaml]
@@ -26,7 +29,7 @@ xpack.monitoring.kibana.collection.enabled: false
 ----------------------------------
 
 Leave the `xpack.monitoring.enabled` set to its default value (`true`). 
-
+// end::disable-kibana-collection[]
 For more information, see 
 <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 --
@@ -79,12 +82,13 @@ For more information, see {ref}/monitoring-settings.html[Monitoring settings in 
 and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
-. {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the 
+. {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the
 same server as {kib}.
 
-. Enable the {kib} module in {metricbeat}. +
+. Enable the {kib} {xpack} module in {metricbeat}. +
 +
 --
+// tag::enable-kibana-module[]
 For example, to enable the default configuration in the `modules.d` directory, 
 run the following command:
 
@@ -96,14 +100,37 @@ metricbeat modules enable kibana-xpack
 For more information, see 
 {metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and 
 {metricbeat-ref}/metricbeat-module-kibana.html[{kib} module]. 
+// end::enable-kibana-module[]
 --
 
-. By default the module will collect {kib} monitoring metrics from `http://localhost:5601`.
-If the local {kib} instance has a different address, you must specify it via the `hosts` setting
-in the `modules.d/kibana-xpack.yml` file.
+. Configure the {kib} {xpack} module in {metricbeat}. +
++
+--
+// tag::configure-kibana-module[]
+You must specify the following settings in the `modules.d/kibana-xpack.yml` file:
+
+[source,yaml]
+----------------------------------
+- module: kibana
+  metricsets:
+    - stats
+  period: 10s
+  hosts: ["KIBANA_URL"] <1>
+  xpack.enabled: true <2>
+----------------------------------
+<1> Replace `KIBANA_URL` with the appropriate host and port number that you use
+to access {kib}. The default value is `localhost:5601`.
+<2> This setting ensures that {kib} can read the monitoring data successfully. 
+That is to say, it's stored in the same location and format as monitoring data 
+that is sent by {ref}/es-monitoring-exporters.html[exporters].
+// end::configure-kibana-module[]
+--
 
 . If the Elastic {security-features} are enabled, you must also provide a user 
-ID and password so that {metricbeat} can collect metrics successfully. 
+ID and password so that {metricbeat} can collect metrics successfully. +
++
+--
+// tag::remote-monitoring-user[]
 
 .. Create a user on the production cluster that has the 
 `remote_monitoring_collector` {stack-ov}/built-in-roles.html[built-in role]. 
@@ -111,11 +138,9 @@ Alternatively, use the `remote_monitoring_user`
 {stack-ov}/built-in-users.html[built-in user].
 
 .. Add the `username` and `password` settings to the {kib} module configuration 
-file.
+file. For example, add the following settings in the
+`modules.d/kibana-xpack.yml` file:
 +
---
-For example, add the following settings in the `modules.d/kibana-xpack.yml` file:
-
 [source,yaml]
 ----------------------------------
 - module: kibana
@@ -123,6 +148,8 @@ For example, add the following settings in the `modules.d/kibana-xpack.yml` file
   username: remote_monitoring_user
   password: YOUR_PASSWORD
 ----------------------------------
+
+// end::remote-monitoring-user[]
 --
 
 . If you configured {kib} to use <<configuring-tls,encrypted communications>>, 
