@@ -400,10 +400,66 @@ module.exports = {
      * SIEM overrides
      */
     {
-      files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
+      // Front end files
+      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            // Prevents UI code from importing server side and then webpack including it when doing builds.
+            patterns: ['**/server/*'],
+            // Prevents NodeJS code from being used client side.
+            paths: [
+              'assert',
+              'buffer',
+              'child_process',
+              'cluster',
+              'crypto',
+              'dgram',
+              'dns',
+              'domain',
+              'events',
+              'freelist',
+              'fs',
+              'http',
+              'https',
+              'module',
+              'net',
+              'os',
+              'path',
+              'punycode',
+              'querystring',
+              'readline',
+              'repl',
+              'smalloc',
+              'stream',
+              'string_decoder',
+              'sys',
+              'timers',
+              'tls',
+              'tracing',
+              'tty',
+              'url',
+              'util',
+              'vm',
+              'zlib',
+            ],
+          },
+        ],
+      },
+    },
+    // typescript specific rules that shouldn't run on JS files
+    {
+      files: ['x-pack/plugins/siem/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
+      },
+    },
+    // rules that can be run for all files and front end code as well as backend code
+    {
+      files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
+      rules: {
         'no-array-constructor': 'error',
         'arrow-body-style': ['error', 'as-needed'],
         complexity: ['error', 20],
@@ -445,7 +501,6 @@ module.exports = {
         'vars-on-top': 'error',
       },
     },
-
     /**
      * disable jsx-a11y for kbn-ui-framework
      */
