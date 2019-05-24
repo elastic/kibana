@@ -70,13 +70,12 @@ export function registerStatsApi(kbnServer, server, config) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
 
-          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve();
+          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
           try {
             const [ usage, clusterUuid ] = await Promise.all([
               usagePromise,
               getClusterUuid(callCluster),
             ]);
-
 
             let modifiedUsage = usage;
             if (isLegacy) {
