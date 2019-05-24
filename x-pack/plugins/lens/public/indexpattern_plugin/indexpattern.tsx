@@ -59,9 +59,9 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
       <div>
         <EuiComboBox
           data-test-subj="indexPattern-switcher"
-          options={Object.keys(props.state.indexPatterns).map(key => ({
-            label: props.state.indexPatterns[key].title,
-            value: props.state.indexPatterns[key].id,
+          options={Object.values(props.state.indexPatterns).map(({ title, id }) => ({
+            label: title,
+            value: id,
           }))}
           selectedOptions={
             props.state.currentIndexPatternId

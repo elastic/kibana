@@ -134,9 +134,9 @@ describe('IndexPattern Data Source', () => {
 
       const wrapper = shallow(<IndexPatternDataPanel {...{ state, setState }} />);
 
-      const comboBox = wrapper.findWhere(node => !!node.length && node.type() === EuiComboBox);
+      const comboBox = wrapper.find(EuiComboBox);
 
-      comboBox.prop('onChange')([
+      comboBox.prop('onChange')!([
         {
           label: expectedIndexPatterns['2'].title,
           value: '2',
