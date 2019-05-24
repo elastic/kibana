@@ -17,13 +17,13 @@
  * under the License.
  */
 import { last } from 'lodash';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
-import getAggValue from '../../helpers/get_agg_value';
+import { getAggValue } from '../../helpers/get_agg_value';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentileRank(bucket, panel, series) {
+export function percentileRank(bucket, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
 

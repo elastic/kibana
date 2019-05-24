@@ -80,7 +80,7 @@ export function registerStatsApi(kbnServer, server, config) {
             return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
           }
 
-          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve();
+          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
           try {
             const [ usage, clusterUuid ] = await Promise.all([
               usagePromise,

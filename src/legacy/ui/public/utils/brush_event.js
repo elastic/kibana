@@ -82,17 +82,17 @@ export function onBrushEvent(event, $state) {
 
     if (_.has(existingFilter, 'range')) {
       existingFilter.range[fieldName] = range;
-    } else if (_.has(existingFilter, 'script.script.params.gte')
-      && _.has(existingFilter, 'script.script.params.lt')) {
-      existingFilter.script.script.params.gte = min;
-      existingFilter.script.script.params.lt = max;
     } else {
       const newFilter = buildRangeFilter(
         field,
         range,
         indexPattern,
         event.data.xAxisFormatter);
-      $state.$newFilters = [newFilter];
+      if (existingFilter) {
+        Object.assign(existingFilter, newFilter);
+      } else {
+        $state.$newFilters = [newFilter];
+      }
     }
   }
 }
