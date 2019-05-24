@@ -21,10 +21,10 @@ import angular from 'angular';
 
 /**
  * Take text from the model and present it to the user as a string
- * @param {text} model value
+ * @param text model value
  * @returns {string}
  */
-export function toUser(text: ToUserQuery | string): string {
+export function toUser(text: { [key: string]: any } | string): string {
   if (text == null) {
     return '';
   }
@@ -38,13 +38,4 @@ export function toUser(text: ToUserQuery | string): string {
     return angular.toJson(text);
   }
   return '' + text;
-}
-
-interface ToUserQuery {
-  match_all: object;
-  query_string: ToUserQueryString;
-}
-
-interface ToUserQueryString {
-  query: string;
 }

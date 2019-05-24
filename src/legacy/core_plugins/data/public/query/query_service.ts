@@ -18,7 +18,14 @@
  */
 
 import { once } from 'lodash';
-import { QueryBar, fromUser, toUser, setupDirective as setupQueryBarDirective } from './query_bar';
+import {
+  QueryBar,
+  QueryBarInput,
+  fromUser,
+  toUser,
+  getQueryLog,
+  setupDirective as setupQueryBarDirective,
+} from './query_bar';
 
 /**
  * Query Service
@@ -32,9 +39,11 @@ export class QueryService {
       helpers: {
         fromUser,
         toUser,
+        getQueryLog,
       },
       ui: {
         QueryBar,
+        QueryBarInput,
       },
     };
   }
@@ -46,3 +55,5 @@ export class QueryService {
 
 /** @public */
 export type QuerySetup = ReturnType<QueryService['setup']>;
+
+export { Query } from './query_bar';

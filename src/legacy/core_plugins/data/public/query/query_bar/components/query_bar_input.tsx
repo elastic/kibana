@@ -35,15 +35,11 @@ import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
 import { localStorage } from 'ui/storage/storage_service';
+import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
-
-interface Query {
-  query: string;
-  language: string;
-}
 
 interface Props {
   indexPatterns: IndexPattern[];
@@ -109,10 +105,10 @@ export class QueryBarInputUI extends Component<Props, State> {
       return;
     }
 
-    const {
-      query: { query, language },
-    } = this.props;
-    const recentSearchSuggestions = this.getRecentSearchSuggestions(query);
+    const language = this.props.query.language;
+    const queryString = this.getQueryString();
+
+    const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
 
     const autocompleteProvider = getAutocompleteProvider(language);
     if (
@@ -132,7 +128,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     }
 
     const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
-      query,
+      query: queryString,
       selectionStart,
       selectionEnd,
     });

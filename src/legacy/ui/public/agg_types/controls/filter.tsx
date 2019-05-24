@@ -28,8 +28,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
-import { QueryBarInput } from '../../../../core_plugins/data/public/query_bar/components/query_bar_input';
-import { Query } from '../../../../core_plugins/data/public/query_bar';
+import { Query, data } from 'plugins/data';
+
+const { QueryBarInput } = data.query.ui;
 
 interface FilterRowProps {
   id: string;
