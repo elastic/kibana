@@ -39,7 +39,7 @@ export const AggLabelForm: React.SFC<Props> = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem className="mlAggregationLabel--text">
-        <span className="mlAggregationLabel__text">{item.aggName}</span>
+        <span className="eui-textTruncate">{item.aggName}</span>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="mlGroupByLabel--button">
         <EuiPopover

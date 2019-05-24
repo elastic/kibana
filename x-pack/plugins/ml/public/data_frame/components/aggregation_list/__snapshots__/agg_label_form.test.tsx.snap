@@ -10,7 +10,7 @@ exports[`Data Frame: <AggLabelForm /> Date histogram aggregation 1`] = `
     className="mlAggregationLabel--text"
   >
     <span
-      className="mlAggregationLabel__text"
+      className="eui-textTruncate"
     >
       the-group-by-agg-name
     </span>

@@ -8,7 +8,7 @@ exports[`Data Frame: <AggListSummary /> Minimal initialization 1`] = `
     paddingSize="s"
   >
     <div
-      className="mlAggregationLabel__text"
+      className="eui-textTruncate"
     >
       the-agg
     </div>
