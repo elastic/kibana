@@ -205,12 +205,11 @@ test('reach returns a valid schema component', () => {
     foo: schema.boolean(),
   });
 
-  const fooSchema = type.reach('foo');
   const value = false;
-  expect(() => fooSchema.validate(value)).toBeTruthy();
+  expect(() => type.validateKey('foo', value)).toBeTruthy();
 
   try {
-    type.reach('bar');
+    type.validateKey('bar', '');
   } catch (err) {
     expect(err.message).toBe('bar is not a valid part of this schema');
   }

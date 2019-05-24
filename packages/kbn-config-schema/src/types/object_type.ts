@@ -61,8 +61,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     }
   }
 
-  reach(key: string) {
-    if (!this.props[key]) throw new Error(`${key} is not a valid part of this schema`);
-    return this.props[key];
+  validateKey(key: string, value: any) {
+    if (!this.props[key]) {
+      throw new Error(`${key} is not a valid part of this schema`);
+    }
+    return this.props[key].validate(value);
   }
 }
