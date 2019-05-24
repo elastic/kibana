@@ -57,7 +57,7 @@ export class EditorComponent extends React.Component<IProps> {
 
   public componentDidMount(): void {
     this.container = document.getElementById('mainEditor') as HTMLElement;
-    this.monaco = new MonacoHelper(this.container, this.props);
+    this.monaco = new MonacoHelper(this.container, this.props, this.props.location.search);
 
     const { file } = this.props;
     if (file && file.content) {
@@ -99,6 +99,9 @@ export class EditorComponent extends React.Component<IProps> {
       prevProps.revealPosition !== this.props.revealPosition
     ) {
       this.revealPosition(this.props.revealPosition);
+    }
+    if (this.monaco && qs !== prevProps.location.search) {
+      this.monaco.updateUrlQuery(qs);
     }
     if (this.monaco && this.monaco.editor) {
       if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {

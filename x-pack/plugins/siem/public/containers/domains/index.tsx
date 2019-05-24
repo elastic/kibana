@@ -11,8 +11,14 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../..';
-import { FlowDirection, FlowTarget } from '../../../server/graphql/types';
-import { DomainsEdges, DomainsSortField, GetDomainsQuery, PageInfo } from '../../graphql/types';
+import {
+  DomainsEdges,
+  DomainsSortField,
+  GetDomainsQuery,
+  FlowDirection,
+  FlowTarget,
+  PageInfo,
+} from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';

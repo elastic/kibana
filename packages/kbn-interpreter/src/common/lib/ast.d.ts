@@ -16,34 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq } from 'lodash';
 
-export function extractIndexPatterns(params, fetchedFields = {}) {
-  const patternsToFetch = [];
+export type Ast = unknown;
 
-  if (!fetchedFields[params.index_pattern]) {
-    patternsToFetch.push(params.index_pattern);
-  }
-
-  params.series.forEach(series => {
-    const indexPattern = series.series_index_pattern;
-    if (series.override_index_pattern && !fetchedFields[indexPattern]) {
-      patternsToFetch.push(indexPattern);
-    }
-  });
-
-  if (params.annotations) {
-    params.annotations.forEach(item => {
-      const indexPattern = item.index_pattern;
-      if (indexPattern && !fetchedFields[indexPattern]) {
-        patternsToFetch.push(indexPattern);
-      }
-    });
-  }
-
-  if (patternsToFetch.length === 0) {
-    patternsToFetch.push('');
-  }
-
-  return uniq(patternsToFetch).sort();
-}
+export declare function fromExpression(expression: string): Ast;
