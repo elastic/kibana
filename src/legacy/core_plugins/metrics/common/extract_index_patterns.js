@@ -18,32 +18,32 @@
  */
 import { uniq } from 'lodash';
 
-export function extractIndexPatterns(params, fetchedFields = {}) {
-  const patternsToFetch = [];
+export function extractIndexPatterns(panel, excludedFields = {}) {
+  const patterns = [];
 
-  if (!fetchedFields[params.index_pattern]) {
-    patternsToFetch.push(params.index_pattern);
+  if (!excludedFields[panel.index_pattern]) {
+    patterns.push(panel.index_pattern);
   }
 
-  params.series.forEach(series => {
+  panel.series.forEach(series => {
     const indexPattern = series.series_index_pattern;
-    if (series.override_index_pattern && !fetchedFields[indexPattern]) {
-      patternsToFetch.push(indexPattern);
+    if (indexPattern && series.override_index_pattern && !excludedFields[indexPattern]) {
+      patterns.push(indexPattern);
     }
   });
 
-  if (params.annotations) {
-    params.annotations.forEach(item => {
+  if (panel.annotations) {
+    panel.annotations.forEach(item => {
       const indexPattern = item.index_pattern;
-      if (indexPattern && !fetchedFields[indexPattern]) {
-        patternsToFetch.push(indexPattern);
+      if (indexPattern && !excludedFields[indexPattern]) {
+        patterns.push(indexPattern);
       }
     });
   }
 
-  if (patternsToFetch.length === 0) {
-    patternsToFetch.push('');
+  if (patterns.length === 0) {
+    patterns.push('');
   }
 
-  return uniq(patternsToFetch).sort();
+  return uniq(patterns).sort();
 }
