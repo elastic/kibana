@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": "logstash-2015.09.21",
+    "index": "date-nanos",
     "mappings": {
       "properties": {
         "@timestamp": {

@@ -30,7 +30,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/getting_started'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
-      require.resolve('./apps/date_nanos'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),

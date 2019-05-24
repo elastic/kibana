@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
@@ -28,30 +27,24 @@ export default function ({ getService, getPageObjects }) {
   const toTime = '2015-09-23 18:31:44.000';
 
   describe('date_nanos', function () {
-    this.tags('ciGroup1');
 
-    before(function () {
-      return browser.setWindowSize(1300, 800);
+    before(async function () {
+      await esArchiver.loadIfNeeded('date_nanos');
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'date-nanos' });
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(function unloadMakelogs() {
       return esArchiver.unload('date_nanos');
     });
 
-    describe('discover', function () {
-      before(async function () {
-        await esArchiver.loadIfNeeded('date_nanos');
-        await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      });
-      it('should show a timestamp with nanoseconds in the first result row', async function () {
-        const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
-        expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
-        const rowData = await PageObjects.discover.getDocTableIndex(1);
-        expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253123345')).to.be.ok();
-      });
+    it('should show a timestamp with nanoseconds in the first result row', async function () {
+      const time = await PageObjects.timePicker.getTimeConfig();
+      expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
+      expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
+      const rowData = await PageObjects.discover.getDocTableIndex(1);
+      expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253123345')).to.be.ok();
     });
   });
 
