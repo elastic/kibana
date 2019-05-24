@@ -7,7 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { DataSetup } from 'src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop } from '../../drag_drop';
@@ -21,7 +21,7 @@ export interface WorkspacePanelProps {
   visualizationState: unknown;
   datasourcePublicAPI: DatasourcePublicAPI;
   dispatch: (action: Action) => void;
-  ExpressionRenderer: DataSetup['expressionExecutor']['ExpressionRenderer'];
+  ExpressionRenderer: ExpressionRenderer;
 }
 
 export function WorkspacePanel({
@@ -32,7 +32,7 @@ export function WorkspacePanel({
   visualizationState,
   datasourcePublicAPI,
   dispatch,
-  ExpressionRenderer,
+  ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
   function onDrop() {
     const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsForField(
@@ -82,7 +82,7 @@ export function WorkspacePanel({
     );
     const expression = `${datasourceExpression} | ${visualizationExpression}`;
 
-    return <ExpressionRenderer expression={expression} />;
+    return <ExpressionRendererComponent expression={expression} />;
   }
 
   return (

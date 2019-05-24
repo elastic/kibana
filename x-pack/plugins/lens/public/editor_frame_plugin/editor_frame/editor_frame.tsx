@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useReducer, useMemo } from 'react';
-import { DataSetup } from 'src/legacy/core_plugins/data/public';
+import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -21,7 +21,7 @@ export interface EditorFrameProps {
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
 
-  ExpressionRenderer: DataSetup['expressionExecutor']['ExpressionRenderer'];
+  ExpressionRenderer: ExpressionRenderer;
 }
 
 export function EditorFrame(props: EditorFrameProps) {

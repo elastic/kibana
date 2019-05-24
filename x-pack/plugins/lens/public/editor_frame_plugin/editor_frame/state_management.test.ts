@@ -7,6 +7,7 @@
 import { getInitialState, reducer } from './state_management';
 import { EditorFrameProps } from '.';
 import { Datasource, Visualization } from '../../types';
+import { createExpressionRendererMock } from '../mocks';
 
 describe('editor_frame state management', () => {
   describe('initialization', () => {
@@ -18,6 +19,7 @@ describe('editor_frame state management', () => {
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
         initialDatasourceId: 'testDatasource',
         initialVisualizationId: 'testVis',
+        ExpressionRenderer: createExpressionRendererMock(),
       };
     });
 

@@ -5,7 +5,7 @@
  */
 
 import { getSuggestions } from './suggestion_helpers';
-import { createMockVisualization, createMockDatasource } from '../mock_extensions';
+import { createMockVisualization, createMockDatasource } from '../mocks';
 import { TableColumn } from '../../types';
 
 describe('suggestion helpers', () => {

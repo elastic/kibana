@@ -5,7 +5,12 @@
  */
 
 import { EditorFramePlugin } from './plugin';
-import { createMockDatasource, createMockVisualization } from './mock_extensions';
+import {
+  createMockDependencies,
+  MockedDependencies,
+  createMockDatasource,
+  createMockVisualization,
+} from './mocks';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
@@ -14,10 +19,12 @@ const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 describe('editor_frame plugin', () => {
   let pluginInstance: EditorFramePlugin;
   let mountpoint: Element;
+  let pluginDependencies: MockedDependencies;
 
   beforeEach(() => {
     pluginInstance = new EditorFramePlugin();
     mountpoint = document.createElement('div');
+    pluginDependencies = createMockDependencies();
   });
 
   afterEach(() => {
@@ -26,7 +33,7 @@ describe('editor_frame plugin', () => {
 
   it('should create an editor frame instance which mounts and unmounts', () => {
     expect(() => {
-      const publicAPI = pluginInstance.setup();
+      const publicAPI = pluginInstance.setup(null, pluginDependencies);
       const instance = publicAPI.createInstance({});
       instance.mount(mountpoint);
       instance.unmount();
@@ -34,7 +41,7 @@ describe('editor_frame plugin', () => {
   });
 
   it('should render something in the provided dom element', () => {
-    const publicAPI = pluginInstance.setup();
+    const publicAPI = pluginInstance.setup(null, pluginDependencies);
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint);
 
@@ -44,7 +51,7 @@ describe('editor_frame plugin', () => {
   });
 
   it('should not have child nodes after unmount', () => {
-    const publicAPI = pluginInstance.setup();
+    const publicAPI = pluginInstance.setup(null, pluginDependencies);
     const instance = publicAPI.createInstance({});
     instance.mount(mountpoint);
     instance.unmount();
@@ -54,7 +61,7 @@ describe('editor_frame plugin', () => {
 
   it('should initialize and render provided datasource', async () => {
     const mockDatasource = createMockDatasource();
-    const publicAPI = pluginInstance.setup();
+    const publicAPI = pluginInstance.setup(null, pluginDependencies);
     publicAPI.registerDatasource('test', mockDatasource);
 
     const instance = publicAPI.createInstance({});
@@ -71,7 +78,7 @@ describe('editor_frame plugin', () => {
   it('should initialize visualization and render config panel', async () => {
     const mockDatasource = createMockDatasource();
     const mockVisualization = createMockVisualization();
-    const publicAPI = pluginInstance.setup();
+    const publicAPI = pluginInstance.setup(null, pluginDependencies);
 
     publicAPI.registerDatasource('test', mockDatasource);
     publicAPI.registerVisualization('test', mockVisualization);
