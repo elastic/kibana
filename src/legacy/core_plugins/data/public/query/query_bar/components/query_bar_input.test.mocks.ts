@@ -18,7 +18,7 @@
  */
 
 import { createKfetch } from 'ui/kfetch/kfetch';
-import { setup } from '../../../../../../test_utils/public/http_test_setup';
+import { setup } from 'test_utils/http_test_setup';
 
 const mockChromeFactory = jest.fn(() => {
   return {

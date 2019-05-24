@@ -18,29 +18,19 @@
  */
 
 import { once } from 'lodash';
-import { QueryBar } from './components/query_bar';
-import { fromUser } from './lib/from_user';
-import { toUser } from './lib/to_user';
-
-// @ts-ignore
-import { setupDirective } from './directive';
+import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
 
 /**
- * Query Bar Service
- *
+ * Search Service
  * @internal
  */
-export class QueryBarService {
+export class SearchService {
   public setup() {
     return {
-      loadLegacyDirectives: once(setupDirective),
-      helpers: {
-        fromUser,
-        toUser,
-      },
       ui: {
-        QueryBar,
+        SearchBar,
       },
+      loadLegacyDirectives: once(setupSearchBarDirective),
     };
   }
 
@@ -50,4 +40,4 @@ export class QueryBarService {
 }
 
 /** @public */
-export type QueryBarSetup = ReturnType<QueryBarService['setup']>;
+export type SearchSetup = ReturnType<SearchService['setup']>;
