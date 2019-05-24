@@ -17,7 +17,7 @@ interface ExecutorOptions {
   services: Services;
 }
 
-interface ActionType {
+export interface ActionType {
   id: string;
   name: string;
   unencryptedAttributes?: string[];
@@ -32,7 +32,7 @@ interface ConstructorOptions {
   services: Services;
 }
 
-interface ExecuteOptions {
+export interface ExecuteOptions {
   id: string;
   actionTypeConfig: Record<string, any>;
   params: Record<string, any>;

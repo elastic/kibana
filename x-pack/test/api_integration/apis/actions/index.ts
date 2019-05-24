@@ -15,5 +15,6 @@ export default function actionsTests({ loadTestFile }: KibanaFunctionalTestDefau
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./builtin_action_types/console_log'));
   });
 }
