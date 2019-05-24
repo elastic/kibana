@@ -1,0 +1,13 @@
+.mlAggregationLabel--button {
+  width: $euiSizeL;
+}
+
+.mlAggregationLabel--text {
+  min-width: 0;
+}
+
+.mlAggregationLabel__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
