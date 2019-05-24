@@ -18,8 +18,6 @@
  */
 
 import _ from 'lodash';
-import '../directives/validate_ip';
-import '../directives/validate_cidr_mask';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterIpRange } from './create_filter/ip_range';
 import { IpRangeTypeParamEditor } from '../controls/ip_range_type';
