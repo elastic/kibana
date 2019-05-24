@@ -26,7 +26,7 @@ const getJobFromRouteHandler = async (
 ): Promise<QueuedJobPayload> => {
   let result: QueuedJobPayload;
   try {
-    const jobParams = getJobParamsFromRequest(request);
+    const jobParams = getJobParamsFromRequest(request, { isImmediate: false });
     result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
   } catch (err) {
     throw handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);

@@ -40,7 +40,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(server: KbnServer) {
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
       const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
-      const jobParams = getJobParamsFromRequest(request);
+      const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
       const createJobFn = createJobFactory(server);
       const executeJobFn = executeJobFactory(server, request);
       const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);

@@ -7,13 +7,16 @@
 import { Request } from 'hapi';
 import { JobParamPostPayload, JobParams } from '../../../types';
 
-export function getJobParamsFromRequest(request: Request): JobParams {
+export function getJobParamsFromRequest(
+  request: Request,
+  opts: { isImmediate: boolean }
+): JobParams {
   const { savedObjectType, savedObjectId } = request.params;
   const { timerange, state } = request.payload as JobParamPostPayload;
   const post = timerange || state ? { timerange, state } : undefined;
 
   return {
-    isImmediate: true,
+    isImmediate: opts.isImmediate,
     savedObjectType,
     savedObjectId,
     post,
