@@ -48,6 +48,10 @@ app.directive('dashboardApp', ($injector: IInjector) => {
   const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
   const confirmModal = $injector.get<() => void>('confirmModal');
   const config = $injector.get('config');
+  // Even though courier is not used directly, we need to call this in order to instanstiate a new
+  // one and start the search poller to handle time picker auto refresh intervals.
+  $injector.get('courier');
+
   const Private = $injector.get<IPrivate>('Private');
   const indexPatterns = $injector.get<{
     getDefault: () => Promise<IndexPattern>;
