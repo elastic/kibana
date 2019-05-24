@@ -21,9 +21,8 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { HttpService, Router } from '.';
-import { HttpConfigType, config, HttpConfig } from './http_config';
+import { HttpConfigType, config } from './http_config';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
