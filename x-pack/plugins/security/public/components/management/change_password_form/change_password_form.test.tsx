@@ -3,13 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-jest.mock('../../../lib/api', () => {
-  return {
-    UserAPIClient: {
-      changePassword: jest.fn(),
-    },
-  };
-});
 import { EuiFieldText } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
@@ -42,7 +35,11 @@ describe('<ChangePasswordForm>', () => {
       };
 
       const wrapper = mountWithIntl(
-        <ChangePasswordForm user={user} isUserChangingOwnPassword={true} />
+        <ChangePasswordForm
+          user={user}
+          isUserChangingOwnPassword={true}
+          apiClient={new UserAPIClient()}
+        />
       );
 
       expect(getCurrentPasswordField(wrapper)).toHaveLength(1);
@@ -61,11 +58,15 @@ describe('<ChangePasswordForm>', () => {
 
       const callback = jest.fn();
 
+      const apiClient = new UserAPIClient();
+      apiClient.changePassword = jest.fn();
+
       const wrapper = mountWithIntl(
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={true}
           onChangePassword={callback}
+          apiClient={apiClient}
         />
       );
 
@@ -80,8 +81,8 @@ describe('<ChangePasswordForm>', () => {
 
       wrapper.find('button[data-test-subj="changePasswordButton"]').simulate('click');
 
-      expect(UserAPIClient.changePassword).toHaveBeenCalledTimes(1);
-      expect(UserAPIClient.changePassword).toHaveBeenCalledWith(
+      expect(apiClient.changePassword).toHaveBeenCalledTimes(1);
+      expect(apiClient.changePassword).toHaveBeenCalledWith(
         'user',
         'myNewPassword',
         'myCurrentPassword'
@@ -100,7 +101,11 @@ describe('<ChangePasswordForm>', () => {
       };
 
       const wrapper = mountWithIntl(
-        <ChangePasswordForm user={user} isUserChangingOwnPassword={false} />
+        <ChangePasswordForm
+          user={user}
+          isUserChangingOwnPassword={false}
+          apiClient={new UserAPIClient()}
+        />
       );
 
       expect(getCurrentPasswordField(wrapper)).toHaveLength(0);

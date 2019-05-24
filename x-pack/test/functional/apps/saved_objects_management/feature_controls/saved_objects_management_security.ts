@@ -12,10 +12,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  let version: string = '';
 
   describe('feature controls saved objects management', () => {
     before(async () => {
       await esArchiver.load('saved_objects_management/feature_controls/security');
+      const versionService = getService('kibanaServer').version;
+      version = await versionService.get();
     });
 
     after(async () => {
@@ -65,12 +68,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['A Dashboard', 'logstash-*', 'A Pie']);
+          expect(objects).to.eql([
+            'Advanced Settings [6.0.0]',
+            `Advanced Settings [${version}]`,
+            'A Dashboard',
+            'logstash-*',
+            'A Pie',
+          ]);
         });
 
         it('can view all saved objects in applications', async () => {
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
+            {
+              title: 'Advanced Settings [6.0.0]',
+              canViewInApp: false,
+            },
+            {
+              title: `Advanced Settings [${version}]`,
+              canViewInApp: false,
+            },
             {
               title: 'A Dashboard',
               canViewInApp: true,
@@ -124,7 +141,126 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    describe('global visualize read privileges', () => {
+    describe('global saved object management read privileges', () => {
+      before(async () => {
+        await security.role.create('global_som_read_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                savedObjectsManagement: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_som_read_user', {
+          password: 'global_som_read_user-password',
+          roles: ['global_som_read_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.logout();
+
+        await PageObjects.security.login('global_som_read_user', 'global_som_read_user-password', {
+          expectSpaceSelector: false,
+        });
+      });
+
+      after(async () => {
+        await Promise.all([
+          security.role.delete('global_som_read_role'),
+          security.user.delete('global_som_read_user'),
+          PageObjects.security.logout(),
+        ]);
+      });
+
+      describe('listing', () => {
+        before(async () => {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaSavedObjects();
+        });
+
+        it('shows all saved objects', async () => {
+          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          expect(objects).to.eql([
+            'Advanced Settings [6.0.0]',
+            `Advanced Settings [${version}]`,
+            'A Dashboard',
+            'logstash-*',
+            'A Pie',
+          ]);
+        });
+
+        it('cannot view any saved objects in applications', async () => {
+          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          expect(bools).to.eql([
+            {
+              title: 'Advanced Settings [6.0.0]',
+              canViewInApp: false,
+            },
+            {
+              title: `Advanced Settings [${version}]`,
+              canViewInApp: false,
+            },
+            {
+              title: 'A Dashboard',
+              canViewInApp: false,
+            },
+            {
+              title: 'logstash-*',
+              canViewInApp: false,
+            },
+            {
+              title: 'A Pie',
+              canViewInApp: false,
+            },
+          ]);
+        });
+
+        it(`can't delete all saved objects`, async () => {
+          await PageObjects.settings.clickSavedObjectsTableSelectAll();
+          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          expect(actual).to.be(false);
+        });
+      });
+
+      describe('edit visualization', () => {
+        before(async () => {
+          await PageObjects.common.navigateToActualUrl(
+            'kibana',
+            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+            {
+              loginIfPrompted: false,
+            }
+          );
+          await testSubjects.existOrFail('savedObjectsEdit');
+        });
+
+        it('does not show delete button', async () => {
+          await testSubjects.missingOrFail('savedObjectEditDelete');
+        });
+
+        it('does not show save button', async () => {
+          await testSubjects.missingOrFail('savedObjectEditSave');
+        });
+
+        it('has inputs with only readonly attributes', async () => {
+          const form = await testSubjects.find('savedObjectEditForm');
+          const inputs = await form.findAllByCssSelector('input');
+          expect(inputs.length).to.be.greaterThan(0);
+          for (const input of inputs) {
+            const isEnabled = await input.isEnabled();
+            expect(isEnabled).to.be(false);
+          }
+        });
+      });
+    });
+
+    describe('global visualize all privileges', () => {
       before(async () => {
         await security.role.create('global_visualize_all_role', {
           elasticsearch: {
@@ -133,7 +269,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           kibana: [
             {
               feature: {
-                visualize: ['read'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },
@@ -166,65 +302,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       describe('listing', () => {
-        before(async () => {
-          await PageObjects.settings.navigateTo();
-          await PageObjects.settings.clickKibanaSavedObjects();
-        });
-
-        it('shows a visualization and an index pattern', async () => {
-          const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['logstash-*', 'A Pie']);
-        });
-
-        it('can view only the visualization in application', async () => {
-          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
-          expect(bools).to.eql([
-            {
-              title: 'logstash-*',
-              canViewInApp: false,
-            },
-            {
-              title: 'A Pie',
-              canViewInApp: true,
-            },
-          ]);
-        });
-
-        it(`can't delete all saved objects`, async () => {
-          await PageObjects.settings.clickSavedObjectsTableSelectAll();
-          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
-          expect(actual).to.be(false);
+        it('redirects to Kibana home', async () => {
+          await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/objects', {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          });
+          await testSubjects.existOrFail('homeApp');
         });
       });
 
       describe('edit visualization', () => {
-        before(async () => {
+        it('redirects to Kibana home', async () => {
           await PageObjects.common.navigateToActualUrl(
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               loginIfPrompted: false,
+              ensureCurrentUrl: false,
             }
           );
-          await testSubjects.existOrFail('savedObjectsEdit');
-        });
-
-        it('shows delete button', async () => {
-          await testSubjects.missingOrFail('savedObjectEditDelete');
-        });
-
-        it('shows save button', async () => {
-          await testSubjects.missingOrFail('savedObjectEditSave');
-        });
-
-        it('has inputs without readonly attributes', async () => {
-          const form = await testSubjects.find('savedObjectEditForm');
-          const inputs = await form.findAllByCssSelector('input');
-          expect(inputs.length).to.be.greaterThan(0);
-          for (const input of inputs) {
-            const isEnabled = await input.isEnabled();
-            expect(isEnabled).to.be(false);
-          }
+          await testSubjects.existOrFail('homeApp');
         });
       });
     });

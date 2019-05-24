@@ -29,7 +29,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import AddDeleteButtons from '../../add_delete_buttons';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 
 export const MultiValueRow = ({
   model,

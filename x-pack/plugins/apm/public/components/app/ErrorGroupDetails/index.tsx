@@ -25,7 +25,7 @@ import {
   loadErrorGroupDetails
 } from '../../../services/rest/apm/error_groups';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
-import { FilterBar } from '../../shared/FilterBar';
+import { ApmHeader } from '../../shared/ApmHeader';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
@@ -62,8 +62,8 @@ function getShortGroupId(errorGroupId?: string) {
 
 export function ErrorGroupDetails() {
   const location = useLocation();
-  const { urlParams } = useUrlParams();
-  const { serviceName, start, end, errorGroupId, kuery } = urlParams;
+  const { urlParams, uiFilters } = useUrlParams();
+  const { serviceName, start, end, errorGroupId } = urlParams;
 
   const { data: errorGroupData } = useFetcher(
     () => {
@@ -73,11 +73,11 @@ export function ErrorGroupDetails() {
           start,
           end,
           errorGroupId,
-          kuery
+          uiFilters
         });
       }
     },
-    [serviceName, start, end, errorGroupId, kuery]
+    [serviceName, start, end, errorGroupId, uiFilters]
   );
 
   const { data: errorDistributionData } = useFetcher(
@@ -88,11 +88,11 @@ export function ErrorGroupDetails() {
           start,
           end,
           errorGroupId,
-          kuery
+          uiFilters
         });
       }
     },
-    [serviceName, start, end, errorGroupId, kuery]
+    [serviceName, start, end, errorGroupId, uiFilters]
   );
 
   if (!errorGroupData || !errorDistributionData) {
@@ -112,32 +112,32 @@ export function ErrorGroupDetails() {
 
   return (
     <div>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h1>
-              {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
-                defaultMessage: 'Error group {errorGroupId}',
-                values: {
-                  errorGroupId: getShortGroupId(urlParams.errorGroupId)
-                }
-              })}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        {isUnhandled && (
+      <ApmHeader>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-                defaultMessage: 'Unhandled'
-              })}
-            </EuiBadge>
+            <EuiTitle>
+              <h1>
+                {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
+                  defaultMessage: 'Error group {errorGroupId}',
+                  values: {
+                    errorGroupId: getShortGroupId(urlParams.errorGroupId)
+                  }
+                })}
+              </h1>
+            </EuiTitle>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          {isUnhandled && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
+                  defaultMessage: 'Unhandled'
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </ApmHeader>
 
-      <EuiSpacer size="m" />
-      <FilterBar />
       <EuiSpacer size="s" />
 
       <EuiPanel>
@@ -186,7 +186,7 @@ export function ErrorGroupDetails() {
           )}
         />
       </EuiPanel>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {showDetails && (
         <DetailView
           errorGroup={errorGroupData}

@@ -32,11 +32,14 @@ import {
   DropDownLabel,
   getPivotQuery,
   groupByConfigHasInterval,
-  IndexPatternContext,
+  isKibanaContext,
+  KibanaContext,
+  KibanaContextValue,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
+  SavedSearchQuery,
 } from '../../common';
 
 import { getPivotDropdownOptions } from './common';
@@ -44,18 +47,21 @@ import { getPivotDropdownOptions } from './common';
 export interface DefinePivotExposedState {
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict;
-  search: string;
+  search: string | SavedSearchQuery;
   valid: boolean;
 }
 
 const defaultSearch = '*';
 const emptySearch = '';
 
-export function getDefaultPivotState(): DefinePivotExposedState {
+export function getDefaultPivotState(kibanaContext: KibanaContextValue): DefinePivotExposedState {
   return {
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
-    search: defaultSearch,
+    search:
+      kibanaContext.currentSavedSearch.id !== undefined
+        ? kibanaContext.combinedQuery
+        : defaultSearch,
     valid: false,
   };
 }
@@ -66,13 +72,15 @@ interface Props {
 }
 
 export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const defaults = { ...getDefaultPivotState(), ...overrides };
+  const kibanaContext = useContext(KibanaContext);
 
-  const indexPattern = useContext(IndexPatternContext);
-
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
+
+  const defaults = { ...getDefaultPivotState(kibanaContext), ...overrides };
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
@@ -99,14 +107,17 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const addGroupBy = (d: DropDownLabel[]) => {
     const label: AggName = d[0].label;
-    if (groupByList[label] === undefined) {
-      groupByList[label] = groupByOptionsData[label];
+    const config: PivotGroupByConfig = groupByOptionsData[label];
+    const aggName: AggName = config.aggName;
+
+    if (groupByList[aggName] === undefined) {
+      groupByList[aggName] = config;
       setGroupByList({ ...groupByList });
     } else {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.definePivot.groupByExistsErrorMessage', {
-          defaultMessage: `A group by configuration with the name '{label}' already exists.`,
-          values: { label },
+          defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
+          values: { aggName },
         })
       );
     }
@@ -118,8 +129,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setGroupByList({ ...groupByList });
   };
 
-  const deleteGroupBy = (label: AggName) => {
-    delete groupByList[label];
+  const deleteGroupBy = (aggName: AggName) => {
+    delete groupByList[aggName];
     setGroupByList({ ...groupByList });
   };
 
@@ -128,14 +139,17 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const addAggregation = (d: DropDownLabel[]) => {
     const label: AggName = d[0].label;
-    if (aggList[label] === undefined) {
-      aggList[label] = aggOptionsData[label];
+    const config: PivotAggsConfig = aggOptionsData[label];
+    const aggName: AggName = config.aggName;
+
+    if (aggList[aggName] === undefined) {
+      aggList[aggName] = config;
       setAggList({ ...aggList });
     } else {
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.dataframe.definePivot.aggExistsErrorMessage', {
-          defaultMessage: `An aggregation configuration with the name '{label}' already exists.`,
-          values: { label },
+          defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
+          values: { aggName },
         })
       );
     }
@@ -147,8 +161,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setAggList({ ...aggList });
   };
 
-  const deleteAggregation = (label: AggName) => {
-    delete aggList[label];
+  const deleteAggregation = (aggName: AggName) => {
+    delete aggList[aggName];
     setAggList({ ...aggList });
   };
 
@@ -173,25 +187,50 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     ]
   );
 
-  const displaySearch = search === defaultSearch ? emptySearch : search;
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.definePivotForm.queryLabel', {
-              defaultMessage: 'Query',
-            })}
-          >
-            <EuiFieldSearch
-              placeholder={i18n.translate('xpack.ml.dataframe.definePivotForm.queryPlaceholder', {
-                defaultMessage: 'Search...',
+          {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
+            <Fragment>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.definePivotForm.indexPatternLabel', {
+                  defaultMessage: 'Index pattern',
+                })}
+              >
+                <span>{kibanaContext.currentIndexPattern.title}</span>
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.definePivotForm.queryLabel', {
+                  defaultMessage: 'Query',
+                })}
+                helpText={i18n.translate('xpack.ml.dataframe.definePivotForm.queryHelpText', {
+                  defaultMessage: 'Use a query string to filter the source data (optional).',
+                })}
+              >
+                <EuiFieldSearch
+                  placeholder={i18n.translate(
+                    'xpack.ml.dataframe.definePivotForm.queryPlaceholder',
+                    {
+                      defaultMessage: 'Search...',
+                    }
+                  )}
+                  onChange={searchHandler}
+                  value={search === defaultSearch ? emptySearch : search}
+                />
+              </EuiFormRow>
+            </Fragment>
+          )}
+
+          {kibanaContext.currentSavedSearch.id !== undefined && (
+            <EuiFormRow
+              label={i18n.translate('xpack.ml.dataframe.definePivotForm.savedSearchLabel', {
+                defaultMessage: 'Saved search',
               })}
-              onChange={searchHandler}
-              value={displaySearch}
-            />
-          </EuiFormRow>
+            >
+              <span>{kibanaContext.currentSavedSearch.title}</span>
+            </EuiFormRow>
+          )}
 
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.definePivotForm.groupByLabel', {

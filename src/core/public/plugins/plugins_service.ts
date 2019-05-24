@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart } from '..';
+import { InternalCoreSetup, InternalCoreStart } from '..';
 import { PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -29,14 +29,15 @@ import {
 } from './plugin_context';
 
 /** @internal */
-export type PluginsServiceSetupDeps = CoreSetup;
+export type PluginsServiceSetupDeps = InternalCoreSetup;
 /** @internal */
-export type PluginsServiceStartDeps = CoreStart;
+export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
 export interface PluginsServiceSetup {
   contracts: Map<string, unknown>;
 }
+/** @internal */
 export interface PluginsServiceStart {
   contracts: Map<string, unknown>;
 }
@@ -69,7 +70,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       );
 
     // Load plugin bundles
-    await this.loadPluginBundles(deps.basePath.addToPath);
+    await this.loadPluginBundles(deps.http.prependBasePath);
 
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();

@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextFilter rendering renders correctly against snapshot 1`] = `
+<Component
+  columnId="foo"
+  minWidth={100}
+/>
+`;

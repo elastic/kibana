@@ -52,7 +52,7 @@ describe('POST /api/saved_objects/_export', () => {
       },
     };
 
-    server.route(createExportRoute(prereqs, server));
+    server.route(createExportRoute(prereqs, server, ['index-pattern', 'search']));
   });
 
   afterEach(() => {

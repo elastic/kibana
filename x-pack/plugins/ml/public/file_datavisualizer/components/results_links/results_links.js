@@ -79,6 +79,7 @@ export class ResultsLinks extends Component {
 
   render() {
     const {
+      index,
       indexPatternId,
       timeFieldName,
       createIndexPattern,
@@ -151,7 +152,7 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/indices`}
+            href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/indices/filter/${index}`}
           />
         </EuiFlexItem>
 

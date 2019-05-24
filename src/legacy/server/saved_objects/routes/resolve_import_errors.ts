@@ -51,7 +51,11 @@ interface ImportRequest extends Hapi.Request {
   };
 }
 
-export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+export const createResolveImportErrorsRoute = (
+  prereqs: Prerequisites,
+  server: Hapi.Server,
+  supportedTypes: string[]
+) => ({
   path: '/api/saved_objects/_resolve_import_errors',
   method: 'POST',
   config: {
@@ -95,6 +99,7 @@ export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: H
     }
 
     return await resolveImportErrors({
+      supportedTypes,
       savedObjectsClient,
       readStream: request.payload.file,
       retries: request.payload.retries,

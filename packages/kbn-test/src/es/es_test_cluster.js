@@ -80,6 +80,7 @@ export function createEsTestCluster(options = {}) {
       }
 
       await cluster.start(installPath, {
+        password: config.password,
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,

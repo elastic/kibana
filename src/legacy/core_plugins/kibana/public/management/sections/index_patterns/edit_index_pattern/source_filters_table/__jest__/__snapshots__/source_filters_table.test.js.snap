@@ -267,6 +267,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
   />
   <eui-overlay-mask>
     <eui-confirm-modal
+      buttonColor="danger"
       cancelButtonText={
         <FormattedMessage
           defaultMessage="Cancel"

@@ -13,13 +13,14 @@
   pointer-events: none; /* 1 */
 }
 
-.mapWidgetOverlay__rightSide {
-  min-width: 19rem;
-  max-width: 24rem;
-}
-
 .mapWidgetOverlay__layerWrapper {
   align-items: flex-end;
+  width: $euiSize * 20;
+  min-height: 0; // Fixes scroll in Firefox
+}
+
+.mapWidgetControl__headerFlexItem {
+  flex-shrink: 0;
 }
 
 .mapWidgetControl {
@@ -42,5 +43,3 @@
   flex-shrink: 0;
   text-transform: uppercase;
 }
-
-

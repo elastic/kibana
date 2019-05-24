@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { NodeDetailStatus } from 'plugins/monitoring/components/elasticsearch/node_detail_status';
 import { I18nContext } from 'ui/i18n';
@@ -18,6 +18,7 @@ uiModule.directive('monitoringNodeSummary', () => {
       node: '='
     },
     link(scope, $el) {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
       scope.$watch('node', node => {
         render(<I18nContext><NodeDetailStatus stats={node} /></I18nContext>, $el[0]);
       });

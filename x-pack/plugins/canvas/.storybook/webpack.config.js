@@ -80,11 +80,53 @@ module.exports = async ({ config }) => {
     ])
   );
 
+  config.plugins.push(
+    // replace imports for `uiExports/*` modules with a synthetic module
+    // created by create_ui_exports_module.js
+    new webpack.NormalModuleReplacementPlugin(/^uiExports\//, resource => {
+      // uiExports used by Canvas
+      const extensions = {
+        hacks: [],
+        chromeNavControls: [],
+      };
+
+      // everything following the first / in the request is
+      // treated as a type of appExtension
+      const type = resource.request.slice(resource.request.indexOf('/') + 1);
+
+      resource.request = [
+        // the "val-loader" is used to execute create_ui_exports_module
+        // and use its return value as the source for the module in the
+        // bundle. This allows us to bypass writing to the file system
+        require.resolve('val-loader'),
+        '!',
+        require.resolve(KIBANA_ROOT + '/src/optimize/create_ui_exports_module'),
+        '?',
+        // this JSON is parsed by create_ui_exports_module and determines
+        // what require() calls it will execute within the bundle
+        JSON.stringify({ type, modules: extensions[type] || [] }),
+      ].join('');
+    })
+  );
+
   // Tell Webpack about the ts/x extensions
   config.resolve.extensions.push('.ts', '.tsx');
 
-  // Alias the any imports from ui/ to the proper directory.
+  // Alias imports to either a mock or the proper module or directory.
+  // NOTE: order is important here - `ui/notify` will override `ui/notify/foo` if it
+  // is added first.
+  config.resolve.alias['ui/notify/lib/format_msg'] = path.resolve(
+    __dirname,
+    '../tasks/mocks/uiNotifyFormatMsg'
+  );
+  config.resolve.alias['ui/notify'] = path.resolve(__dirname, '../tasks/mocks/uiNotify');
+  config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
+  config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');
+  config.resolve.alias['plugins/interpreter/interpreter'] = path.resolve(
+    KIBANA_ROOT,
+    'packages/kbn-interpreter/target/common'
+  );
 
   return config;
 };

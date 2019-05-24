@@ -19,30 +19,32 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import AddDeleteButtons from '../../add_delete_buttons';
-import SeriesConfig from './config';
-import Sortable from 'react-anything-sortable';
-import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import createTextHandler from '../../lib/create_text_handler';
-import createAggRowRender from '../../lib/create_agg_row_render';
-import { createUpDownHandler } from '../../lib/sort_keyhandler';
+import { AddDeleteButtons } from '../../add_delete_buttons';
+import { TableSeriesConfig as SeriesConfig } from './config';
+import { SeriesDragHandler } from '../../series_drag_handler';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { Aggs } from '../../aggs/aggs';
 
-function TableSeries(props) {
+function TableSeriesUI(props) {
   const {
     model,
     onAdd,
+    name,
+    fields,
+    panel,
     onChange,
     onDelete,
     disableDelete,
     disableAdd,
     selectedTab,
     visible,
-    intl
+    intl,
+    uiRestrictions,
   } = props;
 
   const handleChange = createTextHandler(onChange);
-  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -51,21 +53,17 @@ function TableSeries(props) {
   if (visible) {
     let seriesBody;
     if (selectedTab === 'metrics') {
-      const handleSort = (data) => {
-        const metrics = data.map(id => model.metrics.find(m => m.id === id));
-        props.onChange({ metrics });
-      };
       seriesBody = (
         <div>
-          <Sortable
-            style={{ cursor: 'default' }}
-            dynamic={true}
-            direction="vertical"
-            onSort={handleSort}
-            sortHandle="tvbAggRow__sortHandle"
-          >
-            { aggs }
-          </Sortable>
+          <Aggs
+            onChange={props.onChange}
+            fields={fields}
+            panel={panel}
+            model={model}
+            name={name}
+            uiRestrictions={uiRestrictions}
+            dragHandleProps={props.dragHandleProps}
+          />
         </div>
       );
     } else {
@@ -106,33 +104,10 @@ function TableSeries(props) {
     );
   }
 
-  let dragHandle;
-  if (!props.disableDelete) {
-    dragHandle = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={(<FormattedMessage
-            id="tsvb.table.dragToSortTooltip"
-            defaultMessage="Drag to sort"
-          />)}
-        >
-          <EuiButtonIcon
-            className="tvbSeries__sortHandle"
-            iconType="grab"
-            aria-label={intl.formatMessage({ id: 'tsvb.table.dragToSortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
-            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
-
   return (
     <div
       className={`${props.className}`}
       style={props.style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
     >
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -155,7 +130,7 @@ function TableSeries(props) {
           />
         </EuiFlexItem>
 
-        { dragHandle }
+        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
@@ -179,7 +154,7 @@ function TableSeries(props) {
   );
 }
 
-TableSeries.propTypes = {
+TableSeriesUI.propTypes = {
   className: PropTypes.string,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
@@ -189,20 +164,16 @@ TableSeries.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   selectedTab: PropTypes.string,
-  sortData: PropTypes.string,
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
 
-export default injectI18n(TableSeries);
+export const TableSeries = injectI18n(TableSeriesUI);

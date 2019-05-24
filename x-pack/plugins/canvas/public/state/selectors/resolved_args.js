@@ -8,6 +8,10 @@ import { get } from 'lodash';
 import * as argHelper from '../../lib/resolved_arg';
 import { prepend } from '../../lib/modify_path';
 
+export function getArgs(state) {
+  return get(state, ['transient', 'resolvedArgs']);
+}
+
 export function getArg(state, path) {
   return get(state, prepend(path, ['transient', 'resolvedArgs']));
 }
