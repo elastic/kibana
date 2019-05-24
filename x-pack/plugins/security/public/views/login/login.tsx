@@ -35,24 +35,24 @@ interface AnyObject {
     (
       $scope: AnyObject,
       $http: AnyObject,
-      $window: AnyObject,
+      window: AnyObject,
       secureCookies: boolean,
       loginState: LoginState
     ) => {
       const basePath = chrome.getBasePath();
-      const next = parseNext($window.location.href, basePath);
-      const isSecure = !!$window.location.protocol.match(/^https/);
+      const next = parseNext(window.location.href, basePath);
+      const isSecure = !!window.location.protocol.match(/^https/);
 
       $scope.$$postDigest(() => {
         const domNode = document.getElementById('reactLoginRoot');
 
-        const msgQueryParam = parse($window.location.href, true).query.msg || '';
+        const msgQueryParam = parse(window.location.href, true).query.msg || '';
 
         render(
           <I18nContext>
             <LoginPage
               http={$http}
-              window={$window}
+              window={window}
               infoMessage={get(messageMap, msgQueryParam)}
               loginState={loginState}
               isSecureConnection={isSecure}
