@@ -7,8 +7,30 @@
 import { interpretAst } from 'plugins/interpreter/interpreter';
 import { registries } from 'plugins/interpreter/registries';
 import { fromExpression } from '@kbn/interpreter/common';
+import { get } from 'lodash';
 import { getState } from '../state/store';
-import { getGlobalFilterExpression } from '../state/selectors/workpad';
+import { getGlobalFilters } from '../state/selectors/workpad';
+
+function getFiltersByGroup(filters, groups = [], ungrouped = false) {
+  if (!groups || groups.length === 0) {
+    if (!ungrouped) {
+      return filters;
+    }
+
+    // remove all filters that belong to a group
+    return filters.filter(filter => {
+      const ast = fromExpression(filter);
+      const expGroups = get(ast, 'chain[0].arguments.filterGroup', []);
+      return expGroups.length === 0;
+    });
+  }
+
+  return filters.filter(filter => {
+    const ast = fromExpression(filter);
+    const expGroups = get(ast, 'chain[0].arguments.filterGroup', []);
+    return expGroups.length > 0 && expGroups.every(expGroup => groups.includes(expGroup));
+  });
+}
 
 export const filters = () => ({
   name: 'filters',
@@ -16,11 +38,26 @@ export const filters = () => ({
   context: {
     types: ['null'],
   },
+  args: {
+    group: {
+      aliases: ['_'],
+      types: ['string'],
+      help: 'The name of the filter group to use',
+      multi: true,
+    },
+    ungrouped: {
+      aliases: ['nogroup', 'nogroups'],
+      types: ['boolean'],
+      help: "Don't include filters that belong to groups",
+      default: false,
+    },
+  },
   help: 'Collect element filters on the workpad, usually to provide them to a data source',
-  fn: () => {
-    const filterExpression = getGlobalFilterExpression(getState());
+  fn: (_, { group, ungrouped }) => {
+    const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
 
-    if (filterExpression && filterExpression.length) {
+    if (filterList && filterList.length) {
+      const filterExpression = filterList.join(' | ');
       const filterAST = fromExpression(filterExpression);
       return interpretAst(filterAST);
     } else {

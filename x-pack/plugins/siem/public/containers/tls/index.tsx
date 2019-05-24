@@ -11,8 +11,7 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../..';
-import { FlowTarget } from '../../../server/graphql/types';
-import { TlsEdges, TlsSortField, GetTlsQuery, PageInfo } from '../../graphql/types';
+import { FlowTarget, PageInfo, TlsEdges, TlsSortField, GetTlsQuery } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';

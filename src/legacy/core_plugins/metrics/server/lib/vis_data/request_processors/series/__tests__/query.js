@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import query from '../query';
+import { query } from '../query';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

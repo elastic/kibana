@@ -36,7 +36,7 @@ const SPLIT_MODES = {
   EVERYTHING: 'everything',
 };
 
-class Split extends Component {
+export class Split extends Component {
   componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
     if (model.split_mode === 'filters' && !model.split_filters) {
@@ -92,5 +92,3 @@ Split.propTypes = {
   onChange: PropTypes.func,
   panel: PropTypes.object,
 };
-
-export default Split;

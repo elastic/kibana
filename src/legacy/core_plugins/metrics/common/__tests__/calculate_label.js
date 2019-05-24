@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import calculateLabel from '../calculate_label';
+import { calculateLabel } from '../calculate_label';
 
 describe('calculateLabel(metric, metrics)', () => {
   it('returns "Unknown" for empty metric', () => {

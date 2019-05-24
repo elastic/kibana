@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-function YesNo(props) {
+export function YesNo(props) {
   const { name, value } = props;
   const handleChange = value => {
     const { name } = props;
@@ -73,5 +73,3 @@ YesNo.propTypes = {
   name: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 };
-
-export default YesNo;
