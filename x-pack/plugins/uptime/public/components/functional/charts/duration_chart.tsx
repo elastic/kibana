@@ -19,6 +19,7 @@ import {
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   convertMicrosecondsToMilliseconds as microsToMillis,
   getChartDateLabel,
@@ -96,7 +97,9 @@ export const DurationChart = ({
         <Chart className={'story-chart'}>
           <Axis
             id={getAxisId('bottom')}
-            title={'timestamp'}
+            title={i18n.translate('xpack.uptime.monitorCharts.checkStatus.bottomAxis.title', {
+              defaultMessage: 'timestamp',
+            })}
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
@@ -104,7 +107,9 @@ export const DurationChart = ({
           <Axis
             domain={{ min: 0 }}
             id={getAxisId('left')}
-            title="Duration ms"
+            title={i18n.translate('xpack.uptime.monitorCharts.checkStatus.leftAxis.title', {
+              defaultMessage: 'Duration ms',
+            })}
             position={Position.Left}
             tickFormat={d => Number(d).toFixed(0)}
           />
