@@ -117,7 +117,7 @@ describe('Authentication routes', () => {
     describe('authentication succeeds', () => {
 
       it(`returns user data`, async () => {
-        const user = { username: 'user' };
+        const user = { username: 'user', roles: ['superuser'] };
         authenticateStub.returns(
           Promise.resolve(AuthenticationResult.succeeded(user))
         );
