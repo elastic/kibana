@@ -18,8 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFormRow, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFormRow } from '@elastic/eui';
 
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FromToList, FromToObject } from './components/from_to_list';
@@ -45,43 +44,27 @@ function IpRangesParamEditor({
     });
   };
 
-  const onAdd = () => {
-    const type = agg.params.ipRangeType as IpRangeTypes;
-    setValue({ ...value, [type]: [...value[type], {}] });
-  };
-
   return (
     <EuiFormRow fullWidth={true}>
-      <>
-        {agg.params.ipRangeType === IpRangeTypes.MASK ? (
-          <MaskList
-            labelledbyId={agg.id}
-            list={value.mask}
-            showValidation={showValidation}
-            onBlur={setTouched}
-            onChange={items => handleChange(IpRangeTypes.MASK, items)}
-            setValidity={setValidity}
-          />
-        ) : (
-          <FromToList
-            labelledbyId={agg.id}
-            list={value.fromTo}
-            showValidation={showValidation}
-            onBlur={setTouched}
-            onChange={items => handleChange(IpRangeTypes.FROM_TO, items)}
-            setValidity={setValidity}
-          />
-        )}
-        <EuiSpacer size="s" />
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
-            <FormattedMessage
-              id="common.ui.aggTypes.ipRanges.addRangeButtonLabel"
-              defaultMessage="Add Range"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </>
+      {agg.params.ipRangeType === IpRangeTypes.MASK ? (
+        <MaskList
+          labelledbyId={agg.id}
+          list={value.mask}
+          showValidation={showValidation}
+          onBlur={setTouched}
+          onChange={items => handleChange(IpRangeTypes.MASK, items)}
+          setValidity={setValidity}
+        />
+      ) : (
+        <FromToList
+          labelledbyId={agg.id}
+          list={value.fromTo}
+          showValidation={showValidation}
+          onBlur={setTouched}
+          onChange={items => handleChange(IpRangeTypes.FROM_TO, items)}
+          setValidity={setValidity}
+        />
+      )}
     </EuiFormRow>
   );
 }

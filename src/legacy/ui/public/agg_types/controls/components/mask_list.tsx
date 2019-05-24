@@ -24,9 +24,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CidrMask } from '../../../utils/cidr_mask';
 import { InputList, InputListConfig, InputObject } from './input_list';
 
-export type MaskObject = InputObject & {
-  mask: string;
-};
+export interface MaskObject extends InputObject {
+  mask?: string;
+}
 
 interface MaskModel {
   id: string;
@@ -51,10 +51,15 @@ function MaskList({ labelledbyId, showValidation, onBlur, ...rest }: MaskListPro
       value: '0.0.0.0/1',
       isInvalid: false,
     },
+    defaultEmptyValue: {
+      model: '',
+      value: '',
+      isInvalid: false,
+    },
     validateClass: CidrMask,
-    getModelValue: item => ({
-      model: item.mask,
-      value: item.mask,
+    getModelValue: (item: MaskObject) => ({
+      model: item.mask || '',
+      value: item.mask || '',
       isInvalid: false,
     }),
     getModel: (models: MaskModel[], index) => models[index],
@@ -63,13 +68,19 @@ function MaskList({ labelledbyId, showValidation, onBlur, ...rest }: MaskListPro
         defaultMessage: 'Remove the CIDR mask value of {mask}',
         values: { mask: item.value },
       }),
-    onChangeFn: ({ model }: MaskModel) => ({ mask: model }),
+    onChangeFn: ({ model }: MaskModel) => {
+      if (model) {
+        return { mask: model };
+      }
+      return {};
+    },
     hasInvalidValuesFn: ({ isInvalid }) => isInvalid,
     renderInputRow: (item: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText
           aria-labelledby={`visEditorIpRangeCidrLabel${labelledbyId}`}
           isInvalid={showValidation ? item.isInvalid : false}
+          placeholder="*"
           onChange={ev => {
             onChangeValue(index, ev.target.value);
           }}

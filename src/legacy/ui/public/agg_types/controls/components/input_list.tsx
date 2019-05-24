@@ -18,10 +18,19 @@
  */
 
 import React, { useState, useEffect, Fragment } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  htmlIdGenerator,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface InputListConfig {
   defaultValue: {};
+  defaultEmptyValue: {};
   validateClass: new (value: string) => object;
   getModelValue(item: InputObject): {};
   getModel(models: InputModel[], index: number, modelName?: string): InputModel | InputItem;
@@ -34,7 +43,7 @@ export interface InputListConfig {
     onChangeFn: (index: number, value: string, modelName?: string) => void
   ): React.ReactNode;
   validateModel(
-    validateFn: (value: string, modelObj: InputItem) => void,
+    validateFn: (value: string | undefined, modelObj: InputItem) => void,
     object: InputObject,
     model: InputModel
   ): void;
@@ -43,9 +52,7 @@ interface InputModelBase {
   id: string;
   [key: string]: any;
 }
-export interface InputObject {
-  [prop: string]: string;
-}
+export type InputObject = object;
 interface InputItem {
   model: string;
   value: string;
@@ -102,6 +109,17 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
     onUpdate(newArray);
   };
 
+  const onAdd = () => {
+    const newArray = [
+      ...models,
+      {
+        id: generateId(),
+        ...config.defaultEmptyValue,
+      } as InputModel,
+    ];
+    onUpdate(newArray);
+  };
+
   const getUpdatedModels = (objList: InputObject[], modelList: InputModel[]) => {
     if (!objList.length) {
       return modelList;
@@ -118,7 +136,7 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
     });
   };
 
-  const validateItem = (value: string, modelObj: InputItem) => {
+  const validateItem = (value: string | undefined, modelObj: InputItem) => {
     const { model, isInvalid } = validateValue(value);
     if (value !== modelObj.model) {
       modelObj.value = model;
@@ -127,13 +145,13 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
     modelObj.isInvalid = isInvalid;
   };
 
-  const validateValue = (inputValue: string) => {
+  const validateValue = (inputValue: string | undefined) => {
     const result = {
-      model: inputValue,
+      model: inputValue || '',
       isInvalid: false,
     };
     if (!inputValue) {
-      result.isInvalid = true;
+      result.isInvalid = false;
       return result;
     }
     try {
@@ -164,7 +182,7 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
     [models]
   );
 
-  // resposible for setting up an initial value ([from: '0.0.0.0', to: '255.255.255.255' ]) when there is no default value
+  // resposible for setting up an initial value when there is no default value
   useEffect(() => {
     onChange(models.map(config.onChangeFn));
   }, []);
@@ -178,7 +196,6 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
       <EuiFlexGroup gutterSize="s" alignItems="center">
         {header}
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
       {models.map((item, index) => (
         <Fragment key={item.id}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -197,6 +214,15 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
           <EuiSpacer size="xs" />
         </Fragment>
       ))}
+      <EuiSpacer size="s" />
+      <EuiFlexItem>
+        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
+          <FormattedMessage
+            id="common.ui.aggTypes.ipRanges.addRangeButtonLabel"
+            defaultMessage="Add Range"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </>
   );
 }

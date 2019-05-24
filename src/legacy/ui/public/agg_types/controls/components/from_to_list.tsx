@@ -24,10 +24,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import Ipv4Address from '../../../utils/ipv4_address';
 import { InputList, InputListConfig, InputModel, InputObject } from './input_list';
 
-export type FromToObject = InputObject & {
-  from: string;
-  to: string;
-};
+export interface FromToObject extends InputObject {
+  from?: string;
+  to?: string;
+}
 
 interface FromToItem {
   model: string;
@@ -55,10 +55,14 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
       from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
       to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
     },
+    defaultEmptyValue: {
+      from: { value: '', model: '', isInvalid: false },
+      to: { value: '', model: '', isInvalid: false },
+    },
     validateClass: Ipv4Address,
-    getModelValue: item => ({
-      from: { value: item.from, model: item.from, isInvalid: false },
-      to: { value: item.to, model: item.to, isInvalid: false },
+    getModelValue: (item: FromToObject) => ({
+      from: { value: item.from || '', model: item.from || '', isInvalid: false },
+      to: { value: item.to || '', model: item.to || '', isInvalid: false },
     }),
     getModel: (models: FromToModel[], index, modelName: 'from' | 'to') => models[index][modelName],
     getRemoveBtnAriaLabel: (item: FromToModel) =>
@@ -66,7 +70,16 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
         defaultMessage: 'Remove the range of {from} to {to}',
         values: { from: item.from.value, to: item.to.value },
       }),
-    onChangeFn: ({ from, to }: FromToModel) => ({ from: from.model, to: to.model }),
+    onChangeFn: ({ from, to }: FromToModel) => {
+      const result: FromToObject = {};
+      if (from.model) {
+        result.from = from.model;
+      }
+      if (to.model) {
+        result.to = to.model;
+      }
+      return result;
+    },
     hasInvalidValuesFn: ({ from, to }: FromToModel) => from.isInvalid || to.isInvalid,
     renderInputRow: (item: FromToModel, index, onChangeValue) => (
       <>
@@ -74,6 +87,7 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
           <EuiFieldText
             aria-labelledby={`visEditorIpRangeFromLabel${labelledbyId}`}
             isInvalid={showValidation ? item.from.isInvalid : false}
+            placeholder="*"
             onChange={ev => {
               onChangeValue(index, ev.target.value, 'from');
             }}
@@ -85,6 +99,7 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
           <EuiFieldText
             aria-labelledby={`visEditorIpRangeToLabel${labelledbyId}`}
             isInvalid={showValidation ? item.to.isInvalid : false}
+            placeholder="*"
             onChange={ev => {
               onChangeValue(index, ev.target.value, 'to');
             }}
