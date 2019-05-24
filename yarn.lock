@@ -1317,17 +1317,17 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.0.tgz#923ae2e3e1276bb7dbd62ec5b3a7f0190026370e"
-  integrity sha512-eFdR1SrqB73KEe5zuVHfMeJ0Ef9gpR08pHJbN42XFqhNrLkrxO2CJFNhIyP6BW0Qf2k2ncXhayC2oZ58f7pPaA==
+"@elastic/charts@^4.2.6":
+  version "4.2.6"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.6.tgz#19b8fa79758f58ebae6eeba750bea6a418b15659"
+  integrity sha512-ROsv3YwSCDsp09ObeVkAL9YsiNJsAY2kAtBwovRaNCcotI9ybNSQcqbTLlC9vZkduyQSsHBvRL/RAwY8btXE8g==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
     classnames "^2.2.6"
-    d3-array "^2.0.3"
+    d3-array "^1.2.4"
     d3-collection "^1.0.7"
-    d3-scale "^2.2.2"
+    d3-scale "^1.0.7"
     d3-shape "^1.3.4"
     fp-ts "^1.14.2"
     konva "^2.6.0"
@@ -9225,7 +9225,7 @@ d3-scale@^1.0.5, d3-scale@^1.0.7:
     d3-time "1"
     d3-time-format "2"
 
-d3-scale@^2.1.2, d3-scale@^2.2.2:
+d3-scale@^2.1.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-2.2.2.tgz#4e880e0b2745acaaddd3ede26a9e908a9e17b81f"
   integrity sha512-LbeEvGgIb8UMcAa0EATLNX0lelKWGYDQiPdHj+gLblGVhGLyNbaCn3EvrJf0A3Y/uOOU5aD6MTh5ZFCdEwGiCw==
