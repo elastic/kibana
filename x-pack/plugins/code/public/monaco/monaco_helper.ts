@@ -29,7 +29,8 @@ export class MonacoHelper {
 
   constructor(
     public readonly container: HTMLElement,
-    private readonly editorActions: EditorActions
+    private readonly editorActions: EditorActions,
+    private urlQuery: string
   ) {
     this.handleCopy = this.handleCopy.bind(this);
   }
@@ -47,7 +48,7 @@ export class MonacoHelper {
       if (chrome.getInjected('enableLangserversDeveloping', false) === true) {
         this.monaco.languages.registerDefinitionProvider('go', definitionProvider);
       }
-      const codeEditorService = new EditorService();
+      const codeEditorService = new EditorService(this.getUrlQuery);
       codeEditorService.setMonacoHelper(this);
       this.editor = monaco.editor.create(
         this.container!,
@@ -80,7 +81,7 @@ export class MonacoHelper {
           this.editor!.layout();
         });
       });
-      registerReferencesAction(this.editor);
+      registerReferencesAction(this.editor, this.getUrlQuery);
       const hoverController: HoverController = new HoverController(this.editor);
       hoverController.setReduxActions(this.editorActions);
       document.addEventListener('copy', this.handleCopy);
@@ -88,6 +89,14 @@ export class MonacoHelper {
       resolve(this.editor);
     });
   }
+
+  updateUrlQuery = (q: string) => {
+    this.urlQuery = q;
+  };
+
+  getUrlQuery = () => {
+    return this.urlQuery;
+  };
 
   public destroy = () => {
     this.monaco = null;
