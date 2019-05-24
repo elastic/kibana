@@ -59,7 +59,7 @@ uiModules.get('kibana')
         }
       },
       controllerAs: 'paginate',
-      controller: function ($scope, $document) {
+      controller: function ($scope) {
         const self = this;
         const ALL = 0;
         const allSizeTitle = i18n.translate('common.ui.directives.paginate.size.allDropDownOptionLabel', {
@@ -119,7 +119,7 @@ uiModules.get('kibana')
         };
 
         self.goToTop = function goToTop() {
-          $document.scrollTop(0);
+          document.scrollTop(0);
         };
 
         self.renderList = function () {

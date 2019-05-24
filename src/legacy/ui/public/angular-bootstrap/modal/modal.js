@@ -122,7 +122,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
 
   .directive('modalTransclude', function () {
     return {
-      link: function($scope, $element, $attrs, controller, $transclude) {
+      link: function($scope, $element, $transclude) {
         $transclude($scope.$parent, function(clone) {
           $element.empty();
           $element.append(clone);
@@ -131,8 +131,8 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
     };
   })
 
-  .factory('$modalStack', ['$transition', '$timeout', '$document', '$compile', '$rootScope', '$$stackedMap',
-    function ($transition, $timeout, $document, $compile, $rootScope, $$stackedMap) {
+  .factory('$modalStack', ['$transition', '$timeout', '$compile', '$rootScope', '$$stackedMap',
+    function ($transition, $timeout, $compile, $rootScope, $$stackedMap) {
 
       var OPENED_MODAL_CLASS = 'modal-open';
 
@@ -159,7 +159,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
 
       function removeModalWindow(modalInstance) {
 
-        var body = $document.find('body').eq(0);
+        var body = document.find('body').eq(0);
         var modalWindow = openedWindows.get(modalInstance).value;
 
         //clean up the stack
@@ -218,7 +218,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
         }
       }
 
-      $document.bind('keydown', function (evt) {
+      document.bind('keydown', function (evt) {
         var modal;
 
         if (evt.which === 27) {
@@ -241,7 +241,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
           keyboard: modal.keyboard
         });
 
-        var body = $document.find('body').eq(0),
+        var body = document.find('body').eq(0),
             currBackdropIndex = backdropIndex();
 
         if (currBackdropIndex >= 0 && !backdropDomEl) {

@@ -66,7 +66,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position' ] )
    * Returns the actual instance of the $tooltip service.
    * TODO support multiple triggers
    */
-  this.$get = [ '$window', '$compile', '$timeout', '$document', '$position', '$interpolate', function ( $window, $compile, $timeout, $document, $position, $interpolate ) {
+  this.$get = [ '$compile', '$timeout', '$position', '$interpolate', function ( $compile, $timeout, $position, $interpolate ) {
     return function $tooltip ( type, prefix, defaultTriggerShow ) {
       var options = angular.extend( {}, defaultOptions, globalOptions );
 
@@ -245,7 +245,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position' ] )
               tooltipLinkedScope = ttScope.$new();
               tooltip = tooltipLinker(tooltipLinkedScope, function (tooltip) {
                 if ( appendToBody ) {
-                  $document.find( 'body' ).append( tooltip );
+                  document.find( 'body' ).append( tooltip );
                 } else {
                   element.after( tooltip );
                 }
@@ -351,24 +351,24 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position' ] )
   return $tooltip( 'tooltip', 'tooltip', 'mouseenter' );
 }])
 
-.directive( 'tooltipPopup', function () {	
-  return {	
-    restrict: 'EA',	
-    replace: true,	
-    scope: { content: '@', placement: '@', animation: '&', isOpen: '&' },	
-    templateUrl: 'template/tooltip/tooltip-popup.html'	
-  };	
+.directive( 'tooltipPopup', function () {
+  return {
+    restrict: 'EA',
+    replace: true,
+    scope: { content: '@', placement: '@', animation: '&', isOpen: '&' },
+    templateUrl: 'template/tooltip/tooltip-popup.html'
+  };
 })
 
 .directive( 'tooltipHtmlUnsafe', [ '$tooltip', function ( $tooltip ) {
   return $tooltip( 'tooltipHtmlUnsafe', 'tooltip', 'mouseenter' );
 }])
 
-.directive( 'tooltipHtmlUnsafePopup', function () {	
-  return {	
-    restrict: 'EA',	
-    replace: true,	
-    scope: { content: '@', placement: '@', animation: '&', isOpen: '&' },	
-    templateUrl: 'template/tooltip/tooltip-html-unsafe-popup.html'	
-  };	
+.directive( 'tooltipHtmlUnsafePopup', function () {
+  return {
+    restrict: 'EA',
+    replace: true,
+    scope: { content: '@', placement: '@', animation: '&', isOpen: '&' },
+    templateUrl: 'template/tooltip/tooltip-html-unsafe-popup.html'
+  };
 });
