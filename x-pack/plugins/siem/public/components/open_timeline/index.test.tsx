@@ -6,16 +6,16 @@
 
 import { ReactWrapper, mount } from 'enzyme';
 import { get } from 'lodash/fp';
-import { MockedProvider } from 'react-apollo/test-utils';
 import * as React from 'react';
+import { MockedProvider } from 'react-apollo/test-utils';
 
 import { wait } from '../../lib/helpers';
 import { TestProviderWithoutDragAndDrop, apolloClient } from '../../mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines/timelines_page';
 
-import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import { NotePreviews } from './note_previews';
 
 import { StatefulOpenTimeline } from '.';
 

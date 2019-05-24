@@ -16,6 +16,6 @@ export class KpiHosts {
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<KpiHostsData> {
-    return await this.adapter.getKpiHosts(req, options);
+    return this.adapter.getKpiHosts(req, options);
   }
 }

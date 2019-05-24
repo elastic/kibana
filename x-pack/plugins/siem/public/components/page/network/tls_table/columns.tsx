@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import moment from 'moment';
+import React from 'react';
 
 import { TlsNode } from '../../../../graphql/types';
-import { Columns } from '../../../load_more_table';
-import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
-import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { PreferenceFormattedDate } from '../../../formatted_date';
+import { Columns } from '../../../load_more_table';
+import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 
 import * as i18n from './translations';
 

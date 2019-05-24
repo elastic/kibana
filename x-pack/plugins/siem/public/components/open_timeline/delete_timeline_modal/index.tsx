@@ -7,8 +7,8 @@
 import { EuiButtonIcon, EuiModal, EuiOverlayMask, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
-import { DeleteTimelines } from '../types';
 import * as i18n from '../translations';
+import { DeleteTimelines } from '../types';
 
 import { DELETE_TIMELINE_MODAL_WIDTH, DeleteTimelineModal } from './delete_timeline_modal';
 

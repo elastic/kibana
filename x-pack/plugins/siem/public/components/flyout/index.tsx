@@ -12,11 +12,11 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
+import { trackUiAction as track } from '../../lib/track_usage';
 import { State, timelineSelectors } from '../../store';
-import { DataProvider } from '../timeline/data_providers/data_provider';
 import { timelineActions } from '../../store/actions';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
-import { trackUiAction as track } from '../../lib/track_usage';
+import { DataProvider } from '../timeline/data_providers/data_provider';
 
 import { FlyoutButton } from './button';
 import { Pane } from './pane';

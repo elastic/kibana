@@ -14,6 +14,8 @@ import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { State, appSelectors, timelineSelectors } from '../../../store';
+import { appActions, timelineActions } from '../../../store/actions';
+import { TimelineModel } from '../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -23,8 +25,6 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { appActions, timelineActions } from '../../../store/actions';
-import { TimelineModel } from '../../../store/timeline/model';
 
 import { ColumnHeader } from './column_headers/column_header';
 import { getColumnHeaders } from './helpers';

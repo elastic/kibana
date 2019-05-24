@@ -26,6 +26,8 @@ import { SearchHit, TermAggregation } from '../types';
 import { buildDomainsQuery } from './query_domains.dsl';
 import { buildFirstLastSeenDomainQuery } from './query_last_first_seen_domain.dsl';
 import { buildOverviewQuery } from './query_overview.dsl';
+import { buildTlsQuery } from './query_tls.dsl';
+import { buildUsersQuery } from './query_users.dsl';
 import {
   DomainFirstLastSeenItem,
   DomainFirstLastSeenRequestOptions,
@@ -36,8 +38,6 @@ import {
   TlsBuckets,
   UsersBucketsItem,
 } from './types';
-import { buildTlsQuery } from './query_tls.dsl';
-import { buildUsersQuery } from './query_users.dsl';
 
 import {
   DomainsRequestOptions,
@@ -170,12 +170,12 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
 }
 
 export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) => {
-  const firstSeen = getOr(null, `firstSeen.value_as_string`, overviewHit);
-  const lastSeen = getOr(null, `lastSeen.value_as_string`, overviewHit);
+  const firstSeen = getOr(null, 'firstSeen.value_as_string', overviewHit);
+  const lastSeen = getOr(null, 'lastSeen.value_as_string', overviewHit);
 
   const autonomousSystem: AutonomousSystem | null = getOr(
     null,
-    `autonomousSystem.results.hits.hits[0]._source.autonomous_system`,
+    'autonomousSystem.results.hits.hits[0]._source.autonomous_system',
     overviewHit
   );
   const geoFields: GeoEcsFields | null = getOr(
@@ -185,7 +185,7 @@ export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) =>
   );
   const hostFields: HostEcsFields | null = getOr(
     null,
-    `host.results.hits.hits[0]._source.host`,
+    'host.results.hits.hits[0]._source.host',
     overviewHit
   );
 
@@ -209,12 +209,11 @@ export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) =>
 const getDomainsEdges = (
   response: DatabaseSearchResponse<DomainsData, TermAggregation>,
   options: DomainsRequestOptions
-): DomainsEdges[] => {
-  return formatDomainsEdges(
+): DomainsEdges[] =>
+  formatDomainsEdges(
     getOr([], `aggregations.${options.flowTarget}_domains.buckets`, response),
     options.flowTarget
   );
-};
 
 export const formatDomainsEdges = (
   buckets: DomainsBuckets[],
@@ -244,12 +243,10 @@ export const formatDomainsEdges = (
 const getTlsEdges = (
   response: DatabaseSearchResponse<TlsData, TermAggregation>,
   options: TlsRequestOptions
-): TlsEdges[] => {
-  return formatTlsEdges(getOr([], 'aggregations.sha1.buckets', response));
-};
+): TlsEdges[] => formatTlsEdges(getOr([], 'aggregations.sha1.buckets', response));
 
-export const formatTlsEdges = (buckets: TlsBuckets[]): TlsEdges[] => {
-  return buckets.map((bucket: TlsBuckets) => {
+export const formatTlsEdges = (buckets: TlsBuckets[]): TlsEdges[] =>
+  buckets.map((bucket: TlsBuckets) => {
     const edge: TlsEdges = {
       node: {
         _id: bucket.key,
@@ -267,7 +264,6 @@ export const formatTlsEdges = (buckets: TlsBuckets[]): TlsEdges[] => {
     };
     return edge;
   });
-};
 
 const getOrNumber = (path: string, bucket: DomainsBuckets) => {
   const numb = get(path, bucket);
@@ -280,7 +276,7 @@ const getOrNumber = (path: string, bucket: DomainsBuckets) => {
 export const getUsersEdges = (
   response: DatabaseSearchResponse<UsersData, TermAggregation>
 ): UsersEdges[] =>
-  getOr([], `aggregations.users.buckets`, response).map((bucket: UsersBucketsItem) => ({
+  getOr([], 'aggregations.users.buckets', response).map((bucket: UsersBucketsItem) => ({
     node: {
       _id: bucket.key,
       user: {

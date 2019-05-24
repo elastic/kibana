@@ -11,11 +11,11 @@ import { pure } from 'recompose';
 
 import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
-import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
+import { IPDetailsLink } from '../../../links';
 import { LoadingPanel } from '../../../loading';
 import { LoadingOverlay, OverviewWrapper } from '../../index';
-import { IPDetailsLink } from '../../../links';
+import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 
 import * as i18n from './translations';
 

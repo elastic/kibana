@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { omit } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { FormattedDate } from '../../formatted_date';
 import { getEmptyTagValue } from '../../empty_value';
+import { FormattedDate } from '../../formatted_date';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';
-import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 import * as i18n from '../translations';
+import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 
 /** the width of the description column when showing extended columns */
 export const EXTENDED_COLUMNS_DESCRIPTION_WIDTH = '30%';

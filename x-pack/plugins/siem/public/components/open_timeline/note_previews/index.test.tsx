@@ -6,8 +6,8 @@
 
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult, TimelineResultNote } from '../types';
@@ -95,7 +95,7 @@ describe('NotePreviews', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="updated-by"]`)
+        .find('[data-test-subj="updated-by"]')
         .at(2)
         .text()
     ).toEqual('bob');
@@ -127,7 +127,7 @@ describe('NotePreviews', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="updated-by"]`)
+        .find('[data-test-subj="updated-by"]')
         .at(2)
         .text()
     ).toEqual('bob');
@@ -158,7 +158,7 @@ describe('NotePreviews', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="updated-by"]`)
+        .find('[data-test-subj="updated-by"]')
         .at(2)
         .text()
     ).toEqual('bob');

@@ -19,6 +19,7 @@ import { LastEventTime } from '../../components/last_event_time';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
+import { UrlStateContainer } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkDnsQuery } from '../../containers/network_dns';
@@ -26,7 +27,6 @@ import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
 import { State, networkModel, networkSelectors } from '../../store';
-import { UrlStateContainer } from '../../components/url_state';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';

@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
+import { CategoriesPane } from './categories_pane';
+import { FieldsPane } from './fields_pane';
+import { Header } from './header';
 import {
   CATEGORY_PANE_WIDTH,
   FIELDS_PANE_WIDTH,
@@ -21,9 +24,6 @@ import {
   getFieldBrowserSearchInputClassName,
 } from './helpers';
 import { FieldBrowserProps, OnFieldSelected, OnHideFieldBrowser } from './types';
-import { Header } from './header';
-import { CategoriesPane } from './categories_pane';
-import { FieldsPane } from './fields_pane';
 
 const TOP_OFFSET = 207;
 

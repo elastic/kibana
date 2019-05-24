@@ -5,8 +5,8 @@
  */
 
 import { AppResolverOf } from '../../lib/framework';
-import { MutationResolvers, QueryResolvers } from '../types';
 import { PinnedEvent } from '../../lib/pinned_event';
+import { MutationResolvers, QueryResolvers } from '../types';
 
 export type QueryAllPinnedEventsByTimelineIdResolver = AppResolverOf<
   QueryResolvers.GetAllPinnedEventsByTimelineIdResolver
@@ -42,12 +42,12 @@ export const createPinnedEventResolvers = (
 } => ({
   Query: {
     async getAllPinnedEventsByTimelineId(root, args, { req }) {
-      return await libs.pinnedEvent.getAllPinnedEventsByTimelineId(req, args.timelineId);
+      return libs.pinnedEvent.getAllPinnedEventsByTimelineId(req, args.timelineId);
     },
   },
   Mutation: {
     async persistPinnedEventOnTimeline(root, args, { req }) {
-      return await libs.pinnedEvent.persistPinnedEventOnTimeline(
+      return libs.pinnedEvent.persistPinnedEventOnTimeline(
         req,
         args.pinnedEventId || null,
         args.eventId,

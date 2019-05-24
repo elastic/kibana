@@ -21,47 +21,45 @@ export enum FirstLastSeenHostType {
 }
 
 export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHostType }>(
-  ({ hostname, type }) => {
-    return (
-      <ApolloConsumer>
-        {client => {
-          const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
-            hostname,
-            'default',
-            client
-          );
-          if (errorMessage != null) {
-            return (
-              <EuiToolTip
-                position="top"
-                content={errorMessage}
-                data-test-subj="firstLastSeenErrorToolTip"
-                aria-label={`firstLastSeenError-${type}`}
-                id={`firstLastSeenError-${hostname}-${type}`}
-              >
-                <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
-              </EuiToolTip>
-            );
-          }
-          const valueSeen = type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen;
+  ({ hostname, type }) => (
+    <ApolloConsumer>
+      {client => {
+        const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
+          hostname,
+          'default',
+          client
+        );
+        if (errorMessage != null) {
           return (
-            <>
-              {loading && <EuiLoadingSpinner size="m" />}
-              {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
-                ? valueSeen
-                : !loading &&
-                  valueSeen != null && (
-                    <EuiText size="s">
-                      <LocalizedDateTooltip date={moment(new Date(valueSeen)).toDate()}>
-                        <PreferenceFormattedDate value={new Date(valueSeen)} />
-                      </LocalizedDateTooltip>
-                    </EuiText>
-                  )}
-              {!loading && valueSeen == null && getEmptyTagValue()}
-            </>
+            <EuiToolTip
+              position="top"
+              content={errorMessage}
+              data-test-subj="firstLastSeenErrorToolTip"
+              aria-label={`firstLastSeenError-${type}`}
+              id={`firstLastSeenError-${hostname}-${type}`}
+            >
+              <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
+            </EuiToolTip>
           );
-        }}
-      </ApolloConsumer>
-    );
-  }
+        }
+        const valueSeen = type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen;
+        return (
+          <>
+            {loading && <EuiLoadingSpinner size="m" />}
+            {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
+              ? valueSeen
+              : !loading &&
+                valueSeen != null && (
+                  <EuiText size="s">
+                    <LocalizedDateTooltip date={moment(new Date(valueSeen)).toDate()}>
+                      <PreferenceFormattedDate value={new Date(valueSeen)} />
+                    </LocalizedDateTooltip>
+                  </EuiText>
+                )}
+            {!loading && valueSeen == null && getEmptyTagValue()}
+          </>
+        );
+      }}
+    </ApolloConsumer>
+  )
 );

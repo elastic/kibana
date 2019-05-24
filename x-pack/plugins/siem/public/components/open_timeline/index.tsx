@@ -15,11 +15,16 @@ import {
   defaultColumnHeaderType,
   defaultHeaders,
 } from '../../components/timeline/body/column_headers/default_headers';
-import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
-import { AllTimelinesVariables } from '../../containers/timeline/all';
+import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
+import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
-import { DeleteTimelineMutation, GetOneTimeline, TimelineResult } from '../../graphql/types';
+import {
+  DeleteTimelineMutation,
+  Direction,
+  GetOneTimeline,
+  TimelineResult,
+} from '../../graphql/types';
 import { Note } from '../../lib/note';
 import { State, timelineSelectors } from '../../store';
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
@@ -33,12 +38,10 @@ import {
 } from '../../store/timeline/actions';
 import { TimelineModel } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { AllTimelinesQuery } from '../../containers/timeline/all';
-import { Direction } from '../../graphql/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 
-import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import { OpenTimeline } from './open_timeline';
 import { OpenTimelineModal } from './open_timeline_modal/open_timeline_modal';
 import {
   DeleteTimelines,
@@ -148,8 +151,8 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
         sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
         onlyUserFavorite={onlyFavorites}
       >
-        {({ timelines, loading, totalCount }) => {
-          return !isModal ? (
+        {({ timelines, loading, totalCount }) =>
+          !isModal ? (
             <OpenTimeline
               deleteTimelines={this.onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
@@ -199,8 +202,8 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
               title={title}
               totalSearchResultsCount={totalCount}
             />
-          );
-        }}
+          )
+        }
       </AllTimelinesQuery>
     );
   }
@@ -347,6 +350,8 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
+      // NOTE: The cyclomatic complexity of this was 26 when normally it should not exceed 20.
+      /* eslint-disable complexity */
       .then(result => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
@@ -466,6 +471,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
                 : [],
           });
         }
+        /* eslint-enable */
       })
       .finally(() => {
         updateIsLoading({ id: 'timeline-1', isLoading: false });

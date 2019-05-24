@@ -16,7 +16,7 @@ export const UNCOMMON_PROCESSES = i18n.translate(
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.uncommonProcessTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Process} other {Processes}}`,
+    defaultMessage: '{totalCount, plural, =1 {Process} other {Processes}}',
   });
 
 export const HOSTS = i18n.translate('xpack.siem.uncommonProcessTable.hostsTitle', {

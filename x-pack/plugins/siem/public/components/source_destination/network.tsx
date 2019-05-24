@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import { DirectionBadge } from '../direction';
 import { DefaultDraggable, DraggableBadge } from '../draggables';
 
-import * as i18n from './translations';
 import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
@@ -22,6 +21,7 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
+import * as i18n from './translations';
 
 const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 3px;

@@ -7,9 +7,9 @@
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
-import { DeleteTimelines, OnOpenTimeline, OpenTimelineResult } from '../types';
 import { DeleteTimelineModalButton } from '../delete_timeline_modal';
 import * as i18n from '../translations';
+import { DeleteTimelines, OnOpenTimeline, OpenTimelineResult } from '../types';
 
 import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 

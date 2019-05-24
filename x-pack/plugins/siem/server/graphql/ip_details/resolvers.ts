@@ -12,9 +12,9 @@ import {
   TlsRequestOptions,
   UsersRequestOptions,
 } from '../../lib/ip_details';
+import { DomainFirstLastSeenRequestOptions } from '../../lib/ip_details/types';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
-import { DomainFirstLastSeenRequestOptions } from '../../lib/ip_details/types';
 
 export type QueryIpOverviewResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.IpOverviewResolver>,

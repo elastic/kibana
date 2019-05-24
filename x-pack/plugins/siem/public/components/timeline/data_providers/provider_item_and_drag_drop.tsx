@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../containers/source';
 import { AndOrBadge } from '../../and_or_badge';
 import {
   OnChangeDataProviderKqlQuery,
@@ -18,7 +19,6 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
-import { BrowserFields } from '../../../containers/source';
 
 import { DataProvider } from './data_provider';
 import { ProviderItemAnd } from './provider_item_and';
@@ -45,7 +45,7 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
     background-color: ${props.theme.eui.euiColorEmptyShade};
   }`
       : ''};
-  cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};
+  cursor: ${({ hasAndItem }) => (!hasAndItem ? 'default' : 'inherit')};
 `;
 
 const NumberProviderAndBadge = styled(EuiBadge)`

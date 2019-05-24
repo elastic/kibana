@@ -5,8 +5,8 @@
  */
 
 import { EuiInMemoryTable } from '@elastic/eui';
-import { pure } from 'recompose';
 import * as React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';

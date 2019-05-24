@@ -9,8 +9,8 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { render } from 'react-testing-library';
 
-import { LastEventIndexKey } from '../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
+import { LastEventIndexKey } from '../../graphql/types';
 import { wait } from '../../lib/helpers';
 import { TestProviders } from '../../mock';
 

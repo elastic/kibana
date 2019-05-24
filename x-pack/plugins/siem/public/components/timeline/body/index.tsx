@@ -28,9 +28,9 @@ import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
 import { ACTIONS_COLUMN_WIDTH } from './helpers';
-import { Sort } from './sort';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
+import { Sort } from './sort';
 
 interface Props {
   addNoteToEvent: AddNoteToEvent;

@@ -16,6 +16,7 @@ type QueryOrder =
   | { dns_bytes_in: Direction }
   | { dns_bytes_out: Direction };
 
+// eslint-disable-next-line consistent-return
 const getQueryOrder = (networkDnsSortField: NetworkDnsSortField): QueryOrder => {
   switch (networkDnsSortField.field) {
     case NetworkDnsFields.queryCount:

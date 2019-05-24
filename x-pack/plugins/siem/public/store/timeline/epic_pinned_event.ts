@@ -22,8 +22,8 @@ import {
   unPinEvent,
   updateTimeline,
 } from './actions';
-import { TimelineById } from './reducer';
 import { dispatcherTimelinePersistQueue, myEpicTimelineId, refetchQueries } from './epic';
+import { TimelineById } from './reducer';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 

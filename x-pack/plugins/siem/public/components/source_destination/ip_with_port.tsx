@@ -25,8 +25,8 @@ const PortWithSeparator = pure<{
   eventId: string;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, port, portFieldName }) => {
-  return port != null ? (
+}>(({ contextId, eventId, port, portFieldName }) =>
+  port != null ? (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         <IpPortSeparator data-test-subj="ip-port-separator">{':'}</IpPortSeparator>
@@ -41,8 +41,8 @@ const PortWithSeparator = pure<{
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : null;
-});
+  ) : null
+);
 
 /**
  * Renders a draggable, hyperlinked IP address, and if provided, an associated
@@ -55,26 +55,24 @@ export const IpWithPort = pure<{
   ipFieldName: string;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, ip, ipFieldName, port, portFieldName }) => {
-  return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <Ip
-          contextId={contextId}
-          data-test-subj="ip"
-          eventId={eventId}
-          fieldName={ipFieldName}
-          value={ip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <PortWithSeparator
-          contextId={contextId}
-          eventId={eventId}
-          port={port}
-          portFieldName={portFieldName}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+}>(({ contextId, eventId, ip, ipFieldName, port, portFieldName }) => (
+  <EuiFlexGroup gutterSize="none">
+    <EuiFlexItem grow={false}>
+      <Ip
+        contextId={contextId}
+        data-test-subj="ip"
+        eventId={eventId}
+        fieldName={ipFieldName}
+        value={ip}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <PortWithSeparator
+        contextId={contextId}
+        eventId={eventId}
+        port={port}
+        portFieldName={portFieldName}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));

@@ -49,7 +49,7 @@ export const OverviewHostQuery = pure<OverviewHostProps>(
       }}
     >
       {({ data, loading, refetch }) => {
-        const overviewHost = getOr({}, `source.OverviewHost`, data);
+        const overviewHost = getOr({}, 'source.OverviewHost', data);
         return children({
           id,
           overviewHost,

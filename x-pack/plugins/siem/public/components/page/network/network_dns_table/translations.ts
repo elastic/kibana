@@ -13,7 +13,7 @@ export const TOP_DNS_DOMAINS = i18n.translate('xpack.siem.networkDnsTable.title'
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.networkDnsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Domain} other {Domains}}`,
+    defaultMessage: '{totalCount, plural, =1 {Domain} other {Domains}}',
   });
 
 export const TOOLTIP = i18n.translate('xpack.siem.networkDnsTable.helperTooltip', {

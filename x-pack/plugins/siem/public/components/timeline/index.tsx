@@ -15,9 +15,9 @@ import { timelineActions } from '../../store/actions';
 import { KqlMode, TimelineModel } from '../../store/timeline/model';
 
 import { ColumnHeader } from './body/column_headers/column_header';
-import { DataProvider, QueryOperator } from './data_providers/data_provider';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
+import { DataProvider, QueryOperator } from './data_providers/data_provider';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,

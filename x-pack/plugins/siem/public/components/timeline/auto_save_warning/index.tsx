@@ -6,16 +6,16 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import { pure } from 'recompose';
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { State, timelineSelectors } from '../../../store';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../store/inputs/actions';
+import { timelineActions } from '../../../store/timeline';
 import { TimelineModel } from '../../../store/timeline/model';
 import { AutoSavedWarningMsg } from '../../../store/timeline/reducer';
-import { timelineActions } from '../../../store/timeline';
 
 import * as i18n from './translations';
 

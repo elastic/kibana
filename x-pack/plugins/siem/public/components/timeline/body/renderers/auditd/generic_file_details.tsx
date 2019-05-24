@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -14,13 +12,13 @@ import { pure } from 'recompose';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
-import { NetflowRenderer } from '../netflow';
-import { Details, TokensFlexItem } from '../helpers';
-import { ProcessDraggable } from '../process_draggable';
 import { Args } from '../args';
+import { Details, TokensFlexItem } from '../helpers';
+import { NetflowRenderer } from '../netflow';
+import { ProcessDraggable } from '../process_draggable';
 
-import * as i18n from './translations';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
+import * as i18n from './translations';
 
 interface Props {
   id: string;

@@ -6,21 +6,21 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
 import moment from 'moment';
+import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { hostsActions } from '../../../../store/actions';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { State, hostsModel, hostsSelectors } from '../../../../store';
+import { hostsActions } from '../../../../store/actions';
 import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { PreferenceFormattedDate } from '../../../formatted_date';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
-import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 import { MoreRowItems } from '../../index';
 
 import * as i18n from './translations';
@@ -99,9 +99,7 @@ const EventsTableComponent = pure<EventsTableProps>(
 
 const makeMapStateToProps = () => {
   const getEventsSelector = hostsSelectors.eventsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getEventsSelector(state, type);
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) => getEventsSelector(state, type);
   return mapStateToProps;
 };
 

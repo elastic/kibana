@@ -9,8 +9,8 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { OpenTimelineProps } from '../types';
 import * as i18n from '../translations';
+import { OpenTimelineProps } from '../types';
 
 const ButtonFlexItem = styled(EuiFlexItem)`
   margin-left: 5px;

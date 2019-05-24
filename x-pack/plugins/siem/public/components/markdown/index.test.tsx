@@ -10,7 +10,7 @@ import * as React from 'react';
 import { Markdown } from '.';
 
 describe('Markdown', () => {
-  test(`it renders when raw markdown is NOT provided`, () => {
+  test('it renders when raw markdown is NOT provided', () => {
     const wrapper = mount(<Markdown />);
 
     expect(wrapper.find('[data-test-subj="markdown"]').exists()).toEqual(true);

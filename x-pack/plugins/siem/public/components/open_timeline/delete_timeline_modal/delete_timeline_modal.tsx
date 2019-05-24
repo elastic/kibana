@@ -6,8 +6,8 @@
 
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { pure } from 'recompose';
 import * as React from 'react';
+import { pure } from 'recompose';
 
 import * as i18n from '../translations';
 

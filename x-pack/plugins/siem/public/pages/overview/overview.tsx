@@ -10,11 +10,11 @@ import React from 'react';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
+import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
 import { OverviewHost } from '../../components/page/overview/overview_host';
 import { OverviewNetwork } from '../../components/page/overview/overview_network';
 import { GlobalTime } from '../../containers/global_time';
-import { EmptyPage } from '../../components/empty_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 
 import { Summary } from './summary';

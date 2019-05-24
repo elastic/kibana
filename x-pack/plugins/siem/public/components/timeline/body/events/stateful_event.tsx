@@ -18,8 +18,8 @@ import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../.
 import { ExpandableEvent } from '../../expandable_event';
 import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
-import { RowRenderer } from '../renderers/row_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
+import { RowRenderer } from '../renderers/row_renderer';
 
 import { EventColumnView } from './event_column_view';
 

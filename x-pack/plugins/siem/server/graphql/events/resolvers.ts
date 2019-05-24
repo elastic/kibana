@@ -7,11 +7,11 @@
 import { GraphQLScalarType, Kind } from 'graphql';
 
 import { Events } from '../../lib/events';
+import { LastEventTimeRequestOptions } from '../../lib/events/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
-import { LastEventTimeRequestOptions } from '../../lib/events/types';
 
 type QueryEventsResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.EventsResolver>,

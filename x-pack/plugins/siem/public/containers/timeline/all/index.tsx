@@ -5,9 +5,9 @@
  */
 
 import { getOr } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
-import memoizeOne from 'memoize-one';
 
 import { OpenTimelineResult } from '../../../components/open_timeline/types';
 import {
@@ -62,25 +62,22 @@ export class AllTimelinesQuery extends React.PureComponent<OwnProps> {
         notifyOnNetworkStatusChange
         variables={variables}
       >
-        {({ data, loading }) => {
-          return children!({
+        {({ data, loading }) =>
+          children!({
             loading,
             totalCount: getOr(0, 'getAllTimeline.totalCount', data),
             timelines: this.memoizedAllTimeline(
               JSON.stringify(variables),
               getOr([], 'getAllTimeline.timeline', data)
             ),
-          });
-        }}
+          })
+        }
       </Query>
     );
   }
 
-  private getAllTimeline = (
-    variables: string,
-    timelines: TimelineResult[]
-  ): OpenTimelineResult[] => {
-    return timelines.map(timeline => ({
+  private getAllTimeline = (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
+    timelines.map(timeline => ({
       created: timeline.created,
       description: timeline.description,
       eventIdToNoteIds:
@@ -111,5 +108,4 @@ export class AllTimelinesQuery extends React.PureComponent<OwnProps> {
       updated: timeline.updated,
       updatedBy: timeline.updatedBy,
     }));
-  };
 }

@@ -11,12 +11,12 @@ import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../drag_and_drop/helpers';
+import { DefaultDraggable } from '../../../../draggables';
 import { ExternalLinkIcon } from '../../../../external_link_icon';
 import { GoogleLink } from '../../../../links';
 import { Provider } from '../../../../timeline/data_providers/provider';
-import { TokensFlexItem } from '../helpers';
-import { DefaultDraggable } from '../../../../draggables';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
+import { TokensFlexItem } from '../helpers';
 
 import { getBeginningTokens } from './suricata_links';
 

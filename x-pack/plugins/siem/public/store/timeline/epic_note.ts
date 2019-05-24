@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApolloClient } from 'apollo-client';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
+import { ApolloClient } from 'apollo-client';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
@@ -24,8 +24,8 @@ import {
   startTimelineSaving,
   updateTimeline,
 } from './actions';
-import { TimelineById } from './reducer';
 import { dispatcherTimelinePersistQueue, myEpicTimelineId, refetchQueries } from './epic';
+import { TimelineById } from './reducer';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 

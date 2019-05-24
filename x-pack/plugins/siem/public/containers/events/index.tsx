@@ -123,9 +123,7 @@ class EventsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getEventsSelector = hostsSelectors.eventsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getEventsSelector(state, type);
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) => getEventsSelector(state, type);
   return mapStateToProps;
 };
 

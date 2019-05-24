@@ -126,6 +126,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 }
 
+// eslint-disable-next-line func-style
 export function wrapRequest<InternalRequest extends WrappableRequest>(
   req: InternalRequest
 ): FrameworkRequest<InternalRequest> {

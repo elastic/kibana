@@ -14,8 +14,8 @@ import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { NetflowRenderer } from '../netflow';
 
-import { SuricataSignature } from './suricata_signature';
 import { SuricataRefs } from './suricata_refs';
+import { SuricataSignature } from './suricata_signature';
 
 const Details = styled.div`
   margin: 10px 0;

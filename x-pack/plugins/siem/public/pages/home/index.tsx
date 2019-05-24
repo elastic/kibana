@@ -20,12 +20,12 @@ import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
+import { WithSource } from '../../containers/source';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 import { Timelines } from '../timelines';
-import { WithSource } from '../../containers/source';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;

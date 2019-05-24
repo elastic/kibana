@@ -11,13 +11,14 @@ import { Observable } from 'rxjs';
 import { AppApolloClient } from '../lib/lib';
 
 import { appSelectors } from './app';
-import { timelineSelectors } from './timeline';
 import { inputsSelectors } from './inputs';
+import { timelineSelectors } from './timeline';
 
 import { State, createRootEpic, initialState, reducer } from '.';
 
 declare global {
   interface Window {
+    // eslint-disable-next-line no-undef
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: typeof compose;
   }
 }

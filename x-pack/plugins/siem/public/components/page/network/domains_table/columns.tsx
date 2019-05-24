@@ -182,6 +182,7 @@ export const getDomainsColumns = (
   },
 ];
 
+// eslint-disable-next-line consistent-return
 const getFlowTargetTitle = (flowTarget: FlowTarget): string => {
   switch (flowTarget) {
     case FlowTarget.client:

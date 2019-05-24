@@ -25,6 +25,14 @@ import {
 } from '../../../netflow/netflow_columns/duration_event_start_end';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../../../port';
 import {
+  NETWORK_BYTES_FIELD_NAME,
+  NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_DIRECTION_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
+  NETWORK_TRANSPORT_FIELD_NAME,
+} from '../../../source_destination/field_names';
+import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
   DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME,
@@ -42,14 +50,6 @@ import {
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../source_destination/source_destination_arrows';
-import {
-  NETWORK_BYTES_FIELD_NAME,
-  NETWORK_COMMUNITY_ID_FIELD_NAME,
-  NETWORK_DIRECTION_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
-  NETWORK_PROTOCOL_FIELD_NAME,
-  NETWORK_TRANSPORT_FIELD_NAME,
-} from '../../../source_destination/field_names';
 
 export const NetflowRenderer = pure<{ data: Ecs }>(({ data }) => (
   <Netflow

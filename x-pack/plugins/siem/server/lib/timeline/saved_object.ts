@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
+import { failure } from 'io-ts/lib/PathReporter';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 import { FindOptions } from 'src/legacy/server/saved_objects/service';
@@ -49,7 +49,7 @@ export class Timeline {
     request: FrameworkRequest,
     timelineId: string
   ): Promise<TimelineSavedObject> {
-    return await this.getSavedTimeline(request, timelineId);
+    return this.getSavedTimeline(request, timelineId);
   }
 
   public async getAllTimeline(
@@ -70,7 +70,7 @@ export class Timeline {
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
 
-    return await this.getAllSavedTimeline(request, options);
+    return this.getAllSavedTimeline(request, options);
   }
 
   public async persistFavorite(
@@ -260,8 +260,8 @@ export class Timeline {
   }
 }
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
-  return TimelineSavedObjectRuntimeType.decode(savedObject)
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject =>
+  TimelineSavedObjectRuntimeType.decode(savedObject)
     .map(savedTimeline => ({
       savedObjectId: savedTimeline.id,
       version: savedTimeline.version,
@@ -270,7 +270,6 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
     .getOrElseL(errors => {
       throw new Error(failure(errors).join('\n'));
     });
-};
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {

@@ -77,8 +77,8 @@ export const getColumnWidthFromType = (type: string): number =>
 export const getColumnHeaders = (
   headers: ColumnHeader[],
   browserFields: BrowserFields
-): ColumnHeader[] => {
-  return headers.map(header => {
+): ColumnHeader[] =>
+  headers.map(header => {
     const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
 
     return {
@@ -89,4 +89,3 @@ export const getColumnHeaders = (
       ),
     };
   });
-};

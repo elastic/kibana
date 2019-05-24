@@ -19,8 +19,8 @@ import styled, { injectGlobal } from 'styled-components';
 import { Note } from '../../../lib/note';
 import { inputsModel } from '../../../store';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
-import { SuperDatePicker } from '../../super_date_picker';
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
+import { SuperDatePicker } from '../../super_date_picker';
 
 import { Description, Name, NewTimeline, NotesButton, StarIcon } from './helpers';
 import {
@@ -124,6 +124,7 @@ export class Properties extends React.PureComponent<Props, State> {
     });
   };
 
+  /* eslint-disable complexity */
   public render() {
     const {
       associateNote,

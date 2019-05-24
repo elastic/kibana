@@ -24,6 +24,7 @@ import { AppKibanaFrameworkAdapter } from '../adapters/framework/kibana_framewor
 import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 import { AppFrontendLibs } from '../lib';
 
+// eslint-disable-next-line func-style
 export function compose(): AppFrontendLibs {
   const cache = new InMemoryCache({
     dataIdFromObject: () => null,

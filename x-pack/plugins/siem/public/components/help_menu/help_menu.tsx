@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiButton, EuiHorizontalRule, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import styled from 'styled-components';
 
 export const Icon = styled(EuiIcon)`

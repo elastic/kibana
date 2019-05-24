@@ -21,8 +21,8 @@ import {
   updateIsFavorite,
   updateTimeline,
 } from './actions';
-import { TimelineById } from './reducer';
 import { dispatcherTimelinePersistQueue, myEpicTimelineId, refetchQueries } from './epic';
+import { TimelineById } from './reducer';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
@@ -89,12 +89,11 @@ export const epicPersistTimelineFavorite = (
     )
   );
 
-export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => action$ => {
-  return action$.pipe(
+export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => action$ =>
+  action$.pipe(
     filter(action => timelineFavoriteActionsType.includes(action.type)),
     mergeMap(action => {
       dispatcherTimelinePersistQueue.next({ action });
       return empty();
     })
   );
-};

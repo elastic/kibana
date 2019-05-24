@@ -30,8 +30,8 @@ import {
 } from '../../graphql/types';
 import { getDocumentation, getIndexAlias, hasDocumentation } from '../../utils/beat_schema';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
-import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit } from '../../utils/build_query';
+import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { eventFieldsMap } from '../ecs_fields';
 import {
   FrameworkAdapter,

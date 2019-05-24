@@ -121,9 +121,8 @@ class AuthenticationsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getAuthenticationsSelector(state, type);
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) =>
+    getAuthenticationsSelector(state, type);
   return mapStateToProps;
 };
 

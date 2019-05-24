@@ -156,9 +156,7 @@ class HostsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getHostsSelector(state, type);
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) => getHostsSelector(state, type);
   return mapStateToProps;
 };
 

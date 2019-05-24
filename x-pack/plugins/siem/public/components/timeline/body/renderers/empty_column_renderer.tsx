@@ -6,17 +6,17 @@
 
 import * as React from 'react';
 
-import { ColumnHeader } from '../column_headers/column_header';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { escapeQueryValue } from '../../../../lib/keury';
+import { getEmptyValue } from '../../../empty_value';
 import { IS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
-import { TimelineNonEcsData } from '../../../../graphql/types';
-import { getEmptyValue } from '../../../empty_value';
+import { ColumnHeader } from '../column_headers/column_header';
 
-import { parseQueryValue } from './parse_query_value';
 import { ColumnRenderer } from './column_renderer';
+import { parseQueryValue } from './parse_query_value';
 
 export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) === -1;

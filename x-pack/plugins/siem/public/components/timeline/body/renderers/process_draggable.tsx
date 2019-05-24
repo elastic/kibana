@@ -12,13 +12,15 @@ import { DraggableBadge } from '../../../draggables';
 
 import * as i18n from './translations';
 
-export const isNillOrEmptyString = (value: string | number | null | undefined) => {
+export const isNillOrEmptyString = (value: string | number | null | undefined): boolean => {
   if (value == null) {
     return true;
   } else if (isString(value)) {
     return value === '';
   } else if (isNumber(value)) {
     return !isFinite(value);
+  } else {
+    return false;
   }
 };
 

@@ -16,7 +16,7 @@ export const AUTHENTICATIONS = i18n.translate(
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.authenticationsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {User} other {Users}}`,
+    defaultMessage: '{totalCount, plural, =1 {User} other {Users}}',
   });
 
 export const LAST_SUCCESSFUL_SOURCE = i18n.translate(

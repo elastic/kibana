@@ -47,7 +47,7 @@ export const KpiNetworkQuery = pure<KpiNetworkProps>(
       }}
     >
       {({ data, loading, refetch }) => {
-        const kpiNetwork = getOr({}, `source.KpiNetwork`, data);
+        const kpiNetwork = getOr({}, 'source.KpiNetwork', data);
         return children({
           id,
           kpiNetwork,

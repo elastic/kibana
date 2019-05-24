@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { render, unmountComponentAtNode } from 'react-dom';
 import React, { useEffect } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 

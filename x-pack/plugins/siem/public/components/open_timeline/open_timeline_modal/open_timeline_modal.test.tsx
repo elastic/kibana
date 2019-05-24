@@ -5,16 +5,17 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { OpenTimelineResult } from '../types';
-import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../mock/timeline_results';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../';
+import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
+import { TimelinesTableProps } from '../timelines_table';
+import { OpenTimelineResult } from '../types';
 
 import { OpenTimelineModal } from './open_timeline_modal';
+
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 
 describe('OpenTimelineModal', () => {
   const title = 'All Timelines / Open Timelines';

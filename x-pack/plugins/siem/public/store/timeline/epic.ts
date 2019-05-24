@@ -20,8 +20,8 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { DEFAULT_SORT_FIELD } from '../../components/open_timeline';
+import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
@@ -59,13 +59,13 @@ import {
   updateTitle,
   upsertColumn,
 } from './actions';
-import { TimelineModel } from './model';
-import { TimelineById } from './reducer';
+import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
-import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
 import { isNotNull } from './helpers';
 import { ManageEpicTimelineId } from './manage_timeline_id';
+import { TimelineModel } from './model';
+import { TimelineById } from './reducer';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;

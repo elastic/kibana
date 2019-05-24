@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
+import { failure } from 'io-ts/lib/PathReporter';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 import { FindOptions } from 'src/legacy/server/saved_objects/service';
@@ -57,7 +57,7 @@ export class Note {
   }
 
   public async getNote(request: FrameworkRequest, noteId: string): Promise<NoteSavedObject> {
-    return await this.getSavedNote(request, noteId);
+    return this.getSavedNote(request, noteId);
   }
 
   public async getNotesByEventId(
@@ -98,7 +98,7 @@ export class Note {
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
-    return await this.getAllSavedNote(request, options);
+    return this.getAllSavedNote(request, options);
   }
 
   public async persistNote(

@@ -14,8 +14,8 @@ import { TimelineNonEcsData } from '../../../../graphql/types';
 import { TestProviders, defaultHeaders, mockFrameworks, mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
-import { plainColumnRenderer } from './plain_column_renderer';
 import { deleteItemIdx, findItem, getValues } from './helpers';
+import { plainColumnRenderer } from './plain_column_renderer';
 
 const mockFramework = mockFrameworks.default_UTC;
 

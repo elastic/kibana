@@ -51,28 +51,28 @@ export class IpDetails {
     req: FrameworkRequest,
     options: IpOverviewRequestOptions
   ): Promise<IpOverviewData> {
-    return await this.adapter.getIpDetails(req, options);
+    return this.adapter.getIpDetails(req, options);
   }
 
   public async getDomains(
     req: FrameworkRequest,
     options: DomainsRequestOptions
   ): Promise<DomainsData> {
-    return await this.adapter.getDomains(req, options);
+    return this.adapter.getDomains(req, options);
   }
 
   public async getTls(req: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
-    return await this.adapter.getTls(req, options);
+    return this.adapter.getTls(req, options);
   }
 
   public async getDomainFirstLastSeen(
     req: FrameworkRequest,
     options: DomainFirstLastSeenRequestOptions
   ): Promise<FirstLastSeenDomain> {
-    return await this.adapter.getDomainsFirstLastSeen(req, options);
+    return this.adapter.getDomainsFirstLastSeen(req, options);
   }
 
   public async getUsers(req: FrameworkRequest, options: UsersRequestOptions): Promise<UsersData> {
-    return await this.adapter.getUsers(req, options);
+    return this.adapter.getUsers(req, options);
   }
 }

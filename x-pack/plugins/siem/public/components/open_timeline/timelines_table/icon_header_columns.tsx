@@ -7,9 +7,9 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 
-import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
+import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 
 import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 

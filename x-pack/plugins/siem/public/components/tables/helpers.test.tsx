@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
+import * as React from 'react';
 
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';

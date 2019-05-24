@@ -23,6 +23,7 @@ import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
+import { UrlStateContainer } from '../../components/url_state';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
@@ -32,7 +33,6 @@ import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { LastEventIndexKey } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { State, hostsModel, hostsSelectors } from '../../store';
-import { UrlStateContainer } from '../../components/url_state';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';

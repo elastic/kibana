@@ -19,11 +19,8 @@ export type WrapArrayIfExitts = <T>(value: Many<T>) => T[] | undefined;
 export const asArrayIfExists: WrapArrayIfExitts = value =>
   !isUndefined(value) ? castArray(value) : undefined;
 
-export const wait = (delay = 0): Promise<void> => {
-  return new Promise(resolve => {
-    return setTimeout(resolve, delay);
-  });
-};
+export const wait = (delay = 0): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, delay));
 
 /**
  * Creates a Union Type for all the values of an object

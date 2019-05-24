@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GraphQLOptions, runHttpQuery } from 'apollo-server-core';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import Boom from 'boom';
 import { Plugin, Request, ResponseToolkit, RouteOptions, Server } from 'hapi';
-import { GraphQLOptions, runHttpQuery } from 'apollo-server-core';
 
 export type HapiOptionsFunction = (req: Request) => GraphQLOptions | Promise<GraphQLOptions>;
 

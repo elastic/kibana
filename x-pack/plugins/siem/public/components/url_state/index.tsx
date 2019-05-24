@@ -7,15 +7,15 @@
 import { History, Location } from 'history';
 import { get, throttle } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import { connect } from 'react-redux';
 import { Route, RouteProps } from 'react-router-dom';
+import { pure } from 'recompose';
 import { RisonValue, decode, encode } from 'rison-node';
-import { QueryString } from 'ui/utils/query_string';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { QueryString } from 'ui/utils/query_string';
 
-import { hostsActions, inputsActions, networkActions } from '../../store/actions';
+import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import {
   KueryFilterModel,
   KueryFilterQuery,
@@ -27,13 +27,13 @@ import {
   networkModel,
   networkSelectors,
 } from '../../store';
+import { hostsActions, inputsActions, networkActions } from '../../store/actions';
 import {
   InputsModelId,
   TimeRangeKinds,
   UrlInputsModel,
   UrlTimeRange,
 } from '../../store/inputs/model';
-import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 
 interface KqlQueryHosts {
   filterQuery: KueryFilterQuery | null;

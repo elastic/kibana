@@ -17,8 +17,8 @@ import { DataProvider, IS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
 import { ColumnHeader } from '../column_headers/column_header';
 
-import { FormattedFieldValue, IP_FIELD_TYPE } from './formatted_field';
 import { ColumnRenderer } from './column_renderer';
+import { FormattedFieldValue, IP_FIELD_TYPE } from './formatted_field';
 import { parseQueryValue } from './parse_query_value';
 import { parseValue } from './parse_value';
 

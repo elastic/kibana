@@ -58,26 +58,24 @@ export const initialInputsState: InputsState = {
 };
 
 export const inputsReducer = reducerWithInitialState(initialInputsState)
-  .case(setTimelineRangeDatePicker, (state, { from, to }) => {
-    return {
-      ...state,
-      global: {
-        ...state.global,
-        linkTo: [],
+  .case(setTimelineRangeDatePicker, (state, { from, to }) => ({
+    ...state,
+    global: {
+      ...state.global,
+      linkTo: [],
+    },
+    timeline: {
+      ...state.timeline,
+      timerange: {
+        kind: 'absolute',
+        fromStr: undefined,
+        toStr: undefined,
+        from,
+        to,
       },
-      timeline: {
-        ...state.timeline,
-        timerange: {
-          kind: 'absolute',
-          fromStr: undefined,
-          toStr: undefined,
-          from,
-          to,
-        },
-        linkTo: [],
-      },
-    };
-  })
+      linkTo: [],
+    },
+  }))
   .case(setAbsoluteRangeDatePicker, (state, { id, from, to }) => {
     const timerange: TimeRange = {
       kind: 'absolute',

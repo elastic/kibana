@@ -9,12 +9,12 @@ import { Server } from 'hapi';
 
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
-import { createLogger } from './utils/logger';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from './saved_objects';
+import { createLogger } from './utils/logger';
 
 const APP_ID = 'siem';
 

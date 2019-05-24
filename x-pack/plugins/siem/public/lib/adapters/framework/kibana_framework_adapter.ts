@@ -184,6 +184,7 @@ class KibanaAdapterServiceProvider {
         if (!this.serviceRefs) {
           return;
         }
+        // eslint-disable-next-line consistent-return
         return serviceCall(this.serviceRefs);
       });
     });

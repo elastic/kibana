@@ -7,10 +7,11 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { Router } from 'react-router-dom';
 import { ActionCreator } from 'typescript-fsa';
 
+import { wait } from '../../lib/helpers';
 import { TestProviders, apolloClientObservable, mockGlobalState } from '../../mock';
 import {
   KueryFilterModel,
@@ -22,7 +23,6 @@ import {
   networkModel,
 } from '../../store';
 import { InputsModelId } from '../../store/inputs/model';
-import { wait } from '../../lib/helpers';
 
 import {
   UrlStateContainer,

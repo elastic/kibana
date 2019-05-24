@@ -50,7 +50,7 @@ interface ServerWithConfig {
   config(): any;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, func-style
 function isServerWithConfig(maybeServer: any): maybeServer is ServerWithConfig {
   return (
     Joi.validate(
@@ -67,7 +67,7 @@ interface KibanaConfiguration {
   get(key: string): any;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, func-style
 function isKibanaConfiguration(maybeConfiguration: any): maybeConfiguration is KibanaConfiguration {
   return (
     Joi.validate(

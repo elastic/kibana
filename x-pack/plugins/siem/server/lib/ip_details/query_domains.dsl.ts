@@ -21,62 +21,60 @@ const getAggs = (
   flowDirection: FlowDirection,
   domainsSortField: DomainsSortField,
   limit: number
-) => {
-  return {
-    domain_count: {
-      cardinality: {
-        field: `${flowTarget}.domain`,
+) => ({
+  domain_count: {
+    cardinality: {
+      field: `${flowTarget}.domain`,
+    },
+  },
+  [`${flowTarget}_domains`]: {
+    terms: {
+      field: `${flowTarget}.domain`,
+      size: limit + 1,
+      order: {
+        ...getQueryOrder(domainsSortField),
       },
     },
-    [`${flowTarget}_domains`]: {
-      terms: {
-        field: `${flowTarget}.domain`,
-        size: limit + 1,
-        order: {
-          ...getQueryOrder(domainsSortField),
+    aggs: {
+      firstSeen: {
+        min: {
+          field: '@timestamp',
         },
       },
-      aggs: {
-        firstSeen: {
-          min: {
-            field: '@timestamp',
-          },
+      lastSeen: {
+        max: {
+          field: '@timestamp',
         },
-        lastSeen: {
-          max: {
-            field: '@timestamp',
-          },
+      },
+      bytes: {
+        sum: {
+          field:
+            flowDirection === FlowDirection.uniDirectional
+              ? 'network.bytes'
+              : `${flowTarget}.bytes`,
         },
-        bytes: {
-          sum: {
-            field:
-              flowDirection === FlowDirection.uniDirectional
-                ? 'network.bytes'
-                : `${flowTarget}.bytes`,
-          },
+      },
+      direction: {
+        terms: {
+          field: 'network.direction',
         },
-        direction: {
-          terms: {
-            field: 'network.direction',
-          },
+      },
+      uniqueIpCount: {
+        cardinality: {
+          field: `${getOppositeField(flowTarget)}.ip`,
         },
-        uniqueIpCount: {
-          cardinality: {
-            field: `${getOppositeField(flowTarget)}.ip`,
-          },
-        },
-        packets: {
-          sum: {
-            field:
-              flowDirection === FlowDirection.uniDirectional
-                ? 'network.packets'
-                : `${flowTarget}.packets`,
-          },
+      },
+      packets: {
+        sum: {
+          field:
+            flowDirection === FlowDirection.uniDirectional
+              ? 'network.packets'
+              : `${flowTarget}.packets`,
         },
       },
     },
-  };
-};
+  },
+});
 
 const getUniDirectionalFilter = (flowDirection: FlowDirection) =>
   flowDirection === FlowDirection.uniDirectional

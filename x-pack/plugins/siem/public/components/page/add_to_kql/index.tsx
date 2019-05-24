@@ -107,5 +107,6 @@ export const AddToKql = pure<AddToKqlProps>(
         );
     }
     assertUnreachable(componentFilterType, 'Unknown Filter Type in switch statement');
+    return null;
   }
 );

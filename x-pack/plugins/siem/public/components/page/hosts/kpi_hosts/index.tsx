@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
 
 import { KpiHostsData } from '../../../../graphql/types';
 import {
@@ -95,8 +93,8 @@ const fieldTitleMapping: StatItems[] = [
   },
 ];
 
-export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
-  return loading ? (
+export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) =>
+  loading ? (
     <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 247 }}>
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
@@ -131,8 +129,8 @@ export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
         return <StatItemsComponent {...statItemProps} />;
       })}
     </EuiFlexGroup>
-  );
-});
+  )
+);
 
 const addValueToFields = (fields: StatItem[], data: KpiHostsData): StatItem[] =>
   fields.map(field => ({ ...field, value: get(field.key, data) }));

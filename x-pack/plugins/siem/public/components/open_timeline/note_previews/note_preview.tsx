@@ -10,8 +10,8 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { FormattedDate } from '../../formatted_date';
 import { defaultToEmptyTag, getEmptyValue } from '../../empty_value';
+import { FormattedDate } from '../../formatted_date';
 import { Markdown } from '../../markdown';
 import * as i18n from '../translations';
 import { TimelineResultNote } from '../types';

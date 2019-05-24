@@ -6,20 +6,19 @@
 
 import { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
-
-import { getEmptyValue } from '../../empty_value';
-import { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../mock/timeline_results';
+import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
+import { getEmptyValue } from '../../empty_value';
 import { NotePreviews } from '../note_previews';
 import * as i18n from '../translations';
+import { OpenTimelineResult } from '../types';
 
 import { TimelinesTable } from '.';
+
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 
 describe('#getCommonColumns', () => {
   let mockResults: OpenTimelineResult[];

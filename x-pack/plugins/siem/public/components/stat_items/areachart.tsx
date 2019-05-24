@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiAreaSeries, EuiSeriesChart, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { EuiAreaSeries, EuiSeriesChart, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
 
 import { AutoSizer } from '../auto_sizer';
 
@@ -53,20 +53,18 @@ export const AreaChartWithCustomPrompt = pure<{
   data: AreaChartData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
-}>(({ data, height, width }) => {
-  return data != null &&
-    data.length &&
-    data.every(
-      ({ value }) =>
-        value != null &&
-        value.length > 0 &&
-        value.every(chart => chart.x != null && chart.y != null)
-    ) ? (
+}>(({ data, height, width }) =>
+  data != null &&
+  data.length &&
+  data.every(
+    ({ value }) =>
+      value != null && value.length > 0 && value.every(chart => chart.x != null && chart.y != null)
+  ) ? (
     <AreaChartBaseComponent height={height} width={width} data={data} />
   ) : (
     <ChartHolder />
-  );
-});
+  )
+);
 
 export const AreaChart = pure<{ areaChart: AreaChartData[] | null | undefined }>(
   ({ areaChart }) => (

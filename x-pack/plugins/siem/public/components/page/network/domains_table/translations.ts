@@ -13,7 +13,7 @@ export const DOMAINS = i18n.translate('xpack.siem.network.ipDetails.domainsTable
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.network.ipDetails.domainsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Domain} other {Domains}}`,
+    defaultMessage: '{totalCount, plural, =1 {Domain} other {Domains}}',
   });
 
 // Columns

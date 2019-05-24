@@ -50,7 +50,7 @@ export const OverviewNetworkQuery = pure<OverviewNetworkProps>(
       }}
     >
       {({ data, loading, refetch }) => {
-        const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);
+        const overviewNetwork = getOr({}, 'source.OverviewNetwork', data);
         return children({
           id,
           overviewNetwork,

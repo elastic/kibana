@@ -5,18 +5,17 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
-
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockTimelineResults } from '../../../mock/timeline_results';
-import { OpenTimelineResult } from '../types';
+import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import * as i18n from '../translations';
+import { OpenTimelineResult } from '../types';
 
 import { TimelinesTable, TimelinesTableProps } from '.';
+
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 
 describe('TimelinesTable', () => {
   let mockResults: OpenTimelineResult[];

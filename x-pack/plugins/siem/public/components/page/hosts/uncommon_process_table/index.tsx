@@ -9,9 +9,9 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { hostsActions } from '../../../../store/actions';
 import { UncommonProcessItem, UncommonProcessesEdges } from '../../../../graphql/types';
 import { State, hostsModel, hostsSelectors } from '../../../../store';
+import { hostsActions } from '../../../../store/actions';
 import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { getRowItemDraggables } from '../../../tables/helpers';

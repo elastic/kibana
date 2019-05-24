@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
+import { failure } from 'io-ts/lib/PathReporter';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 import { FindOptions } from 'src/legacy/server/saved_objects/service';
 
 import { Pick3 } from '../../../common/utility_types';
-import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import { PageInfoNote, SortNote } from '../../graphql/types';
+import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import {
   convertSavedObjectToSavedTimeline,
   pickSavedTimeline,
@@ -64,7 +64,7 @@ export class PinnedEvent {
     request: FrameworkRequest,
     pinnedEventId: string
   ): Promise<PinnedEventSavedObject> {
-    return await this.getSavedPinnedEvent(request, pinnedEventId);
+    return this.getSavedPinnedEvent(request, pinnedEventId);
   }
 
   public async getAllPinnedEventsByTimelineId(
@@ -75,7 +75,7 @@ export class PinnedEvent {
       search: timelineId,
       searchFields: ['timelineId'],
     };
-    return await this.getAllSavedPinnedEvents(request, options);
+    return this.getAllSavedPinnedEvents(request, options);
   }
 
   public async getAllPinnedEvents(
@@ -92,7 +92,7 @@ export class PinnedEvent {
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
-    return await this.getAllSavedPinnedEvents(request, options);
+    return this.getAllSavedPinnedEvents(request, options);
   }
 
   public async persistPinnedEventOnTimeline(

@@ -22,6 +22,7 @@ const OUTPUT_CLIENT_TYPES_PATH = resolve('public', 'graphql', 'types.ts');
 const OUTPUT_SERVER_TYPES_PATH = resolve('server', 'graphql', 'types.ts');
 const SCHEMA_PATH = resolve(__dirname, 'combined_schema.ts');
 
+// eslint-disable-next-line
 async function main() {
   await generate(
     {

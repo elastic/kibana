@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import uuid from 'uuid';
 import styled from 'styled-components';
+import uuid from 'uuid';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
+import { NOTES_PANEL_WIDTH } from './notes_size';
 import {
   ButtonContainer,
   DescriptionContainer,
@@ -34,7 +35,6 @@ import {
   StyledStar,
 } from './styles';
 import * as i18n from './translations';
-import { NOTES_PANEL_WIDTH } from './notes_size';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';

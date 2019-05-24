@@ -9,10 +9,10 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { OpenTimelineProps } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
 import { TitleRow } from '../title_row';
+import { OpenTimelineProps } from '../types';
 
 export const HeaderContainer = styled.div`
   width: 100%;

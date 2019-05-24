@@ -5,10 +5,10 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
-import { Router } from 'react-router-dom';
 import { cloneDeep } from 'lodash/fp';
+import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { Router } from 'react-router-dom';
 
 import '../../mock/match_media';
 import { mocksSource } from '../../containers/source/mock';

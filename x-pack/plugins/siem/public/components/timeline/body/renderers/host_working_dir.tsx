@@ -9,8 +9,8 @@ import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../draggables';
 
-import * as i18n from './translations';
 import { TokensFlexItem } from './helpers';
+import * as i18n from './translations';
 
 interface Props {
   contextId: string;
@@ -19,31 +19,24 @@ interface Props {
   workingDirectory: string | null | undefined;
 }
 
-export const HostWorkingDir = pure<Props>(({ contextId, eventId, hostName, workingDirectory }) => {
-  return (
-    <>
+export const HostWorkingDir = pure<Props>(({ contextId, eventId, hostName, workingDirectory }) => (
+  <>
+    <TokensFlexItem grow={false} component="span">
+      <DraggableBadge contextId={contextId} eventId={eventId} field="host.name" value={hostName} />
+    </TokensFlexItem>
+    {workingDirectory != null && (
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="host.name"
-          value={hostName}
-        />
+        {i18n.IN}
       </TokensFlexItem>
-      {workingDirectory != null && (
-        <TokensFlexItem grow={false} component="span">
-          {i18n.IN}
-        </TokensFlexItem>
-      )}
-      <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="process.working_directory"
-          value={workingDirectory}
-          iconType="folderOpen"
-        />
-      </TokensFlexItem>
-    </>
-  );
-});
+    )}
+    <TokensFlexItem grow={false} component="span">
+      <DraggableBadge
+        contextId={contextId}
+        eventId={eventId}
+        field="process.working_directory"
+        value={workingDirectory}
+        iconType="folderOpen"
+      />
+    </TokensFlexItem>
+  </>
+));

@@ -16,7 +16,7 @@ describe('helpers', () => {
       expect(getExampleText(aField.example)).toEqual('Example: Y-6TfmcB0WOhS6qyMv3s');
     });
 
-    test(`it returns an empty string when the field's example is an empty string`, () => {
+    test("it returns an empty string when the field's example is an empty string", () => {
       const fieldWithEmptyExample = {
         ...aField,
         example: '',

@@ -23,10 +23,10 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
+import { getRowItemDraggables } from '../../../tables/helpers';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
-import { getRowItemDraggables } from '../../../tables/helpers';
 
 import * as i18n from './translations';
 
@@ -174,6 +174,7 @@ export const getNetworkTopNFlowColumns = (
   },
 ];
 
+// eslint-disable-next-line consistent-return
 const getIpTitle = (flowTarget: FlowTarget) => {
   switch (flowTarget) {
     case FlowTarget.source:
@@ -188,6 +189,7 @@ const getIpTitle = (flowTarget: FlowTarget) => {
   assertUnreachable(flowTarget);
 };
 
+// eslint-disable-next-line consistent-return
 const getUniqueTitle = (flowTarget: FlowTarget) => {
   switch (flowTarget) {
     case FlowTarget.source:

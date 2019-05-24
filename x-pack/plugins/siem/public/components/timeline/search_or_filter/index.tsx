@@ -11,8 +11,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
-import { KueryFilterQuery, SerializedFilterQuery, timelineSelectors } from '../../../store';
-import { State } from '../../../store';
+import { KueryFilterQuery, SerializedFilterQuery, State, timelineSelectors } from '../../../store';
 import { timelineActions } from '../../../store/actions';
 import { KqlMode, TimelineModel } from '../../../store/timeline/model';
 

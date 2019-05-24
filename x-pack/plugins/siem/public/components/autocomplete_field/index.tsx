@@ -233,6 +233,7 @@ type StateUpdater<State, Props = {}> = (
   prevProps: Readonly<Props>
 ) => State | null;
 
+// eslint-disable-next-line func-style
 function composeStateUpdaters<State, Props>(...updaters: Array<StateUpdater<State, Props>>) {
   return (state: State, props: Props) =>
     updaters.reduce((currentState, updater) => updater(currentState, props) || currentState, state);

@@ -8,11 +8,11 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { ACTIONS_COLUMN_WIDTH } from '../helpers';
-import { Direction } from '../../../../graphql/types';
 import { mockBrowserFields } from '../../../../../public/containers/source/mock';
-import { Sort } from '../sort';
+import { Direction } from '../../../../graphql/types';
 import { TestProviders } from '../../../../mock/test_providers';
+import { ACTIONS_COLUMN_WIDTH } from '../helpers';
+import { Sort } from '../sort';
 
 import { defaultHeaders } from './default_headers';
 

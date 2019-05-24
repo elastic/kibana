@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { StatItem, StatItems, StatItemsComponent } from '../../../../components/stat_items';
@@ -91,8 +90,8 @@ const FlexGroup = styled(EuiFlexGroup)`
   margin-height: 86px;
 `;
 
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
-  return loading ? (
+export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) =>
+  loading ? (
     <FlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
@@ -108,8 +107,8 @@ export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => 
         />
       ))}
     </EuiFlexGroup>
-  );
-});
+  )
+);
 
 const addValueToFields = (fields: StatItem[], data: KpiNetworkData): StatItem[] =>
   fields.map(field => ({ ...field, value: get(field.key, data) }));

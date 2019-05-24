@@ -11,10 +11,10 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
+import { timelineActions } from '../../../store/actions';
 import { OnResize, Resizeable } from '../../resize_handle';
 import { TimelineResizeHandle } from '../../resize_handle/styled_handles';
 import { FlyoutHeader } from '../header';
-import { timelineActions } from '../../../store/actions';
 
 import * as i18n from './translations';
 

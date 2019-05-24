@@ -47,6 +47,7 @@ export const TestProviders = pure<Props>(
     children,
     store = createStore(state, apolloClientObservable),
     mockFramework = mockFrameworks.default_UTC,
+    // eslint-disable-next-line no-undef
     onDragEnd = jest.fn(),
   }) => (
     <I18nProvider>

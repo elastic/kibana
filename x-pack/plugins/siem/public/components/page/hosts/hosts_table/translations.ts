@@ -13,7 +13,7 @@ export const HOSTS = i18n.translate('xpack.siem.hostsTable.hostsTitle', {
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.hostsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Host} other {Hosts}}`,
+    defaultMessage: '{totalCount, plural, =1 {Host} other {Hosts}}',
   });
 
 export const NAME = i18n.translate('xpack.siem.hostsTable.nameTitle', {

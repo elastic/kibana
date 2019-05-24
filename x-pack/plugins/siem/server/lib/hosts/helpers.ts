@@ -15,23 +15,21 @@ export const buildFieldsTermAggregation = (esFields: ReadonlyArray<string>): Agg
     {}
   );
 
-const getAggregationTypeFromField = (field: string): AggregationRequest => {
-  return {
-    [field.replace(/\./g, '_')]: {
-      terms: {
-        field,
-        size: 10,
-        order: {
-          timestamp: 'desc',
-        },
+const getAggregationTypeFromField = (field: string): AggregationRequest => ({
+  [field.replace(/\./g, '_')]: {
+    terms: {
+      field,
+      size: 10,
+      order: {
+        timestamp: 'desc',
       },
-      aggs: {
-        timestamp: {
-          max: {
-            field: '@timestamp',
-          },
+    },
+    aggs: {
+      timestamp: {
+        max: {
+          field: '@timestamp',
         },
       },
     },
-  };
-};
+  },
+});

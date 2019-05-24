@@ -6,8 +6,8 @@
 
 import React from 'react';
 
-import { RowRenderer } from './row_renderer';
 import { Row } from './helpers';
+import { RowRenderer } from './row_renderer';
 
 export const plainRowRenderer: RowRenderer = {
   isInstance: _ => true,

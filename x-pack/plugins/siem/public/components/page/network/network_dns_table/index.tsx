@@ -9,9 +9,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { networkActions } from '../../../../store/actions';
 import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
 import { State, networkModel, networkSelectors } from '../../../../store';
+import { networkActions } from '../../../../store/actions';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { getNetworkDnsColumns } from './columns';

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiHorizontalRule } from '@elastic/eui';
 import { ReactWrapper, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
 
-import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
+import { BarChart } from './barchart';
 
 import { StatItemsComponent, StatItemsProps } from '.';
 

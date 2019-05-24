@@ -6,8 +6,8 @@
 
 import { TimelineResult } from '../../server/graphql/types';
 import { OpenTimelineResult } from '../components/open_timeline/types';
-import { Direction, GetAllTimeline, SortFieldTimeline } from '../graphql/types';
 import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
+import { Direction, GetAllTimeline, SortFieldTimeline } from '../graphql/types';
 
 export interface MockedProvidedQuery {
   request: {

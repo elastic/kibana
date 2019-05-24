@@ -89,7 +89,7 @@ class DomainsComponentQuery extends QueryTemplate<
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const domains = getOr([], `source.Domains.edges`, data);
+          const domains = getOr([], 'source.Domains.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string) => ({
             variables: {

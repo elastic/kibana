@@ -5,10 +5,10 @@
  */
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
+import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import { Sort } from '../../components/timeline/body/sort';
+import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Direction, PinnedEvent } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 

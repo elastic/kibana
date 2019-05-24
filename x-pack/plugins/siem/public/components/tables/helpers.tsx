@@ -8,12 +8,12 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { Provider } from '../timeline/data_providers/provider';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { Provider } from '../timeline/data_providers/provider';
 
 export const getRowItemDraggable = ({
   rowItem,
@@ -135,36 +135,34 @@ export const getRowItemOverflow = (
   idPrefix: string,
   overflowIndexStart = 5,
   maxOverflowItems = 5
-): JSX.Element => {
-  return (
-    <>
-      {rowItems.length > overflowIndexStart && (
-        <EuiToolTip
-          content={
-            <>
-              {rowItems
-                .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
-                .map(rowItem => (
-                  <span key={`${idPrefix}-${rowItem}`}>
-                    {defaultToEmptyTag(rowItem)}
-                    <br />
-                  </span>
-                ))}
-              {rowItems.length > overflowIndexStart + maxOverflowItems && (
-                <b>
+): JSX.Element => (
+  <>
+    {rowItems.length > overflowIndexStart && (
+      <EuiToolTip
+        content={
+          <>
+            {rowItems
+              .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
+              .map(rowItem => (
+                <span key={`${idPrefix}-${rowItem}`}>
+                  {defaultToEmptyTag(rowItem)}
                   <br />
-                  <FormattedMessage
-                    id="xpack.siem.tables.rowItemHelper.moreDescription"
-                    defaultMessage="More..."
-                  />
-                </b>
-              )}
-            </>
-          }
-        >
-          <MoreRowItems type="boxesHorizontal" />
-        </EuiToolTip>
-      )}
-    </>
-  );
-};
+                </span>
+              ))}
+            {rowItems.length > overflowIndexStart + maxOverflowItems && (
+              <b>
+                <br />
+                <FormattedMessage
+                  id="xpack.siem.tables.rowItemHelper.moreDescription"
+                  defaultMessage="More..."
+                />
+              </b>
+            )}
+          </>
+        }
+      >
+        <MoreRowItems type="boxesHorizontal" />
+      </EuiToolTip>
+    )}
+  </>
+);

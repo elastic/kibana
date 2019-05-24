@@ -21,21 +21,21 @@ import { manageQuery } from '../../components/page/manage_query';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { FlowTargetSelectConnected } from '../../components/page/network/flow_target_select_connected';
 import { IpOverview } from '../../components/page/network/ip_overview';
+import { TlsTable } from '../../components/page/network/tls_table';
+import { UsersTable } from '../../components/page/network/users_table';
+import { UrlStateContainer } from '../../components/url_state';
 import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
+import { TlsQuery } from '../../containers/tls';
+import { UsersQuery } from '../../containers/users';
 import { FlowTarget, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { State, networkModel, networkSelectors } from '../../store';
-import { TlsTable } from '../../components/page/network/tls_table';
-import { TlsQuery } from '../../containers/tls';
-import { UsersTable } from '../../components/page/network/users_table';
-import { UsersQuery } from '../../containers/users';
-import { UrlStateContainer } from '../../components/url_state';
 
-import * as i18n from './translations';
 import { NetworkKql } from './kql';
+import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 

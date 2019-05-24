@@ -9,6 +9,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { BrowserFields } from '../../../containers/source';
 import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
@@ -21,7 +22,6 @@ import {
   OnToggleDataProviderExcluded,
 } from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
-import { BrowserFields } from '../../../containers/source';
 
 interface Props {
   browserFields: BrowserFields;

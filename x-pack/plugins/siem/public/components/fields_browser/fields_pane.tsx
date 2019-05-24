@@ -5,18 +5,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { pure } from 'recompose';
 import * as React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 import { Category } from './category';
-import { FieldBrowserProps } from './types';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
 import * as i18n from './translations';
+import { FieldBrowserProps } from './types';
 
 const NoFieldsPanel = styled.div`
   background-color: ${props => props.theme.eui.euiColorLightestShade};

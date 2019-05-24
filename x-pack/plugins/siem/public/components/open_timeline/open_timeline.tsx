@@ -10,10 +10,10 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { OpenTimelineProps } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
+import { OpenTimelineProps } from './types';
 
 export const OpenTimelinePanel = styled(EuiPanel)`
   width: 100%;

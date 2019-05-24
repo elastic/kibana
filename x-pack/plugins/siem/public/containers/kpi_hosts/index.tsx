@@ -11,11 +11,11 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../..';
+import { ChartData } from '../../components/stat_items';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
-import { ChartData } from '../../components/stat_items';
 
 import { kpiHostsQuery } from './index.gql_query';
 
@@ -35,14 +35,13 @@ const formatHistogramData = (
     x: number;
     y: { value: number; doc_count: number };
   }>
-): ChartData[] => {
-  return data.length > 0
+): ChartData[] =>
+  data.length > 0
     ? data.map(({ x, y }) => ({
         x,
         y: y.value || y.doc_count,
       }))
     : [];
-};
 
 export const KpiHostsQuery = pure<KpiHostsProps>(
   ({ id = 'kpiHostsQuery', children, filterQuery, sourceId, startDate, endDate }) => (
@@ -62,12 +61,12 @@ export const KpiHostsQuery = pure<KpiHostsProps>(
       }}
     >
       {({ data, loading, refetch }) => {
-        const kpiHosts = getOr({}, `source.KpiHosts`, data);
-        const hostsHistogram = get(`hostsHistogram`, kpiHosts);
-        const authFailureHistogram = get(`authFailureHistogram`, kpiHosts);
-        const authSuccessHistogram = get(`authSuccessHistogram`, kpiHosts);
-        const uniqueSourceIpsHistogram = get(`uniqueSourceIpsHistogram`, kpiHosts);
-        const uniqueDestinationIpsHistogram = get(`uniqueDestinationIpsHistogram`, kpiHosts);
+        const kpiHosts = getOr({}, 'source.KpiHosts', data);
+        const hostsHistogram = get('hostsHistogram', kpiHosts);
+        const authFailureHistogram = get('authFailureHistogram', kpiHosts);
+        const authSuccessHistogram = get('authSuccessHistogram', kpiHosts);
+        const uniqueSourceIpsHistogram = get('uniqueSourceIpsHistogram', kpiHosts);
+        const uniqueDestinationIpsHistogram = get('uniqueDestinationIpsHistogram', kpiHosts);
         return children({
           id,
           kpiHosts: {

@@ -10,6 +10,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../containers/source';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -18,7 +19,6 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
-import { BrowserFields } from '../../../containers/source';
 
 import { DataProvider, IS_OPERATOR } from './data_provider';
 import { Empty } from './empty';

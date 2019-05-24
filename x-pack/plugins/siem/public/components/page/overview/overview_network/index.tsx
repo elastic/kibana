@@ -9,10 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { HeaderPanel } from '../../../header_panel';
-import { manageQuery } from '../../../page/manage_query';
 import { OverviewNetworkQuery } from '../../../../containers/overview/overview_network';
 import { inputsModel } from '../../../../store/inputs';
+import { HeaderPanel } from '../../../header_panel';
+import { manageQuery } from '../../../page/manage_query';
 import { OverviewNetworkStats } from '../overview_network_stats';
 
 export interface OwnProps {

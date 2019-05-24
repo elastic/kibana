@@ -5,18 +5,17 @@
  */
 
 import { cloneDeep, omit } from 'lodash/fp';
+import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import 'jest-styled-components';
-import * as React from 'react';
-
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 
 import { mockTimelineResults } from '../../../mock/timeline_results';
+import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { OpenTimelineResult } from '../types';
 
 import { TimelinesTable } from '.';
+
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 
 describe('#getActionsColumns', () => {
   let mockResults: OpenTimelineResult[];

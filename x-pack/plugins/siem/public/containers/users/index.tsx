@@ -86,7 +86,7 @@ class UsersComponentQuery extends QueryTemplate<
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const users = getOr([], `source.Users.edges`, data);
+          const users = getOr([], 'source.Users.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string) => ({
             variables: {

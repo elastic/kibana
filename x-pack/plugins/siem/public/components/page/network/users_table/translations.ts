@@ -13,7 +13,7 @@ export const USERS = i18n.translate('xpack.siem.network.ipDetails.usersTable.use
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.network.ipDetails.usersTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {User} other {Users}}`,
+    defaultMessage: '{totalCount, plural, =1 {User} other {Users}}',
   });
 
 // Columns

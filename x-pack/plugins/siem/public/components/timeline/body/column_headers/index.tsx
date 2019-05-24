@@ -21,6 +21,7 @@ import {
 } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -29,7 +30,6 @@ import {
   OnUpdateColumns,
 } from '../../events';
 import { Sort } from '../sort';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
 
 import { ColumnHeader } from './column_header';
 import { EventsSelect } from './events_select';

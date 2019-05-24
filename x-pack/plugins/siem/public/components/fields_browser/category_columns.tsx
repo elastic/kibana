@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
+import * as React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { getColumnsWithTimestamp } from '../event_details/helpers';
+import { CountBadge } from '../page';
 import { OnUpdateColumns } from '../timeline/events';
 import { WithHoverActions } from '../with_hover_actions';
-import { CountBadge } from '../page';
 
-import * as i18n from './translations';
 import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
+import * as i18n from './translations';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};

@@ -87,7 +87,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const networkDns = getOr([], `source.NetworkDns.edges`, data);
+          const networkDns = getOr([], 'source.NetworkDns.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string) => ({
             variables: {

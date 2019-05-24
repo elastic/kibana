@@ -29,6 +29,7 @@ export interface OwnProps extends QueryTemplateProps {
   indexKey: LastEventIndexKey;
 }
 
+// eslint-disable-next-line func-style
 export function useLastEventTimeQuery<TCache = object>(
   indexKey: LastEventIndexKey,
   details: LastTimeDetails,
@@ -39,6 +40,7 @@ export function useLastEventTimeQuery<TCache = object>(
   const [lastSeen, updateLastSeen] = useState(null);
   const [errorMessage, updateErrorMessage] = useState(null);
   const [currentIndexKey, updateCurrentIndexKey] = useState(null);
+  // eslint-disable-next-line func-style
   async function fetchLastEventTime() {
     updateLoading(true);
     return apolloClient

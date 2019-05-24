@@ -5,9 +5,9 @@
  */
 
 import { mount } from 'enzyme';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { cloneDeep } from 'lodash/fp';
 
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';

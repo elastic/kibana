@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import * as i18n from '../translations';
 import {
   DeleteTimelines,
   OnOpenTimeline,
@@ -17,7 +18,6 @@ import {
   OnToggleShowNotes,
   OpenTimelineResult,
 } from '../types';
-import * as i18n from '../translations';
 
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';

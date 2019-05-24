@@ -401,34 +401,48 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
-      plugins: ['eslint-plugin-import-order-alphabetical'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        // '@typescript-eslint/no-unused-vars': 'error',
-        'no-shadow': 'error',
-        'no-bitwise': 'error',
-        // module importing
-        //'import-order-alphabetical/order': [
-        'import/order': 'off',
-        'import-order-alphabetical/order': [
+        'no-array-constructor': 'error',
+        'arrow-body-style': ['error', 'as-needed'],
+        complexity: ['error', 20],
+        'consistent-return': 'error',
+        'func-style': ['error', 'expression'],
+        'import/order': [
           'error',
           {
             groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
             'newlines-between': 'always',
           },
         ],
-        // 'import-order-alphabetical/order': 'error',
-        // 'import-order-alphabetical/order': 'error',
-        /*
-        // module importing
-        'sort-imports': [
-          'error',
-          {
-            memberSyntaxSortOrder: ['all', 'single', 'multiple', 'none'],
-          },
-        ],
-        */
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-imports': 'error',
+        'no-this-before-super': 'error',
+        'no-multi-assign': 'error',
+        'no-new-symbol': 'error',
+        'no-process-exit': 'error',
+        'no-return-await': 'error',
+        'no-self-compare': 'error',
+        'no-shadow': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-undef': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-rename': 'error',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        quotes: ['error', 'single', { avoidEscape: true }],
+        'require-atomic-updates': 'error',
+        'rest-spread-spacing': ['error', 'never'],
+        'symbol-description': 'error',
+        'template-curly-spacing': 'error',
+        'vars-on-top': 'error',
       },
     },
 

@@ -92,7 +92,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const networkTopNFlow = getOr([], `source.NetworkTopNFlow.edges`, data);
+          const networkTopNFlow = getOr([], 'source.NetworkTopNFlow.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string) => ({
             variables: {

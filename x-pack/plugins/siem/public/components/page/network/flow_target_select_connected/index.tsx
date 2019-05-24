@@ -14,9 +14,9 @@ import { ActionCreator } from 'typescript-fsa';
 import { FlowDirection, FlowTarget } from '../../../../graphql/types';
 import { State } from '../../../../store';
 import { networkActions, networkSelectors } from '../../../../store/network';
-import * as i18nIp from '../ip_overview/translations';
-import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { IpOverviewId } from '../../../field_renderers/field_renderers';
+import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
+import * as i18nIp from '../ip_overview/translations';
 
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
@@ -51,11 +51,9 @@ const FlowTargetSelectComponent = pure<FlowTargetSelectProps>(
 
 const makeMapStateToProps = () => {
   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
-  return (state: State) => {
-    return {
-      flowTarget: getIpDetailsFlowTargetSelector(state),
-    };
-  };
+  return (state: State) => ({
+    flowTarget: getIpDetailsFlowTargetSelector(state),
+  });
 };
 
 export const FlowTargetSelectConnected = connect(

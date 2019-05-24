@@ -6,8 +6,8 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
 
-import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import { trackUiAction as track } from '../../../lib/track_usage';
+import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import * as i18n from '../translations';
 
 interface NavTab {

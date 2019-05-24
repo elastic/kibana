@@ -10,7 +10,6 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
   HostFields,
@@ -22,6 +21,7 @@ import {
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { State, hostsModel, hostsSelectors } from '../../../../store';
+import { hostsActions } from '../../../../store/actions';
 import {
   Columns,
   Criteria,
@@ -186,6 +186,7 @@ const getSortField = (field: string): HostsFields => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 const getNodeField = (field: HostsFields): string => {
   switch (field) {
     case HostsFields.hostName:
@@ -198,9 +199,7 @@ const getNodeField = (field: HostsFields): string => {
 
 const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getHostsSelector(state, type);
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) => getHostsSelector(state, type);
   return mapStateToProps;
 };
 

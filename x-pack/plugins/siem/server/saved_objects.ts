@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { noteSavedObjectMappings, noteSavedObjectType } from './lib/note';
-import { timelineSavedObjectMappings, timelineSavedObjectType } from './lib/timeline';
 import { pinnedEventSavedObjectMappings, pinnedEventSavedObjectType } from './lib/pinned_event';
+import { timelineSavedObjectMappings, timelineSavedObjectType } from './lib/timeline';
 
 export { noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType };
 export const savedObjectMappings = {

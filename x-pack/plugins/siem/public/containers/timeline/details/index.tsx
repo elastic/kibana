@@ -52,15 +52,15 @@ export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineD
         notifyOnNetworkStatusChange
         variables={variables}
       >
-        {({ data, loading, refetch }) => {
-          return children!({
+        {({ data, loading, refetch }) =>
+          children!({
             loading,
             detailsData: this.memoizedDetailsEvents(
               JSON.stringify(variables),
               getOr([], 'source.TimelineDetails.data', data)
             ),
-          });
-        }}
+          })
+        }
       </Query>
     ) : (
       children!({ loading: false, detailsData: null })

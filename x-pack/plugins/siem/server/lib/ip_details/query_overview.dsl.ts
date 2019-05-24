@@ -6,89 +6,87 @@
 
 import { IpOverviewRequestOptions } from './index';
 
-const getAggs = (type: string, ip: string) => {
-  return {
-    [type]: {
-      filter: {
-        term: {
-          [`${type}.ip`]: ip,
+const getAggs = (type: string, ip: string) => ({
+  [type]: {
+    filter: {
+      term: {
+        [`${type}.ip`]: ip,
+      },
+    },
+    aggs: {
+      firstSeen: {
+        min: {
+          field: '@timestamp',
         },
       },
-      aggs: {
-        firstSeen: {
-          min: {
-            field: '@timestamp',
+      lastSeen: {
+        max: {
+          field: '@timestamp',
+        },
+      },
+      autonomous_system: {
+        filter: {
+          exists: {
+            field: 'autonomous_system',
           },
         },
-        lastSeen: {
-          max: {
-            field: '@timestamp',
-          },
-        },
-        autonomous_system: {
-          filter: {
-            exists: {
-              field: 'autonomous_system',
-            },
-          },
-          aggs: {
-            results: {
-              top_hits: {
-                size: 1,
-                _source: ['autonomous_system'],
-                sort: [
-                  {
-                    '@timestamp': 'desc',
-                  },
-                ],
-              },
+        aggs: {
+          results: {
+            top_hits: {
+              size: 1,
+              _source: ['autonomous_system'],
+              sort: [
+                {
+                  '@timestamp': 'desc',
+                },
+              ],
             },
           },
         },
-        host: {
-          filter: {
-            exists: {
-              field: 'host',
-            },
+      },
+      host: {
+        filter: {
+          exists: {
+            field: 'host',
           },
-          aggs: {
-            results: {
-              top_hits: {
-                size: 1,
-                _source: ['host'],
-                sort: [
-                  {
-                    '@timestamp': 'desc',
-                  },
-                ],
-              },
+        },
+        aggs: {
+          results: {
+            top_hits: {
+              size: 1,
+              _source: ['host'],
+              sort: [
+                {
+                  '@timestamp': 'desc',
+                },
+              ],
             },
           },
         },
-        geo: {
-          filter: {
-            exists: {
-              field: `${type}.geo`,
-            },
+      },
+      geo: {
+        filter: {
+          exists: {
+            field: `${type}.geo`,
           },
-          aggs: {
-            results: {
-              top_hits: {
-                size: 1,
-                _source: [`${type}.geo`],
-                sort: [
-                  {
-                    '@timestamp': 'desc',
-                  },
-                ],
-              },
+        },
+        aggs: {
+          results: {
+            top_hits: {
+              size: 1,
+              _source: [`${type}.geo`],
+              sort: [
+                {
+                  '@timestamp': 'desc',
+                },
+              ],
             },
           },
         },
       },
     },
-  };
-};
+  },
+});
 
 export const buildOverviewQuery = ({ defaultIndex, ip }: IpOverviewRequestOptions) => {
   const dslQuery = {

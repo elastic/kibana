@@ -121,9 +121,8 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getUncommonProcessesSelector(state, type);
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) =>
+    getUncommonProcessesSelector(state, type);
   return mapStateToProps;
 };
 

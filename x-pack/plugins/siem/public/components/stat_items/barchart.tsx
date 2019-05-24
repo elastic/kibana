@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
   // @ts-ignore
   EuiSeriesChartUtils,
 } from '@elastic/eui';
+import { EuiBarSeries, EuiSeriesChart, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
+import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { EuiBarSeries, EuiSeriesChart, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
 
 import { AutoSizer } from '../auto_sizer';
 
@@ -28,8 +28,8 @@ export const BarChartBaseComponent = pure<{
   data: BarChartData[];
   width: number | null | undefined;
   height: number | null | undefined;
-}>(({ data, ...chartConfigs }) => {
-  return chartConfigs.width && chartConfigs.height ? (
+}>(({ data, ...chartConfigs }) =>
+  chartConfigs.width && chartConfigs.height ? (
     // @ts-ignore
     <SeriesChart
       yType={SCALE.ORDINAL}
@@ -38,17 +38,15 @@ export const BarChartBaseComponent = pure<{
       data-test-subj="stat-bar-chart"
       {...chartConfigs}
     >
-      {data.map(series => {
-        return (
-          <EuiBarSeries
-            key={`stat-items-areachart-${series.key}`}
-            name={series.key}
-            // @ts-ignore
-            data={series.value!}
-            color={series.color}
-          />
-        );
-      })}
+      {data.map(series => (
+        <EuiBarSeries
+          key={`stat-items-areachart-${series.key}`}
+          name={series.key}
+          // @ts-ignore
+          data={series.value!}
+          color={series.color}
+        />
+      ))}
       {/*
 // @ts-ignore */}
       <EuiXAxis />
@@ -56,25 +54,25 @@ export const BarChartBaseComponent = pure<{
 // @ts-ignore */}
       <EuiYAxis tickFormat={getYaxis} />
     </SeriesChart>
-  ) : null;
-});
+  ) : null
+);
 
 export const BarChartWithCustomPrompt = pure<{
   data: BarChartData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
-}>(({ data, height, width }) => {
-  return data &&
-    data.length &&
-    data.some(
-      ({ value }) =>
-        value != null && value.length > 0 && value.every(chart => chart.x != null && chart.x > 0)
-    ) ? (
+}>(({ data, height, width }) =>
+  data &&
+  data.length &&
+  data.some(
+    ({ value }) =>
+      value != null && value.length > 0 && value.every(chart => chart.x != null && chart.x > 0)
+  ) ? (
     <BarChartBaseComponent height={height} width={width} data={data} />
   ) : (
     <ChartHolder />
-  );
-});
+  )
+);
 
 export const BarChart = pure<{ barChart: BarChartData[] | null | undefined }>(({ barChart }) => (
   <AutoSizer detectAnyWindowResize={false} content>

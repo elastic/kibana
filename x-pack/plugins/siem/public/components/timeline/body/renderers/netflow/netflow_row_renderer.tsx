@@ -28,6 +28,14 @@ import {
 } from '../../../../netflow/netflow_columns/user_process';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../../../../port';
 import {
+  NETWORK_BYTES_FIELD_NAME,
+  NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_DIRECTION_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
+  NETWORK_TRANSPORT_FIELD_NAME,
+} from '../../../../source_destination/field_names';
+import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
   DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME,
@@ -45,16 +53,8 @@ import {
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../../source_destination/source_destination_arrows';
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { Row } from '../helpers';
-import {
-  NETWORK_BYTES_FIELD_NAME,
-  NETWORK_COMMUNITY_ID_FIELD_NAME,
-  NETWORK_DIRECTION_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
-  NETWORK_PROTOCOL_FIELD_NAME,
-  NETWORK_TRANSPORT_FIELD_NAME,
-} from '../../../../source_destination/field_names';
+import { RowRenderer, RowRendererContainer } from '../row_renderer';
 
 const Details = styled.div`
   margin: 10px 0;
@@ -76,12 +76,9 @@ export const eventActionMatches = (eventAction: string | object | undefined | nu
 };
 
 export const netflowRowRenderer: RowRenderer = {
-  isInstance: ecs => {
-    return (
-      eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
-      eventActionMatches(get(EVENT_ACTION_FIELD, ecs))
-    );
-  },
+  isInstance: ecs =>
+    eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
+    eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),
   renderRow: ({ data, width, children }) => (
     <Row>
       {children}

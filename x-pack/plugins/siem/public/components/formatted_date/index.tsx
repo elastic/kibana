@@ -16,13 +16,13 @@ export const KibanaConfigContext = React.createContext<Partial<AppKibanaFramewor
 
 export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => (
   <KibanaConfigContext.Consumer>
-    {(config: Partial<AppKibanaFrameworkAdapter>) => {
-      return config && config.dateFormat && config.dateFormatTz && config.timezone
+    {(config: Partial<AppKibanaFrameworkAdapter>) =>
+      config && config.dateFormat && config.dateFormatTz && config.timezone
         ? moment
             .tz(value, config.dateFormatTz === 'Browser' ? config.timezone : config.dateFormatTz)
             .format(config.dateFormat)
-        : moment.utc(value).toISOString();
-    }}
+        : moment.utc(value).toISOString()
+    }
   </KibanaConfigContext.Consumer>
 ));
 

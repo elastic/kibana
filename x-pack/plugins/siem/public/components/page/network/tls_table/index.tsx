@@ -9,9 +9,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
 
-import { networkActions } from '../../../../store/network';
 import { TlsEdges, TlsFields, TlsSortField } from '../../../../graphql/types';
 import { State, networkModel, networkSelectors } from '../../../../store';
+import { networkActions } from '../../../../store/network';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
 
 import { getTlsColumns } from './columns';

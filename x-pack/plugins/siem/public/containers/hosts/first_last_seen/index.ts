@@ -30,6 +30,7 @@ export interface OwnProps extends QueryTemplateProps {
   hostName: string;
 }
 
+// eslint-disable-next-line func-style
 export function useFirstLastSeenHostQuery<TCache = object>(
   hostName: string,
   sourceId: string,
@@ -40,6 +41,7 @@ export function useFirstLastSeenHostQuery<TCache = object>(
   const [lastSeen, updateLastSeen] = useState(null);
   const [errorMessage, updateErrorMessage] = useState(null);
 
+  // eslint-disable-next-line func-style
   async function fetchFirstLastSeenHost() {
     updateLoading(true);
     return apolloClient

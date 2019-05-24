@@ -15,12 +15,12 @@ import { KpiHosts } from './kpi_hosts';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
 import { Note } from './note';
-import { PinnedEvent } from './pinned_event';
 import { Overview } from './overview';
+import { PinnedEvent } from './pinned_event';
 import { SourceStatus } from './source_status';
 import { SourceConfiguration, Sources } from './sources';
-import { UncommonProcesses } from './uncommon_processes';
 import { Timeline } from './timeline';
+import { UncommonProcesses } from './uncommon_processes';
 
 export * from './hosts';
 

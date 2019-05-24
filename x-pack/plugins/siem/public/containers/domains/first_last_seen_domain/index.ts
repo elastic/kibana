@@ -32,6 +32,7 @@ export interface OwnProps extends QueryTemplateProps {
   flowTarget: FlowTarget;
 }
 
+// eslint-disable-next-line func-style
 export function useFirstLastSeenDomainQuery<TCache = object>(
   ip: string,
   domainName: string,
@@ -44,6 +45,7 @@ export function useFirstLastSeenDomainQuery<TCache = object>(
   const [lastSeen, updateLastSeen] = useState(null);
   const [errorMessage, updateErrorMessage] = useState(null);
 
+  // eslint-disable-next-line func-style
   async function fetchDomainFirstLastSeen() {
     updateLoading(true);
     return apolloClient

@@ -6,8 +6,8 @@
 
 import { EuiButtonIconProps } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { DeleteTimelineModalButton } from '.';
 

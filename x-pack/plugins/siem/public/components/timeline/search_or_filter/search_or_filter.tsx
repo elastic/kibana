@@ -18,8 +18,8 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { KueryAutocompletion } from '../../../containers/kuery_autocompletion';
 import { KueryFilterQuery } from '../../../store';
-import { AutocompleteField } from '../../autocomplete_field';
 import { KqlMode } from '../../../store/timeline/model';
+import { AutocompleteField } from '../../autocomplete_field';
 
 import { getPlaceholderText, modes, options } from './helpers';
 import * as i18n from './translations';

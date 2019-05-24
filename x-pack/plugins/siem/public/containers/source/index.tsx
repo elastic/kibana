@@ -6,11 +6,11 @@
 
 import { isUndefined } from 'lodash';
 import { get, keyBy, pick, set } from 'lodash/fp';
-import { Query } from 'react-apollo';
-import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import chrome from 'ui/chrome';
 import memoizeOne from 'memoize-one';
+import React from 'react';
+import { Query } from 'react-apollo';
+import chrome from 'ui/chrome';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { DEFAULT_INDEX_KEY } from '../../..';
 import { IndexField, SourceQuery } from '../../graphql/types';
@@ -79,8 +79,8 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
-        {({ data }) => {
-          return children({
+        {({ data }) =>
+          children({
             indicesExist: get('source.status.indicesExist', data),
             browserFields: this.memoizedBrowserFields(get('source.status.indexFields', data)),
             indexPattern: this.memoizedIndexFields(
@@ -90,8 +90,8 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
                 .join(),
               get('source.status.indexFields', data)
             ),
-          });
-        }}
+          })
+        }
       </Query>
     );
   }

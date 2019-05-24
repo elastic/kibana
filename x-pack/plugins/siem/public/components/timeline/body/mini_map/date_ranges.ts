@@ -63,6 +63,7 @@ export const getDates = ({ unit, end, current }: GetDatesParams): Date[] =>
  * given a unit (e.g. `'year' | 'month' | 'week'...`), it
  * returns range of `Date`s with a granularity appropriate to the unit.
  */
+// eslint-disable-next-line func-style
 export function getDateRange(unit: MomentUnit): Date[] {
   const current = moment()
     .utc()

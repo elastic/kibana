@@ -14,9 +14,7 @@ import { TIMELINES_PAGE_NAME } from '../../link_to/redirect_to_timelines';
 import { getBreadcrumbsForRoute, rootBreadcrumbs, setBreadcrumbs } from '.';
 
 jest.mock('ui/chrome', () => ({
-  getBasePath: () => {
-    return '<basepath>';
-  },
+  getBasePath: () => '<basepath>',
   breadcrumbs: {
     set: jest.fn(),
   },

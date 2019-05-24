@@ -20,8 +20,8 @@ import {
   reputationRenderer,
   whoisRenderer,
 } from '../../../field_renderers/field_renderers';
-import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
+import { LoadingOverlay, OverviewWrapper } from '../../index';
 
 import * as i18n from './translations';
 
@@ -40,13 +40,11 @@ interface OwnProps {
 
 export type IpOverviewProps = OwnProps;
 
-const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
-  return (
-    <EuiFlexItem key={key}>
-      <EuiDescriptionList listItems={descriptionList} />
-    </EuiFlexItem>
-  );
-};
+const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
+  <EuiFlexItem key={key}>
+    <EuiDescriptionList listItems={descriptionList} />
+  </EuiFlexItem>
+);
 
 export const IpOverview = pure<IpOverviewProps>(({ ip, data, loading, flowTarget }) => {
   const typeData: Overview = data[flowTarget]!;

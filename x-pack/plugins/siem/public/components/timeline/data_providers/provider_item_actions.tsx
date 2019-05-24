@@ -8,8 +8,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
-import { OnDataProviderEdited } from '../events';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
+import { OnDataProviderEdited } from '../events';
 
 import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
 import * as i18n from './translations';

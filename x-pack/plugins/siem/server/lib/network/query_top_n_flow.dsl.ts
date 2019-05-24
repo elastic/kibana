@@ -245,6 +245,7 @@ const getBiDirectionAggs = (
       }
     : {};
 
+// eslint-disable-next-line consistent-return
 const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
   switch (flowTarget) {
     case FlowTarget.source:
@@ -261,6 +262,7 @@ const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
 
 type QueryOrder = { bytes: Direction } | { packets: Direction } | { ip_count: Direction };
 
+// eslint-disable-next-line consistent-return
 const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
   switch (networkTopNFlowSortField.field) {
     case NetworkTopNFlowFields.bytes:

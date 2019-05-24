@@ -92,12 +92,10 @@ const HostsFilterComponent = pure<HostsFilterProps>(
 const makeMapStateToProps = () => {
   const getHostsFilterQueryDraft = hostsSelectors.hostsFilterQueryDraft();
   const getIsHostFilterQueryDraftValid = hostsSelectors.isHostFilterQueryDraftValid();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return {
-      hostsFilterQueryDraft: getHostsFilterQueryDraft(state, type),
-      isHostFilterQueryDraftValid: getIsHostFilterQueryDraftValid(state, type),
-    };
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) => ({
+    hostsFilterQueryDraft: getHostsFilterQueryDraft(state, type),
+    isHostFilterQueryDraftValid: getIsHostFilterQueryDraftValid(state, type),
+  });
   return mapStateToProps;
 };
 

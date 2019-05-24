@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import { mount } from 'enzyme';
+import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 

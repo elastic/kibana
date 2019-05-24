@@ -5,8 +5,8 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
-import styled, { injectGlobal } from 'styled-components';
 import { getOr } from 'lodash/fp';
+import styled, { injectGlobal } from 'styled-components';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions

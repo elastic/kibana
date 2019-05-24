@@ -19,14 +19,14 @@ import {
   inputsSelectors,
   timelineSelectors,
 } from '../../../store';
-import { UpdateNote } from '../../notes/helpers';
-import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
-import { Properties } from '../../timeline/properties';
+import { timelineActions } from '../../../store/actions';
 import { appActions } from '../../../store/app';
 import { inputsActions } from '../../../store/inputs';
-import { timelineActions } from '../../../store/actions';
 import { TimelineModel } from '../../../store/timeline/model';
+import { UpdateNote } from '../../notes/helpers';
+import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/helpers';
+import { Properties } from '../../timeline/properties';
 
 interface OwnProps {
   timelineId: string;

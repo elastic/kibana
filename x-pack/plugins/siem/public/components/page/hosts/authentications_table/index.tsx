@@ -12,17 +12,17 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { hostsActions } from '../../../../store/hosts';
 import { AuthenticationsEdges } from '../../../../graphql/types';
 import { State, hostsModel, hostsSelectors } from '../../../../store';
+import { hostsActions } from '../../../../store/hosts';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { getRowItemDraggables } from '../../../tables/helpers';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
-import { getRowItemDraggables } from '../../../tables/helpers';
 
 import * as i18n from './translations';
 
@@ -100,9 +100,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  return (state: State, { type }: OwnProps) => {
-    return getAuthenticationsSelector(state, type);
-  };
+  return (state: State, { type }: OwnProps) => getAuthenticationsSelector(state, type);
 };
 
 export const AuthenticationTable = connect(

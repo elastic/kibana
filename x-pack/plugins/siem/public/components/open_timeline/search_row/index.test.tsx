@@ -5,8 +5,8 @@
  */
 
 import { EuiFilterButtonProps } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import * as i18n from '../translations';
 

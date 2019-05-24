@@ -16,7 +16,7 @@ export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
 export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, func-style
 export function siem(kibana: any) {
   return new kibana.Plugin({
     id: APP_ID,

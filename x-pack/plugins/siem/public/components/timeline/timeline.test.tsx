@@ -12,19 +12,18 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { eventsQuery } from '../../containers/events/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
-import { defaultHeaders, mockTimelineData } from '../../mock';
-import { mockIndexPattern } from '../../mock';
+import { defaultHeaders, mockIndexPattern, mockTimelineData } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { flyoutHeaderHeight } from '../flyout';
 
+import { Sort } from './body/sort';
+import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import {
   DELETE_CLASS_NAME,
   ENABLE_CLASS_NAME,
   EXCLUDE_CLASS_NAME,
 } from './data_providers/provider_item_actions';
 import { Timeline } from './timeline';
-import { Sort } from './body/sort';
-import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 const testFlyoutHeight = 980;
 

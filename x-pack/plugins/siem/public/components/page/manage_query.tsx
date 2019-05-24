@@ -16,6 +16,7 @@ interface OwnProps {
   setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void;
 }
 
+// eslint-disable-next-line func-style
 export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>) {
   class ManageQuery extends React.PureComponent<OwnProps & T> {
     public componentDidUpdate(prevProps: OwnProps) {
