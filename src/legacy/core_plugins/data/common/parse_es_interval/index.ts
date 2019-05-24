@@ -17,11 +17,7 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
-const chrome = {
-  getUiSettingsClient: jest.fn(),
-};
-
-// eslint-disable-next-line import/no-default-export
-export default chrome;
+export { parseEsInterval, ParsedInterval } from './parse_es_interval';
+export { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
+export { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
+export { isValidEsInterval } from './is_valid_es_interval';

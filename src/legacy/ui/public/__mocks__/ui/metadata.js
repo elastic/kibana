@@ -17,11 +17,9 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
-const chrome = {
-  getUiSettingsClient: jest.fn(),
+const metadata = {
+  branch: 'test',
+  version: '42.0.0',
 };
 
-// eslint-disable-next-line import/no-default-export
-export default chrome;
+export { metadata };

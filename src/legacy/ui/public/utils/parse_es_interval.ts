@@ -17,11 +17,11 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
-const chrome = {
-  getUiSettingsClient: jest.fn(),
-};
-
-// eslint-disable-next-line import/no-default-export
-export default chrome;
+// Those exports are kept here for now, so we can move over imports
+// step by step into the data plugin.
+export {
+  parseEsInterval,
+  ParsedInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+} from 'plugins/data';

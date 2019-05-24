@@ -17,11 +17,7 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
-const chrome = {
-  getUiSettingsClient: jest.fn(),
-};
-
-// eslint-disable-next-line import/no-default-export
-export default chrome;
+/** @public */
+export { dateHistogramInterval } from '../common/date_histogram_interval';
+/** @public */
+export * from '../common/parse_es_interval';
