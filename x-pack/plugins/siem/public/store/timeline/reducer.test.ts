@@ -1712,26 +1712,55 @@ describe('Timeline', () => {
     });
 
     test('should remove only first provider and not nested andProvider', () => {
-      const secondDataProvider: DataProvider = {
-        and: [],
-        id: '789',
-        name: 'data provider 2',
-        enabled: true,
-        queryMatch: {
-          field: '',
-          value: '',
-          operator: IS_OPERATOR,
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          id: '111',
+          name: 'data provider 1',
+          enabled: true,
+          queryMatch: {
+            field: '',
+            value: '',
+            operator: IS_OPERATOR,
+          },
+
+          excluded: false,
+          kqlQuery: '',
         },
+        {
+          and: [],
+          id: '222',
+          name: 'data provider 2',
+          enabled: true,
+          queryMatch: {
+            field: '',
+            value: '',
+            operator: IS_OPERATOR,
+          },
 
-        excluded: false,
-        kqlQuery: '',
-      };
+          excluded: false,
+          kqlQuery: '',
+        },
+        {
+          and: [],
+          id: '333',
+          name: 'data provider 3',
+          enabled: true,
+          queryMatch: {
+            field: '',
+            value: '',
+            operator: IS_OPERATOR,
+          },
 
-      const multiDataProvider = timelineByIdMock.foo.dataProviders.concat(secondDataProvider);
-      const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
+          excluded: false,
+          kqlQuery: '',
+        },
+      ];
+
+      const multiDataProviderMock = set('foo.dataProviders', dataProviders, timelineByIdMock);
 
       const andDataProvider: DataProvidersAnd = {
-        id: '568',
+        id: '211',
         name: 'And Data Provider',
         enabled: true,
         queryMatch: {
@@ -1745,20 +1774,110 @@ describe('Timeline', () => {
       };
 
       const nestedMultiAndDataProviderMock = set(
-        'foo.dataProviders[0].and',
+        'foo.dataProviders[1].and',
         [andDataProvider],
         multiDataProviderMock
       );
 
       const update = removeTimelineProvider({
         id: 'foo',
-        providerId: '123',
+        providerId: '222',
         timelineById: nestedMultiAndDataProviderMock,
       });
       expect(update).toEqual(
         set(
           'foo.dataProviders',
-          [{ ...andDataProvider, and: [] }, secondDataProvider],
+          [
+            nestedMultiAndDataProviderMock.foo.dataProviders[0],
+            { ...andDataProvider, and: [] },
+            nestedMultiAndDataProviderMock.foo.dataProviders[2],
+          ],
+          timelineByIdMock
+        )
+      );
+    });
+
+    test('should remove only the first provider and keep multiple nested andProviders', () => {
+      const multiDataProvider: DataProvider[] = [
+        {
+          and: [
+            {
+              enabled: true,
+              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+              name: 'root',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'user.name',
+                value: 'root',
+                operator: ':',
+              },
+            },
+            {
+              enabled: true,
+              id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+              name: 'success',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'auditd.result',
+                value: 'success',
+                operator: ':',
+              },
+            },
+          ],
+          enabled: true,
+          excluded: false,
+          id: 'hosts-table-hostName-suricata-iowa',
+          name: 'suricata-iowa',
+          kqlQuery: '',
+          queryMatch: {
+            field: 'host.name',
+            value: 'suricata-iowa',
+            operator: ':',
+          },
+        },
+      ];
+
+      const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
+
+      const update = removeTimelineProvider({
+        id: 'foo',
+        providerId: 'hosts-table-hostName-suricata-iowa',
+        timelineById: multiDataProviderMock,
+      });
+
+      expect(update).toEqual(
+        set(
+          'foo.dataProviders',
+          [
+            {
+              enabled: true,
+              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+              name: 'root',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'user.name',
+                value: 'root',
+                operator: ':',
+              },
+              and: [
+                {
+                  enabled: true,
+                  id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+                  name: 'success',
+                  excluded: false,
+                  kqlQuery: '',
+                  queryMatch: {
+                    field: 'auditd.result',
+                    value: 'success',
+                    operator: ':',
+                  },
+                },
+              ],
+            },
+          ],
           timelineByIdMock
         )
       );
