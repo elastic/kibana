@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildRequestBody from './table/build_request_body';
-import handleErrorResponse from './handle_error_response';
+import { buildRequestBody } from './table/build_request_body';
+import { handleErrorResponse } from './handle_error_response';
 import { get } from 'lodash';
-import processBucket from './table/process_bucket';
+import { processBucket } from './table/process_bucket';
 import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
