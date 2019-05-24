@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { AggName, PivotAggsConfig, PivotAggsConfigDict } from '../../common';
 
