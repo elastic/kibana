@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -206,11 +206,30 @@ export const PopoverForm: React.SFC<Props> = ({
             defaultMessage: 'Interval',
           })}
         >
-          <EuiFieldText
-            defaultValue={interval}
-            isInvalid={!validInterval}
-            onChange={e => setInterval(e.target.value)}
-          />
+          <Fragment>
+            {isGroupByHistogram(defaultData) && (
+              <EuiFieldText
+                defaultValue={interval}
+                isInvalid={!validInterval}
+                onChange={e => setInterval(e.target.value)}
+              />
+            )}
+            {isGroupByDateHistogram(defaultData) && (
+              <EuiSelect
+                options={[
+                  { value: '1m', text: '1m' },
+                  { value: '1h', text: '1h' },
+                  { value: '1d', text: '1d' },
+                  { value: '1w', text: '1w' },
+                  { value: '1M', text: '1M' },
+                  { value: '1q', text: '1q' },
+                  { value: '1y', text: '1y' },
+                ]}
+                value={interval}
+                onChange={e => setInterval(e.target.value)}
+              />
+            )}
+          </Fragment>
         </EuiFormRow>
       )}
       <EuiFormRow hasEmptyLabelSpace>
