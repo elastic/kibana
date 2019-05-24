@@ -22,13 +22,26 @@ import { Ast } from '@kbn/interpreter/common';
 // TODO:
 // this type import and the types below them should be switched to the types of
 // the interpreter plugin itself once they are ready
-import { RunPipelineHandlers } from 'ui/visualize/loader/pipeline_helpers/run_pipeline';
 import { Registry } from '@kbn/interpreter/common';
+import { Adapters } from 'ui/inspector';
+import { Query, Filters, TimeRange } from 'ui/embeddable';
 import { createRenderer } from './expression_renderer';
 import { createRunFn } from './expression_runner';
 
+export interface InitialContextObject {
+  timeRange?: TimeRange;
+  filters?: Filters;
+  query?: Query;
+}
+
+export type getInitialContextFunction = () => InitialContextObject;
+
+export interface Handlers {
+  getInitialContext: getInitialContextFunction;
+  inspectorAdapters?: Adapters;
+}
+
 type Context = object;
-type Handlers = RunPipelineHandlers;
 export interface Result {
   type: string;
   as?: string;

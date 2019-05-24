@@ -38,6 +38,7 @@ export const createRunFn = (
   renderersRegistry: RenderFunctionsRegistry,
   interpreterPromise: Promise<Interpreter>
 ): ExpressionRunner => async (expressionOrAst, { element, context, getInitialContext }) => {
+  // TODO: make interpreter initialization synchronous to avoid this
   const interpreter = await interpreterPromise;
   const ast =
     typeof expressionOrAst === 'string' ? fromExpression(expressionOrAst) : expressionOrAst;
