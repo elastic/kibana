@@ -30,7 +30,8 @@ export const FlyoutFooter = (
     >
       <FormattedMessage
         id="xpack.maps.addLayerPanel.addLayerButtonLabel"
-        defaultMessage={nextButtonText}
+        defaultMessage="{nextButtonText}"
+        values={{ nextButtonText }}
       />
     </EuiButton>
   );

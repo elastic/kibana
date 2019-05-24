@@ -168,6 +168,7 @@ export class AddLayerPanel extends Component {
   }
 
   _renderFlyout() {
+    const { panelDescription } = this.state;
     return (
       <EuiFlexGroup
         direction="column"
@@ -178,7 +179,8 @@ export class AddLayerPanel extends Component {
             <h2>
               <FormattedMessage
                 id="xpack.maps.addLayerPanel.panelTitle"
-                defaultMessage={this.state.panelDescription}
+                defaultMessage="{panelDescription}"
+                values={{ panelDescription }}
               />
             </h2>
           </EuiTitle>
