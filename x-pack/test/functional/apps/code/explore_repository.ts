@@ -147,10 +147,13 @@ export default function exploreRepositoryFunctonalTests({
         });
 
         // Click breadcrumb does not affect file tree
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileBreadcrumb-src')).ok();
+        });
         await testSubjects.click('codeFileBreadcrumb-src');
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-closed')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
