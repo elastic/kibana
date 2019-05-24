@@ -73,7 +73,7 @@ exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
           },
         ]
       }
-      value="10m"
+      value="1m"
     />
   </EuiFormRow>
   <EuiFormRow
