@@ -14,7 +14,7 @@ const superuserRole = 'superuser';
 
 /**
  *  Intercept all requests after auth has completed and apply filtering
- *  logic to enforce `xpack:dashboardMode` scope
+ *  logic to enforce dashboard only mode.
  *
  *  @type {Hapi.RequestExtension}
  */
@@ -41,7 +41,7 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
       const dashboardOnlyModeRoles = await uiSettings.get(CONFIG_DASHBOARD_ONLY_MODE_ROLES);
 
       if (!dashboardOnlyModeRoles || roles.length === 0) {
-        return;
+        return h.continue;
       }
 
       const isDashboardOnlyModeUser = user.roles.find(role => dashboardOnlyModeRoles.includes(role));
