@@ -19,7 +19,7 @@ import {
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   convertMicrosecondsToMilliseconds as microsToMillis,
   getChartDateLabel,
