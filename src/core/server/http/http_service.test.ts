@@ -95,15 +95,8 @@ test('creates and sets up second http server', async () => {
   const serverSetup = await service.setup();
   await service.start();
 
-  const configService2 = createConfigService({
-    host: 'example.org',
-    port: 2345,
-  });
-
-  const config2 = configService2.atPath<HttpConfig>('server');
-  const cfg = await config2.pipe(first()).toPromise();
+  const cfg = { port: 2345 };
   await serverSetup.createNewServer(cfg);
-
   expect(mockHttpServer.mock.instances.length).toBe(2);
 
   try {

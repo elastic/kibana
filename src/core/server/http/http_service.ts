@@ -117,8 +117,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     }
 
     for (let [key, val] of Object.entries(cfg)) {
-      const schema = config.schema.reach(key);
-      schema.validate(val);
+      config.schema.validateKey(key, val);
     }
 
     const baseConfig = await this.config$.pipe(first()).toPromise();
