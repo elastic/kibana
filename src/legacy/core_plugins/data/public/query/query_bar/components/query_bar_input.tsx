@@ -242,6 +242,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             event.preventDefault();
           }
           if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
+            event.preventDefault();
             this.selectSuggestion(this.state.suggestions[index]);
           } else {
             this.onSubmit(this.props.query);
