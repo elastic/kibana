@@ -17,7 +17,7 @@ export function initOnPreResponseHandler(server: Legacy.Server) {
     const canRedirect = canRedirectRequest(request);
 
     if ((isForbidden || isNotFound) && canRedirect) {
-      const app = server.getHiddenUiAppById('not_found');
+      const app = server.getHiddenUiAppById('unavailable');
       return (await h.renderAppWithDefaultConfig(app)).takeover();
     }
 

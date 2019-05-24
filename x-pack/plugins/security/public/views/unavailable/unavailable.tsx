@@ -8,7 +8,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { AuthenticationStatePage } from 'plugins/security/components/authentication_state_page';
 // @ts-ignore
-import template from 'plugins/security/views/not_found/not_found.html';
+import template from 'plugins/security/views/unavailable/unavailable.html';
 import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
@@ -20,7 +20,7 @@ chrome
   .setRootTemplate(template)
   .setRootController('logout', ($scope: any, canAccessKibana: boolean) => {
     $scope.$$postDigest(() => {
-      const domNode = document.getElementById('reactNotFoundRoot');
+      const domNode = document.getElementById('reactUnavailableRoot');
       const { title, message, help } = getMessaging(canAccessKibana);
 
       render(
@@ -38,7 +38,7 @@ chrome
                 <EuiFlexItem grow={false}>
                   <EuiButton href={chrome.getBasePath()}>
                     <FormattedMessage
-                      id="xpack.security.notFound.goHome"
+                      id="xpack.security.unavailable.goHome"
                       defaultMessage="Kibana home"
                     />
                   </EuiButton>
@@ -46,7 +46,10 @@ chrome
               )}
               <EuiFlexItem grow={false}>
                 <EuiButton href={chrome.addBasePath('/logout')}>
-                  <FormattedMessage id="xpack.security.notFound.logout" defaultMessage="Logout" />
+                  <FormattedMessage
+                    id="xpack.security.unavailable.logout"
+                    defaultMessage="Logout"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -60,16 +63,21 @@ chrome
 function getMessaging(canAccessKibana: boolean) {
   if (canAccessKibana) {
     return {
-      title: <FormattedMessage id="xpack.security.notFound.title" defaultMessage="Not found" />,
+      title: (
+        <FormattedMessage
+          id="xpack.security.unavailable.notFound.title"
+          defaultMessage="Not found"
+        />
+      ),
       message: (
         <FormattedMessage
-          id="xpack.security.notFound.notFoundMessage"
+          id="xpack.security.unavailable.notFound.notFoundMessage"
           defaultMessage="Sorry, the requested resource was not found."
         />
       ),
       help: (
         <FormattedMessage
-          id="xpack.security.notFound.helpMessage"
+          id="xpack.security.unavailable.notFound.helpMessage"
           defaultMessage="It might be missing, or you might not have access. Contact your administrator for assistance."
         />
       ),
@@ -79,19 +87,19 @@ function getMessaging(canAccessKibana: boolean) {
   return {
     title: (
       <FormattedMessage
-        id="xpack.security.unauthorized.title"
+        id="xpack.security.unavailable.unauthorized.title"
         defaultMessage="No access to Kibana"
       />
     ),
     message: (
       <FormattedMessage
-        id="xpack.security.unauthorized.notFoundMessage"
+        id="xpack.security.unavailable.unauthorized.notFoundMessage"
         defaultMessage="Your account does not have access to Kibana."
       />
     ),
     help: (
       <FormattedMessage
-        id="xpack.security.unauthorized.helpMessage"
+        id="xpack.security.unavailable.unauthorized.helpMessage"
         defaultMessage="Contact your administrator for assistance."
       />
     ),

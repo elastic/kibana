@@ -111,9 +111,9 @@ export const security = (kibana) => new kibana.Plugin({
       main: 'plugins/security/views/logged_out',
       hidden: true
     }, {
-      id: 'not_found',
-      title: 'Not found',
-      main: 'plugins/security/views/not_found',
+      id: 'unavailable',
+      title: 'Unavailable',
+      main: 'plugins/security/views/unavailable',
       hidden: true
     }],
     hacks: [
