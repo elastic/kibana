@@ -19,7 +19,7 @@ export const UnauthorizedLoginForm = injectI18n((props: Props) => {
   }
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="unauthorized-login-form">
       <EuiEmptyPrompt
         iconType="lock"
         title={

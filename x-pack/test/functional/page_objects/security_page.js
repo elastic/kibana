@@ -40,9 +40,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectForbidden) {
-        await retry.try(async () => {
-          await PageObjects.error.expectForbidden();
-        });
+        await testSubjects.existOrFail('unauthorized-login-form');
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectNotFound) {
         await retry.try(async () => {
