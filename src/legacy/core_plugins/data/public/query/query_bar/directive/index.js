@@ -17,30 +17,22 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { SearchBar } from './components/search_bar';
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+import { QueryBar } from '../components';
 
-// @ts-ignore
-import { setupDirective } from './directive';
+const app = uiModules.get('app/data', ['react']);
 
-/**
- * Search Bar Service
- * @internal
- */
-export class SearchBarService {
-  public setup() {
-    return {
-      ui: {
-        SearchBar,
-      },
-      loadLegacyDirectives: once(setupDirective),
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
+export function setupDirective() {
+  app.directive('queryBar', (reactDirective, localStorage) => {
+    return reactDirective(
+      wrapInI18nContext(QueryBar),
+      undefined,
+      {},
+      {
+        store: localStorage,
+      }
+    );
+  });
 }
-
-/** @public */
-export type SearchBarSetup = ReturnType<SearchBarService['setup']>;

@@ -231,6 +231,7 @@ describe('brushEvent', () => {
     test('by updating the existing scripted filter', () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [3, 7];
+      event.aggConfigs[0].params.field.scripted = true;
       $state.filters.push({
         meta: {
           key: 'numberField'

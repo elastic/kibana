@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { SearchBarService } from './search_bar_service';
+export { QueryBar } from './components';
+export { fromUser } from './lib/from_user';
+export { toUser } from './lib/to_user';
+
+// @ts-ignore
+export { setupDirective } from './directive';
