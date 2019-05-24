@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChecksChart passes check data to a chart 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      <FormattedMessage
+        defaultMessage="Check status"
+        id="xpack.uptime.monitorCharts.checkStatus.title"
+        values={Object {}}
+      />
+    </h4>
+  </EuiTitle>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+  >
+    <Chart
+      renderer="canvas"
+    >
+      <inject-SettingsComponent-with-chartStore
+        domain={
+          Object {
+            "absoluteEndDate": 1558727836065,
+            "absoluteStartDate": 1558726936063,
+          }
+        }
+        legendPosition="top"
+        showLegend={false}
+      />
+      <inject-AxisSpec-with-chartStore
+        id="checksBottom"
+        position="bottom"
+        showOverlappingTicks={true}
+        tickFormat={[Function]}
+      />
+      <inject-AxisSpec-with-chartStore
+        id="left"
+        position="left"
+        tickFormat={[Function]}
+      />
+      <inject-AreaSeriesSpecComponent-with-chartStore
+        customSeriesColors={
+          Map {
+            Object {
+              "colorValues": Array [],
+              "specId": "Up",
+            } => "bar",
+          }
+        }
+        data={
+          Array [
+            Object {
+              "Up count": 1,
+              "x": 123,
+            },
+            Object {
+              "Up count": 2,
+              "x": 124,
+            },
+            Object {
+              "Up count": 1,
+              "x": 125,
+            },
+          ]
+        }
+        id="Up"
+        seriesType="area"
+        stackAccessors={
+          Array [
+            "x",
+          ]
+        }
+        xAccessor="x"
+        xScaleType="time"
+        yAccessors={
+          Array [
+            "Up count",
+          ]
+        }
+        yScaleType="linear"
+      />
+      <inject-AreaSeriesSpecComponent-with-chartStore
+        customSeriesColors={
+          Map {
+            Object {
+              "colorValues": Array [],
+              "specId": "Down",
+            } => "foo",
+          }
+        }
+        data={
+          Array [
+            Object {
+              "Down count": 3,
+              "x": 123,
+            },
+            Object {
+              "Down count": 2,
+              "x": 124,
+            },
+            Object {
+              "Down count": 3,
+              "x": 125,
+            },
+          ]
+        }
+        id="Down"
+        seriesType="area"
+        stackAccessors={
+          Array [
+            "x",
+          ]
+        }
+        xAccessor="x"
+        xScaleType="time"
+        yAccessors={
+          Array [
+            "Down count",
+          ]
+        }
+        yScaleType="linear"
+      />
+    </Chart>
+  </EuiPanel>
+</Fragment>
+`;
