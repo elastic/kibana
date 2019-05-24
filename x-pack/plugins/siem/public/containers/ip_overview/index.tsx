@@ -10,7 +10,7 @@ import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
-import { DEFAULT_INDEX_KEY } from '../../..';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
 import { networkModel } from '../../store';
 import { createFilter } from '../helpers';

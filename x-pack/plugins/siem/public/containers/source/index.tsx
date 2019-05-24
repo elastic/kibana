@@ -12,7 +12,7 @@ import { Query } from 'react-apollo';
 import chrome from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { DEFAULT_INDEX_KEY } from '../../..';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IndexField, SourceQuery } from '../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';

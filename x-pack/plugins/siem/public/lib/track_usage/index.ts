@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APP_ID } from '../../..';
 // @ts-ignore
 import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { APP_ID } from '../../../common/constants';
 
 export const trackUiAction = (metricType: string) => trackUiMetric(APP_ID, metricType);

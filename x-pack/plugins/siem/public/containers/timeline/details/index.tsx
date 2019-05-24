@@ -10,7 +10,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import chrome from 'ui/chrome';
 
-import { DEFAULT_INDEX_KEY } from '../../../..';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
 
 import { timelineDetailsQuery } from './index.gql_query';
