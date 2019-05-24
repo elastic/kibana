@@ -82,8 +82,8 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
           <Axis
             id={getAxisId('checksBottom')}
             position={Position.Bottom}
-            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
             showOverlappingTicks={true}
+            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
           />
           <Axis
             id={getAxisId('left')}
@@ -92,31 +92,31 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
           />
           <AreaSeries
             customSeriesColors={getColorsMap(successColor, upSeriesSpecId)}
-            id={upSeriesSpecId}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={[upString]}
-            seriesType="area"
-            stackAccessors={['x']}
             data={status.map(({ x, up }) => ({
               x,
               [upString]: up || 0,
             }))}
+            id={upSeriesSpecId}
+            xAccessor="x"
+            xScaleType={ScaleType.Time}
+            yAccessors={[upString]}
+            yScaleType={ScaleType.Linear}
+            seriesType="area"
+            stackAccessors={['x']}
           />
           <AreaSeries
             customSeriesColors={getColorsMap(dangerColor, downSeriesSpecId)}
-            id={downSeriesSpecId}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={[downString]}
-            seriesType="area"
-            stackAccessors={['x']}
             data={status.map(({ x, down }) => ({
               x,
               [downString]: down || 0,
             }))}
+            id={downSeriesSpecId}
+            seriesType="area"
+            stackAccessors={['x']}
+            xAccessor="x"
+            xScaleType={ScaleType.Time}
+            yAccessors={[downString]}
+            yScaleType={ScaleType.Linear}
           />
         </Chart>
       </EuiPanel>

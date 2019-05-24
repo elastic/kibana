@@ -83,48 +83,48 @@ export const DurationChart = ({
         <Chart className={'story-chart'}>
           <Axis
             id={getAxisId('bottom')}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
-              defaultMessage: 'timestamp',
-            })}
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
+              defaultMessage: 'timestamp',
+            })}
           />
           <Axis
             domain={{ min: 0 }}
             id={getAxisId('left')}
+            position={Position.Left}
+            tickFormat={d => Number(d).toFixed(0)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
               defaultMessage: 'Duration ms',
             })}
-            position={Position.Left}
-            tickFormat={d => Number(d).toFixed(0)}
           />
           <AreaSeries
+            curve={CurveType.CURVE_MONOTONE_X}
             customSeriesColors={getColorsMap(rangeColor, areaSpecId)}
-            id={areaSpecId}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'x'}
-            yAccessors={['Max']}
-            y0Accessors={['Min']}
             data={durationArea.map(({ x, yMin, yMax }) => ({
               x,
               Min: microsToMillis(yMin),
               Max: microsToMillis(yMax),
             }))}
+            id={areaSpecId}
+            xAccessor={'x'}
+            xScaleType={ScaleType.Time}
+            yAccessors={['Max']}
+            yScaleType={ScaleType.Linear}
+            y0Accessors={['Min']}
             yScaleToDataExtent={false}
-            curve={CurveType.CURVE_MONOTONE_X}
           />
           <LineSeries
-            customSeriesColors={getColorsMap(meanColor, averageSpecId)}
-            id={averageSpecId}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={0}
-            yAccessors={[1]}
-            data={durationLine.map(({ x, y }) => [x || 0, microsToMillis(y)])}
-            yScaleToDataExtent={true}
             curve={CurveType.CURVE_MONOTONE_X}
+            customSeriesColors={getColorsMap(meanColor, averageSpecId)}
+            data={durationLine.map(({ x, y }) => [x || 0, microsToMillis(y)])}
+            id={averageSpecId}
+            xAccessor={0}
+            xScaleType={ScaleType.Time}
+            yAccessors={[1]}
+            yScaleToDataExtent={true}
+            yScaleType={ScaleType.Linear}
           />
         </Chart>
       </EuiPanel>

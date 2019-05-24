@@ -42,7 +42,7 @@ const seriesHasCounts = (series: MonitorSeriesPoint[]) => {
 /**
  * There is a specific focus on the monitor's down count, the up series is not shown,
  * so we will only render the series component if there are down counts for the selected monitor.
- * @param props - the values for the monitor this sparkline reflects
+ * @param props - the values for the monitor this chart visualizes
  */
 export const MonitorBarSeries = ({ dangerColor, downSeries }: MonitorBarSeriesProps) => {
   const id = getSpecId('downSeries');

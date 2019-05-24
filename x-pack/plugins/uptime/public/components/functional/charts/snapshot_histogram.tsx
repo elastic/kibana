@@ -61,8 +61,8 @@ export const SnapshotHistogram = ({
             })
           )}
           position={Position.Bottom}
-          tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
           showOverlappingTicks={false}
+          tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
         />
         <Axis
           id={getAxisId(
@@ -71,32 +71,32 @@ export const SnapshotHistogram = ({
             })
           )}
           position={Position.Left}
-          title="Monitor status"
           showOverlappingTicks={true}
+          title="Monitor status"
         />
         <BarSeries
           customSeriesColors={getColorsMap(successColor, upSpecId)}
+          data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
           id={upSpecId}
           name={upMonitorsId}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={0}
-          yAccessors={[1]}
           stackAccessors={[0]}
-          data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
+          xAccessor={0}
+          xScaleType={ScaleType.Time}
+          yAccessors={[1]}
+          yScaleType={ScaleType.Linear}
         />
         <BarSeries
           customSeriesColors={getColorsMap(dangerColor, downSpecId)}
+          data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
           id={downSpecId}
           name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
             defaultMessage: 'Down',
           })}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={0}
-          yAccessors={[1]}
           stackAccessors={[0]}
-          data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
+          xAccessor={0}
+          xScaleType={ScaleType.Time}
+          yAccessors={[1]}
+          yScaleType={ScaleType.Linear}
         />
       </Chart>
     </Fragment>

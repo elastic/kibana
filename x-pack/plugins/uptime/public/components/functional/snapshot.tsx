@@ -42,6 +42,11 @@ interface SnapshotProps {
 
 type Props = UptimeGraphQLQueryProps<SnapshotQueryResult> & SnapshotProps;
 
+/**
+ * This component visualizes a KPI and histogram chart to help users quickly
+ * glean the status of their uptime environment.
+ * @param props the props required by the component
+ */
 export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) =>
   data && data.snapshot ? (
     <EuiFlexGroup gutterSize="s">
@@ -143,6 +148,10 @@ export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) 
     <SnapshotLoading />
   );
 
+/**
+ * This component visualizes a KPI and histogram chart to help users quickly
+ * glean the status of their uptime environment.
+ */
 export const Snapshot = withUptimeGraphQL<SnapshotQueryResult, SnapshotProps>(
   SnapshotComponent,
   snapshotQuery
