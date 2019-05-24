@@ -17,7 +17,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from '../breadcrumbs';
 
-const renderReact = (elem, changeUrl, username) => {
+const renderReact = (elem, httpClient, changeUrl, username) => { // eslint-disable-line no-unused-vars
   render(
     <I18nContext>
       <EditUserPage
@@ -38,7 +38,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
       : getCreateUserBreadcrumbs
   ),
   controllerAs: 'editUser',
-  controller($scope, $route, kbnUrl) {
+  controller($scope, $route, kbnUrl, $http) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('editUserReactRoot');
       if (elem) {
@@ -52,7 +52,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
         kbnUrl.change(url);
         $scope.$apply();
       };
-      renderReact(elem, changeUrl, username);
+      renderReact(elem, $http, changeUrl, username);
     });
   },
 });
