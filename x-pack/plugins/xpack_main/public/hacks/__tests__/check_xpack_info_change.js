@@ -15,7 +15,7 @@ describe('CheckXPackInfoChange Factory', () => {
   const sandbox = sinon.createSandbox();
 
   let mockSessionStorage;
-  beforeEach(ngMock.module('kibana', () => {
+  beforeEach(ngMock.module('kibana', ($provide) => {
     mockSessionStorage = sinon.stub({
       setItem() {},
       getItem() {},
@@ -23,6 +23,11 @@ describe('CheckXPackInfoChange Factory', () => {
     });
 
     mockSessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('foo');
+
+    $provide.service('$window', () => ({
+      sessionStorage: mockSessionStorage,
+      location: { pathname: '' }
+    }));
   }));
 
   let $http;

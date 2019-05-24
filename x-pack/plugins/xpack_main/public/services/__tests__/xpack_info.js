@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { MockWindowProvider } from './_mock_window';
 
 const XPACK_INFO_KEY = 'xpackMain.info';
 
@@ -14,7 +15,12 @@ describe('xpack_info service', () => {
   let mockWindow;
   let xpackInfo;
 
-  beforeEach(ngMock.inject((Private) => {
+  beforeEach(ngMock.module('kibana', ($provide) => {
+    $provide.service('$window', MockWindowProvider);
+  }));
+
+  beforeEach(ngMock.inject(($window, Private) => {
+    mockWindow = $window;
     xpackInfo = Private(XPackInfoProvider);
   }));
 
