@@ -28,7 +28,6 @@ import getSplits from './get_splits';
 import getTimerange from './get_timerange';
 import mapBucket from './map_bucket';
 import parseSettings from './parse_settings';
-import unitToSeconds from './unit_to_seconds';
 
 export default {
   bucketTransform,
@@ -42,5 +41,4 @@ export default {
   getTimerange,
   mapBucket,
   parseSettings,
-  unitToSeconds,
 };

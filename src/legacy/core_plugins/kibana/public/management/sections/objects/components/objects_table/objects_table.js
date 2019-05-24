@@ -73,6 +73,7 @@ class ObjectsTableUI extends Component {
     basePath: PropTypes.string.isRequired,
     perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
+    confirmModalPromise: PropTypes.func.isRequired,
     services: PropTypes.array.isRequired,
     uiCapabilities: PropTypes.object.isRequired,
     goInspectObject: PropTypes.func.isRequired,
@@ -418,6 +419,7 @@ class ObjectsTableUI extends Component {
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={this.props.newIndexPatternUrl}
         savedObjectTypes={this.props.savedObjectTypes}
+        confirmModalPromise={this.props.confirmModalPromise}
       />
     );
   }

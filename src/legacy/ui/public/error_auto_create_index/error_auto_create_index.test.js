@@ -20,7 +20,7 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import { __newPlatformSetup__, kfetch } from '../kfetch';
-import { setup } from '../../../../test_utils/public/kfetch_test_setup';
+import { setup } from '../../../../test_utils/public/http_test_setup';
 
 import { isAutoCreateIndexError } from './error_auto_create_index';
 

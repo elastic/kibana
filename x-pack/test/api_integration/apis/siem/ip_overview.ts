@@ -24,6 +24,7 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
             variables: {
               sourceId: 'default',
               ip: '151.205.0.17',
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {
@@ -49,6 +50,7 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
             variables: {
               sourceId: 'default',
               ip: '185.53.91.88',
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {

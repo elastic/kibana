@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as runtimeTypes from 'io-ts';
+
 import { Resolver } from '../graphql/types';
 
 type ResolverResult<R> = R | Promise<R>;
@@ -97,3 +99,6 @@ export type ChildResolverOf<Resolver_, ParentResolver> = ResolverWithParent<
   Resolver_,
   ResultOf<ParentResolver>
 >;
+
+export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
+  runtimeTypes.union([type, runtimeTypes.null]);

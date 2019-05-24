@@ -28,14 +28,6 @@ export const sourcesSchema = gql`
 
   "A set of configuration options for a security data source"
   type SourceConfiguration {
-    "The alias to read file data from"
-    logAlias: String!
-    "The alias to read auditbeat data from"
-    auditbeatAlias: String!
-    "The alias to read packetbeat data from"
-    packetbeatAlias: String!
-    "The alias to read winlogbeat data from"
-    winlogbeatAlias: String!
     "The field mapping to use for this source"
     fields: SourceFields!
   }
