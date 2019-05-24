@@ -34,19 +34,15 @@ interface SnapshotQueryResult {
 }
 
 interface SnapshotProps {
+  /**
+   * Valid colors to be used by the component and its children.
+   */
   colors: UptimeAppColors;
-  dateRangeStart: string;
-  dateRangeEnd: string;
 }
 
 type Props = UptimeGraphQLQueryProps<SnapshotQueryResult> & SnapshotProps;
 
-export const SnapshotComponent = ({
-  colors: { danger, success },
-  data,
-  dateRangeStart,
-  dateRangeEnd,
-}: Props) =>
+export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) =>
   data && data.snapshot ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={4}>
