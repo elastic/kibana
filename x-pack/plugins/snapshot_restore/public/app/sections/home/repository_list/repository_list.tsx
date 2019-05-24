@@ -47,7 +47,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     });
 
   const openRepositoryDetails = (newRepositoryName: Repository['name']) => {
-    history.push(`${getBasePathUrlRepositoryDetail(newRepositoryName)}/${newRepositoryName}`);
+    history.push(`${getBasePathUrlRepositoryDetail()}/${newRepositoryName}`);
   };
 
   const closeRepositoryDetails = () => {

@@ -29,7 +29,7 @@ interface Props extends RouteComponentProps {
   repositories: Repository[];
   reload: () => Promise<void>;
   basePathDetailsUrl: string;
-  openRepositoryDetails: (name: Repository['name']) => string;
+  openRepositoryDetails: (name: Repository['name']) => void;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 

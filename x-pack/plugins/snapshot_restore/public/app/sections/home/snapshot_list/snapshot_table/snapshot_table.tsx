@@ -19,7 +19,8 @@ interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
   reload: () => Promise<void>;
-  openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
+  getUrlSnapshotDetail: (repositoryName: string, snapshotId: string) => string;
+  openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
   repositoryFilter?: string;
 }
 
@@ -27,7 +28,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
   repositories,
   reload,
-  openSnapshotDetailsUrl,
+  getUrlSnapshotDetail,
+  openSnapshotDetails,
   repositoryFilter,
 }) => {
   const {
@@ -47,8 +49,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         <EuiLink
-          onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
-          href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
+          onClick={() => {
+            trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK);
+            openSnapshotDetails(snapshot.repository, snapshotId);
+          }}
+          href={getUrlSnapshotDetail(snapshot.repository, snapshotId)}
+          data-test-subj="snapshotLink"
         >
           {snapshotId}
         </EuiLink>
@@ -154,7 +160,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
 
   const search = {
     toolsRight: (
-      <EuiButton color="secondary" iconType="refresh" onClick={reload}>
+      <EuiButton
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+      >
         <FormattedMessage
           id="xpack.snapshotRestore.snapshotList.table.reloadSnapshotsButton"
           defaultMessage="Reload"
@@ -196,11 +207,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       sorting={sorting}
       pagination={pagination}
       rowProps={() => ({
-        'data-test-subj': 'srSnapshotListTableRow',
+        'data-test-subj': 'row',
       })}
       cellProps={(item: any, column: any) => ({
-        'data-test-subj': `srSnapshotListTableCell-${column.field}`,
+        'data-test-subj': 'cell',
       })}
+      data-test-subj="snapshotTable"
     />
   );
 };
