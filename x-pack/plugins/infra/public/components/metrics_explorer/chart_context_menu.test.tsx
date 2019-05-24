@@ -26,9 +26,10 @@ describe('MetricsExplorerChartContextMenu', () => {
 
     component.find('button').simulate('click');
     const menuItems = component.find('.euiContextMenuItem__text');
-    expect(menuItems.length).toBe(2);
-    expect(menuItems.at(0).text()).toBe('Add Filter');
+    expect(menuItems.length).toBe(3);
+    expect(menuItems.at(0).text()).toBe('Add filter');
     expect(menuItems.at(1).text()).toBe('Open in Visualize');
+    expect(menuItems.at(2).text()).toBe('View metrics for host');
   });
 
   it('should not display "Add Filter" without onFilter', async () => {
@@ -43,8 +44,9 @@ describe('MetricsExplorerChartContextMenu', () => {
 
     component.find('button').simulate('click');
     const menuItems = component.find('.euiContextMenuItem__text');
-    expect(menuItems.length).toBe(1);
+    expect(menuItems.length).toBe(2);
     expect(menuItems.at(0).text()).toBe('Open in Visualize');
+    expect(menuItems.at(1).text()).toBe('View metrics for host');
   });
 
   it('should not display "Add Filter" without options.groupBy', async () => {
