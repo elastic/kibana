@@ -84,130 +84,109 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
   return (
     <EuiDescriptionList textStyle="reverse">
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="srSnapshotDetailsVersionItem">
+        <EuiFlexItem data-test-subj="version">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemVersionLabel"
-              data-test-subj="srSnapshotDetailsVersionTitle"
+              data-test-subj="title"
               defaultMessage="Version / Version ID"
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailsVersionDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             {version} / {versionId}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
-        <EuiFlexItem data-test-subj="srSnapshotDetailsIncludeGlobalUuidItem">
+        <EuiFlexItem data-test-subj="uuid">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemUuidLabel"
-              data-test-subj="srSnapshotDetailsUuidTitle"
+              data-test-subj="title"
               defaultMessage="UUID"
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailUuidDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             {uuid}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="srSnapshotDetailsStateItem">
+        <EuiFlexItem data-test-subj="state">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemStateLabel"
-              data-test-subj="srSnapshotDetailsStateTitle"
+              data-test-subj="title"
               defaultMessage="State"
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailStateDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             <SnapshotState state={state} />
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
-        <EuiFlexItem data-test-subj="srSnapshotDetailsIncludeGlobalStateItem">
+        <EuiFlexItem data-test-subj="includeGlobalState">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateLabel"
-              data-test-subj="srSnapshotDetailsIncludeGlobalStateTitle"
+              data-test-subj="title"
               defaultMessage="Includes global state"
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailIncludeGlobalStateDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             {includeGlobalStateToHumanizedMap[includeGlobalState]}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="srSnapshotDetailsIndicesItem">
+        <EuiFlexItem data-test-subj="indices">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemIndicesLabel"
-              data-test-subj="srSnapshotDetailsIndicesTitle"
+              data-test-subj="title"
               defaultMessage="Indices ({indicesCount})"
               values={{ indicesCount: indices.length }}
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailIndicesDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             <EuiText>{indicesList}</EuiText>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="srSnapshotDetailsStartTimeItem">
+        <EuiFlexItem data-test-subj="startTime">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemStartTimeLabel"
-              data-test-subj="srSnapshotDetailsStartTimeTitle"
+              data-test-subj="title"
               defaultMessage="Start time"
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailStartTimeDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             <DataPlaceholder data={startTimeInMillis}>
               {formatDate(startTimeInMillis)}
             </DataPlaceholder>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
-        <EuiFlexItem data-test-subj="srSnapshotDetailsEndTimeItem">
+        <EuiFlexItem data-test-subj="endTime">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemEndTimeLabel"
-              data-test-subj="srSnapshotDetailsEndTimeTitle"
+              data-test-subj="title"
               defaultMessage="End time"
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailEndTimeDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             {state === SNAPSHOT_STATE.IN_PROGRESS ? (
               <EuiLoadingSpinner size="m" />
             ) : (
@@ -220,19 +199,16 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
       </EuiFlexGroup>
 
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="srSnapshotDetailsDurationItem">
+        <EuiFlexItem data-test-subj="duration">
           <EuiDescriptionListTitle>
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemDurationLabel"
-              data-test-subj="srSnapshotDetailsDurationTitle"
+              data-test-subj="title"
               defaultMessage="Duration"
             />
           </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription
-            className="eui-textBreakWord"
-            data-test-subj="srSnapshotDetailDurationDescription"
-          >
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             {state === SNAPSHOT_STATE.IN_PROGRESS ? (
               <EuiLoadingSpinner size="m" />
             ) : (

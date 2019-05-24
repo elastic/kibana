@@ -112,7 +112,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
               }}
               isSelected={tab.id === activeTab}
               key={tab.id}
-              data-test-subject={tab.testSubj}
+              data-test-subject="tab"
             >
               {tab.name}
             </EuiTab>
@@ -173,7 +173,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             iconType="cross"
             flush="left"
             onClick={onClose}
-            data-test-subj="srSnapshotDetailsFlyoutCloseButton"
+            data-test-subj="closeButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.closeButtonLabel"
@@ -188,7 +188,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      data-test-subj="srSnapshotDetailsFlyout"
+      data-test-subj="snapshotDetail"
       aria-labelledby="srSnapshotDetailsFlyoutTitle"
       size="m"
       maxWidth={400}
@@ -197,7 +197,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="srSnapshotDetailsFlyoutTitle">
+              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="title">
                 {snapshotId}
               </h2>
             </EuiTitle>
@@ -206,7 +206,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
           <EuiFlexItem>
             <EuiText size="s">
               <p>
-                <EuiLink href={linkToRepository(repositoryName)}>
+                <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
                   <FormattedMessage
                     id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
                     defaultMessage="'{repositoryName}' repository"
@@ -221,7 +221,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         {tabs}
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">{content}</EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
       <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );

@@ -60,12 +60,25 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     server.respondWith('GET', `${API_BASE_PATH}snapshots`, mockResponse(defaultResponse, response));
   };
 
+  const setGetSnapshotResponse = (response?: HttpResponse) => {
+    const defaultResponse = {};
+
+    server.respondWith(
+      'GET',
+      /\/api\/snapshot_restore\/snapshots\/.+/,
+      response
+        ? mockResponse(defaultResponse, response)
+        : [200, { 'Content-Type': 'application/json' }, '']
+    );
+  };
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
     setGetRepositoryResponse,
     setSaveRepositoryResponse,
     setLoadSnapshotsResponse,
+    setGetSnapshotResponse,
   };
 };
 

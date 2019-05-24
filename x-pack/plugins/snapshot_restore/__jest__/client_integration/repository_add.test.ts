@@ -141,11 +141,11 @@ describe('<RepositoryAdd />', () => {
       test('should validate required repository settings', async () => {
         const { component, actions, form } = testBed;
 
-        testBed.form.setInputValue('nameInput', 'my-repo');
+        form.setInputValue('nameInput', 'my-repo');
 
         const selectRepoTypeAndExpectErrors = async (type: RepositoryType) => {
-          testBed.actions.selectRepositoryType(type);
-          testBed.actions.clickNextButton();
+          actions.selectRepositoryType(type);
+          actions.clickNextButton();
 
           await act(async () => {
             actions.clickSubmitButton();
@@ -166,10 +166,6 @@ describe('<RepositoryAdd />', () => {
             }
           });
 
-          // Go back for the next test
-          // actions.clickBackButton();
-          // await nextTick();
-          // await nextTick(2000);
           await act(async () => {
             actions.clickBackButton();
             await nextTick(100);

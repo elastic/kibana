@@ -14,6 +14,7 @@ import {
   findTestSubject,
 } from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
+import { REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.home;
 
@@ -396,8 +397,124 @@ describe('<SnapshotRestoreHome />', () => {
       });
     });
 
-    describe('when there are snapshots', () => {
-      // TODO
+    describe('when there are snapshots and repositories', () => {
+      const snapshot1 = fixtures.getSnapshot({
+        repository: REPOSITORY_NAME,
+        snapshot: `a${getRandomString()}`,
+      });
+      const snapshot2 = fixtures.getSnapshot({
+        repository: REPOSITORY_NAME,
+        snapshot: `b${getRandomString()}`,
+      });
+      const snapshots = [snapshot1, snapshot2];
+
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({
+          snapshots,
+          repositories: [REPOSITORY_NAME],
+          errors: {},
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+          await nextTick(2000);
+          testBed.component.update();
+        });
+      });
+
+      test('should list them in the table', async () => {
+        const { table } = testBed;
+
+        const { tableCellsValues } = table.getMetaData('snapshotTable');
+        tableCellsValues.forEach((row, i) => {
+          const snapshot = snapshots[i];
+          expect(row).toEqual([
+            snapshot.snapshot, // Snapshot
+            REPOSITORY_NAME, // Repository
+            '23 May 2019 14:25:15', // Date created
+            `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
+            snapshot.indices.length.toString(), // Indices
+            snapshot.shards.total.toString(), // Shards
+            snapshot.shards.failed.toString(), // Failed shards
+          ]);
+        });
+      });
+
+      test('should have a button to reload the snapshots', async () => {
+        const { component, exists, find } = testBed;
+        const totalRequests = server.requests.length;
+        expect(exists('reloadButton')).toBe(true);
+
+        await act(async () => {
+          find('reloadButton').simulate('click');
+          await nextTick();
+          component.update();
+        });
+
+        expect(server.requests.length).toBe(totalRequests + 1);
+        expect(server.requests[server.requests.length - 1].url).toBe(
+          '/api/snapshot_restore/snapshots'
+        );
+      });
+
+      describe('detail panel', () => {
+        beforeAll(async () => {
+          httpRequestsMockHelpers.setGetSnapshotResponse(snapshot1);
+        });
+
+        test('should show the detail when clicking on a snapshot', async () => {
+          const { exists, actions } = testBed;
+          expect(exists('snapshotDetail')).toBe(false);
+
+          await actions.clickSnapshotAt(0);
+
+          expect(exists('snapshotDetail')).toBe(true);
+        });
+
+        test('should show a loading while fetching the snapshot', async () => {
+          const { find, exists, actions } = testBed;
+          // By providing undefined, the "loading section" will be displayed
+          httpRequestsMockHelpers.setGetSnapshotResponse(undefined);
+
+          await actions.clickSnapshotAt(0);
+
+          expect(exists('snapshotDetail.sectionLoading')).toBe(true);
+          expect(find('snapshotDetail.sectionLoading').text()).toEqual('Loading snapshot…');
+        });
+
+        describe('on mount', () => {
+          beforeEach(async () => {
+            await testBed.actions.clickSnapshotAt(0);
+          });
+
+          test('should set the correct title', async () => {
+            const { find } = testBed;
+
+            expect(find('snapshotDetail.title').text()).toEqual(snapshot1.snapshot);
+          });
+
+          test('should have a link to show the repository detail', async () => {
+            const { component, exists, find, router } = testBed;
+            expect(exists('snapshotDetail.repositoryLink')).toBe(true);
+
+            const { href } = find('snapshotDetail.repositoryLink').props();
+
+            await act(async () => {
+              router.navigateTo(href);
+              await nextTick();
+              component.update();
+            });
+
+            // Make sure that we navigated to the repository list
+            // and opened the detail panel
+            expect(exists('snapshotList')).toBe(false);
+            expect(exists('repositoryList')).toBe(true);
+            expect(exists('repositoryDetail')).toBe(true);
+          });
+        });
+      });
     });
   });
 });
