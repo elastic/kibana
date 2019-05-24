@@ -89,8 +89,8 @@ export class AddLayerPanel extends Component {
     this.props.removeTransientLayer();
   }
 
-  _onSourceSelectionChange = ({ type, indexReadyFile }) => {
-    this.setState({ sourceType: type, importView: indexReadyFile });
+  _onSourceSelectionChange = ({ type, isIndexingSource }) => {
+    this.setState({ sourceType: type, importView: isIndexingSource });
   }
 
   _layerAddHandler = () => {
@@ -109,11 +109,12 @@ export class AddLayerPanel extends Component {
       return (
         <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />
       );
-    } else if (this.state.importView) {
+    }
+    if (this.state.importView) {
       return (
         <ImportEditor
           clearSource={this._clearLayerData}
-          previewLayer={source => this._viewLayer(source, this.state.importView)}
+          previewLayer={source => this._viewLayer(source, true)}
           addImportLayer={source => this._addImportedLayer(source)}
           indexingTriggered={this.state.indexingTriggered}
           onIndexReady={
@@ -128,15 +129,14 @@ export class AddLayerPanel extends Component {
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
         />
       );
-    } else {
-      return (
-        <SourceEditor
-          clearSource={this._clearLayerData}
-          sourceType={this.state.sourceType}
-          previewLayer={source => this._viewLayer(source, this.state.importView)}
-        />
-      );
     }
+    return (
+      <SourceEditor
+        clearSource={this._clearLayerData}
+        sourceType={this.state.sourceType}
+        previewLayer={source => this._viewLayer(source, false)}
+      />
+    );
   }
 
   _renderFooter() {
@@ -161,7 +161,7 @@ export class AddLayerPanel extends Component {
     return (
       <FlyoutFooter
         onClick={this._layerAddHandler}
-        disableButton={!buttonEnabled}
+        disableNextButton={!buttonEnabled}
         buttonText={panelDescription}
       />
     );

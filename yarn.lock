@@ -12420,7 +12420,7 @@ geojson-random@^0.2.2:
   resolved "https://registry.yarnpkg.com/geojson-random/-/geojson-random-0.2.2.tgz#ab4838f126adc5e16f8f94e655def820f9119dbc"
   integrity sha1-q0g48SatxeFvj5TmVd74IPkRnbw=
 
-geojson-rewind@^0.3.0, geojson-rewind@^0.3.1:
+geojson-rewind@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/geojson-rewind/-/geojson-rewind-0.3.1.tgz#22240797c847cc2f0c1d313e4aa0c915afa7f29d"
   integrity sha1-IiQHl8hHzC8MHTE+SqDJFa+n8p0=

@@ -15,13 +15,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const FlyoutFooter = (
-  { onClick, disableButton, buttonText, closeFlyout, hasLayerSelected, isLoading }
+  { onClick, disableNextButton, buttonText, closeFlyout, hasLayerSelected, isLoading }
 ) => {
 
   const nextButtonText = buttonText || 'Add layer';
   const nextButton = (
     <EuiButton
-      disabled={!hasLayerSelected || disableButton}
+      disabled={!hasLayerSelected || disableNextButton || isLoading}
       isLoading={hasLayerSelected && isLoading}
       iconSide="right"
       iconType={'sortRight'}

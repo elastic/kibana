@@ -18,7 +18,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   static title = 'Upload GeoJSON vector file';
   static description = 'Upload a GeoJSON file and index in Elasticsearch';
   static icon = 'importAction';
-  static indexReadyFile = true;
+  static isIndexingSource = true;
 
   static createDescriptor(featureCollection, name) {
     return {
@@ -114,7 +114,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   }
 
   shouldBeIndexed() {
-    return GeojsonFileSource.indexReadyFile;
+    return GeojsonFileSource.isIndexingSource;
   }
 
 }

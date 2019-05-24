@@ -33,13 +33,13 @@ function mapDispatchToProps(dispatch) {
       //this triggers a new request for preview. Any existing transient layers need to be cleared before the new one can be added.
       await dispatch(setSelectedLayer(null));
       await dispatch(removeTransientLayer());
-      await dispatch(addLayer(layer.toLayerDescriptor()));
+      dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
       dispatch(setTransientLayer(layer.getId()));
     },
     addImportedLayer: async layer => {
       await dispatch(setSelectedLayer(null));
-      await dispatch(addLayer(layer.toLayerDescriptor()));
+      dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
       dispatch(setTransientLayer(layer.getId()));
     },
