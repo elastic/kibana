@@ -4,12 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BarSeries, Chart, getSpecId, ScaleType, Settings, TooltipType } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  getSpecId,
+  ScaleType,
+  Settings,
+  TooltipType,
+  getAxisId,
+  Position,
+  timeFormatter,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useContext } from 'react';
 import { MonitorSeriesPoint } from '../../../../common/graphql/types';
 import { formatSparklineCounts } from '../format_sparkline_counts';
 import { getColorsMap } from './get_colors_map';
+import { getChartDateLabel } from '../../../lib/helper';
+import { UptimeSettingsContext } from '../../../contexts';
 
 export interface MonitorBarSeriesProps {
   /**
@@ -33,11 +46,18 @@ const seriesHasCounts = (series: MonitorSeriesPoint[]) => {
  */
 export const MonitorBarSeries = ({ dangerColor, downSeries }: MonitorBarSeriesProps) => {
   const id = getSpecId('downSeries');
+  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
 
   return seriesHasCounts(downSeries) ? (
     <div style={{ height: 50, width: '100%' }}>
       <Chart renderer="canvas">
         <Settings tooltipType={TooltipType.VerticalCursor} />
+        <Axis
+          hide
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+        />
         <BarSeries
           customSeriesColors={getColorsMap(dangerColor, id)}
           data={formatSparklineCounts(downSeries).map(({ x, y }) => [x, y])}
