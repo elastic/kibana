@@ -6,14 +6,9 @@
 
 import {
   EuiIcon,
-  // @ts-ignore missing type definition
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
-  // @ts-ignore missing type definition
-  EuiSeriesChart,
-  // @ts-ignore missing type definition
-  EuiSeriesChartUtils,
   EuiSpacer,
   EuiText,
   EuiTitle,
