@@ -70,9 +70,7 @@
 
   .stat.min.value, .stat.max.value, .stat.median.value {
     font-size: $euiFontSizeS;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include euiTextTruncate;
   }
 
   .not-exist-message {
