@@ -7,7 +7,7 @@
 import {
   BaseOptions,
   BulkCreateObject,
-  BulkGetObjects,
+  BulkGetObject,
   CreateOptions,
   FindOptions,
   SavedObjectAttributes,
@@ -182,7 +182,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public async bulkGet(objects: BulkGetObjects = [], options: BaseOptions = {}) {
+  public async bulkGet(objects: BulkGetObject[] = [], options: BaseOptions = {}) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 

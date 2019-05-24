@@ -33,11 +33,10 @@ import {
   CreateOptions,
   SavedObject,
   FindOptions,
-  BulkCreateResponse,
   SavedObjectAttributes,
   FindResponse,
   BulkGetObject,
-  BulkGetResponse,
+  BulkResponse,
   UpdateOptions,
   BaseOptions,
   MigrationVersion,
@@ -199,7 +198,7 @@ export class SavedObjectsRepository {
   async bulkCreate<T extends SavedObjectAttributes = any>(
     objects: Array<BulkCreateObject<T>>,
     options: CreateOptions = {}
-  ): Promise<BulkCreateResponse<T>> {
+  ): Promise<BulkResponse<T>> {
     const { namespace, overwrite = false } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams: object[] = [];
@@ -492,7 +491,7 @@ export class SavedObjectsRepository {
   async bulkGet<T extends SavedObjectAttributes = any>(
     objects: BulkGetObject[] = [],
     options: BaseOptions = {}
-  ): Promise<BulkGetResponse<T>> {
+  ): Promise<BulkResponse<T>> {
     const { namespace } = options;
 
     if (objects.length === 0) {

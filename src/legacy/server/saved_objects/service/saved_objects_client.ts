@@ -22,6 +22,7 @@ import { errors, SavedObjectsRepository } from './lib';
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export interface BaseOptions {
+  /** Specify the namespace for this operation */
   namespace?: string;
 }
 
@@ -43,7 +44,7 @@ export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
   // extraDocumentProperties?: string[];
 }
 
-export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
+export interface BulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -55,6 +56,7 @@ export interface FindOptions extends BaseOptions {
   sortOrder?: string;
   fields?: string[];
   search?: string;
+  /** see Elasticsearch Simple Query String Query field argument for more information */
   searchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
@@ -68,6 +70,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
 }
 
 export interface UpdateOptions extends BaseOptions {
+  /** Ensures version matches that of persisted object */
   version?: string;
   references?: SavedObjectReference[];
 }
@@ -75,15 +78,11 @@ export interface UpdateOptions extends BaseOptions {
 export interface BulkGetObject {
   id: string;
   type: string;
+  /** SavedObject fields to include in the response */
   fields?: string[];
 }
-export type BulkGetObjects = BulkGetObject[];
 
-export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
-  saved_objects: Array<SavedObject<T>>;
-}
-
-export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
+export interface BulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -123,42 +122,6 @@ export interface SavedObjectReference {
   type: string;
   id: string;
 }
-
-// export interface SavedObjectsClientInterface {
-//   errors: any;
-//   /**
-//    * Persists a SavedObject
-//    *
-//    * @param type
-//    * @param attributes
-//    * @param options
-//    */
-//   create<T extends SavedObjectAttributes = any>(
-//     type: string,
-//     attributes: T,
-//     options?: CreateOptions
-//   ): Promise<SavedObject>;
-
-//   /**
-//    * Creates multiple documents at once
-//    *
-//    * @param objects
-//    * @param options
-//    */
-//   bulkCreate<T extends SavedObjectAttributes = any>(
-//     objects: Array<BulkCreateObject<T>>,
-//     options?: CreateOptions
-//   ): Promise<BulkCreateResponse>;
-
-//   /**
-//    * Deletes a SavedObject
-//    *
-//    * @param type
-//    * @param id
-//    * @param options
-//    */
-//   delete(type: string, id: string, options: BaseOptions): Promise<void>;
-// }
 
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
@@ -238,17 +201,11 @@ export class SavedObjectsClient {
   }
 
   /**
-   * Persists an object
+   * Persists a SavedObject
    *
-   * @param {string} type
-   * @param {object} attributes
-   * @param {object} [options={}]
-   * @property {string} [options.id] - force id on creation, not recommended
-   * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.migrationVersion=undefined]
-   * @property {string} [options.namespace]
-   * @property {array} [options.references] - [{ name, type, id }]
-   * @returns {promise} - { id, type, version, attributes }
+   * @param type
+   * @param attributes
+   * @param options
    */
   async create<T extends SavedObjectAttributes = any>(
     type: string,
@@ -259,13 +216,10 @@ export class SavedObjectsClient {
   }
 
   /**
-   * Creates multiple documents at once
+   * Persists multiple documents batched together as a single request
    *
-   * @param {array} objects - [{ type, id, attributes }]
-   * @param {object} [options={}]
-   * @property {boolean} [options.overwrite=false] - overwrites existing documents
-   * @property {string} [options.namespace]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
+   * @param objects
+   * @param options
    */
   async bulkCreate<T extends SavedObjectAttributes = any>(
     objects: Array<BulkCreateObject<T>>,
@@ -275,33 +229,20 @@ export class SavedObjectsClient {
   }
 
   /**
-   * Deletes an object
+   * Deletes a SavedObject
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise}
+   * @param type
+   * @param id
+   * @param options
    */
   async delete(type: string, id: string, options: BaseOptions = {}) {
     return this._repository.delete(type, id, options);
   }
 
   /**
-   * @param {object} [options={}]
-   * @property {(string|Array<string>)} [options.type]
-   * @property {string} [options.search]
-   * @property {string} [options.defaultSearchOperator]
-   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
-   * @property {integer} [options.page=1]
-   * @property {integer} [options.perPage=20]
-   * @property {string} [options.sortField]
-   * @property {string} [options.sortOrder]
-   * @property {Array<string>} [options.fields]
-   * @property {string} [options.namespace]
-   * @property {object} [options.hasReference] - { type, id }
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
+   * Find all SavedObjects matching the search query
+   *
+   * @param options
    */
   async find<T extends SavedObjectAttributes = any>(
     options: FindOptions
@@ -312,10 +253,7 @@ export class SavedObjectsClient {
   /**
    * Returns an array of objects by id
    *
-   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
+   * @param objects - an array of ids, or an array of objects containing id, type and optionally fields
    * @example
    *
    * bulkGet([
@@ -324,20 +262,18 @@ export class SavedObjectsClient {
    * ])
    */
   async bulkGet<T extends SavedObjectAttributes = any>(
-    objects: BulkGetObjects = [],
+    objects: BulkGetObject[] = [],
     options: BaseOptions = {}
-  ): Promise<BulkGetResponse<T>> {
+  ): Promise<BulkResponse<T>> {
     return this._repository.bulkGet(objects, options);
   }
 
   /**
-   * Gets a single object
+   * Retrieves a single object
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { id, type, version, attributes }
+   * @param type - The type of SavedObject to retrieve
+   * @param id - The ID of the SavedObject to retrieve
+   * @param options
    */
   async get<T extends SavedObjectAttributes = any>(
     type: string,
@@ -348,14 +284,11 @@ export class SavedObjectsClient {
   }
 
   /**
-   * Updates an object
+   * Updates an SavedObject
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {integer} options.version - ensures version matches that of persisted object
-   * @property {string} [options.namespace]
-   * @returns {promise}
+   * @param type
+   * @param id
+   * @param options
    */
   async update<T extends SavedObjectAttributes = any>(
     type: string,

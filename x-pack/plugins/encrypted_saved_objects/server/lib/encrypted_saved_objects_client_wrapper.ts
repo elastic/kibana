@@ -8,9 +8,8 @@ import uuid from 'uuid';
 import {
   BaseOptions,
   BulkCreateObject,
-  BulkCreateResponse,
-  BulkGetObjects,
-  BulkGetResponse,
+  BulkGetObject,
+  BulkResponse,
   CreateOptions,
   FindOptions,
   FindResponse,
@@ -118,7 +117,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async bulkGet(objects: BulkGetObjects = [], options?: BaseOptions) {
+  public async bulkGet(objects: BulkGetObject[] = [], options?: BaseOptions) {
     return this.stripEncryptedAttributesFromBulkResponse(
       await this.options.baseClient.bulkGet(objects, options)
     );
@@ -176,9 +175,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * response portion isn't registered, it is returned as is.
    * @param response Raw response returned by the underlying base client.
    */
-  private stripEncryptedAttributesFromBulkResponse<
-    T extends BulkCreateResponse | BulkGetResponse | FindResponse
-  >(response: T): T {
+  private stripEncryptedAttributesFromBulkResponse<T extends BulkResponse | FindResponse>(
+    response: T
+  ): T {
     for (const savedObject of response.saved_objects) {
       if (this.options.service.isRegistered(savedObject.type)) {
         savedObject.attributes = this.options.service.stripEncryptedAttributes(

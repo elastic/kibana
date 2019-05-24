@@ -28,14 +28,13 @@ export {
   SavedObjectsService,
   BaseOptions,
   BulkCreateObject,
-  BulkGetObjects,
+  BulkGetObject,
   CreateOptions,
   FindOptions,
   FindResponse,
   UpdateOptions,
   UpdateResponse,
-  BulkCreateResponse,
-  BulkGetResponse,
+  BulkResponse,
 } from './service';
 
 export { SavedObjectsSchema } from './schema';
