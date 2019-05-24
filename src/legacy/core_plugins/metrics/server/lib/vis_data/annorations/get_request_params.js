@@ -21,24 +21,16 @@ import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities) {
-  const bodies = [];
   const esShardTimeout = await getEsShardTimeout(req);
   const indexPattern = annotation.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities);
 
-  if (capabilities.batchRequestsSupport) {
-    bodies.push({
-      index: indexPatternString,
-      ignoreUnavailable: true,
-    });
-  }
-
-  if (esShardTimeout > 0) {
-    request.timeout = `${esShardTimeout}ms`;
-  }
-
-  bodies.push(request);
-
-  return bodies;
+  return {
+    index: indexPatternString,
+    body: {
+      ...request,
+      timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+    },
+  };
 }

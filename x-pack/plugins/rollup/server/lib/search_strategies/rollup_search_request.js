@@ -7,12 +7,11 @@ const SEARCH_METHOD = 'rollup.search';
 
 export const getRollupSearchRequest = (AbstractSearchRequest) =>
   (class RollupSearchRequest extends AbstractSearchRequest {
-    async search(options) {
-      const bodies = Array.isArray(options.body) ? options.body : [options.body];
-      const requests = bodies
-        .map(body => this.callWithRequest(SEARCH_METHOD, {
+    async search(searches) {
+      const requests = searches
+        .map(({ body, index }) => this.callWithRequest(SEARCH_METHOD, {
           body,
-          index: this.indexPattern,
+          index,
           rest_total_hits_as_int: true,
         }));
 
