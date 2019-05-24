@@ -18,13 +18,13 @@
  */
 
 import _ from 'lodash';
-import getAggValue from '../../helpers/get_agg_value';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
+import { getAggValue } from '../../helpers/get_agg_value';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentile(resp, panel, series, meta) {
+export function percentile(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
 

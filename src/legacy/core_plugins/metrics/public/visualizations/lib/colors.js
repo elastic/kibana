@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default {
+export const COLORS = {
   lineColor: 'rgba(105,112,125,0.2)',
   textColor: 'rgba(0,0,0,0.4)',
   textColorReversed: 'rgba(255,255,255,0.5)',

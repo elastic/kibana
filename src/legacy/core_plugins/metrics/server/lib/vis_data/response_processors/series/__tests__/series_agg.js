@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import seriesAgg from '../series_agg';
-import stdMetric from '../std_metric';
+import { seriesAgg } from '../series_agg';
+import { stdMetric } from '../std_metric';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
