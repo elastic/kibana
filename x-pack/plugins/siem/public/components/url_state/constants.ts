@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KeyUrlState, KeyKqlQueryObject, LocationMappedToModel } from './types';
+import { KeyUrlState, LocationKeysType, LocationMappedToModel } from './types';
 import { networkModel } from '../../store/network';
 import { hostsModel } from '../../store/hosts';
 
@@ -19,7 +19,7 @@ export enum CONSTANTS {
   timerange = 'timerange',
 }
 
-export const LOCATION_KEYS: KeyKqlQueryObject[] = [
+export const LOCATION_KEYS: LocationKeysType[] = [
   CONSTANTS.hostsDetails,
   CONSTANTS.hostsPage,
   CONSTANTS.networkDetails,

@@ -28,7 +28,7 @@ import {
   UrlInputsModel,
 } from '../../store/inputs/model';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import { URL_STATE_KEYS, CONSTANTS, LOCATION_MAPPED_TO_MODEL } from './constants';
+import { URL_STATE_KEYS, CONSTANTS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './constants';
 import {
   decodeRisonUrlState,
   getQueryStringFromLocation,
@@ -42,12 +42,9 @@ import {
   KeyUrlState,
   KqlQuery,
   UrlStateContainerPropTypes,
-  LocationMappedToModel,
   LocationTypes,
-  KeyKqlQueryObject,
+  KqlQueryObject,
 } from './types';
-
-
 
 export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerPropTypes> {
   public render() {
@@ -66,23 +63,20 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])
         ) {
           if (urlKey === CONSTANTS.kqlQuery) {
-            console.log('LOCATION_MAPPED_TO_MODEL', LOCATION_MAPPED_TO_MODEL);
-            Object.keys(LOCATION_MAPPED_TO_MODEL).forEach((index: string) => {
-              const queryKey: LocationTypes = index;
-              if (queryKey !== null) {
-                const value = urlState[urlKey][queryKey];
+            let queryLocation: keyof typeof LOCATION_KEYS;
+            for (queryLocation in LOCATION_KEYS) {
+              if ({}.hasOwnProperty.call(LOCATION_KEYS, queryLocation)) {
+                if (
+                  JSON.stringify(urlState[CONSTANTS.kqlQuery][queryLocation]) !==
+                  JSON.stringify(prevUrlState[CONSTANTS.kqlQuery][queryLocation])
+                ) {
+                  this.replaceStateInLocation(
+                    urlState[CONSTANTS.kqlQuery][queryLocation],
+                    CONSTANTS.kqlQuery
+                  );
+                }
               }
-              if (
-                index !== null &&
-                JSON.stringify(urlState[CONSTANTS.kqlQuery][index]) !==
-                  JSON.stringify(prevUrlState[CONSTANTS.kqlQuery][index])
-              ) {
-                this.replaceStateInLocation(
-                  urlState[CONSTANTS.kqlQuery][index],
-                  CONSTANTS.kqlQuery
-                );
-              }
-            });
+            }
           } else {
             this.replaceStateInLocation(urlState[urlKey], urlKey);
           }
@@ -112,7 +106,6 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
   );
 
   private handleInitialize = (location: Location) => {
-    console.log('location', location);
     URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
       const newUrlStateString = getParamFromQueryString(
         getQueryStringFromLocation(location),
@@ -211,7 +204,10 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
         if (urlKey === CONSTANTS.kqlQuery) {
           const currentLocation: LocationTypes = getCurrentLocation(location.pathname);
           if (currentLocation !== null) {
-            this.replaceStateInLocation(this.props.urlState[urlKey][currentLocation], urlKey);
+            this.replaceStateInLocation(
+              this.props.urlState[CONSTANTS.kqlQuery][currentLocation],
+              urlKey
+            );
           }
         }
       }
@@ -228,6 +224,29 @@ const makeMapStateToProps = () => {
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
+    const kqlQueryInitialState: KqlQueryObject = {
+      [CONSTANTS.hostsDetails]: {
+        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
+        queryLocation: CONSTANTS.hostsDetails,
+        type: hostsModel.HostsType.details,
+      },
+      [CONSTANTS.hostsPage]: {
+        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
+        queryLocation: CONSTANTS.hostsPage,
+        type: hostsModel.HostsType.page,
+      },
+      [CONSTANTS.networkDetails]: {
+        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details),
+        queryLocation: CONSTANTS.networkDetails,
+        type: networkModel.NetworkType.details,
+      },
+      [CONSTANTS.networkPage]: {
+        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
+        queryLocation: CONSTANTS.networkPage,
+        type: networkModel.NetworkType.page,
+      },
+    };
+
     return {
       urlState: {
         [CONSTANTS.timerange]: {
@@ -240,24 +259,7 @@ const makeMapStateToProps = () => {
             linkTo: timelineLinkTo,
           },
         },
-        [CONSTANTS.kqlQuery]: {
-          [CONSTANTS.hostsDetails]: {
-            filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-            queryLocation: CONSTANTS.hostsDetails,
-          },
-          [CONSTANTS.hostsPage]: {
-            filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-            queryLocation: CONSTANTS.hostsPage,
-          },
-          [CONSTANTS.networkDetails]: {
-            filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details),
-            queryLocation: CONSTANTS.networkDetails,
-          },
-          [CONSTANTS.networkPage]: {
-            filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-            queryLocation: CONSTANTS.networkPage,
-          },
-        },
+        [CONSTANTS.kqlQuery]: kqlQueryInitialState,
       },
     };
   };

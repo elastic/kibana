@@ -19,17 +19,18 @@ export type LocationTypes =
   | null;
 
 export interface KqlQueryObject {
-  [CONSTANTS.networkDetails]: KqlQuery;
-  [CONSTANTS.networkPage]: KqlQuery;
-  [CONSTANTS.hostsDetails]: KqlQuery;
-  [CONSTANTS.hostsPage]: KqlQuery;
+  [CONSTANTS.networkDetails]?: KqlQuery;
+  [CONSTANTS.networkPage]?: KqlQuery;
+  [CONSTANTS.hostsDetails]?: KqlQuery;
+  [CONSTANTS.hostsPage]?: KqlQuery;
+  [key: string]: KqlQuery;
 }
 
 export interface LocationMappedToModel {
-  [CONSTANTS.networkDetails]: networkModel.NetworkType.details;
-  [CONSTANTS.networkPage]: networkModel.NetworkType.page;
   [CONSTANTS.hostsDetails]: hostsModel.HostsType.details;
   [CONSTANTS.hostsPage]: hostsModel.HostsType.page;
+  [CONSTANTS.networkDetails]: networkModel.NetworkType.details;
+  [CONSTANTS.networkPage]: networkModel.NetworkType.page;
 }
 
 export interface LocationMappedToSelf {
@@ -38,7 +39,7 @@ export interface LocationMappedToSelf {
   [CONSTANTS.hostsDetails]: string;
   [CONSTANTS.hostsPage]: string;
 }
-export type KeyKqlQueryObject = keyof LocationMappedToSelf;
+export type LocationKeysType = keyof LocationMappedToModel;
 
 export interface KqlQueryHosts {
   filterQuery: KueryFilterQuery | null;
@@ -52,7 +53,13 @@ export interface KqlQueryNetwork {
   type: networkModel.NetworkType;
 }
 
-export type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
+export interface KqlQuery {
+  filterQuery: KueryFilterQuery | null;
+  queryLocation: LocationTypes;
+  type: networkModel.NetworkType | hostsModel.HostsType;
+}
+
+// export type KqlQuery = KqlQueryHosts | KqlQueryNetwork;
 
 export interface UrlState {
   [CONSTANTS.kqlQuery]: KqlQueryObject;

@@ -87,13 +87,13 @@ const mockProps: UrlStateContainerPropTypes = {
         linkTo: ['global'],
       },
     },
-    [CONSTANTS.kqlQuery]: [
-      {
+    [CONSTANTS.kqlQuery]: {
+      [CONSTANTS.networkPage]: {
         filterQuery,
+        queryLocation: CONSTANTS.networkPage,
         type: networkModel.NetworkType.page,
-        model: KueryFilterModel.network,
       },
-    ],
+    },
   },
   setAbsoluteTimerange: (jest.fn() as unknown) as ActionCreator<{
     from: number;
@@ -200,12 +200,10 @@ describe('UrlStateContainer', () => {
   });
   describe('handleInitialize', () => {
     test('handleInitialize', () => {
-      const wrapper = shallow(
-        <UrlStateContainerLifecycle {...mockProps} />
-      );
+      const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
       const urlStateComponents = wrapper.find('[data-test-subj="urlStateComponents"]');
       urlStateComponents.exists();
-     // console.log('WWWWW I', wrapper.instance());
+      // console.log('WWWWW I', wrapper.instance());
     });
   });
 });
