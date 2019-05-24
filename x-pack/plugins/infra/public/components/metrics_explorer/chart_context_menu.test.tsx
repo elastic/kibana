@@ -32,6 +32,26 @@ describe('MetricsExplorerChartContextMenu', () => {
     expect(menuItems.at(2).text()).toBe('View metrics for host');
   });
 
+  it('should not display View metrics for incompatible groupBy', async () => {
+    const customOptions = { ...options, groupBy: 'system.network.name' };
+    const onFilter = jest.fn().mockImplementation((query: string) => void 0);
+    const component = mountWithIntl(
+      <MetricsExplorerChartContextMenu
+        timeRange={timeRange}
+        source={source}
+        series={series}
+        options={customOptions}
+        onFilter={onFilter}
+      />
+    );
+
+    component.find('button').simulate('click');
+    const menuItems = component.find('.euiContextMenuItem__text');
+    expect(menuItems.length).toBe(2);
+    expect(menuItems.at(0).text()).toBe('Add filter');
+    expect(menuItems.at(1).text()).toBe('Open in Visualize');
+  });
+
   it('should not display "Add Filter" without onFilter', async () => {
     const component = mountWithIntl(
       <MetricsExplorerChartContextMenu
