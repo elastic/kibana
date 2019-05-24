@@ -6,16 +6,18 @@
 
 import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
 
-const { FOUR_DAYS, FOUR_MINUTES, FOUR_YEARS, HOUR, THIRTY_SIX_HOURS, WEEK } = CHART_FORMAT_LIMITS;
+const { FOUR_DAYS, FOUR_MINUTES, FOUR_YEARS, THIRTY_SIX_HOURS, WEEK } = CHART_FORMAT_LIMITS;
 
-const array: Array<{ key: number; value: string }> = [
+/**
+ * Any date range that falls between these stops will have the value applied as its label.
+ * The goal is to provide a helpful label for chunks of time, i.e. if a timespan covers only 12 hours but those
+ * hours are intersected by a date change, we should show the month/day along with the time. The thinking here
+ * is that if there are a minimum of four or more of most units, it is safe to decrease the label's resolution.
+ */
+const dateStops: Array<{ key: number; value: string }> = [
   {
     key: FOUR_MINUTES,
     value: 'HH:mm:ss',
-  },
-  {
-    key: HOUR,
-    value: 'HH:mm',
   },
   {
     key: THIRTY_SIX_HOURS,
@@ -40,8 +42,8 @@ const array: Array<{ key: number; value: string }> = [
  * @param delta The length of the timespan in milliseconds
  */
 export const getLabelFormat = (delta: number): string => {
-  for (let index = 0; index < array.length; index += 1) {
-    const { key, value } = array[index];
+  for (let index = 0; index < dateStops.length; index += 1) {
+    const { key, value } = dateStops[index];
     if (delta < key) {
       return value;
     }

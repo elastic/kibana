@@ -7,12 +7,16 @@
 const DAY = 24 * 60 * 60 * 1000;
 const WEEK = DAY * 7;
 
+/**
+ * These contsants are used by the charting code to determine
+ * what label should be applied to chart axes so as to help users
+ * understand the timeseries data they're being shown.
+ */
 export const CHART_FORMAT_LIMITS = {
   DAY,
   FOUR_DAYS: 1000 * 60 * 60 * 24 * 4,
   FOUR_MINUTES: 1000 * 60 * 4,
   FOUR_YEARS: 4 * 12 * 4 * WEEK,
-  HOUR: 1000 * 60 * 60,
   THIRTY_SIX_HOURS: 1000 * 60 * 60 * 36,
   WEEK,
 };
