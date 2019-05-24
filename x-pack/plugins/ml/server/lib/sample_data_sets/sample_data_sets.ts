@@ -20,7 +20,7 @@ export function addLinksToSampleDatasets(server: any) {
 
   server.addAppLinksToSampleDataset('logs', {
     path:
-      '/app/ml#/modules/check_view_or_create?id=sample_data_weblogs&index=edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
+      '/app/ml#/modules/check_view_or_create?id=sample_data_weblogs&index=90943e30-9a47-11e8-b64d-95841ca0b247',
     label: sampleDataLinkLabel,
     icon: 'machineLearningApp',
   });

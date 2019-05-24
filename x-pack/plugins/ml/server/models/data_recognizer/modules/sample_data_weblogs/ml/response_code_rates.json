@@ -1,5 +1,5 @@
 {
-  "groups": ["kibana_sample_logs", "kibana_sample_web_logs"],
+  "groups": ["kibana_sample_data", "kibana_sample_web_logs"],
   "description": "Find unusual event rates by HTTP response code (high and low)",
   "analysis_config": {
     "bucket_span": "1h",
