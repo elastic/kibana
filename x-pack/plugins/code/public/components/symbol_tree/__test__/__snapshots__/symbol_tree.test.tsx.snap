@@ -107,7 +107,7 @@ exports[`render symbol tree correctly 1`] = `
                 </svg>
                 <a
                   className="code-symbol-link"
-                  href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?tab=structure"
+                  href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?sideTab=structure"
                   onClick={[Function]}
                 >
                   <div
@@ -157,7 +157,7 @@ exports[`render symbol tree correctly 1`] = `
                   >
                     <a
                       className="code-symbol-link"
-                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?tab=structure"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?sideTab=structure"
                       onClick={[Function]}
                     >
                       <div
@@ -203,7 +203,7 @@ exports[`render symbol tree correctly 1`] = `
                   >
                     <a
                       className="code-symbol-link"
-                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?tab=structure"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?sideTab=structure"
                       onClick={[Function]}
                     >
                       <div
@@ -271,7 +271,7 @@ exports[`render symbol tree correctly 1`] = `
                     </svg>
                     <a
                       className="code-symbol-link"
-                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?tab=structure"
+                      href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?sideTab=structure"
                       onClick={[Function]}
                     >
                       <div
@@ -319,7 +319,7 @@ exports[`render symbol tree correctly 1`] = `
                       >
                         <a
                           className="code-symbol-link"
-                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?tab=structure"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?sideTab=structure"
                           onClick={[Function]}
                         >
                           <div
@@ -365,7 +365,7 @@ exports[`render symbol tree correctly 1`] = `
                       >
                         <a
                           className="code-symbol-link"
-                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?tab=structure"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?sideTab=structure"
                           onClick={[Function]}
                         >
                           <div
@@ -411,7 +411,7 @@ exports[`render symbol tree correctly 1`] = `
                       >
                         <a
                           className="code-symbol-link"
-                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?tab=structure"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?sideTab=structure"
                           onClick={[Function]}
                         >
                           <div
@@ -457,7 +457,7 @@ exports[`render symbol tree correctly 1`] = `
                       >
                         <a
                           className="code-symbol-link"
-                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?tab=structure"
+                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?sideTab=structure"
                           onClick={[Function]}
                         >
                           <div
@@ -503,7 +503,7 @@ exports[`render symbol tree correctly 1`] = `
                       >
                         <a
                           className="code-symbol-link"
-                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?tab=structure"
+                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?sideTab=structure"
                           onClick={[Function]}
                         >
                           <div
@@ -571,7 +571,7 @@ exports[`render symbol tree correctly 1`] = `
                         </svg>
                         <a
                           className="code-symbol-link"
-                          href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?tab=structure"
+                          href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?sideTab=structure"
                           onClick={[Function]}
                         >
                           <div
@@ -619,7 +619,7 @@ exports[`render symbol tree correctly 1`] = `
                           >
                             <a
                               className="code-symbol-link"
-                              href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?tab=structure"
+                              href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?sideTab=structure"
                               onClick={[Function]}
                             >
                               <div

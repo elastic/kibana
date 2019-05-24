@@ -25,31 +25,30 @@
 import { getInterpreter } from 'plugins/interpreter/interpreter';
 // @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
-import { ExpressionExecutorService, ExpressionExecutorSetup } from './expression_executor';
-
-import { SearchBarService } from './search_bar';
-import { QueryBarService } from './query_bar';
+import { ExpressionsService, ExpressionsSetup } from './expressions';
+import { SearchService, SearchSetup } from './search';
+import { QueryService, QuerySetup } from './query';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
-  private readonly searchBar: SearchBarService;
-  private readonly queryBar: QueryBarService;
-  private readonly expressionExecutor: ExpressionExecutorService;
+  private readonly search: SearchService;
+  private readonly query: QueryService;
+  private readonly expressions: ExpressionsService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
-    this.queryBar = new QueryBarService();
-    this.searchBar = new SearchBarService();
-    this.expressionExecutor = new ExpressionExecutorService();
+    this.search = new SearchService();
+    this.query = new QueryService();
+    this.expressions = new ExpressionsService();
   }
 
-  public setup() {
+  public setup(): DataSetup {
     return {
       indexPatterns: this.indexPatterns.setup(),
-      search: this.searchBar.setup(),
-      query: this.queryBar.setup(),
-      expressionExecutor: this.expressionExecutor.setup(null, {
+      search: this.search.setup(),
+      query: this.query.setup(),
+      expressions: this.expressions.setup({
         interpreter: {
           getInterpreter,
           renderersRegistry,
@@ -60,9 +59,9 @@ class DataPlugin {
 
   public stop() {
     this.indexPatterns.stop();
-    this.searchBar.stop();
-    this.queryBar.stop();
-    this.expressionExecutor.stop();
+    this.search.stop();
+    this.query.stop();
+    this.expressions.stop();
   }
 }
 
@@ -76,10 +75,15 @@ export const data = new DataPlugin().setup();
 /** @public */
 export interface DataSetup {
   indexPatterns: IndexPatternsSetup;
-  expressionExecutor: ExpressionExecutorSetup;
+  expressions: ExpressionsSetup;
+  search: SearchSetup;
+  query: QuerySetup;
 }
 
 export { ExpressionExecutorSetup } from './expression_executor';
+
+/** @public types */
+export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';

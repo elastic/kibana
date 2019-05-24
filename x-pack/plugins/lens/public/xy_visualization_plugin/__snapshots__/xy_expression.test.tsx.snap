@@ -1,0 +1,151 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_expression XYChart component it renders area 1`] = `
+<Chart
+  className="lnsChart"
+  renderer="canvas"
+>
+  <inject-SettingsComponent-with-chartStore
+    legendPosition="top"
+    showLegend={false}
+  />
+  <inject-AxisSpec-with-chartStore
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    title="C"
+  />
+  <inject-AxisSpec-with-chartStore
+    id="y"
+    position="left"
+    showGridLines={false}
+    title="A and B"
+  />
+  <inject-AreaSeriesSpecComponent-with-chartStore
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": 4,
+        },
+      ]
+    }
+    id="a,b"
+    splitSeriesAccessors={Array []}
+    stackAccessors={Array []}
+    xAccessor="c"
+    yAccessors={
+      Array [
+        "a",
+        "b",
+      ]
+    }
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders bar 1`] = `
+<Chart
+  className="lnsChart"
+  renderer="canvas"
+>
+  <inject-SettingsComponent-with-chartStore
+    legendPosition="top"
+    showLegend={false}
+  />
+  <inject-AxisSpec-with-chartStore
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    title="C"
+  />
+  <inject-AxisSpec-with-chartStore
+    id="y"
+    position="left"
+    showGridLines={false}
+    title="A and B"
+  />
+  <inject-BarSeriesSpecComponent-with-chartStore
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": 4,
+        },
+      ]
+    }
+    id="a,b"
+    splitSeriesAccessors={Array []}
+    stackAccessors={Array []}
+    xAccessor="c"
+    yAccessors={
+      Array [
+        "a",
+        "b",
+      ]
+    }
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders line 1`] = `
+<Chart
+  className="lnsChart"
+  renderer="canvas"
+>
+  <inject-SettingsComponent-with-chartStore
+    legendPosition="top"
+    showLegend={false}
+  />
+  <inject-AxisSpec-with-chartStore
+    id="x"
+    position="bottom"
+    showGridLines={false}
+    title="C"
+  />
+  <inject-AxisSpec-with-chartStore
+    id="y"
+    position="left"
+    showGridLines={false}
+    title="A and B"
+  />
+  <inject-LineSeriesSpecComponent-with-chartStore
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": 4,
+        },
+      ]
+    }
+    id="a,b"
+    splitSeriesAccessors={Array []}
+    stackAccessors={Array []}
+    xAccessor="c"
+    yAccessors={
+      Array [
+        "a",
+        "b",
+      ]
+    }
+  />
+</Chart>
+`;
