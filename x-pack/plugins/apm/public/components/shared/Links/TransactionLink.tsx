@@ -22,7 +22,9 @@ export const TransactionLink: React.SFC<TransactionLinkProps> = ({
   }
 
   const serviceName = transaction.service.name;
-  const transactionType = transaction.transaction.type;
+  const transactionType = legacyEncodeURIComponent(
+    transaction.transaction.type
+  );
   const traceId = transaction.trace.id;
   const transactionId = transaction.transaction.id;
   const name = transaction.transaction.name;
