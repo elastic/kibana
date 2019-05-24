@@ -39,6 +39,11 @@ interface ChecksChartProps {
   successColor: string;
 }
 
+/**
+ * Renders a chart that displays the total count of up/down status checks over time
+ * as a stacked area chart.
+ * @param props The props values required by this component.
+ */
 export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartProps) => {
   const checkareaseriesspecid = getSpecId('Up');
   const checkdownseriesspecid = getSpecId('Down');
