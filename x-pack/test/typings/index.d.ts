@@ -9,3 +9,8 @@ declare module '*.html' {
   // eslint-disable-next-line import/no-default-export
   export default template;
 }
+
+declare module 'lodash/internal/toPath' {
+  function toPath(value: string | string[]): string[];
+  export = toPath;
+}
