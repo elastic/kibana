@@ -41,13 +41,10 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     request: reload,
   } = loadRepositories();
 
-  const getBasePathUrlRepositoryDetail = (): string =>
-    history.createHref({
-      pathname: `${BASE_PATH}/repositories`,
+  const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
+    return history.createHref({
+      pathname: `${BASE_PATH}/repositories/${newRepositoryName}`,
     });
-
-  const openRepositoryDetails = (newRepositoryName: Repository['name']) => {
-    history.push(`${getBasePathUrlRepositoryDetail()}/${newRepositoryName}`);
   };
 
   const closeRepositoryDetails = () => {
@@ -137,8 +134,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       <RepositoryTable
         repositories={repositories || []}
         reload={reload}
-        basePathDetailsUrl={getBasePathUrlRepositoryDetail()}
-        openRepositoryDetails={openRepositoryDetails}
+        openRepositoryDetailsUrl={openRepositoryDetailsUrl}
         onRepositoryDeleted={onRepositoryDeleted}
       />
     );
