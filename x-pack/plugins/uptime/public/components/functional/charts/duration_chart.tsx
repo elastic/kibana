@@ -66,22 +66,24 @@ export const DurationChart = ({
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
   // this id is used for the area chart representing the max/min of check durations
   const areaSpecId = getSpecId('area');
-  const areaSeriesColorMap = getColorsMap(rangeColor, areaSpecId);
 
   // this id is used for the line chart representing the average duration length
   const averageSpecId = getSpecId('average');
-  const averageSeriesColorMap = getColorsMap(meanColor, averageSpecId);
 
   return (
     <React.Fragment>
       <EuiTitle size="xs">
-        <h4>Monitor Duration ms</h4>
+        <h4>
+          {i18n.translate('xpack.uptime.monitorCharts.durationChart.title', {
+            defaultMessage: 'Monitor Duration ms',
+          })}
+        </h4>
       </EuiTitle>
       <EuiPanel>
         <Chart className={'story-chart'}>
           <Axis
             id={getAxisId('bottom')}
-            title={i18n.translate('xpack.uptime.monitorCharts.checkStatus.bottomAxis.title', {
+            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
               defaultMessage: 'timestamp',
             })}
             position={Position.Bottom}
@@ -91,14 +93,14 @@ export const DurationChart = ({
           <Axis
             domain={{ min: 0 }}
             id={getAxisId('left')}
-            title={i18n.translate('xpack.uptime.monitorCharts.checkStatus.leftAxis.title', {
+            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
               defaultMessage: 'Duration ms',
             })}
             position={Position.Left}
             tickFormat={d => Number(d).toFixed(0)}
           />
           <AreaSeries
-            customSeriesColors={areaSeriesColorMap}
+            customSeriesColors={getColorsMap(rangeColor, areaSpecId)}
             id={areaSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
@@ -114,7 +116,7 @@ export const DurationChart = ({
             curve={CurveType.CURVE_MONOTONE_X}
           />
           <LineSeries
-            customSeriesColors={averageSeriesColorMap}
+            customSeriesColors={getColorsMap(meanColor, averageSpecId)}
             id={averageSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
