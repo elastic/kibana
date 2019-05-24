@@ -8,6 +8,7 @@ import queryString from 'querystring';
 import { Action } from 'redux-actions';
 import { kfetch } from 'ui/kfetch';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
+import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import { FileTree } from '../../model';
@@ -41,6 +42,7 @@ import {
   lastRequestPathSelector,
   refUrlSelector,
   repoScopeSelector,
+  urlQueryStringSelector,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -68,10 +70,11 @@ export function* watchLspMethods() {
   yield takeLatest(String(findReferences), handleReferences);
 }
 
-function handleCloseReferences(action: Action<boolean>) {
+function* handleCloseReferences(action: Action<boolean>) {
   if (action.payload) {
-    const { pathname, search } = history.location;
-    const queryParams = queryString.parse(search);
+    const search = yield select(urlQueryStringSelector);
+    const { pathname } = history.location;
+    const queryParams = Url.parse(search, true).query;
     if (queryParams.tab) {
       delete queryParams.tab;
     }
