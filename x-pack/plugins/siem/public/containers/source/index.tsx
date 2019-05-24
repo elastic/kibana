@@ -60,7 +60,7 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
   private memoizedIndexFields: (title: string, fields: IndexField[]) => StaticIndexPattern;
   private memoizedBrowserFields: (fields: IndexField[]) => BrowserFields;
 
-  constructor(props: WithSourceProps) {
+  public constructor(props: WithSourceProps) {
     super(props);
     this.memoizedIndexFields = memoizeOne(this.getIndexFields);
     this.memoizedBrowserFields = memoizeOne(this.getBrowserFields);

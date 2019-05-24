@@ -7,7 +7,7 @@
 export { ConfigurationSourcesAdapter } from './configuration';
 
 export class Sources {
-  constructor(private readonly adapter: SourcesAdapter) {}
+  public constructor(private readonly adapter: SourcesAdapter) {}
 
   public async getConfiguration(sourceId: string): Promise<SourceConfiguration> {
     const sourceConfigurations = await this.getAllConfigurations();

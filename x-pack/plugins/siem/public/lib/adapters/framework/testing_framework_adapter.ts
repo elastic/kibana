@@ -14,7 +14,7 @@ export class AppTestingFrameworkAdapter implements AppFrameworkAdapter {
   public scaledDateFormat?: string;
   public timezone?: string;
 
-  constructor() {
+  public constructor() {
     this.appState = {};
   }
 

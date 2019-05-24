@@ -95,7 +95,7 @@ export const SuperDatePickerComponent = class extends Component<
   SuperDatePickerProps,
   SuperDatePickerState
 > {
-  constructor(props: SuperDatePickerProps) {
+  public constructor(props: SuperDatePickerProps) {
     super(props);
 
     this.state = {

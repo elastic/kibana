@@ -13,7 +13,7 @@ export class KibanaConfigurationAdapter<Configuration>
   private readonly server: ServerWithConfig;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(server: any) {
+  public constructor(server: any) {
     if (!isServerWithConfig(server)) {
       throw new Error('Failed to find configuration on server.');
     }

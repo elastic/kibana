@@ -10,7 +10,7 @@ import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { KpiHostsAdapter } from './types';
 
 export class KpiHosts {
-  constructor(private readonly adapter: KpiHostsAdapter) {}
+  public constructor(private readonly adapter: KpiHostsAdapter) {}
 
   public async getKpiHosts(
     req: FrameworkRequest,

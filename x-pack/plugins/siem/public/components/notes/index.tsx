@@ -58,7 +58,7 @@ const InMemoryTable = styled(EuiInMemoryTable)`
 
 /** A view for entering and reviewing notes */
 export class Notes extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
 
     this.state = { newNote: '' };

@@ -94,7 +94,7 @@ export const getInitialOperatorLabel = (
 };
 
 export class StatefulEditDataProvider extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
 
     const { field, isExcluded, operator, value } = props;

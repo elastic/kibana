@@ -8,7 +8,7 @@ import { ConfigurationAdapter } from './adapter_types';
 
 export class InmemoryConfigurationAdapter<Configuration>
   implements ConfigurationAdapter<Configuration> {
-  constructor(private readonly configuration: Configuration) {}
+  public constructor(private readonly configuration: Configuration) {}
 
   public async get() {
     return this.configuration;

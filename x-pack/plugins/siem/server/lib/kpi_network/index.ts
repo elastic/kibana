@@ -10,7 +10,7 @@ import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { KpiNetworkAdapter } from './types';
 
 export class KpiNetwork {
-  constructor(private readonly adapter: KpiNetworkAdapter) {}
+  public constructor(private readonly adapter: KpiNetworkAdapter) {}
 
   public async getKpiNetwork(
     req: FrameworkRequest,

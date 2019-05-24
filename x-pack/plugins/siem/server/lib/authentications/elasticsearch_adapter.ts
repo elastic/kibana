@@ -20,7 +20,7 @@ import {
 } from './types';
 
 export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getAuthentications(
     request: FrameworkRequest,

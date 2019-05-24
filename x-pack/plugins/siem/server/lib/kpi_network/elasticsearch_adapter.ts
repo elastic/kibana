@@ -17,7 +17,7 @@ import { buildUniquePrvateIpQuery } from './query_unique_private_ips.dsl';
 import { KpiNetworkAdapter, KpiNetworkESMSearchBody, KpiNetworkHit } from './types';
 
 export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getKpiNetwork(
     request: FrameworkRequest,

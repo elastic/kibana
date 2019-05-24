@@ -42,7 +42,7 @@ export class AllTimelinesQuery extends React.PureComponent<OwnProps> {
     timelines: TimelineResult[]
   ) => OpenTimelineResult[];
 
-  constructor(props: OwnProps) {
+  public constructor(props: OwnProps) {
     super(props);
     this.memoizedAllTimeline = memoizeOne(this.getAllTimeline);
   }

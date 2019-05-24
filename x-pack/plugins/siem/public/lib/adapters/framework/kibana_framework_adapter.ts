@@ -37,7 +37,11 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private breadcrumbsComponent: React.ReactElement<any> | null = null;
 
-  constructor(uiModule: IModule, uiRoutes: KibanaUIRoutes, timezoneProvider: AppTimezoneProvider) {
+  public constructor(
+    uiModule: IModule,
+    uiRoutes: KibanaUIRoutes,
+    timezoneProvider: AppTimezoneProvider
+  ) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.timezoneProvider = timezoneProvider;
     this.register(uiModule, uiRoutes);

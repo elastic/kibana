@@ -61,7 +61,7 @@ const WithHoverActionsContainer = styled.div`
  * provides a signal to the content that the user is in a hover state.
  */
 export class WithHoverActions extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
 
     this.state = { showHoverContent: false };

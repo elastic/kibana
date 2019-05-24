@@ -26,7 +26,7 @@ interface State {
  * Renders a button that when clicked, displays the `Delete Timeline` modal
  */
 export class DeleteTimelineModalButton extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
 
     this.state = { showModal: false };

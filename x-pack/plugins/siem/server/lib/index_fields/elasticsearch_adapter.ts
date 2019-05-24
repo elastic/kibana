@@ -21,7 +21,7 @@ import { FieldsAdapter, IndexFieldDescriptor } from './types';
 type IndexesAliasIndices = Record<string, string[]>;
 
 export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getIndexFields(request: FrameworkRequest, indices: string[]): Promise<IndexField[]> {
     const indexPatternsService = this.framework.getIndexPatternsService(request);

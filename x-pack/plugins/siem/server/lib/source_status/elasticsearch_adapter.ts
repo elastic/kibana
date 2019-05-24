@@ -9,7 +9,7 @@ import { DatabaseGetIndicesResponse, FrameworkAdapter, FrameworkRequest } from '
 import { SourceStatusAdapter } from './index';
 
 export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
   public async getIndexNames(request: FrameworkRequest, aliasName: string | string[]) {
     const indexMaps = await Promise.all([
       this.framework

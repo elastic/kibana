@@ -69,7 +69,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
   /** tracks the latest timeout id from `setTimeout`*/
   private inputTimeoutId: number = 0;
 
-  constructor(props: FieldBrowserProps) {
+  public constructor(props: FieldBrowserProps) {
     super(props);
 
     this.state = {

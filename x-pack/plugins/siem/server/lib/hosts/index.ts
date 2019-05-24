@@ -18,7 +18,7 @@ export * from './elasticsearch_adapter';
 export * from './types';
 
 export class Hosts {
-  constructor(private readonly adapter: HostsAdapter) {}
+  public constructor(private readonly adapter: HostsAdapter) {}
 
   public async getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData> {
     return this.adapter.getHosts(req, options);

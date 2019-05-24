@@ -21,7 +21,7 @@ import {
 } from './types';
 
 export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getUncommonProcesses(
     request: FrameworkRequest,

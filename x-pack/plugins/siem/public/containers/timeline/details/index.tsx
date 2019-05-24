@@ -31,7 +31,7 @@ export interface TimelineDetailsProps {
 export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineDetailsProps> {
   private memoizedDetailsEvents: (variables: string, detail: DetailItem[]) => DetailItem[];
 
-  constructor(props: TimelineDetailsProps) {
+  public constructor(props: TimelineDetailsProps) {
     super(props);
     this.memoizedDetailsEvents = memoizeOne(this.getDetailsEvent);
   }

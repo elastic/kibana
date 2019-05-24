@@ -117,7 +117,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     paginationLoading: false,
   };
 
-  static getDerivedStateFromProps<T, U, V, W, X, Y, Z, AA, AB>(
+  public static getDerivedStateFromProps<T, U, V, W, X, Y, Z, AA, AB>(
     props: BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>,
     state: BasicTableState
   ) {

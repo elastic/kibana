@@ -10,7 +10,7 @@ import { FrameworkRequest, RequestOptions } from '../framework';
 import { AuthenticationsAdapter } from './types';
 
 export class Authentications {
-  constructor(private readonly adapter: AuthenticationsAdapter) {}
+  public constructor(private readonly adapter: AuthenticationsAdapter) {}
 
   public async getAuthentications(
     req: FrameworkRequest,

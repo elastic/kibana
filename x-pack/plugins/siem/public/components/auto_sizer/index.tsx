@@ -57,7 +57,7 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
     },
   };
 
-  constructor(props: AutoSizerProps) {
+  public constructor(props: AutoSizerProps) {
     super(props);
     if (this.props.detectAnyWindowResize) {
       window.addEventListener('resize', this.updateMeasurement);

@@ -24,7 +24,7 @@ import { NoteSavedObject, NoteSavedObjectRuntimeType, SavedNote } from './types'
 import { noteSavedObjectType } from '.';
 
 export class Note {
-  constructor(
+  public constructor(
     private readonly libs: {
       savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
         Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isConflictError'>;

@@ -47,7 +47,7 @@ import {
 } from './index';
 
 export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getIpDetails(
     request: FrameworkRequest,

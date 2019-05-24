@@ -99,7 +99,7 @@ const settingsWidth = 50;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export class Properties extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
 
     this.state = {

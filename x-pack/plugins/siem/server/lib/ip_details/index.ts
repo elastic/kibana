@@ -45,7 +45,7 @@ export interface UsersRequestOptions extends RequestOptions {
 }
 
 export class IpDetails {
-  constructor(private readonly adapter: IpDetailsAdapter) {}
+  public constructor(private readonly adapter: IpDetailsAdapter) {}
 
   public async getIpOverview(
     req: FrameworkRequest,

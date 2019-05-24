@@ -68,7 +68,7 @@ export class Resizeable extends React.PureComponent<Props> {
   private dragSubscription: Subscription | null;
   private upSubscription: Subscription | null;
 
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
 
     // NOTE: the ref and observable below are NOT stored in component `State`

@@ -30,7 +30,7 @@ export interface NetworkDnsRequestOptions extends RequestOptions {
 }
 
 export class Network {
-  constructor(private readonly adapter: NetworkAdapter) {}
+  public constructor(private readonly adapter: NetworkAdapter) {}
 
   public async getNetworkTopNFlow(
     req: FrameworkRequest,

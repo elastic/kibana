@@ -27,7 +27,7 @@ import {
 } from './types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getHosts(
     request: FrameworkRequest,

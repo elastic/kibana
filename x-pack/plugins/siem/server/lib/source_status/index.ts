@@ -8,7 +8,7 @@ import { FrameworkRequest } from '../framework';
 export { ElasticsearchSourceStatusAdapter } from './elasticsearch_adapter';
 
 export class SourceStatus {
-  constructor(private readonly adapter: SourceStatusAdapter) {}
+  public constructor(private readonly adapter: SourceStatusAdapter) {}
 
   public async hasIndices(request: FrameworkRequest, indexes: string[]): Promise<boolean> {
     return this.adapter.hasIndices(request, indexes);

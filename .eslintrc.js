@@ -452,8 +452,32 @@ module.exports = {
     {
       files: ['x-pack/plugins/siem/**/*.{ts,tsx}'],
       rules: {
+        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
+        '@typescript-eslint/no-object-literal-type-assertion': 'warn',
+        '@typescript-eslint/unified-signatures': 'error',
+
+        // Eventually we want this to be a warn and then an error since this is a recommended linter rule
+        // for now, keeping it commented out to avoid too much IDE noise until the other linter issues
+        // are fixed in the next release or two
+        // '@typescript-eslint/explicit-function-return-type': 'warn',
+
+        // These rules cannot be turned on at the moment until the parser is upgraded and once that happens
+        // uncomment these and fix any errors from them
+        // '@typescript-eslint/await-thenable': 'error',
+        // '@typescript-eslint/no-non-null-assertion': 'error',
+        // '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+        // '@typescript-eslint/no-unused-vars': 'error',
+        // '@typescript-eslint/prefer-includes': 'error',
+        // '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+        // '@typescript-eslint/promise-function-async': 'error',
+        // '@typescript-eslint/prefer-regexp-exec': 'error',
+        // '@typescript-eslint/promise-function-async': 'error',
+        // '@typescript-eslint/require-array-sort-compare': 'error',
+        // '@typescript-eslint/restrict-plus-operands': 'error',
+        // '@typescript-eslint/unbound-method': 'error',
       },
     },
     // rules that can be run for all files and front end code as well as backend code
@@ -475,17 +499,28 @@ module.exports = {
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
         'no-duplicate-imports': 'error',
-        'no-this-before-super': 'error',
+        'no-empty-character-class': 'error',
+        'no-ex-assign': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-func-assign': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
         'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
         'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
         'no-return-await': 'error',
         'no-self-compare': 'error',
-        'no-shadow': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
         'no-undef': 'error',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
         'no-useless-computed-key': 'error',
         'no-useless-rename': 'error',
         'one-var-declaration-per-line': 'error',

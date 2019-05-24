@@ -45,7 +45,7 @@ export class OpenTimelineModalButton extends React.PureComponent<
   OpenTimelineModalButtonProps,
   OpenTimelineModalButtonState
 > {
-  constructor(props: OpenTimelineModalButtonProps) {
+  public constructor(props: OpenTimelineModalButtonProps) {
     super(props);
 
     this.state = { showModal: false };

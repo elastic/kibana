@@ -21,7 +21,7 @@ import {
 } from './types';
 
 export class Events {
-  constructor(private readonly adapter: EventsAdapter) {}
+  public constructor(private readonly adapter: EventsAdapter) {}
 
   public async getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
     return this.adapter.getEvents(req, options);

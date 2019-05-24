@@ -46,7 +46,7 @@ interface State {
 
 /** A view for entering and reviewing notes */
 export class NoteCards extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
 
     this.state = { newNote: '' };

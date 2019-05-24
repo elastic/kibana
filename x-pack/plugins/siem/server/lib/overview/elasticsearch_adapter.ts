@@ -14,7 +14,7 @@ import { buildOverviewHostQuery, buildOverviewNetworkQuery } from './query.dsl';
 import { OverviewAdapter, OverviewHostHit, OverviewNetworkHit } from './types';
 
 export class ElasticsearchOverviewAdapter implements OverviewAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getOverviewNetwork(
     request: FrameworkRequest,

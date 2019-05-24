@@ -16,7 +16,7 @@ interface ConfigurationWithSources {
 export class ConfigurationSourcesAdapter implements SourcesAdapter {
   private readonly configuration: ConfigurationAdapter<ConfigurationWithSources>;
 
-  constructor(configuration: ConfigurationAdapter<ConfigurationWithSources>) {
+  public constructor(configuration: ConfigurationAdapter<ConfigurationWithSources>) {
     this.configuration = configuration;
   }
 

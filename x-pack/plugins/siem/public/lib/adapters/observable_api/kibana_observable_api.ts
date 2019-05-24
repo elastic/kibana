@@ -15,7 +15,7 @@ export class AppKibanaObservableApiAdapter implements AppObservableApi {
     [headerName: string]: string;
   };
 
-  constructor({ basePath, xsrfToken }: { basePath: string; xsrfToken: string }) {
+  public constructor({ basePath, xsrfToken }: { basePath: string; xsrfToken: string }) {
     this.basePath = basePath;
     this.defaultHeaders = {
       'kbn-version': xsrfToken,

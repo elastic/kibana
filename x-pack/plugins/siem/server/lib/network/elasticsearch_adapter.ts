@@ -23,7 +23,7 @@ import { NetworkAdapter, NetworkDnsBuckets, NetworkTopNFlowBuckets } from './typ
 import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getNetworkTopNFlow(
     request: FrameworkRequest,

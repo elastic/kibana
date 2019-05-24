@@ -10,7 +10,7 @@ import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { OverviewAdapter } from './types';
 
 export class Overview {
-  constructor(private readonly adapter: OverviewAdapter) {}
+  public constructor(private readonly adapter: OverviewAdapter) {}
 
   public async getOverviewNetwork(
     req: FrameworkRequest,

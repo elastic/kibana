@@ -53,7 +53,7 @@ import {
 } from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
     const queryOptions = cloneDeep(options);

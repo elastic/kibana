@@ -11,7 +11,7 @@ export * from './elasticsearch_adapter';
 import { UncommonProcessesAdapter } from './types';
 
 export class UncommonProcesses {
-  constructor(private readonly adapter: UncommonProcessesAdapter) {}
+  public constructor(private readonly adapter: UncommonProcessesAdapter) {}
 
   public async getUncommonProcesses(
     req: FrameworkRequest,

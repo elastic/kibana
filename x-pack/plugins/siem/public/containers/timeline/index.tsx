@@ -50,7 +50,7 @@ export class TimelineQuery extends QueryTemplate<
   private updatedDate: number = Date.now();
   private memoizedTimelineEvents: (variables: string, events: TimelineEdges[]) => TimelineItem[];
 
-  constructor(props: OwnProps) {
+  public constructor(props: OwnProps) {
     super(props);
     this.memoizedTimelineEvents = memoizeOne(this.getTimelineEvents);
   }

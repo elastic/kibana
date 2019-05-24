@@ -28,7 +28,7 @@ import {
 import { pinnedEventSavedObjectType } from '.';
 
 export class PinnedEvent {
-  constructor(
+  public constructor(
     private readonly libs: {
       savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
         Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isConflictError'>;

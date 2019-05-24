@@ -29,7 +29,7 @@ interface CallWithRequestParams extends GenericParams {
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
 
-  constructor(private server: Legacy.Server) {
+  public constructor(private server: Legacy.Server) {
     this.version = server.config().get('pkg.version');
   }
 

@@ -53,7 +53,7 @@ interface TabNavigationState {
 }
 
 export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
-  constructor(props: TabNavigationProps) {
+  public constructor(props: TabNavigationProps) {
     super(props);
     const pathname = props.location;
     const selectedTabId = this.mapLocationToTab(pathname);

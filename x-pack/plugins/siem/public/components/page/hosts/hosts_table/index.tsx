@@ -99,7 +99,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     direction: Direction
   ) => SortingBasicTable;
 
-  constructor(props: HostsTableProps) {
+  public constructor(props: HostsTableProps) {
     super(props);
     this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
     this.memoizedSorting = memoizeOne(this.getSorting);

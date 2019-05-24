@@ -11,7 +11,7 @@ import { FieldsAdapter } from './types';
 export { ElasticsearchIndexFieldAdapter } from './elasticsearch_adapter';
 
 export class IndexFields {
-  constructor(private readonly adapter: FieldsAdapter) {}
+  public constructor(private readonly adapter: FieldsAdapter) {}
 
   public async getFields(request: FrameworkRequest, defaultIndex: string[]): Promise<IndexField[]> {
     return this.adapter.getIndexFields(request, defaultIndex);

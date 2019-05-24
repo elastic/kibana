@@ -110,7 +110,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
   OpenTimelineOwnProps,
   OpenTimelineState
 > {
-  constructor(props: OpenTimelineOwnProps) {
+  public constructor(props: OpenTimelineOwnProps) {
     super(props);
 
     this.state = {

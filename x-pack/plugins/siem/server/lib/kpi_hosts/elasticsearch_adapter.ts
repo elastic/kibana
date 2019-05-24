@@ -20,7 +20,7 @@ import {
 } from './types';
 
 export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  public constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getKpiHosts(
     request: FrameworkRequest,

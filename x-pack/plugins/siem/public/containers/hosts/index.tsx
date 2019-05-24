@@ -64,7 +64,7 @@ class HostsComponentQuery extends QueryTemplate<
     data: GetHostsTableQuery.Source | undefined
   ) => HostsEdges[];
 
-  constructor(props: HostsProps) {
+  public constructor(props: HostsProps) {
     super(props);
     this.memoizedHosts = memoizeOne(this.getHosts);
   }
