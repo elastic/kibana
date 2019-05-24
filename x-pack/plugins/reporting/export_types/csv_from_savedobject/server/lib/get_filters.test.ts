@@ -62,8 +62,8 @@ describe('CSV from Saved Object: get_filters', () => {
             range: {
               testtimestamp: {
                 format: 'strict_date_time',
-                gte: '1901-01-01T00:00:00Z',
-                lte: '1902-01-01T00:00:00Z',
+                gte: '1901-01-01T00:00:00+00:00',
+                lte: '1902-01-01T00:00:00+00:00',
               },
             },
           },
