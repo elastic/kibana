@@ -107,7 +107,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
         { defaultMessage: 'Show trace logs' }
       ),
-      target: traceId,
+      condition: traceId,
       hash: `/link-to/logs`,
       query: { time, filter: `trace.id:${traceId}` }
     },
@@ -171,6 +171,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
     {
       icon: 'discoverApp',
       key: 'discover-transaction',
+      condition: true,
       child: (
         <DiscoverTransactionLink transaction={transaction}>
           {i18n.translate(
@@ -192,7 +193,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
           })}
         </EuiLink>
       ),
-      condition: transaction && transaction.url
+      condition: idx(transaction, _ => _.url.domain)
     }
   ]
     .filter(({ condition }) => condition)
