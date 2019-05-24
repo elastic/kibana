@@ -295,7 +295,7 @@ export class FieldEditorComponent extends PureComponent {
               values={{
                 language: <EuiCode>{field.lang}</EuiCode>,
                 painlessLink: (
-                  <EuiLink target="_window" href={getDocLink('scriptedFields.painless')}>
+                  <EuiLink target="_blank" href={getDocLink('scriptedFields.painless')}>
                     <FormattedMessage
                       id="common.ui.fieldEditor.warningLabel.painlessLinkLabel"
                       defaultMessage="Painless"

@@ -7,5 +7,8 @@
 <b>Signature:</b>
 
 ```typescript
-elasticsearch: ElasticsearchServiceSetup;
+elasticsearch: {
+        adminClient$: Observable<ClusterClient>;
+        dataClient$: Observable<ClusterClient>;
+    };
 ```

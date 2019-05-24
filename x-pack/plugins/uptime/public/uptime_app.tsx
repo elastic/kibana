@@ -167,7 +167,7 @@ const Application = (props: UptimeAppProps) => {
                             )}
                           />
                           <Route
-                            path="/monitor/:id"
+                            path="/monitor/:id/:location?"
                             render={routerProps => (
                               <MonitorPage
                                 query={client.query}

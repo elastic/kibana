@@ -29,7 +29,13 @@ export const overviewSchema = gql`
       id: String
       timerange: TimerangeInput!
       filterQuery: String
+      defaultIndex: [String!]!
     ): OverviewNetworkData
-    OverviewHost(id: String, timerange: TimerangeInput!, filterQuery: String): OverviewHostData
+    OverviewHost(
+      id: String
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): OverviewHostData
   }
 `;

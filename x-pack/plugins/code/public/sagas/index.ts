@@ -14,7 +14,12 @@ import {
   watchLspMethods,
   watchMainRouteChange,
 } from './editor';
-import { watchFetchBranchesAndCommits, watchFetchRepoTree, watchRepoRouteChange } from './file';
+import {
+  watchFetchBranchesAndCommits,
+  watchFetchRepoTree,
+  watchRepoRouteChange,
+  watchFetchRootRepoTree,
+} from './file';
 import { watchInstallLanguageServer, watchLoadLanguageServers } from './language_server';
 import { watchLoadConfigs, watchSwitchProjectLanguageServer } from './project_config';
 import {
@@ -52,6 +57,7 @@ export function* rootSaga() {
   yield fork(watchIndexRepo);
   yield fork(watchImportRepo);
   yield fork(watchFetchRepoTree);
+  yield fork(watchFetchRootRepoTree);
   yield fork(watchFetchBranchesAndCommits);
   yield fork(watchDocumentSearch);
   yield fork(watchRepositorySearch);
