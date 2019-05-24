@@ -31,7 +31,9 @@ declare interface Ml {
   };
 
   checkPrivilege(obj: object): Promise<any>;
-  esSearch: any;
+  getJobStats(obj: object): Promise<any>;
+  getDatafeedStats(obj: object): Promise<any>;
+  esSearch(obj: object): any;
   getIndices(): Promise<EsIndex[]>;
 
   getTimeFieldRange(obj: object): Promise<any>;
