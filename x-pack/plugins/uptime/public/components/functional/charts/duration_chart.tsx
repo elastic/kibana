@@ -9,7 +9,6 @@ import {
   Axis,
   Chart,
   CurveType,
-  DataSeriesColorsValues,
   getAxisId,
   getSpecId,
   LineSeries,
@@ -29,6 +28,7 @@ import {
   MonitorDurationAveragePoint,
 } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
+import { getColorsMap } from './get_colors_map';
 
 interface DurationChartProps {
   /**
@@ -65,28 +65,12 @@ export const DurationChart = ({
 }: DurationChartProps) => {
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
   // this id is used for the area chart representing the max/min of check durations
-  const areaspecid = getSpecId('area');
-  // defines a map for the color series for the max/min duration
-  const areaseriescolormap = new Map<DataSeriesColorsValues, string>();
-  areaseriescolormap.set(
-    {
-      colorValues: [],
-      specId: areaspecid,
-    },
-    rangeColor
-  );
+  const areaSpecId = getSpecId('area');
+  const areaSeriesColorMap = getColorsMap(rangeColor, areaSpecId);
 
   // this id is used for the line chart representing the average duration length
-  const averageSpecid = getSpecId('average');
-  // defines a map for the color series for the average duration line
-  const averageseriescolormap = new Map<DataSeriesColorsValues, string>();
-  averageseriescolormap.set(
-    {
-      colorValues: [],
-      specId: averageSpecid,
-    },
-    meanColor
-  );
+  const averageSpecId = getSpecId('average');
+  const averageSeriesColorMap = getColorsMap(meanColor, averageSpecId);
 
   return (
     <React.Fragment>
@@ -113,10 +97,9 @@ export const DurationChart = ({
             position={Position.Left}
             tickFormat={d => Number(d).toFixed(0)}
           />
-
           <AreaSeries
-            customSeriesColors={areaseriescolormap}
-            id={areaspecid}
+            customSeriesColors={areaSeriesColorMap}
+            id={areaSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
@@ -130,10 +113,9 @@ export const DurationChart = ({
             yScaleToDataExtent={false}
             curve={CurveType.CURVE_MONOTONE_X}
           />
-
           <LineSeries
-            customSeriesColors={averageseriescolormap}
-            id={averageSpecid}
+            customSeriesColors={averageSeriesColorMap}
+            id={averageSpecId}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor={0}
