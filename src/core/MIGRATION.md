@@ -699,6 +699,7 @@ In order to have access to a config, plugin *should*:
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
 ```js
+// my_plugin/server/index.ts
 import { schema } from '@kbn/config-schema';
 export const plugin = ...
 export const config = {
@@ -707,7 +708,10 @@ export const config = {
 ```
 - Read config value exposed via initializerContext. No config path is required.
 ```js
-const config$ = this.initializerContext.config.create();
-// or if config is optional:
-const config$ = this.initializerContext.config.createIfExists();
+class MyPlugin {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config$ = initializerContext.config.create();
+    // or if config is optional:
+    this.config$ = initializerContext.config.createIfExists();
+  }
 ```
