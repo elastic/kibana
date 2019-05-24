@@ -19,15 +19,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import AddDeleteButtons from '../../add_delete_buttons';
-import SeriesConfig from './config';
+import { AddDeleteButtons } from '../../add_delete_buttons';
+import { TableSeriesConfig as SeriesConfig } from './config';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import createTextHandler from '../../lib/create_text_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 
-function TableSeries(props) {
+function TableSeriesUI(props) {
   const {
     model,
     onAdd,
@@ -154,7 +154,7 @@ function TableSeries(props) {
   );
 }
 
-TableSeries.propTypes = {
+TableSeriesUI.propTypes = {
   className: PropTypes.string,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
@@ -176,4 +176,4 @@ TableSeries.propTypes = {
   dragHandleProps: PropTypes.object,
 };
 
-export default injectI18n(TableSeries);
+export const TableSeries = injectI18n(TableSeriesUI);

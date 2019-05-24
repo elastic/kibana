@@ -6,3 +6,5 @@
 
 export { getAllStats } from './monitoring';
 export { getLocalStats } from './local';
+export { encryptTelemetry } from './encryption';
+export { createTelemetryUsageCollector } from './usage';

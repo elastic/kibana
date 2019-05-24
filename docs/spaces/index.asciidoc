@@ -3,15 +3,27 @@
 == Spaces
 
 With spaces, you can organize your dashboards and other saved objects into meaningful categories.
-After creating your own spaces, you will be asked to choose a space when you enter {kib}. Once inside a space,
-you will only see the dashboards and other saved objects that belong to that space. You can change your active space at any time.
+After creating your own spaces, you will be asked to choose a space when you enter Kibana. 
+Once inside a space, you will only see the dashboards and other saved objects that belong to that space. 
 
-With security enabled, you can control which users have access to individual spaces.
+You can change your current space at any time, by clicking on the space avatar in the top left.
 
 [role="screenshot"]
-image::spaces/images/space-selector.png["Space selector screen"]
+image::spaces/images/change-space.png["Change current space"]
 
-include::getting-started.asciidoc[]
+With security enabled, you can <<xpack-security-authorization, control which users have access to individual spaces>>.
+
+
+[float]
+[[spaces-getting-started]]
+=== Getting Started
+
+Spaces are automatically enabled in {kib}. If you don't wish to use this feature, you can disable it
+by setting `xpack.spaces.enabled` to `false` in your `kibana.yml` configuration file.
+
+{kib} automatically creates a default space for you. If you are upgrading from another 
+version of {kib}, then the default space will contain all of your existing saved objects. 
+Although you can't delete the default space, you can customize it to your liking.
+
 include::managing-spaces.asciidoc[]
-include::securing-spaces.asciidoc[]
 include::moving-saved-objects.asciidoc[]

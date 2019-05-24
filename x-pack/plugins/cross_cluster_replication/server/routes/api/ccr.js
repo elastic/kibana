@@ -64,8 +64,8 @@ export const registerCcrRoutes = (server) => {
       }
 
       const securityInfo = (xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security'));
-      if (!securityInfo || !securityInfo.isEnabled()) {
-        // If security isn't enabled, let the user use CCR.
+      if (!securityInfo || !securityInfo.isAvailable() || !securityInfo.isEnabled()) {
+        // If security isn't enabled or available (in the case where security is enabled but license reverted to Basic) let the user use CCR.
         return {
           hasPermission: true,
           missingClusterPrivileges: [],

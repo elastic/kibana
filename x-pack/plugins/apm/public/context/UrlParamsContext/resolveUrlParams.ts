@@ -44,7 +44,8 @@ export function resolveUrlParams(location: Location, state: IUrlParams) {
     refreshPaused = TIMEPICKER_DEFAULTS.refreshPaused,
     refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
     rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
-    rangeTo = TIMEPICKER_DEFAULTS.rangeTo
+    rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
+    environment
   } = toQuery(location.search);
 
   return removeUndefinedProps({
@@ -66,12 +67,14 @@ export function resolveUrlParams(location: Location, state: IUrlParams) {
     detailTab: toString(detailTab),
     flyoutDetailTab: toString(flyoutDetailTab),
     spanId: toNumber(spanId),
-    kuery: legacyDecodeURIComponent(kuery),
+    kuery: kuery && decodeURIComponent(kuery),
     // path params
     processorEvent,
     serviceName,
     transactionType: legacyDecodeURIComponent(transactionType),
     transactionName: legacyDecodeURIComponent(transactionName),
-    errorGroupId
+    errorGroupId,
+    // ui filters
+    environment
   });
 }

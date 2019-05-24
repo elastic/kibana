@@ -116,7 +116,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         headerCount={totalCount}
         headerSupplement={
           <FlowDirectionSelect
-            id={DomainsTableId}
             selectedDirection={flowDirection}
             onChangeDirection={this.onChangeDomainsDirection}
           />
@@ -154,7 +153,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     }
   };
 
-  private onChangeDomainsDirection = (_: string, flowDirection: FlowDirection) =>
+  private onChangeDomainsDirection = (flowDirection: FlowDirection) =>
     this.props.updateDomainsDirection({ flowDirection, networkType: this.props.type });
 }
 

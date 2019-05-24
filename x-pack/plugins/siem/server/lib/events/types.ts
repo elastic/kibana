@@ -58,6 +58,7 @@ export interface LastEventTimeRequestOptions {
   indexKey: LastEventIndexKey;
   details: LastTimeDetails;
   sourceConfiguration: SourceConfiguration;
+  defaultIndex: string[];
 }
 
 export interface TimerangeFilter {
@@ -72,4 +73,5 @@ export interface TimerangeFilter {
 export interface RequestDetailsOptions {
   indexName: string;
   eventId: string;
+  defaultIndex: string[];
 }

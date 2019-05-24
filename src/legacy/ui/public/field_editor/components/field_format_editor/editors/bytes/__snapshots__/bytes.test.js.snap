@@ -12,7 +12,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
         <EuiLink
           color="primary"
           href="https://adamwdraper.github.io/Numeral-js/"
-          target="_window"
+          target="_blank"
           type="button"
         >
           <FormattedMessage

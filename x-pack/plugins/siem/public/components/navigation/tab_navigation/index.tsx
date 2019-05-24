@@ -5,9 +5,9 @@
  */
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
+import { trackUiAction as track } from '../../../lib/track_usage';
 
 import * as i18n from '../translations';
 
@@ -53,13 +53,6 @@ interface TabNavigationState {
   selectedTabId: string;
 }
 
-const TabNavigationContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-top: -8px;
-`;
-
 export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
   constructor(props: TabNavigationProps) {
     super(props);
@@ -81,11 +74,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     }
   }
   public render() {
-    return (
-      <TabNavigationContainer>
-        <EuiTabs>{this.renderTabs()}</EuiTabs>
-      </TabNavigationContainer>
-    );
+    return <EuiTabs display="condensed">{this.renderTabs()}</EuiTabs>;
   }
 
   public mapLocationToTab = (pathname: string) =>
@@ -101,6 +90,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       ...this.state,
       selectedTabId: id,
     });
+    track(`tab_${id}`);
     window.location.assign(href);
   };
 
@@ -109,10 +99,10 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       <EuiTab
         data-href={tab.href}
         data-test-subj={`navigation-${tab.id}`}
-        onClick={() => this.handleTabClick(tab.href, tab.id)}
-        isSelected={this.state.selectedTabId === tab.id}
         disabled={tab.disabled}
+        isSelected={this.state.selectedTabId === tab.id}
         key={`navigation-${tab.id}`}
+        onClick={() => this.handleTabClick(tab.href, tab.id)}
       >
         {tab.name}
       </EuiTab>

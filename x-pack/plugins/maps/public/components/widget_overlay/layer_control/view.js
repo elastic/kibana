@@ -44,7 +44,7 @@ export function LayerControl({ isReadOnly, showAddLayerWizard, closeLayerTOC }) 
   return (
     <Fragment>
       <EuiPanel className="mapWidgetControl mapWidgetControl-hasShadow" paddingSize="none" grow={false}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className="mapWidgetControl__headerFlexItem" grow={false}>
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"

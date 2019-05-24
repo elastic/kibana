@@ -6,6 +6,7 @@
 
 import { groupBy, flatten, pick, map } from 'lodash';
 import { ContextFunction, Datatable, DatatableColumn } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   by: string[];
@@ -15,18 +16,19 @@ interface Arguments {
 type Return = Datatable | Promise<Datatable>;
 
 export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
+  const { help, args: argHelp } = getFunctionHelp().ply;
+
   return {
     name: 'ply',
     type: 'datatable',
-    help:
-      'Subdivide a datatable and pass the resulting tables into an expression, then merge the output',
+    help,
     context: {
       types: ['datatable'],
     },
     args: {
       by: {
         types: ['string'],
-        help: 'The column to subdivide on',
+        help: argHelp.by,
         multi: true,
       },
       expression: {
@@ -34,12 +36,7 @@ export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
         resolve: false,
         multi: true,
         aliases: ['fn', 'function'],
-        help:
-          'An expression to pass each resulting data table into. Tips: \n' +
-          ' Expressions must return a datatable. Use `as` to turn literals into datatables.\n' +
-          ' Multiple expressions must return the same number of rows.' +
-          ' If you need to return a differing row count, pipe into another instance of ply.\n' +
-          ' If multiple expressions return the same columns, the last one wins.',
+        help: argHelp.expression,
       },
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
       // The way the function below is written you can add as many arbitrary named args as you want.
