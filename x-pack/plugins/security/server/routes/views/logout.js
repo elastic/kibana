@@ -10,7 +10,7 @@ export function initLogoutView(server) {
   server.route({
     method: 'GET',
     path: '/logout',
-    handler(request, h) {
+    handler(request, h) { // eslint-disable-line no-unused-vars
       return h.renderAppWithDefaultConfig(logout);
     },
     config: {
