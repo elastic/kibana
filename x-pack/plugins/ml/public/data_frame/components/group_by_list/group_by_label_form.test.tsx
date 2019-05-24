@@ -18,7 +18,7 @@ describe('Data Frame: <GroupByLabelForm />', () => {
       field: 'the-group-by-field',
       aggName: 'the-group-by-agg-name',
       dropDownName: 'the-group-by-drop-down-name',
-      calendar_interval: '10m',
+      calendar_interval: '1m',
     };
     const props = {
       item,
