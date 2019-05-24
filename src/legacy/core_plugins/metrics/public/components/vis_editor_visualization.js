@@ -22,7 +22,7 @@ import { get, isEqual } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval } from './lib/get_interval';
+import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval, AUTO_INTERVAL } from './lib/get_interval';
 import { PANEL_TYPES } from '../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 250;
@@ -71,7 +71,7 @@ class VisEditorVisualizationUI extends Component {
       timeRange,
       appState,
       savedObj,
-      onDataChange
+      onDataChange,
     } = this.props;
 
     this._handler = loader.embedVisualizationWithSavedObject(this._visEl.current, savedObj, {
@@ -112,10 +112,11 @@ class VisEditorVisualizationUI extends Component {
         };
       });
     }
-  }
+  };
 
   hasShowPanelIntervalValue() {
     const type = get(this.props, 'model.type', '');
+    const interval = get(this.props, 'model.interval', AUTO_INTERVAL);
 
     return [
       PANEL_TYPES.METRIC,
@@ -123,23 +124,14 @@ class VisEditorVisualizationUI extends Component {
       PANEL_TYPES.GAUGE,
       PANEL_TYPES.MARKDOWN,
       PANEL_TYPES.TABLE,
-    ].includes(type);
+    ].includes(type) && (interval === AUTO_INTERVAL
+      || isGteInterval(interval) || !isIntervalValid(interval));
   }
 
   getFormattedPanelInterval() {
-    const interval = get(this.props, 'model.interval') || 'auto';
-    const isValid = isIntervalValid(interval);
-    const shouldShowActualInterval = interval === 'auto' || isGteInterval(interval);
+    const interval = convertIntervalIntoUnit(this.state.panelInterval, false);
 
-    if (shouldShowActualInterval || !isValid) {
-      const autoInterval = convertIntervalIntoUnit(this.state.panelInterval, false);
-
-      if (autoInterval) {
-        return `${autoInterval.unitValue}${autoInterval.unitString}`;
-      }
-    } else {
-      return interval;
-    }
+    return interval ? `${interval.unitValue}${interval.unitString}` : null;
   }
 
   componentWillUnmount() {
@@ -173,7 +165,7 @@ class VisEditorVisualizationUI extends Component {
       title,
       description,
       onToggleAutoApply,
-      onCommit
+      onCommit,
     } = this.props;
     const style = { height: this.state.height };
 
