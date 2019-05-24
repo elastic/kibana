@@ -18,6 +18,12 @@ export type LocationTypes =
   | CONSTANTS.hostsPage
   | null;
 
+export type LocationTypesNoNull =
+  | CONSTANTS.networkDetails
+  | CONSTANTS.networkPage
+  | CONSTANTS.hostsDetails
+  | CONSTANTS.hostsPage;
+
 export interface KqlQueryObject {
   [CONSTANTS.networkDetails]: KqlQuery;
   [CONSTANTS.networkPage]: KqlQuery;

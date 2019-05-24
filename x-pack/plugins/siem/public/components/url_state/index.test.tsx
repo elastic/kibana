@@ -212,13 +212,13 @@ describe('UrlStateContainer', () => {
     const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
 
     const newUrlState = {
-      [CONSTANTS.kqlQuery]: [
-        {
+      [CONSTANTS.kqlQuery]: {
+        [CONSTANTS.networkPage]: {
           filterQuery,
-          type: networkModel.NetworkType.details,
-          model: KueryFilterModel.network,
+          type: networkModel.NetworkType.page,
+          queryLocation: CONSTANTS.networkPage,
         },
-      ],
+      },
     };
 
     wrapper.setProps({ urlState: newUrlState });
@@ -228,7 +228,7 @@ describe('UrlStateContainer', () => {
       hash: '',
       pathname: '/network',
       search:
-        "?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),model:network,type:details)",
+        "?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page,type:page)",
       state: '',
     });
   });

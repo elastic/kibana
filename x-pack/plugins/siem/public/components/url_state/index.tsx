@@ -44,6 +44,7 @@ import {
   KqlQuery,
   KqlQueryObject,
   LocationTypes,
+  LocationTypesNoNull,
   UrlStateContainerPropTypes,
   UrlStateProps,
 } from './types';
@@ -65,20 +66,18 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])
         ) {
           if (urlKey === CONSTANTS.kqlQuery) {
-            let queryLocation: keyof typeof LOCATION_KEYS;
-            for (queryLocation in LOCATION_KEYS) {
-              if ({}.hasOwnProperty.call(LOCATION_KEYS, queryLocation)) {
-                if (
-                  JSON.stringify(urlState[CONSTANTS.kqlQuery][queryLocation]) !==
+            LOCATION_KEYS.forEach((queryLocation: LocationTypesNoNull) => {
+              if (
+                !!urlState[CONSTANTS.kqlQuery][queryLocation] &&
+                JSON.stringify(urlState[CONSTANTS.kqlQuery][queryLocation]) !==
                   JSON.stringify(prevUrlState[CONSTANTS.kqlQuery][queryLocation])
-                ) {
-                  this.replaceStateInLocation(
-                    urlState[CONSTANTS.kqlQuery][queryLocation],
-                    CONSTANTS.kqlQuery
-                  );
-                }
+              ) {
+                this.replaceStateInLocation(
+                  urlState[CONSTANTS.kqlQuery][queryLocation],
+                  CONSTANTS.kqlQuery
+                );
               }
-            }
+            });
           } else {
             this.replaceStateInLocation(urlState[urlKey], urlKey);
           }
