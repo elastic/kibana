@@ -126,11 +126,10 @@ to access {kib}. The default value is `localhost:5601`.
 <2> This setting ensures that {kib} can read the monitoring data successfully. 
 That is to say, it's stored in the same location and format as monitoring data 
 that is sent by {ref}/es-monitoring-exporters.html[exporters].
-// end::configure-kibana-module[]
 
-If you configured {kib} to use <<configuring-tls,encrypted communications>>, 
-you must access it via HTTPS. For example, use a `hosts` setting like 
-`https://localhost:5601` in the `modules.d/kibana-xpack.yml` file. 
+If you configured {kib} to use encrypted communications, you must access it via
+HTTPS. For example, use a `hosts` setting like `https://localhost:5601`.
+// end::configure-kibana-module[]
 
 // tag::remote-monitoring-user[]
 If the Elastic {security-features} are enabled, you must also provide a user 
@@ -170,11 +169,14 @@ output.elasticsearch:
   #password: "changeme"
 ----------------------------------
 <1> In this example, the data is stored on a monitoring cluster with nodes 
-`es-mon-1` and `es-mon-2`. 
+`es-mon-1` and `es-mon-2`.
 
-If you configured the monitoring cluster to use 
-{ref}/configuring-tls.html[encrypted communications], you must access it via 
-HTTPS. For example, use a `hosts` setting like `https://es-mon-1:9200`.
+If you configured the monitoring cluster to use encrypted communications, you
+must access it via HTTPS. For example, use a `hosts` setting like
+`https://es-mon-1:9200`.
+
+IMPORTANT: The {es} {monitor-features} use ingest pipelines, therefore the
+cluster that stores the monitoring data must have at least one ingest node.
 
 If the {es} {security-features} are enabled on the monitoring cluster, you 
 must provide a valid user ID and password so that {metricbeat} can send metrics 
