@@ -53,7 +53,7 @@ export interface RunResult {
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
    */
-  state: object;
+  state: Record<string, any>;
 }
 
 export const validateRunResult = Joi.object({
@@ -180,14 +180,14 @@ export interface TaskInstance {
    * A task-specific set of parameters, used by the task's run function to tailor
    * its work. This is generally user-input, such as { sms: '333-444-2222' }.
    */
-  params: object;
+  params: Record<string, any>;
 
   /**
    * The state passed into the task's run function, and returned by the previous
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  state: object;
+  state: Record<string, any>;
 
   /**
    * The id of the user who scheduled this task.
@@ -249,5 +249,5 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  state: object;
+  state: Record<string, any>;
 }

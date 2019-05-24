@@ -11,17 +11,15 @@ import { ActionsPlugin } from '../../actions';
 export function createFireHandler(
   alert: AlertDefinition,
   taskInstance: TaskInstance,
-  fire: ActionsPlugin['fire']
+  fireAction: ActionsPlugin['fire']
 ) {
   return async (actionGroupId: string, context: any, state: any) => {
     const actions =
-      // @ts-ignore
       taskInstance.params.actionGroups[actionGroupId] ||
-      // @ts-ignore
       taskInstance.params.actionGroups.default ||
       [];
     for (const action of actions) {
-      fire({
+      fireAction({
         id: action.id,
         // TODO: Maybe not merge context & state here, but somewhere before
         params: { ...context, ...state },

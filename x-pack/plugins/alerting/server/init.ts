@@ -19,7 +19,7 @@ export function init(server: Legacy.Server) {
   const { taskManager } = server;
   const alertService = new AlertService({
     taskManager: taskManager!,
-    fire: server.plugins.actions!.fire,
+    fireAction: server.plugins.actions!.fire,
   });
 
   // Register routes

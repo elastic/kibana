@@ -15,20 +15,23 @@ interface TaskRunnerOptions {
   taskInstance: TaskInstance;
 }
 
-export function getCreateTaskRunnerFunction(alert: AlertDefinition, fire: ActionsPlugin['fire']) {
+export function getCreateTaskRunnerFunction(
+  alert: AlertDefinition,
+  fireAction: ActionsPlugin['fire']
+) {
   return ({ taskInstance }: TaskRunnerOptions) => {
-    const fireHandler = createFireHandler(alert, taskInstance, fire);
+    const fireHandler = createFireHandler(alert, taskInstance, fireAction);
     return {
       run: async () => {
-        // @ts-ignore
-        const alertInstances = ((taskInstance.state && taskInstance.state.alertInstances) ||
-          {}) as Record<string, AlertInstance>;
+        const alertInstances = (taskInstance.state.alertInstances || {}) as Record<
+          string,
+          AlertInstance
+        >;
 
         const services = {
           alertInstanceFactory: createAlertInstanceFactory(alertInstances),
         };
 
-        // @ts-ignore
         const updatedState = await alert.execute(services, taskInstance.params.checkParams);
 
         for (const alertInstanceId of Object.keys(alertInstances)) {
@@ -50,20 +53,15 @@ export function getCreateTaskRunnerFunction(alert: AlertDefinition, fire: Action
           alertInstance.clearFireOptions();
         }
 
-        // TODO: Should it be now + interval or previous runAt + interval
-        let nextRunAt;
-        // @ts-ignore
-        if (taskInstance.params.interval) {
-          // @ts-ignore
-          nextRunAt = Date.now() + taskInstance.params.interval;
-        }
-
         return {
           state: {
             ...(updatedState || {}),
             alertInstances,
           },
-          runAt: nextRunAt,
+          // TODO: Should it be now + interval or previous runAt + interval
+          runAt: taskInstance.params.interval
+            ? Date.now() + taskInstance.params.interval
+            : undefined,
         };
       },
     };

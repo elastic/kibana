@@ -13,16 +13,16 @@ const taskManagerNamespace = 'alerting';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
-  fire: ActionsPlugin['fire'];
+  fireAction: ActionsPlugin['fire'];
 }
 
 export class AlertService {
   private taskManager: TaskManager;
-  private fire: ActionsPlugin['fire'];
+  private fireAction: ActionsPlugin['fire'];
 
-  constructor({ fire, taskManager }: ConstructorOptions) {
+  constructor({ fireAction, taskManager }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.fire = fire;
+    this.fireAction = fireAction;
   }
 
   public register(alert: AlertDefinition) {
@@ -30,7 +30,7 @@ export class AlertService {
       [`${taskManagerNamespace}:${alert.id}`]: {
         title: alert.description,
         type: `${taskManagerNamespace}:${alert.id}`,
-        createTaskRunner: getCreateTaskRunnerFunction(alert, this.fire),
+        createTaskRunner: getCreateTaskRunnerFunction(alert, this.fireAction),
       },
     });
   }
