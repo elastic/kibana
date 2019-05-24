@@ -25,6 +25,7 @@ import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { safeMakeLabel, isCompatibleAgg } from '../buckets/_terms_helper';
 
 function OrderAggParamEditor({
+  agg,
   value,
   showValidation,
   setValue,
@@ -99,6 +100,7 @@ function OrderAggParamEditor({
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
+        data-test-subj={`visEditorOrderBy${agg.id}`}
       />
     </EuiFormRow>
   );
