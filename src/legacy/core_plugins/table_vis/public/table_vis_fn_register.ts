@@ -17,18 +17,8 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+// @ts-ignore
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { kibanaTable } from './table_vis_fn';
 
-export default function (kibana) {
-
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: [
-        'plugins/table_vis/table_vis'
-      ],
-      interpreter: 'plugins/table_vis/table_vis_fn_register',
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  });
-
-}
+functionsRegistry.register(kibanaTable);

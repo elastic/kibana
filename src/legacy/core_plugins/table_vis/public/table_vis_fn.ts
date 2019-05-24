@@ -18,8 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
- // @ts-ignore
-import { functionsRegistry } from 'plugins/interpreter/registries';
 // @ts-ignore
 import { convert } from '../../../ui/public/vis/response_handlers/legacy';
 
@@ -27,12 +25,10 @@ export const kibanaTable = () => ({
   name: 'kibana_table',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('tableVis.function.help', {
-    defaultMessage: 'Table visualization'
+    defaultMessage: 'Table visualization',
   }),
   args: {
     visConfig: {
@@ -89,7 +85,7 @@ export const kibanaTable = () => ({
     }}'
     */
   },
-  async fn(context, args) {
+  async fn(context: any, args: any) {
     const { perPage, showPartialRows, showMetricsAtAllLevels, showTotal, totalFunc } = args;
     const visConfig = {
       ...JSON.parse(args.visConfig),
@@ -99,7 +95,6 @@ export const kibanaTable = () => ({
       showTotal,
       totalFunc,
     };
-    console.log('visConfig', visConfig);
     const convertedData = convert(context, visConfig.dimensions);
 
     return {
@@ -111,10 +106,8 @@ export const kibanaTable = () => ({
         visConfig,
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },
 });
-
-functionsRegistry.register(kibanaTable);
