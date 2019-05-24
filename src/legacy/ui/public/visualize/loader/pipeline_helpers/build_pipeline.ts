@@ -23,6 +23,8 @@ import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
+import { prepareJson } from './utilities';
+import { table } from './generators/table';
 
 interface SchemaFormat {
   id: string;
@@ -192,12 +194,6 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   return schemas;
 };
 
-export const prepareJson = (variable: string, data: object): string => {
-  return `${variable}='${JSON.stringify(data)
-    .replace(/\\/g, `\\\\`)
-    .replace(/'/g, `\\'`)}' `;
-};
-
 export const prepareString = (variable: string, data: string): string => {
   return `${variable}='${escapeString(data)}' `;
 };
@@ -236,59 +232,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     }
     return expr;
   },
-  table: (visState, schemas) => {
-    const {
-      perPage,
-      showMetricsAtAllLevels,
-      showPartialRows,
-      showTotal,
-      totalFunc,
-      ...restParams
-    } = visState.params;
-    const {
-      metric: metrics,
-      bucket: buckets = [],
-      split_row: splitRow,
-      split_column: splitColumn,
-    } = schemas;
-    const visConfig = {
-      ...restParams,
-      dimensions:{
-        metrics,
-        buckets,
-        splitRow,
-        splitColumn,
-      },
-    };
-
-    if (showMetricsAtAllLevels === false && showPartialRows === true) {
-      // Handle case where user wants to see partial rows but not metrics at all levels.
-      // This requires calculating how many metrics will come back in the tabified response,
-      // and removing all metrics from the dimensions except the last set.
-      const metricsPerBucket = metrics.length / buckets.length;
-      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
-    }
-
-    let expr = `kibana_table ${prepareJson('visConfig', visConfig).trim()}`;
-
-    if (perPage) {
-      expr += ` perPage=${ perPage }`;
-    }
-    if (showMetricsAtAllLevels !== undefined) {
-      expr += ` showMetricsAtAllLevels=${ showMetricsAtAllLevels }`;
-    }
-    if (showPartialRows !== undefined) {
-      expr += ` showPartialRows=${ showPartialRows }`;
-    }
-    if (showTotal !== undefined) {
-      expr += ` showTotal=${ showTotal }`;
-    }
-    if (totalFunc) {
-      expr += ` totalFunc="${ totalFunc }"`;
-    }
-
-    return expr;
-  },
+  table,
   metric: (visState, schemas) => {
     const visConfig = {
       ...visState.params,

@@ -106,3 +106,9 @@ export const getTableAggs = (vis: Vis): AggConfig[] => {
   const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
   return columns.map((c: any) => c.aggConfig);
 };
+
+export const prepareJson = (variable: string, data: object): string => {
+  return `${variable}='${JSON.stringify(data)
+    .replace(/\\/g, `\\\\`)
+    .replace(/'/g, `\\'`)}' `;
+};
