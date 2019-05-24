@@ -11,12 +11,12 @@ import {
   has,
   isEmpty,
   isNumber,
+  isObject,
   isString,
   last,
   merge,
   uniq,
 } from 'lodash/fp';
-import { isObject } from 'util';
 
 import {
   DetailItem,
@@ -28,13 +28,9 @@ import {
   TimelineDetailsData,
   TimelineEdges,
 } from '../../graphql/types';
-import {
-  getDocumentation,
-  getIndexAlias,
-  hasDocumentation,
-  IndexAlias,
-} from '../../utils/beat_schema';
+import { getDocumentation, getIndexAlias, hasDocumentation } from '../../utils/beat_schema';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
+import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
 import {
@@ -60,10 +56,12 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
+    const queryOptions = cloneDeep(options);
+    queryOptions.fields = reduceFields(options.fields, eventFieldsMap);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      buildQuery(queryOptions)
     );
 
     const kpiEventType: KpiItem[] =
@@ -90,7 +88,10 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     options: EventsRequestOptions
   ): Promise<TimelineData> {
     const queryOptions = cloneDeep(options);
-    queryOptions.fields = uniq([...queryOptions.fieldRequested, ...queryOptions.fields]);
+    queryOptions.fields = uniq([
+      ...queryOptions.fieldRequested,
+      ...reduceFields(queryOptions.fields, eventFieldsMap),
+    ]);
     delete queryOptions.fieldRequested;
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
@@ -137,7 +138,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
           ...getOr({}, [options.indexName, 'mappings', 'properties'], mapResponse),
         },
         getDataFromHits(merge(sourceData, hitsData)),
-        getIndexAlias(options.indexName)
+        getIndexAlias(options.defaultIndex, options.indexName)
       ),
     };
   }
@@ -216,6 +217,8 @@ export const formatTimelineData = (
     }
   );
 
+const specialFields = ['_id', '_index', '_type', '_score'];
+
 const mergeTimelineFieldsWithHit = <T>(
   fieldName: string,
   flattenedFields: T,
@@ -224,16 +227,21 @@ const mergeTimelineFieldsWithHit = <T>(
   dataFields: ReadonlyArray<string>,
   ecsFields: ReadonlyArray<string>
 ) => {
-  if (fieldMap[fieldName] != null) {
-    const esField = fieldMap[fieldName];
-    if (has(esField, hit._source)) {
+  if (fieldMap[fieldName] != null || dataFields.includes(fieldName)) {
+    const esField = dataFields.includes(fieldName) ? fieldName : fieldMap[fieldName];
+    if (has(esField, hit._source) || specialFields.includes(esField)) {
       const objectWithProperty = {
         node: {
           ...get('node', flattenedFields),
           data: dataFields.includes(fieldName)
             ? [
                 ...get('node.data', flattenedFields),
-                { field: fieldName, value: get(esField, hit._source) },
+                {
+                  field: fieldName,
+                  value: specialFields.includes(esField)
+                    ? get(esField, hit)
+                    : get(esField, hit._source),
+                },
               ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
@@ -285,7 +293,7 @@ const getDataFromHits = (sources: EventSource, category?: string, path?: string)
 const getSchemaFromData = (
   properties: MappingProperties,
   data: DetailItem[],
-  index: IndexAlias,
+  index: string,
   path?: string
 ): DetailItem[] =>
   !isEmpty(properties)

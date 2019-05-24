@@ -28,31 +28,9 @@ export const sourceStatusSchema = gql`
   }
 
   extend type SourceStatus {
-    "Whether the configured auditbeat alias exists"
-    auditbeatAliasExists: Boolean!
     "Whether the configured alias or wildcard pattern resolve to any auditbeat indices"
-    auditbeatIndicesExist: Boolean!
-    "The list of indices in the auditbeat alias"
-    auditbeatIndices: [String!]!
-    "Whether the configured filebeat alias exists"
-    filebeatAliasExists: Boolean!
-    "Whether the configured alias or wildcard pattern resolve to any filebeat indices"
-    filebeatIndicesExist: Boolean!
-    "The list of indices in the filebeat alias"
-    filebeatIndices: [String!]!
-    "Whether the configured packetbeat alias exists"
-    packetbeatAliasExists: Boolean!
-    "Whether the configured alias or wildcard pattern resolve to any packetbeat indices"
-    packetbeatIndicesExist: Boolean!
-    "The list of indices in the packetbeat alias"
-    packetbeatIndices: [String!]!
-    "Whether the configured winlogbeat alias exists"
-    winlogbeatAliasExists: Boolean!
-    "Whether the configured alias or wildcard pattern resolve to any winlogbeat indices"
-    winlogbeatIndicesExist: Boolean!
-    "The list of indices in the winlogbeat alias"
-    winlogbeatIndices: [String!]!
+    indicesExist(defaultIndex: [String!]!): Boolean!
     "The list of fields defined in the index mappings"
-    indexFields(indexTypes: [IndexType!] = [ANY]): [IndexField!]!
+    indexFields(defaultIndex: [String!]!): [IndexField!]!
   }
 `;

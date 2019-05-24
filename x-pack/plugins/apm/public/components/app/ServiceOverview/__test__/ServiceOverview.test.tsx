@@ -54,14 +54,16 @@ describe('Service Overview -> View', () => {
             agentName: 'python',
             transactionsPerMinute: 100,
             errorsPerMinute: 200,
-            avgResponseTime: 300
+            avgResponseTime: 300,
+            environments: ['test', 'dev']
           },
           {
             serviceName: 'My Go Service',
             agentName: 'go',
             transactionsPerMinute: 400,
             errorsPerMinute: 500,
-            avgResponseTime: 600
+            avgResponseTime: 600,
+            environments: []
           }
         ]
       });

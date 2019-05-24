@@ -16,7 +16,8 @@ describe('Data Frame: <GroupByLabelSummary />', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
       interval: '10m',
     };
     const props = {
@@ -33,7 +34,8 @@ describe('Data Frame: <GroupByLabelSummary />', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
       interval: '100',
     };
     const props = {
@@ -50,7 +52,8 @@ describe('Data Frame: <GroupByLabelSummary />', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const props = {
       item,

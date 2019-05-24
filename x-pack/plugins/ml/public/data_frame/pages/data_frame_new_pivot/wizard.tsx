@@ -85,7 +85,7 @@ export const Wizard: SFC = React.memo(() => {
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
 
   // The DEFINE_PIVOT state
-  const [pivotState, setPivot] = useState(getDefaultPivotState());
+  const [pivotState, setPivot] = useState(getDefaultPivotState(kibanaContext));
 
   // The JOB_DETAILS state
   const [jobDetailsState, setJobDetails] = useState(getDefaultJobDetailsState());
@@ -167,11 +167,8 @@ export const Wizard: SFC = React.memo(() => {
       children: (
         <Fragment>
           {jobCreate}
-          {currentStep === WIZARD_STEPS.JOB_CREATE && (
-            <WizardNav
-              previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
-              previousActive={!jobCreateState.created}
-            />
+          {currentStep === WIZARD_STEPS.JOB_CREATE && !jobCreateState.created && (
+            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
           )}
         </Fragment>
       ),

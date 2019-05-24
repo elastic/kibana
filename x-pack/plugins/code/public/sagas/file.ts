@@ -39,6 +39,9 @@ import {
   gotoRepo,
   Match,
   setNotFound,
+  fetchRootRepoTree,
+  fetchRootRepoTreeSuccess,
+  fetchRootRepoTreeFailed,
 } from '../actions';
 import { RootState } from '../reducers';
 import { treeCommitsSelector, createTreeSelector } from '../selectors';
@@ -94,7 +97,7 @@ function requestRepoTree({
   uri,
   revision,
   path,
-  limit = 50,
+  limit = 1000,
   parents = false,
 }: FetchRepoTreePayload) {
   const query: FileTreeQuery = { limit, flatten: true };
@@ -109,6 +112,20 @@ function requestRepoTree({
 
 export function* watchFetchRepoTree() {
   yield takeEvery(String(fetchRepoTree), handleFetchRepoTree);
+}
+
+function* handleFetchRootRepoTree(action: Action<FetchRepoPayloadWithRevision>) {
+  try {
+    const { uri, revision } = action.payload!;
+    const tree = yield call(requestRepoTree, { uri, revision, path: '', isDir: true });
+    yield put(fetchRootRepoTreeSuccess(tree));
+  } catch (err) {
+    yield put(fetchRootRepoTreeFailed(err));
+  }
+}
+
+export function* watchFetchRootRepoTree() {
+  yield takeEvery(String(fetchRootRepoTree), handleFetchRootRepoTree);
 }
 
 function* handleFetchBranches(action: Action<FetchRepoPayload>) {

@@ -18,7 +18,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel, State } from '../../store';
-import { inputsActions } from '../../store/actions';
+import { inputsActions, timelineActions } from '../../store/actions';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -55,6 +55,7 @@ interface SuperDatePickerDispatchProps {
     id: inputsModel.InputsModelId;
     from: number;
     to: number;
+    timelineId?: string;
   }>;
   setRelativeSuperDatePicker: ActionCreator<{
     id: inputsModel.InputsModelId;
@@ -62,14 +63,17 @@ interface SuperDatePickerDispatchProps {
     from: number;
     to: number;
     toStr: string;
+    timelineId?: string;
   }>;
   startAutoReload: ActionCreator<{ id: inputsModel.InputsModelId }>;
   stopAutoReload: ActionCreator<{ id: inputsModel.InputsModelId }>;
   setDuration: ActionCreator<{ id: inputsModel.InputsModelId; duration: number }>;
+  updateTimelineRange: ActionCreator<{ id: string; start: number; end: number }>;
 }
 interface OwnProps {
   id: inputsModel.InputsModelId;
   disabled?: boolean;
+  timelineId?: string;
 }
 
 interface TimeArgs {
@@ -199,20 +203,36 @@ export const SuperDatePickerComponent = class extends Component<
   };
 
   private updateReduxTime = ({ start, end, isQuickSelection }: OnTimeChangeProps) => {
-    const { id, setAbsoluteSuperDatePicker, setRelativeSuperDatePicker } = this.props;
+    const {
+      id,
+      setAbsoluteSuperDatePicker,
+      setRelativeSuperDatePicker,
+      timelineId,
+      updateTimelineRange,
+    } = this.props;
+    const fromDate = this.formatDate(start);
+    let toDate = this.formatDate(end, { roundUp: true });
     if (isQuickSelection) {
       setRelativeSuperDatePicker({
         id,
         fromStr: start,
         toStr: end,
-        from: this.formatDate(start),
-        to: this.formatDate(end, { roundUp: true }),
+        from: fromDate,
+        to: toDate,
       });
     } else {
+      toDate = this.formatDate(end);
       setAbsoluteSuperDatePicker({
         id,
         from: this.formatDate(start),
         to: this.formatDate(end),
+      });
+    }
+    if (timelineId != null) {
+      updateTimelineRange({
+        id: timelineId,
+        start: fromDate,
+        end: toDate,
       });
     }
   };
@@ -241,5 +261,6 @@ export const SuperDatePicker = connect(
     startAutoReload: inputsActions.startAutoReload,
     stopAutoReload: inputsActions.stopAutoReload,
     setDuration: inputsActions.setDuration,
+    updateTimelineRange: timelineActions.updateRange,
   }
 )(SuperDatePickerComponent);

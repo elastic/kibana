@@ -13,6 +13,7 @@ import { AndOrBadge } from '../../and_or_badge';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
+  OnDataProviderEdited,
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
@@ -22,6 +23,7 @@ import { DataProvider } from './data_provider';
 import { ProviderItemAnd } from './provider_item_and';
 
 import * as i18n from './translations';
+import { BrowserFields } from '../../../containers/source';
 
 const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
   margin: 0px 8px;
@@ -52,23 +54,29 @@ const NumberProviderAndBadge = styled(EuiBadge)`
 `;
 
 interface ProviderItemDropProps {
+  browserFields: BrowserFields;
   dataProvider: DataProvider;
   mousePosition?: { x: number; y: number; boundLeft: number; boundTop: number };
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
+  onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  timelineId: string;
 }
 
 export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
   ({
+    browserFields,
     dataProvider,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
+    onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
+    timelineId,
   }) => {
     const onMouseEnter = () => onChangeDroppableAndProvider(dataProvider.id);
     const onMouseLeave = () => onChangeDroppableAndProvider('');
@@ -98,12 +106,15 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
           </DropAndTargetDataProviders>
         </DropAndTargetDataProvidersContainer>
         <ProviderItemAnd
+          browserFields={browserFields}
           dataProvidersAnd={dataProvider.and}
           providerId={dataProvider.id}
           onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+          onDataProviderEdited={onDataProviderEdited}
           onDataProviderRemoved={onDataProviderRemoved}
           onToggleDataProviderEnabled={onToggleDataProviderEnabled}
           onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+          timelineId={timelineId}
         />
       </EuiFlexGroup>
     );

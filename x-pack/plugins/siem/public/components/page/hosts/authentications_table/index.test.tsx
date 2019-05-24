@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockGlobalState } from '../../../../mock';
+import { apolloClientObservable, mockGlobalState } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 
 import { AuthenticationTable } from '.';
@@ -20,10 +20,10 @@ describe('Authentication Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   describe('rendering', () => {
