@@ -25,6 +25,7 @@
   * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
 * [How to](#how-to)
   * [Configure plugin](#configure-plugin)
+  * [Mock core services in tests](#mock-core-services-in-tests)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -714,4 +715,44 @@ class MyPlugin {
     // or if config is optional:
     this.config$ = initializerContext.config.createIfExists();
   }
+```
+
+### Mock core services in tests
+Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts. 
+```typescript
+// my_plugin/server/plugin.test.ts
+Import { configServiceMock } from 'src/core/server/mocks.ts'
+
+const configService = configServiceMock.create();
+configService.atPath.mockReturnValue(config$);
+…
+const plugin = new MyPlugin({ configService }, …)
+```
+This is not mandatory, but we strongly recommended to export your plugin mocks as well in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root level of the plugin.
+```typescript
+// my_plugin/server/mocks.ts
+type MyPluginContract = PublicMethodsOf<MyPlugin>;
+
+const createSetupContractMock = () => {
+  const startContract: jest.Mocked<MyPluginStartContract>= {
+    isValid: jest.fn();
+  }
+  isValid.mockReturnValue(true);
+  return startContract;
+}
+
+const createMyPluginMock = () => {
+  const mocked: jest.Mocked<MyPluginContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  // here we already type check as TS infers to the correct type from above
+  mocked.setup.mockResolvedValue(createSetupContractMock());
+  return mocked;
+};
+
+export const myPluginMocks = {
+   create: createMyPluginMock
+} 
 ```
