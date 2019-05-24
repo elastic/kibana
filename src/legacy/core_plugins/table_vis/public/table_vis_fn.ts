@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
  // @ts-ignore
 import { functionsRegistry } from 'plugins/interpreter/registries';
 // @ts-ignore
-import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-import { i18n } from '@kbn/i18n';
+import { convert } from '../../../ui/public/vis/response_handlers/legacy';
 
 export const kibanaTable = () => ({
   name: 'kibana_table',
@@ -100,10 +100,7 @@ export const kibanaTable = () => ({
       totalFunc,
     };
     console.log('visConfig', visConfig);
-
-    const responseHandler = legacyResponseHandlerProvider().handler;
-    const convertedData = await responseHandler(context, visConfig.dimensions);
-    console.log(2)
+    const convertedData = convert(context, visConfig.dimensions);
 
     return {
       type: 'render',
