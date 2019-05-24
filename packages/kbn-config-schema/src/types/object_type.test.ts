@@ -200,7 +200,7 @@ test('includes namespace in failure when wrong value type', () => {
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
 
-test('reach returns a valid schema component', () => {
+test('individual keys can validated', () => {
   const type = schema.object({
     foo: schema.boolean(),
   });
