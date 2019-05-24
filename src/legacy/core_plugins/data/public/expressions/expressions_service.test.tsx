@@ -67,114 +67,151 @@ describe('expressions_service', () => {
     testAst = fromExpression(testExpression);
   });
 
-  it('should return run function', () => {
-    expect(typeof api.run).toBe('function');
+  describe('expression_runner', () => {
+    it('should return run function', () => {
+      expect(typeof api.run).toBe('function');
+    });
+
+    it('should call the interpreter with parsed expression', async () => {
+      await api.run(testExpression, { element: document.createElement('div') });
+      expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
+        testAst,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should call the interpreter with given context and getInitialContext functions', async () => {
+      const getInitialContext = () => ({});
+      const context = {};
+
+      await api.run(testExpression, { getInitialContext, context });
+      const interpretCall = interpreterMock.interpretAst.mock.calls[0];
+
+      expect(interpretCall[1]).toBe(context);
+      expect(interpretCall[2].getInitialContext).toBe(getInitialContext);
+    });
+
+    it('should call the interpreter with passed in ast', async () => {
+      await api.run(testAst, { element: document.createElement('div') });
+      expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
+        testAst,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should call the render function with the result and element', async () => {
+      const element = document.createElement('div');
+
+      await api.run(testAst, { element });
+      expect(renderFunctionMock.render).toHaveBeenCalledWith(
+        element,
+        expressionResult.value,
+        expect.anything()
+      );
+      expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
+        testAst,
+        expect.anything(),
+        expect.anything()
+      );
+    });
   });
 
-  it('should call the interpreter with parsed expression', async () => {
-    await api.run(testExpression, document.createElement('div'));
-    expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
-      testAst,
-      expect.anything(),
-      expect.anything()
-    );
-  });
+  describe('expression_renderer', () => {
+    it('should call interpreter and render function when called through react component', async () => {
+      const ExpressionRenderer = api.ExpressionRenderer;
 
-  it('should call the interpreter with passed in ast', async () => {
-    await api.run(testAst, document.createElement('div'));
-    expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
-      testAst,
-      expect.anything(),
-      expect.anything()
-    );
-  });
+      mount(<ExpressionRenderer expression={testExpression} />);
 
-  it('should call the render function with the result and element', async () => {
-    const element = document.createElement('div');
+      await waitForInterpreterRun();
 
-    await api.run(testAst, element);
-    expect(renderFunctionMock.render).toHaveBeenCalledWith(
-      element,
-      expressionResult.value,
-      expect.anything()
-    );
-    expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
-      testAst,
-      expect.anything(),
-      expect.anything()
-    );
-  });
+      expect(renderFunctionMock.render).toHaveBeenCalledWith(
+        expect.any(Element),
+        expressionResult.value,
+        expect.anything()
+      );
+      expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
+        testAst,
+        expect.anything(),
+        expect.anything()
+      );
+    });
 
-  it('should call interpreter and render function when called through react component', async () => {
-    const ExpressionRenderer = api.ExpressionRenderer;
+    it('should call the interpreter with given context and getInitialContext functions', async () => {
+      const getInitialContext = () => ({});
+      const context = {};
 
-    mount(<ExpressionRenderer expression={testExpression} />);
+      const ExpressionRenderer = api.ExpressionRenderer;
 
-    await waitForInterpreterRun();
+      mount(
+        <ExpressionRenderer
+          expression={testExpression}
+          getInitialContext={getInitialContext}
+          context={context}
+        />
+      );
 
-    expect(renderFunctionMock.render).toHaveBeenCalledWith(
-      expect.any(Element),
-      expressionResult.value,
-      expect.anything()
-    );
-    expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
-      testAst,
-      expect.anything(),
-      expect.anything()
-    );
-  });
+      await waitForInterpreterRun();
 
-  it('should call interpreter and render function again if expression changes', async () => {
-    const ExpressionRenderer = api.ExpressionRenderer;
+      const interpretCall = interpreterMock.interpretAst.mock.calls[0];
 
-    const instance = mount(<ExpressionRenderer expression={testExpression} />);
+      expect(interpretCall[1]).toBe(context);
+      expect(interpretCall[2].getInitialContext).toBe(getInitialContext);
+    });
 
-    await waitForInterpreterRun();
+    it('should call interpreter and render function again if expression changes', async () => {
+      const ExpressionRenderer = api.ExpressionRenderer;
 
-    expect(renderFunctionMock.render).toHaveBeenCalledWith(
-      expect.any(Element),
-      expressionResult.value,
-      expect.anything()
-    );
-    expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
-      testAst,
-      expect.anything(),
-      expect.anything()
-    );
+      const instance = mount(<ExpressionRenderer expression={testExpression} />);
 
-    instance.setProps({ expression: 'supertest | expression ' });
+      await waitForInterpreterRun();
 
-    await waitForInterpreterRun();
+      expect(renderFunctionMock.render).toHaveBeenCalledWith(
+        expect.any(Element),
+        expressionResult.value,
+        expect.anything()
+      );
+      expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
+        testAst,
+        expect.anything(),
+        expect.anything()
+      );
 
-    expect(renderFunctionMock.render).toHaveBeenCalledTimes(2);
-    expect(interpreterMock.interpretAst).toHaveBeenCalledTimes(2);
-  });
+      instance.setProps({ expression: 'supertest | expression ' });
 
-  it('should not call interpreter and render function again if expression does not change', async () => {
-    const ast = fromExpression(testExpression);
+      await waitForInterpreterRun();
 
-    const ExpressionRenderer = api.ExpressionRenderer;
+      expect(renderFunctionMock.render).toHaveBeenCalledTimes(2);
+      expect(interpreterMock.interpretAst).toHaveBeenCalledTimes(2);
+    });
 
-    const instance = mount(<ExpressionRenderer expression={testExpression} />);
+    it('should not call interpreter and render function again if expression does not change', async () => {
+      const ast = fromExpression(testExpression);
 
-    await waitForInterpreterRun();
+      const ExpressionRenderer = api.ExpressionRenderer;
 
-    expect(renderFunctionMock.render).toHaveBeenCalledWith(
-      expect.any(Element),
-      expressionResult.value,
-      expect.anything()
-    );
-    expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
-      ast,
-      expect.anything(),
-      expect.anything()
-    );
+      const instance = mount(<ExpressionRenderer expression={testExpression} />);
 
-    instance.update();
+      await waitForInterpreterRun();
 
-    await waitForInterpreterRun();
+      expect(renderFunctionMock.render).toHaveBeenCalledWith(
+        expect.any(Element),
+        expressionResult.value,
+        expect.anything()
+      );
+      expect(interpreterMock.interpretAst).toHaveBeenCalledWith(
+        ast,
+        expect.anything(),
+        expect.anything()
+      );
 
-    expect(renderFunctionMock.render).toHaveBeenCalledTimes(1);
-    expect(interpreterMock.interpretAst).toHaveBeenCalledTimes(1);
+      instance.update();
+
+      await waitForInterpreterRun();
+
+      expect(renderFunctionMock.render).toHaveBeenCalledTimes(1);
+      expect(interpreterMock.interpretAst).toHaveBeenCalledTimes(1);
+    });
   });
 });

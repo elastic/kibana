@@ -19,22 +19,31 @@
 
 import { useRef, useEffect } from 'react';
 import React from 'react';
+import { Ast } from '@kbn/interpreter/common';
 
-export interface ExpressionRendererProps {
-  expression: string;
-}
+import { ExpressionRunnerOptions, ExpressionRunner } from './expression_runner';
+
+// Accept all options of the runner as props except for the
+// dom element which is provided by the component itself
+export type ExpressionRendererProps = Pick<
+  ExpressionRunnerOptions,
+  Exclude<keyof ExpressionRunnerOptions, 'element'>
+> & {
+  expression: string | Ast;
+};
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
-export const createRenderer = (
-  run: (expression: string, element: Element) => void
-): ExpressionRenderer => ({ expression }: ExpressionRendererProps) => {
+export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
+  expression,
+  ...options
+}: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
   useEffect(
     () => {
       if (mountpoint.current) {
-        run(expression, mountpoint.current);
+        run(expression, { ...options, element: mountpoint.current });
       }
     },
     [expression, mountpoint.current]

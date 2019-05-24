@@ -22,43 +22,49 @@ import { Ast, fromExpression } from '@kbn/interpreter/common';
 import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
 import { RenderFunctionsRegistry, Interpreter, Result } from './expressions_service';
 
+export interface ExpressionRunnerOptions {
+  // TODO use the real types here once they are ready
+  context?: object;
+  getInitialContext?: () => object;
+  element?: Element;
+}
+
 export type ExpressionRunner = (
-  expressionOrAst: string | Ast,
-  element?: Element
+  expression: string | Ast,
+  options: ExpressionRunnerOptions
 ) => Promise<Result>;
 
 export const createRunFn = (
   renderersRegistry: RenderFunctionsRegistry,
   interpreterPromise: Promise<Interpreter>
-): ExpressionRunner => async (expressionOrAst, element) => {
+): ExpressionRunner => async (expressionOrAst, { element, context, getInitialContext }) => {
   const interpreter = await interpreterPromise;
   const ast =
     typeof expressionOrAst === 'string' ? fromExpression(expressionOrAst) : expressionOrAst;
-  const response = await interpreter.interpretAst(
-    ast,
-    { type: 'null' },
-    {
-      getInitialContext: () => ({}),
-      inspectorAdapters: {
-        // TODO connect real adapters
-        requests: new RequestAdapter(),
-        data: new DataAdapter(),
-      },
-    }
-  );
 
-  if (element && response.type === 'render' && response.as) {
-    renderersRegistry.get(response.as).render(element, response.value, {
-      onDestroy: fn => {
-        // TODO implement
-      },
-      done: () => {
-        // TODO implement
-      },
-    });
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Unexpected result of expression', response);
+  const response = await interpreter.interpretAst(ast, context || { type: 'null' }, {
+    getInitialContext: getInitialContext || (() => ({})),
+    inspectorAdapters: {
+      // TODO connect real adapters
+      requests: new RequestAdapter(),
+      data: new DataAdapter(),
+    },
+  });
+
+  if (element) {
+    if (response.type === 'render' && response.as) {
+      renderersRegistry.get(response.as).render(element, response.value, {
+        onDestroy: fn => {
+          // TODO implement
+        },
+        done: () => {
+          // TODO implement
+        },
+      });
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('Unexpected result of expression', response);
+    }
   }
 
   return response;
