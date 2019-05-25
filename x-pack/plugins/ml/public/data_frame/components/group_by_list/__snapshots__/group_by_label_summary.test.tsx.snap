@@ -23,7 +23,7 @@ exports[`Data Frame: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
       className="mlGroupByLabel__text"
       color="subdued"
     >
-      10m
+      1m
     </EuiTextColor>
   </EuiFlexItem>
 </EuiFlexGroup>
