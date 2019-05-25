@@ -24,7 +24,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header']);
+  const PageObjects = getPageObjects(['header', 'common']);
 
   class TimePickerPage {
 
@@ -197,6 +197,21 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       return moment.duration(moment(endMoment) - moment(startMoment)).asHours();
     }
 
+    async setRefreshInterval(refreshInterval, unitToSelect) {
+      await this.openQuickSelectTimeMenu();
+      await testSubjects.setValue('superDatePickerRefreshIntervalInput', refreshInterval);
+
+      const select = await testSubjects.find('superDatePickerRefreshIntervalUnitsSelect');
+      const options = await find.allDescendantDisplayedByCssSelector('option', select);
+      await Promise.all(options.map(async (optionElement) => {
+        const optionText = await optionElement.getVisibleText();
+        if (unitToSelect === optionText) {
+          await optionElement.click();
+        }
+      }));
+      await this.closeQuickSelectTimeMenu();
+    }
+
     async pauseAutoRefresh() {
       log.debug('pauseAutoRefresh');
       const refreshConfig = await this.getRefreshConfig(true);
@@ -218,6 +233,14 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       }
 
       await this.closeQuickSelectTimeMenu();
+    }
+
+    async triggerSingleRefresh(refreshInterval) {
+      log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
+      await this.resumeAutoRefresh();
+      log.debug('waiting to give time for refresh timer to fire');
+      await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
+      await this.pauseAutoRefresh();
     }
   }
 

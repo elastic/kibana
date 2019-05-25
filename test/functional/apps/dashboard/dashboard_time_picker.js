@@ -18,9 +18,12 @@
  */
 
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
+  const inspector = getService('inspector');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
@@ -29,6 +32,11 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+      await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
     });
 
     after(async function () {
@@ -36,27 +44,44 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickVisualize();
       await PageObjects.visualize.gotoLandingPage();
       await PageObjects.header.clickDashboard();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+    });
+
+    it('Saved search updated when time picker changes', async () => {
+      await dashboardExpect.docTableFieldCount(150);
+
+      // Set to time range with no data
+      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
+      await dashboardExpect.docTableFieldCount(0);
     });
 
     it('Visualization updated when time picker changes', async () => {
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
       await pieChart.expectPieSliceCount(0);
 
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
       await pieChart.expectPieSliceCount(10);
     });
 
-    it('Saved search updated when time picker changes', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
-      await dashboardExpect.docTableFieldCount(150);
+    it('visualization re-fetch documents with refresh timer', async () => {
+      await PageObjects.timePicker.setRefreshInterval('1', 'seconds');
+      await dashboardPanelActions.openInspectorByTitle(PIE_CHART_VIS_NAME);
+      await inspector.openInspectorRequestsView();
+      const beforeRefreshTimerTimestamp = await inspector.getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp.length).to.be(24);
+      await PageObjects.timePicker.triggerSingleRefresh(1000);
+      await dashboardPanelActions.openInspectorByTitle(PIE_CHART_VIS_NAME);
+      await inspector.openInspectorRequestsView();
+      const afterRefreshTimerTimestamp = await inspector.getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+    });
 
-      // Set to time range with no data
-      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
-      await dashboardExpect.docTableFieldCount(0);
+    it('saved search re-fetch documents with refresh timer', async () => {
+      await dashboardPanelActions.openInspectorByTitle('saved search');
+      const beforeRefreshTimerTimestamp = await inspector.getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp.length).to.be(24);
+      await PageObjects.timePicker.triggerSingleRefresh(1000);
+      await dashboardPanelActions.openInspectorByTitle('saved search');
+      const afterRefreshTimerTimestamp = await inspector.getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
   });
 }

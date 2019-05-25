@@ -174,5 +174,26 @@ export function InspectorProvider({ getService }) {
       const singleRequest = await testSubjects.find('inspectorRequestName');
       return await singleRequest.getVisibleText();
     }
+
+    async getRequestTimestamp() {
+      const requestStats = await this.getTableData();
+      const requestTimestamp = this.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      await this.close();
+      return requestTimestamp;
+    }
+
+    async getInspectorStatRowHit(stats, rowName) {
+      const STATS_ROW_NAME_INDEX = 0;
+      const STATS_ROW_VALUE_INDEX = 1;
+
+      const statsRow = stats.find((statsRow) => {
+        return statsRow[STATS_ROW_NAME_INDEX] === rowName;
+      });
+      if (!statsRow) {
+        throw new Error(`Unable to find value for row ${rowName} in ${stats}`);
+      }
+
+      return statsRow[STATS_ROW_VALUE_INDEX];
+    }
   };
 }
