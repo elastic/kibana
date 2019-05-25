@@ -166,6 +166,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
   });
 
   const menuItems = [
+    ...infraItems,
     {
       icon: 'discoverApp',
       key: 'discover-transaction',
@@ -181,7 +182,6 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         </DiscoverTransactionLink>
       )
     },
-    ...infraItems,
     {
       icon: 'uptimeApp',
       key: 'uptime',
