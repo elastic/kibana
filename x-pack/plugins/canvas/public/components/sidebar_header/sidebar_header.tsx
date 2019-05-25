@@ -20,6 +20,7 @@ import {
 // @ts-ignore unconverted component
 import { Popover } from '../popover';
 import { CustomElementModal } from '../custom_element_modal';
+import { ToolTipShortcut } from '../tool_tip_shortcut/';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
@@ -153,7 +154,15 @@ export class SidebarHeader extends Component<Props, State> {
     return (
       <Fragment>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element to top layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Bring to front
+                <ToolTipShortcut namespace="ELEMENT" action="BRING_TO_FRONT" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="sortUp"
@@ -163,7 +172,15 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element up one layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Bring forward
+                <ToolTipShortcut namespace="ELEMENT" action="BRING_FORWARD" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="arrowUp"
@@ -173,7 +190,15 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element down one layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Send backward
+                <ToolTipShortcut namespace="ELEMENT" action="SEND_BACKWARD" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="arrowDown"
@@ -183,7 +208,15 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element to bottom layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Send to back
+                <ToolTipShortcut namespace="ELEMENT" action="SEND_TO_BACK" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="sortDown"

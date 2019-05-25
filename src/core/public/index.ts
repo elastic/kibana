@@ -35,7 +35,6 @@
  * @packageDocumentation
  */
 
-import { BasePathSetup, BasePathStart } from './base_path';
 import {
   ChromeBadge,
   ChromeBrand,
@@ -46,7 +45,7 @@ import {
   ChromeStart,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpSetup, HttpStart } from './http';
+import { HttpServiceBase, HttpSetup, HttpStart } from './http';
 import { I18nSetup, I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
@@ -73,8 +72,6 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
-  /** {@link BasePathSetup} */
-  basePath: BasePathSetup;
   /** {@link ChromeSetup} */
   chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
@@ -101,8 +98,6 @@ export interface CoreSetup {
 export interface CoreStart {
   /** {@link ApplicationStart} */
   application: Pick<ApplicationStart, 'capabilities'>;
-  /** {@link BasePathStart} */
-  basePath: BasePathStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link HttpStart} */
@@ -130,8 +125,7 @@ export interface InternalCoreStart extends CoreStart {
 export {
   ApplicationSetup,
   ApplicationStart,
-  BasePathSetup,
-  BasePathStart,
+  HttpServiceBase,
   HttpSetup,
   HttpStart,
   FatalErrorsSetup,

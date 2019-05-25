@@ -44,7 +44,7 @@ module.directive('mlFilterLists', function () {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function (element) {
       const props = {
         canCreateFilter: checkPermission('canCreateFilter'),
         canDeleteFilter: checkPermission('canDeleteFilter'),

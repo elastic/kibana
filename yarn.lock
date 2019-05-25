@@ -1410,10 +1410,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/github-checks-reporter@0.0.13":
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/@elastic/github-checks-reporter/-/github-checks-reporter-0.0.13.tgz#92178f1a24e7649c9ac1357737ca684fe3069c43"
-  integrity sha512-rGKlEmbwn+eKKyQC0LG1Mq9p4kXGNLE+yY4oyWzyQCHaNedkX213yc+cA/3PMAHFaGXlpO+Tsyy1hhJHGrmRkw==
+"@elastic/github-checks-reporter@0.0.14-beta1":
+  version "0.0.14-beta1"
+  resolved "https://registry.yarnpkg.com/@elastic/github-checks-reporter/-/github-checks-reporter-0.0.14-beta1.tgz#44e9170d13089eafa3dd419675766e54e08c696d"
+  integrity sha512-GLG/A2It/Exj2WeQxGwTET+8/43XEdRuyaJQFT7u/1Z1yYbarkMM1eVeHoqoIXNqK5Z9dvuBwVT9gjil5vLCLw==
   dependencies:
     "@octokit/app" "^2.2.2"
     "@octokit/plugin-retry" "^2.2.0"

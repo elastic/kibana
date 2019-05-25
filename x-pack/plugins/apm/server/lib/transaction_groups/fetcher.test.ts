@@ -27,11 +27,7 @@ describe('transactionGroupsFetcher', () => {
         }),
         has: () => true
       },
-      uiFiltersES: [
-        {
-          term: { 'service.environment': 'test' }
-        }
-      ]
+      uiFiltersES: [{ term: { 'service.environment': 'test' } }]
     };
     const bodyQuery = { my: 'bodyQuery' };
     res = await transactionGroupsFetcher(setup, bodyQuery);

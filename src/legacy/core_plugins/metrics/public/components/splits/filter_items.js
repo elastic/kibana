@@ -20,9 +20,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import * as collectionActions from '../lib/collection_actions';
-import AddDeleteButtons from '../add_delete_buttons';
-import ColorPicker from '../color_picker';
+import { collectionActions } from '../lib/collection_actions';
+import { AddDeleteButtons } from '../add_delete_buttons';
+import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
@@ -115,5 +115,4 @@ FilterItemsUi.propTypes = {
   onChange: PropTypes.func
 };
 
-const FilterItems = injectI18n(FilterItemsUi);
-export default FilterItems;
+export const FilterItems = injectI18n(FilterItemsUi);

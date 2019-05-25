@@ -530,5 +530,16 @@ module.exports = {
         jquery: true,
       },
     },
+
+    /**
+     * TSVB overrides
+     */
+    {
+      files: ['src/legacy/core_plugins/metrics/**/*.js'],
+      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
+      rules: {
+        'import/no-default-export': 'error',
+      },
+    },
   ],
 };
