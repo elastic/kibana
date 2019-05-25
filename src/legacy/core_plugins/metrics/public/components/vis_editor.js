@@ -28,7 +28,7 @@ import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 

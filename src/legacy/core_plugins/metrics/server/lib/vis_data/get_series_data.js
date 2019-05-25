@@ -25,15 +25,13 @@ import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
 
 export async function getSeriesData(req, panel) {
-  const panelIndexPattern = panel.index_pattern;
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
-  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategyForPanel(req, panel);
+  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
-
   const bodiesPromises = getActiveSeries(panel)
     .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
 
-  const body = (await Promise.all(bodiesPromises))
+  const searches = (await Promise.all(bodiesPromises))
     .reduce((acc, items) => acc.concat(items), []);
 
   const meta = {
@@ -42,7 +40,7 @@ export async function getSeriesData(req, panel) {
   };
 
   try {
-    const data = await searchRequest.search({ body });
+    const data = await searchRequest.search(searches);
     const series = data.map(handleResponseBody(panel));
 
     let annotations = null;
@@ -50,11 +48,11 @@ export async function getSeriesData(req, panel) {
     if (panel.annotations && panel.annotations.length) {
       annotations = await getAnnotations({
         req,
+        panel,
+        series,
         esQueryConfig,
         searchStrategy,
-        panel,
         capabilities,
-        series
       });
     }
 

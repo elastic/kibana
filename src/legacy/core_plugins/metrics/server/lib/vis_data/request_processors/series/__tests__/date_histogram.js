@@ -52,7 +52,7 @@ describe('dateHistogram(req, panel, series)', () => {
       queryStringOptions: {},
     };
     indexPatternObject = {};
-    capabilities = new DefaultSearchCapabilities(req, true);
+    capabilities = new DefaultSearchCapabilities(req);
   });
 
   it('calls next when finished', () => {
