@@ -71,6 +71,10 @@ import { natsLogsSpecProvider } from './nats_logs';
 import { zeekLogsSpecProvider } from './zeek_logs';
 import { corednsMetricsSpecProvider } from './coredns_metrics';
 import { corednsLogsSpecProvider } from './coredns_logs';
+import { auditbeatSpecProvider } from './auditbeat';
+import { iptablesLogsSpecProvider } from './iptables_logs';
+import { ciscoLogsSpecProvider } from './cisco_logs';
+import { envoyproxyLogsSpecProvider } from './envoyproxy_logs';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -127,4 +131,8 @@ export function registerTutorials(server) {
   server.registerTutorial(zeekLogsSpecProvider);
   server.registerTutorial(corednsMetricsSpecProvider);
   server.registerTutorial(corednsLogsSpecProvider);
+  server.registerTutorial(auditbeatSpecProvider);
+  server.registerTutorial(iptablesLogsSpecProvider);
+  server.registerTutorial(ciscoLogsSpecProvider);
+  server.registerTutorial(envoyproxyLogsSpecProvider);
 }

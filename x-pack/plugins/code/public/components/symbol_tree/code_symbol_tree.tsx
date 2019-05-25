@@ -7,16 +7,16 @@
 import { EuiFlexGroup, EuiIcon, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import url from 'url';
 import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
 import { isEqual } from 'lodash';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { EuiSideNavItem } from '../../common/types';
+import { EuiSideNavItem, MainRouteParams } from '../../common/types';
 import { SymbolWithMembers } from '../../reducers/symbol';
 
-interface Props {
+interface Props extends RouteComponentProps<MainRouteParams> {
   structureTree: SymbolWithMembers[];
   closedPaths: string[];
   openSymbolPath: (p: string) => void;
@@ -64,6 +64,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
     ) {
       bg = <div className="code-full-width-node" />;
     }
+    const queries = url.parse(this.props.location.search, true).query;
     return (
       <div className="code-symbol-container">
         {bg}
@@ -89,7 +90,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
           <Link
             to={url.format({
               pathname: RepositoryUtils.locationToUrl(location),
-              query: { tab: 'structure' },
+              query: { sideTab: 'structure', ...queries },
             })}
             className="code-symbol-link"
             onClick={this.getClickHandler({ name, location })}
@@ -145,7 +146,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
       { name: '', id: '', items: this.symbolsToSideNavItems(this.props.structureTree) },
     ];
     return (
-      <div className="codeContainer__symbolTree">
+      <div className="codeContainer__sideTabTree">
         <EuiSideNav items={items} />
       </div>
     );

@@ -186,6 +186,7 @@ module.exports = function (grunt) {
       flags: [
         ...browserTestServerFlags,
         '--dev',
+        '--no-dev-config',
         '--no-watch',
         '--no-base-path',
         '--optimize.watchPort=5611',

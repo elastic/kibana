@@ -7,6 +7,7 @@
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
 import { Datatable, ContextFunction } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   name: string;
@@ -15,18 +16,20 @@ interface Arguments {
 type Context = string | boolean | number | null;
 
 export function asFn(): ContextFunction<'as', Context, Arguments, Datatable> {
+  const { help, args: argHelp } = getFunctionHelp().as;
+
   return {
     name: 'as',
     type: 'datatable',
     context: {
       types: ['string', 'boolean', 'number', 'null'],
     },
-    help: 'Creates a datatable with a single value',
+    help,
     args: {
       name: {
         types: ['string'],
         aliases: ['_'],
-        help: 'A name to give the column',
+        help: argHelp.name,
         default: 'value',
       },
     },

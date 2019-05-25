@@ -19,8 +19,7 @@
 
 import './core.css';
 
-import { CoreSetup, CoreStart } from '.';
-import { BasePathService } from './base_path';
+import { InternalCoreSetup, InternalCoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
@@ -60,7 +59,6 @@ export class CoreSystem {
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly uiSettings: UiSettingsService;
-  private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
   private readonly overlay: OverlayService;
@@ -68,7 +66,6 @@ export class CoreSystem {
   private readonly application: ApplicationService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly overlayTargetDomElement: HTMLDivElement;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -95,10 +92,8 @@ export class CoreSystem {
 
     this.notifications = new NotificationsService();
     this.http = new HttpService();
-    this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
-    this.overlayTargetDomElement = document.createElement('div');
-    this.overlay = new OverlayService(this.overlayTargetDomElement);
+    this.overlay = new OverlayService();
     this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
 
@@ -118,27 +113,14 @@ export class CoreSystem {
       const i18n = this.i18n.setup();
       const injectedMetadata = this.injectedMetadata.setup();
       this.fatalErrorsSetup = this.fatalErrors.setup({ injectedMetadata, i18n });
-      const basePath = this.basePath.setup({ injectedMetadata });
-      const http = this.http.setup({
-        basePath,
-        injectedMetadata,
-        fatalErrors: this.fatalErrorsSetup,
-      });
-      const uiSettings = this.uiSettings.setup({
-        http,
-        injectedMetadata,
-        basePath,
-      });
+      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const application = this.application.setup();
-      const chrome = this.chrome.setup({
-        injectedMetadata,
-        notifications,
-      });
+      const chrome = this.chrome.setup({ injectedMetadata, notifications });
 
-      const core: CoreSetup = {
+      const core: InternalCoreSetup = {
         application,
-        basePath,
         chrome,
         fatalErrors: this.fatalErrorsSetup,
         http,
@@ -167,12 +149,13 @@ export class CoreSystem {
   public async start() {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
-      const basePath = await this.basePath.start({ injectedMetadata });
-      const http = await this.http.start();
+      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const i18n = await this.i18n.start();
-      const application = await this.application.start({ basePath, injectedMetadata });
+      const application = await this.application.start({ injectedMetadata });
+      const chrome = await this.chrome.start({ application, http });
 
       const notificationsTargetDomElement = document.createElement('div');
+      const overlayTargetDomElement = document.createElement('div');
       const legacyPlatformTargetDomElement = document.createElement('div');
 
       // ensure the rootDomElement is empty
@@ -180,17 +163,17 @@ export class CoreSystem {
       this.rootDomElement.classList.add('coreSystemRootDomElement');
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
-      this.rootDomElement.appendChild(this.overlayTargetDomElement);
+      this.rootDomElement.appendChild(overlayTargetDomElement);
 
       const notifications = await this.notifications.start({
         i18n,
         targetDomElement: notificationsTargetDomElement,
       });
-      const overlays = await this.overlay.start({ i18n });
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
 
-      const core: CoreStart = {
+      const core: InternalCoreStart = {
         application,
-        basePath,
+        chrome,
         http,
         i18n,
         injectedMetadata,

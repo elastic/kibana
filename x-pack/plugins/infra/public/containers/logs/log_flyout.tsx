@@ -7,10 +7,12 @@
 import createContainer from 'constate-latest';
 import { isString } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+
 import { FlyoutItemQuery, InfraLogItem } from '../../graphql/types';
 import { useApolloClient } from '../../utils/apollo_context';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
+import { Source } from '../source';
 import { flyoutItemQuery } from './flyout_item.gql_query';
 
 export enum FlyoutVisibility {
@@ -24,7 +26,8 @@ interface FlyoutOptionsUrlState {
   surroundingLogsId?: string | null;
 }
 
-export const useLogFlyout = ({ sourceId }: { sourceId: string }) => {
+export const useLogFlyout = () => {
+  const { sourceId } = useContext(Source.Context);
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
   const [flyoutItem, setFlyoutItem] = useState<InfraLogItem | null>(null);

@@ -134,7 +134,7 @@ const migrateDateHistogramAggregation = doc => {
   return doc;
 };
 
-const executeMigrations710 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
+const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
 
 function removeDateHistogramTimeZones(doc) {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -264,7 +264,7 @@ export const migrations = {
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
-    '7.1.0': doc => executeMigrations710(doc)
+    '7.2.0': doc => executeMigrations720(doc)
   },
   dashboard: {
     '7.0.0': (doc) => {

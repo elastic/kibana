@@ -6,9 +6,6 @@
 
 import { rootSchema } from '../../common/graphql/root';
 import { sharedSchema } from '../../common/graphql/shared';
-import { getSourceQueryMock } from '../graphql/sources/source.mock';
-import { getAllSourcesQueryMock } from '../graphql/sources/sources.mock';
-import { Logger } from '../utils/logger';
 
 import { authenticationsSchema } from './authentications';
 import { ecsSchema } from './ecs';
@@ -20,11 +17,14 @@ import { kpiNetworkSchema } from './kpi_network';
 import { networkSchema } from './network';
 import { overviewSchema } from './overview';
 import { dateSchema } from './scalar_date';
+import { noteSchema } from './note';
+import { pinnedEventSchema } from './pinned_event';
 import { toBooleanSchema } from './scalar_to_boolean_array';
 import { toDateSchema } from './scalar_to_date_array';
 import { toNumberSchema } from './scalar_to_number_array';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
+import { timelineSchema } from './timeline';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
 export const schemas = [
@@ -40,11 +40,14 @@ export const schemas = [
   kpiNetworkSchema,
   kpiHostsSchema,
   networkSchema,
+  noteSchema,
   overviewSchema,
+  pinnedEventSchema,
   rootSchema,
   sourcesSchema,
   sourceStatusSchema,
   sharedSchema,
+  timelineSchema,
   uncommonProcessesSchema,
   whoAmISchema,
 ];
@@ -60,10 +63,3 @@ export interface SiemContext {
     };
   };
 }
-
-export const createMocks = (logger: Logger) => ({
-  Query: () => ({
-    ...getAllSourcesQueryMock(logger),
-    ...getSourceQueryMock(logger),
-  }),
-});

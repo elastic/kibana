@@ -19,7 +19,8 @@
 
 import uuid from 'uuid';
 import _ from 'lodash';
-export default source => {
+
+export const reIdSeries = source => {
   const series = _.cloneDeep(source);
   series.id = uuid.v1();
   series.metrics.forEach((metric) => {

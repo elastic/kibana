@@ -22,7 +22,8 @@ export default function codeIntelligenceFunctionalTests({
   const FIND_TIME = config.get('timeouts.find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Code Intelligence', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/36480
+  describe.skip('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
       const testGoToDefinition = async () => {

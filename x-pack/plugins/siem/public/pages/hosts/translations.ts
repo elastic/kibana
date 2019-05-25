@@ -15,7 +15,7 @@ export const NO_AUDITBEAT_INDICES = i18n.translate('xpack.siem.hosts.noAuditBeat
 });
 
 export const KQL_PLACE_HOLDER = i18n.translate('xpack.siem.hosts.kqlPlaceHolder', {
-  defaultMessage: 'Search… (e.g. host.name:"foo" AND process.name:"bar")',
+  defaultMessage: 'e.g. host.name: "foo"',
 });
 
 export const LETS_ADD_SOME = i18n.translate('xpack.siem.hosts.letsAddSome.description', {

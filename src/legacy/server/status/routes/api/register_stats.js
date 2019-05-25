@@ -18,9 +18,14 @@
  */
 
 import Joi from 'joi';
-import { boomify } from 'boom';
+import boom from 'boom';
+import { i18n }  from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
+
+const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
+  defaultMessage: 'Stats are not ready yet. Please try again later.',
+});
 
 /*
  * API for Kibana meta info and accumulated operations stats
@@ -69,14 +74,18 @@ export function registerStatsApi(kbnServer, server, config) {
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
+          const collectorsReady = await collectorSet.areAllCollectorsReady();
 
-          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve();
+          if (shouldGetUsage && !collectorsReady) {
+            return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
+          }
+
+          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
           try {
             const [ usage, clusterUuid ] = await Promise.all([
               usagePromise,
               getClusterUuid(callCluster),
             ]);
-
 
             let modifiedUsage = usage;
             if (isLegacy) {
@@ -123,7 +132,7 @@ export function registerStatsApi(kbnServer, server, config) {
               });
             }
           } catch (e) {
-            throw boomify(e);
+            throw boom.boomify(e);
           }
         }
 
@@ -131,6 +140,9 @@ export function registerStatsApi(kbnServer, server, config) {
          * for health-checking Kibana and fetch does not rely on fetching data
          * from ES */
         const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
+        if (!await kibanaStatsCollector.isReady()) {
+          return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
+        }
         let kibanaStats = await kibanaStatsCollector.fetch();
         kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
 

@@ -8,8 +8,8 @@ import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
-import { initPublicRolesApi } from './server/routes/api/public/roles';
-import { initPrivilegesApi } from './server/routes/api/public/privileges';
+import { initExternalRolesApi } from './server/routes/api/external/roles';
+import { initPrivilegesApi } from './server/routes/api/external/privileges';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initOverwrittenSessionView } from './server/routes/views/overwritten_session';
 import { initLoginView } from './server/routes/views/login';
@@ -45,7 +45,11 @@ export const security = (kibana) => new kibana.Plugin({
       authProviders: Joi.array().items(Joi.string()).default(['basic']),
       enabled: Joi.boolean().default(true),
       cookieName: Joi.string().default('sid'),
-      encryptionKey: Joi.string(),
+      encryptionKey: Joi.when(Joi.ref('$dist'), {
+        is: true,
+        then: Joi.string(),
+        otherwise: Joi.string().default('a'.repeat(32)),
+      }),
       sessionTimeout: Joi.number().allow(null).default(null),
       secureCookies: Joi.boolean().default(false),
       public: Joi.object({
@@ -61,6 +65,15 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
+      authc: Joi.object({})
+        .when('authProviders', {
+          is: Joi.array().items(Joi.string().valid('oidc').required(), Joi.string()),
+          then: Joi.object({
+            oidc: Joi.object({
+              realm: Joi.string().required(),
+            }).default()
+          }).default()
+        })
     }).default();
   },
 
@@ -199,7 +212,7 @@ export const security = (kibana) => new kibana.Plugin({
     initAPIAuthorization(server, authorization);
     initAppAuthorization(server, xpackMainPlugin, authorization);
     initUsersApi(server);
-    initPublicRolesApi(server);
+    initExternalRolesApi(server);
     initIndicesApi(server);
     initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);

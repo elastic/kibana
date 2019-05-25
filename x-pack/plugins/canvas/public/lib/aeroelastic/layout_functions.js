@@ -896,7 +896,7 @@ const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
         const preexistingGroupParent = groupsToDissolve.find(
           groupShape => groupShape.id === shape.parent
         );
-        // if linked, dissociate from ad hoc group parent
+        // if linked, dissociate from group parent
         return preexistingGroupParent
           ? {
               ...shape,
@@ -909,7 +909,7 @@ const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
             }
           : shape;
       }),
-    selectedShapes,
+    selectedShapes: selectedShapes.filter(s => !groupsToDissolve.find(g => g.id === s.id)),
   };
 };
 
@@ -1034,7 +1034,9 @@ const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const down = true; // this function won't be called otherwise
   const depthIndex =
-    config.depthSelect && metaHeld
+    config.depthSelect &&
+    metaHeld &&
+    (!hoveredShapes.length || hoveredShapes[0].type !== 'annotation')
       ? (prev.depthIndex + (down && !prev.down ? 1 : 0)) % hoveredShapes.length
       : 0;
   return {

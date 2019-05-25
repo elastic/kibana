@@ -5,10 +5,14 @@
  */
 import { editor } from 'monaco-editor';
 import queryString from 'querystring';
+import url from 'url';
 import { parseSchema } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 
-export function registerReferencesAction(e: editor.IStandaloneCodeEditor) {
+export function registerReferencesAction(
+  e: editor.IStandaloneCodeEditor,
+  getUrlQuery: () => string
+) {
   e.addAction({
     id: 'editor.action.referenceSearch.trigger',
     label: 'Find All References',
@@ -18,7 +22,7 @@ export function registerReferencesAction(e: editor.IStandaloneCodeEditor) {
       const position = ed.getPosition();
       const { uri } = parseSchema(ed.getModel().uri.toString());
       const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;
-      const queries = queryString.parse(location.search);
+      const queries = url.parse(getUrlQuery(), true).query;
       const query = queryString.stringify({
         ...queries,
         tab: 'references',

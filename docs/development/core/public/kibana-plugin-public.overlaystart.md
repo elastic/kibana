@@ -15,5 +15,6 @@ export interface OverlayStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [openFlyout](./kibana-plugin-public.overlaystart.openflyout.md) | <code>(flyoutChildren: React.ReactNode, flyoutProps?: {`<p/>`        closeButtonAriaLabel?: string;`<p/>`        'data-test-subj'?: string;`<p/>`    }) =&gt; FlyoutRef</code> |  |
+|  [openFlyout](./kibana-plugin-public.overlaystart.openflyout.md) | <code>(flyoutChildren: React.ReactNode, flyoutProps?: {`<p/>`        closeButtonAriaLabel?: string;`<p/>`        'data-test-subj'?: string;`<p/>`    }) =&gt; OverlayRef</code> |  |
+|  [openModal](./kibana-plugin-public.overlaystart.openmodal.md) | <code>(modalChildren: React.ReactNode, modalProps?: {`<p/>`        closeButtonAriaLabel?: string;`<p/>`        'data-test-subj'?: string;`<p/>`    }) =&gt; OverlayRef</code> |  |
 

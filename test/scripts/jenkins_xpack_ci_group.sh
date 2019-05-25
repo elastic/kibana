@@ -24,7 +24,10 @@ node scripts/functional_tests --assert-none-excluded \
   --include-tag ciGroup4 \
   --include-tag ciGroup5 \
   --include-tag ciGroup6 \
-  --include-tag ciGroup7
+  --include-tag ciGroup7 \
+  --include-tag ciGroup8 \
+  --include-tag ciGroup9 \
+  --include-tag ciGroup10
 
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
