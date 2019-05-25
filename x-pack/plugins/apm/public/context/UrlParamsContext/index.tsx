@@ -28,14 +28,8 @@ interface TimeRangeRefreshAction {
   time: TimeRange;
 }
 
-function useUiFilters(urlParams: IUrlParams): UIFilters {
-  return useMemo(
-    () => ({
-      kuery: urlParams.kuery,
-      environment: urlParams.environment
-    }),
-    [urlParams]
-  );
+function useUiFilters({ kuery, environment }: IUrlParams): UIFilters {
+  return useMemo(() => ({ kuery, environment }), [kuery, environment]);
 }
 
 const defaultRefresh = (time: TimeRange) => {};
@@ -74,6 +68,10 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
     resolveUrlParams(location, {})
   );
   const uiFilters = useUiFilters(urlParams);
+  const contextValue = React.useMemo(
+    () => ({ urlParams, refreshTimeRange, uiFilters }),
+    [urlParams]
+  );
 
   function refreshTimeRange(time: TimeRange) {
     dispatch({ type: TIME_RANGE_REFRESH, time });
@@ -86,12 +84,7 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
     [location]
   );
 
-  return (
-    <UrlParamsContext.Provider
-      children={children}
-      value={{ urlParams, refreshTimeRange, uiFilters }}
-    />
-  );
+  return <UrlParamsContext.Provider children={children} value={contextValue} />;
 };
 
 export { UrlParamsContext, UrlParamsProvider, useUiFilters };
