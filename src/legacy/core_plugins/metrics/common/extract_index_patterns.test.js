@@ -17,49 +17,51 @@
  * under the License.
  */
 
-import { extractIndexPatterns } from '../extract_index_patterns';
-import { expect } from 'chai';
+import { extractIndexPatterns } from './extract_index_patterns';
+
 describe('extractIndexPatterns(vis)', () => {
   let visParams;
   let visFields;
+
   beforeEach(() => {
     visFields = {
-      '*': []
+      '*': [],
     };
     visParams = {
       index_pattern: '*',
       series: [
         {
           override_index_pattern: 1,
-          series_index_pattern: 'example-1-*'
+          series_index_pattern: 'example-1-*',
         },
         {
           override_index_pattern: 1,
-          series_index_pattern: 'example-2-*'
-        }
+          series_index_pattern: 'example-2-*',
+        },
       ],
       annotations: [
         { index_pattern: 'notes-*' },
-        { index_pattern: 'example-1-*' }
-      ]
+        { index_pattern: 'example-1-*' },
+      ],
     };
   });
 
-  it('should return index patterns', () => {
+  test('should return index patterns', () => {
     visFields = {};
-    expect(extractIndexPatterns(visParams, visFields)).to.eql([
+
+    expect(extractIndexPatterns(visParams, visFields)).toEqual([
       '*',
       'example-1-*',
       'example-2-*',
-      'notes-*'
+      'notes-*',
     ]);
   });
 
-  it('should return index patterns that do not exist in visFields', () => {
-    expect(extractIndexPatterns(visParams, visFields)).to.eql([
+  test('should return index patterns that do not exist in visFields', () => {
+    expect(extractIndexPatterns(visParams, visFields)).toEqual([
       'example-1-*',
       'example-2-*',
-      'notes-*'
+      'notes-*',
     ]);
   });
 });
