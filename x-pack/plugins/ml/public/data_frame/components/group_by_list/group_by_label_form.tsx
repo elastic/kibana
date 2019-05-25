@@ -53,11 +53,11 @@ export const GroupByLabelForm: React.SFC<Props> = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem className="mlGroupByLabel--text">
-        <span className="mlGroupByLabel__text">{item.aggName}</span>
+        <span className="eui-textTruncate">{item.aggName}</span>
       </EuiFlexItem>
       {interval !== undefined && (
         <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
-          <EuiTextColor color="subdued" className="mlGroupByLabel__text">
+          <EuiTextColor color="subdued" className="eui-textTruncate">
             {interval}
           </EuiTextColor>
         </EuiFlexItem>
