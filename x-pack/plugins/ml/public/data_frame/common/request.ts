@@ -105,7 +105,7 @@ export function getDataFramePreviewRequest(
       const dateHistogramAgg: DateHistogramAgg = {
         date_histogram: {
           field: g.field,
-          interval: g.interval,
+          calendar_interval: g.calendar_interval,
         },
       };
 
@@ -113,7 +113,7 @@ export function getDataFramePreviewRequest(
       // date_histrogram aggregation formats like 'yyyy-MM-dd'. The following code extracts
       // the interval unit from the configurations interval and adds a matching
       // aggregation format to the configuration.
-      const timeUnitMatch = g.interval.match(dateHistogramIntervalFormatRegex);
+      const timeUnitMatch = g.calendar_interval.match(dateHistogramIntervalFormatRegex);
       if (timeUnitMatch !== null && Array.isArray(timeUnitMatch) && timeUnitMatch.length === 2) {
         // the following is just a TS compatible way of using the
         // matched string like `d` as the property to access the enum.
