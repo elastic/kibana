@@ -75,19 +75,7 @@ export function initAuthenticateApi(server) {
     method: 'GET',
     path: '/api/security/v1/oidc',
     config: {
-      auth: false,
-      validate: {
-        query: Joi.object().keys({
-          iss: Joi.string(),
-          login_hint: Joi.string(),
-          target_link_uri: Joi.string(),
-          code: Joi.string(),
-          error: Joi.string(),
-          error_description: Joi.string(),
-          error_uri: Joi.string(),
-          state: Joi.string()
-        })
-      }
+      auth: false
     },
     async handler(request, h) {
       try {
@@ -117,14 +105,7 @@ export function initAuthenticateApi(server) {
     method: 'POST',
     path: '/api/security/v1/oidc',
     config: {
-      auth: false,
-      validate: {
-        query: Joi.object().keys({
-          iss: Joi.string(),
-          login_hint: Joi.string(),
-          target_link_uri: Joi.string()
-        })
-      }
+      auth: false
     },
     async handler(request, h) {
       try {
