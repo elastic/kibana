@@ -22,10 +22,9 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('data-shared-item', function indexPatternCreation() {
+  describe.skip('data-shared-item', function indexPatternCreation() {
     before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToApp('visualize');
@@ -39,7 +38,6 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.visualize.clickVisualizationByName('Shared-Item Visualization AreaChart');
       await retry.try(async function () {
-        await browser.refresh();
         const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
         expect(title).to.eql(expected.title);
         expect(description).to.eql(expected.description);
