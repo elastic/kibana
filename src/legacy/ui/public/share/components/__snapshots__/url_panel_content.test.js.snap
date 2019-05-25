@@ -54,8 +54,7 @@ exports[`render 1`] = `
                   aria-label="Info"
                   content={
                     <FormattedMessage
-                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
-            Edits to the saved {objectType} won't be visible via this URL."
+                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
                       id="common.ui.share.urlPanel.snapshotDescription"
                       values={
                         Object {
@@ -111,6 +110,7 @@ exports[`render 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    data-test-subj="createShortUrl"
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -140,10 +140,7 @@ exports[`render 1`] = `
           aria-label="Info"
           content={
             <FormattedMessage
-              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
-        Internet Explorer has URL length restrictions,
-        and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
-        but the short URL should work great."
+              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
               id="common.ui.share.urlPanel.shortUrlHelpText"
               values={Object {}}
             />
@@ -207,8 +204,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                   aria-label="Info"
                   content={
                     <FormattedMessage
-                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
-            Edits to the saved {objectType} won't be visible via this URL."
+                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
                       id="common.ui.share.urlPanel.snapshotDescription"
                       values={
                         Object {
@@ -264,6 +260,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
     />
   </EuiFormRow>
   <EuiFormRow
+    data-test-subj="createShortUrl"
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -293,10 +290,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
           aria-label="Info"
           content={
             <FormattedMessage
-              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
-        Internet Explorer has URL length restrictions,
-        and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
-        but the short URL should work great."
+              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
               id="common.ui.share.urlPanel.shortUrlHelpText"
               values={Object {}}
             />
@@ -306,6 +300,114 @@ exports[`should enable saved object export option when objectId is provided 1`] 
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+  </EuiFormRow>
+  <EuiCopy
+    afterMessage="Copied"
+    anchorClassName="kbnShareContextMenu__copyAnchor"
+    textToCopy="http://localhost/"
+  >
+    <Component />
+  </EuiCopy>
+</EuiForm>
+`;
+
+exports[`should hide short url section when allowShortUrl is false 1`] = `
+<EuiForm
+  className="kbnShareContextMenu__finalPanel"
+  data-test-subj="shareUrlForm"
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Generate the link as"
+        id="common.ui.share.urlPanel.generateLinkAsLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiRadioGroup
+      idSelected="snapshot"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "data-test-subj": "exportAsSnapshot",
+            "id": "snapshot",
+            "label": <EuiFlexGroup
+              gutterSize="none"
+            >
+              <EuiFlexItem>
+                <FormattedMessage
+                  defaultMessage="Snapshot"
+                  id="common.ui.share.urlPanel.snapshotLabel"
+                  values={Object {}}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Info"
+                  content={
+                    <FormattedMessage
+                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                      id="common.ui.share.urlPanel.snapshotDescription"
+                      values={
+                        Object {
+                          "objectType": "dashboard",
+                        }
+                      }
+                    />
+                  }
+                  position="bottom"
+                  type="questionInCircle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+          },
+          Object {
+            "data-test-subj": "exportAsSavedObject",
+            "disabled": false,
+            "id": "savedObject",
+            "label": <EuiFlexGroup
+              gutterSize="none"
+            >
+              <EuiFlexItem>
+                <FormattedMessage
+                  defaultMessage="Saved object"
+                  id="common.ui.share.urlPanel.savedObjectLabel"
+                  values={Object {}}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Info"
+                  content={
+                    <FormattedMessage
+                      defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+                      id="common.ui.share.urlPanel.savedObjectDescription"
+                      values={
+                        Object {
+                          "objectType": "dashboard",
+                        }
+                      }
+                    />
+                  }
+                  position="bottom"
+                  type="questionInCircle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+          },
+        ]
+      }
+    />
   </EuiFormRow>
   <EuiCopy
     afterMessage="Copied"

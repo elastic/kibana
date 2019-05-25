@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
@@ -27,8 +26,14 @@ uiModules
   .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggParamReactWrapper), [
     ['agg', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
+    ['aggParams', { watchDepth: 'collection' }],
+    ['editorConfig', { watchDepth: 'collection' }],
+    ['indexedFields', { watchDepth: 'collection' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
+    'showValidation',
     'value',
   ]))
   .directive('visAggParamEditor', function (config) {
@@ -51,9 +56,15 @@ uiModules
             ng-if="editorComponent"
             param-editor="editorComponent"
             agg="agg"
+            agg-params="agg.params"
             agg-param="aggParam"
-            on-change="onChange"
+            editor-config="editorConfig"
+            indexed-fields="indexedFields"
+            show-validation="showValidation"
             value="paramValue"
+            on-change="onChange"
+            set-touched="setTouched"
+            set-validity="setValidity"
           ></vis-agg-param-react-wrapper>`;
         }
 
@@ -62,19 +73,11 @@ uiModules
       link: {
         pre: function ($scope, $el, attr) {
           $scope.$bind('aggParam', attr.aggParam);
-          $scope.$bind('agg', attr.agg);
           $scope.$bind('editorComponent', attr.editorComponent);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
           $scope.config = config;
-
-          $scope.optionEnabled = function (option) {
-            if (option && isFunction(option.enabled)) {
-              return option.enabled($scope.agg);
-            }
-
-            return true;
-          };
+          $scope.showValidation = false;
 
           if (attr.editorComponent) {
             $scope.$watch('agg.params[aggParam.name]', (value) => {
@@ -82,16 +85,33 @@ uiModules
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
             }, true);
+
+            $scope.$watch(() => {
+              // The model can become touched either onBlur event or when the form is submitted.
+              return ngModelCtrl.$touched;
+            }, (value) => {
+              if (value) {
+                $scope.showValidation = true;
+              }
+            }, true);
+
+            $scope.paramValue = $scope.agg.params[$scope.aggParam.name];
           }
 
           $scope.onChange = (value) => {
-            // This is obviously not a good code quality, but without using scope binding (which we can't see above)
-            // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-            $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
+            $scope.paramValue = value;
+            $scope.onParamChange($scope.agg, $scope.aggParam.name, value);
+            $scope.showValidation = true;
+            ngModelCtrl.$setDirty();
+          };
 
-            if(ngModelCtrl) {
-              ngModelCtrl.$setDirty();
-            }
+          $scope.setTouched = () => {
+            ngModelCtrl.$setTouched();
+            $scope.showValidation = true;
+          };
+
+          $scope.setValidity = (isValid) => {
+            ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
           };
         }
       }

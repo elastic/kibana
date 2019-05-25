@@ -5,7 +5,7 @@
  */
 
 import { handleResponse } from '../get_clusters_state';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from 'lodash';
 

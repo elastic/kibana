@@ -18,7 +18,7 @@
  */
 
 import { buildRangeFilter } from '../range';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';
@@ -63,8 +63,8 @@ describe('Filter Manager', function () {
 
     it('should wrap painless scripts in comparator lambdas', function () {
       const field = getField(indexPattern, 'script date');
-      const expected = `boolean gte(Supplier s, def v) {return s.get() >= v} ` +
-              `boolean lte(Supplier s, def v) {return s.get() <= v}` +
+      const expected = `boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))} ` +
+              `boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}` +
               `gte(() -> { ${field.script} }, params.gte) && ` +
               `lte(() -> { ${field.script} }, params.lte)`;
 

@@ -32,7 +32,6 @@ import {
   getConfiguration,
   getConstrainedShapesWithPreexistingAnnotations,
   getCursor,
-  getDirectSelect,
   getDraggedPrimaryShape,
   getFocusedShape,
   getGroupAction,
@@ -48,9 +47,7 @@ import {
   getMouseTransformGesturePrev,
   getMouseTransformState,
   getNextScene,
-  getNextShapes,
   getResizeManipulator,
-  getRestateShapesEvent,
   getRotationAnnotations,
   getRotationTooltipAnnotation,
   getSelectedPrimaryShapeIds,
@@ -58,6 +55,7 @@ import {
   getSelectedShapes,
   getSelectedShapesPrev,
   getSelectionState,
+  getSelectionStateFull,
   getShapes,
   getSnappedShapes,
   getTransformIntents,
@@ -95,28 +93,23 @@ const mouseTransformGesture = select(getMouseTransformGesture)(mouseTransformSta
 
 const transformGestures = mouseTransformGesture;
 
-const restateShapesEvent = select(getRestateShapesEvent)(primaryUpdate);
-
-// directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
-const directSelect = select(getDirectSelect)(primaryUpdate);
-
-const selectedShapeObjects = select(getSelectedShapeObjects)(scene);
+const selectedShapeObjects = select(getSelectedShapeObjects)(scene, shapes);
 
 const selectedShapesPrev = select(getSelectedShapesPrev)(scene);
 
-const selectionState = select(getSelectionState)(
+const selectionStateFull = select(getSelectionStateFull)(
   selectedShapesPrev,
   configuration,
   selectedShapeObjects,
   hoveredShapes,
   mouseButton,
   metaHeld,
-  multiselectModifier,
-  directSelect,
-  shapes
+  multiselectModifier
 );
 
-const selectedShapes = select(getSelectedShapes)(selectionState);
+const selectionState = select(getSelectionState)(selectionStateFull);
+
+const selectedShapes = select(getSelectedShapes)(selectionStateFull);
 
 const selectedPrimaryShapeIds = select(getSelectedPrimaryShapeIds)(selectedShapes); // fixme unify with contentShape
 
@@ -134,11 +127,7 @@ const transformIntents = select(getTransformIntents)(
   resizeManipulator
 );
 
-// "cumulative" is the effect of the ongoing interaction; "baseline" is sans "cumulative", plain "localTransformMatrix"
-
-const nextShapes = select(getNextShapes)(shapes, restateShapesEvent);
-
-const transformedShapes = select(applyLocalTransforms)(nextShapes, transformIntents);
+const transformedShapes = select(applyLocalTransforms)(shapes, transformIntents);
 
 const draggedPrimaryShape = select(getDraggedPrimaryShape)(shapes, draggedShape);
 
@@ -182,7 +171,7 @@ const rotationTooltipAnnotation = select(getRotationTooltipAnnotation)(
   cursorPosition
 );
 
-const groupAction = select(getGroupAction)(actionEvent);
+const groupAction = select(getGroupAction)(actionEvent, mouseIsDown);
 
 const groupingTuple = select(getGroupingTuple)(
   configuration,
@@ -239,7 +228,6 @@ export const nextScene = select(getNextScene)(
   cursor,
   selectionState,
   mouseTransformState,
-  groupedSelectedShapes,
   gestureState
 );
 

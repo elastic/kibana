@@ -44,6 +44,7 @@ export const TabHistogram = ({ histogram, histogramInterval }) => (
     <FieldList
       columns={columns}
       fields={histogram}
+      dataTestSubj="detailPanelHistogramTabTable"
     />
   </Fragment>
 );

@@ -2,116 +2,99 @@
 
 exports[`Snapshot component renders without errors 1`] = `
 <EuiFlexGroup
-  alignItems="baseline"
-  gutterSize="xl"
+  gutterSize="s"
 >
   <EuiFlexItem
     grow={4}
   >
-    <EuiTitle
-      size="xs"
-      textTransform="none"
-    >
-      <h5>
-        <FormattedMessage
-          defaultMessage="Endpoint status"
-          id="xpack.uptime.snapshot.endpointStatusTitle"
-          values={Object {}}
-        />
-      </h5>
-    </EuiTitle>
     <EuiPanel
       grow={true}
       hasShadow={false}
-      paddingSize="m"
+      paddingSize="s"
     >
       <EuiFlexGroup
-        gutterSize="xl"
-        justifyContent="spaceEvenly"
+        direction="column"
       >
-        <EuiFlexItem>
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiTitle
+            size="xs"
           >
-            <EuiStat
-              description="Up"
-              reverse={false}
-              textAlign="center"
-              title={8}
-              titleColor="primary"
-              titleSize="l"
-            />
-          </EuiPanel>
+            <h5>
+              <FormattedMessage
+                defaultMessage="Current status"
+                id="xpack.uptime.snapshot.endpointStatusTitle"
+                values={Object {}}
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
+          <EuiFlexGroup
+            gutterSize="s"
+            justifyContent="spaceEvenly"
           >
-            <EuiStat
-              description="Down"
-              reverse={false}
-              textAlign="center"
-              title={2}
-              titleColor="danger"
-              titleSize="l"
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
-          >
-            <EuiStat
-              description="Total"
-              reverse={false}
-              textAlign="center"
-              title={10}
-              titleColor="subdued"
-              titleSize="l"
-            />
-          </EuiPanel>
+            <EuiFlexItem>
+              <EuiStat
+                description="Up"
+                textAlign="center"
+                title={8}
+                titleColor="secondary"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                description="Down"
+                textAlign="center"
+                title={2}
+                titleColor="danger"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                description="Total"
+                textAlign="center"
+                title={10}
+                titleColor="subdued"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   </EuiFlexItem>
   <EuiFlexItem
     grow={8}
-    style={
-      Object {
-        "paddingRight": "12px",
-        "paddingTop": "12px",
-      }
-    }
   >
-    <EuiTitle
-      size="xs"
-      textTransform="none"
-    >
-      <h5>
-        <FormattedMessage
-          defaultMessage="Status over time"
-          id="xpack.uptime.snapshot.statusOverTimeTitle"
-          values={Object {}}
-        />
-      </h5>
-    </EuiTitle>
     <EuiPanel
       grow={true}
       hasShadow={false}
       paddingSize="s"
       style={
         Object {
-          "maxHeight": "137px",
+          "height": 170,
         }
       }
     >
-      <Component
+      <EuiTitle
+        size="xs"
+      >
+        <h5>
+          <FormattedMessage
+            defaultMessage="Status over time"
+            id="xpack.uptime.snapshot.statusOverTimeTitle"
+            values={Object {}}
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <SnapshotHistogram
         dangerColor="#F050F0"
         histogram={
           Array [
@@ -194,8 +177,7 @@ exports[`Snapshot component renders without errors 1`] = `
             },
           ]
         }
-        primaryColor="#000000"
-        windowWidth={1600}
+        successColor="#000000"
       />
     </EuiPanel>
   </EuiFlexItem>

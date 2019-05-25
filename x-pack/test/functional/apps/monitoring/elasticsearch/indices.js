@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       ]; /*eslint-enable*/
 
       // check the all data in the table
-      indicesAll.forEach((obj, index) => {
+      indicesAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
         expect(indicesAll[index].name).to.be(tableData[index].name);
         expect(indicesAll[index].status).to.be(tableData[index].status);
         expect(indicesAll[index].documentCount).to.be(tableData[index].documentCount);

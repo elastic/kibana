@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import overviewFixtureGreenPlatinum from './fixtures/overview_green_platinum';
 import overviewFixtureRedPlatinum from './fixtures/overview_red_platinum';

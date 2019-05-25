@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { Notifier } from '..';
 import { metadata } from 'ui/metadata';

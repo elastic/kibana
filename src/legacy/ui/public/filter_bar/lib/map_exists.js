@@ -17,14 +17,12 @@
  * under the License.
  */
 
-export function FilterBarLibMapExistsProvider(Promise) {
-  return function (filter) {
-    if (filter.exists) {
-      const type = 'exists';
-      const key = filter.exists.field;
-      const value = type;
-      return Promise.resolve({ type, key, value });
-    }
-    return Promise.reject(filter);
-  };
+export async function mapExists(filter) {
+  if (filter.exists) {
+    const type = 'exists';
+    const key = filter.exists.field;
+    const value = type;
+    return { type, key, value };
+  }
+  throw filter;
 }

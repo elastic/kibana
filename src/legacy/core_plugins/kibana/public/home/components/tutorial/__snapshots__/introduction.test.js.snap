@@ -12,7 +12,6 @@ exports[`props exportedFieldsUrl 1`] = `
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
           <h2>
             Great tutorial
@@ -32,6 +31,7 @@ exports[`props exportedFieldsUrl 1`] = `
         href="exported_fields_url"
         iconSide="left"
         rel="noopener"
+        size="m"
         target="_blank"
         type="button"
       >
@@ -69,7 +69,6 @@ exports[`props iconType 1`] = `
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
           <h2>
             Great tutorial
@@ -100,7 +99,6 @@ exports[`props isBeta 1`] = `
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
           <h2>
             Great tutorial
@@ -135,7 +133,6 @@ exports[`props previewUrl 1`] = `
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
           <h2>
             Great tutorial
@@ -175,7 +172,6 @@ exports[`render 1`] = `
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
           <h2>
             Great tutorial

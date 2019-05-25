@@ -38,6 +38,7 @@ interface JsonObject {
   [key: string]: JsonValue;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface JsonArray extends Array<JsonValue> {}
 
 export function fromKueryExpression(

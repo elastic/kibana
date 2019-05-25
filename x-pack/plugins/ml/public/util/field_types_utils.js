@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { i18n } from '@kbn/i18n';
+import {
+  KBN_FIELD_TYPES,
+  ML_JOB_FIELD_TYPES,
+} from './../../common/constants/field_types';
 
 // convert kibana types to ML Job types
 // this is needed because kibana types only have string and not text and keyword.
@@ -39,3 +41,38 @@ export function kbnTypeToMLJobType(field) {
 
   return type;
 }
+
+export const mlJobTypeAriaLabels = {
+  BOOLEAN: i18n.translate('xpack.ml.fieldTypeIcon.booleanTypeAriaLabel', {
+    defaultMessage: 'boolean type',
+  }),
+  DATE: i18n.translate('xpack.ml.fieldTypeIcon.dateTypeAriaLabel', {
+    defaultMessage: 'date type',
+  }),
+  GEO_POINT: i18n.translate('xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel', {
+    defaultMessage: '{geoPointParam} type',
+    values: {
+      geoPointParam: 'geo point'
+    }
+  }),
+  IP: i18n.translate('xpack.ml.fieldTypeIcon.ipTypeAriaLabel', {
+    defaultMessage: 'ip type',
+  }),
+  KEYWORD: i18n.translate('xpack.ml.fieldTypeIcon.keywordTypeAriaLabel', {
+    defaultMessage: 'keyword type',
+  }),
+  NUMBER: i18n.translate('xpack.ml.fieldTypeIcon.numberTypeAriaLabel', {
+    defaultMessage: 'number type',
+  }),
+  TEXT: i18n.translate('xpack.ml.fieldTypeIcon.textTypeAriaLabel', {
+    defaultMessage: 'text type',
+  }),
+  UNKNOWN: i18n.translate('xpack.ml.fieldTypeIcon.unknownTypeAriaLabel', {
+    defaultMessage: 'unknown type',
+  }),
+};
+
+export const getMLJobTypeAriaLabel = (type) => {
+  const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(k => (ML_JOB_FIELD_TYPES[k] === type));
+  return mlJobTypeAriaLabels[requestedFieldType] || null;
+};

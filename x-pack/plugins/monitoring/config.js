@@ -70,7 +70,8 @@ export const config = (Joi) => {
         keyPassphrase: Joi.string(),
         alwaysPresentCertificate: Joi.boolean().default(false),
       }).default(),
-      apiVersion: Joi.string().default('master')
+      apiVersion: Joi.string().default('master'),
+      logFetchCount: Joi.number().default(10)
     }).default(),
     tests: Joi.object({
       cloud_detector: Joi.object({

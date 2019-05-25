@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
 import { PathProvider } from 'plugins/xpack_main/services/path';
@@ -20,17 +21,25 @@ const SESSION_TIMEOUT_GRACE_PERIOD_MS = 5000;
 
 const module = uiModules.get('security', []);
 module.config(($httpProvider) => {
-  $httpProvider.interceptors.push(($timeout, $window, $q, $injector, sessionTimeout, Notifier, Private, autoLogout, i18n) => {
+  $httpProvider.interceptors.push((
+    $timeout,
+    $q,
+    $injector,
+    sessionTimeout,
+    Notifier,
+    Private,
+    autoLogout
+  ) => {
     const isUnauthenticated = Private(PathProvider).isUnauthenticated();
     const notifier = new Notifier();
     const notificationLifetime = 60 * 1000;
     const notificationOptions = {
       type: 'warning',
-      content: i18n('xpack.security.hacks.logoutNotification', {
+      content: i18n.translate('xpack.security.hacks.logoutNotification', {
         defaultMessage: 'You will soon be logged out due to inactivity. Click OK to resume.'
       }),
       icon: 'warning',
-      title: i18n('xpack.security.hacks.warningTitle', {
+      title: i18n.translate('xpack.security.hacks.warningTitle', {
         defaultMessage: 'Warning'
       }),
       lifetime: Math.min(

@@ -12,7 +12,7 @@ import {
   PHASE_ROLLOVER_ALIAS,
   PHASE_FREEZE_ENABLED,
   PHASE_INDEX_PRIORITY,
-} from '../constants';
+} from '../../constants';
 
 export const defaultColdPhase = {
   [PHASE_ENABLED]: false,

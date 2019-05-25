@@ -5,14 +5,14 @@
  */
 /* eslint  max-len: 0 */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('migrations', () => {
 
-    it('should apply saved object reference migration when importing map saved objects prior to 7.1.0', async () => {
+    it('should apply saved object reference migration when importing map saved objects prior to 7.2.0', async () => {
       const resp = await supertest
         .post(`/api/saved_objects/map`)
         .set('kbn-xsrf', 'kibana')
@@ -42,7 +42,7 @@ export default function ({ getService }) {
           type: 'index-pattern'
         }
       ]);
-      expect(resp.body.migrationVersion).to.eql({ map: '7.1.0' });
+      expect(resp.body.migrationVersion).to.eql({ map: '7.2.0' });
       expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
     });
   });

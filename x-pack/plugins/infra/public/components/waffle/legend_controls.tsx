@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { SyntheticEvent, useState } from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { InfraWaffleMapBounds } from '../../lib/lib';
 
 interface Props {
@@ -162,7 +163,7 @@ export const LegendControls = injectI18n(
   }
 );
 
-const ControlContainer = styled.div`
+const ControlContainer = euiStyled.div`
   position: absolute;
   top: -20px;
   right: 6px;

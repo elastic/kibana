@@ -6,10 +6,13 @@
 
 import React, { Fragment } from 'react';
 
-import { StyleTabs } from './style_tabs';
+import { FilterEditor } from './filter_editor';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
-import { SettingsPanel } from './settings_panel';
+import { LayerErrors } from './layer_errors';
+import { LayerSettings } from './layer_settings';
+import { SourceSettings } from './source_settings';
+import { StyleSettings } from './style_settings';
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -17,7 +20,6 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
   EuiAccordion,
@@ -85,6 +87,21 @@ export class LayerPanel extends React.Component {
         hasLoadedSourcePropsForLayer: true,
       });
     }
+  }
+
+  _renderFilterSection() {
+    if (!this.props.selectedLayer.supportsElasticsearchFilters()) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiPanel>
+          <FilterEditor/>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
   }
 
   _renderJoinSection() {
@@ -174,12 +191,23 @@ export class LayerPanel extends React.Component {
           </div>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody className="mapLayerPanel__body">
-          <SettingsPanel/>
-          <EuiSpacer size="s" />
-          {this._renderJoinSection()}
-          <StyleTabs layer={selectedLayer}/>
-        </EuiFlyoutBody>
+        <div className="mapLayerPanel__body">
+          <div className="mapLayerPanel__bodyOverflow">
+
+            <LayerErrors/>
+
+            <LayerSettings/>
+
+            <SourceSettings/>
+
+            {this._renderFilterSection()}
+
+            {this._renderJoinSection()}
+
+            <StyleSettings/>
+
+          </div>
+        </div>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
           <FlyoutFooter hasStateChanged={this.props.hasStateChanged}/>

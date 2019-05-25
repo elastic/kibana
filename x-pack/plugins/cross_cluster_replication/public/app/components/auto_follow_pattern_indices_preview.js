@@ -29,6 +29,7 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
     <EuiCallOut
       title={title}
       iconType="indexMapping"
+      data-test-subj="autoFollowPatternIndicesPreview"
     >
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
@@ -36,7 +37,7 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
       />
       <ul>
         {indicesPreview.map(({ followPattern: { prefix, suffix, template } }, i) => (
-          <li key={i}>
+          <li key={i} data-test-subj="indexPreview">
             {prefix}<strong>{template}</strong>{suffix}
           </li>
         ))}

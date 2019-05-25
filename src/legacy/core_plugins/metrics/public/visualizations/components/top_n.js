@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import getLastValue from '../../../common/get_last_value';
+import { getLastValue } from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
-class TopN extends Component {
+export class TopN extends Component {
   constructor(props) {
     super(props);
 
@@ -119,7 +119,7 @@ class TopN extends Component {
 
     return (
       <div className={className}>
-        <table className="tvbVisTopN__table" ref={this.tableRef}>
+        <table className="tvbVisTopN__table" data-test-subj="tvbVisTopNTable" ref={this.tableRef}>
           <tbody>
             { rows }
           </tbody>
@@ -143,5 +143,3 @@ TopN.propTypes = {
   reversed: PropTypes.bool,
   direction: PropTypes.string
 };
-
-export default TopN;

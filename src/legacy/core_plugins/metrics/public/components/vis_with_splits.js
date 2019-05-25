@@ -20,7 +20,8 @@
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { last, findIndex, first } from 'lodash';
-import calculateLabel  from '../../common/calculate_label';
+import { calculateLabel }  from '../../common/calculate_label';
+
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
     const { model, visData } = props;
@@ -35,7 +36,13 @@ export function visWithSplits(WrappedComponent) {
       if (!seriesModel || !splitId) return acc;
       const metric = last(seriesModel.metrics);
       const label = calculateLabel(metric, seriesModel.metrics);
-      if (!acc[splitId]) acc[splitId] = { series: [], label: series.label };
+
+      if (!acc[splitId]) {
+        acc[splitId] = {
+          series: [],
+          label: series.label.toString()
+        };
+      }
 
       acc[splitId].series.push({
         ...series,

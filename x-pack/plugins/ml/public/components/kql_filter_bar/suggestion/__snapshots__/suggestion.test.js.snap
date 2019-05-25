@@ -17,12 +17,8 @@ exports[`Suggestion snapshot 1`] = `
   <styled.div>
     fieldValue
   </styled.div>
-  <styled.div
-    dangerouslySetInnerHTML={
-      Object {
-        "__html": "<p>Test description for fieldValue</p>",
-      }
-    }
-  />
+  <styled.div>
+    &lt;p&gt;Test description for fieldValue&lt;/p&gt;
+  </styled.div>
 </styled.li>
 `;

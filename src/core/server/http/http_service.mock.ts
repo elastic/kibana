@@ -16,30 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
 
-const createStartContractMock = () => {
-  const startContract = {
+const createSetupContractMock = () => {
+  const setupContract = {
+    options: {} as ServerOptions,
+    registerAuth: jest.fn(),
+    registerOnRequest: jest.fn(),
+    registerRouter: jest.fn(),
+    getBasePathFor: jest.fn(),
+    setBasePathFor: jest.fn(),
     // we can mock some hapi server method when we need it
     server: {} as Server,
-    options: {} as ServerOptions,
   };
+  return setupContract;
+};
+
+const createStartContractMock = () => {
+  const startContract = {
+    isListening: jest.fn(),
+  };
+  startContract.isListening.mockReturnValue(true);
   return startContract;
 };
 
-type HttpSericeContract = PublicMethodsOf<HttpService>;
+type HttpServiceContract = PublicMethodsOf<HttpService>;
 const createHttpServiceMock = () => {
-  const mocked: jest.Mocked<HttpSericeContract> = {
+  const mocked: jest.Mocked<HttpServiceContract> = {
+    setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
-    registerRouter: jest.fn(),
   };
+  mocked.setup.mockResolvedValue(createSetupContractMock());
   mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 
 export const httpServiceMock = {
   create: createHttpServiceMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

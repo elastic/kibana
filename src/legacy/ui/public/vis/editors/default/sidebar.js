@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import './agg_group';
 import './vis_options';
+import 'ui/directives/css_truncate';
 import { uiModules } from '../../../modules';
 import sidebarTemplate from './sidebar.html';
 

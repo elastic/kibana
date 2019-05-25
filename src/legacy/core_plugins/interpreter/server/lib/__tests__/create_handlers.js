@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { createHandlers } from '../create_handlers';
 
 const mockRequest = {

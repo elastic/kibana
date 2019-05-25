@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
-// tslint:disable-next-line: no-default-export
+// eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
@@ -31,6 +31,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       log.debug('Starting visualize before method');
       browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
@@ -79,6 +80,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_tsvb_chart'));
       loadTestFile(require.resolve('./_tsvb_markdown'));
+      loadTestFile(require.resolve('./_tsvb_table'));
       loadTestFile(require.resolve('./_vega_chart'));
     });
   });

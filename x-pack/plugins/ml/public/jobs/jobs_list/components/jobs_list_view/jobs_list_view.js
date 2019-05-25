@@ -76,7 +76,7 @@ export class JobsListView extends Component {
     this.props.angularWrapperScope.$on('jobsUpdated', () => {
       this.refreshJobSummaryList(true);
     });
-    this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => {
+    this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => { // eslint-disable-line no-unused-vars
       this.showCreateWatchFlyout(job.job_id);
     });
 
@@ -406,7 +406,7 @@ export class JobsListView extends Component {
         <JobStatsBar
           jobsSummaryList={jobsSummaryList}
         />
-        <div className="job-management">
+        <div className="job-management" data-test-subj="ml-jobs-list">
           <NodeAvailableWarning />
           <UpgradeWarning />
           <header>
@@ -435,4 +435,3 @@ export class JobsListView extends Component {
     );
   }
 }
-

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import { derivativeMetricAgg } from '../../metrics/derivative';
@@ -30,7 +30,7 @@ import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 const metrics = [
   { name: 'derivative', title: 'Derivative', agg: derivativeMetricAgg },
   { name: 'cumulative_sum', title: 'Cumulative Sum', agg: cumulativeSumMetricAgg },
-  { name: 'moving_avg', title: 'Moving Avg', agg: movingAvgMetricAgg },
+  { name: 'moving_avg', title: 'Moving Avg', agg: movingAvgMetricAgg, dslName: 'moving_fn' },
   { name: 'serial_diff', title: 'Serial Diff', agg: serialDiffMetricAgg },
 ];
 
@@ -137,7 +137,7 @@ describe('parent pipeline aggs', function () {
             schema: 'orderAgg'
           }
         });
-        expect(aggDsl[metric.name].buckets_path).to.be('2-metric');
+        expect(aggDsl[metric.dslName || metric.name].buckets_path).to.be('2-metric');
         expect(aggDsl.parentAggs['2-metric'].max.field).to.be('bytes');
       });
 
@@ -159,8 +159,8 @@ describe('parent pipeline aggs', function () {
             schema: 'orderAgg'
           }
         });
-        expect(aggDsl[metric.name].buckets_path).to.be('2-metric');
-        expect(aggDsl.parentAggs['2-metric'][metric.name].buckets_path).to.be('2-metric-metric');
+        expect(aggDsl[metric.dslName || metric.name].buckets_path).to.be('2-metric');
+        expect(aggDsl.parentAggs['2-metric'][metric.dslName || metric.name].buckets_path).to.be('2-metric-metric');
       });
 
       it('should have correct formatter', function () {

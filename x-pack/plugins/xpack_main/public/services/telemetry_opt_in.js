@@ -5,20 +5,23 @@
  */
 
 import moment from 'moment';
+import { setCanTrackUiMetrics } from 'ui/ui_metric';
 
 export function TelemetryOptInProvider($injector, chrome) {
-
   const Notifier = $injector.get('Notifier');
   const notify = new Notifier();
   let currentOptInStatus = $injector.get('telemetryOptedIn');
+  setCanTrackUiMetrics(currentOptInStatus);
 
-  return {
+  const provider = {
     getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled) => {
+      setCanTrackUiMetrics(enabled);
+
       const $http = $injector.get('$http');
 
       try {
-        await $http.post(chrome.addBasePath('/api/telemetry/v1/optIn'), { enabled });
+        await $http.post(chrome.addBasePath('/api/telemetry/v2/optIn'), { enabled });
         currentOptInStatus = enabled;
       } catch (error) {
         notify.error(error);
@@ -29,7 +32,8 @@ export function TelemetryOptInProvider($injector, chrome) {
     },
     fetchExample: async () => {
       const $http = $injector.get('$http');
-      return $http.post(chrome.addBasePath(`/api/telemetry/v1/clusters/_stats`), {
+      return $http.post(chrome.addBasePath(`/api/telemetry/v2/clusters/_stats`), {
+        unencrypted: true,
         timeRange: {
           min: moment().subtract(20, 'minutes').toISOString(),
           max: moment().toISOString()
@@ -37,4 +41,6 @@ export function TelemetryOptInProvider($injector, chrome) {
       });
     }
   };
+
+  return provider;
 }

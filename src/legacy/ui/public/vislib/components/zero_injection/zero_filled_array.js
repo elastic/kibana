@@ -17,28 +17,25 @@
  * under the License.
  */
 
-export function VislibComponentsZeroInjectionZeroFilledArrayProvider() {
-  /*
-   * Accepts an array of x axis values (strings or numbers).
-   * Returns a zero filled array.
-  */
+/*
+  * Accepts an array of x axis values (strings or numbers).
+  * Returns a zero filled array.
+*/
+export function createZeroFilledArray(arr, label) {
+  if (!Array.isArray(arr)) {
+    throw new Error('createZeroFilledArray expects an array of strings or numbers');
+  }
 
-  return function (arr, label) {
-    if (!Array.isArray(arr)) {
-      throw new Error('ZeroFilledArrayUtilService expects an array of strings or numbers');
-    }
+  const zeroFilledArray = [];
 
-    const zeroFilledArray = [];
-
-    arr.forEach(function (val) {
-      zeroFilledArray.push({
-        x: val,
-        xi: Infinity,
-        y: 0,
-        series: label
-      });
+  arr.forEach(function (val) {
+    zeroFilledArray.push({
+      x: val,
+      xi: Infinity,
+      y: 0,
+      series: label
     });
+  });
 
-    return zeroFilledArray;
-  };
+  return zeroFilledArray;
 }

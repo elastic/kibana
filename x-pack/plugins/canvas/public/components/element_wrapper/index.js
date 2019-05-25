@@ -5,52 +5,73 @@
  */
 
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { compose, shouldUpdate } from 'recompose';
+import { connectAdvanced } from 'react-redux';
+import { compose, withPropsOnChange, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
-import { getState, getValue, getError } from '../../lib/resolved_arg';
+import { getState, getValue } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
 
-const mapStateToProps = (state, { element }) => ({
-  resolvedArg: getResolvedArgs(state, element.id, 'expressionRenderable'),
-  selectedPage: getSelectedPage(state),
-});
+function selectorFactory(dispatch) {
+  let result = {};
+  const createHandlers = createHandlersWithDispatch(dispatch);
 
-const mapDispatchToProps = (dispatch, { element }) => ({
-  createHandlers: pageId => createHandlersWithDispatch(element, pageId, dispatch),
-});
+  return (nextState, nextOwnProps) => {
+    const { element, ...restOwnProps } = nextOwnProps;
+    const { transformMatrix, width, height } = element;
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { resolvedArg, selectedPage } = stateProps;
-  const { element, restProps } = ownProps;
-  const { id, transformMatrix, width, height } = element;
+    const resolvedArg = getResolvedArgs(nextState, element.id, 'expressionRenderable');
+    const selectedPage = getSelectedPage(nextState);
 
-  return {
-    selectedPage,
-    ...restProps, // pass through unused props
-    id, //pass through useful parts of the element object
-    transformMatrix,
-    width,
-    height,
-    state: getState(resolvedArg),
-    error: getError(resolvedArg),
-    renderable: getValue(resolvedArg),
-    createHandlers: dispatchProps.createHandlers,
+    // build interim props object
+    const nextResult = {
+      ...restOwnProps,
+      // state and state-derived props
+      selectedPage,
+      state: getState(resolvedArg),
+      renderable: getValue(resolvedArg),
+      // pass along the handlers creation function
+      createHandlers,
+      // required parts of the element object
+      transformMatrix,
+      width,
+      height,
+      // pass along only the useful parts of the element object
+      // so handlers object can be created
+      element: {
+        id: element.id,
+        filter: element.filter,
+        expression: element.expression,
+      },
+    };
+
+    // update props only if something actually changed
+    if (!isEqual(result, nextResult)) {
+      result = nextResult;
+    }
+
+    return result;
   };
-};
+}
 
 export const ElementWrapper = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps,
-    {
-      areOwnPropsEqual: isEqual,
+  connectAdvanced(selectorFactory),
+  withPropsOnChange(
+    (props, nextProps) => !isEqual(props.element, nextProps.element),
+    props => {
+      const { element, createHandlers } = props;
+      const handlers = createHandlers(element, props.selectedPage);
+      // this removes element and createHandlers from passed props
+      return { handlers };
     }
   ),
-  shouldUpdate((props, nextProps) => !isEqual(props, nextProps))
+  mapProps(props => {
+    // remove element and createHandlers from props passed to component
+    // eslint-disable-next-line no-unused-vars
+    const { element, createHandlers, selectedPage, ...restProps } = props;
+    return restProps;
+  })
 )(Component);
 
 ElementWrapper.propTypes = {
@@ -59,5 +80,9 @@ ElementWrapper.propTypes = {
     transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    // sometimes we get a shape, which lacks an expression
+    // so element properties can not be marked as required
+    expression: PropTypes.string,
+    filter: PropTypes.string,
   }).isRequired,
 };

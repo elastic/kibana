@@ -18,7 +18,7 @@
  */
 
 import { uniqFilters } from '../uniq_filters';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('Filter Bar Directive', function () {
   describe('uniqFilter', function () {

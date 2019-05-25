@@ -43,7 +43,7 @@ describe('AnnotationsTable', () => {
   });
 
   test('Initialization with annotations prop.', () => {
-    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent annotations={mockAnnotations} />);
+    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent annotations={mockAnnotations.slice(0, 1)} />);
     expect(wrapper).toMatchSnapshot();
   });
 

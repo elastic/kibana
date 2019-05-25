@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { ErrorListItem } from 'x-pack/plugins/uptime/common/graphql/types';
-import { ErrorList } from '../error_list';
+import { ErrorListItem } from '../../../../common/graphql/types';
+import { ErrorListComponent } from '../error_list';
 
 describe('ErrorList component', () => {
   let getErrorListResponse: { errorList: ErrorListItem[] };
@@ -22,6 +22,7 @@ describe('ErrorList component', () => {
           count: 843,
           statusCode: null,
           timestamp: '2019-01-28T18:43:15.077Z',
+          name: null,
         },
         {
           latestMessage: 'dial tcp 127.0.0.1:9200: connect: connection refused',
@@ -30,6 +31,7 @@ describe('ErrorList component', () => {
           count: 748,
           statusCode: null,
           timestamp: '2019-01-28T17:59:34.075Z',
+          name: null,
         },
         {
           latestMessage: 'lookup www.reddit.com: no such host',
@@ -38,6 +40,7 @@ describe('ErrorList component', () => {
           count: 1,
           statusCode: null,
           timestamp: '2019-01-28T18:03:10.077Z',
+          name: null,
         },
         {
           latestMessage: 'received status code 301 expecting 200',
@@ -46,6 +49,7 @@ describe('ErrorList component', () => {
           count: 645,
           statusCode: '301',
           timestamp: '2019-01-28T18:43:07.078Z',
+          name: null,
         },
       ],
     };
@@ -53,7 +57,7 @@ describe('ErrorList component', () => {
 
   it('renders the error list without errors', () => {
     const { errorList } = getErrorListResponse;
-    const component = shallowWithIntl(<ErrorList loading={false} errorList={errorList} />);
+    const component = shallowWithIntl(<ErrorListComponent loading={false} data={{ errorList }} />);
     expect(component).toMatchSnapshot();
   });
 });

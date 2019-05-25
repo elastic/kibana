@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
 
-import { initTestBed, mockServerResponses, nextTick } from './job_create.test_helpers';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -15,39 +14,49 @@ jest.mock('ui/index_patterns', () => {
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path,
   breadcrumbs: { set: () => {} },
+  getInjected: () => ({}),
 }));
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+  trackUiMetric: jest.fn(),
+}));
+
+const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 5: Metrics', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
-  let userActions;
-  let mockIndexPatternValidityResponse;
+  let httpRequestsMockHelpers;
+  let find;
+  let exists;
+  let actions;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
   let form;
 
-  beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
-    ({
-      findTestSubject,
-      testSubjectExists,
-      userActions,
-      getEuiStepsHorizontalActive,
-      goToStep,
-      getMetadataFromEuiTable,
-      form
-    } = initTestBed());
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
   });
 
-  afterEach(() => {
+  afterAll(() => {
     server.restore();
+  });
+
+  beforeEach(() => {
+    // Set "default" mock responses by not providing any arguments
+    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+
+    ({
+      find,
+      exists,
+      actions,
+      getEuiStepsHorizontalActive,
+      goToStep,
+      table,
+      form
+    } = setup());
   });
 
   describe('layout', () => {
@@ -60,28 +69,28 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     it('should have the title set to "Review"', () => {
-      expect(testSubjectExists('rollupJobCreateReviewTitle')).toBe(true);
+      expect(exists('rollupJobCreateReviewTitle')).toBe(true);
     });
 
     it('should have the "next" and "save" button visible', () => {
-      expect(testSubjectExists('rollupJobBackButton')).toBe(true);
-      expect(testSubjectExists('rollupJobNextButton')).toBe(false);
-      expect(testSubjectExists('rollupJobSaveButton')).toBe(true);
+      expect(exists('rollupJobBackButton')).toBe(true);
+      expect(exists('rollupJobNextButton')).toBe(false);
+      expect(exists('rollupJobSaveButton')).toBe(true);
     });
 
     it('should go to the "Metrics" step when clicking the back button', async () => {
-      userActions.clickPreviousStep();
+      actions.clickPreviousStep();
       expect(getEuiStepsHorizontalActive()).toContain('Metrics');
     });
   });
 
   describe('tabs', () => {
-    const getTabsText = () => findTestSubject('stepReviewTab').map(tab => tab.text());
+    const getTabsText = () => find('stepReviewTab').map(tab => tab.text());
     const selectFirstField = (step) => {
-      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      find('rollupJobShowFieldChooserButton').simulate('click');
 
       // Select the first term field
-      getMetadataFromEuiTable(`rollupJob${step}FieldChooser-table`)
+      table.getMetaData(`rollupJob${step}FieldChooser-table`)
         .rows[0]
         .reactWrapper
         .simulate('click');
@@ -93,36 +102,36 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     it('should have a "Summary", "Terms" & "JSON" tab if a term aggregation was added', async () => {
-      mockIndexPatternValidityResponse({ numericFields: ['my-field'] });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['my-field'] });
       await goToStep(3);
       selectFirstField('Terms');
 
-      userActions.clickNextStep(); // go to step 4
-      userActions.clickNextStep(); // go to step 5
-      userActions.clickNextStep(); // go to review
+      actions.clickNextStep(); // go to step 4
+      actions.clickNextStep(); // go to step 5
+      actions.clickNextStep(); // go to review
 
       expect(getTabsText()).toEqual(['Summary', 'Terms', 'JSON']);
     });
 
     it('should have a "Summary", "Histogram" & "JSON" tab if a histogram field was added', async () => {
-      mockIndexPatternValidityResponse({ numericFields: ['a-field'] });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'] });
       await goToStep(4);
       selectFirstField('Histogram');
       form.setInputValue('rollupJobCreateHistogramInterval', 3); // set an interval
 
-      userActions.clickNextStep(); // go to step 5
-      userActions.clickNextStep(); // go to review
+      actions.clickNextStep(); // go to step 5
+      actions.clickNextStep(); // go to review
 
       expect(getTabsText()).toEqual(['Summary', 'Histogram', 'JSON']);
     });
 
     it('should have a "Summary", "Metrics" & "JSON" tab if a histogram field was added', async () => {
-      mockIndexPatternValidityResponse({ numericFields: ['a-field'], dateFields: ['b-field'] });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'], dateFields: ['b-field'] });
       await goToStep(5);
       selectFirstField('Metrics');
       form.selectCheckBox('rollupJobMetricsCheckbox-avg'); // select a metric
 
-      userActions.clickNextStep(); // go to review
+      actions.clickNextStep(); // go to review
 
       expect(getTabsText()).toEqual(['Summary', 'Metrics', 'JSON']);
     });
@@ -135,7 +144,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       const jobCreateApiPath = '/api/rollup/create';
       expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
 
-      userActions.clickSave();
+      actions.clickSave();
       await nextTick();
 
       expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!

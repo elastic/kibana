@@ -87,5 +87,10 @@ run(
       config,
       log,
     });
+  },
+  {
+    flags: {
+      allowUnexpected: true,
+    },
   }
 );

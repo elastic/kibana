@@ -1,6 +1,3 @@
-plugins: [
-  '@elastic/eslint-plugin-kibana-custom'
-]
 rules:
   no-console: 2
-  '@elastic/kibana-custom/no-default-export': error
+  'import/no-default-export': error

@@ -24,6 +24,7 @@ export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
       visTypes: ['plugins/tagcloud/tag_cloud_vis'],
+      interpreter: ['plugins/tagcloud/tag_cloud_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     }
   });

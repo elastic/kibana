@@ -14,10 +14,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { ErrorDistribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
-import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ErrorGroupOverviewRequest } from '../../../store/reactReduxRequest/errorGroupList';
+import { useFetcher } from '../../../hooks/useFetcher';
+import {
+  loadErrorDistribution,
+  loadErrorGroupList
+} from '../../../services/rest/apm/error_groups';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { useUiFilters } from '../../../context/UrlParamsContext';
+import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
 interface ErrorGroupOverviewProps {
@@ -29,45 +33,72 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   urlParams,
   location
 }) => {
+  const { serviceName, start, end, sortField, sortDirection } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
+  const { data: errorDistributionData } = useFetcher(
+    () => {
+      if (serviceName && start && end) {
+        return loadErrorDistribution({
+          serviceName,
+          start,
+          end,
+          uiFilters
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters]
+  );
+
+  const { data: errorGroupListData } = useFetcher(
+    () => {
+      if (serviceName && start && end) {
+        return loadErrorGroupList({
+          serviceName,
+          start,
+          end,
+          sortField,
+          sortDirection,
+          uiFilters
+        });
+      }
+    },
+    [serviceName, start, end, sortField, sortDirection, uiFilters]
+  );
+
+  if (!errorDistributionData || !errorGroupListData) {
+    return null;
+  }
+
   return (
     <React.Fragment>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel>
-            <ErrorDistributionRequest
-              urlParams={urlParams}
-              render={({ data }) => (
-                <ErrorDistribution
-                  distribution={data}
-                  title={i18n.translate(
-                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                    {
-                      defaultMessage: 'Error occurrences'
-                    }
-                  )}
-                />
+            <ErrorDistribution
+              distribution={errorDistributionData}
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                {
+                  defaultMessage: 'Error occurrences'
+                }
               )}
             />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiPanel>
         <EuiTitle size="xs">
           <h3>Errors</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <ErrorGroupOverviewRequest
+
+        <ErrorGroupList
           urlParams={urlParams}
-          render={({ data }) => (
-            <ErrorGroupList
-              urlParams={urlParams}
-              items={data}
-              location={location}
-            />
-          )}
+          items={errorGroupListData}
+          location={location}
         />
       </EuiPanel>
     </React.Fragment>

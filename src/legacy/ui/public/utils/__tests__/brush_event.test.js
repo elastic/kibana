@@ -38,7 +38,7 @@ jest.mock('ui/chrome',
 
 import _ from 'lodash';
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { onBrushEvent } from '../brush_event';
 import { timefilter } from 'ui/timefilter';
 
@@ -231,6 +231,7 @@ describe('brushEvent', () => {
     test('by updating the existing scripted filter', () => {
       const event = _.cloneDeep(numberEvent);
       event.range = [3, 7];
+      event.aggConfigs[0].params.field.scripted = true;
       $state.filters.push({
         meta: {
           key: 'numberField'

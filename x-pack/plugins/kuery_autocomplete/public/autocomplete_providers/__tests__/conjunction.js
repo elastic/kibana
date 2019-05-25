@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getSuggestionsProvider } from '../conjunction';
 
 describe('Kuery conjunction suggestions', function () {
@@ -35,13 +35,14 @@ describe('Kuery conjunction suggestions', function () {
     expect(suggestions.map(suggestion => suggestion.start)).to.eql([end, end]);
     expect(suggestions.map(suggestion => suggestion.end)).to.eql([end, end]);
   });
-
   it('should have descriptions', function () {
     const text = ' ';
     const suggestions = getSuggestions({ text });
-    expect(suggestions.length).to.be(2);
+    expect(typeof suggestions).to.be('object');
+    expect(Object.keys(suggestions).length).to.be(2);
     suggestions.forEach(suggestion => {
-      expect(suggestion.description.length).to.be.greaterThan(0);
+      expect(typeof suggestion).to.be('object');
+      expect(suggestion).to.have.property('description');
     });
   });
 });

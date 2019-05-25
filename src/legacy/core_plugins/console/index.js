@@ -96,6 +96,15 @@ export default function (kibana) {
       ];
     },
 
+    uiCapabilities() {
+      return {
+        dev_tools: {
+          show: true,
+          save: true,
+        },
+      };
+    },
+
     async init(server, options) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
       if (options.ssl && options.ssl.verify) {
@@ -103,14 +112,14 @@ export default function (kibana) {
       }
 
       const config = server.config();
-      const legacyEsConfig = await server.newPlatform.start.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
+      const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
       defaultVars = {
         elasticsearchUrl: url.format(
           Object.assign(url.parse(head(legacyEsConfig.hosts)), { auth: false })
-        )
+        ),
       };
 
       server.route(createProxyRoute({

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { readConfigFile } from '../read_config_file';

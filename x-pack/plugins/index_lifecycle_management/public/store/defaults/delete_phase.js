@@ -9,7 +9,7 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_ROLLOVER_ALIAS,
-} from '../constants';
+} from '../../constants';
 
 export const defaultDeletePhase = {
   [PHASE_ENABLED]: false,

@@ -5,14 +5,17 @@
  */
 
 import routes from 'ui/routes';
+import 'ui/capabilities/route_setup';
 import { toastNotifications } from 'ui/notify';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import template from './grokdebugger_route.html';
 import './directives/grokdebugger';
 
+
 routes
   .when('/dev_tools/grokdebugger', {
     template: template,
+    requireUICapability: 'dev_tools.show',
     resolve: {
       licenseCheckResults(Private) {
         const xpackInfo = Private(XPackInfoProvider);

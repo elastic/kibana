@@ -19,7 +19,7 @@ import {
 import {
   PHASE_DELETE,
   PHASE_ENABLED,
-} from '../../../../store/constants';
+} from '../../../../constants';
 import { ActiveBadge, PhaseErrorMessage } from '../../../components';
 
 export class DeletePhase extends PureComponent {

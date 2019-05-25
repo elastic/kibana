@@ -1,0 +1,69 @@
+[role="xpack"]
+[[maps-search]]
+== Searching your data
+
+The **Maps** application embeds the query bar for real-time ad hoc search.
+Only layers requesting data from {es} are filtered when you submit a search request.
+
+You can create a layer that requests data from {es} from the following:
+
+* <<vector-layer>> with:
+
+** Documents source
+
+** Grid aggregation source
+
+** <<terms-join>>
+
+* <<heatmap-layer>> with Grid aggregation source
+
+[role="screenshot"]
+image::maps/images/global_search_bar.png[]
+
+
+[role="xpack"]
+[[maps-layer-based-filtering]]
+=== Filtering a single layer
+
+You can apply a search request to individual layers by setting `Filters` in the layer details panel.
+Click the *Add filter* button to add a filter to a layer.
+
+
+[role="screenshot"]
+image::maps/images/layer_search.png[]
+
+[role="xpack"]
+[[maps-search-across-multiple-indices]]
+=== Searching across multiple indices
+
+Your map might contain multiple {es} indices.
+This can occur when your map contains two or more layers with {es} sources from different indices.
+This can also occur with a single layer with an {es} source and a <<terms-join>>.
+
+Searching across multiple indices might sometimes result in empty layers.
+The most common cause for empty layers are searches for a field that exists in one index, but does not exist in other indices.
+Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
+
+For example, suppose you have a vector layer showing the `kibana_sample_data_logs` documents
+and another vector layer with `kibana_sample_data_flights` documents.
+(See <<add-sample-data, adding sample data>>
+to install the `kibana_sample_data_logs` and `kibana_sample_data_flights` indices.)
+
+If you query for
+--------------------------------------------------
+machine.os.keyword : "osx"
+--------------------------------------------------
+the `kibana_sample_data_flights` layer is empty because the index
+`kibana_sample_data_flights` does not contain the field `machine.os.keyword` and no documents match the query.
+
+[role="screenshot"]
+image::maps/images/global_search_multiple_indices_query1.png[]
+
+If you instead query for
+--------------------------------------------------
+machine.os.keyword : "osx" or _index : "kibana_sample_data_flights"
+--------------------------------------------------
+the `kibana_sample_data_flights` layer includes data.
+
+[role="screenshot"]
+image::maps/images/global_search_multiple_indices_query2.png[]

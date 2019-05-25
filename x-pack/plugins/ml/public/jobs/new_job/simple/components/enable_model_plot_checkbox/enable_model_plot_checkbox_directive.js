@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import ReactDOM from 'react-dom';
 
 import { EnableModelPlotCheckbox } from './enable_model_plot_checkbox_view.js';
@@ -16,7 +17,7 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlEnableModelPlotCheckbox', function (i18n) {
+module.directive('mlEnableModelPlotCheckbox', function () {
   return {
     restrict: 'AE',
     replace: false,
@@ -37,12 +38,13 @@ module.directive('mlEnableModelPlotCheckbox', function (i18n) {
       function errorHandler(error) {
         console.log('Cardinality could not be validated', error);
         $scope.ui.cardinalityValidator.status = STATUS.FAILED;
-        $scope.ui.cardinalityValidator.message =  i18n('xpack.ml.newJob.simple.enableModelPlot.validatingConfigurationErrorMessage', {
-          defaultMessage: 'An error occurred validating the configuration' +
-            'for running the job with model plot enabled.' +
-            'Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high.' +
+        $scope.ui.cardinalityValidator.message =  i18n.translate(
+          'xpack.ml.newJob.simple.enableModelPlot.validatingConfigurationErrorMessage', {
+            defaultMessage: 'An error occurred validating the configuration ' +
+            'for running the job with model plot enabled. ' +
+            'Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high. ' +
             'You may want to select a dedicated results index on the Job Details tab.'
-        });
+          });
         // Go ahead and check the dedicated index box for them
         $scope.formConfig.useDedicatedIndex = true;
       }
@@ -61,11 +63,11 @@ module.directive('mlEnableModelPlotCheckbox', function (i18n) {
             if (validationResult.success === true) {
               $scope.formConfig.enableModelPlot = true;
               $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
-
-              $scope.ui.cardinalityValidator.message = i18n('xpack.ml.newJob.simple.enableModelPlot.enableModelPlotDescription', {
-                defaultMessage: 'Creating model plots is resource intensive and not recommended' +
-                  'where the cardinality of the selected fields is greater than 100. Estimated cardinality' +
-                  'for this job is {highCardinality}.' +
+            } else {
+              $scope.ui.cardinalityValidator.message = i18n.translate('xpack.ml.newJob.simple.enableModelPlot.enableModelPlotDescription', {
+                defaultMessage: 'Creating model plots is resource intensive and not recommended ' +
+                  'where the cardinality of the selected fields is greater than 100. Estimated cardinality ' +
+                  'for this job is {highCardinality}. ' +
                   'If you enable model plot with this configuration we recommend you use a dedicated results index.',
                 values: { highCardinality: validationResult.highCardinality }
               });
@@ -106,10 +108,10 @@ module.directive('mlEnableModelPlotCheckbox', function (i18n) {
       // Update checkbox on these changes
       $scope.$watch('ui.formValid', updateCheckbox, true);
       $scope.$watch('ui.cardinalityValidator.status', updateCheckbox, true);
-      // MultiMetric: Fire off cardinality validatation when fields and/or split by field is updated
+      // MultiMetric: Fire off cardinality validation when fields and/or split by field is updated
       $scope.$watch('formConfig.fields', revalidateCardinalityOnFieldChange, true);
       $scope.$watch('formConfig.splitField', revalidateCardinalityOnFieldChange, true);
-      // Population: Fire off cardinality validatation when overField is updated
+      // Population: Fire off cardinality validation when overField is updated
       $scope.$watch('formConfig.overField', revalidateCardinalityOnFieldChange, true);
 
       function updateCheckbox() {
@@ -126,10 +128,10 @@ module.directive('mlEnableModelPlotCheckbox', function (i18n) {
             $scope.ui.cardinalityValidator.status === STATUS.FAILED) &&
             $scope.ui.formValid === true);
         const checkboxText = (validatorRunning)
-          ? i18n('xpack.ml.newJob.simple.enableModelPlot.validatingCardinalityLabel', {
+          ? i18n.translate('xpack.ml.newJob.simple.enableModelPlot.validatingCardinalityLabel', {
             defaultMessage: 'Validating cardinality…'
           })
-          : i18n('xpack.ml.newJob.simple.enableModelPlot.enableModelPlotLabel', {
+          : i18n.translate('xpack.ml.newJob.simple.enableModelPlot.enableModelPlotLabel', {
             defaultMessage: 'Enable model plot'
           });
 

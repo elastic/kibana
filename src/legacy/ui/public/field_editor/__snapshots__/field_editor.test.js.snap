@@ -151,13 +151,16 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={true}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -379,14 +382,17 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       error={null}
+      fullWidth={true}
       isInvalid={false}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={false}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
         value="doc.test.value"
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -672,13 +678,16 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={true}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -834,7 +843,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 </eui-code>,
                 "painlessLink": <eui-link
                   href="(docLink for scriptedFields.painless)"
-                  target="_window"
+                  target="_blank"
                 >
                   <FormattedMessage
                     defaultMessage="Painless"
@@ -986,14 +995,17 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     </eui-form-row>
     <eui-form-row
       error={null}
+      fullWidth={true}
       isInvalid={false}
       label="Script"
     >
-      <eui-textArea
+      <Component
         data-test-subj="editorFieldScript"
-        isInvalid={false}
+        height="300px"
+        mode="groovy"
         onChange={[Function]}
         value="doc.test.value"
+        width="100%"
       />
     </eui-form-row>
     <eui-form-row>
@@ -1074,6 +1086,334 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               </eui-button-empty>
             </eui-flex-item>
           </eui-flex-group>
+        </eui-flex-item>
+      </eui-flex-group>
+    </eui-form-row>
+  </eui-form>
+  <eui-spacer
+    size="l"
+  />
+</div>
+`;
+
+exports[`FieldEditor should show multiple type field warning with a table containing indices 1`] = `
+<div>
+  <eui-text>
+    <h3>
+      <FormattedMessage
+        defaultMessage="Create scripted field"
+        id="common.ui.fieldEditor.createHeader"
+        values={Object {}}
+      />
+    </h3>
+  </eui-text>
+  <eui-spacer
+    size="m"
+  />
+  <eui-form>
+    <scripting-disabled-callOut
+      isVisible={false}
+    />
+    <scripting-warning-callOut
+      isVisible={true}
+    />
+    <ScriptingHelpFlyout
+      executeScript={[Function]}
+      indexPattern={
+        Object {
+          "fields": Array [
+            Object {
+              "name": "foobar",
+            },
+            Object {
+              "format": Format {},
+              "lang": "painless",
+              "name": "test",
+              "script": "doc.test.value",
+              "scripted": true,
+              "type": "number",
+            },
+            Object {
+              "format": Format {},
+              "lang": "testlang",
+              "name": "test",
+              "script": "doc.test.value",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+        }
+      }
+      isVisible={false}
+      lang="painless"
+      name="foobar"
+      onClose={[Function]}
+    />
+    <eui-form-row
+      error={null}
+      helpText={
+        <span>
+          <eui-icon
+            color="warning"
+            size="s"
+            type="alert"
+          />
+           
+          <FormattedMessage
+            defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
+            id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
+            values={
+              Object {
+                "fieldName": <eui-code>
+                  foobar
+                </eui-code>,
+                "mappingConflict": <strong>
+                  <FormattedMessage
+                    defaultMessage="Mapping Conflict:"
+                    id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictLabel"
+                    values={Object {}}
+                  />
+                </strong>,
+              }
+            }
+          />
+        </span>
+      }
+      isInvalid={false}
+      label="Name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldName"
+        isInvalid={false}
+        onChange={[Function]}
+        placeholder="New scripted field"
+        value="foobar"
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={null}
+      label="Language"
+    >
+      <eui-select
+        data-test-subj="editorFieldLang"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "painless",
+              "value": "painless",
+            },
+            Object {
+              "text": "testlang",
+              "value": "testlang",
+            },
+          ]
+        }
+        value="painless"
+      />
+    </eui-form-row>
+    <eui-form-row
+      label="Type"
+    >
+      <eui-select
+        data-test-subj="editorFieldType"
+        disabled={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "number",
+              "value": "number",
+            },
+            Object {
+              "text": "string",
+              "value": "string",
+            },
+            Object {
+              "text": "date",
+              "value": "date",
+            },
+            Object {
+              "text": "boolean",
+              "value": "boolean",
+            },
+          ]
+        }
+        value="number"
+      />
+    </eui-form-row>
+    <div>
+      <eui-call-out
+        color="warning"
+        iconType="alert"
+        size="s"
+        title={
+          <FormattedMessage
+            defaultMessage="Field type conflict"
+            id="common.ui.fieldEditor.fieldTypeConflict"
+            values={Object {}}
+          />
+        }
+      >
+        <FormattedMessage
+          defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+          id="common.ui.fieldEditor.multiTypeLabelDesc"
+          values={Object {}}
+        />
+      </eui-call-out>
+      <eui-spacer
+        size="m"
+      />
+      <eui-basic-table
+        columns={
+          Array [
+            Object {
+              "field": "type",
+              "name": "Type",
+              "width": "100px",
+            },
+            Object {
+              "field": "indices",
+              "name": "Index names",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "indices": "index_name_1, index_name_2",
+              "type": "long",
+            },
+            Object {
+              "indices": "index_name_3",
+              "type": "text",
+            },
+          ]
+        }
+      />
+      <eui-spacer
+        size="m"
+      />
+    </div>
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
+          id="common.ui.fieldEditor.formatLabel"
+          values={Object {}}
+        />
+      }
+      label={
+        <FormattedMessage
+          defaultMessage="Format (Default: {defaultFormat})"
+          id="common.ui.fieldEditor.defaultFormatHeader"
+          values={
+            Object {
+              "defaultFormat": <eui-code>
+                Test format
+              </eui-code>,
+            }
+          }
+        />
+      }
+    >
+      <eui-select
+        data-test-subj="editorSelectedFormatId"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "- Default -",
+              "value": "",
+            },
+            Object {
+              "text": "Test format",
+              "value": "test_format",
+            },
+          ]
+        }
+      />
+    </eui-form-row>
+    <eui-form-row
+      label="Popularity"
+    >
+      <eui-field-number
+        data-test-subj="editorFieldCount"
+        onChange={[Function]}
+      />
+    </eui-form-row>
+    <eui-form-row
+      error="Script is required"
+      fullWidth={true}
+      isInvalid={true}
+      label="Script"
+    >
+      <Component
+        data-test-subj="editorFieldScript"
+        height="300px"
+        mode="groovy"
+        onChange={[Function]}
+        width="100%"
+      />
+    </eui-form-row>
+    <eui-form-row>
+      <eui-text>
+        <FormattedMessage
+          defaultMessage="Access fields with {code}."
+          id="common.ui.fieldEditor.script.accessWithLabel"
+          values={
+            Object {
+              "code": <code>
+                doc['some_field'].value
+              </code>,
+            }
+          }
+        />
+      </eui-text>
+      <br />
+      <eui-link
+        data-test-subj="scriptedFieldsHelpLink"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Get help with the syntax and preview the results of your script."
+          id="common.ui.fieldEditor.script.getHelpLabel"
+          values={Object {}}
+        />
+      </eui-link>
+    </eui-form-row>
+    <eui-form-row>
+      <eui-flex-group>
+        <eui-flex-item
+          grow={false}
+        >
+          <eui-button
+            data-test-subj="fieldSaveButton"
+            fill={true}
+            isDisabled={true}
+            isLoading={false}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Create field"
+              id="common.ui.fieldEditor.actions.createButton"
+              values={Object {}}
+            />
+          </eui-button>
+        </eui-flex-item>
+        <eui-flex-item
+          grow={false}
+        >
+          <eui-button-empty
+            data-test-subj="fieldCancelButton"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="common.ui.fieldEditor.actions.cancelButton"
+              values={Object {}}
+            />
+          </eui-button-empty>
         </eui-flex-item>
       </eui-flex-group>
     </eui-form-row>

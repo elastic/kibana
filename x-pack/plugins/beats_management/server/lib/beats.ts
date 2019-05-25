@@ -82,7 +82,6 @@ export class CMBeatsDomain {
     }
 
     const user = typeof userOrToken === 'string' ? this.framework.internalUser : userOrToken;
-
     await this.adapter.update(user, {
       ...beat,
       ...beatData,
@@ -96,6 +95,7 @@ export class CMBeatsDomain {
     beat: Partial<CMBeat>
   ): Promise<{ status: string; accessToken?: string }> {
     const { token, expires_on } = await this.tokens.getEnrollmentToken(enrollmentToken);
+    // eslint-disable-next-line @typescript-eslint/camelcase
     if (expires_on && moment(expires_on).isBefore(moment())) {
       return { status: BeatEnrollmentStatus.ExpiredEnrollmentToken };
     }

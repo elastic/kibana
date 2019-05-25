@@ -26,6 +26,7 @@ import {
   ContextMenuPanel,
   Embeddable,
 } from 'ui/embeddable';
+import { Dispatch } from 'redux';
 import { panelActionsStore } from '../../store/panel_actions_store';
 import {
   getCustomizePanelAction,
@@ -46,7 +47,6 @@ import {
   setVisibleContextMenuPanelId,
 } from '../../actions';
 
-import { Dispatch } from 'redux';
 import { CoreKibanaState } from '../../../selectors';
 import { DashboardViewMode } from '../../dashboard_view_mode';
 import {
@@ -158,6 +158,7 @@ const mergeProps = (
   };
 
   const toggleExpandedPanel = () => {
+    // eslint-disable-next-line no-unused-expressions
     isExpanded ? onMinimizePanel() : onMaximizePanel();
     closeMyContextMenuPanel();
   };

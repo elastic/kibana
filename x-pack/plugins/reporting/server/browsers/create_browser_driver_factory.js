@@ -17,13 +17,14 @@ export async function createBrowserDriverFactory(server) {
   const BROWSER_TYPE = CAPTURE_CONFIG.browser.type;
   const BROWSER_AUTO_DOWNLOAD = CAPTURE_CONFIG.browser.autoDownload;
   const BROWSER_CONFIG = CAPTURE_CONFIG.browser[BROWSER_TYPE];
+  const REPORTING_TIMEOUT = config.get('xpack.reporting.queue.timeout');
 
   if (BROWSER_AUTO_DOWNLOAD) {
     await ensureBrowserDownloaded(BROWSER_TYPE);
   }
 
   try {
-    const browserDriverFactory = await installBrowser(logger, BROWSER_CONFIG, BROWSER_TYPE, DATA_DIR);
+    const browserDriverFactory = await installBrowser(logger, BROWSER_CONFIG, BROWSER_TYPE, DATA_DIR, REPORTING_TIMEOUT);
     logger.debug(`Browser installed at ${browserDriverFactory.binaryPath}`);
     return browserDriverFactory;
   } catch (error) {

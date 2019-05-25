@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ToastsStart } from './toasts_start';
+import { ToastsApi } from './toasts_api';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<PublicMethodsOf<ToastsStart>> = {
+const createToastsApiMock = () => {
+  const api: jest.Mocked<PublicMethodsOf<ToastsApi>> = {
     get$: jest.fn(),
     add: jest.fn(),
     remove: jest.fn(),
@@ -27,9 +27,14 @@ const createStartContractMock = () => {
     addWarning: jest.fn(),
     addDanger: jest.fn(),
   };
-  return startContract;
+  return api;
 };
 
+const createSetupContractMock = createToastsApiMock;
+
+const createStartContractMock = createToastsApiMock;
+
 export const toastsServiceMock = {
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

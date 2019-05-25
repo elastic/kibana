@@ -5,7 +5,7 @@
  */
 
 import { calculateRate } from '../calculate_rate';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('Calculate Rate', () => {
   it('returns null when all fields are undefined', () => {

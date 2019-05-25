@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import { RegionMapsVisualizationProvider } from '../region_map_visualization';
@@ -29,6 +29,9 @@ import worldJson from './world.json';
 import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
 import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
 import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
+import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -105,6 +108,14 @@ describe('RegionMapsVisualizationTests', function () {
         return EMS_TILES;
       } else if (url.startsWith('https://files.foobar')) {
         return EMS_FILES;
+      } else if (url.startsWith('https://raster-style.foobar')) {
+        if (url.includes('osm-bright-desaturated')) {
+          return EMS_STYLE_ROAD_MAP_DESATURATED;
+        } else if (url.includes('osm-bright')) {
+          return EMS_STYLE_ROAD_MAP_BRIGHT;
+        } else if (url.includes('dark-matter')) {
+          return EMS_STYLE_DARK_MAP;
+        }
       }
     });
 

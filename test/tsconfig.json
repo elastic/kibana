@@ -3,11 +3,18 @@
   "compilerOptions": {
     "types": [
       "node",
-      "mocha",
-      "@kbn/test/types/expect.js"
+      "mocha"
+    ],
+    "lib": [
+      "esnext",
+      "dom"
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "plugin_functional/plugins/**/*"
   ]
 }

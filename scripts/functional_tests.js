@@ -22,4 +22,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/functional/config.js'),
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/plugin_functional/config.js'),
+  require.resolve('../test/interpreter_functional/config.js'),
 ]);

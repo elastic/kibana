@@ -1,0 +1,11 @@
+{
+  "data_frame.delete_data_frame_transform": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_data_frame/transforms/{transform_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-data-frame-transform.html"
+  }
+}

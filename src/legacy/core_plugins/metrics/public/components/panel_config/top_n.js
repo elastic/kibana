@@ -19,13 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesEditor from '../series_editor';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createTextHandler from '../lib/create_text_handler';
-import ColorRules from '../color_rules';
-import ColorPicker from '../color_picker';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -43,7 +43,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class TopNPanelConfig extends Component {
+export class TopNPanelConfig extends Component {
 
   constructor(props) {
     super(props);
@@ -77,6 +77,7 @@ class TopNPanelConfig extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
+          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -246,6 +247,5 @@ TopNPanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  visData$: PropTypes.object,
 };
-
-export default TopNPanelConfig;

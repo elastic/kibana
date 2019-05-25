@@ -14,7 +14,6 @@ exports[`PipelineViewer component passes expected props 1`] = `
       verticalPosition="center"
     >
       <StatementSection
-        detailVertex={null}
         elements={
           Array [
             Object {
@@ -26,7 +25,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
         }
         headingText="Inputs"
         iconType="logstashInput"
-        onShowVertexDetails={[Function]}
+        onShowVertexDetails={[MockFunction]}
       />
       <EuiSpacer />
       <Queue
@@ -41,7 +40,6 @@ exports[`PipelineViewer component passes expected props 1`] = `
       />
       <EuiSpacer />
       <StatementSection
-        detailVertex={null}
         elements={
           Array [
             Object {
@@ -53,11 +51,10 @@ exports[`PipelineViewer component passes expected props 1`] = `
         }
         headingText="Filters"
         iconType="logstashFilter"
-        onShowVertexDetails={[Function]}
+        onShowVertexDetails={[MockFunction]}
       />
       <EuiSpacer />
       <StatementSection
-        detailVertex={null}
         elements={
           Array [
             Object {
@@ -69,7 +66,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
         }
         headingText="Outputs"
         iconType="logstashOutput"
-        onShowVertexDetails={[Function]}
+        onShowVertexDetails={[MockFunction]}
       />
     </EuiPageContent>
   </EuiPageBody>
@@ -90,11 +87,6 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
       verticalPosition="center"
     >
       <StatementSection
-        detailVertex={
-          Object {
-            "id": "stdin",
-          }
-        }
         elements={
           Array [
             Object {
@@ -106,7 +98,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
         }
         headingText="Inputs"
         iconType="logstashInput"
-        onShowVertexDetails={[Function]}
+        onShowVertexDetails={[MockFunction]}
       />
       <EuiSpacer />
       <Queue
@@ -121,11 +113,6 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
       />
       <EuiSpacer />
       <StatementSection
-        detailVertex={
-          Object {
-            "id": "stdin",
-          }
-        }
         elements={
           Array [
             Object {
@@ -137,15 +124,10 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
         }
         headingText="Filters"
         iconType="logstashFilter"
-        onShowVertexDetails={[Function]}
+        onShowVertexDetails={[MockFunction]}
       />
       <EuiSpacer />
       <StatementSection
-        detailVertex={
-          Object {
-            "id": "stdin",
-          }
-        }
         elements={
           Array [
             Object {
@@ -157,7 +139,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
         }
         headingText="Outputs"
         iconType="logstashOutput"
-        onShowVertexDetails={[Function]}
+        onShowVertexDetails={[MockFunction]}
       />
       <DetailDrawer
         onHide={[Function]}

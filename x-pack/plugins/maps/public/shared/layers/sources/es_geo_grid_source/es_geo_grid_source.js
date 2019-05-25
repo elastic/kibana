@@ -7,6 +7,7 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
@@ -176,9 +177,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
-
     const featureCollection = await this.getGeoJsonPoints(layerName, searchFilters);
-
     return {
       data: featureCollection,
       meta: {
@@ -194,7 +193,6 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async getGeoJsonPoints(layerName, searchFilters) {
-
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
@@ -305,11 +303,11 @@ export class ESGeoGridSource extends AbstractESSource {
     }
 
     const layerDescriptor = this._createDefaultLayerDescriptor(options);
-    const style = new VectorStyle(layerDescriptor.style);
+    const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style: style
+      style
     });
   }
 
@@ -319,5 +317,13 @@ export class ESGeoGridSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+  }
+
+  async getSupportedShapeTypes() {
+    if (this._descriptor.requestType === RENDER_AS.GRID) {
+      return [VECTOR_SHAPE_TYPES.POLYGON];
+    }
+
+    return [VECTOR_SHAPE_TYPES.POINT];
   }
 }

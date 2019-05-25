@@ -16,20 +16,11 @@ import { AttributionControl } from './attribution_control';
 export function WidgetOverlay() {
   return (
     <EuiFlexGroup className="mapWidgetOverlay" responsive={false} direction="column" alignItems="flexEnd" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup
-          className="mapWidgetOverlay__rightSide"
-          direction="column"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem>
-            <LayerControl/>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ViewControl/>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexItem className="mapWidgetOverlay__layerWrapper">
+        <LayerControl/>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ViewControl/>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <AttributionControl/>

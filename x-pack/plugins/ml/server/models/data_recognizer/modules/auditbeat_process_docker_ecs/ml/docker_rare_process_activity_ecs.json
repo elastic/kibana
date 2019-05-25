@@ -25,6 +25,7 @@
     "time_format": "epoch_ms"
   },
   "custom_settings": {
+    "created_by": "ml-module-auditbeat-process-docker",
     "custom_urls": [
       {
         "url_name": "Process explorer",

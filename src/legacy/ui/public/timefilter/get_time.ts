@@ -56,7 +56,6 @@ export function getTime(
     return;
   }
 
-  let filter: Filter;
   const timefield: Field | undefined = indexPattern.fields.find(
     field => field.name === indexPattern.timeFieldName
   );
@@ -69,7 +68,7 @@ export function getTime(
   if (!bounds) {
     return;
   }
-  filter = { range: { [timefield.name]: { format: 'strict_date_optional_time' } } };
+  const filter: Filter = { range: { [timefield.name]: { format: 'strict_date_optional_time' } } };
 
   if (bounds.min) {
     filter.range[timefield.name].gte = bounds.min.toISOString();

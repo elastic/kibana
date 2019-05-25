@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { delay } from 'bluebird';
 
 import {
@@ -25,6 +25,7 @@ import {
   createPromiseFromStreams,
 } from '../../../../legacy/utils';
 
+import { Progress } from '../../progress';
 import { createIndexDocRecordsStream } from '../index_doc_records_stream';
 import {
   createStubStats,
@@ -57,13 +58,16 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       }
     ]);
     const stats = createStubStats();
+    const progress = new Progress();
 
     await createPromiseFromStreams([
       createListStream(records),
-      createIndexDocRecordsStream(client, stats),
+      createIndexDocRecordsStream(client, stats, progress),
     ]);
 
     client.assertNoPendingResponses();
+    expect(progress.getComplete()).to.be(1);
+    expect(progress.getTotal()).to.be(undefined);
   });
 
   it('consumes multiple doc records and sends to `_bulk` api together', async () => {
@@ -85,13 +89,16 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       }
     ]);
     const stats = createStubStats();
+    const progress = new Progress();
 
     await createPromiseFromStreams([
       createListStream(records),
-      createIndexDocRecordsStream(client, stats),
+      createIndexDocRecordsStream(client, stats, progress),
     ]);
 
     client.assertNoPendingResponses();
+    expect(progress.getComplete()).to.be(10);
+    expect(progress.getTotal()).to.be(undefined);
   });
 
   it('waits until request is complete before sending more', async () => {
@@ -117,13 +124,16 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
         return { ok: true };
       }
     ]);
+    const progress = new Progress();
 
     await createPromiseFromStreams([
       createListStream(records),
-      createIndexDocRecordsStream(client, stats)
+      createIndexDocRecordsStream(client, stats, progress)
     ]);
 
     client.assertNoPendingResponses();
+    expect(progress.getComplete()).to.be(10);
+    expect(progress.getTotal()).to.be(undefined);
   });
 
   it('sends a maximum of 300 documents at a time', async () => {
@@ -146,13 +156,16 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
         return { ok: true };
       },
     ]);
+    const progress = new Progress();
 
     await createPromiseFromStreams([
       createListStream(records),
-      createIndexDocRecordsStream(client, stats),
+      createIndexDocRecordsStream(client, stats, progress),
     ]);
 
     client.assertNoPendingResponses();
+    expect(progress.getComplete()).to.be(301);
+    expect(progress.getTotal()).to.be(undefined);
   });
 
   it('emits an error if any request fails', async () => {
@@ -162,11 +175,12 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       async () => ({ ok: true }),
       async () => ({ errors: true, forcedError: true })
     ]);
+    const progress = new Progress();
 
     try {
       await createPromiseFromStreams([
         createListStream(records),
-        createIndexDocRecordsStream(client, stats),
+        createIndexDocRecordsStream(client, stats, progress),
       ]);
       throw new Error('expected stream to emit error');
     } catch (err) {
@@ -174,5 +188,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
     }
 
     client.assertNoPendingResponses();
+    expect(progress.getComplete()).to.be(1);
+    expect(progress.getTotal()).to.be(undefined);
   });
 });

@@ -62,7 +62,7 @@
                 "height": 102,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Clothing\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false palette={palette \"#ede9e7\" \"#eb6c66\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Clothing\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false seriesStyle={seriesStyle label=\"Women's Clothing\" color=\"#eb6c66\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#ede9e7\"}"
             },
             {
               "id": "element-eaa7f9a9-54ca-4c7c-9d27-62312d92a264",
@@ -73,7 +73,7 @@
                 "height": 102,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Accessories\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false palette={palette \"#ede9e7\" \"#eb6c66\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Accessories\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false seriesStyle={seriesStyle label=\"Women's Accessories\" color=\"#eb6c66\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#ede9e7\"}"
             },
             {
               "id": "element-58dfc1e8-a470-447f-8107-62bebe955475",
@@ -84,7 +84,7 @@
                 "height": 102,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Shoes\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false palette={palette \"#ede9e7\" \"#eb6c66\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Shoes\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false seriesStyle={seriesStyle label=\"Women's Shoes\" color=\"#eb6c66\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#ede9e7\"}"
             },
             {
               "id": "element-c0a5f8d9-f52f-4e0f-a8a4-08c1b7984bb2",
@@ -95,7 +95,7 @@
                 "height": 102,
                 "angle": 0
               },
-              "expression": "essql \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category\" \n| mapColumn \"category\" fn={if {getCell \"category\" | eq \"Men's Accessories\"} then={getCell \"category\"} else=\"Other\"} \n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"} | staticColumn \"total\" value={math \"sum(count)\"} \n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"} \n| pointseries color=\"category\" size=\"percentage\" \n| pie hole=\"65\" labels=false palette={palette \"#f8bd4a\" \"#ede9e7\" gradient=false}"
+              "expression": "essql \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category\" \n| mapColumn \"category\" fn={if {getCell \"category\" | eq \"Men's Accessories\"} then={getCell \"category\"} else=\"Other\"} \n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"} | staticColumn \"total\" value={math \"sum(count)\"} \n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"} \n| pointseries color=\"category\" size=\"percentage\" \n| pie hole=\"65\" labels=false seriesStyle={seriesStyle label=\"Men's Accessories\" color=\"#f8bd4a\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#ede9e7\"}"
             },
             {
               "id": "element-060eb797-c583-4c8f-b0e1-3ab9b58c4cf5",
@@ -106,7 +106,7 @@
                 "height": 102,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Men's Clothing\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false palette={palette \"#f8bd4a\" \"#ede9e7\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Men's Clothing\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false seriesStyle={seriesStyle label=\"Men's Clothing\" color=\"#f8bd4a\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#ede9e7\"}"
             },
             {
               "id": "element-8f811cd0-e4b2-48b3-a96f-b8384179bbfb",
@@ -117,7 +117,7 @@
                 "height": 102,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Men's Shoes\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false palette={palette \"#f8bd4a\" \"#ede9e7\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Men's Shoes\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"65\" labels=false seriesStyle={seriesStyle label=\"Men's Shoes\" color=\"#f8bd4a\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#ede9e7\"}"
             },
             {
               "id": "element-c0595f68-81c5-43e7-9ecf-808e8cfe48c0",
@@ -568,7 +568,7 @@
                 "height": 145,
                 "angle": -45
               },
-              "expression": "essql \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category\" \n| mapColumn \"category\" fn={if {getCell \"category\" | eq \"Men's Accessories\"} then={getCell \"category\"} else=\"Other\"} \n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"} | staticColumn \"total\" value={math \"sum(count)\"} \n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"} \n| pointseries color=\"category\" size=\"percentage\"\n| pie hole=\"85\" labels=false palette={palette \"#00A89C\" \"#CBCBCB\" gradient=false}"
+              "expression": "essql \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category\" \n| mapColumn \"category\" fn={if {getCell \"category\" | eq \"Men's Accessories\"} then={getCell \"category\"} else=\"Other\"} \n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"} | staticColumn \"total\" value={math \"sum(count)\"} \n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"} \n| pointseries color=\"category\" size=\"percentage\"\n| pie hole=\"85\" labels=false seriesStyle={seriesStyle label=\"Men's Accessories\" color=\"#00A89C\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#CBCBCB\"}"
             },
             {
               "id": "element-29967798-174d-4109-b229-e776b0a4bf8c",
@@ -579,7 +579,7 @@
                 "height": 145,
                 "angle": -99
               },
-              "expression": "essql \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category\" \n| mapColumn \"category\" fn={if {getCell \"category\" | eq \"Men's Clothing\"} then={getCell \"category\"} else=\"Other\"} \n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"} | staticColumn \"total\" value={math \"sum(count)\"} \n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"} \n| pointseries color=\"category\" size=\"percentage\"\n| pie hole=\"85\" labels=false palette={palette \"#00A89C\" \"#CBCBCB\" gradient=false}"
+              "expression": "essql \n  \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category ORDER BY category\"\n| mapColumn \"category\" \n  fn={if {getCell \"category\" | eq \"Men's Clothing\"} then={getCell \"category\"} else=\"Other\"}\n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"}\n| staticColumn \"total\" value={math \"sum(count)\"}\n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"}\n| sort \"category\"\n| pointseries color=\"category\" size=\"percentage\"\n| pie hole=\"85\" labels=false seriesStyle={seriesStyle label=\"Men's Clothing\" color=\"#00A89C\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#CBCBCB\"}"
             },
             {
               "id": "element-abaa4e35-cfc0-4171-8c34-0914cea35082",
@@ -590,7 +590,7 @@
                 "height": 145,
                 "angle": -56
               },
-              "expression": "essql \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category\" \n| mapColumn \"category\" fn={if {getCell \"category\" | eq \"Men's Shoes\"} then={getCell \"category\"} else=\"Other\"} \n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"} | staticColumn \"total\" value={math \"sum(count)\"} \n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"} \n| pointseries color=\"category\" size=\"percentage\"\n| pie hole=\"85\" labels=false palette={palette \"#00A89C\" \"#CBCBCB\" gradient=false}"
+              "expression": "essql \"SELECT category, COUNT(category) AS count FROM \\\"kibana_sample_data_ecommerce\\\" GROUP BY category\" \n| mapColumn \"category\" fn={if {getCell \"category\" | eq \"Men's Shoes\"} then={getCell \"category\"} else=\"Other\"} \n| ply by=\"category\" fn={math \"sum(count)\" | as \"count\"} | staticColumn \"total\" value={math \"sum(count)\"} \n| mapColumn \"percentage\" fn={math \"round(count/total * 100, 2)\"} \n| pointseries color=\"category\" size=\"percentage\"\n| pie hole=\"85\" labels=false seriesStyle={seriesStyle label=\"Men's Shoes\" color=\"#00A89C\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#CBCBCB\"}"
             },
             {
               "id": "element-20da5d5d-2b29-4888-a304-a14377d727ec",
@@ -601,7 +601,7 @@
                 "height": 145,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Accessories\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"85\" labels=false palette={palette \"#CBCBCB\" \"#F05A24\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Accessories\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"85\" labels=false palette={palette \"#CBCBCB\" \"#F05A24\" gradient=false} seriesStyle={seriesStyle label=\"Women's Accessories\" color=\"#F05A24\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#CBCBCB\"}"
             },
             {
               "id": "element-9dd99310-e0a6-4ab7-b049-c7ea63180b4e",
@@ -612,7 +612,7 @@
                 "height": 145,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Clothing\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"85\" labels=false palette={palette \"#CBCBCB\" \"#F05A24\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Clothing\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"85\" labels=false seriesStyle={seriesStyle label=\"Women's Clothing\" color=\"#F05A24\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#CBCBCB\"}"
             },
             {
               "id": "element-715b318d-fe6d-42b2-abea-b238b0daa8c7",
@@ -623,7 +623,7 @@
                 "height": 145,
                 "angle": 0
               },
-              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Shoes\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"85\" labels=false palette={palette \"#CBCBCB\" \"#F05A24\" gradient=false}"
+              "expression": "essql 'SELECT category, COUNT(category) AS count FROM \"kibana_sample_data_ecommerce\" GROUP BY category'\n| mapColumn category fn={if {getCell category | eq \"Women's Shoes\"} then={getCell category} else=\"Other\"}\n| ply by=category fn={math 'sum(count)' | as count}\n| staticColumn total value={math 'sum(count)'}\n| mapColumn percentage fn={math 'round(count/total * 100, 2)'}\n| pointseries color=category size=percentage\n| pie hole=\"85\" labels=false seriesStyle={seriesStyle label=\"Women's Shoes\" color=\"#F05A24\"}\n  seriesStyle={seriesStyle label=\"Other\" color=\"#CBCBCB\"}"
             },
             {
               "id": "element-9c27c6d0-b9d9-4adb-a5f3-abb7a3403977",
@@ -1067,8 +1067,8 @@
         "#FFFFFF",
         "rgba(255,255,255,0)"
       ],
-      "@timestamp": "2018-10-22T15:19:02.081Z",
-      "@created": "2018-10-22T15:19:02.081Z",
+      "@timestamp": "2019-03-18T17:22:07.449Z",
+      "@created": "2019-03-18T16:05:37.945Z",
       "assets": {
         "asset-66a89124-fc39-4109-8acd-e1ac7f382e04": {
           "id": "asset-66a89124-fc39-4109-8acd-e1ac7f382e04",

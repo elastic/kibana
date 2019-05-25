@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'ui/fancy_forms';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { TIME_UNITS } from 'plugins/watcher/constants';
@@ -30,7 +31,7 @@ app.directive('durationSelect', function ($injector) {
     replace: true,
     controllerAs: 'durationSelect',
     bindToController: true,
-    link: function ($scope, $element, $attrs, $ctrl) {
+    link: function ($scope, $ctrl) {
       $scope.durationSelect.form = $ctrl;
     },
     controller: class DurationSelectController extends InitAfterBindingsWorkaround {

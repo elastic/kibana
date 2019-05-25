@@ -2,14 +2,70 @@
 [[kibana-privileges]]
 === Kibana privileges
 
-This section lists the Kibana privileges that you can assign to a role.
+{kib} privileges grant users access to features within {kib}. Roles have privileges to determine whether users have write or read access.
 
-[horizontal]
+==== Base privileges
+Assigning a base privilege grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
 [[kibana-privileges-all]]
-`all`::
-All Kibana privileges, can read, write and delete saved searches, dashboards, visualizations,
-short URLs, Timelion sheets, graph workspaces, index patterns and advanced settings.
+`all`:: Grants full read-write access.
+`read`:: Grants read-only access.
 
-`read`::
-Can read saved searches, dashboards, visualizations, short URLs, Timelion sheets, graph workspaces,
-index patterns, and advanced settings.
+===== Assigning base privileges
+From the role management screen:
+
+[role="screenshot"]
+image::security/images/assign_base_privilege.png[Assign base privilege]
+
+From the <<role-management-api-put, role management API>>:
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": ["all"],
+      "feature": {},
+      "spaces": ["marketing"]
+    }
+  ]
+}
+--------------------------------------------------
+
+
+
+==== Feature privileges
+Assigning a feature privilege grants access to a specific feature.
+
+`all`:: Grants full read-write access.
+`read`:: Grants read-only access.
+
+===== Assigning feature privileges
+From the role management screen:
+
+[role="screenshot"]
+image::security/images/assign_feature_privilege.png[Assign feature privilege]
+
+From the <<role-management-api-put, role management API>>:
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "dashboard": ["all"]
+      },
+      "spaces": ["marketing"]
+    }
+  ]
+}
+--------------------------------------------------

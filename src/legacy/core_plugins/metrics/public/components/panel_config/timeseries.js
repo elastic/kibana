@@ -19,13 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesEditor from '../series_editor';
-import AnnotationsEditor from '../annotations_editor';
+import { SeriesEditor } from '../series_editor';
+import { AnnotationsEditor } from '../annotations_editor';
 import { IndexPattern } from '../index_pattern';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import ColorPicker from '../color_picker';
-import YesNo from '../yes_no';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorPicker } from '../color_picker';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -119,6 +119,7 @@ class TimeseriesPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
+          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -379,7 +380,7 @@ TimeseriesPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  visData$: PropTypes.object,
 };
 
-const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);
-export default TimeseriesPanelConfig;
+export const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);

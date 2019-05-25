@@ -6,5 +6,6 @@
 
 declare module 'graphql-fields' {
   function graphqlFields(info: any, obj?: any): any;
+  // eslint-disable-next-line import/no-default-export
   export default graphqlFields;
 }

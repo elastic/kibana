@@ -4,75 +4,125 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore missing typings
-import { EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCodeBlock,
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { Fragment } from 'react';
-import { Link } from 'react-router-dom';
-import { ErrorListItem } from '../../../common/graphql/types';
+import React from 'react';
+import { ErrorListItem, Ping } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { errorListQuery } from '../../queries';
+import { MonitorPageLink } from './monitor_page_link';
 
 interface ErrorListProps {
-  loading: boolean;
-  errorList: ErrorListItem[];
+  linkParameters?: string;
 }
 
-export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
-  <Fragment>
+interface ErrorListQueryResult {
+  errorList?: ErrorListItem[];
+}
+
+type Props = UptimeGraphQLQueryProps<ErrorListQueryResult> & ErrorListProps;
+
+export const ErrorListComponent = ({ data, linkParameters, loading }: Props) => (
+  <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
-        <FormattedMessage id="xpack.uptime.errorList.title" defaultMessage="Error list" />
+        <FormattedMessage id="xpack.uptime.errorList.title" defaultMessage="Errors" />
       </h5>
     </EuiTitle>
-    <EuiPanel>
-      <EuiInMemoryTable
-        loading={loading}
-        items={errorList}
-        columns={[
-          {
-            field: 'type',
-            name: i18n.translate('xpack.uptime.errorList.errorTypeColumnLabel', {
-              defaultMessage: 'Error type',
-            }),
-          },
-          {
-            field: 'monitorId',
-            name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
-              defaultMessage: 'Monitor ID',
-            }),
-            render: (id: string) => <Link to={`/monitor/${id}`}>{id}</Link>,
-            width: '25%',
-          },
-          {
-            field: 'count',
-            name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
-              defaultMessage: 'Count',
-            }),
-          },
-          {
-            field: 'timestamp',
-            name: i18n.translate('xpack.uptime.errorList.latestErrorColumnLabel', {
-              defaultMessage: 'Latest error',
-            }),
-            render: (timestamp: string) => moment(timestamp).fromNow(),
-          },
-          {
-            field: 'statusCode',
-            name: i18n.translate('xpack.uptime.errorList.statusCodeColumnLabel', {
-              defaultMessage: 'Status code',
-            }),
-          },
-          {
-            field: 'latestMessage',
-            name: i18n.translate('xpack.uptime.errorList.latestMessageColumnLabel', {
-              defaultMessage: 'Latest message',
-            }),
-            width: '40%',
-          },
-        ]}
-        pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
-      />
-    </EuiPanel>
-  </Fragment>
+    <EuiInMemoryTable
+      loading={loading}
+      items={(data && data.errorList) || undefined}
+      columns={[
+        {
+          field: 'count',
+          width: '200px',
+          name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
+            defaultMessage: 'Frequency',
+          }),
+          render: (count: number, item: Ping) => (
+            <div>
+              <EuiText size="s">
+                <EuiTextColor color="danger">{count}</EuiTextColor> errors
+              </EuiText>
+              <EuiText size="xs" color="subdued">
+                Latest was {moment(item.timestamp).fromNow()}
+              </EuiText>
+            </div>
+          ),
+        },
+        {
+          field: 'type',
+          name: i18n.translate('xpack.uptime.errorList.errorTypeColumnLabel', {
+            defaultMessage: 'Error type',
+          }),
+        },
+        {
+          field: 'monitorId',
+          name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
+            defaultMessage: 'Monitor ID',
+          }),
+          render: (id: string, { name, location }: ErrorListItem) => (
+            <MonitorPageLink
+              id={id}
+              location={location || undefined}
+              linkParameters={linkParameters}
+            >
+              {name || id}
+            </MonitorPageLink>
+          ),
+          width: '12.5%',
+        },
+        {
+          field: 'location',
+          name: i18n.translate('xpack.uptime.errorList.location', {
+            defaultMessage: 'Location',
+            description:
+              "The heading of a column that displays the location of a Heartbeat instance's host machine.",
+          }),
+          width: '12.5%',
+        },
+        {
+          field: 'statusCode',
+          name: i18n.translate('xpack.uptime.errorList.statusCodeColumnLabel', {
+            defaultMessage: 'Status code',
+          }),
+          render: (statusCode: string) => (statusCode ? <EuiBadge>{statusCode}</EuiBadge> : null),
+        },
+        {
+          field: 'latestMessage',
+          name: i18n.translate('xpack.uptime.errorList.latestMessageColumnLabel', {
+            defaultMessage: 'Latest message',
+          }),
+          width: '40%',
+          render: (message: string) => (
+            <div>
+              {
+                // TODO: remove this ignore when prop is defined on type
+                // @ts-ignore size is not currently defined on the type for EuiCodeBlock
+                <EuiCodeBlock transparentBackground size="xs" paddingSize="none">
+                  {message}
+                </EuiCodeBlock>
+              }
+            </div>
+          ),
+        },
+      ]}
+      pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
+    />
+  </EuiPanel>
+);
+
+export const ErrorList = withUptimeGraphQL<ErrorListQueryResult, ErrorListProps>(
+  ErrorListComponent,
+  errorListQuery
 );

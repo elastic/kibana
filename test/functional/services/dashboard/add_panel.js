@@ -52,33 +52,33 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const itemList = await testSubjects.find('savedObjectFinderItemList');
       const embeddableRows = await itemList.findAllByCssSelector('li');
+      const embeddableList = [];
       for (let i = 0; i < embeddableRows.length; i++) {
+        embeddableList.push(await embeddableRows[i].getVisibleText());
         await embeddableRows[i].click();
         await PageObjects.common.closeToast();
       }
       log.debug(`Added ${embeddableRows.length} embeddables`);
+      return embeddableList;
     }
 
     async clickPagerNextButton() {
       // Clear all toasts that could hide pagination controls
       await PageObjects.common.clearAllToasts();
 
-      const addPanel = await testSubjects.find('dashboardAddPanel');
-      const pagination = await addPanel.findAllByClassName('euiPagination');
-      if (pagination.length === 0) {
+      const isNext = await testSubjects.exists('pagination-button-next');
+      if (!isNext) {
         return false;
       }
 
-      const pagerNextButton = await pagination[0].findByCssSelector('button[aria-label="Next page"]');
-      if (!pagerNextButton) {
-        return false;
-      }
+      const pagerNextButton = await testSubjects.find('pagination-button-next');
 
       const isDisabled = await pagerNextButton.getAttribute('disabled');
       if (isDisabled != null) {
         return false;
       }
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await pagerNextButton.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
       return true;
@@ -104,9 +104,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async waitForListLoading() {
-      await retry.waitFor('dashboard add panel loading to complete', async () => {
-        return !(await testSubjects.exists('savedObjectFinderLoadingIndicator'));
-      });
+      await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
     }
 
     async closeAddPanel() {
@@ -121,38 +119,34 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         await this.filterEmbeddableNames(filter.replace('-', ' '));
       }
       let morePages = true;
+      const vizList = [];
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        vizList.push(await this.addEveryEmbeddableOnCurrentPage());
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
+      return vizList.reduce((acc, vizList) => [...acc, ...vizList], []);
     }
 
     async addEverySavedSearch(filter) {
       log.debug('DashboardAddPanel.addEverySavedSearch');
       await this.ensureAddPanelIsShowing();
       await this.toggleFilter('search');
+      const searchList = [];
       if (filter) {
         await this.filterEmbeddableNames(filter.replace('-', ' '));
       }
       let morePages = true;
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        searchList.push(await this.addEveryEmbeddableOnCurrentPage());
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
+      return searchList.reduce((acc, searchList) => [...acc, ...searchList], []);
     }
 
     async addSavedSearch(searchName) {
-      log.debug(`addSavedSearch(${searchName})`);
-
-      await this.ensureAddPanelIsShowing();
-      await this.toggleFilter('search');
-      await this.filterEmbeddableNames(searchName);
-
-      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
-      await testSubjects.exists('addObjectToDashboardSuccess');
-      await this.closeAddPanel();
+      return this.addEmbeddable(searchName, 'search');
     }
 
     async addSavedSearches(searches) {
@@ -163,19 +157,27 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
     async addVisualizations(visualizations) {
       log.debug('DashboardAddPanel.addVisualizations');
+      const vizList = [];
       for (const vizName of visualizations) {
         await this.addVisualization(vizName);
+        vizList.push(vizName);
       }
+      return vizList;
     }
 
     async addVisualization(vizName) {
-      log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
+      return this.addEmbeddable(vizName, 'visualization');
+    }
+
+    async addEmbeddable(embeddableName, embeddableType) {
+      log.debug(`DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`);
       await this.ensureAddPanelIsShowing();
-      await this.toggleFilter('visualization');
-      await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
-      await testSubjects.click(`savedObjectTitle${vizName.split(' ').join('-')}`);
+      await this.toggleFilter(embeddableType);
+      await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+      await testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
       await testSubjects.exists('addObjectToDashboardSuccess');
       await this.closeAddPanel();
+      return embeddableName;
     }
 
     async filterEmbeddableNames(name) {

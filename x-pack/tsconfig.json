@@ -28,12 +28,14 @@
       ],
       "test_utils/*": [
         "x-pack/test_utils/*"
+      ],
+      "monitoring/common/*": [
+        "x-pack/monitoring/common/*"
       ]
     },
     "types": [
       "node",
-      "jest",
-      "@kbn/test/types/expect.js"
+      "jest"
     ]
   }
 }

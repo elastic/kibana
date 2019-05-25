@@ -18,7 +18,7 @@
  */
 
 import { createTransform } from '../create_transform';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 describe('deprecation', function () {

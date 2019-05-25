@@ -17,123 +17,21 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
-import _ from 'lodash';
-import { modifyUrl } from 'ui/url';
-import { i18n }  from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import { uiModules } from '../../modules';
-import { toastNotifications } from '../../notify';
-import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';
-
-const URL_LIMIT_WARN_WITHIN = 1000;
+import { registerSubUrlHooks } from './sub_url_hooks';
+import { configureAppAngularModule } from 'ui/legacy_compat';
 
 export function initAngularApi(chrome, internals) {
-  chrome.getFirstPathSegment = _.noop;
-
   chrome.setupAngular = function () {
     const kibana = uiModules.get('kibana');
 
-    _.forOwn(chrome.getInjected(), function (val, name) {
-      kibana.value(name, val);
-    });
+    configureAppAngularModule(kibana);
 
-    kibana
-      .value('kbnVersion', internals.version)
-      .value('buildNum', internals.buildNum)
-      .value('buildSha', internals.buildSha)
-      .value('serverName', internals.serverName)
-      .value('sessionId', Date.now())
-      .value('chrome', chrome)
-      .value('esUrl', (function () {
-        const a = document.createElement('a');
-        a.href = chrome.addBasePath('/elasticsearch');
-        return {
-          host: a.hostname,
-          port: a.port,
-          protocol: a.protocol,
-          pathname: a.pathname
-        };
-      }()))
-      .config($locationProvider => {
-        $locationProvider.html5Mode({
-          enabled: false,
-          requireBase: false,
-          rewriteLinks: false,
-        });
-      })
-      .config(chrome.$setupXsrfRequestInterceptor)
-      .config(function ($compileProvider, $locationProvider) {
-        if (!internals.devMode) {
-          $compileProvider.debugInfoEnabled(false);
-        }
+    kibana.value('chrome', chrome);
 
-        $locationProvider.hashPrefix('');
-      })
-      .run(internals.capture$httpLoadingCount)
-      .run(internals.$setupBreadcrumbsAutoClear)
-      .run(internals.$setupHelpExtensionAutoClear)
-      .run(internals.$initNavLinksDeepWatch)
-      .run(($location, $rootScope, Private, config) => {
-        chrome.getFirstPathSegment = () => {
-          return $location.path().split('/')[1];
-        };
-
-        const urlOverflow = Private(UrlOverflowServiceProvider);
-        const check = () => {
-          // disable long url checks when storing state in session storage
-          if (config.get('state:storeInSessionStorage')) {
-            return;
-          }
-
-          if ($location.path() === '/error/url-overflow') {
-            return;
-          }
-
-          try {
-            if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-              toastNotifications.addWarning({
-                title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
-                  defaultMessage: 'The URL is big and Kibana might stop working'
-                }),
-                text: (
-                  <Fragment>
-                    <FormattedMessage
-                      id="common.ui.chrome.bigUrlWarningNotificationMessage"
-                      defaultMessage="Either enable the {storeInSessionStorageParam} option
-                        in {advancedSettingsLink} or simplify the onscreen visuals."
-                      values={{
-                        storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
-                        advancedSettingsLink: (
-                          <a href="#/management/kibana/settings">
-                            <FormattedMessage
-                              id="common.ui.chrome.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
-                              defaultMessage="advanced settings"
-                            />
-                          </a>
-                        )
-                      }}
-                    />
-                  </Fragment>
-                ),
-              });
-            }
-          } catch (e) {
-            window.location.href = modifyUrl(window.location.href, parts => {
-              parts.hash = '#/error/url-overflow';
-            });
-            // force the browser to reload to that Kibana's potentially unstable state is unloaded
-            window.location.reload();
-          }
-        };
-
-        $rootScope.$on('$routeUpdate', check);
-        $rootScope.$on('$routeChangeStart', check);
-      });
-
+    registerSubUrlHooks(kibana, internals);
     directivesProvider(chrome, internals);
 
     uiModules.link(kibana);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
+      await PageObjects.dashboard.waitForRenderComplete();
     });
 
     it('should have data-shared-items-count set to the number of embeddables on the dashboard', async () => {
@@ -68,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data-shared-item title is cleared with an empty panel title string', async () => {
-      await dashboardPanelActions.setCustomPanelTitle('h\b');
+      await dashboardPanelActions.setCustomPanelTitle('');
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find(item => {

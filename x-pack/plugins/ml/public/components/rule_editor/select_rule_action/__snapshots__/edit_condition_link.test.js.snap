@@ -8,10 +8,7 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="Update rule condition from {conditionValue} to"
         id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
@@ -64,10 +61,7 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
   <EuiFlexItem
     grow={false}
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="Update rule condition from {conditionValue} to"
         id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
@@ -120,10 +114,7 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="Update rule condition from {conditionValue} to"
         id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"

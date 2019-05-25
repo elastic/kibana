@@ -15,31 +15,31 @@
             "args": [
               {
                 "name": "sort",
-                "description": "",
+                "description": "Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "size",
-                "description": "",
+                "description": "Optional: the number of results to return.",
                 "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "monitorId",
-                "description": "",
+                "description": "Optional: the monitor ID filter.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "status",
-                "description": "",
+                "description": "Optional: the check status to filter by.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "dateRangeStart",
-                "description": "",
+                "description": "The lower limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -49,12 +49,18 @@
               },
               {
                 "name": "dateRangeEnd",
-                "description": "",
+                "description": "The upper limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "location",
+                "description": "Optional: agent location to filter by.",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -181,6 +187,12 @@
                   "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "location",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "MonitorChart", "ofType": null },
@@ -189,11 +201,11 @@
           },
           {
             "name": "getLatestMonitors",
-            "description": "",
+            "description": "Fetch the most recent event data for a monitor ID, date range, location.",
             "args": [
               {
                 "name": "dateRangeStart",
-                "description": "",
+                "description": "The lower limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -203,7 +215,7 @@
               },
               {
                 "name": "dateRangeEnd",
-                "description": "",
+                "description": "The upper limit of the date range.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -213,7 +225,13 @@
               },
               {
                 "name": "monitorId",
-                "description": "",
+                "description": "Optional: a specific monitor ID filter.",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "location",
+                "description": "Optional: a specific instance location filter.",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
@@ -425,7 +443,7 @@
             "name": "millisFromNow",
             "description": "Milliseconds from the timestamp to the current time",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -434,6 +452,14 @@
             "description": "The agent that recorded the ping",
             "args": [],
             "type": { "kind": "OBJECT", "name": "Beat", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "container",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Container", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -506,6 +532,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "OBJECT", "name": "Monitor", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "observer",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Observer", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -602,6 +636,76 @@
           },
           {
             "name": "type",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Container",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "image",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "ContainerImage", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "runtime",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ContainerImage",
+        "description": "",
+        "fields": [
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tag",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -1275,6 +1379,100 @@
       },
       {
         "kind": "OBJECT",
+        "name": "Observer",
+        "description": "Metadata added by a proccessor, which is specified in its configuration.",
+        "fields": [
+          {
+            "name": "geo",
+            "description": "Geolocation data for the agent.",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Geo", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Geo",
+        "description": "Geolocation data added via processors to enrich events.",
+        "fields": [
+          {
+            "name": "city_name",
+            "description": "Name of the city in which the agent is running.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "continent_name",
+            "description": "The name of the continent on which the agent is running.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "country_iso_code",
+            "description": "ISO designation for the agent's country.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "country_name",
+            "description": "The name of the agent's country.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "location",
+            "description": "The lat/long of the agent.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "A name for the host's location, e.g. 'us-east-1' or 'LAX'.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "region_iso_code",
+            "description": "ISO designation of the agent's region.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "region_name",
+            "description": "Name of the region hosting the agent.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "Resolve",
         "description": "",
         "fields": [
@@ -1600,7 +1798,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1612,7 +1814,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -2016,11 +2222,11 @@
       {
         "kind": "OBJECT",
         "name": "FilterBar",
-        "description": "",
+        "description": "The data used to enrich the filter bar.",
         "fields": [
           {
             "name": "ids",
-            "description": "",
+            "description": "A series of monitor IDs in the heartbeat indices.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -2035,8 +2241,24 @@
             "deprecationReason": null
           },
           {
+            "name": "locations",
+            "description": "The location values users have configured for the agents.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "names",
-            "description": "",
+            "description": "The names users have configured for the monitors.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -2052,7 +2274,7 @@
           },
           {
             "name": "ports",
-            "description": "",
+            "description": "The ports of the monitored endpoints.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -2068,7 +2290,7 @@
           },
           {
             "name": "schemes",
-            "description": "",
+            "description": "The schemes used by the monitors.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -2084,7 +2306,7 @@
           },
           {
             "name": "statuses",
-            "description": "",
+            "description": "The possible status values contained in the indices.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -2107,11 +2329,31 @@
       {
         "kind": "OBJECT",
         "name": "ErrorListItem",
-        "description": "",
+        "description": "A representation of an error state for a monitor.",
         "fields": [
           {
+            "name": "count",
+            "description": "The number of times this error has occurred.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "latestMessage",
-            "description": "",
+            "description": "The most recent message associated with this error type.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "location",
+            "description": "The location assigned to the agent reporting this error.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
@@ -2119,35 +2361,23 @@
           },
           {
             "name": "monitorId",
-            "description": "",
+            "description": "The ID of the monitor reporting the error.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "type",
-            "description": "",
+            "name": "name",
+            "description": "The name configured for the monitor by the user.",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "count",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "statusCode",
-            "description": "",
+            "description": "The status code, if available, of the error request.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
@@ -2155,9 +2385,21 @@
           },
           {
             "name": "timestamp",
-            "description": "",
+            "description": "When the most recent error state occurred.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "What kind of error the monitor reported.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }

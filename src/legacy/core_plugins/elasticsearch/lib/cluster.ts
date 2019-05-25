@@ -18,7 +18,7 @@
  */
 
 import { errors } from 'elasticsearch';
-import { CallAPIOptions, ClusterClient } from 'kibana';
+import { CallAPIOptions, ClusterClient } from 'kibana/server';
 
 export class Cluster {
   public readonly errors = errors;

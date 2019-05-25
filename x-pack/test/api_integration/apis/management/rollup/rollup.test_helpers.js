@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { initElasticsearchIndicesHelpers, getRandomString, wait } from './lib';
+import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
 import { API_BASE_PATH, ROLLUP_INDEX_NAME, INDEX_TO_ROLLUP_MAPPINGS } from './constants';
 
 const jobsCreated = [];
 const jobsStarted = [];
 
 export const registerHelpers = ({ supertest, es }) => {
-  const { createIndex, deleteAllIndices } = initElasticsearchIndicesHelpers(es);
+  const { createIndex, deleteIndex, deleteAllIndicesCreated } = initElasticsearchIndicesHelpers(es);
 
   const createIndexWithMappings = (indexName = undefined, mappings = INDEX_TO_ROLLUP_MAPPINGS) => {
     return createIndex(indexName, { mappings });
@@ -81,91 +81,56 @@ export const registerHelpers = ({ supertest, es }) => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
 
     return supertest
-      .post(`${API_BASE_PATH}/stop`)
+      .post(`${API_BASE_PATH}/stop?waitForCompletion=true`)
       .set('kbn-xsrf', 'xxx')
       .send({ jobIds });
   };
 
   const loadJobs = () => supertest.get(`${API_BASE_PATH}/jobs`);
 
-  const waitForJobsToStop = (attempt = 0) => (
+  const stopAllJobs = () => (
     loadJobs()
       .then(async ({ body: { jobs } }) => {
-        const jobBeingStopped = jobs.filter(job => job.status.job_state !== 'stopped' && job.status.job_state !== 'started');
+        const jobIds = jobs.map(job => job.config.id);
 
-        if (!jobBeingStopped.length) {
-          return;
-        }
+        await stopJob(jobIds);
 
-        if (attempt < 3 && jobBeingStopped.length) {
-          await wait(500);
-          return waitForJobsToStop(++attempt);
-        }
-
-        throw new Error('Error while waiting for Rollup Jobs to stop');
-      }));
-
-  const stopAllJobStarted = (jobIds = jobsStarted, attempt = 0) => (
-    stopJob(jobIds)
-      .then(waitForJobsToStop)
-      .then(loadJobs)
-      .then(({ body: { jobs } }) => {
-        // We make sure that there are no more jobs started
-        // as trying to delete a job that is started will throw an exception
-        const jobsStillStarted = jobs.filter(job => job.status.job_state === 'started').map(job => job.config.id);
-
-        if (jobsStillStarted.length && attempt < 3) {
-          return stopAllJobStarted(jobsStillStarted, ++attempt);
-        } else if(jobsStillStarted.length) {
-          throw new Error('Error trying to stop jobs started');
-        }
-      })
-  );
-
-  const deleteJobsCreated = (ids = jobsCreated, attempt = 0) => (
-    deleteJob(ids)
-      .then((response) => {
-        if (response.status !== 200 && response.status !== 404) {
-          throw response;
-        }
-      })
-      .then(loadJobs)
-      .then(({ body: { jobs } }) => {
-        if (jobs.length && attempt < 3) {
-          // There are still some jobs left to delete.
-          // Call recursively until all rollup jobs are removed.
-          return deleteJobsCreated(jobs.map(job => job.config.id), ++attempt);
-        } else if (jobs.length) {
-          throw new Error('Error trying to delete Jobs created');
-        }
+        return jobIds;
       })
   );
 
   const deleteIndicesGeneratedByJobs = () => (
     supertest.get(`${API_BASE_PATH}/indices`)
-      .then(({ body }) => {
+      .then(({ status, body }) => {
+
+        if (status !== 200) {
+          throw new Error(`Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
+        }
+
         const index = Object.keys(body);
+
         if (!index.length) {
           return;
         }
-        return es.indices.delete({ index });
+
+        return deleteIndex(index);
       })
   );
 
   const cleanUp = () => (
     Promise.all([
-      deleteAllIndices(),
-      stopAllJobStarted().then(deleteJobsCreated),
-      deleteIndicesGeneratedByJobs(),
+      stopAllJobs().then(deleteJob),
+      deleteIndicesGeneratedByJobs().then(deleteAllIndicesCreated),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
-      throw(err);
+      throw err;
     })
   );
 
   return {
     createIndexWithMappings,
     getJobPayload,
+    loadJobs,
     createJob,
     deleteJob,
     startJob,

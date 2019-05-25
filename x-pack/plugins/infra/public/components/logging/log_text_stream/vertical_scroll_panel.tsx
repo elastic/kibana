@@ -8,8 +8,8 @@ import { bisector } from 'd3-array';
 import sortBy from 'lodash/fp/sortBy';
 import throttle from 'lodash/fp/throttle';
 import * as React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { Rect } from './measurable_item_view';
 
 interface VerticalScrollPanelProps<Child> {
@@ -29,6 +29,7 @@ interface VerticalScrollPanelProps<Child> {
   height: number;
   width: number;
   hideScrollbar?: boolean;
+  'data-test-subj'?: string;
 }
 
 interface VerticalScrollPanelSnapshot<Child> {
@@ -41,7 +42,7 @@ interface MeasurableChild {
 }
 
 const SCROLL_THROTTLE_INTERVAL = 250;
-const ASSUMED_SCROLLBAR_WIDTH = 20;
+export const ASSUMED_SCROLLBAR_WIDTH = 20;
 
 export class VerticalScrollPanel<Child> extends React.PureComponent<
   VerticalScrollPanelProps<Child>
@@ -208,11 +209,12 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 
   public render() {
-    const { children, height, width, hideScrollbar } = this.props;
+    const { children, height, width, hideScrollbar, 'data-test-subj': dataTestSubj } = this.props;
     const scrollbarOffset = hideScrollbar ? ASSUMED_SCROLLBAR_WIDTH : 0;
 
     return (
       <ScrollPanelWrapper
+        data-test-subj={dataTestSubj}
         style={{ height, width: width + scrollbarOffset }}
         scrollbarOffset={scrollbarOffset}
         onScroll={this.handleScroll}
@@ -227,7 +229,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 }
 
-const ScrollPanelWrapper = styled.div.attrs<{ scrollbarOffset?: number }>({})`
+const ScrollPanelWrapper = euiStyled.div.attrs<{ scrollbarOffset?: number }>({})`
   overflow-x: hidden;
   overflow-y: scroll;
   position: relative;

@@ -19,7 +19,7 @@
 
 
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from '../phrase';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';

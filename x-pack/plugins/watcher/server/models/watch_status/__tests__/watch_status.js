@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { WatchStatus } from '../watch_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../../common/constants';
 import moment from 'moment';

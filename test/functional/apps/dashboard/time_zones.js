@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');

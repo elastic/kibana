@@ -5,8 +5,8 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/ui/Span';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import {
   getClockSkew,
   getOrderedWaterfallItems,
@@ -96,13 +96,12 @@ describe('waterfall_helpers', () => {
 
     it('should return full waterfall', () => {
       const entryTransactionId = 'myTransactionId1';
-      const errorCountsByTransactionId = {
+      const errorsPerTransaction = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        hits,
-        errorCountsByTransactionId,
+        { trace: hits, errorsPerTransaction },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(6);
@@ -112,13 +111,12 @@ describe('waterfall_helpers', () => {
 
     it('should return partial waterfall', () => {
       const entryTransactionId = 'myTransactionId2';
-      const errorCountsByTransactionId = {
+      const errorsPerTransaction = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        hits,
-        errorCountsByTransactionId,
+        { trace: hits, errorsPerTransaction },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(4);
@@ -128,13 +126,12 @@ describe('waterfall_helpers', () => {
 
     it('getTransactionById', () => {
       const entryTransactionId = 'myTransactionId1';
-      const errorCountsByTransactionId = {
+      const errorsPerTransaction = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        hits,
-        errorCountsByTransactionId,
+        { trace: hits, errorsPerTransaction },
         entryTransactionId
       );
       const transaction = waterfall.getTransactionById('myTransactionId2');
@@ -261,7 +258,7 @@ describe('waterfall_helpers', () => {
       expect(getClockSkew(child, parent)).toBe(130);
     });
 
-    it('should adjust when child starts after parent has ended', () => {
+    it('should not adjust when child starts after parent has ended', () => {
       const child = {
         docType: 'transaction',
         timestamp: 250,
@@ -274,7 +271,7 @@ describe('waterfall_helpers', () => {
         skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(child, parent)).toBe(-120);
+      expect(getClockSkew(child, parent)).toBe(0);
     });
 
     it('should not adjust when child starts within parent duration', () => {

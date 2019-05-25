@@ -72,10 +72,11 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
   }
 
   private static transformPlugins(configValue: Record<string, any>) {
-    // This property is the only one we use from the existing `plugins` config node
-    // since `scanDirs` and `paths` aren't respected by new platform plugin discovery.
+    // These properties are the only ones we use from the existing `plugins` config node
+    // since `scanDirs` isn't respected by new platform plugin discovery.
     return {
       initialize: configValue.initialize,
+      paths: configValue.paths,
     };
   }
 

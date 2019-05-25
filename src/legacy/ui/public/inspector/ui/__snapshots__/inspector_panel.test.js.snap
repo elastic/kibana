@@ -157,7 +157,6 @@ exports[`InspectorPanel should render as expected 1`] = `
             >
               <EuiTitle
                 size="s"
-                textTransform="none"
               >
                 <h1
                   className="euiTitle euiTitle--small"
@@ -242,8 +241,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                     <div
                       className="euiPopover euiPopover--anchorDownRight"
                       id="inspectorViewChooser"
-                      onClick={[Function]}
                       onKeyDown={[Function]}
+                      onMouseDown={[Function]}
+                      onMouseUp={[Function]}
+                      onTouchEnd={[Function]}
+                      onTouchStart={[Function]}
                     >
                       <div
                         className="euiPopover__anchor"

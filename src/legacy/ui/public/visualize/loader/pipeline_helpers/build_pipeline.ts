@@ -22,16 +22,22 @@ import { cloneDeep } from 'lodash';
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
+import moment from 'moment';
 
 interface SchemaFormat {
   id: string;
   params?: any;
 }
 
+interface SchemaConfigParams {
+  precision?: number;
+  useGeocentroid?: boolean;
+}
+
 interface SchemaConfig {
   accessor: number;
   format: SchemaFormat | {};
-  params: any;
+  params: SchemaConfigParams;
   aggType: string;
 }
 
@@ -104,43 +110,39 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   };
 
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
-    const schema = {
-      accessor,
-      format: {},
-      params: {},
-      aggType: agg.type.name,
-    };
-
     if (agg.type.name === 'date_histogram') {
       agg.params.timeRange = timeRange;
       setBounds(agg, true);
     }
+
+    const hasSubAgg = [
+      'derivative',
+      'moving_avg',
+      'serial_diff',
+      'cumulative_sum',
+      'sum_bucket',
+      'avg_bucket',
+      'min_bucket',
+      'max_bucket',
+    ].includes(agg.type.name);
+
+    const format = createFormat(
+      hasSubAgg ? agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg] : agg
+    );
+
+    const params: SchemaConfigParams = {};
+
     if (agg.type.name === 'geohash_grid') {
-      schema.params = {
-        precision: agg.params.precision,
-        useGeocentroid: agg.params.useGeocentroid,
-      };
+      params.precision = agg.params.precision;
+      params.useGeocentroid = agg.params.useGeocentroid;
     }
 
-    if (
-      [
-        'derivative',
-        'moving_avg',
-        'serial_diff',
-        'cumulative_sum',
-        'sum_bucket',
-        'avg_bucket',
-        'min_bucket',
-        'max_bucket',
-      ].includes(agg.type.name)
-    ) {
-      const subAgg = agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg];
-      schema.format = createFormat(subAgg);
-    } else {
-      schema.format = createFormat(agg);
-    }
-
-    return schema;
+    return {
+      accessor,
+      format,
+      params,
+      aggType: agg.type.name,
+    };
   };
 
   let cnt = 0;
@@ -197,7 +199,11 @@ export const prepareJson = (variable: string, data: object): string => {
 };
 
 export const prepareString = (variable: string, data: string): string => {
-  return `${variable}='${data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`)}' `;
+  return `${variable}='${escapeString(data)}' `;
+};
+
+export const escapeString = (data: string): string => {
+  return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
@@ -219,9 +225,16 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `timelion_vis ${expression}${interval}`;
   },
   markdown: visState => {
-    const expression = prepareString('expression', visState.params.markdown);
-    const visConfig = prepareJson('visConfig', visState.params);
-    return `kibana_markdown ${expression}${visConfig}`;
+    const { markdown, fontSize, openLinksInNewTab } = visState.params;
+    const escapedMarkdown = escapeString(markdown);
+    let expr = `markdownvis '${escapedMarkdown}' `;
+    if (fontSize) {
+      expr += ` fontSize=${fontSize} `;
+    }
+    if (openLinksInNewTab) {
+      expr += `openLinksInNewTab=${openLinksInNewTab} `;
+    }
+    return expr;
   },
   table: (visState, schemas) => {
     const visConfig = {
@@ -238,11 +251,35 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    const visConfig = {
-      ...visState.params,
-      ...buildVisConfig.tagcloud(schemas),
-    };
-    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
+    const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
+    const { metric, bucket } = buildVisConfig.tagcloud(schemas);
+    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
+
+    if (scale) {
+      expr += `scale='${scale}' `;
+    }
+    if (orientation) {
+      expr += `orientation='${orientation}' `;
+    }
+    if (minFontSize) {
+      expr += `minFontSize=${minFontSize} `;
+    }
+    if (maxFontSize) {
+      expr += `maxFontSize=${maxFontSize} `;
+    }
+    if (showLabel !== undefined) {
+      expr += `showLabel=${showLabel} `;
+    }
+
+    if (bucket) {
+      expr += ` bucket={visdimension ${bucket.accessor} `;
+      if (bucket.format) {
+        expr += `format=${bucket.format.id} `;
+        expr += prepareJson('formatParams', bucket.format.params);
+      }
+      expr += '} ';
+    }
+    return expr;
   },
   region_map: (visState, schemas) => {
     const visConfig = {
@@ -351,7 +388,8 @@ export const buildVislibDimensions = async (
     const xAgg = vis.aggs.getResponseAggs()[dimensions.x.accessor];
     if (xAgg.type.name === 'date_histogram') {
       dimensions.x.params.date = true;
-      dimensions.x.params.interval = xAgg.buckets.getInterval().asMilliseconds();
+      const { esUnit, esValue } = xAgg.buckets.getInterval();
+      dimensions.x.params.interval = moment.duration(esValue, esUnit);
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {

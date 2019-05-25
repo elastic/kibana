@@ -44,7 +44,7 @@
   }
 
   .results-container {
-    padding: $euiSize 0px $euiSize 0px;
+    padding: 0px 0px $euiSize 0px;
 
       // SASSTODO: Overwrite of bootstrap
     .col-xs-12 {
@@ -86,45 +86,6 @@
       padding: 0px $euiSizeXS 0px 0px;
       position: relative;
       display: inline-block;
-    }
-
-    button.dropdown-toggle {
-      // SASSTODO: Make a proper calc
-      min-width: 160px;
-      text-align: left;
-      margin-bottom: $euiSizeXS;
-
-      // SASSTODO: Make a proper selector
-      span {
-        font-size: $euiFontSizeXS;
-      }
-    }
-
-    // SASSTODO: Make a proper calc
-    button.dropdown-toggle.dropdown-toggle-narrow {
-      min-width: 60px;
-    }
-
-    button.dropdown-toggle:hover,
-    button.dropdown-toggle:focus {
-      color: $euiColorDarkShade;
-    }
-
-    .dropdown-menu {
-      font-size: $euiFontSizeXS;
-    }
-
-      // SASSTODO: Make a proper selector
-    .dropdown-menu > li > a {
-      color: $euiColorDarkShade;
-      text-decoration: none;
-    }
-
-    .dropdown-menu > li > a:hover,
-    .dropdown-menu > li > a:active,
-    .dropdown-menu > li > a:focus {
-      color: $euiColorEmptyShade;
-      box-shadow: none;
     }
   }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from '../../buckets/_terms_other_bucket_helper';
 import { VisProvider } from '../../../vis';

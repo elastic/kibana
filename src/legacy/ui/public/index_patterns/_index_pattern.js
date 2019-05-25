@@ -27,12 +27,10 @@ import { Notifier, toastNotifications } from '../notify';
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
 import { IndexPatternsGetProvider } from './_get';
-import { IndexPatternsIntervalsProvider } from './_intervals';
 import { FieldList } from './_field_list';
 import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
-import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../saved_objects';
 import { i18n } from '@kbn/i18n';
 
@@ -48,15 +46,13 @@ export function getRoutes() {
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
+export function IndexPatternProvider(Private, config, Promise) {
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
-  const intervals = Private(IndexPatternsIntervalsProvider);
   const mappingSetup = Private(UtilsMappingSetupProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
-  const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const fieldformats = fieldFormats;
 
@@ -116,27 +112,6 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     if (!indexPattern.title) {
       indexPattern.title = indexPattern.id;
-    }
-
-    if (indexPattern.isUnsupportedTimePattern()) {
-      if (!isUserAwareOfUnsupportedTimePattern(indexPattern)) {
-        const warningTitle = i18n.translate('common.ui.indexPattern.warningTitle', {
-          defaultMessage: 'Support for time intervals was removed',
-        });
-
-        const warningText = i18n.translate('common.ui.indexPattern.warningText', {
-          defaultMessage: 'For more information, view the ["{title}" index pattern in management]({link})',
-          values: {
-            title: indexPattern.title,
-            link: kbnUrl.getRouteHref(indexPattern, 'edit'),
-          },
-        });
-
-        toastNotifications.addWarning({
-          title: warningTitle,
-          text: warningText,
-        });
-      }
     }
 
     return indexFields(indexPattern, forceFieldRefresh);
@@ -329,49 +304,8 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return _.where(this.fields, { scripted: true });
     }
 
-    getInterval() {
-      return this.intervalName && _.find(intervals, { name: this.intervalName });
-    }
-
-    toIndexList(start, stop, sortDirection) {
-      return this
-        .toDetailedIndexList(start, stop, sortDirection)
-        .then(detailedIndices => {
-          if (!Array.isArray(detailedIndices)) {
-            return detailedIndices.index;
-          }
-          return detailedIndices.map(({ index }) => index).join(',');
-        });
-    }
-
-    toDetailedIndexList(start, stop, sortDirection) {
-      return Promise.resolve().then(() => {
-        if (this.isTimeBasedInterval()) {
-          return intervals.toIndexList(
-            this.title, this.getInterval(), start, stop, sortDirection
-          );
-        }
-
-        return [
-          {
-            index: this.title,
-            min: -Infinity,
-            max: Infinity
-          }
-        ];
-      });
-    }
-
     isTimeBased() {
       return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
-    }
-
-    isTimeBasedInterval() {
-      return this.isTimeBased() && !!this.getInterval();
-    }
-
-    isUnsupportedTimePattern() {
-      return !!this.intervalName;
     }
 
     isTimeBasedWildcard() {
@@ -404,7 +338,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return body;
     }
 
-    async create(allowOverride = false, showOverridePrompt = false) {
+    async create(allowOverride = false) {
       const _create = async (duplicateId) => {
         if (duplicateId) {
           const duplicatePattern = new IndexPattern(duplicateId);
@@ -424,40 +358,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
       // We found a duplicate but we aren't allowing override, show the warn modal
       if (!allowOverride) {
-        const confirmMessage = i18n.translate('common.ui.indexPattern.titleExistsLabel', { values: { title: this.title },
-          defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
-        try {
-          await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
-          return kbnUrl.redirect('/management/kibana/index_patterns/{{id}}', { id: potentialDuplicateByTitle.id });
-        } catch (err) {
-          return false;
-        }
-      }
-
-      // We can override, but we do not want to see a prompt, so just do it
-      if (!showOverridePrompt) {
-        return await _create(potentialDuplicateByTitle.id);
-      }
-
-      // We can override and we want to prompt for confirmation
-      try {
-        await confirmModalPromise(
-          i18n.translate('common.ui.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
-            defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
-          {
-            title: i18n.translate('common.ui.indexPattern.confirmOverwriteTitle', {
-              defaultMessage: 'Overwrite {type}?',
-              values: { type },
-            }),
-            confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' }),
-          }
-        );
-      } catch (err) {
-        // They changed their mind
         return false;
       }
 
-      // Let's do it!
       return await _create(potentialDuplicateByTitle.id);
     }
 

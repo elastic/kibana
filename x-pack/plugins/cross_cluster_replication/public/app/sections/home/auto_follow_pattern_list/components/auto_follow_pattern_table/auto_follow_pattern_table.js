@@ -17,9 +17,10 @@ import {
   EuiToolTip,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { API_STATUS } from '../../../../../constants';
+import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { AutoFollowPatternDeleteProvider } from '../../../../../components';
 import routing from '../../../../../services/routing';
+import { trackUiMetric } from '../../../../../services/track_ui_metric';
 
 export class AutoFollowPatternTable extends PureComponent {
   static propTypes = {
@@ -75,8 +76,11 @@ export class AutoFollowPatternTable extends PureComponent {
       render: (name) => {
         return (
           <EuiLink
-            onClick={() => selectAutoFollowPattern(name)}
-            data-test-subj="ccrAutoFollowPatternListPatternLink"
+            onClick={() => {
+              trackUiMetric(UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
+              selectAutoFollowPattern(name);
+            }}
+            data-test-subj="autoFollowPatternLink"
           >
             {name}
           </EuiLink>
@@ -148,7 +152,7 @@ export class AutoFollowPatternTable extends PureComponent {
                       iconType="trash"
                       color="danger"
                       onClick={() => deleteAutoFollowPattern(name)}
-                      data-test-subj="ccrAutoFollowPatternListDeleteActionButton"
+                      data-test-subj="deleteButton"
                     />
                   )}
                 </AutoFollowPatternDeleteProvider>
@@ -172,7 +176,7 @@ export class AutoFollowPatternTable extends PureComponent {
                   iconType="pencil"
                   color="primary"
                   href={routing.getAutoFollowPatternPath(name)}
-                  data-test-subj="ccrAutoFollowPatternListEditActionButton"
+                  data-test-subj="editButton"
                 />
               </EuiToolTip>
             );
@@ -225,7 +229,7 @@ export class AutoFollowPatternTable extends PureComponent {
               iconType="trash"
               color="danger"
               onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
-              data-test-subj="ccrAutoFollowPatternListBulkDeleteActionButton"
+              data-test-subj="bulkDeleteButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
@@ -256,11 +260,12 @@ export class AutoFollowPatternTable extends PureComponent {
           selection={selection}
           isSelectable={true}
           rowProps={() => ({
-            'data-test-subj': 'ccrAutoFollowPatternListTableRow'
+            'data-test-subj': 'row'
           })}
           cellProps={(item, column) => ({
-            'data-test-subj': `ccrAutoFollowPatternListTableCell-${column.field}`
+            'data-test-subj': `cell_${column.field}`
           })}
+          data-test-subj="autoFollowPatternListTable"
         />
         {this.renderLoading()}
       </Fragment>

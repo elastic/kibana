@@ -16,7 +16,6 @@ exports[`PipelineEditor component includes required error message for falsy pipe
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -291,6 +290,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -309,6 +309,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -339,7 +340,6 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -613,6 +613,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -631,6 +632,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -661,7 +663,6 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -935,6 +936,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -953,6 +955,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -983,7 +986,6 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Clone Pipeline "pipelineToClone"
@@ -1228,6 +1230,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1246,6 +1249,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1293,7 +1297,6 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -1563,6 +1566,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1581,6 +1585,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1611,7 +1616,6 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Edit Pipeline "pipelineId"
@@ -1856,6 +1860,7 @@ Default value: 1024"
           iconSide="left"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1874,6 +1879,7 @@ Default value: 1024"
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from '../query_filter';
@@ -122,15 +122,25 @@ describe('pin filters', function () {
 
 
     it('should only fire the update event', function () {
-      const emitSpy = sinon.spy(queryFilter, 'emit');
+      const updateStub = sinon.stub();
+      const fetchStub = sinon.stub();
+
+      queryFilter.getUpdates$().subscribe({
+        next: updateStub,
+      });
+
+      queryFilter.getFetches$().subscribe({
+        next: fetchStub,
+      });
+
       const filter = appState.filters[1];
       $rootScope.$digest();
 
       queryFilter.pinFilter(filter);
       $rootScope.$digest();
 
-      expect(emitSpy.callCount).to.be(1);
-      expect(emitSpy.firstCall.args[0]).to.be('update');
+      expect(!fetchStub.called);
+      expect(updateStub.called);
     });
   });
 

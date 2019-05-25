@@ -36,7 +36,9 @@ import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
-import { timefilter } from 'ui/timefilter';
+
+import { timefilter } from '../timefilter';
+import '../bind';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);

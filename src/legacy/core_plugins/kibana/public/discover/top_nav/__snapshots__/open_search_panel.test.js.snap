@@ -15,7 +15,6 @@ exports[`render 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <FormattedMessage
@@ -60,6 +59,7 @@ exports[`render 1`] = `
           href="#/management/kibana/objects?_a=(tab:search)"
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

@@ -10,10 +10,7 @@ exports[`render 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           <FormattedMessage
             defaultMessage="When all steps are complete, you're ready to explore your data."
@@ -31,6 +28,7 @@ exports[`render 1`] = `
         fill={true}
         href="/app/myapp"
         iconSide="left"
+        size="m"
         type="button"
       >
         launch myapp

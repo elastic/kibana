@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 

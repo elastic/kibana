@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import JoiNamespace from 'joi';
 import { initInfraServer } from './infra_server';
@@ -18,8 +19,72 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   const libs = compose(kbnServer);
   initInfraServer(libs);
 
+  kbnServer.expose(
+    'defineInternalSourceConfiguration',
+    libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
+  );
+
   // Register a function with server to manage the collection of usage stats
   kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
+
+  const xpackMainPlugin = kbnServer.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: 'infrastructure',
+    name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
+      defaultMessage: 'Infrastructure',
+    }),
+    icon: 'infraApp',
+    navLinkId: 'infra:home',
+    app: ['infra', 'kibana'],
+    catalogue: ['infraops'],
+    privileges: {
+      all: {
+        api: ['infra'],
+        savedObject: {
+          all: ['infrastructure-ui-source'],
+          read: ['index-pattern'],
+        },
+        ui: ['show', 'configureSource', 'save'],
+      },
+      read: {
+        api: ['infra'],
+        savedObject: {
+          all: [],
+          read: ['infrastructure-ui-source', 'index-pattern'],
+        },
+        ui: ['show'],
+      },
+    },
+  });
+
+  xpackMainPlugin.registerFeature({
+    id: 'logs',
+    name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
+      defaultMessage: 'Logs',
+    }),
+    icon: 'loggingApp',
+    navLinkId: 'infra:logs',
+    app: ['infra', 'kibana'],
+    catalogue: ['infralogging'],
+    privileges: {
+      all: {
+        api: ['infra'],
+        savedObject: {
+          all: ['infrastructure-ui-source'],
+          read: [],
+        },
+        ui: ['show', 'configureSource', 'save'],
+      },
+      read: {
+        api: ['infra'],
+        savedObject: {
+          all: [],
+          read: ['infrastructure-ui-source'],
+        },
+        ui: ['show'],
+      },
+    },
+  });
 };
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {

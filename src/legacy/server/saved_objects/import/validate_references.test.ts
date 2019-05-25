@@ -299,7 +299,9 @@ Object {
       {
         id: '2',
         type: 'visualization',
-        attributes: {},
+        attributes: {
+          title: 'My Visualization 2',
+        },
         references: [
           {
             name: 'ref_0',
@@ -311,7 +313,9 @@ Object {
       {
         id: '4',
         type: 'visualization',
-        attributes: {},
+        attributes: {
+          title: 'My Visualization 4',
+        },
         references: [
           {
             name: 'ref_0',
@@ -342,6 +346,7 @@ Object {
   "errors": Array [
     Object {
       "error": Object {
+        "blocking": Array [],
         "references": Array [
           Object {
             "id": "3",
@@ -351,10 +356,12 @@ Object {
         "type": "missing_references",
       },
       "id": "2",
+      "title": "My Visualization 2",
       "type": "visualization",
     },
     Object {
       "error": Object {
+        "blocking": Array [],
         "references": Array [
           Object {
             "id": "5",
@@ -372,6 +379,7 @@ Object {
         "type": "missing_references",
       },
       "id": "4",
+      "title": "My Visualization 4",
       "type": "visualization",
     },
   ],
@@ -582,5 +590,37 @@ Object {
 }
 `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
+  });
+
+  test('throws when bulkGet fails', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          error: {
+            statusCode: 400,
+            message: 'Error',
+          },
+        },
+      ],
+    });
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '1',
+          },
+        ],
+      },
+    ];
+    await expect(
+      validateReferences(savedObjects, savedObjectsClient)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad Request"`);
   });
 });

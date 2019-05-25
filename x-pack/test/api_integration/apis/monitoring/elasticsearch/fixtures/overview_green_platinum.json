@@ -5748,5 +5748,19 @@
         "total_time_in_millis": 0
       }
     }
-  ]
+  ],
+  "logs": {
+    "enabled": false,
+    "limit": 10,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
+      "nodeExists": null,
+      "indexExists": null,
+      "typeExists": false
+    },
+    "logs": []
+  }
 }

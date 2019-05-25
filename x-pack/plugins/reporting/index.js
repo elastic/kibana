@@ -39,7 +39,7 @@ export const reporting = (kibana) => {
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
-      injectDefaultVars(server, options) {
+      injectDefaultVars(server, options) { // eslint-disable-line no-unused-vars
         return {
           reportingPollConfig: options.poll
         };
@@ -128,7 +128,11 @@ export const reporting = (kibana) => {
             size: Joi.number().integer().default(500)
           }).default(),
         }).default(),
-        encryptionKey: Joi.string(),
+        encryptionKey: Joi.when(Joi.ref('$dist'), {
+          is: true,
+          then: Joi.string(),
+          otherwise: Joi.string().default('a'.repeat(32)),
+        }),
         roles: Joi.object({
           allow: Joi.array().items(Joi.string()).default(['reporting_user']),
         }).default(),
@@ -147,6 +151,11 @@ export const reporting = (kibana) => {
     },
 
     init: async function (server) {
+      let isCollectorReady = false;
+      const isReady = () => isCollectorReady;
+      // Register a function with server to manage the collection of usage stats
+      server.usage.collectorSet.register(getReportingUsageCollector(server, isReady));
+
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
       const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
@@ -168,8 +177,8 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(getReportingUsageCollector(server));
+      // Post initialization of the above code, the collector is now ready to fetch its data
+      isCollectorReady = true;
 
       server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));

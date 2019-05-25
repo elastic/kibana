@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 const HIGH_ALERT_MESSAGE = 'High severity alert';
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
 
         const alertsAll = await alerts.getOverviewAlertsAll();
 
-        alertsAll.forEach((obj, index) => {
+        alertsAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
           expect(alertsAll[index].alertIcon).to.be(panelData[index].alertIcon);
           expect(alertsAll[index].alertText).to.be(panelData[index].alertText);
         });
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }) {
         ));
         expect(alertsAll.length).to.be(tableData.length);
 
-        alertsAll.forEach((obj, index) => {
+        alertsAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars
           expect(`${alertsAll[index].alertIcon} ${alertsAll[index].alertText}`)
             .to.be(`${tableData[index].alertIcon} ${tableData[index].alertText}`);
         });

@@ -5,11 +5,8 @@
  */
 
 import { flow, omit } from 'lodash';
-import {
-  CURRENT_MAJOR_VERSION,
-  PREV_MAJOR_VERSION,
-} from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
+import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { FlatSettings } from './types';
 
 export interface ParsedIndexName {

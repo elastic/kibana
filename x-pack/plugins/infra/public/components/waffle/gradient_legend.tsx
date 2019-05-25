@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import {
   InfraFormatter,
   InfraWaffleMapBounds,
@@ -52,7 +53,7 @@ export const GradientLegend: React.SFC<Props> = ({ legend, bounds, formatter }) 
   );
 };
 
-const GradientLegendContainer = styled.div`
+const GradientLegendContainer = euiStyled.div`
   position: absolute;
   height: 10px;
   bottom: 0;
@@ -60,13 +61,13 @@ const GradientLegendContainer = styled.div`
   right: 40px;
 `;
 
-const GradientLegendTick = styled.div`
+const GradientLegendTick = euiStyled.div`
   position: absolute;
   bottom: 0;
   top: -18px;
 `;
 
-const GradientLegendTickLine = styled.div`
+const GradientLegendTickLine = euiStyled.div`
   position: absolute;
   background-color: ${props => props.theme.eui.euiBorderColor};
   width: 1px;
@@ -81,7 +82,7 @@ const GradientLegendTickLine = styled.div`
   }
 `;
 
-const GradientLegendTickLabel = styled.div`
+const GradientLegendTickLabel = euiStyled.div`
   position: absolute;
   font-size: 11px;
   text-align: center;

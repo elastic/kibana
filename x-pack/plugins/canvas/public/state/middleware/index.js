@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { applyMiddleware, compose } from 'redux';
+import { applyMiddleware, compose as reduxCompose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { getWindow } from '../../lib/get_window';
-import { aeroelastic } from './aeroelastic';
 import { breadcrumbs } from './breadcrumbs';
 import { esPersistMiddleware } from './es_persist';
 import { fullscreen } from './fullscreen';
@@ -15,6 +14,7 @@ import { historyMiddleware } from './history';
 import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
 import { workpadRefresh } from './workpad_refresh';
+import { workpadAutoplay } from './workpad_autoplay';
 import { appReady } from './app_ready';
 import { elementStats } from './element_stats';
 import { resolvedArgs } from './resolved_args';
@@ -26,19 +26,17 @@ const middlewares = [
     resolvedArgs,
     esPersistMiddleware,
     historyMiddleware,
-    aeroelastic,
     breadcrumbs,
     fullscreen,
     inFlight,
     appReady,
     workpadUpdate,
-    workpadRefresh
+    workpadRefresh,
+    workpadAutoplay
   ),
 ];
 
-// intitialize redux devtools if extension is installed
-if (getWindow().__REDUX_DEVTOOLS_EXTENSION__) {
-  middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
-}
+// compose with redux devtools, if extension is installed
+const compose = getWindow().__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || reduxCompose;
 
 export const middleware = compose(...middlewares);

@@ -29,6 +29,14 @@ export class FilterBar extends Component {
     return null;
   }
 
+  // Set value to filter created via filter table
+  componentDidUpdate(oldProps) {
+    const newProps = this.props;
+    if (oldProps.valueExternal !== newProps.valueExternal) {
+      this.setState({ value: newProps.valueExternal, index: null });
+    }
+  }
+
   incrementIndex = currentIndex => {
     let nextIndex = currentIndex + 1;
     if (currentIndex === null || nextIndex >= this.props.suggestions.length) {
@@ -143,6 +151,9 @@ export class FilterBar extends Component {
   };
 
   render() {
+    const { disabled } = this.props;
+    const { value } = this.state;
+
     return (
       <ClickOutside
         onClickOutside={this.onClickOutside}
@@ -170,8 +181,8 @@ export class FilterBar extends Component {
                 this.inputRef = node;
               }
             }}
-            disabled={this.props.disabled}
-            value={this.state.value}
+            disabled={disabled}
+            value={value}
             onKeyDown={this.onKeyDown}
             onKeyUp={this.onKeyUp}
             onChange={this.onChangeInputValue}
@@ -212,6 +223,7 @@ FilterBar.propTypes = {
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
+  valueExternal: PropTypes.string,
   suggestions: PropTypes.array.isRequired
 };
 

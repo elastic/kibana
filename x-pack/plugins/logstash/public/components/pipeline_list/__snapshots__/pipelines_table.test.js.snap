@@ -118,6 +118,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         iconSide="left"
         isDisabled={false}
         onClick={[MockFunction]}
+        size="m"
         type="button"
       >
         <FormattedMessage

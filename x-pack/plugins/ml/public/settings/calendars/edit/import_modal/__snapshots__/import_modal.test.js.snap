@@ -52,20 +52,6 @@ exports[`ImportModal Renders import modal 1`] = `
       </EuiFlexGroup>
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiButton
-        color="primary"
-        disabled={true}
-        fill={true}
-        iconSide="left"
-        onClick={[Function]}
-        type="button"
-      >
-        <FormattedMessage
-          defaultMessage="Import"
-          id="xpack.ml.calendarsEdit.eventsTable.importButtonLabel"
-          values={Object {}}
-        />
-      </EuiButton>
       <EuiButtonEmpty
         color="primary"
         iconSide="left"
@@ -78,6 +64,21 @@ exports[`ImportModal Renders import modal 1`] = `
           values={Object {}}
         />
       </EuiButtonEmpty>
+      <EuiButton
+        color="primary"
+        disabled={true}
+        fill={true}
+        iconSide="left"
+        onClick={[Function]}
+        size="m"
+        type="button"
+      >
+        <FormattedMessage
+          defaultMessage="Import"
+          id="xpack.ml.calendarsEdit.eventsTable.importButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
     </EuiModalFooter>
   </EuiModal>
 </Fragment>

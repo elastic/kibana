@@ -14,7 +14,7 @@ import React, {
 } from 'react';
 
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -282,21 +282,29 @@ class ForecastsTableUI extends Component {
           id: 'xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel',
           defaultMessage: 'View'
         }),
-        render: (forecast) => (
-          <EuiButton
-            onClick={() => this.openSingleMetricView(forecast)}
-            className="view-forecast-btn"
-            isDisabled={forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED}
-          >
-            <i aria-hidden="true" className="fa fa-line-chart"/>
-          </EuiButton>
-        )
+        width: '60px',
+        render: (forecast) => {
+          const viewForecastAriaLabel = intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel',
+            defaultMessage: 'View forecast created at {createdDate}' }, {
+            createdDate: formatDate(forecast.forecast_create_timestamp, TIME_FORMAT)
+          });
+
+          return (
+            <EuiButtonIcon
+              onClick={() => this.openSingleMetricView(forecast)}
+              isDisabled={forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED}
+              iconType="stats"
+              aria-label={viewForecastAriaLabel}
+            />
+          );
+        }
       }
     ];
 
     return (
       <EuiInMemoryTable
-        className="forecasts-table"
+        compressed={true}
         items={forecasts}
         columns={columns}
         pagination={{

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from 'x-pack/plugins/apm/common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { ESBucket, ESResponse } from './fetcher';
 import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
 import { anomalySeriesTransform, replaceFirstAndLastBucket } from './transform';

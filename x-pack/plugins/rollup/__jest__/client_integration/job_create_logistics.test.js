@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
 
 import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from '../../public/crud_app/services';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
-import { initTestBed, mockServerResponses } from './job_create.test_helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -17,36 +16,41 @@ jest.mock('ui/index_patterns', () => {
 jest.mock('ui/chrome', () => ({
   addBasePath: () => '/api/rollup',
   breadcrumbs: { set: () => {} },
+  getInjected: () => ({}),
 }));
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+const { setup } = pageHelpers.jobCreate;
+
 describe('Create Rollup Job, step 1: Logistics', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
-  let userActions;
-  let getFormErrorsMessages;
+  let httpRequestsMockHelpers;
+  let find;
+  let exists;
+  let actions;
   let form;
-  let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
 
-  beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
-    ({
-      findTestSubject,
-      testSubjectExists,
-      userActions,
-      getFormErrorsMessages,
-      form,
-      getEuiStepsHorizontalActive,
-    } = initTestBed());
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
   });
 
-  afterEach(() => {
+  afterAll(() => {
     server.restore();
+  });
+
+  beforeEach(() => {
+    // Set "default" mock responses by not providing any arguments
+    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+
+    ({
+      find,
+      exists,
+      actions,
+      form,
+      getEuiStepsHorizontalActive,
+    } = setup());
   });
 
   it('should have the horizontal step active on "Logistics"', () => {
@@ -54,77 +58,77 @@ describe('Create Rollup Job, step 1: Logistics', () => {
   });
 
   it('should have the title set to "Logistics"', () => {
-    expect(testSubjectExists('rollupJobCreateLogisticsTitle')).toBe(true);
+    expect(exists('rollupJobCreateLogisticsTitle')).toBe(true);
   });
 
   it('should have a link to the documentation', () => {
-    expect(testSubjectExists('rollupJobCreateLogisticsDocsButton')).toBe(true);
+    expect(exists('rollupJobCreateLogisticsDocsButton')).toBe(true);
   });
 
   it('should only have the "next" button visible', () => {
-    expect(testSubjectExists('rollupJobBackButton')).toBe(false);
-    expect(testSubjectExists('rollupJobNextButton')).toBe(true);
-    expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+    expect(exists('rollupJobBackButton')).toBe(false);
+    expect(exists('rollupJobNextButton')).toBe(true);
+    expect(exists('rollupJobSaveButton')).toBe(false);
   });
 
   it('should display errors when clicking "next" without filling the form', () => {
-    expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
+    expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
-    userActions.clickNextStep();
+    actions.clickNextStep();
 
-    expect(testSubjectExists('rollupJobCreateStepError')).toBeTruthy();
-    expect(getFormErrorsMessages()).toEqual([
+    expect(exists('rollupJobCreateStepError')).toBeTruthy();
+    expect(form.getErrorsMessages()).toEqual([
       'Name is required.',
       'Index pattern is required.',
       'Rollup index is required.',
     ]);
-    expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+    expect(find('rollupJobNextButton').props().disabled).toBe(true);
   });
 
   describe('form validations', () => {
     describe('index pattern', () => {
       beforeEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props().disabled).toBe(false);
       });
 
       afterEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       it('should not allow spaces', async () => {
         await form.setInputValue('rollupIndexPattern', 'with space', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Remove the spaces from your index pattern.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Remove the spaces from your index pattern.');
       });
 
       it('should not allow an unknown index pattern', async () => {
-        mockIndexPatternValidityResponse({ doesMatchIndices: false });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchIndices: false });
         await form.setInputValue('rollupIndexPattern', 'unknown', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index pattern doesn\'t match any indices.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index pattern doesn\'t match any indices.');
       });
 
       it('should not allow an index pattern without time fields', async () => {
-        mockIndexPatternValidityResponse({ dateFields: [] });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields: [] });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index pattern must match indices that contain time fields.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index pattern must match indices that contain time fields.');
       });
 
       it('should not allow an index pattern that matches a rollup index', async () => {
-        mockIndexPatternValidityResponse({ doesMatchRollupIndices: true });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchRollupIndices: true });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index pattern must not match rollup indices.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index pattern must not match rollup indices.');
       });
 
       it('should not be the same as the rollup index name', async () => {
         await form.setInputValue('rollupIndexPattern', 'abc', true);
         await form.setInputValue('rollupIndexName', 'abc', true);
 
-        userActions.clickNextStep();
+        actions.clickNextStep();
 
-        const errorMessages = getFormErrorsMessages();
+        const errorMessages = form.getErrorsMessages();
         expect(errorMessages).toContain('Index pattern cannot have the same as the rollup index.');
         expect(errorMessages).toContain('Rollup index cannot have the same as the index pattern.');
       });
@@ -132,24 +136,24 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
     describe('rollup index name', () => {
       beforeEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props().disabled).toBe(false);
       });
 
       afterEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       it('should not allow spaces', () => {
         form.setInputValue('rollupIndexName', 'with space');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Remove the spaces from your rollup index name.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Remove the spaces from your rollup index name.');
       });
 
       it('should not allow invalid characters', () => {
         const expectInvalidChar = (char) => {
           form.setInputValue('rollupIndexName', `rollup_index_${char}`);
-          userActions.clickNextStep();
-          expect(getFormErrorsMessages()).toContain(`Remove the characters ${char} from your rollup index name.`);
+          actions.clickNextStep();
+          expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your rollup index name.`);
         };
 
         [...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
@@ -159,23 +163,23 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
       it('should not allow a dot as first character', () => {
         form.setInputValue('rollupIndexName', '.kibana');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index names cannot begin with periods.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index names cannot begin with periods.');
       });
     });
 
     describe('rollup cron', () => {
       const changeFrequency = (value) => {
-        findTestSubject('rollupJobCreateFrequencySelect').simulate('change', { target: { value } });
+        find('rollupJobCreateFrequencySelect').simulate('change', { target: { value } });
       };
 
       const generateStringSequenceOfNumbers = (total) => (
-        new Array(total).fill('').map((_, i) => i < 10 ? `0${i}` : i.toString())
+        new Array(total).fill('').map((_, i) => i < 10 ? `0${i}` : i.toString()) // eslint-disable-line no-unused-vars
       );
 
       describe('frequency', () => {
         it('should allow "minute", "hour", "day", "week", "month", "year"', () => {
-          const frequencySelect = findTestSubject('rollupJobCreateFrequencySelect');
+          const frequencySelect = find('rollupJobCreateFrequencySelect');
           const options = frequencySelect.find('option').map(option => option.text());
           expect(options).toEqual(['minute', 'hour', 'day', 'week', 'month', 'year']);
         });
@@ -183,7 +187,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
         describe('every minute', () => {
           it('should not have any additional configuration', () => {
             changeFrequency(MINUTE);
-            expect(findTestSubject('rollupCronFrequencyConfiguration').length).toBe(0);
+            expect(find('rollupCronFrequencyConfiguration').length).toBe(0);
           });
         });
 
@@ -193,12 +197,12 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           });
 
           it('should have 1 additional configuration', () => {
-            expect(findTestSubject('rollupCronFrequencyConfiguration').length).toBe(1);
-            expect(testSubjectExists('rollupJobCreateFrequencyHourlyMinuteSelect')).toBe(true);
+            expect(find('rollupCronFrequencyConfiguration').length).toBe(1);
+            expect(exists('rollupJobCreateFrequencyHourlyMinuteSelect')).toBe(true);
           });
 
           it('should allow to select any minute from 00 -> 59', () => {
-            const minutSelect = findTestSubject('rollupJobCreateFrequencyHourlyMinuteSelect');
+            const minutSelect = find('rollupJobCreateFrequencyHourlyMinuteSelect');
             const options = minutSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
@@ -210,19 +214,19 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           });
 
           it('should have 1 additional configuration with hour and minute selects', () => {
-            expect(findTestSubject('rollupCronFrequencyConfiguration').length).toBe(1);
-            expect(testSubjectExists('rollupJobCreateFrequencyDailyHourSelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyDailyMinuteSelect')).toBe(true);
+            expect(find('rollupCronFrequencyConfiguration').length).toBe(1);
+            expect(exists('rollupJobCreateFrequencyDailyHourSelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyDailyMinuteSelect')).toBe(true);
           });
 
           it('should allow to select any hour from 00 -> 23', () => {
-            const hourSelect = findTestSubject('rollupJobCreateFrequencyDailyHourSelect');
+            const hourSelect = find('rollupJobCreateFrequencyDailyHourSelect');
             const options = hourSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
-            const minutSelect = findTestSubject('rollupJobCreateFrequencyDailyMinuteSelect');
+            const minutSelect = find('rollupJobCreateFrequencyDailyMinuteSelect');
             const options = minutSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
@@ -234,14 +238,14 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           });
 
           it('should have 2 additional configurations with day, hour and minute selects', () => {
-            expect(findTestSubject('rollupCronFrequencyConfiguration').length).toBe(2);
-            expect(testSubjectExists('rollupJobCreateFrequencyWeeklyDaySelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyWeeklyHourSelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyWeeklyMinuteSelect')).toBe(true);
+            expect(find('rollupCronFrequencyConfiguration').length).toBe(2);
+            expect(exists('rollupJobCreateFrequencyWeeklyDaySelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyWeeklyHourSelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyWeeklyMinuteSelect')).toBe(true);
           });
 
           it('should allow to select any day of the week', () => {
-            const hourSelect = findTestSubject('rollupJobCreateFrequencyWeeklyDaySelect');
+            const hourSelect = find('rollupJobCreateFrequencyWeeklyDaySelect');
             const options = hourSelect.find('option').map(option => option.text());
             expect(options).toEqual([
               'Sunday',
@@ -255,13 +259,13 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           });
 
           it('should allow to select any hour from 00 -> 23', () => {
-            const hourSelect = findTestSubject('rollupJobCreateFrequencyWeeklyHourSelect');
+            const hourSelect = find('rollupJobCreateFrequencyWeeklyHourSelect');
             const options = hourSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
-            const minutSelect = findTestSubject('rollupJobCreateFrequencyWeeklyMinuteSelect');
+            const minutSelect = find('rollupJobCreateFrequencyWeeklyMinuteSelect');
             const options = minutSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
@@ -273,26 +277,26 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           });
 
           it('should have 2 additional configurations with date, hour and minute selects', () => {
-            expect(findTestSubject('rollupCronFrequencyConfiguration').length).toBe(2);
-            expect(testSubjectExists('rollupJobCreateFrequencyMonthlyDateSelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyMonthlyHourSelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyMonthlyMinuteSelect')).toBe(true);
+            expect(find('rollupCronFrequencyConfiguration').length).toBe(2);
+            expect(exists('rollupJobCreateFrequencyMonthlyDateSelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyMonthlyHourSelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyMonthlyMinuteSelect')).toBe(true);
           });
 
           it('should allow to select any date of the month from 1st to 31st', () => {
-            const dateSelect = findTestSubject('rollupJobCreateFrequencyMonthlyDateSelect');
+            const dateSelect = find('rollupJobCreateFrequencyMonthlyDateSelect');
             const options = dateSelect.find('option').map(option => option.text());
             expect(options.length).toEqual(31);
           });
 
           it('should allow to select any hour from 00 -> 23', () => {
-            const hourSelect = findTestSubject('rollupJobCreateFrequencyMonthlyHourSelect');
+            const hourSelect = find('rollupJobCreateFrequencyMonthlyHourSelect');
             const options = hourSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
-            const minutSelect = findTestSubject('rollupJobCreateFrequencyMonthlyMinuteSelect');
+            const minutSelect = find('rollupJobCreateFrequencyMonthlyMinuteSelect');
             const options = minutSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
@@ -304,15 +308,15 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           });
 
           it('should have 3 additional configurations with month, date, hour and minute selects', () => {
-            expect(findTestSubject('rollupCronFrequencyConfiguration').length).toBe(3);
-            expect(testSubjectExists('rollupJobCreateFrequencyYearlyMonthSelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyYearlyDateSelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyYearlyHourSelect')).toBe(true);
-            expect(testSubjectExists('rollupJobCreateFrequencyYearlyMinuteSelect')).toBe(true);
+            expect(find('rollupCronFrequencyConfiguration').length).toBe(3);
+            expect(exists('rollupJobCreateFrequencyYearlyMonthSelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyYearlyDateSelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyYearlyHourSelect')).toBe(true);
+            expect(exists('rollupJobCreateFrequencyYearlyMinuteSelect')).toBe(true);
           });
 
           it('should allow to select any month of the year', () => {
-            const monthSelect = findTestSubject('rollupJobCreateFrequencyYearlyMonthSelect');
+            const monthSelect = find('rollupJobCreateFrequencyYearlyMonthSelect');
             const options = monthSelect.find('option').map(option => option.text());
             expect(options).toEqual([
               'January',
@@ -331,19 +335,19 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           });
 
           it('should allow to select any date of the month from 1st to 31st', () => {
-            const dateSelect = findTestSubject('rollupJobCreateFrequencyYearlyDateSelect');
+            const dateSelect = find('rollupJobCreateFrequencyYearlyDateSelect');
             const options = dateSelect.find('option').map(option => option.text());
             expect(options.length).toEqual(31);
           });
 
           it('should allow to select any hour from 00 -> 23', () => {
-            const hourSelect = findTestSubject('rollupJobCreateFrequencyYearlyHourSelect');
+            const hourSelect = find('rollupJobCreateFrequencyYearlyHourSelect');
             const options = hourSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(24));
           });
 
           it('should allow to select any miute from 00 -> 59', () => {
-            const minutSelect = findTestSubject('rollupJobCreateFrequencyYearlyMinuteSelect');
+            const minutSelect = find('rollupJobCreateFrequencyYearlyMinuteSelect');
             const options = minutSelect.find('option').map(option => option.text());
             expect(options).toEqual(generateStringSequenceOfNumbers(60));
           });
@@ -352,78 +356,78 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
       describe('advanced cron expression', () => {
         const activateAdvancedCronExpression = () => {
-          findTestSubject('rollupShowAdvancedCronLink').simulate('click');
+          find('rollupShowAdvancedCronLink').simulate('click');
         };
 
         it('should allow to create a cron expression', () => {
-          expect(testSubjectExists('rollupAdvancedCron')).toBe(false);
+          expect(exists('rollupAdvancedCron')).toBe(false);
 
           activateAdvancedCronExpression();
 
-          expect(testSubjectExists('rollupAdvancedCron')).toBe(true);
+          expect(exists('rollupAdvancedCron')).toBe(true);
         });
 
         it('should not be empty', () => {
           activateAdvancedCronExpression();
 
           form.setInputValue('rollupAdvancedCron', '');
-          userActions.clickNextStep();
+          actions.clickNextStep();
 
-          expect(getFormErrorsMessages()).toContain('Cron pattern or basic interval is required.');
+          expect(form.getErrorsMessages()).toContain('Cron pattern or basic interval is required.');
         });
 
         it('should not allow unvalid expression', () => {
           activateAdvancedCronExpression();
 
           form.setInputValue('rollupAdvancedCron', 'invalid');
-          userActions.clickNextStep();
+          actions.clickNextStep();
 
-          expect(getFormErrorsMessages()).toContain('Expression has only 1 part. At least 5 parts are required.');
+          expect(form.getErrorsMessages()).toContain('Expression has only 1 part. At least 5 parts are required.');
         });
       });
     });
 
     describe('page size', () => {
       beforeEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props().disabled).toBe(false);
       });
 
       afterEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       it('should not be empty', () => {
         form.setInputValue('rollupPageSize', '');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Page size is required.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Page size is required.');
       });
 
       it('should be greater than 0', () => {
         form.setInputValue('rollupPageSize', '-1');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Page size must be greater than zero.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Page size must be greater than zero.');
       });
     });
 
     describe('delay', () => {
       beforeEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props().disabled).toBe(false);
       });
 
       afterEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       it('should validate the interval format', () => {
         form.setInputValue('rollupDelay', 'abc');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Invalid delay format.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Invalid delay format.');
       });
 
       it('should validate the calendar format', () => {
         form.setInputValue('rollupDelay', '3y');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
       });
     });
   });

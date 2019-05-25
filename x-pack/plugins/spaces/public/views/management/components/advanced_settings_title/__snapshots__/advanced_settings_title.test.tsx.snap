@@ -9,10 +9,11 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <Component
+    <SpaceAvatar
       announceSpaceName={true}
       space={
         Object {
+          "disabledFeatures": Array [],
           "id": "my-space",
           "name": "My Space",
         }
@@ -28,7 +29,6 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h1
         data-test-subj="managementSettingsTitle"

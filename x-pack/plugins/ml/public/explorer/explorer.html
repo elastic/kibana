@@ -1,9 +1,8 @@
 <ml-nav-menu name="explorer"></ml-nav-menu>
 <ml-chart-tooltip></ml-chart-tooltip>
 <div class="ml-explorer" ng-controller="MlExplorerController">
-  <navbar ng-show="jobs.length > 0 && chrome.getVisible()">
-    <job-select-button></job-select-button>
-  </navbar>
+
+  <ml-job-selector-react-wrapper />
 
   <ml-explorer-react-wrapper />
 </div>

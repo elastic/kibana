@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
 
-import { initTestBed, mockServerResponses } from './job_create.test_helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -15,36 +14,43 @@ jest.mock('ui/index_patterns', () => {
 jest.mock('ui/chrome', () => ({
   addBasePath: () => '/api/rollup',
   breadcrumbs: { set: () => {} },
+  getInjected: () => ({}),
 }));
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+const { setup } = pageHelpers.jobCreate;
+
 describe('Create Rollup Job, step 3: Terms', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
-  let userActions;
-  let mockIndexPatternValidityResponse;
+  let httpRequestsMockHelpers;
+  let find;
+  let exists;
+  let actions;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
 
-  beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
-    ({
-      findTestSubject,
-      testSubjectExists,
-      userActions,
-      getEuiStepsHorizontalActive,
-      goToStep,
-      getMetadataFromEuiTable,
-    } = initTestBed());
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
   });
 
-  afterEach(() => {
+  afterAll(() => {
     server.restore();
+  });
+
+  beforeEach(() => {
+    // Set "default" mock responses by not providing any arguments
+    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+
+    ({
+      find,
+      exists,
+      actions,
+      getEuiStepsHorizontalActive,
+      goToStep,
+      table,
+    } = setup());
   });
 
   const numericFields = ['a-numericField', 'c-numericField'];
@@ -52,7 +58,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
   const goToStepAndOpenFieldChooser = async () => {
     await goToStep(3);
-    findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+    find('rollupJobShowFieldChooserButton').simulate('click');
   };
 
   describe('layout', () => {
@@ -65,35 +71,35 @@ describe('Create Rollup Job, step 3: Terms', () => {
     });
 
     it('should have the title set to "Terms"', () => {
-      expect(testSubjectExists('rollupJobCreateTermsTitle')).toBe(true);
+      expect(exists('rollupJobCreateTermsTitle')).toBe(true);
     });
 
     it('should have a link to the documentation', () => {
-      expect(testSubjectExists('rollupJobCreateTermsDocsButton')).toBe(true);
+      expect(exists('rollupJobCreateTermsDocsButton')).toBe(true);
     });
 
     it('should have the "next" and "back" button visible', () => {
-      expect(testSubjectExists('rollupJobBackButton')).toBe(true);
-      expect(testSubjectExists('rollupJobNextButton')).toBe(true);
-      expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+      expect(exists('rollupJobBackButton')).toBe(true);
+      expect(exists('rollupJobNextButton')).toBe(true);
+      expect(exists('rollupJobSaveButton')).toBe(false);
     });
 
     it('should go to the "Date histogram" step when clicking the back button', async () => {
-      userActions.clickPreviousStep();
+      actions.clickPreviousStep();
       expect(getEuiStepsHorizontalActive()).toContain('Date histogram');
     });
 
     it('should go to the "Histogram" step when clicking the next button', async () => {
-      userActions.clickNextStep();
+      actions.clickNextStep();
       expect(getEuiStepsHorizontalActive()).toContain('Histogram');
     });
 
     it('should have a button to display the list of terms to chose from', () => {
-      expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(false);
+      expect(exists('rollupJobTermsFieldChooser')).toBe(false);
 
-      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      find('rollupJobShowFieldChooserButton').simulate('click');
 
-      expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(true);
+      expect(exists('rollupJobTermsFieldChooser')).toBe(true);
     });
   });
 
@@ -104,24 +110,24 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
 
       it('should have the title set to "Add terms fields"', async () => {
-        expect(findTestSubject('rollupJobCreateFlyoutTitle').text()).toEqual('Add terms fields');
+        expect(find('rollupJobCreateFlyoutTitle').text()).toEqual('Add terms fields');
       });
 
       it('should have a button to close the flyout', () => {
-        expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(true);
+        expect(exists('rollupJobTermsFieldChooser')).toBe(true);
 
-        findTestSubject('euiFlyoutCloseButton').simulate('click');
+        find('euiFlyoutCloseButton').simulate('click');
 
-        expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(false);
+        expect(exists('rollupJobTermsFieldChooser')).toBe(false);
       });
     });
 
     describe('when no terms are available', () => {
       it('should indicate it to the user', async () => {
-        mockIndexPatternValidityResponse({ numericFields: [], keywordFields: [] });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: [], keywordFields: [] });
         await goToStepAndOpenFieldChooser();
 
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldChooser-table');
 
         expect(tableCellsValues).toEqual([['No items found']]);
       });
@@ -129,12 +135,12 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
     describe('when terms are available', () => {
       beforeEach(async () => {
-        mockIndexPatternValidityResponse({ numericFields, keywordFields });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, keywordFields });
         await goToStepAndOpenFieldChooser();
       });
 
       it('should display the numeric & keyword fields available', async () => {
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldChooser-table');
 
         expect(tableCellsValues).toEqual([
           ['a-numericField', 'numeric'],
@@ -145,13 +151,13 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
 
       it('should add term to the field list when clicking on it', () => {
-        let { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldList');
+        let { tableCellsValues } = table.getMetaData('rollupJobTermsFieldList');
         expect(tableCellsValues).toEqual([['No terms fields added']]); // make sure the field list is empty
 
-        const { rows } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+        const { rows } = table.getMetaData('rollupJobTermsFieldChooser-table');
         rows[0].reactWrapper.simulate('click'); // Select first row
 
-        ({ tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldList'));
+        ({ tableCellsValues } = table.getMetaData('rollupJobTermsFieldList'));
         const [firstRow] = tableCellsValues;
         const [term, type] = firstRow;
         expect(term).toEqual('a-numericField');
@@ -164,19 +170,19 @@ describe('Create Rollup Job, step 3: Terms', () => {
     it('should have an empty field list', async () => {
       await goToStep(3);
 
-      const { tableCellsValues } = getMetadataFromEuiTable('rollupJobTermsFieldList');
+      const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldList');
       expect(tableCellsValues).toEqual([['No terms fields added']]);
     });
 
     it('should have a delete button on each row to remove a term', async () => {
       // First let's add a term to the list
-      mockIndexPatternValidityResponse({ numericFields, keywordFields });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, keywordFields });
       await goToStepAndOpenFieldChooser();
-      const { rows: fieldChooserRows } = getMetadataFromEuiTable('rollupJobTermsFieldChooser-table');
+      const { rows: fieldChooserRows } = table.getMetaData('rollupJobTermsFieldChooser-table');
       fieldChooserRows[0].reactWrapper.simulate('click');
 
       // Make sure rows value has been set
-      let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobTermsFieldList');
+      let { rows: fieldListRows } = table.getMetaData('rollupJobTermsFieldList');
       expect(fieldListRows[0].columns[0].value).not.toEqual('No terms fields added');
 
       const columnsFirstRow = fieldListRows[0].columns;
@@ -184,7 +190,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
       const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
       deleteButton.simulate('click');
 
-      ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobTermsFieldList'));
+      ({ rows: fieldListRows } = table.getMetaData('rollupJobTermsFieldList'));
       expect(fieldListRows[0].columns[0].value).toEqual('No terms fields added');
     });
   });

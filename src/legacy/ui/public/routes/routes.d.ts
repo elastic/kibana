@@ -20,6 +20,7 @@
 import RouteManager from 'ui/routes/route_manager';
 
 interface DefaultRouteManager extends RouteManager {
+  WAIT_FOR_URL_CHANGE_TOKEN: string;
   enable(): void;
 }
 

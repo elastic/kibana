@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 // linear algebra
 type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
 type f = f64; // shorthand
@@ -38,14 +40,6 @@ export type PlainFun = (...args: Json[]) => Json;
 export type Selector = (...fns: Resolve[]) => Resolve;
 type Resolve = ((obj: State) => Json);
 
-//
-export interface Meta {
-  silent: boolean;
-}
 export type TypeName = string;
 export type Payload = JsonMap;
 export type UpdaterFunction = (arg: State) => State;
-export type ChangeCallbackFunction = (
-  { type, state }: { type: TypeName; state: State },
-  meta: Meta
-) => void;

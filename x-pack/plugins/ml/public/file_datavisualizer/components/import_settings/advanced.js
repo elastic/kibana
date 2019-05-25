@@ -60,6 +60,10 @@ function AdvancedSettingsUi({
           disabled={(initialized === true)}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
+          aria-label={intl.formatMessage({
+            id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameAriaLabel',
+            defaultMessage: 'Index name, required field'
+          })}
         />
       </EuiFormRow>
 

@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview Host Stat Data rendering it renders the default OverviewHostStats 1`] = `
+<Component
+  data={
+    Object {
+      "auditbeatAuditd": 73847,
+      "auditbeatFIM": 107307,
+      "auditbeatLogin": 60015,
+      "auditbeatPackage": 2003,
+      "auditbeatProcess": 1200,
+      "auditbeatUser": 1979,
+    }
+  }
+  loading={false}
+/>
+`;

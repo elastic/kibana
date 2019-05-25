@@ -6,7 +6,7 @@ exports[`FormLabel Basic initialization 1`] = `
     className="euiFormLabel"
     id="ml_aria_label_undefined"
   />
-  <Component
+  <JsonTooltip
     position="top"
   />
 </Fragment>
@@ -20,7 +20,7 @@ exports[`FormLabel Full initialization 1`] = `
   >
     Label Text
   </label>
-  <Component
+  <JsonTooltip
     id="uid"
     position="top"
   />

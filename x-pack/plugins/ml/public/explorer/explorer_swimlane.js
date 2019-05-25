@@ -168,6 +168,14 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     swimlaneCellClick(selectedCells);
   }
 
+  highlightOverall(times) {
+    const overallSwimlane = d3.select('.ml-swimlane-overall');
+    times.forEach(time => {
+      const overallCell = overallSwimlane.selectAll(`div[data-time="${time}"]`).selectAll('.sl-cell-inner,.sl-cell-inner-dragselect');
+      overallCell.classed('sl-cell-inner-selected', true);
+    });
+  }
+
   highlightSelection(cellsToSelect, laneLabels, times) {
     const { swimlaneType } = this.props;
 
@@ -191,11 +199,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     if (swimlaneType === 'viewBy') {
       // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
-      const overallSwimlane = d3.select('.ml-swimlane-overall');
-      times.forEach(time => {
-        const overallCell = overallSwimlane.selectAll(`div[data-time="${time}"]`).selectAll('.sl-cell-inner,.sl-cell-inner-dragselect');
-        overallCell.classed('sl-cell-inner-selected', true);
-      });
+      this.highlightOverall(times);
     }
   }
 
@@ -289,7 +293,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       };
     }
 
-    function cellMouseover(target, laneLabel, bucketScore, index, time) {
+    function cellMouseover(target, laneLabel, bucketScore, index, time) { // eslint-disable-line no-unused-vars
       if (bucketScore === undefined || cellMouseoverActive === false) {
         return;
       }
@@ -364,7 +368,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     // TODO - mark if zoomed in to bucket width?
     let time = startTime;
-    Array(numBuckets || 0).fill(null).forEach((v, i) => {
+    Array(numBuckets || 0).fill(null).forEach((v, i) => { // eslint-disable-line no-unused-vars
       const cell = cellsContainer.append('div')
         .classed('sl-cell', true)
         .style('width', `${cellWidth}px`)
@@ -503,6 +507,9 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
       this.highlightSelection(cellsToSelect, selectedLanes, selectedTimes);
     } else if (filterActive === true) {
+      if (selectedTimes) {
+        this.highlightOverall(selectedTimes);
+      }
       this.maskIrrelevantSwimlanes(maskAll);
     } else {
       this.clearSelection();

@@ -9,15 +9,15 @@ import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
+import { IUrlParams } from '../../../../../../context/UrlParamsContext/types';
+// @ts-ignore
+import Timeline from '../../../../../shared/charts/Timeline';
 import {
   APMQueryParams,
   fromQuery,
-  history,
   toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { IUrlParams } from '../../../../../../store/urlParams';
-// @ts-ignore
-import Timeline from '../../../../../shared/charts/Timeline';
+} from '../../../../../shared/Links/url_helpers';
+import { history } from '../../../../../../utils/history';
 import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
@@ -67,6 +67,11 @@ export class Waterfall extends Component<Props> {
   public renderWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
 
+    const errorCount =
+      item.docType === 'transaction'
+        ? waterfall.errorCountByTransactionId[item.transaction.transaction.id]
+        : 0;
+
     return (
       <WaterfallItem
         key={item.id}
@@ -75,13 +80,14 @@ export class Waterfall extends Component<Props> {
         item={item}
         totalDuration={waterfall.duration}
         isSelected={item.id === urlParams.waterfallItemId}
+        errorCount={errorCount}
         onClick={() => this.onOpenFlyout(item)}
       />
     );
   };
 
   public getFlyOut = () => {
-    const { waterfall, location, urlParams } = this.props;
+    const { waterfall, urlParams } = this.props;
 
     const currentItem =
       urlParams.waterfallItemId &&
@@ -110,8 +116,6 @@ export class Waterfall extends Component<Props> {
           <TransactionFlyout
             transaction={currentItem.transaction}
             onClose={this.onCloseFlyout}
-            location={location}
-            urlParams={urlParams}
             traceRootDuration={waterfall.traceRootDuration}
             errorCount={currentItem.errorCount}
           />

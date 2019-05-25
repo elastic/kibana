@@ -7,39 +7,26 @@
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { get } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
-import {
-  fromQuery,
-  history,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { IUrlParams } from '../../../../store/urlParams';
-import { px, units } from '../../../../style/variables';
-import { HeightRetainer } from '../../../shared/HeightRetainer';
-import { PropertiesTable } from '../../../shared/PropertiesTable';
-import {
-  getCurrentTab,
-  getTabsFromObject
-} from '../../../shared/PropertiesTable/tabConfig';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { history } from '../../../../utils/history';
+import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
-const TableContainer = styled.div`
-  padding: ${px(units.plus)} ${px(units.plus)} 0;
-`;
-
-interface TimelineTab {
-  key: 'timeline';
-  label: string;
-}
-
-const timelineTab: TimelineTab = {
+const timelineTab = {
   key: 'timeline',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
     defaultMessage: 'Timeline'
+  })
+};
+
+const metadataTab = {
+  key: 'metadata',
+  label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+    defaultMessage: 'Metadata'
   })
 };
 
@@ -56,12 +43,12 @@ export function TransactionTabs({
   urlParams,
   waterfall
 }: Props) {
-  const tabs = [timelineTab, ...getTabsFromObject(transaction)];
-  const currentTab = getCurrentTab(tabs, urlParams.detailTab);
-  const agentName = transaction.agent.name;
+  const tabs = [timelineTab, metadataTab];
+  const currentTab =
+    urlParams.detailTab === metadataTab.key ? metadataTab : timelineTab;
 
   return (
-    <HeightRetainer>
+    <React.Fragment>
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
@@ -94,14 +81,8 @@ export function TransactionTabs({
           waterfall={waterfall}
         />
       ) : (
-        <TableContainer>
-          <PropertiesTable
-            propData={get(transaction, currentTab.key)}
-            propKey={currentTab.key}
-            agentName={agentName}
-          />
-        </TableContainer>
+        <TransactionMetadata transaction={transaction} />
       )}
-    </HeightRetainer>
+    </React.Fragment>
   );
 }

@@ -11,7 +11,8 @@
 import { chain, each, get, union, uniq } from 'lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
 
-import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
+import { getEntityFieldList } from '../../common/util/anomaly_utils';
+import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
@@ -19,6 +20,7 @@ import { mlResultsService } from 'plugins/ml/services/results_service';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
+  SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import {
@@ -190,6 +192,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
 export function getSelectionInfluencers(selectedCells, fieldName) {
   if (
     selectedCells !== null &&
+    selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
   ) {
@@ -204,6 +207,8 @@ export function getViewBySwimlaneOptions({
   currentSwimlaneViewByFieldName,
   filterActive,
   filteredFields,
+  isAndOperator,
+  selectedCells,
   selectedJobs
 }) {
   const selectedJobIds = selectedJobs.map(d => d.id);
@@ -288,9 +293,15 @@ export function getViewBySwimlaneOptions({
   }
 
   // filter View by options to relevant filter fields
-  if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
+  // If it's an AND filter only show job Id view by as the rest will have no results
+  if (filterActive === true && isAndOperator === true && selectedCells === null) {
+    viewBySwimlaneOptions = [VIEW_BY_JOB_LABEL];
+  } else if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
     const filteredOptions = viewBySwimlaneOptions.filter(option => {
-      return (filteredFields.includes(option) || option === 'job ID');
+      return (
+        filteredFields.includes(option) ||
+        option === VIEW_BY_JOB_LABEL ||
+        (selectedCells && selectedCells.viewByFieldName === option));
     });
     // only replace viewBySwimlaneOptions with filteredOptions if we found a relevant matching field
     if (filteredOptions.length > 1) {
@@ -495,7 +506,17 @@ export async function loadAnomaliesTableData(
 
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.
-        anomaly.isTimeSeriesViewDetector = isTimeSeriesViewDetector(mlJobService.getJob(jobId), anomaly.detectorIndex);
+        const job = mlJobService.getJob(jobId);
+        let isChartable = isSourceDataChartableForDetector(job, anomaly.detectorIndex);
+        if (isChartable === false) {
+          // Check if model plot is enabled for this job.
+          // Need to check the entity fields for the record in case the model plot config has a terms list.
+          // If terms is specified, model plot is only stored if both the partition and by fields appear in the list.
+          const entityFields = getEntityFieldList(anomaly.source);
+          isChartable = isModelPlotEnabled(job, anomaly.detectorIndex, entityFields);
+        }
+        anomaly.isTimeSeriesViewRecord = isChartable;
+
         if (mlJobService.customUrlsByJob[jobId] !== undefined) {
           anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
         }

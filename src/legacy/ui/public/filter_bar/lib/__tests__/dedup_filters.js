@@ -18,7 +18,7 @@
  */
 
 import { dedupFilters } from '../dedup_filters';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('Filter Bar Directive', function () {
   describe('dedupFilters(existing, filters)', function () {

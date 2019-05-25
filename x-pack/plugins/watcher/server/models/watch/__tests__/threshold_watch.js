@@ -5,7 +5,7 @@
  */
 
 import { pick } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { COMPARATORS, SORT_ORDERS } from '../../../../common/constants';

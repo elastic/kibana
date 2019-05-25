@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { deprecations as deprecationsModule } from '../deprecations';
 import sinon from 'sinon';
 

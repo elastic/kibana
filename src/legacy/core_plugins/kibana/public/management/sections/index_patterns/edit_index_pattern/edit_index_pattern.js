@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import './index_header';
 import './create_edit_field';
+import { DocTitleProvider } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError, toastNotifications } from 'ui/notify';
@@ -57,7 +58,7 @@ function updateSourceFiltersTable($scope, $state) {
             filterFilter={$scope.fieldFilter}
             fieldWildcardMatcher={$scope.fieldWildcardMatcher}
             onAddOrRemoveFilter={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
               $scope.refreshFilters();
               $scope.$apply();
             }}
@@ -170,7 +171,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndexPatternsEdit', function (
-    $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
+    $scope, $location, $route, config, indexPatterns, Private, AppState, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
     const indexPatternListProvider = Private(IndexPatternListFactory)();
@@ -182,6 +183,7 @@ uiModules.get('apps/management')
     $scope.indexPatternListProvider = indexPatternListProvider;
     $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
+    const docTitle = Private(DocTitleProvider);
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -189,7 +191,7 @@ uiModules.get('apps/management')
     });
 
     $scope.$watch('indexPattern.fields', function () {
-      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, indexPatternListProvider);
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
       updateIndexedFieldsTable($scope, $state);
@@ -292,6 +294,7 @@ uiModules.get('apps/management')
     };
 
     $scope.$watch('fieldFilter', () => {
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
       if ($scope.fieldFilter === undefined) {
         return;
       }

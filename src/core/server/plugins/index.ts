@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { CoreContext } from '../core_context';
-import { PluginsService } from './plugins_service';
-
+export { PluginsService, PluginsServiceSetup, PluginsServiceStart } from './plugins_service';
+export { config } from './plugins_config';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';
-export { PluginInitializerContext, PluginStartContext } from './plugin_context';
-export { PluginName } from './plugin';
-
 /** @internal */
-export class PluginsModule {
-  public readonly service: PluginsService;
-
-  constructor(coreContext: CoreContext) {
-    this.service = new PluginsService(coreContext);
-  }
-}
+export {
+  DiscoveredPlugin,
+  DiscoveredPluginInternal,
+  Plugin,
+  PluginInitializer,
+  PluginName,
+} from './plugin';
+export { PluginInitializerContext } from './plugin_context';

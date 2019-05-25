@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
+import { pushFilterBarFilters } from '../filter_bar/push_filters';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { onBrushEvent } from '../utils/brush_event';
 
@@ -84,7 +84,6 @@ const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
 };
 
 const VisFiltersProvider = (Private, getAppState) => {
-  const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   const pushFilters = (filters, simulate) => {
@@ -92,7 +91,7 @@ const VisFiltersProvider = (Private, getAppState) => {
     if (filters.length && !simulate) {
       const flatFilters = _.flatten(filters);
       const deduplicatedFilters = flatFilters.filter((v, i) => i === flatFilters.findIndex(f => _.isEqual(v, f)));
-      filterBarPushFilters(appState)(deduplicatedFilters);
+      pushFilterBarFilters(appState, deduplicatedFilters);
     }
   };
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { join } from 'path';
 
 export default function ({ getService }) {
@@ -32,6 +32,7 @@ export default function ({ getService }) {
       it('should return 200 and import nothing when empty parameters are passed in', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .field('retries', '[]')
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
           .then((resp) => {
@@ -45,18 +46,21 @@ export default function ({ getService }) {
       it('should return 200 and import everything when overwrite parameters contains all objects', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
-          .field('overwrites', JSON.stringify([
+          .field('retries', JSON.stringify([
             {
               type: 'index-pattern',
               id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+              overwrite: true,
             },
             {
               type: 'visualization',
               id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+              overwrite: true,
             },
             {
               type: 'dashboard',
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+              overwrite: true,
             },
           ]))
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
@@ -72,7 +76,7 @@ export default function ({ getService }) {
       it('should return 400 when no file passed in', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
-          .field('skips', '[]')
+          .field('retries', '[]')
           .expect(400)
           .then((resp) => {
             expect(resp.body).to.eql({
@@ -84,51 +88,28 @@ export default function ({ getService }) {
           });
       });
 
-      it('should return 200 when replacing references', async () => {
-        const objToInsert = {
-          id: '1',
-          type: 'visualization',
-          attributes: {
-            title: 'My favorite vis',
-          },
-          references: [
-            {
-              name: 'ref_0',
-              type: 'search',
-              id: '1',
-            },
-          ]
-        };
+      it('should return 200 when retrying unsupported types', async () => {
+        const fileBuffer = Buffer.from('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}', 'utf8');
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
-          .field('replaceReferences', JSON.stringify(
-            [
-              {
-                type: 'search',
-                from: '1',
-                to: '2',
-              }
-            ]
-          ))
-          .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
+          .field('retries', JSON.stringify([{ type: 'wigwags', id: '1' }]))
+          .attach('file', fileBuffer, 'export.ndjson')
           .expect(200)
-          .then((resp) => {
+          .then(resp => {
             expect(resp.body).to.eql({
-              success: true,
-              successCount: 1,
+              success: false,
+              successCount: 0,
+              errors: [
+                {
+                  id: '1',
+                  type: 'wigwags',
+                  title: 'my title',
+                  error: {
+                    type: 'unsupported_type',
+                  },
+                },
+              ],
             });
-          });
-        await supertest
-          .get('/api/saved_objects/visualization/1')
-          .expect(200)
-          .then((resp) => {
-            expect(resp.body.references).to.eql([
-              {
-                name: 'ref_0',
-                type: 'search',
-                id: '2',
-              },
-            ]);
           });
       });
 
@@ -139,6 +120,7 @@ export default function ({ getService }) {
         }
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .field('retries', '[]')
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(400)
           .then((resp) => {
@@ -146,6 +128,59 @@ export default function ({ getService }) {
               statusCode: 400,
               error: 'Bad Request',
               message: 'Can\'t import more than 10000 objects',
+            });
+          });
+      });
+
+      it('should return 200 with errors when missing references', async () => {
+        const objToInsert = {
+          id: '1',
+          type: 'visualization',
+          attributes: {
+            title: 'My favorite vis',
+            visState: '{}',
+          },
+          references: [
+            {
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: '2',
+            },
+          ],
+        };
+        await supertest
+          .post('/api/saved_objects/_resolve_import_errors')
+          .field('retries', JSON.stringify(
+            [
+              {
+                type: 'visualization',
+                id: '1',
+              },
+            ]
+          ))
+          .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
+          .expect(200)
+          .then((resp) => {
+            expect(resp.body).to.eql({
+              success: false,
+              successCount: 0,
+              errors: [
+                {
+                  id: '1',
+                  type: 'visualization',
+                  title: 'My favorite vis',
+                  error: {
+                    type: 'missing_references',
+                    blocking: [],
+                    references: [
+                      {
+                        type: 'index-pattern',
+                        id: '2',
+                      },
+                    ],
+                  },
+                },
+              ],
             });
           });
       });
@@ -159,22 +194,7 @@ export default function ({ getService }) {
         it('should return 200 when skipping all the records', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
-            .field('skips', JSON.stringify(
-              [
-                {
-                  id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                  type: 'index-pattern',
-                },
-                {
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  type: 'visualization',
-                },
-                {
-                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                  type: 'dashboard',
-                },
-              ]
-            ))
+            .field('retries', '[]')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
@@ -185,19 +205,22 @@ export default function ({ getService }) {
         it('should return 200 when manually overwriting each object', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
-            .field('overwrites', JSON.stringify(
+            .field('retries', JSON.stringify(
               [
                 {
                   id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                   type: 'index-pattern',
+                  overwrite: true,
                 },
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   type: 'visualization',
+                  overwrite: true,
                 },
                 {
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                   type: 'dashboard',
+                  overwrite: true,
                 },
               ]
             ))
@@ -211,19 +234,12 @@ export default function ({ getService }) {
         it('should return 200 with only one record when overwriting 1 and skipping 1', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
-            .field('overwrites', JSON.stringify(
+            .field('retries', JSON.stringify(
               [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   type: 'visualization',
-                },
-              ]
-            ))
-            .field('skips', JSON.stringify(
-              [
-                {
-                  id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                  type: 'index-pattern',
+                  overwrite: true,
                 },
               ]
             ))
@@ -231,6 +247,61 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               expect(resp.body).to.eql({ success: true, successCount: 1 });
+            });
+        });
+
+        it('should return 200 when replacing references', async () => {
+          const objToInsert = {
+            id: '1',
+            type: 'visualization',
+            attributes: {
+              title: 'My favorite vis',
+              visState: '{}',
+            },
+            references: [
+              {
+                name: 'ref_0',
+                type: 'index-pattern',
+                id: '2',
+              },
+            ]
+          };
+          await supertest
+            .post('/api/saved_objects/_resolve_import_errors')
+            .field('retries', JSON.stringify(
+              [
+                {
+                  type: 'visualization',
+                  id: '1',
+                  replaceReferences: [
+                    {
+                      type: 'index-pattern',
+                      from: '2',
+                      to: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                    },
+                  ],
+                },
+              ]
+            ))
+            .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 1,
+              });
+            });
+          await supertest
+            .get('/api/saved_objects/visualization/1')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body.references).to.eql([
+                {
+                  name: 'ref_0',
+                  type: 'index-pattern',
+                  id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                },
+              ]);
             });
         });
       });

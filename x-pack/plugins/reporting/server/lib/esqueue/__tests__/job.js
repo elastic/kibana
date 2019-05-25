@@ -5,7 +5,7 @@
  */
 
 import events from 'events';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { QueueMock } from './fixtures/queue';

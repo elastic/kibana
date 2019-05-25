@@ -20,7 +20,11 @@
 /**
  * All exports from TS source files (where the implementation is actually done in TS).
  */
-export * from './target/types/type_exports';
+import * as Public from 'target/types/public';
+import * as Server from 'target/types/server';
+
+export { Public, Server };
+
 /**
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
@@ -31,7 +35,7 @@ import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
 /**
  *  Re-export legacy types under a namespace.
  */
-// tslint:disable:no-namespace
+// eslint-disable-next-line @typescript/eslint-no-namespace
 export namespace Legacy {
   export type IndexPatternsService = LegacyKibanaServer.IndexPatternsService;
   export type KibanaConfig = LegacyKibanaServer.KibanaConfig;

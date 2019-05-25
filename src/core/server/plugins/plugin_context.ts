@@ -17,38 +17,25 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { ConfigWithSchema, EnvironmentMode } from '../config';
+import { EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
-import { ClusterClient } from '../elasticsearch';
 import { LoggerFactory } from '../logging';
-import { Plugin, PluginManifest } from './plugin';
-import { PluginsServiceStartDeps } from './plugins_service';
+import { PluginWrapper, PluginManifest } from './plugin';
+import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * Context that's available to plugins during initialization stage.
+ *
+ * @public
  */
 export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
-    create: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config>;
-    createIfExists: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config | undefined>;
-  };
-}
-
-/**
- * Context passed to the plugins `start` method.
- */
-export interface PluginStartContext {
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
+    create: <Schema>() => Observable<Schema>;
+    createIfExists: <Schema>() => Observable<Schema | undefined>;
   };
 }
 
@@ -95,12 +82,45 @@ export function createPluginInitializerContext(
        * @param ConfigClass A class (not an instance of a class) that contains a
        * static `schema` that we validate the config at the given `path` against.
        */
-      create(ConfigClass) {
-        return coreContext.configService.atPath(pluginManifest.configPath, ConfigClass);
+      create() {
+        return coreContext.configService.atPath(pluginManifest.configPath);
       },
-      createIfExists(ConfigClass) {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath, ConfigClass);
+      createIfExists() {
+        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
       },
+    },
+  };
+}
+
+/**
+ * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
+ * This facade should be safe to use only within `setup` itself.
+ *
+ * This is called for each plugin when it's set up, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param coreContext Kibana core context
+ * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during setup.
+ * @internal
+ */
+export function createPluginSetupContext<TPlugin, TPluginDependencies>(
+  coreContext: CoreContext,
+  deps: PluginsServiceSetupDeps,
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): CoreSetup {
+  return {
+    elasticsearch: {
+      adminClient$: deps.elasticsearch.adminClient$,
+      dataClient$: deps.elasticsearch.dataClient$,
+    },
+    http: {
+      registerAuth: deps.http.registerAuth,
+      registerOnRequest: deps.http.registerOnRequest,
+      getBasePathFor: deps.http.getBasePathFor,
+      setBasePathFor: deps.http.setBasePathFor,
     },
   };
 }
@@ -109,10 +129,8 @@ export function createPluginInitializerContext(
  * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
  * This facade should be safe to use only within `start` itself.
  *
- * This is called for each plugin when it's started, so each plugin gets its own
+ * This is called for each plugin when it starts, so each plugin gets its own
  * version of these values.
- *
- * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
  * @param plugin The plugin we're building these values for.
@@ -122,12 +140,7 @@ export function createPluginInitializerContext(
 export function createPluginStartContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
-  plugin: Plugin<TPlugin, TPluginDependencies>
-): PluginStartContext {
-  return {
-    elasticsearch: {
-      adminClient$: deps.elasticsearch.adminClient$,
-      dataClient$: deps.elasticsearch.dataClient$,
-    },
-  };
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): CoreStart {
+  return {};
 }

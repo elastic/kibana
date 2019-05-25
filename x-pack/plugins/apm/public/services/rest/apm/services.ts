@@ -4,19 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
-import { ServiceListAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
-import { IUrlParams } from '../../../store/urlParams';
+import { ServiceAPIResponse } from '../../../../server/lib/services/get_service';
+import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
 import { callApi } from '../callApi';
-import { getEncodedEsQuery } from './apm';
+import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
+import { UIFilters } from '../../../../typings/ui-filters';
 
-export async function loadServiceList({ start, end, kuery }: IUrlParams) {
+export async function loadServiceList({
+  start,
+  end,
+  uiFilters
+}: {
+  start: string;
+  end: string;
+  uiFilters: UIFilters;
+}) {
   return callApi<ServiceListAPIResponse>({
     pathname: `/api/apm/services`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
@@ -25,14 +33,19 @@ export async function loadServiceDetails({
   serviceName,
   start,
   end,
-  kuery
-}: IUrlParams) {
+  uiFilters
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  uiFilters: UIFilters;
+}) {
   return callApi<ServiceAPIResponse>({
     pathname: `/api/apm/services/${serviceName}`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }

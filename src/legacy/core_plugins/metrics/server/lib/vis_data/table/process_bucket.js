@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import buildProcessorFunction from '../build_processor_function';
-import processors from '../response_processors/table';
-import getLastValue from '../../../../common/get_last_value';
+import { buildProcessorFunction } from '../build_processor_function';
+import { processors } from '../response_processors/table';
+import { getLastValue } from '../../../../common/get_last_value';
 import regression from 'regression';
 import { first, get, set } from 'lodash';
 import { getActiveSeries } from '../helpers/get_active_series';
 
-export default function processBucket(panel) {
+export function processBucket(panel) {
   return bucket => {
     const series = getActiveSeries(panel)
       .map(series => {

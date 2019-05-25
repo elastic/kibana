@@ -27,7 +27,7 @@ const durationsLookup = durationInputOptions.reduce((acc, row) => {
   return acc;
 }, {});
 
-export default (format = '0,0.[00]', template, getConfig = null) => {
+export const tickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template, { knownHelpersOnly: true });
   const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
@@ -55,7 +55,7 @@ export default (format = '0,0.[00]', template, getConfig = null) => {
   return (val) => {
     let value;
     if (!isNumber(val)) {
-      value = 0;
+      value = val;
     } else {
       try {
         value = formatter.convert(val, 'text');

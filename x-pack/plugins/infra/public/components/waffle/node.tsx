@@ -8,11 +8,10 @@ import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
-import styled from 'styled-components';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { InfraNodeType } from '../../../server/lib/adapters/nodes';
-import { InfraTimerangeInput } from '../../graphql/types';
+import euiStyled from '../../../../../common/eui_styled_components';
+import { InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
@@ -76,9 +75,11 @@ export const Node = injectI18n(
           closePopover={this.closePopover}
           options={options}
           timeRange={newTimerange}
+          popoverPosition="upCenter"
         >
           <EuiToolTip position="top" content={`${node.name} | ${value}`}>
             <NodeContainer
+              data-test-subj="nodeContainer"
               style={{ width: squareSize || 0, height: squareSize || 0 }}
               onClick={this.togglePopover}
             >
@@ -116,7 +117,7 @@ export const Node = injectI18n(
   }
 );
 
-const NodeContainer = styled.div`
+const NodeContainer = euiStyled.div`
   position: relative;
 `;
 
@@ -124,7 +125,7 @@ interface ColorProps {
   color: string;
 }
 
-const SquareOuter = styled<ColorProps, 'div'>('div')`
+const SquareOuter = euiStyled<ColorProps, 'div'>('div')`
   position: absolute;
   top: 4px;
   left: 4px;
@@ -135,7 +136,7 @@ const SquareOuter = styled<ColorProps, 'div'>('div')`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
-const SquareInner = styled<ColorProps, 'div'>('div')`
+const SquareInner = euiStyled<ColorProps, 'div'>('div')`
   cursor: pointer;
   position: absolute;
   top: 0;
@@ -146,7 +147,7 @@ const SquareInner = styled<ColorProps, 'div'>('div')`
   background-color: ${props => props.color};
 `;
 
-const ValueInner = styled.button`
+const ValueInner = euiStyled.button`
   position: absolute;
   top: 0;
   left: 0;
@@ -169,7 +170,7 @@ const ValueInner = styled.button`
   }
 `;
 
-const Value = styled<ColorProps, 'div'>('div')`
+const Value = euiStyled<ColorProps, 'div'>('div')`
   font-weight: bold;
   font-size: 0.9em;
   text-align: center;
@@ -179,7 +180,7 @@ const Value = styled<ColorProps, 'div'>('div')`
   color: ${props => readableColor(props.color)};
 `;
 
-const Label = styled<ColorProps, 'div'>('div')`
+const Label = euiStyled<ColorProps, 'div'>('div')`
   text-overflow: ellipsis;
   font-size: 0.7em;
   margin-bottom: 0.7em;

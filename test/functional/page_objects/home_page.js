@@ -60,9 +60,9 @@ export function HomePageProvider({ getService }) {
     async _waitForSampleDataLoadingAction(id) {
       const sampleDataCard = await testSubjects.find(`sampleDataSetCard${id}`);
       await retry.try(async () => {
-        // waitForDeletedByClassName needs to be inside retry because it will timeout at least once
+        // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
         // before action is complete
-        await sampleDataCard.waitForDeletedByClassName('euiLoadingSpinner');
+        await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
 

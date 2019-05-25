@@ -36,7 +36,7 @@ jest.mock('ui/chrome',
     },
   }), { virtual: true });
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { changeTimeFilter } from '../change_time_filter';
 import { timefilter } from 'ui/timefilter';
 
