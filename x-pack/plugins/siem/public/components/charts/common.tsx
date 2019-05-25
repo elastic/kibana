@@ -7,6 +7,7 @@ import { EuiFlexGroup, EuiText, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { CustomSeriesColorsMap, DataSeriesColorsValues, getSpecId } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -16,7 +17,9 @@ export const ChartHolder = () => (
   <FlexGroup justifyContent="center" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiText size="s" textAlign="center" color="subdued">
-        Chart Data Not Available
+        {i18n.translate('xpack.siem.chart.dataNotAvailableTitle', {
+          defaultMessage: 'Chart Data Not Available',
+        })}
       </EuiText>
     </EuiFlexItem>
   </FlexGroup>

@@ -11,9 +11,9 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiTitle,
+  IconType,
 } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BarChart } from '../charts/barchart';
@@ -36,7 +36,7 @@ export interface StatItem {
   description?: string;
   value: number | undefined | null;
   color?: string;
-  icon?: 'storage' | 'cross' | 'check' | 'visMapCoordinate' | 'globe';
+  icon?: IconType;
   name?: string;
 }
 
@@ -54,7 +54,7 @@ export interface StatItemsProps extends StatItems {
   barChart?: BarChartData[];
 }
 
-export const StatItemsComponent = pure<StatItemsProps>(
+export const StatItemsComponent = React.memo<StatItemsProps>(
   ({ fields, description, key, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
     const isBarChartDataAbailable =
       barChart &&

@@ -7,7 +7,6 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { KpiHostsData } from '../../../../graphql/types';
@@ -87,7 +86,7 @@ const fieldTitleMapping: StatItems[] = [
   },
 ];
 
-export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
+export const KpiHostsComponent = React.memo<KpiHostsProps>(({ data, loading }) => {
   return loading ? (
     <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 247 }}>
       <EuiFlexItem grow={false}>

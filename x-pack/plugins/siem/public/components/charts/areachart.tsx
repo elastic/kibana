@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { pure } from 'recompose';
 import {
   Axis,
   AreaSeries,
@@ -58,7 +57,7 @@ const getSeriesLineStyle = (color: string | undefined) => {
     : undefined;
 };
 
-export const AreaChartBaseComponent = pure<{
+export const AreaChartBaseComponent = React.memo<{
   data: AreaChartData[];
   width: number | null | undefined;
   height: number | null | undefined;
@@ -66,7 +65,7 @@ export const AreaChartBaseComponent = pure<{
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        {data.map((series, idx) => {
+        {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
           return series.value != null ? (
@@ -103,7 +102,7 @@ export const AreaChartBaseComponent = pure<{
   ) : null;
 });
 
-export const AreaChartWithCustomPrompt = pure<{
+export const AreaChartWithCustomPrompt = React.memo<{
   data: AreaChartData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
@@ -122,7 +121,7 @@ export const AreaChartWithCustomPrompt = pure<{
   );
 });
 
-export const AreaChart = pure<{ areaChart: AreaChartData[] | null | undefined }>(
+export const AreaChart = React.memo<{ areaChart: AreaChartData[] | null | undefined }>(
   ({ areaChart }) => (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (

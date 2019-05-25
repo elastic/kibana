@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { pure } from 'recompose';
 import {
   Chart,
   BarSeries,
@@ -38,7 +37,7 @@ const getTheme = () => {
   return mergeWithDefaultTheme(theme);
 };
 
-export const BarChartBaseComponent = pure<{
+export const BarChartBaseComponent = React.memo<{
   data: BarChartData[];
   width: number | null | undefined;
   height: number | null | undefined;
@@ -82,7 +81,7 @@ export const BarChartBaseComponent = pure<{
   ) : null;
 });
 
-export const BarChartWithCustomPrompt = pure<{
+export const BarChartWithCustomPrompt = React.memo<{
   data: BarChartData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
@@ -99,12 +98,14 @@ export const BarChartWithCustomPrompt = pure<{
   );
 });
 
-export const BarChart = pure<{ barChart: BarChartData[] | null | undefined }>(({ barChart }) => (
-  <AutoSizer detectAnyWindowResize={false} content>
-    {({ measureRef, content: { height, width } }) => (
-      <WrappedByAutoSizer innerRef={measureRef}>
-        <BarChartWithCustomPrompt height={height} width={width} data={barChart} />
-      </WrappedByAutoSizer>
-    )}
-  </AutoSizer>
-));
+export const BarChart = React.memo<{ barChart: BarChartData[] | null | undefined }>(
+  ({ barChart }) => (
+    <AutoSizer detectAnyWindowResize={false} content>
+      {({ measureRef, content: { height, width } }) => (
+        <WrappedByAutoSizer innerRef={measureRef}>
+          <BarChartWithCustomPrompt height={height} width={width} data={barChart} />
+        </WrappedByAutoSizer>
+      )}
+    </AutoSizer>
+  )
+);
