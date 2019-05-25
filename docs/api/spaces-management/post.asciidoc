@@ -1,7 +1,7 @@
 [[spaces-api-post]]
 === Create Space
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
 
 Creates a new {kib} space. To update an existing space, use the PUT command.
 
@@ -9,7 +9,7 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Request
 
-To create a space, issue a POST request to the 
+To create a space, issue a POST request to the
 `/api/spaces/space` endpoint.
 
 [source,js]
@@ -27,6 +27,8 @@ The following parameters can be specified in the body of a POST request to creat
 
 `description`:: (string) Optional description for the space.
 
+`disabledFeatures`:: (string array) Optional list of features that are disabled for the space. Use the <<features-api-get, Features API>> to get a list of available features IDs.
+
 `initials`:: (string) Optionally specify the initials shown in the Space Avatar for this space. By default, the initials will be automatically generated from the space name.
 If specified, initials should be either 1 or 2 characters.
 
@@ -42,7 +44,8 @@ POST /api/spaces/space
   "name": "Marketing",
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
-  "initials": "MK"
+  "initials": "MK",
+  "disabledFeatures": ["timelion"]
 }
 --------------------------------------------------
 // KIBANA

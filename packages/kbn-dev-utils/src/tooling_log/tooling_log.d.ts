@@ -38,7 +38,7 @@ export class ToolingLog {
   public warning(...args: any[]): void;
   public error(errOrMsg: string | Error): void;
   public write(...args: any[]): void;
-  public indent(spaces: number): void;
+  public indent(spaces?: number): void;
   public getWriters(): ToolingLogWriter[];
   public setWriters(reporters: ToolingLogWriter[]): void;
   public getWritten$(): Rx.Observable<LogMessage>;

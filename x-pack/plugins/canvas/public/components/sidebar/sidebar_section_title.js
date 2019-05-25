@@ -10,7 +10,7 @@ import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 
 export const SidebarSectionTitle = ({ title, tip, children }) => {
   const formattedTitle = (
-    <EuiTitle size="xs">
+    <EuiTitle size="xxs">
       <h4>{title}</h4>
     </EuiTitle>
   );
@@ -27,7 +27,12 @@ export const SidebarSectionTitle = ({ title, tip, children }) => {
   };
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+    <EuiFlexGroup
+      className="canvasSidebar__panelTitle"
+      gutterSize="xs"
+      alignItems="center"
+      justifyContent="spaceBetween"
+    >
       <EuiFlexItem grow={false}>{renderTitle(tip)}</EuiFlexItem>
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
     </EuiFlexGroup>

@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List <CreateJobButton /> Minimal initialization 1`] = `
+<EuiToolTip
+  content="Your license has expired. Please contact your administrator."
+  delay="regular"
+  position="top"
+>
+  <EuiButton
+    color="primary"
+    disabled={true}
+    fill={true}
+    iconSide="left"
+    iconType="plusInCircle"
+    onClick={[Function]}
+    size="s"
+    type="button"
+  >
+    <FormattedMessage
+      defaultMessage="Create data frame"
+      id="xpack.ml.dataframe.jobsList.createDataFrameButton"
+      values={Object {}}
+    />
+  </EuiButton>
+</EuiToolTip>
+`;

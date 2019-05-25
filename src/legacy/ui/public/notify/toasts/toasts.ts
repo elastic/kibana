@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { ToastsSetup } from '../../../../../core/public';
+import { ToastsApi } from '../../../../../core/public';
 import { ToastNotifications } from './toast_notifications';
 
 export let toastNotifications: ToastNotifications;
 
-export function __newPlatformInit__(toasts: ToastsSetup) {
+export function __newPlatformSetup__(toasts: ToastsApi) {
   if (toastNotifications) {
     throw new Error('ui/notify/toasts already initialized with new platform apis');
   }

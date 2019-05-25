@@ -65,7 +65,7 @@ $ node scripts/my_task
 
 ## API
 
-- ***`run(fn: async ({ flags: Flags, log: ToolingLog }) => Promise<void>, options: Options)`***
+- ***`run(fn: async ({ flags: Flags, log: ToolingLog, addCleanupTask }) => Promise<void>, options: Options)`***
   
     Execte an async function, passing it the parsed flags and a tooling log that is configured to the requested logging level. If the returned promise is rejected with an error created by `createFailError(...)` or `createFlagError(...)` the process will exit as described by the error, otherwise the process will exit with code 1.
     
@@ -77,6 +77,14 @@ $ node scripts/my_task
     - *[`flags: Flags`](flags.ts)*:
 
       The parsed CLI flags, created by [`getopts`](https://www.npmjs.com/package/getopts). Includes the default flags for controlling the log level of the ToolingLog, and `flags.unexpected`, which is an array of flag names which were passed but not expected.
+
+    - *`addCleanupTask: (task: CleanupTask) => void`*:
+
+      A function that registers a task to be called __once__ as soon as one of the following occurs:
+
+      1. `fn` resolve/rejects
+      2. something calls `process.exit()`
+      3. the user hits <kbd>ctrl</kbd>+<kbd>c</kbd> in their terminal causing the SIGINT signal to be sent to the process
 
     **`Options`:**
     - *`usage: string`*

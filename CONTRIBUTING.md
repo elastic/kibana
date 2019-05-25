@@ -221,7 +221,7 @@ Start the development server.
 yarn start
 ```
 
-> On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
+> On Windows, you'll need to use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
 
@@ -279,6 +279,17 @@ IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality To
 
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 
+Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
+
+```json
+   "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+    ]
+```
+
 ### Internationalization
 
 All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
@@ -327,19 +338,36 @@ macOS users on a machine with a discrete graphics card may see significant speed
 `yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
 ### Unit testing frameworks
-Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still
+exist in Mocha but all new unit tests should be written in Jest. Mocha tests
+are contained in `__tests__` directories. Whereas Jest tests are stored in
+the same directory as source code files with the `.test.js` suffix.
 
-#### Mocha (legacy)
-Mocha tests are contained in `__tests__` directories.
+### Running specific Kibana tests
 
-#### Jest
-Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
+The following table outlines possible test file locations and how to invoke them:
 
-### Running Jest Unit Tests
+| Test runner        | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
+| -----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                                  |
+| Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
+| Mocha              | `src/**/__tests__/**/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`                                          |
+| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`                                                                                     | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
 
-```bash
-node scripts/jest
-```
+For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)
+
+Test runner arguments:
+ - Where applicable, the optional arguments `-t=regexp` or `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression.
+ - `[test path]` is the relative path to the test file.
+
+ Examples:
+  - Run the entire elasticsearch_service test suite with yarn:
+    `node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the jest test case whose description matches 'stops both admin and data clients':
+    `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the api integration test case whose description matches the given string:
+    `node scripts/functional_tests_server --config test/api_integration/config.js`
+    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
 
 ### Debugging Unit Tests
 

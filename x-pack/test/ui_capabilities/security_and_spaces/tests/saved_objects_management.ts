@@ -8,8 +8,8 @@ import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
 import {
-  GetUICapabilitiesFailureReason,
   UICapabilitiesService,
+  GetUICapabilitiesFailureReason,
 } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
@@ -26,13 +26,15 @@ export default function savedObjectsManagementTests({
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
-        const uiCapabilities = await uiCapabilitiesService.get(
-          { username: user.username, password: user.password },
-          space.id
-        );
+        const uiCapabilities = await uiCapabilitiesService.get({
+          credentials: { username: user.username, password: user.password },
+          spaceId: space.id,
+        });
         switch (scenario.id) {
           case 'superuser at everything_space':
-          case 'superuser at nothing_space':
+          case 'global_all at everything_space':
+          case 'dual_privileges_all at everything_space':
+          case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
@@ -40,57 +42,31 @@ export default function savedObjectsManagementTests({
             );
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
             break;
-          case 'global_all at everything_space':
-          case 'dual_privileges_all at everything_space':
-          case 'everything_space_all at everything_space':
-          case 'global_all at nothing_space':
-          case 'dual_privileges_all at nothing_space':
-          case 'nothing_space_all at nothing_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                all: [
-                  'config',
-                  'graph-workspace',
-                  'map',
-                  'canvas-workpad',
-                  'index-pattern',
-                  'visualization',
-                  'search',
-                  'dashboard',
-                  'timelion-sheet',
-                  'url',
-                  'infrastructure-ui-source',
-                ],
-              })
-            );
-            break;
+
           case 'dual_privileges_read at everything_space':
           case 'global_read at everything_space':
           case 'everything_space_read at everything_space':
-          case 'dual_privileges_read at nothing_space':
-          case 'global_read at nothing_space':
-          case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                read: [
-                  'config',
-                  'graph-workspace',
-                  'map',
-                  'canvas-workpad',
-                  'index-pattern',
-                  'visualization',
-                  'search',
-                  'dashboard',
-                  'timelion-sheet',
-                  'url',
-                  'infrastructure-ui-source',
-                ],
-              })
+            const readExpected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+              savedObjectsManagementBuilder.uiCapabilities('read')
             );
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(readExpected);
+            break;
+
+          case 'superuser at nothing_space':
+          case 'nothing_space_all at nothing_space':
+          case 'nothing_space_read at nothing_space':
+          case 'global_all at nothing_space':
+          case 'global_read at nothing_space':
+          case 'dual_privileges_all at nothing_space':
+          case 'dual_privileges_read at nothing_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
+            const noneExpected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+              savedObjectsManagementBuilder.uiCapabilities('none')
+            );
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(noneExpected);
             break;
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
@@ -105,6 +81,7 @@ export default function savedObjectsManagementTests({
               GetUICapabilitiesFailureReason.RedirectedToRoot
             );
             break;
+
           default:
             throw new UnreachableError(scenario);
         }

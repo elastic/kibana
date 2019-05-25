@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import splitByEverything from '../split_by_everything';
+import { splitByEverything } from '../split_by_everything';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

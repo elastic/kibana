@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
+<EuiForm
+  style={
+    Object {
+      "width": "300px",
+    }
+  }
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={false}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Group by name"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={false}
+      defaultValue="the-agg-name"
+      fullWidth={false}
+      isInvalid={false}
+      isLoading={false}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    error={false}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Interval"
+    labelType="label"
+  >
+    <EuiSelect
+      compressed={false}
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "1m",
+            "value": "1m",
+          },
+          Object {
+            "text": "1h",
+            "value": "1h",
+          },
+          Object {
+            "text": "1d",
+            "value": "1d",
+          },
+          Object {
+            "text": "1w",
+            "value": "1w",
+          },
+          Object {
+            "text": "1M",
+            "value": "1M",
+          },
+          Object {
+            "text": "1q",
+            "value": "1q",
+          },
+          Object {
+            "text": "1y",
+            "value": "1y",
+          },
+        ]
+      }
+      value="1m"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={true}
+    labelType="label"
+  >
+    <EuiButton
+      color="primary"
+      fill={false}
+      iconSide="left"
+      isDisabled={false}
+      onClick={[Function]}
+      size="m"
+      type="button"
+    >
+      Apply
+    </EuiButton>
+  </EuiFormRow>
+</EuiForm>
+`;

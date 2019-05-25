@@ -41,15 +41,15 @@ export const initServerWithKibana = (server: KibanaServer) => {
         api: ['uptime'],
         savedObject: {
           all: [],
-          read: ['config'],
+          read: [],
         },
-        ui: [],
+        ui: ['save'],
       },
       read: {
         api: ['uptime'],
         savedObject: {
           all: [],
-          read: ['config'],
+          read: [],
         },
         ui: [],
       },

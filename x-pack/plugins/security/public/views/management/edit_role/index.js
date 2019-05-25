@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import routes from 'ui/routes';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
@@ -87,10 +87,17 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       return [];
     },
     privileges() {
-      return  kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+      return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
     },
     features() {
-      return kfetch({ method: 'get', pathname: '/api/features/v1' });
+      return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
+        // TODO: This check can be removed once all of these `resolve` entries are moved out of Angular and into the React app.
+        const unauthorizedForFeatures = _.get(e, 'body.statusCode') === 404;
+        if (unauthorizedForFeatures) {
+          return [];
+        }
+        throw e;
+      });
     }
   },
   controllerAs: 'editRole',
@@ -112,7 +119,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       if (allowFieldLevelSecurity) {
         emptyOption.field_security = {
-          grant: ['*']
+          grant: ['*'],
+          except: [],
         };
       }
 
@@ -145,7 +153,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             allowFieldLevelSecurity={allowFieldLevelSecurity}
             spaces={spaces}
             spacesEnabled={enableSpaceAwarePrivileges}
-            uiCapabilities={uiCapabilities}
+            uiCapabilities={capabilities.get()}
             features={features}
             privileges={privileges}
           />

@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { ESResponse } from './fetcher';
 
 function getDefaultSample(buckets: IBucket[]) {

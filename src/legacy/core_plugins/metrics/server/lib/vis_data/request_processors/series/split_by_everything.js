@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-export default function splitByEverything(req, panel, series) {
+
+export function splitByEverything(req, panel, series) {
   return next => doc => {
     if (series.split_mode === 'everything' ||
       (series.split_mode === 'terms' &&

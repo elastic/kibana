@@ -72,6 +72,7 @@ export function Field(indexPattern, spec) {
 
   obj.fact('name');
   obj.fact('type');
+  obj.fact('esTypes');
   obj.writ('count', spec.count || 0);
 
   // scripted objs

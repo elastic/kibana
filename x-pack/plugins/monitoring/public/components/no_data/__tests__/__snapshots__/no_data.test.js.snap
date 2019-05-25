@@ -127,7 +127,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
+          <span
             class="euiLoadingSpinner euiLoadingSpinner--medium"
           />
         </div>

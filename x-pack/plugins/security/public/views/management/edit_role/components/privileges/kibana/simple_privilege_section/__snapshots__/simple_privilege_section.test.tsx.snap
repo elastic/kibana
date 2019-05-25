@@ -41,10 +41,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
         options={
           Array [
             Object {
-              "dropdownDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "dropdownDisplay": <EuiText>
                 <strong>
                   <FormattedMessage
                     defaultMessage="None"
@@ -60,10 +57,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   />
                 </p>
               </EuiText>,
-              "inputDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "inputDisplay": <EuiText>
                 <FormattedMessage
                   defaultMessage="None"
                   id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeInput"
@@ -73,10 +67,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
               "value": "none",
             },
             Object {
-              "dropdownDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "dropdownDisplay": <EuiText>
                 <strong>
                   <FormattedMessage
                     defaultMessage="Custom"
@@ -92,10 +83,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   />
                 </p>
               </EuiText>,
-              "inputDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "inputDisplay": <EuiText>
                 <FormattedMessage
                   defaultMessage="Custom"
                   id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeInput"
@@ -105,10 +93,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
               "value": "custom",
             },
             Object {
-              "dropdownDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "dropdownDisplay": <EuiText>
                 <strong>
                   <FormattedMessage
                     defaultMessage="Read"
@@ -124,10 +109,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   />
                 </p>
               </EuiText>,
-              "inputDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "inputDisplay": <EuiText>
                 <FormattedMessage
                   defaultMessage="Read"
                   id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
@@ -137,10 +119,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
               "value": "read",
             },
             Object {
-              "dropdownDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "dropdownDisplay": <EuiText>
                 <strong>
                   <FormattedMessage
                     defaultMessage="All"
@@ -156,10 +135,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   />
                 </p>
               </EuiText>,
-              "inputDisplay": <EuiText
-                grow={true}
-                size="m"
-              >
+              "inputDisplay": <EuiText>
                 <FormattedMessage
                   defaultMessage="All"
                   id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput"

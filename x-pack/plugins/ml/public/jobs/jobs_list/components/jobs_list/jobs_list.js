@@ -153,7 +153,7 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         field: 'description',
-        render: (description, item) => (
+        render: (description, item) => ( // eslint-disable-line no-unused-vars
           <JobDescription job={item} />
         ),
         textOnly: true,
@@ -199,7 +199,7 @@ class JobsListUI extends Component {
         truncateText: false,
         field: 'latestTimestampSortValue',
         sortable: true,
-        render: (time, item) => (
+        render: (time, item) => ( // eslint-disable-line no-unused-vars
           <span className="euiTableCellContent__text">
             {
               (item.latestTimestampMs === undefined) ? '' : moment(item.latestTimestampMs).format(TIME_FORMAT)
@@ -256,6 +256,7 @@ class JobsListUI extends Component {
 
     return (
       <EuiBasicTable
+        data-test-subj="mlJobListTable"
         loading={loading === true}
         noItemsMessage={loading ?
           intl.formatMessage({

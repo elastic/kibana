@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List Expanded Row <JobJsonPane /> Minimal initialization 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem
+    style={
+      Object {
+        "width": "100%",
+      }
+    }
+  >
+    <EuiSpacer
+      size="s"
+    />
+    <EuiCodeEditor
+      mode="json"
+      readOnly={true}
+      setOptions={Object {}}
+      value="{
+  \\"id\\": \\"fq_date_histogram_1m_1441\\",
+  \\"source\\": {
+    \\"index\\": [
+      \\"farequote-2019\\"
+    ],
+    \\"query\\": {
+      \\"match_all\\": {}
+    }
+  },
+  \\"dest\\": {
+    \\"index\\": \\"fq_data_histogram_1m_1441\\"
+  },
+  \\"pivot\\": {
+    \\"group_by\\": {
+      \\"date_histogram(@timestamp)\\": {
+        \\"date_histogram\\": {
+          \\"field\\": \\"@timestamp\\",
+          \\"interval\\": \\"1m\\"
+        }
+      }
+    },
+    \\"aggregations\\": {
+      \\"avg(response)\\": {
+        \\"avg\\": {
+          \\"field\\": \\"responsetime\\"
+        }
+      }
+    }
+  }
+}"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+     
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

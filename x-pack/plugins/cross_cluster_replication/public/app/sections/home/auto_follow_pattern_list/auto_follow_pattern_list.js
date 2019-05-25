@@ -121,7 +121,7 @@ export class AutoFollowPatternList extends PureComponent {
                 {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
                 fill
                 iconType="plusInCircle"
-                data-test-subj="ccrCreateAutoFollowPatternButton"
+                data-test-subj="createAutoFollowPatternButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
@@ -177,7 +177,7 @@ export class AutoFollowPatternList extends PureComponent {
 
     if (apiStatus === API_STATUS.LOADING) {
       return (
-        <SectionLoading dataTestSubj="ccrAutoFollowPatternLoading">
+        <SectionLoading dataTestSubj="autoFollowPatternLoading">
           <FormattedMessage
             id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
             defaultMessage="Loading auto-follow patterns..."
@@ -217,7 +217,7 @@ export class AutoFollowPatternList extends PureComponent {
             {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
             fill
             iconType="plusInCircle"
-            data-test-subj="ccrCreateAutoFollowPatternButton"
+            data-test-subj="createAutoFollowPatternButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
@@ -225,7 +225,7 @@ export class AutoFollowPatternList extends PureComponent {
             />
           </EuiButton>
         }
-        data-test-subj="ccrAutoFollowPatternEmptyPrompt"
+        data-test-subj="emptyPrompt"
       />
     );
   }

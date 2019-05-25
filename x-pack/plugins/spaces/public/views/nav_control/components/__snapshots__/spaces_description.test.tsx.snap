@@ -9,8 +9,6 @@ exports[`SpacesDescription renders without crashing 1`] = `
 >
   <EuiText
     className="spcDescription__text"
-    grow={true}
-    size="m"
   >
     <p>
       Organize your dashboards and other saved objects into meaningful categories.

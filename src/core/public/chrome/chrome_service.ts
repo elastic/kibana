@@ -22,14 +22,25 @@ import * as Url from 'url';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { IconType } from '@elastic/eui';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { NotificationsSetup } from '../notifications';
+import { NavLinksService } from './nav_links/nav_links_service';
+import { ApplicationStart } from '../application';
+import { HttpStart } from '../http';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
 function isEmbedParamInHash() {
   const { query } = Url.parse(String(window.location.hash).slice(1), true);
   return Boolean(query.embed);
+}
+
+/** @public */
+export interface ChromeBadge {
+  text: string;
+  tooltip: string;
+  iconType?: IconType;
 }
 
 /** @public */
@@ -57,10 +68,16 @@ interface SetupDeps {
   notifications: NotificationsSetup;
 }
 
+interface StartDeps {
+  application: ApplicationStart;
+  http: HttpStart;
+}
+
 /** @internal */
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
+  private readonly navLinks = new NavLinksService();
 
   public constructor({ browserSupportsCsp }: ConstructorParams) {
     this.browserSupportsCsp = browserSupportsCsp;
@@ -75,6 +92,7 @@ export class ChromeService {
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const badge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -174,6 +192,17 @@ export class ChromeService {
           map(set => [...set]),
           takeUntil(this.stop$)
         ),
+      /**
+       * Get an observable of the current badge
+       */
+      getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
+
+      /**
+       * Override the current badge
+       */
+      setBadge: (badge: ChromeBadge | undefined) => {
+        badge$.next(badge);
+      },
 
       /**
        * Get an observable of the current list of breadcrumbs
@@ -201,10 +230,20 @@ export class ChromeService {
     };
   }
 
+  public start({ application, http }: StartDeps) {
+    return {
+      navLinks: this.navLinks.start({ application, http }),
+    };
+  }
+
   public stop() {
+    this.navLinks.stop();
     this.stop$.next();
   }
 }
 
 /** @public */
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
+
+/** @public */
+export type ChromeStart = ReturnType<ChromeService['start']>;

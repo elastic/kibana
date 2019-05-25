@@ -238,6 +238,9 @@ describe('Terms Agg', function () {
           aggParams: {
             include: '404',
             exclude: '400',
+            field: {
+              type: 'string'
+            },
           }
         });
 
@@ -245,8 +248,8 @@ describe('Terms Agg', function () {
         const includeArg = $rootScope.agg.type.params.byName.include;
         const excludeArg = $rootScope.agg.type.params.byName.exclude;
 
-        expect(includeArg.serialize(aggConfig.params.include)).to.equal('404');
-        expect(excludeArg.serialize(aggConfig.params.exclude)).to.equal('400');
+        expect(includeArg.serialize(aggConfig.params.include, aggConfig)).to.equal('404');
+        expect(excludeArg.serialize(aggConfig.params.exclude, aggConfig)).to.equal('400');
 
         const output = { params: {} };
 
@@ -265,6 +268,9 @@ describe('Terms Agg', function () {
             }, exclude: {
               pattern: '400'
             },
+            field: {
+              type: 'string'
+            },
           }
         });
 
@@ -272,8 +278,8 @@ describe('Terms Agg', function () {
         const includeArg = $rootScope.agg.type.params.byName.include;
         const excludeArg = $rootScope.agg.type.params.byName.exclude;
 
-        expect(includeArg.serialize(aggConfig.params.include)).to.equal('404');
-        expect(excludeArg.serialize(aggConfig.params.exclude)).to.equal('400');
+        expect(includeArg.serialize(aggConfig.params.include, aggConfig)).to.equal('404');
+        expect(excludeArg.serialize(aggConfig.params.exclude, aggConfig)).to.equal('400');
 
         const output = { params: {} };
 

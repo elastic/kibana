@@ -23,7 +23,7 @@
     "@types/intl-relativeformat": "^2.1.0",
     "@types/react-intl": "^2.3.15",
     "del": "^3.0.0",
-    "getopts": "^2.2.3",
+    "getopts": "^2.2.4",
     "supports-color": "^6.1.0",
     "typescript": "^3.3.3333"
   },

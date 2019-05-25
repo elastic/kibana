@@ -20,13 +20,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import * as collectionActions from './lib/collection_actions';
-import AddDeleteButtons from './add_delete_buttons';
-import ColorPicker from './color_picker';
-import FieldSelect from './aggs/field_select';
+import { collectionActions } from './lib/collection_actions';
+import { ES_TYPES } from '../../common/es_types';
+import { AddDeleteButtons } from './add_delete_buttons';
+import { ColorPicker } from './color_picker';
+import { FieldSelect } from './aggs/field_select';
 import uuid from 'uuid';
-import IconSelect from './icon_select';
-import YesNo from './yes_no';
+import { IconSelect } from './icon_select';
+import { YesNo } from './yes_no';
 
 import {
   htmlIdGenerator,
@@ -55,7 +56,9 @@ function newAnnotation() {
   };
 }
 
-class AnnotationsEditor extends Component {
+const RESTRICT_FIELDS = [ES_TYPES.DATE];
+
+export class AnnotationsEditor extends Component {
 
   constructor(props) {
     super(props);
@@ -128,7 +131,7 @@ class AnnotationsEditor extends Component {
                   fullWidth
                 >
                   <FieldSelect
-                    restrict="date"
+                    restrict={RESTRICT_FIELDS}
                     value={model.time_field}
                     onChange={this.handleChange(model, 'time_field')}
                     indexPattern={model.index_pattern}
@@ -322,5 +325,3 @@ AnnotationsEditor.propTypes = {
   name: PropTypes.string,
   onChange: PropTypes.func
 };
-
-export default AnnotationsEditor;

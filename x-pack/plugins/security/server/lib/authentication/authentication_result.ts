@@ -7,6 +7,8 @@
 /**
  * Represents status that `AuthenticationResult` can be in.
  */
+import { AuthenticatedUser } from '../../../common/model';
+
 enum AuthenticationResultStatus {
   /**
    * Authentication of the user can't be handled (e.g. supported credentials
@@ -40,7 +42,7 @@ interface AuthenticationOptions {
   error?: Error;
   redirectURL?: string;
   state?: unknown;
-  user?: unknown;
+  user?: AuthenticatedUser;
 }
 
 /**
@@ -60,7 +62,7 @@ export class AuthenticationResult {
    * @param user User information retrieved as a result of successful authentication attempt.
    * @param [state] Optional state to be stored and reused for the next request.
    */
-  public static succeeded(user: unknown, state?: unknown) {
+  public static succeeded(user: AuthenticatedUser, state?: unknown) {
     if (!user) {
       throw new Error('User should be specified.');
     }

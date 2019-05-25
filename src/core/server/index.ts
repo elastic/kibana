@@ -16,9 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ElasticsearchServiceSetup } from './elasticsearch';
-import { HttpServiceSetup } from './http';
-import { PluginsServiceSetup } from './plugins';
+
+/**
+ * The Kibana Core APIs for server-side plugins.
+ *
+ * A plugin's `server/index` file must contain a named import, `plugin`, that
+ * implements {@link PluginInitializer} which returns an object that implements
+ * {@link Plugin}.
+ *
+ * The plugin integrates with the core system via lifecycle events: `setup`,
+ * `start`, and `stop`. In each lifecycle method, the plugin will receive the
+ * corresponding core services available (either {@link CoreSetup} or
+ * {@link CoreStart}) and any interfaces returned by dependency plugins'
+ * lifecycle method. Anything returned by the plugin's lifecycle method will be
+ * exposed to downstream dependencies when their corresponding lifecycle methods
+ * are invoked.
+ *
+ * @packageDocumentation
+ */
+
+import { Observable } from 'rxjs';
+import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
+import { HttpServiceSetup, HttpServiceStart } from './http';
+import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export { bootstrap } from './bootstrap';
 export { ConfigService } from './config';
@@ -30,6 +50,14 @@ export {
   ElasticsearchClientConfig,
   APICaller,
 } from './elasticsearch';
+export {
+  AuthenticationHandler,
+  AuthToolkit,
+  KibanaRequest,
+  OnRequestHandler,
+  OnRequestToolkit,
+  Router,
+} from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -38,14 +66,52 @@ export {
   PluginInitializer,
   PluginInitializerContext,
   PluginName,
-  PluginSetupContext,
 } from './plugins';
 
-/** @public */
+/**
+ * Context passed to the plugins `setup` method.
+ *
+ * @public
+ */
 export interface CoreSetup {
+  elasticsearch: {
+    adminClient$: Observable<ClusterClient>;
+    dataClient$: Observable<ClusterClient>;
+  };
+  http: {
+    registerAuth: HttpServiceSetup['registerAuth'];
+    registerOnRequest: HttpServiceSetup['registerOnRequest'];
+    getBasePathFor: HttpServiceSetup['getBasePathFor'];
+    setBasePathFor: HttpServiceSetup['setBasePathFor'];
+  };
+}
+
+/**
+ * Context passed to the plugins `start` method.
+ *
+ * @public
+ */
+export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+/** @internal */
+export interface InternalCoreSetup {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
   plugins: PluginsServiceSetup;
 }
 
-export { ElasticsearchServiceSetup, HttpServiceSetup, PluginsServiceSetup };
+/**
+ * @public
+ */
+export interface InternalCoreStart {
+  http: HttpServiceStart;
+  plugins: PluginsServiceStart;
+}
+
+export {
+  HttpServiceSetup,
+  HttpServiceStart,
+  ElasticsearchServiceSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+};

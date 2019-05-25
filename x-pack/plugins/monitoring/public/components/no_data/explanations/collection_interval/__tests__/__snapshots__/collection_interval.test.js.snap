@@ -117,7 +117,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 >
   <EuiTitle
     size="l"
-    textTransform="none"
   >
     <h2
       className="euiTitle euiTitle--large"
@@ -138,10 +137,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <div
       className="euiText euiText--medium"
     >
@@ -164,7 +160,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   <EuiLoadingSpinner
     size="l"
   >
-    <div
+    <span
       className="euiLoadingSpinner euiLoadingSpinner--large"
     />
   </EuiLoadingSpinner>
@@ -289,7 +285,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   <WhatIs>
     <EuiTitle
       size="l"
-      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -305,15 +300,11 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
     </EuiTitle>
     <EuiTextColor
       color="subdued"
-      component="span"
     >
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText
-          grow={true}
-          size="m"
-        >
+        <EuiText>
           <div
             className="euiText euiText--medium"
           >
@@ -338,10 +329,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <div
       className="euiText euiText--medium"
     >
@@ -469,7 +457,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
                   className="euiButton__spinner"
                   size="m"
                 >
-                  <div
+                  <span
                     className="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
                   />
                 </EuiLoadingSpinner>
@@ -612,7 +600,6 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   <WhatIs>
     <EuiTitle
       size="l"
-      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -628,15 +615,11 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
     </EuiTitle>
     <EuiTextColor
       color="subdued"
-      component="span"
     >
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText
-          grow={true}
-          size="m"
-        >
+        <EuiText>
           <div
             className="euiText euiText--medium"
           >
@@ -661,10 +644,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <div
       className="euiText euiText--medium"
     >

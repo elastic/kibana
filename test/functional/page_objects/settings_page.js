@@ -281,7 +281,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickIndexPatternLogstash() {
-      await find.clickByPartialLinkText('logstash-*');
+      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
+      await indexLink.click();
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
@@ -487,7 +488,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const datePatternField = await find.byCssSelector(
         'input[data-test-subj="dateEditorPattern"]'
       );
-      // Both clearValue & clearValueWithKeyboard does not work here
+      // clearValue does not work here
       // Send Backspace event for each char in value string to clear field
       await datePatternField.clearValueWithKeyboard({ charByChar: true });
       await datePatternField.type(datePattern);
@@ -509,13 +510,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      const field = await testSubjects.find('editorFieldScript');
-      const currentValue = await field.getAttribute('value');
-      if (script === currentValue) {
-        return;
+      const aceEditorCssSelector = '[data-test-subj="codeEditorContainer"] .ace_editor';
+      await find.clickByCssSelector(aceEditorCssSelector);
+      for (let i = 0; i < 1000; i++) {
+        await browser.pressKeys(browser.keys.BACK_SPACE);
       }
-      await field.clearValueWithKeyboard({ charByChar: true });
-      await field.type(script);
+      await browser.pressKeys(...script.split(''));
     }
 
     async openScriptedFieldHelp(activeTab) {
@@ -564,7 +564,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      await find.setValue('.euiFilePicker__input', path);
+      if (browser.isW3CEnabled) {
+        const input = await find.byCssSelector('.euiFilePicker__input');
+        await input.type(path);
+      } else {
+        await find.setValue('.euiFilePicker__input', path);
+      }
+
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
         await testSubjects.click('importSavedObjectsOverwriteToggle');
@@ -631,7 +637,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         const title = await titleCell.getVisibleText();
 
 
-        const viewInAppButtons = await row.findAllByCssSelector('[aria-label="In app"]');
+        const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
         const canViewInApp = Boolean(viewInAppButtons.length);
         summary.push({
           title,

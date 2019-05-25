@@ -40,10 +40,7 @@ exports[`Form should render normally 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -104,10 +101,7 @@ exports[`Form should render normally 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -150,10 +144,7 @@ exports[`Form should render normally 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -230,10 +221,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -294,10 +282,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -340,10 +325,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >

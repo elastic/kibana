@@ -273,7 +273,8 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
       updatedElement.expression.includes(filter)
     )
   ) {
-    dispatch(setFilter('', elementId, pageId, doRender));
+    const filter = '';
+    dispatch(setFilter(filter, elementId, pageId, doRender));
     // setFilter will trigger a re-render so we can skip the fetch here
   } else if (doRender === true) {
     dispatch(fetchRenderable(updatedElement));

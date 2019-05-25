@@ -5,8 +5,9 @@
  */
 
 import { AbstractVectorSource } from '../vector_source';
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import React from 'react';
-import { GIS_API_PATH, EMS_FILE } from '../../../../../common/constants';
+import { EMS_FILE } from '../../../../../common/constants';
 import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +59,7 @@ export class EMSFileSource extends AbstractVectorSource {
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: emsVectorFileMeta.format,
       featureCollectionPath: 'data',
-      fetchUrl: `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`
+      fetchUrl: emsVectorFileMeta.url
     });
     return {
       data: featureCollection,
@@ -105,7 +106,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     const emsVectorFileMeta = await this._getEmsVectorFileMeta();
     return emsVectorFileMeta.fields.map(f => {
       return { name: f.name, label: f.description };
@@ -114,6 +115,10 @@ export class EMSFileSource extends AbstractVectorSource {
 
   canFormatFeatureProperties() {
     return true;
+  }
+
+  async getSupportedShapeTypes() {
+    return [VECTOR_SHAPE_TYPES.POLYGON];
   }
 
 }

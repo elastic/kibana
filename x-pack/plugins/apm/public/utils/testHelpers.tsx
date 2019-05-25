@@ -8,12 +8,13 @@
 
 import { ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { History, Location } from 'history';
+import { Location } from 'history';
 import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { render, waitForElement } from 'react-testing-library';
+import { MemoryRouter } from 'react-router-dom';
 import { LocationProvider } from '../context/LocationContext';
 
 export function toJson(wrapper: ReactWrapper) {
@@ -42,16 +43,11 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <LocationProvider
-      history={
-        ({
-          listen: jest.fn(),
-          location
-        } as unknown) as History
-      }
-    >
-      <Component />
-    </LocationProvider>
+    <MemoryRouter initialEntries={[location]}>
+      <LocationProvider>
+        <Component />
+      </LocationProvider>
+    </MemoryRouter>
   );
 
   await tick();
@@ -72,3 +68,25 @@ export function delay(ms: number) {
 
 // Await this when you need to "flush" promises to immediately resolve or throw in tests
 export const tick = () => new Promise(resolve => setImmediate(resolve, 0));
+
+export function expectTextsNotInDocument(output: any, texts: string[]) {
+  texts.forEach(text => {
+    try {
+      output.getByText(text);
+    } catch (err) {
+      if (err.message.startsWith('Unable to find an element with the text:')) {
+        return;
+      } else {
+        throw err;
+      }
+    }
+
+    throw new Error(`Unexpected text found: ${text}`);
+  });
+}
+
+export function expectTextsInDocument(output: any, texts: string[]) {
+  texts.forEach(text => {
+    expect(output.getByText(text)).toBeInTheDocument();
+  });
+}
