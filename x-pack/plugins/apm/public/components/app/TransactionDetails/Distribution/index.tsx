@@ -116,23 +116,16 @@ export const TransactionDistribution: FunctionComponent<Props> = (
       const defaultSample =
         distribution && distribution.defaultSample
           ? distribution.defaultSample
-          : null;
+          : {};
 
       const parsedQueryParams = toQuery(search);
-
-      const nextTransaction = defaultSample
-        ? {
-            traceId: defaultSample.traceId,
-            transactionId: defaultSample.transactionId
-          }
-        : {};
 
       history.replace({
         pathname,
         hash,
         search: fromQuery({
           ...omit(parsedQueryParams, 'transactionId', 'traceId'),
-          ...nextTransaction
+          ...defaultSample
         })
       });
     },
