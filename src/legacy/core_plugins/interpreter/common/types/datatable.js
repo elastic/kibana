@@ -64,6 +64,13 @@ export const datatable = () => ({
         }),
       };
     },
+    kibana_datatable: context => {
+      return {
+        type: 'kibana_datatable',
+        rows: context.rows,
+        columns: context.columns.map(({ name }) => ({ name })),
+      };
+    },
   },
   to: {
     render: datatable => {

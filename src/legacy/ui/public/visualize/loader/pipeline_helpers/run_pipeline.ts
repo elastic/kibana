@@ -43,8 +43,14 @@ export const runPipeline = async (
   context: object,
   handlers: RunPipelineHandlers
 ) => {
+  console.log(expression);
+  console.log('context', context);
+  console.log('handlers', handlers);
   const ast = fromExpression(expression);
+  console.log('ast', ast);
   const { interpreter } = await getInterpreter();
+  console.log('interpreter', interpreter);
   const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
+  console.log('pipelineResponse', pipelineResponse);
   return pipelineResponse;
 };

@@ -20,12 +20,15 @@
 import { prepareJson } from '../utilities';
 
 export const table = (visState: any, schemas: any) => {
+  console.log('visState', visState);
+  console.log('schemas', schemas);
   const {
     perPage,
     showMetricsAtAllLevels,
     showPartialRows,
     showTotal,
     totalFunc,
+    sort,
     ...restParams
   } = visState.params;
   const {
@@ -68,6 +71,13 @@ export const table = (visState: any, schemas: any) => {
   }
   if (totalFunc) {
     expr += ` totalFunc="${totalFunc}"`;
+  }
+
+  if (sort) {
+    const { columnIndex, direction } = sort;
+    if (typeof columnIndex === 'number') {
+      expr += ` sort={sort ${columnIndex}${direction === 'asc' ? ' reverse=true' : ''}}`;
+    }
   }
 
   return expr;

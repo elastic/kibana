@@ -21,4 +21,5 @@
 import { functionsRegistry } from 'plugins/interpreter/registries';
 import { kibanaTable } from './table_vis_fn';
 
+// NOTE: This line will run in setup life-cycle of NP plugin.
 functionsRegistry.register(kibanaTable);

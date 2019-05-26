@@ -68,8 +68,8 @@ function TableVisTypeProvider(Private) {
         showPartialRows: false,
         showMetricsAtAllLevels: false,
         sort: {
-          columnIndex: null,
-          direction: null
+          columnIndex: null, // null, number
+          direction: null // null, "desc", "asc"
         },
         showTotal: false,
         totalFunc: 'sum'
