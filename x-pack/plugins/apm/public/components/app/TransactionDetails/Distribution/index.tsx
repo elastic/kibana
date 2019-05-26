@@ -7,7 +7,6 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { Location } from 'history';
 import React, { FunctionComponent, useEffect, useCallback } from 'react';
 import { omit } from 'lodash';
 import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
@@ -89,7 +88,6 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
 };
 
 interface Props {
-  location: Location;
   distribution?: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }
@@ -98,7 +96,6 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   props: Props
 ) => {
   const {
-    location: { pathname, search, hash },
     distribution,
     urlParams: { transactionId, traceId, transactionType }
   } = props;
@@ -118,18 +115,17 @@ export const TransactionDistribution: FunctionComponent<Props> = (
           ? distribution.defaultSample
           : {};
 
-      const parsedQueryParams = toQuery(search);
+      const parsedQueryParams = toQuery(history.location.search);
 
       history.replace({
-        pathname,
-        hash,
+        ...history.location,
         search: fromQuery({
           ...omit(parsedQueryParams, 'transactionId', 'traceId'),
           ...defaultSample
         })
       });
     },
-    [distribution, pathname, hash, search]
+    [distribution]
   );
 
   useEffect(
@@ -214,10 +210,9 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         onClick={(bucket: IChartPoint) => {
           if (bucket.sample && bucket.y > 0) {
             history.push({
-              pathname,
-              hash,
+              ...history.location,
               search: fromQuery({
-                ...toQuery(search),
+                ...toQuery(history.location.search),
                 transactionId: bucket.sample.transactionId,
                 traceId: bucket.sample.traceId
               })

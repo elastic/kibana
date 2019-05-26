@@ -50,7 +50,6 @@ export function TransactionDetails() {
         <TransactionDistribution
           distribution={distributionData}
           urlParams={urlParams}
-          location={location}
         />
       </EuiPanel>
 
