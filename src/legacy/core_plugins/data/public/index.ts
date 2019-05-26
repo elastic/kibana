@@ -32,11 +32,12 @@ import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
-  private readonly indexPatterns: IndexPatternsService;
+  // Exposed services, sorted alphabetically
+  private readonly expressions: ExpressionsService;
   private readonly filter: FilterService;
+  private readonly indexPatterns: IndexPatternsService;
   private readonly search: SearchService;
   private readonly query: QueryService;
-  private readonly expressions: ExpressionsService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();

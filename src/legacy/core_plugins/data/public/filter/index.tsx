@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FilterService } from './filter_service';
+export { FilterService, FilterSetup } from './filter_service';
