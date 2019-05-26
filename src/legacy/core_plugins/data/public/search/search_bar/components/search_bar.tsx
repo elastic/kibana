@@ -28,7 +28,7 @@ import { FilterBar } from 'ui/filter_bar';
 import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 
-import { QueryBar } from '../../query_bar';
+import { QueryBar } from '../../../query/query_bar';
 
 interface Query {
   query: string;
