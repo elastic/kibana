@@ -163,7 +163,7 @@ NodeList [
         >
           <a
             aria-describedby="service-name-tooltip"
-            class="euiLink euiLink--primary sc-bwzfXH dkBCjq"
+            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
             href="#/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
           >
             My Go Service
@@ -182,13 +182,7 @@ NodeList [
       </div>
       <div
         class="euiTableCellContent euiTableCellContent--overflowingContent"
-      >
-        <span
-          class="euiToolTipAnchor sc-bdVaJa dequQV"
-        >
-          
-        </span>
-      </div>
+      />
     </td>
     <td
       class="euiTableRowCell"
@@ -267,7 +261,7 @@ NodeList [
         >
           <a
             aria-describedby="service-name-tooltip"
-            class="euiLink euiLink--primary sc-bwzfXH dkBCjq"
+            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
             href="#/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
           >
             My Python Service
@@ -288,9 +282,30 @@ NodeList [
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiToolTipAnchor sc-bdVaJa dequQV"
+          class="euiBadge euiBadge--hollow"
         >
-          test, dev
+          <span
+            class="euiBadge__content"
+          >
+            <span
+              class="euiBadge__text"
+            >
+              test
+            </span>
+          </span>
+        </span>
+        <span
+          class="euiBadge euiBadge--hollow"
+        >
+          <span
+            class="euiBadge__content"
+          >
+            <span
+              class="euiBadge__text"
+            >
+              dev
+            </span>
+          </span>
         </span>
       </div>
     </td>

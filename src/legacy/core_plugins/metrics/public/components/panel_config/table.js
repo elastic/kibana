@@ -19,13 +19,13 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import FieldSelect from '../aggs/field_select';
-import SeriesEditor from '../series_editor';
+import { FieldSelect } from '../aggs/field_select';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createTextHandler from '../lib/create_text_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import { get } from 'lodash';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -44,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class TablePanelConfig extends Component {
+export class TablePanelConfig extends Component {
 
   constructor(props) {
     super(props);
@@ -283,5 +283,3 @@ TablePanelConfig.propTypes = {
   onChange: PropTypes.func,
   visData$: PropTypes.object,
 };
-
-export default TablePanelConfig;

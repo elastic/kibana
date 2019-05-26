@@ -21,7 +21,7 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import sinon from 'sinon';
-import AddDeleteButtons from './add_delete_buttons';
+import { AddDeleteButtons } from './add_delete_buttons';
 
 describe('AddDeleteButtons', () => {
   it('calls onAdd={handleAdd}', () => {
