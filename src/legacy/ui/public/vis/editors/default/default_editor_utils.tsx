@@ -80,7 +80,7 @@ function groupAggregationsBy(
 }
 
 function sortByLabel(a: ComboBoxGroupedOption, b: ComboBoxGroupedOption) {
-  return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+  return (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase());
 }
 
 export { groupAggregationsBy };
