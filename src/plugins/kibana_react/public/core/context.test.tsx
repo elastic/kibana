@@ -21,6 +21,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { context, createContext, useKibana } from './context';
 import { createInMemoryCore } from './memory';
+import { Core } from './types';
 
 let container: HTMLDivElement | null;
 
@@ -35,7 +36,7 @@ afterEach(() => {
 });
 
 test('can mount <Provider> without crashing', () => {
-  const core = createInMemoryCore();
+  const core = createInMemoryCore() as Core;
   ReactDOM.render(
     <context.Provider value={{ core }}>
       <div>Hello world</div>
@@ -50,7 +51,7 @@ const TestConsumer = () => {
 };
 
 test('useKibana() hook retrieves Kibana context', () => {
-  const core = createInMemoryCore();
+  const core = createInMemoryCore() as Core;
   (core as any).foo = 'bar';
   ReactDOM.render(
     <context.Provider value={{ core }}>
@@ -64,7 +65,7 @@ test('useKibana() hook retrieves Kibana context', () => {
 });
 
 test('createContext() creates context that can be consumed by useKibana() hook', () => {
-  const core = createInMemoryCore();
+  const core = createInMemoryCore() as Core;
   (core as any).foo = 'baz';
   const { Provider } = createContext(core, {});
 

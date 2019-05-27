@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import { CoreStart } from './types';
+import { Core } from './types';
+import { createInMemoryUiSettingsService } from './memory/ui_settings';
 
-export const createInMemoryCore = (): CoreStart => {
-  const core: CoreStart = ({} as any) as CoreStart;
-  return core;
+export const createInMemoryCore = (): Core => {
+  const uiSettings = createInMemoryUiSettingsService();
+
+  const core: Partial<Core> = {
+    uiSettings,
+  };
+
+  return core as Core;
 };

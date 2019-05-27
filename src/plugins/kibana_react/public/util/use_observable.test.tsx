@@ -50,3 +50,5 @@ test('returns the latest value of observables', () => {
   });
   expect(result.current).toBe(400);
 });
+
+xtest('subscribes to observable only once', () => {});

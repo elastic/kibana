@@ -17,28 +17,5 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart } from '../../../../core/public';
-
-export { CoreSetup, CoreStart };
-
-export type MaybePromise<T> = T | Promise<T>;
-export type NPPluginLifecycle<Core, Imports, Exports> = (
-  core: Core,
-  plugins: Imports
-) => MaybePromise<Exports>;
-
-export interface NPClientPlugin<
-  SetupImports extends {},
-  SetupExports extends {},
-  StartImports extends {},
-  StartExports extends {}
-> {
-  setup?: NPPluginLifecycle<CoreSetup, SetupImports, SetupExports>;
-  start?: NPPluginLifecycle<CoreStart, StartImports, StartExports>;
-}
-
-export type Core = Partial<CoreSetup> & Partial<CoreStart>;
-
-export interface KibanaReactContextValue {
-  core: Core;
-}
+export { context, createContext, useKibana } from './context';
+export { KibanaReactContextValue } from './types';
