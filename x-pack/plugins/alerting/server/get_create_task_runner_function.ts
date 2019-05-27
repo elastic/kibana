@@ -48,19 +48,15 @@ export function getCreateTaskRunnerFunction({
           const alertInstance = alertInstanceFactory(alertInstanceId);
 
           // Unpersist any alert instances that were not explicitly fired in this alert execution
-          if (!alertInstance.getFireOptions()) {
+          if (!alertInstance.shouldFire()) {
             delete alertInstances[alertInstanceId];
             continue;
           }
 
           const { actionGroup, context, state } = alertInstance.getFireOptions()!;
           await fireHandler(actionGroup, context, state);
-          alertInstance.replaceState({
-            ...alertInstance.getPreviousState(),
-            lastFired: Date.now(),
-          });
-
-          alertInstance.clearFireOptions();
+          alertInstance.replaceMeta({ lastFired: Date.now() });
+          alertInstance.resetFire();
         }
 
         return {

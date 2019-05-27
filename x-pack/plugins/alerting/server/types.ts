@@ -5,7 +5,7 @@
  */
 
 import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertInstance } from './create_alert_instance_factory';
+import { AlertInstance } from './alert_instance';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
