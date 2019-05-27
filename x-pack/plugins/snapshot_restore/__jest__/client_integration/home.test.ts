@@ -6,6 +6,7 @@
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
+import { SNAPSHOT_STATE } from '../../public/app/constants';
 import {
   setupEnvironment,
   pageHelpers,
@@ -442,6 +443,26 @@ describe('<SnapshotRestoreHome />', () => {
         });
       });
 
+      test('each row should have a link to the repository', async () => {
+        const { component, exists, table, router } = testBed;
+
+        const { rows } = table.getMetaData('snapshotTable');
+        const repositoryLink = findTestSubject(rows[0].reactWrapper, 'repositoryLink');
+        const { href } = repositoryLink.props();
+
+        await act(async () => {
+          router.navigateTo(href!);
+          await nextTick();
+          component.update();
+        });
+
+        // Make sure that we navigated to the repository list
+        // and opened the detail panel
+        expect(exists('snapshotList')).toBe(false);
+        expect(exists('repositoryList')).toBe(true);
+        expect(exists('repositoryDetail')).toBe(true);
+      });
+
       test('should have a button to reload the snapshots', async () => {
         const { component, exists, find } = testBed;
         const totalRequests = server.requests.length;
@@ -492,7 +513,7 @@ describe('<SnapshotRestoreHome />', () => {
           test('should set the correct title', async () => {
             const { find } = testBed;
 
-            expect(find('snapshotDetail.title').text()).toEqual(snapshot1.snapshot);
+            expect(find('snapshotDetail.detailTitle').text()).toEqual(snapshot1.snapshot);
           });
 
           test('should have a link to show the repository detail', async () => {
@@ -535,9 +556,8 @@ describe('<SnapshotRestoreHome />', () => {
             test('should have the default tab set on "Summary"', () => {
               const { find } = testBed;
 
-              const detailPanel = find('snapshotDetail');
               const tabs = find('snapshotDetail.tab');
-              const selectedTab = detailPanel.find('.euiTab-isSelected');
+              const selectedTab = find('snapshotDetail').find('.euiTab-isSelected');
 
               expect(selectedTab.instance()).toBe(tabs.at(0).instance());
             });
@@ -552,11 +572,130 @@ describe('<SnapshotRestoreHome />', () => {
                 expect(find('snapshotDetail.uuid.value').text()).toBe(snapshot1.uuid);
                 expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
                 expect(find('snapshotDetail.includeGlobalState.value').text()).toBe('Yes');
+                expect(find('snapshotDetail.indices.title').text()).toBe(
+                  `Indices (${snapshot1.indices.length})`
+                );
+                expect(find('snapshotDetail.indices.value').text()).toBe(
+                  snapshot1.indices.join('')
+                );
                 expect(find('snapshotDetail.startTime.value').text()).toBe('23 May 2019 14:25:15');
                 expect(find('snapshotDetail.endTime.value').text()).toBe('23 May 2019 14:25:16');
               });
+
+              test('should indicate the different snapshot states', async () => {
+                const { find, actions } = testBed;
+
+                // We need to click back and forth between 0 and 1 to trigger
+                // the HTTP request that loads the snapshot with the new state.
+                // This varible keeps track of it.
+                let itemIndexToClickOn = 1;
+
+                const setSnapshotStateAndUpdateDetail = async (state: string) => {
+                  const updatedSnapshot = { ...snapshot1, state };
+                  httpRequestsMockHelpers.setGetSnapshotResponse(updatedSnapshot);
+                  await actions.clickSnapshotAt(itemIndexToClickOn); // click another snapshot to trigger the HTTP call
+                };
+
+                const expectMessageForSnapshotState = async (
+                  state: string,
+                  expectedMessage: string
+                ) => {
+                  await setSnapshotStateAndUpdateDetail(state);
+
+                  const stateMessage = find('snapshotDetail.state.value').text();
+                  try {
+                    expect(stateMessage).toBe(expectedMessage);
+                  } catch {
+                    throw new Error(
+                      `Expected snapshot state message "${expectedMessage}" for state "${state}, but got "${stateMessage}".`
+                    );
+                  }
+
+                  itemIndexToClickOn = itemIndexToClickOn ? 0 : 1;
+                };
+
+                const mapStateToMessage = {
+                  [SNAPSHOT_STATE.IN_PROGRESS]: 'Taking snapshot…',
+                  [SNAPSHOT_STATE.FAILED]: 'Snapshot failed',
+                  [SNAPSHOT_STATE.PARTIAL]: 'Partial failure ',
+                  [SNAPSHOT_STATE.INCOMPATIBLE]: 'Incompatible version ',
+                };
+
+                // Call sequencially each state and verify that the message is ok
+                return Object.entries(mapStateToMessage).reduce((promise, [state, message]) => {
+                  return promise.then(async () => expectMessageForSnapshotState(state, message));
+                }, Promise.resolve());
+              });
+            });
+
+            describe('failed indices tab', () => {
+              test('should display a message when snapshot created successfully', () => {
+                const { find, actions } = testBed;
+                actions.selectSnapshotDetailTab('failedIndices');
+
+                expect(find('snapshotDetail.content').text()).toBe(
+                  'All indices were stored successfully.'
+                );
+              });
+
+              test('should display a message when snapshot in progress ', async () => {
+                const { find, actions } = testBed;
+                const updatedSnapshot = { ...snapshot1, state: 'IN_PROGRESS' };
+                httpRequestsMockHelpers.setGetSnapshotResponse(updatedSnapshot);
+
+                await actions.clickSnapshotAt(1); // click another snapshot to trigger the HTTP call
+                actions.selectSnapshotDetailTab('failedIndices');
+
+                expect(find('snapshotDetail.content').text()).toBe('Snapshot is being created.');
+              });
             });
           });
+        });
+      });
+
+      describe('when there are failed indices', () => {
+        const failure1 = fixtures.getIndexFailure();
+        const failure2 = fixtures.getIndexFailure();
+        const indexFailures = [failure1, failure2];
+
+        beforeEach(async () => {
+          const updatedSnapshot = { ...snapshot1, indexFailures };
+          httpRequestsMockHelpers.setGetSnapshotResponse(updatedSnapshot);
+          await testBed.actions.clickSnapshotAt(0);
+          testBed.actions.selectSnapshotDetailTab('failedIndices');
+        });
+
+        test('should update the tab label', () => {
+          const { find } = testBed;
+          expect(
+            find('snapshotDetail.tab')
+              .at(1)
+              .text()
+          ).toBe(`Failed indices (${indexFailures.length})`);
+        });
+
+        test('should display the failed indices', () => {
+          const { find } = testBed;
+
+          const expected = indexFailures.map(failure => failure.index);
+          const found = find('snapshotDetail.indexFailure.index').map(wrapper => wrapper.text());
+          expect(find('snapshotDetail.indexFailure').length).toBe(2);
+          expect(found).toEqual(expected);
+        });
+
+        test('should detail the failure for each index', () => {
+          const { find } = testBed;
+          const index0Failure = find('snapshotDetail.indexFailure').at(0);
+          const failures = findTestSubject(index0Failure, 'failure');
+
+          expect(failures.length).toBe(failure1.failures.length);
+
+          const failure0 = failures.at(0);
+          const shardText = findTestSubject(failure0, 'shard').text();
+          const reasonText = findTestSubject(failure0, 'reason').text();
+
+          expect(shardText).toBe(`Shard ${failure1.failures[0].shard_id}`);
+          expect(reasonText).toBe(`${failure1.failures[0].status}: ${failure1.failures[0].reason}`);
         });
       });
     });

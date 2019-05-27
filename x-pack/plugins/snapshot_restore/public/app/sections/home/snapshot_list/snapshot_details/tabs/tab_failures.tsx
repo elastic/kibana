@@ -47,7 +47,7 @@ export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) 
 
     return (
       <div key={index} data-test-subj="indexFailure">
-        <EuiTitle size="xs" data-test-sub="index">
+        <EuiTitle size="xs" data-test-subj="index">
           <h3>{index}</h3>
         </EuiTitle>
 

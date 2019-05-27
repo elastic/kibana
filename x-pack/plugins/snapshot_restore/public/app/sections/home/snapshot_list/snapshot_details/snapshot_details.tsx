@@ -85,7 +85,6 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             defaultMessage="Summary"
           />
         ),
-        testSubj: 'srSnapshotDetailsSummaryTab',
       },
       {
         id: TAB_FAILURES,
@@ -96,7 +95,6 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             values={{ failuresCount: indexFailures.length }}
           />
         ),
-        testSubj: 'srSnapshotDetailsFailuresTab',
       },
     ];
 
@@ -197,7 +195,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="title">
+              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="detailTitle">
                 {snapshotId}
               </h2>
             </EuiTitle>

@@ -5,4 +5,4 @@
  */
 
 export { getRandomString } from './strings';
-export { nextTick } from './utils';
+export { nextTick, getRandomNumber } from './utils';

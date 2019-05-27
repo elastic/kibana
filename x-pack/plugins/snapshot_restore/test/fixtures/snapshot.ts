@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString } from '../../../../test_utils';
+import { getRandomString, getRandomNumber } from '../../../../test_utils';
 
 export const getSnapshot = ({
   repository = 'my-repo',
@@ -12,13 +12,14 @@ export const getSnapshot = ({
   uuid = getRandomString(),
   state = 'SUCCESS',
   indexFailures = [],
+  totalIndices = getRandomNumber(),
 } = {}) => ({
   repository,
   snapshot,
   uuid,
   versionId: 8000099,
   version: '8.0.0',
-  indices: ['.kibana_1', '.kibana_task_manager', '.security-7'],
+  indices: new Array(totalIndices).fill('').map(getRandomString),
   includeGlobalState: 1,
   state,
   startTime: '2019-05-23T06:25:15.896Z',
@@ -32,11 +33,9 @@ export const getSnapshot = ({
 
 export const getIndexFailure = (index = getRandomString()) => ({
   index,
-  failures: [
-    {
-      status: 400,
-      reason: getRandomString(),
-      shard_id: getRandomString(),
-    },
-  ],
+  failures: new Array(getRandomNumber({ min: 1, max: 5 })).fill('').map(() => ({
+    status: 400,
+    reason: getRandomString(),
+    shard_id: getRandomString(),
+  })),
 });

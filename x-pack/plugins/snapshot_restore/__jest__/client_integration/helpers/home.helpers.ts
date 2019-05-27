@@ -33,6 +33,7 @@ export interface HomeTestBed extends TestBed<TestSubjects | NonVisibleTestSubjec
     clickSnapshotAt: (index: number) => void;
     clickRepositoryActionAt: (index: number, action: 'delete' | 'edit') => void;
     selectTab: (tab: 'snapshots' | 'repositories') => void;
+    selectSnapshotDetailTab: (tab: 'summary' | 'failedIndices') => void;
   };
 }
 
@@ -84,7 +85,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = snapshotLink.props();
       testBed.router.navigateTo(href!);
-      await nextTick();
+      await nextTick(100);
       testBed.component.update();
     });
   };
@@ -98,6 +99,15 @@ export const setup = async (): Promise<HomeTestBed> => {
       .simulate('click');
   };
 
+  const selectSnapshotDetailTab = (tab: 'summary' | 'failedIndices') => {
+    const tabs = ['summary', 'failedIndices'];
+
+    testBed
+      .find('snapshotDetail.tab')
+      .at(tabs.indexOf(tab))
+      .simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
@@ -106,6 +116,7 @@ export const setup = async (): Promise<HomeTestBed> => {
       clickRepositoryActionAt,
       clickSnapshotAt,
       selectTab,
+      selectSnapshotDetailTab,
     },
   };
 };
@@ -474,6 +485,7 @@ export type TestSubjects =
   | 'snapshotList.snapshotDetail.title'
   | 'snapshotList.snapshotLink'
   | 'snapshotList.snapshotTable'
+  | 'snapshotList.snapshotTable.repositoryLink'
   | 'snapshotList.snapshotTable.row'
   | 'snapshotList.snapshotTable.row.cell'
   | 'snapshotList.snapshotTable.row.cell.snapshotLink'
@@ -668,6 +680,7 @@ export type TestSubjects =
   | 'snapshotTable'
   | 'snapshotTable.cell'
   | 'snapshotTable.cell.snapshotLink'
+  | 'snapshotTable.repositoryLink'
   | 'snapshotTable.row'
   | 'snapshotTable.row.cell'
   | 'snapshotTable.row.cell.snapshotLink'
@@ -754,13 +767,17 @@ export type TestSubjects =
   | 'snapshotDetail.duration.value'
   | 'snapshotDetail.endTime.value'
   | 'snapshotDetail.includeGlobalState.value'
+  | 'snapshotDetail.indices.title'
   | 'snapshotDetail.indices.value'
   | 'snapshotDetail.startTime.value'
   | 'snapshotDetail.state.value'
   | 'snapshotDetail.uuid.value'
+  | 'snapshotDetail.detailTitle'
   | 'snapshotDetail.value'
   | 'snapshotDetail.version'
   | 'snapshotDetail.version.value'
+  | 'snapshotDetail.indexFailure'
+  | 'snapshotDetail.indexFailure.index'
   | 'snapshotList.content.duration'
   | 'snapshotList.content.duration.value'
   | 'snapshotList.content.endTime'
@@ -866,4 +883,5 @@ export type TestSubjects =
   | 'uuid.value'
   | 'value'
   | 'version'
-  | 'version.value';
+  | 'version.value'
+  | 'repositoryLink';

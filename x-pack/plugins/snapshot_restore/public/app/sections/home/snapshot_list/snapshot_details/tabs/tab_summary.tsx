@@ -76,7 +76,6 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
   ) : (
     <FormattedMessage
       id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
-      data-test-subj="srSnapshotDetailsIndicesNoneTitle"
       defaultMessage="-"
     />
   );
@@ -85,10 +84,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
     <EuiDescriptionList textStyle="reverse">
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="version">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemVersionLabel"
-              data-test-subj="title"
               defaultMessage="Version / Version ID"
             />
           </EuiDescriptionListTitle>
@@ -99,10 +97,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="uuid">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemUuidLabel"
-              data-test-subj="title"
               defaultMessage="UUID"
             />
           </EuiDescriptionListTitle>
@@ -115,10 +112,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
 
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="state">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemStateLabel"
-              data-test-subj="title"
               defaultMessage="State"
             />
           </EuiDescriptionListTitle>
@@ -129,10 +125,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="includeGlobalState">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateLabel"
-              data-test-subj="title"
               defaultMessage="Includes global state"
             />
           </EuiDescriptionListTitle>
@@ -145,10 +140,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
 
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="indices">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemIndicesLabel"
-              data-test-subj="title"
               defaultMessage="Indices ({indicesCount})"
               values={{ indicesCount: indices.length }}
             />
@@ -162,10 +156,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
 
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="startTime">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemStartTimeLabel"
-              data-test-subj="title"
               defaultMessage="Start time"
             />
           </EuiDescriptionListTitle>
@@ -178,10 +171,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="endTime">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemEndTimeLabel"
-              data-test-subj="title"
               defaultMessage="End time"
             />
           </EuiDescriptionListTitle>
@@ -200,10 +192,9 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
 
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="duration">
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.itemDurationLabel"
-              data-test-subj="title"
               defaultMessage="Duration"
             />
           </EuiDescriptionListTitle>
