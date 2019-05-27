@@ -74,15 +74,12 @@ export async function loadErrorDistribution({
   uiFilters: UIFilters;
   errorGroupId?: string;
 }) {
-  const pathname = errorGroupId
-    ? `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`
-    : `/api/apm/services/${serviceName}/errors/distribution`;
-
   return callApi<ErrorDistributionAPIResponse>({
-    pathname,
+    pathname: `/api/apm/services/${serviceName}/errors/distribution`,
     query: {
       start,
       end,
+      groupId: errorGroupId,
       uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });

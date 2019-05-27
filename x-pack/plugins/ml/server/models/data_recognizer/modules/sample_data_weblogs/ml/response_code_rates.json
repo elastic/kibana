@@ -1,11 +1,11 @@
 {
-  "groups": ["kibana_sample_logs", "kibana_sample_data"],
-  "description": "Kibana sample web logs data: find anomalies in the event count by HTTP response code ",
+  "groups": ["kibana_sample_data", "kibana_sample_web_logs"],
+  "description": "Find unusual event rates by HTTP response code (high and low)",
   "analysis_config": {
     "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "Event count by response code",
+        "detector_description": "Event rate by response code",
         "function": "count",
         "partition_field_name": "response.keyword"
       }

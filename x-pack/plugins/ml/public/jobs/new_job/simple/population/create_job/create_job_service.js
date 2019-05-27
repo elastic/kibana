@@ -69,7 +69,7 @@ export function PopulationJobServiceProvider(Private) {
           fieldIds.splice(0, 0, EVENT_RATE_COUNT_FIELD);
         }
 
-        fieldIds.forEach((fieldId, i) => {
+        fieldIds.forEach((fieldId, i) => { // eslint-disable-line no-unused-vars
           this.chartData.detectors[i] = {
             line: [],
             swimlane: [],
