@@ -84,7 +84,8 @@ export interface CoreSetup {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    basePath: HttpServiceSetup['basePath'];
+    getBasePathFor: HttpServiceSetup['getBasePathFor'];
+    setBasePathFor: HttpServiceSetup['setBasePathFor'];
   };
 }
 

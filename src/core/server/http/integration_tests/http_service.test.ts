@@ -18,7 +18,6 @@
  */
 import request from 'request';
 import Boom from 'boom';
-import { Request } from 'hapi';
 
 import { AuthenticationHandler } from '../../../../core/server';
 import { Router } from '../router';
@@ -330,7 +329,7 @@ describe('http service', () => {
       });
     });
 
-    describe('#basePath()', () => {
+    describe('#getBasePathFor()/#setBasePathFor()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
@@ -341,7 +340,7 @@ describe('http service', () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
         http.registerOnPreAuth((req, t) => {
-          http.basePath.set(req, reqBasePath);
+          http.setBasePathFor(req, reqBasePath);
           return t.next();
         });
 
@@ -352,7 +351,7 @@ describe('http service', () => {
         kbnServer.server.route({
           method: 'GET',
           path: legacyUrl,
-          handler: (req: Request) => kbnServer.newPlatform.setup.core.http.basePath.get(req),
+          handler: kbnServer.newPlatform.setup.core.http.getBasePathFor,
         });
 
         await kbnTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);
