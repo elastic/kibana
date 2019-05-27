@@ -33,7 +33,7 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  * Usage:
  *
  * ```js
- * const [darkMode, setDarkMode] = useKibanaUiSetting('theme:darkMode');
+ * const [darkMode, setDarkMode] = useUiSetting('theme:darkMode');
  * ```
  *
  * @todo As of this writing `uiSettings` service exists only on *setup* `core`
