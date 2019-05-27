@@ -4,25 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { Alert } from './types';
 import { TaskManager } from '../../task_manager';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
+  savedObjectsClient: SavedObjectsClient;
 }
 
 export class AlertsClient {
   private taskManager: TaskManager;
+  private savedObjectsClient: SavedObjectsClient;
 
-  constructor({ taskManager }: ConstructorOptions) {
+  constructor({ savedObjectsClient, taskManager }: ConstructorOptions) {
     this.taskManager = taskManager;
+    this.savedObjectsClient = savedObjectsClient;
   }
 
   public async create(alert: Alert) {
-    await this.taskManager.schedule({
+    const createdAlert = await this.savedObjectsClient.create<any>('alert', alert);
+    const scheduledTask = await this.taskManager.schedule({
       taskType: `alerting:${alert.alertTypeId}`,
-      params: alert,
+      params: {
+        alertId: createdAlert.id,
+      },
       state: {},
+    });
+    await this.savedObjectsClient.update('alert', createdAlert.id, {
+      scheduledTaskId: scheduledTask.id,
     });
   }
 }

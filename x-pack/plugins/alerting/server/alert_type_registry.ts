@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { AlertType } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
@@ -14,16 +15,19 @@ import { ActionsPlugin } from '../../actions';
 interface ConstructorOptions {
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
+  savedObjectsClient: SavedObjectsClient;
 }
 
 export class AlertTypeRegistry {
   private taskManager: TaskManager;
   private fireAction: ActionsPlugin['fire'];
   private alertTypes: Record<string, AlertType> = {};
+  private savedObjectsClient: SavedObjectsClient;
 
-  constructor({ fireAction, taskManager }: ConstructorOptions) {
+  constructor({ savedObjectsClient, fireAction, taskManager }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.fireAction = fireAction;
+    this.savedObjectsClient = savedObjectsClient;
   }
 
   public has(id: string) {
@@ -46,7 +50,11 @@ export class AlertTypeRegistry {
       [`alerting:${alertType.id}`]: {
         title: alertType.description,
         type: `alerting:${alertType.id}`,
-        createTaskRunner: getCreateTaskRunnerFunction(alertType, this.fireAction),
+        createTaskRunner: getCreateTaskRunnerFunction({
+          alertType,
+          fireAction: this.fireAction,
+          savedObjectsClient: this.savedObjectsClient,
+        }),
       },
     });
   }

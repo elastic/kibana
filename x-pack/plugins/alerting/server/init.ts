@@ -18,10 +18,16 @@ export function init(server: Legacy.Server) {
     return;
   }
 
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const savedObjectsClientWithInternalUser = server.savedObjects.getSavedObjectsRepository(
+    callWithInternalUser
+  );
+
   const { taskManager } = server;
   const alertTypeRegistry = new AlertTypeRegistry({
     taskManager: taskManager!,
     fireAction: server.plugins.actions!.fire,
+    savedObjectsClient: savedObjectsClientWithInternalUser,
   });
 
   // Register routes
@@ -29,7 +35,10 @@ export function init(server: Legacy.Server) {
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {
+    const request = this;
+    const savedObjectsClient = request.getSavedObjectsClient();
     const alertsClient = new AlertsClient({
+      savedObjectsClient,
       taskManager: taskManager!,
     });
     return alertsClient;

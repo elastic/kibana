@@ -4,24 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ActionsPlugin } from '../../actions';
 import { AlertType, AlertInstanceData } from './types';
 import { TaskInstance } from '../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 
+interface CreateTaskRunnerFunctionOptions {
+  alertType: AlertType;
+  fireAction: ActionsPlugin['fire'];
+  savedObjectsClient: SavedObjectsClient;
+}
+
 interface TaskRunnerOptions {
   taskInstance: TaskInstance;
 }
 
-export function getCreateTaskRunnerFunction(
-  alertType: AlertType,
-  fireAction: ActionsPlugin['fire']
-) {
+export function getCreateTaskRunnerFunction({
+  alertType,
+  fireAction,
+  savedObjectsClient,
+}: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
-    const fireHandler = createFireHandler(alertType, taskInstance, fireAction);
     return {
       run: async () => {
+        const alertSavedObject = await savedObjectsClient.get('alert', taskInstance.params.alertId);
+        const fireHandler = createFireHandler({ alertSavedObject, fireAction });
         const alertInstances = (taskInstance.state.alertInstances || {}) as Record<
           string,
           AlertInstanceData
@@ -32,7 +41,10 @@ export function getCreateTaskRunnerFunction(
           alertInstanceFactory: createAlertInstanceFactory(alertInstances),
         };
 
-        const updatedState = await alertType.execute(services, taskInstance.params.checkParams);
+        const updatedState = await alertType.execute(
+          services,
+          alertSavedObject.attributes.checkParams
+        );
 
         for (const alertInstanceId of Object.keys(alertInstances)) {
           const alertInstance = alertInstanceFactory(alertInstanceId);
@@ -59,8 +71,8 @@ export function getCreateTaskRunnerFunction(
             alertInstances,
           },
           // TODO: Should it be now + interval or previous runAt + interval
-          runAt: taskInstance.params.interval
-            ? new Date(Date.now() + taskInstance.params.interval * 1000)
+          runAt: alertSavedObject.attributes.interval
+            ? new Date(Date.now() + alertSavedObject.attributes.interval * 1000)
             : undefined,
         };
       },

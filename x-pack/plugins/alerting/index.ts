@@ -6,6 +6,7 @@
 
 import { Root } from 'joi';
 import { init } from './server';
+import mappings from './mappings.json';
 
 export { AlertingPlugin, AlertsClient } from './server';
 
@@ -13,7 +14,7 @@ export function alerting(kibana: any) {
   return new kibana.Plugin({
     id: 'alerting',
     configPrefix: 'xpack.alerting',
-    require: ['kibana', 'actions', 'task_manager'],
+    require: ['kibana', 'elasticsearch', 'actions', 'task_manager'],
     config(Joi: Root) {
       return Joi.object()
         .keys({
@@ -22,5 +23,8 @@ export function alerting(kibana: any) {
         .default();
     },
     init,
+    uiExports: {
+      mappings,
+    },
   });
 }

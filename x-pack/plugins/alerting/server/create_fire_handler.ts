@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType, State, Context } from './types';
-import { TaskInstance } from '../../task_manager';
+import { SavedObject } from 'src/legacy/server/saved_objects';
+import { State, Context } from './types';
 import { ActionsPlugin } from '../../actions';
 
-export function createFireHandler(
-  alertType: AlertType,
-  taskInstance: TaskInstance,
-  fireAction: ActionsPlugin['fire']
-) {
+interface CreateFireHandlerOptions {
+  fireAction: ActionsPlugin['fire'];
+  alertSavedObject: SavedObject;
+}
+
+export function createFireHandler({ fireAction, alertSavedObject }: CreateFireHandlerOptions) {
   return async (actionGroupId: string, context: Context, state: State) => {
     const actions =
-      taskInstance.params.actionGroups[actionGroupId] ||
-      taskInstance.params.actionGroups.default ||
+      alertSavedObject.attributes.actionGroups[actionGroupId] ||
+      alertSavedObject.attributes.actionGroups.default ||
       [];
     for (const action of actions) {
       fireAction({
