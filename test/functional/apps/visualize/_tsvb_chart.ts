@@ -66,9 +66,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       it('should open color picker, deactivate panel and clone series', async () => {
         await PageObjects.visualBuilder.clickColorPicker();
         await PageObjects.visualBuilder.checkColorPickerPopUpIsPresent();
+        await PageObjects.visualBuilder.clickColorPicker();
+
         await PageObjects.visualBuilder.changePanelPreview();
         await PageObjects.visualBuilder.checkPreviewIsDisabled();
         await PageObjects.visualBuilder.changePanelPreview();
+
         await PageObjects.visualBuilder.cloneSeries();
         const legend = await PageObjects.visualBuilder.getLegentItems();
         const series = await PageObjects.visualBuilder.getSeries();
