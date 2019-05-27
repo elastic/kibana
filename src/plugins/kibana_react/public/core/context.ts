@@ -17,28 +17,20 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import * as React from 'react';
+import { KibanaReactContextValue, Core } from './types';
 
-export { CoreSetup, CoreStart };
+export const context = React.createContext<KibanaReactContextValue>({
+  core: {},
+});
 
-export type MaybePromise<T> = T | Promise<T>;
-export type NPPluginLifecycle<Core, Imports, Exports> = (
-  core: Core,
-  plugins: Imports
-) => MaybePromise<Exports>;
+export const createContext = (core: Core, plugins?: any) => {
+  const value: KibanaReactContextValue = { core };
+  const Provider: React.FC = ({ children }) =>
+    React.createElement(context.Provider, { value, children });
 
-export interface NPClientPlugin<
-  SetupImports extends {},
-  SetupExports extends {},
-  StartImports extends {},
-  StartExports extends {}
-> {
-  setup?: NPPluginLifecycle<CoreSetup, SetupImports, SetupExports>;
-  start?: NPPluginLifecycle<CoreStart, StartImports, StartExports>;
-}
-
-export type Core = Partial<CoreSetup> | Partial<CoreStart>;
-
-export interface KibanaReactContextValue {
-  core: Core;
-}
+  return {
+    Provider,
+    Consumer: context.Consumer,
+  };
+};
