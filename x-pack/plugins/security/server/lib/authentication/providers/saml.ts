@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticatedUser } from '../../../../common/model';
@@ -151,7 +152,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: RequestWithLoginAttempt, state?: ProviderState) {
+  public async deauthenticate(request: Legacy.Request, state?: ProviderState) {
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
     if ((!state || !state.accessToken) && !isSAMLRequestQuery(request.query)) {
@@ -573,7 +574,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * Provider and redirects user back to the Identity Provider if needed.
    * @param request Request instance.
    */
-  private async performIdPInitiatedSingleLogout(request: RequestWithLoginAttempt) {
+  private async performIdPInitiatedSingleLogout(request: Legacy.Request) {
     this.debug('Single logout has been initiated by the Identity Provider.');
 
     // This operation should be performed on behalf of the user with a privilege that normal

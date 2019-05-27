@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { get } from 'lodash';
+import { Legacy } from 'kibana';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -97,7 +98,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: RequestWithLoginAttempt, state?: ProviderState) {
+  public async deauthenticate(request: Legacy.Request, state?: ProviderState) {
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
     if (!state || !state.accessToken) {

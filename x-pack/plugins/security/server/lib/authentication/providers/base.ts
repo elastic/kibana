@@ -59,7 +59,7 @@ export abstract class BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider that needs to be invalidated.
    */
   abstract deauthenticate(
-    request: RequestWithLoginAttempt,
+    request: Legacy.Request,
     state?: unknown
   ): Promise<DeauthenticationResult>;
 }

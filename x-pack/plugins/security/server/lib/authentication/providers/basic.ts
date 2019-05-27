@@ -6,6 +6,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -102,7 +103,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
    */
-  public async deauthenticate(request: RequestWithLoginAttempt) {
+  public async deauthenticate(request: Legacy.Request) {
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     return DeauthenticationResult.redirectTo(

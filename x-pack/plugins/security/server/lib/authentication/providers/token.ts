@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
@@ -95,7 +96,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
+  public async deauthenticate(request: Legacy.Request, state?: ProviderState | null) {
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
     if (!state || !state.accessToken || !state.refreshToken) {

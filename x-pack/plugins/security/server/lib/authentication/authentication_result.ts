@@ -76,7 +76,7 @@ export class AuthenticationResult {
    * Produces `AuthenticationResult` for the case when authentication fails.
    * @param error Error that occurred during authentication attempt.
    * @param [challenges] Optional list of the challenges that will be returned to the user within
-   * `WWW-Authenticate` HTTP header. Multiple challenges will result into multiple headers (one per
+   * `WWW-Authenticate` HTTP header. Multiple challenges will result in multiple headers (one per
    * challenge) as it's better supported by the browsers than comma separated list within a single
    * header. Challenges can only be set for errors with `401` error status.
    */
