@@ -44,6 +44,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
         $http: $injector.get('$http'),
         savedObjectsClient: Private(SavedObjectsClientProvider),
         indexPatternCreationType,
+        confirmModalPromise: $injector.get('confirmModalPromise'),
         changeUrl: url => {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },

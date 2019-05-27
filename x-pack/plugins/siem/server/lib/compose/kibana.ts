@@ -20,23 +20,30 @@ import { ElasticsearchIpOverviewAdapter, IpDetails } from '../ip_details';
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
 import { ElasticsearchNetworkAdapter, Network } from '../network';
+import { Note } from '../note';
+import { PinnedEvent } from '../pinned_event';
 import { Overview } from '../overview';
 import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
 import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
+import { Timeline } from '../timeline';
 
 export function compose(server: Server): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);
   const framework = new KibanaBackendFrameworkAdapter(server);
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
-  const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework), sources);
+  const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
+
+  const timeline = new Timeline({ savedObjects: framework.getSavedObjectsService() });
+  const note = new Note({ savedObjects: framework.getSavedObjectsService() });
+  const pinnedEvent = new PinnedEvent({ savedObjects: framework.getSavedObjectsService() });
 
   const domainLibs: AppDomainLibs = {
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
-    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
+    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
     ipDetails: new IpDetails(new ElasticsearchIpOverviewAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
@@ -52,6 +59,9 @@ export function compose(server: Server): AppBackendLibs {
     sourceStatus,
     sources,
     ...domainLibs,
+    timeline,
+    note,
+    pinnedEvent,
   };
 
   return libs;

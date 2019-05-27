@@ -84,7 +84,19 @@ const props = {
         fromPx: 1,
         label: 'Apr 17th 2019, 20:04 to May 18th 2019, 19:45',
         widthPx: 93.1
-      }
+      },
+    },
+    {
+      groups: ['test'],
+      id: 'non-timeseries-job',
+      isRunning: false,
+      isSingleMetricViewerJob: false,
+      job_id: 'non-timeseries-job',
+      timeRange: {
+        fromPx: 1,
+        label: 'Apr 17th 2019, 20:04 to May 18th 2019, 19:45',
+        widthPx: 93.1
+      },
     }
   ],
   onSelection: jest.fn(),
@@ -108,6 +120,13 @@ describe('JobSelectorTable', () => {
       const { getByTestId } = render(<JobSelectorTable {...singleSelectionProps} />);
       const radioButton = getByTestId('price-by-day-radio-button');
       expect(radioButton.firstChild.checked).toEqual(true);
+    });
+
+    test('job cannot be selected if it is not a single metric viewer job', () => {
+      const timeseriesOnlyProps = { ...props, singleSelection: 'true', timeseriesOnly: 'true' };
+      const { getByTestId } = render(<JobSelectorTable {...timeseriesOnlyProps} />);
+      const radioButton = getByTestId('non-timeseries-job-radio-button');
+      expect(radioButton.firstChild.disabled).toEqual(true);
     });
 
   });

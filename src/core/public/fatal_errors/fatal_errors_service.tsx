@@ -23,7 +23,7 @@ import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
 import { I18nSetup } from '../i18n';
-import { InjectedMetadataSetup } from '../';
+import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 

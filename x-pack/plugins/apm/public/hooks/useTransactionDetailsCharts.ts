@@ -5,9 +5,10 @@
  */
 
 import { useMemo } from 'react';
-import { loadTransactionDetailsCharts } from '../services/rest/apm/transaction_groups';
+import { loadTransactionCharts } from '../services/rest/apm/transaction_groups';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 
 export function useTransactionDetailsCharts(urlParams: IUrlParams) {
@@ -16,24 +17,24 @@ export function useTransactionDetailsCharts(urlParams: IUrlParams) {
     transactionType,
     start,
     end,
-    transactionName,
-    kuery
+    transactionName
   } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
 
   const { data, error, status } = useFetcher(
     () => {
       if (serviceName && start && end && transactionName && transactionType) {
-        return loadTransactionDetailsCharts({
+        return loadTransactionCharts({
           serviceName,
           start,
           end,
           transactionName,
           transactionType,
-          kuery
+          uiFilters
         });
       }
     },
-    [serviceName, start, end, transactionName, transactionType, kuery]
+    [serviceName, start, end, transactionName, transactionType, uiFilters]
   );
 
   const memoizedData = useMemo(() => getTransactionCharts(urlParams, data), [

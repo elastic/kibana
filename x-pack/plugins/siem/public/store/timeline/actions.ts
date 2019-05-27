@@ -8,10 +8,13 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
+import {
+  DataProvider,
+  QueryOperator,
+} from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { KqlMode } from './model';
+import { KqlMode, TimelineModel } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
@@ -23,7 +26,9 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export const addColumn = actionCreator<{ id: string; columns: ColumnHeader }>('ADD_COLUMN');
+export const upsertColumn = actionCreator<{ column: ColumnHeader; id: string; index: number }>(
+  'UPSERT_COLUMN'
+);
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
@@ -64,6 +69,29 @@ export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_T
 
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 
+export const updateTimeline = actionCreator<{
+  id: string;
+  timeline: TimelineModel;
+}>('UPDATE_TIMELINE');
+
+export const addTimeline = actionCreator<{
+  id: string;
+  timeline: TimelineModel;
+}>('ADD_TIMELINE');
+
+export const startTimelineSaving = actionCreator<{
+  id: string;
+}>('START_TIMELINE_SAVING');
+
+export const endTimelineSaving = actionCreator<{
+  id: string;
+}>('END_TIMELINE_SAVING');
+
+export const updateIsLoading = actionCreator<{
+  id: string;
+  isLoading: boolean;
+}>('UPDATE_LOADING');
+
 export const updateColumns = actionCreator<{
   id: string;
   columns: ColumnHeader[];
@@ -82,6 +110,16 @@ export const updateDataProviderExcluded = actionCreator<{
   providerId: string;
   andProviderId?: string;
 }>('TOGGLE_PROVIDER_EXCLUDED');
+
+export const dataProviderEdited = actionCreator<{
+  andProviderId?: string;
+  excluded: boolean;
+  field: string;
+  id: string;
+  operator: QueryOperator;
+  providerId: string;
+  value: string | number;
+}>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderKqlQuery = actionCreator<{
   id: string;
@@ -135,6 +173,13 @@ export const updateProviders = actionCreator<{ id: string; providers: DataProvid
   'UPDATE_PROVIDERS'
 );
 
-export const updateRange = actionCreator<{ id: string; range: string }>('UPDATE_RANGE');
+export const updateRange = actionCreator<{ id: string; start: number; end: number }>(
+  'UPDATE_RANGE'
+);
 
 export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
+
+export const updateAutoSaveMsg = actionCreator<{
+  timelineId: string | null;
+  newTimelineModel: TimelineModel | null;
+}>('UPDATE_AUTO_SAVE');

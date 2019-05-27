@@ -90,18 +90,10 @@ const getAggs = (type: string, ip: string) => {
   };
 };
 
-export const buildOverviewQuery = ({
-  filterQuery,
-  sourceConfiguration: {
-    fields: { timestamp },
-    logAlias,
-    packetbeatAlias,
-  },
-  ip,
-}: IpOverviewRequestOptions) => {
+export const buildOverviewQuery = ({ defaultIndex, ip }: IpOverviewRequestOptions) => {
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, packetbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggs: {

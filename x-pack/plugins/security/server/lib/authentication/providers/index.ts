@@ -13,3 +13,4 @@ export { BasicAuthenticationProvider, BasicCredentials } from './basic';
 export { KerberosAuthenticationProvider } from './kerberos';
 export { SAMLAuthenticationProvider } from './saml';
 export { TokenAuthenticationProvider } from './token';
+export { OIDCAuthenticationProvider } from './oidc';

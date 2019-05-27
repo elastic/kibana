@@ -29,4 +29,4 @@ export {
   PluginInitializer,
   PluginName,
 } from './plugin';
-export { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
+export { PluginInitializerContext } from './plugin_context';

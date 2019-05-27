@@ -21,7 +21,7 @@ export class CreateSourceEditor extends Component {
   };
 
   _loadUrl = async () => {
-    const tilemap = await getKibanaTileMap();
+    const tilemap = getKibanaTileMap();
     if (this._isMounted) {
       this.setState(
         { url: tilemap.url },
