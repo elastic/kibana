@@ -18,14 +18,15 @@
  */
 
 import _ from 'lodash';
+import d3 from 'd3';
 import { PointSeries } from './_point_series';
-
 
 const defaults = {
   mode: 'normal',
   showTooltip: true,
   color: undefined,
   fillColor: undefined,
+  showLabel: true,
 };
 
 /**
@@ -44,6 +45,15 @@ function datumWidth(defaultWidth, datum, nextDatum, scale, gutterWidth, groupCou
   return datumWidth;
 }
 
+function invertColor(hex) {
+  const d3rgb = d3.rgb(hex);
+  const r = d3rgb.r;
+  const g = d3rgb.g;
+  const b = d3rgb.b;
+  const a = 1.0 - (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return a < 0.5 ? d3rgb.darker(1) : d3rgb.brighter(3);
+}
+
 /**
  * Vertical Bar Chart Visualization: renders vertical and/or stacked bars
  *
@@ -58,6 +68,7 @@ export class ColumnChart extends PointSeries {
   constructor(handler, chartEl, chartData, seriesConfigArgs) {
     super(handler, chartEl, chartData, seriesConfigArgs);
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
+    this.labelOptions = _.defaults(handler.visConfig.get('labels', {}), defaults.showLabel);
   }
 
   addBars(svg, data) {
@@ -124,8 +135,10 @@ export class ColumnChart extends PointSeries {
     const yScale = this.getValueAxis().getScale();
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
     const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
+    const isLabels = this.labelOptions.show;
     const yMin = yScale.domain()[0];
     const gutterSpacingPercentage = 0.15;
+    const chartData = this.chartData;
     const groupCount = this.getGroupedCount();
     const groupNum = this.getGroupedNum(this.chartData);
     let barWidth;
@@ -171,6 +184,18 @@ export class ColumnChart extends PointSeries {
       return Math.abs(yScale(d.y0) - yScale(d.y0 + d.y));
     }
 
+    function hideText(d, i, selector) {
+      if (isHorizontal && selector.getBBox().width > widthFunc(d, i)) return true;
+      if (!isHorizontal && selector.getBBox().width > heightFunc(d)) return true;
+      if (isHorizontal && selector.getBBox().height > heightFunc(d)) return true;
+      if (!isHorizontal && selector.getBBox().height > widthFunc(d, i)) return true;
+      return false;
+    }
+
+    function formatValue(d) {
+      return chartData.yAxisFormatter(d.y);
+    }
+
     // update
     bars
       .attr('x', isHorizontal ? x : y)
@@ -178,9 +203,48 @@ export class ColumnChart extends PointSeries {
       .attr('y', isHorizontal ? y : x)
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
+      const data = this.chartData;
+      const color = this.handler.data.getColorFunc();
+      const layer = d3.select(bars[0].parentNode);
+      const barLabels = layer.selectAll('text').data(data.values.filter(function (d) {
+        return !_.isNull(d.y);
+      }));
+
+    barLabels
+      .exit()
+      .remove();
+
+    if (isLabels) {
+      if (isHorizontal) {
+        barLabels
+          .enter()
+          .append('text')
+          .text(formatValue)
+          .attr('x', (d, i) => x(d, i) + widthFunc(d, i) / 2)
+          .attr('y', (d) => y(d) + heightFunc(d) / 2)
+          .attr('dominant-baseline', 'central')
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '8pt')
+          .attr('fill', () => invertColor(color(data.label)))
+          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
+      } else {
+        barLabels
+          .enter()
+          .append('text')
+          .text(formatValue)
+          .attr('x', (d) => y(d) + heightFunc(d) / 2)
+          .attr('y', (d, i) => x(d, i) + widthFunc(d, i) / 2)
+          .attr('dominant-baseline', 'central')
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '8pt')
+          .attr('fill', () => invertColor(color(data.label)))
+          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
+      }
+    }
+
     return bars;
   }
-
+  
   /**
    * Adds grouped bars to column chart visualization
    *
@@ -191,15 +255,17 @@ export class ColumnChart extends PointSeries {
   addGroupedBars(bars) {
     const xScale = this.getCategoryAxis().getScale();
     const yScale = this.getValueAxis().getScale();
+    const chartData = this.chartData;
     const groupCount = this.getGroupedCount();
     const groupNum = this.getGroupedNum(this.chartData);
     const gutterSpacingPercentage = 0.15;
     const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
     const isLogScale = this.getValueAxis().axisConfig.isLogScale();
+    const isLabels = this.labelOptions.show;
     let barWidth;
     let gutterWidth;
-
+    
     if (isTimeScale) {
       const { min, interval } = this.handler.data.get('ordered');
       let intervalWidth = xScale(min + interval) - xScale(min);
@@ -235,6 +301,16 @@ export class ColumnChart extends PointSeries {
       const baseValue = isLogScale ? 1 : 0;
       return Math.abs(yScale(baseValue) - yScale(d.y));
     }
+    
+    function hideText(d, i, selector) {
+      if (isHorizontal && selector.getBBox().width > widthFunc(d, i)) return true;
+      if (!isHorizontal && selector.getBBox().height > widthFunc(d)) return true;
+      return false;
+    }
+
+    function formatValue(d) {
+      return chartData.yAxisFormatter(d.y);
+    }
 
     // update
     bars
@@ -243,8 +319,46 @@ export class ColumnChart extends PointSeries {
       .attr('y', isHorizontal ? y : x)
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
+    const data = this.chartData;
+    const color = this.handler.data.getColorFunc();
+    const layer = d3.select(bars[0].parentNode);
+    const barLabels = layer.selectAll('text').data(data.values.filter(function (d) {
+      return !_.isNull(d.y);
+    }));
+
+    barLabels
+      .exit()
+      .remove();
+
+    if (isLabels) {
+      if (isHorizontal) {
+        barLabels
+          .enter()
+          .append('text')
+          .text(formatValue)
+          .attr('x', (d, i) => x(d, i) + widthFunc(d, i) / 2)
+          .attr('y', (d, i) => y(d, i) - 4)
+          .attr('dominant-baseline', 'auto')
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '8pt')
+          .attr('fill', () => color(data.label))
+          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
+      } else {
+        barLabels
+          .enter()
+          .append('text')
+          .text(formatValue)
+          .attr('x', (d) => y(d) + heightFunc(d) + 4)
+          .attr('y', (d, i) => x(d, i) + widthFunc(d, i) / 2)
+          .attr('dominant-baseline', 'central')
+          .attr('text-anchor', 'start')
+          .attr('font-size', '8pt')
+          .attr('fill', () => color(data.label))
+          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
+      }
+    }
     return bars;
-  }
+  }  
 
   /**
    * Renders d3 visualization

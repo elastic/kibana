@@ -156,10 +156,11 @@ export class AxisScale {
   }
 
   getRange(length) {
+    const pad = this.axisConfig.get('padForLabels');
     if (this.axisConfig.isHorizontal()) {
-      return !this.axisConfig.get('scale.inverted') ? [0, length] : [length, 0];
+      return !this.axisConfig.get('scale.inverted') ? [0, length - pad] : [length - pad, 0];
     } else {
-      return this.axisConfig.get('scale.inverted') ? [0, length] : [length, 0];
+      return this.axisConfig.get('scale.inverted') ? [0 + pad, length] : [length, 0 + pad];
     }
   }
 
