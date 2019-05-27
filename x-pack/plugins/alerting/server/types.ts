@@ -8,6 +8,13 @@ import { AlertTypeRegistry } from './alert_type_registry';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
+export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
+
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
 
 export interface AlertServices {
   alertInstanceFactory: (id: string) => AlertInstance;
@@ -30,6 +37,7 @@ export interface Alert {
     }>
   >;
   checkParams: Record<string, any>;
+  scheduledTaskId?: string;
 }
 
 export interface AlertInstanceData {
@@ -56,5 +64,6 @@ export interface AlertInstance {
 }
 
 export interface AlertingPlugin {
-  register: AlertTypeRegistry['register'];
+  registerType: AlertTypeRegistry['register'];
+  listTypes: AlertTypeRegistry['list'];
 }
