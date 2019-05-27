@@ -18,19 +18,10 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import { FilterBarLibMapDefaultProvider } from '../map_default';
+import { mapDefault } from '../map_default';
 
 describe('Filter Bar Directive', function () {
   describe('mapDefault()', function () {
-
-    let mapDefault;
-    let $rootScope;
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
-      mapDefault = Private(FilterBarLibMapDefaultProvider);
-    }));
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { query: { match_all: {} } };
@@ -39,7 +30,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.have.property('value', '{"match_all":{}}');
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should work with undefined filter types', function (done) {
@@ -57,7 +47,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.have.property('value', JSON.stringify(filter.bool));
         done();
       });
-      $rootScope.$apply();
     });
 
     it('should return undefined if there is no valid key', function (done) {
@@ -66,7 +55,6 @@ describe('Filter Bar Directive', function () {
         expect(result).to.be(filter);
         done();
       });
-      $rootScope.$apply();
     });
 
 

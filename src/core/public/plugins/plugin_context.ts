@@ -18,17 +18,10 @@
  */
 
 import { DiscoveredPlugin } from '../../server';
-import { BasePathSetup } from '../base_path';
-import { ChromeSetup } from '../chrome';
 import { CoreContext } from '../core_system';
-import { FatalErrorsSetup } from '../fatal_errors';
-import { I18nSetup, I18nStart } from '../i18n';
-import { NotificationsSetup, NotificationsStart } from '../notifications';
-import { UiSettingsSetup } from '../ui_settings';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CapabilitiesStart } from '../capabilities';
-import { OverlayStart } from '../overlays';
+import { CoreSetup, CoreStart } from '../';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -37,32 +30,6 @@ import { OverlayStart } from '../overlays';
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
-
-/**
- * The available core services passed to a plugin's `Plugin#setup` method.
- *
- * @public
- */
-export interface PluginSetupContext {
-  basePath: BasePathSetup;
-  chrome: ChromeSetup;
-  fatalErrors: FatalErrorsSetup;
-  i18n: I18nSetup;
-  notifications: NotificationsSetup;
-  uiSettings: UiSettingsSetup;
-}
-
-/**
- * The available core services passed to a plugin's `Plugin#start` method.
- *
- * @public
- */
-export interface PluginStartContext {
-  capabilities: CapabilitiesStart;
-  i18n: I18nStart;
-  notifications: NotificationsStart;
-  overlays: OverlayStart;
-}
 
 /**
  * Provides a plugin-specific context passed to the plugin's construtor. This is currently
@@ -93,9 +60,9 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): PluginSetupContext {
+): CoreSetup {
   return {
-    basePath: deps.basePath,
+    http: deps.http,
     chrome: deps.chrome,
     fatalErrors: deps.fatalErrors,
     i18n: deps.i18n,
@@ -118,9 +85,13 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): PluginStartContext {
+): CoreStart {
   return {
-    capabilities: deps.capabilities,
+    application: {
+      capabilities: deps.application.capabilities,
+    },
+    http: deps.http,
+    chrome: deps.chrome,
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

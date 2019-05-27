@@ -20,6 +20,7 @@
 import typeDetect from 'type-detect';
 import { AnySchema, internals } from '../internals';
 import { Type, TypeOptions } from './type';
+import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
 
@@ -31,6 +32,8 @@ export type TypeOf<RT extends Type<any>> = RT['type'];
 export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeOf<P[K]> }>;
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
+  private props: Record<string, AnySchema>;
+
   constructor(props: P, options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
@@ -44,6 +47,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .default();
 
     super(schema, options);
+    this.props = schemaKeys;
   }
 
   protected handleError(type: string, { reason, value }: Record<string, any>) {
@@ -56,5 +60,16 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.child':
         return reason[0];
     }
+  }
+
+  validateKey(key: string, value: any) {
+    if (!this.props[key]) {
+      throw new Error(`${key} is not a valid part of this schema`);
+    }
+    const { value: validatedValue, error } = this.props[key].validate(value);
+    if (error) {
+      throw new ValidationError(error as any, key);
+    }
+    return validatedValue;
   }
 }

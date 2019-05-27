@@ -19,9 +19,15 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
+
+import { Type } from '@kbn/config-schema';
+
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
+import { PluginInitializerContext } from './plugin_context';
+import { CoreSetup, CoreStart } from '..';
+
+export type PluginConfigSchema = Type<unknown> | null;
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -85,7 +91,7 @@ export interface PluginManifest {
 /**
  * Small container object used to expose information about discovered plugins that may
  * or may not have been started.
- * @internal
+ * @public
  */
 export interface DiscoveredPlugin {
   /**
@@ -135,8 +141,8 @@ export interface Plugin<
   TPluginsSetup extends Record<PluginName, unknown> = {},
   TPluginsStart extends Record<PluginName, unknown> = {}
 > {
-  setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
-  start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+  setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+  start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
   stop?: () => void;
 }
 
@@ -197,7 +203,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: PluginSetupContext, plugins: TPluginsSetup) {
+  public async setup(setupContext: CoreSetup, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
 
     this.log.info('Setting up plugin');
@@ -212,7 +218,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public async start(startContext: PluginStartContext, plugins: TPluginsStart) {
+  public async start(startContext: CoreStart, plugins: TPluginsStart) {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
@@ -235,6 +241,25 @@ export class PluginWrapper<
     }
 
     this.instance = undefined;
+  }
+
+  public getConfigSchema(): PluginConfigSchema {
+    if (!this.manifest.server) {
+      return null;
+    }
+    const pluginPathServer = join(this.path, 'server');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pluginDefinition = require(pluginPathServer);
+
+    if (!('config' in pluginDefinition)) {
+      this.log.debug(`"${pluginPathServer}" does not export "config".`);
+      return null;
+    }
+
+    if (!(pluginDefinition.config.schema instanceof Type)) {
+      throw new Error('Configuration schema expected to be an instance of Type');
+    }
+    return pluginDefinition.config.schema;
   }
 
   private createPluginInstance() {

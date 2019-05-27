@@ -41,10 +41,13 @@ export class UICapabilitiesService {
     });
   }
 
-  public async get(
-    credentials: BasicCredentials | null,
-    spaceId?: string
-  ): Promise<GetUICapabilitiesResult> {
+  public async get({
+    credentials,
+    spaceId,
+  }: {
+    credentials?: BasicCredentials;
+    spaceId?: string;
+  }): Promise<GetUICapabilitiesResult> {
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
     const requestHeaders = credentials
@@ -83,7 +86,7 @@ export class UICapabilitiesService {
     const dom = cheerio.load(response.data.toString());
     const element = dom('kbn-injected-metadata');
     if (!element) {
-      throw new Error('Unable to find "kbn-injected-metadata" element ');
+      throw new Error('Unable to find "kbn-injected-metadata" element');
     }
 
     const dataAttrJson = element.attr('data');
@@ -92,7 +95,7 @@ export class UICapabilitiesService {
       const dataAttr = JSON.parse(dataAttrJson);
       return {
         success: true,
-        value: dataAttr.vars.uiCapabilities as UICapabilities,
+        value: dataAttr.capabilities as UICapabilities,
       };
     } catch (err) {
       throw new Error(

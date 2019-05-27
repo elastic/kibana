@@ -18,6 +18,15 @@ You cannot change the space identifier once the space is created.
 [role="screenshot"]
 image::spaces/images/edit-space.png["Updating a space"]
 
+==== Controlling feature visibility
+You can control which {kib} features are visible in each space. For example, you can hide “Dev Tools” in your “Executive” space, if users of that space don’t need this feature.
+
+[role="screenshot"]
+image::spaces/images/edit-space-feature-visibility.png["Controlling features visiblity"]
+
+
+NOTE: This is not considered a security feature. If you wish to secure access to specific features on a per-user basis, then you need to configure <<xpack-security-authorization, Kibana Security>>.
+
 ==== Deleting spaces
 Deleting a space is a destructive operation, which cannot be undone. When you delete a space, all of the saved objects that belong to that space are also deleted.
 

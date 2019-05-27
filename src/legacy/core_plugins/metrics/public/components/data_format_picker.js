@@ -29,7 +29,8 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const DEFAULT_OUTPUT_PRECISION = '2';
 
-class DataFormatPicker extends Component {
+class DataFormatPickerUI extends Component {
+
   constructor(props) {
     super(props);
 
@@ -254,14 +255,14 @@ class DataFormatPicker extends Component {
   }
 }
 
-DataFormatPicker.defaultProps = {
+DataFormatPickerUI.defaultProps = {
   label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' }),
 };
 
-DataFormatPicker.propTypes = {
+DataFormatPickerUI.propTypes = {
   value: PropTypes.string,
   label: PropTypes.string,
   onChange: PropTypes.func,
 };
 
-export default injectI18n(DataFormatPicker);
+export const DataFormatPicker = injectI18n(DataFormatPickerUI);

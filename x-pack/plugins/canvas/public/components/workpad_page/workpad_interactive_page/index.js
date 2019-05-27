@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withHandlers, withProps, withState } from 'recompose';
+import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
@@ -51,14 +51,21 @@ const configuration = {
   tooltipZ: 1100,
 };
 
-const componentLayoutState = ({ aeroStore, setAeroStore, elements, selectedToplevelNodes }) => {
+const componentLayoutState = ({
+  aeroStore,
+  setAeroStore,
+  elements,
+  selectedToplevelNodes,
+  height,
+  width,
+}) => {
   const shapes = shapesForNodes(elements);
   const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
   const newState = {
     primaryUpdate: null,
     currentScene: {
       shapes,
-      configuration,
+      configuration: { ...configuration, pageHeight: height, pageWidth: width },
       selectedShapes,
       selectionState: aeroStore
         ? aeroStore.getCurrentState().currentScene.selectionState
@@ -124,7 +131,7 @@ const mergeProps = (
   ...ownProps,
   ...restDispatchProps,
   ...restStateProps,
-  updateGlobalState: globalStateUpdater(dispatch, () => state),
+  updateGlobalState: globalStateUpdater(dispatch, state),
 });
 
 export const InteractivePage = compose(
@@ -143,9 +150,27 @@ export const InteractivePage = compose(
       }
     },
   })),
+  lifecycle({
+    componentWillUnmount() {
+      this.props.unregisterLayout(this.props.aeroStore);
+    },
+  }),
   withState('canvasOrigin', 'saveCanvasOrigin'),
   withState('_forceRerender', 'forceRerender'),
-  withProps(({ aeroStore }) => ({ cursor: aeroStore.getCurrentState().currentScene.cursor })),
+  withProps(({ registerLayout, aeroStore, updateGlobalState, forceRerender }) => {
+    registerLayout((type, payload) => {
+      const newLayoutState = aeroStore.commit(type, payload);
+      if (newLayoutState.currentScene.gestureEnd) {
+        // conditionalizing the global update so as to enable persist-free nudge series
+        updateGlobalState(newLayoutState);
+      }
+      forceRerender(newLayoutState);
+      return newLayoutState;
+    });
+    return {
+      cursor: aeroStore.getCurrentState().currentScene.cursor,
+    };
+  }),
   withProps(({ aeroStore, elements }) => {
     const elementLookup = new Map(elements.map(element => [element.id, element]));
     const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map(shape => {

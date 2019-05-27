@@ -4,25 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
-import { EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiForm, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { AggName, PivotAggsConfigDict } from '../../common';
 
-interface ListProps {
+export interface AggListSummaryProps {
   list: PivotAggsConfigDict;
-  deleteHandler?(l: string): void;
 }
 
-export const AggListSummary: React.SFC<ListProps> = ({ list }) => {
-  const listKeys = Object.keys(list);
+export const AggListSummary: React.SFC<AggListSummaryProps> = ({ list }) => {
+  const aggNames = Object.keys(list);
   return (
     <EuiForm>
-      {listKeys.map((l: AggName) => (
-        <EuiFormRow key={l} label={list[l].aggName}>
-          <span>{l}</span>
-        </EuiFormRow>
+      {aggNames.map((aggName: AggName) => (
+        <Fragment key={aggName}>
+          <EuiPanel paddingSize="s">
+            <div className="eui-textTruncate">{aggName}</div>
+          </EuiPanel>
+          {aggNames.length > 0 && <EuiSpacer size="s" />}
+        </Fragment>
       ))}
     </EuiForm>
   );

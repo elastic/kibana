@@ -15,10 +15,12 @@ import {
   EuiToolTip,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanelDescriptor,
+  EuiOverlayMask,
 } from '@elastic/eui';
 // @ts-ignore unconverted component
 import { Popover } from '../popover';
-import { CustomElementModal } from './custom_element_modal';
+import { CustomElementModal } from '../custom_element_modal';
+import { ToolTipShortcut } from '../tool_tip_shortcut/';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
@@ -70,20 +72,23 @@ interface Props {
   /**
    * saves the selected elements as an custom-element saved object
    */
-  createCustomElement: () => void;
-  // TODO: restore when group and ungroup can be triggered outside of workpad_page
-  // /**
-  //  * indicated whether the selected element is a group or not
-  //  */
-  // groupIsSelected: boolean,
-  // /**
-  //  * groups selected elements
-  //  */
-  // groupNodes: () => void;
-  // /**
-  //  * ungroups selected group
-  //  */
-  // ungroupNodes: () => void;
+  createCustomElement: (name: string, description: string, image: string) => void;
+  /**
+   * indicated whether the selected element is a group or not
+   */
+  groupIsSelected: boolean;
+  /**
+   * only more than one selected element can be grouped
+   */
+  selectedNodes: string[];
+  /**
+   * groups selected elements
+   */
+  groupNodes: () => void;
+  /**
+   * ungroups selected group
+   */
+  ungroupNodes: () => void;
 }
 
 interface State {
@@ -116,16 +121,16 @@ export class SidebarHeader extends Component<Props, State> {
     sendBackward: PropTypes.func.isRequired,
     sendToBack: PropTypes.func.isRequired,
     createCustomElement: PropTypes.func.isRequired,
-    // TODO: restore when group and ungroup can be triggered outside of workpad_page
-    // groupIsSelected: PropTypes.bool,
-    // groupNodes: PropTypes.func.isRequired,
-    // ungroupNodes: PropTypes.func.isRequired,
+    groupIsSelected: PropTypes.bool,
+    selectedNodes: PropTypes.array,
+    groupNodes: PropTypes.func.isRequired,
+    ungroupNodes: PropTypes.func.isRequired,
   };
 
   public static defaultProps = {
-    // TODO: restore when group and ungroup can be triggered outside of workpad_page
-    // groupIsSelected: false,
-    showLayerControls: true,
+    groupIsSelected: false,
+    showLayerControls: false,
+    selectedNodes: [],
   };
 
   public state = {
@@ -143,12 +148,21 @@ export class SidebarHeader extends Component<Props, State> {
   public componentWillUnmount() {
     this._isMounted = false;
   }
+
   private _renderLayoutControls = () => {
     const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
     return (
       <Fragment>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element to top layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Bring to front
+                <ToolTipShortcut namespace="ELEMENT" action="BRING_TO_FRONT" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="sortUp"
@@ -158,7 +172,15 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element up one layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Bring forward
+                <ToolTipShortcut namespace="ELEMENT" action="BRING_FORWARD" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="arrowUp"
@@ -168,7 +190,15 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element down one layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Send backward
+                <ToolTipShortcut namespace="ELEMENT" action="SEND_BACKWARD" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="arrowDown"
@@ -178,7 +208,15 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content="Move element to bottom layer">
+          <EuiToolTip
+            position="bottom"
+            content={
+              <span>
+                Send to back
+                <ToolTipShortcut namespace="ELEMENT" action="SEND_TO_BACK" />
+              </span>
+            }
+          >
             <EuiButtonIcon
               color="text"
               iconType="sortDown"
@@ -228,21 +266,28 @@ export class SidebarHeader extends Component<Props, State> {
     };
   };
 
-  // TODO: restore when group and ungroup can be triggered outside of workpad_page
-  // private _getGroupMenuItem = ():EuiContextMenuPanelItemDescriptor => {
-  //   const { groupIsSelected, ungroupNodes, groupNodes } = this.props;
-  //   return groupIsSelected
-  //     ? {
-  //         name: 'Ungroup',
-  //         className: topBorderClassName,
-  //         onClick: close(ungroupNodes),
-  //       }
-  //     : {
-  //         name: 'Group',
-  //         className: topBorderClassName,
-  //         onClick: close(groupNodes),
-  //       };
-  // };
+  private _getGroupMenuItems = (
+    close: (fn: () => void) => () => void
+  ): EuiContextMenuPanelItemDescriptor[] => {
+    const { groupIsSelected, ungroupNodes, groupNodes, selectedNodes } = this.props;
+    return groupIsSelected
+      ? [
+          {
+            name: 'Ungroup',
+            className: topBorderClassName,
+            onClick: close(ungroupNodes),
+          },
+        ]
+      : selectedNodes.length > 1
+      ? [
+          {
+            name: 'Group',
+            className: topBorderClassName,
+            onClick: close(groupNodes),
+          },
+        ]
+      : [];
+  };
 
   private _getPanels = (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
     const {
@@ -285,8 +330,7 @@ export class SidebarHeader extends Component<Props, State> {
         name: 'Clone',
         onClick: close(cloneNodes),
       },
-      // TODO: restore when group and ungroup can be triggered outside of workpad_page
-      // this._getGroupMenuItem(),
+      ...this._getGroupMenuItems(close),
     ];
 
     const panels: EuiContextMenuPanelDescriptor[] = [
@@ -330,8 +374,14 @@ export class SidebarHeader extends Component<Props, State> {
     </Popover>
   );
 
+  private _handleSave = (name: string, description: string, image: string) => {
+    const { createCustomElement } = this.props;
+    createCustomElement(name, description, image);
+    this._hideModal();
+  };
+
   render() {
-    const { title, showLayerControls, createCustomElement } = this.props;
+    const { title, showLayerControls } = this.props;
     const { isModalVisible } = this.state;
 
     return (
@@ -365,11 +415,13 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiFlexItem>
         </EuiFlexGroup>
         {isModalVisible ? (
-          <CustomElementModal
-            title="Create new element"
-            onSave={createCustomElement}
-            onCancel={this._hideModal}
-          />
+          <EuiOverlayMask>
+            <CustomElementModal
+              title="Create new element"
+              onSave={this._handleSave}
+              onCancel={this._hideModal}
+            />
+          </EuiOverlayMask>
         ) : null}
       </Fragment>
     );

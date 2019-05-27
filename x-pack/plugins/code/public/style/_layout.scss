@@ -1,6 +1,13 @@
-.euiFlexItem.codeContainer__adminWrapper {
-  padding: $euiSize $euiSizeXL;
+.codeContainer__adminWrapper {
+  width: 100%;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.codeContainer__adminMain {
+  padding: $euiSize $euiSizeXL;
 }
 
 .codeContainer__root {
@@ -92,7 +99,7 @@
   height: 100%;
 }
 
-.codeContainer__symbolTree {
+.codeContainer__sideTabTree {
   position: relative;
   display: inline-block;
   min-width: 100%;

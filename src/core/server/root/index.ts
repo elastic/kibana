@@ -20,8 +20,8 @@
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
-import { Config, ConfigService, Env } from '../config';
-import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
+import { Config, Env } from '../config';
+import { Logger, LoggerFactory, LoggingConfigType, LoggingService } from '../logging';
 import { Server } from '../server';
 
 /**
@@ -29,30 +29,27 @@ import { Server } from '../server';
  */
 export class Root {
   public readonly logger: LoggerFactory;
-  private readonly configService: ConfigService;
   private readonly log: Logger;
-  private readonly server: Server;
   private readonly loggingService: LoggingService;
+  private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
 
   constructor(
     config$: Observable<Config>,
-    private readonly env: Env,
+    env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingService = new LoggingService();
     this.logger = this.loggingService.asLoggerFactory();
     this.log = this.logger.get('root');
-
-    this.configService = new ConfigService(config$, env, this.logger);
-    this.server = new Server(this.configService, this.logger, this.env);
+    this.server = new Server(config$, env, this.logger);
   }
 
   public async setup() {
-    this.log.debug('setting up root');
-
     try {
+      await this.server.setupConfigSchemas();
       await this.setupLogging();
+      this.log.debug('setting up root');
       return await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
@@ -62,7 +59,6 @@ export class Root {
 
   public async start() {
     this.log.debug('starting root');
-
     try {
       return await this.server.start();
     } catch (e) {
@@ -98,10 +94,11 @@ export class Root {
   }
 
   private async setupLogging() {
+    const { configService } = this.server;
     // Stream that maps config updates to logger updates, including update failures.
-    const update$ = this.configService.getConfig$().pipe(
+    const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
-      switchMap(() => this.configService.atPath('logging', LoggingConfig)),
+      switchMap(() => configService.atPath<LoggingConfigType>('logging')),
       map(config => this.loggingService.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console

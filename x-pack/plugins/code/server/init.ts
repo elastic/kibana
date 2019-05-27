@@ -30,6 +30,7 @@ import { IndexScheduler, UpdateScheduler } from './scheduler';
 import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
+import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
 
 async function retryUntilAvailable<T>(
   func: () => Promise<T>,
@@ -77,6 +78,10 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 }
 
 export function init(server: Server, options: any) {
+  if (!options.enabled) {
+    return;
+  }
+
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
   const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
@@ -147,10 +152,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   const queueIndex: string = server.config().get('xpack.code.queueIndex');
   const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
   const devMode: boolean = server.config().get('env.dev');
-  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
-  // @ts-ignore
-  const esClient: EsClient = adminCluster.clusterClient.client;
+  const esClient: EsClient = new EsClientWithInternalRequest(server);
   const repoConfigController = new RepositoryConfigController(esClient);
 
   server.injectUiAppVars('code', () => ({
@@ -170,6 +173,9 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     new ServerLoggerFactory(server),
     repoConfigController
   );
+  server.events.on('stop', async () => {
+    await lspService.shutdown();
+  });
   // Initialize indexing factories.
   const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, esClient, log);
 
@@ -252,4 +258,12 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   installRoute(codeServerRouter, lspService);
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
+
+  server.events.on('stop', () => {
+    if (!serverOptions.disableIndexScheduler) {
+      indexScheduler.stop();
+    }
+    updateScheduler.stop();
+    queue.destroy();
+  });
 }

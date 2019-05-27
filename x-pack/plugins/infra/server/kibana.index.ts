@@ -19,6 +19,11 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   const libs = compose(kbnServer);
   initInfraServer(libs);
 
+  kbnServer.expose(
+    'defineInternalSourceConfiguration',
+    libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
+  );
+
   // Register a function with server to manage the collection of usage stats
   kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
 
@@ -37,7 +42,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
         api: ['infra'],
         savedObject: {
           all: ['infrastructure-ui-source'],
-          read: [],
+          read: ['index-pattern'],
         },
         ui: ['show', 'configureSource', 'save'],
       },
@@ -45,7 +50,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
         api: ['infra'],
         savedObject: {
           all: [],
-          read: ['infrastructure-ui-source'],
+          read: ['infrastructure-ui-source', 'index-pattern'],
         },
         ui: ['show'],
       },

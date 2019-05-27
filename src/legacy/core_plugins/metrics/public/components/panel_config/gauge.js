@@ -19,14 +19,14 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesEditor from '../series_editor';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import ColorRules from '../color_rules';
-import ColorPicker from '../color_picker';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -344,5 +344,4 @@ GaugePanelConfigUi.propTypes = {
   visData$: PropTypes.object,
 };
 
-const GaugePanelConfig = injectI18n(GaugePanelConfigUi);
-export default GaugePanelConfig;
+export const GaugePanelConfig = injectI18n(GaugePanelConfigUi);

@@ -56,6 +56,7 @@ export class PluginSpec {
       version,
       kibanaVersion,
       uiExports,
+      uiCapabilities,
       publicDir,
       configPrefix,
       config,
@@ -74,6 +75,7 @@ export class PluginSpec {
 
     this._publicDir = publicDir;
     this._uiExports = uiExports;
+    this._uiCapabilities = uiCapabilities;
 
     this._configPrefix = configPrefix;
     this._configSchemaProvider = config;
@@ -168,6 +170,10 @@ export class PluginSpec {
 
   getExportSpecs() {
     return this._uiExports;
+  }
+
+  getUiCapabilitiesProvider() {
+    return this._uiCapabilities;
   }
 
   getPreInitHandler() {

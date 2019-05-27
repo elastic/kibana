@@ -5,10 +5,10 @@
  */
 
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { InputFieldProps } from './source_configuration_form_state';
+import { InputFieldProps } from './input_fields';
 
 interface NameConfigurationPanelProps {
   isLoading: boolean;
@@ -22,7 +22,7 @@ export const NameConfigurationPanel = ({
   nameFieldProps,
 }: NameConfigurationPanelProps) => (
   <EuiForm>
-    <EuiTitle size="s">
+    <EuiTitle size="s" data-test-subj="sourceConfigurationNameSectionTitle">
       <h3>
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.nameSectionTitle"

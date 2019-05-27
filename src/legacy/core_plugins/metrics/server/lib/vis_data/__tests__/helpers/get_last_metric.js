@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getLastMetric from '../../helpers/get_last_metric';
+import { getLastMetric } from '../../helpers/get_last_metric';
 
 describe('getLastMetric(series)', () => {
   it('returns the last metric', () => {

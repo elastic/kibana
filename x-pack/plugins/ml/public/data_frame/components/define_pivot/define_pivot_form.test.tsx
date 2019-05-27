@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { IndexPatternContext } from '../../common';
+import { KibanaContext } from '../../common';
 import { DefinePivotForm } from './define_pivot_form';
 
 // workaround to make React.memo() work with enzyme
@@ -18,7 +18,8 @@ jest.mock('react', () => {
 
 describe('Data Frame: <DefinePivotForm />', () => {
   test('Minimal initialization', () => {
-    const indexPattern = {
+    const currentIndexPattern = {
+      id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -27,9 +28,18 @@ describe('Data Frame: <DefinePivotForm />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <IndexPatternContext.Provider value={indexPattern}>
+        <KibanaContext.Provider
+          value={{
+            combinedQuery: {},
+            currentIndexPattern,
+            currentSavedSearch: {},
+            indexPatterns: {},
+            kbnBaseUrl: 'url',
+            kibanaConfig: {},
+          }}
+        >
           <DefinePivotForm onChange={() => {}} />
-        </IndexPatternContext.Provider>
+        </KibanaContext.Provider>
       </div>
     );
 

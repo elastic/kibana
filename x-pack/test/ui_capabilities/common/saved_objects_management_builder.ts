@@ -8,6 +8,7 @@
 class SavedObjectsTypeUICapabilitiesGroup {
   public all = ['delete', 'edit', 'read'];
   public read = ['read'];
+  public none = [] as string[];
 }
 const savedObjectsTypeUICapabilitiesGroup = new SavedObjectsTypeUICapabilitiesGroup();
 
@@ -52,6 +53,9 @@ export class SavedObjectsManagementBuilder {
       'timelion-sheet',
       'ui-metric',
       'sample-data-telemetry',
+      'siem-ui-timeline',
+      'siem-ui-timeline-note',
+      'siem-ui-timeline-pinned-event',
     ];
   }
 

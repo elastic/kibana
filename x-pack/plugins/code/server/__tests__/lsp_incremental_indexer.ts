@@ -40,7 +40,7 @@ function prepareProject(url: string, p: string) {
   const opts: CloneOptions = {
     fetchOpts: {
       callbacks: {
-        certificateCheck: () => 1,
+        certificateCheck: () => 0,
       },
     },
   };

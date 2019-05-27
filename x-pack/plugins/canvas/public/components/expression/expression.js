@@ -17,10 +17,29 @@ import {
   EuiRange,
   EuiToolTip,
 } from '@elastic/eui';
+import { Shortcuts } from 'react-shortcuts';
 import { ExpressionInput } from '../expression_input';
+import { ToolTipShortcut } from '../tool_tip_shortcut';
+
+const { useRef } = React;
 
 const minFontSize = 12;
 const maxFontSize = 32;
+
+const shortcut = (ref, cmd, callback) => (
+  <Shortcuts
+    name="EXPRESSION"
+    handler={(command, event) => {
+      const isInputActive = ref.current && ref.current.ref === event.target;
+      if (isInputActive && command === cmd) {
+        callback();
+      }
+    }}
+    targetNodeSelector="body"
+    global
+    stopPropagation
+  />
+);
 
 export const Expression = ({
   functionDefinitions,
@@ -36,11 +55,18 @@ export const Expression = ({
   isCompact,
   toggleCompactView,
 }) => {
+  const refExpressionInput = useRef(null);
   return (
     <EuiPanel
       className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
     >
+      {shortcut(refExpressionInput, 'RUN', () => {
+        if (!error) {
+          setExpression(formState.expression);
+        }
+      })}
       <ExpressionInput
+        ref={refExpressionInput}
         fontSize={fontSize}
         isCompact={isCompact}
         functionDefinitions={functionDefinitions}
@@ -106,14 +132,22 @@ export const Expression = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                disabled={!!error}
-                onClick={() => setExpression(formState.expression)}
-                size="s"
+              <EuiToolTip
+                content={
+                  <span>
+                    Run the expression <ToolTipShortcut namespace="EXPRESSION" action="RUN" />
+                  </span>
+                }
               >
-                Run
-              </EuiButton>
+                <EuiButton
+                  fill
+                  disabled={!!error}
+                  onClick={() => setExpression(formState.expression)}
+                  size="s"
+                >
+                  Run
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

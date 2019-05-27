@@ -51,6 +51,7 @@ import {
   resolveImportErrors,
   logLegacyImport,
   processImportResponse,
+  getDefaultTitle,
 } from '../../../../lib';
 import {
   resolveSavedObjects,
@@ -68,6 +69,7 @@ class FlyoutUI extends Component {
     services: PropTypes.array.isRequired,
     newIndexPatternUrl: PropTypes.string.isRequired,
     indexPatterns: PropTypes.object.isRequired,
+    confirmModalPromise: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -212,7 +214,7 @@ class FlyoutUI extends Component {
   }
 
   legacyImport = async () => {
-    const { services, indexPatterns, intl } = this.props;
+    const { services, indexPatterns, intl, confirmModalPromise } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
 
     this.setState({ status: 'loading', error: undefined });
@@ -267,7 +269,8 @@ class FlyoutUI extends Component {
       contents,
       isOverwriteAllChecked,
       services,
-      indexPatterns
+      indexPatterns,
+      confirmModalPromise
     );
 
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
@@ -600,6 +603,17 @@ class FlyoutUI extends Component {
                     }
                   );
                 });
+              } else if (error.type === 'unsupported_type') {
+                return intl.formatMessage(
+                  {
+                    id: 'kbn.management.objects.objectsTable.flyout.importFailedUnsupportedType',
+                    defaultMessage: '{type} [id={id}] unsupported type',
+                  },
+                  {
+                    id: obj.id,
+                    type: obj.type,
+                  },
+                );
               }
               return getField(error, 'body.message', error.message || '');
             }).join(' ')}
@@ -887,7 +901,9 @@ class FlyoutUI extends Component {
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.flyout.confirmOverwriteBody"
                 defaultMessage="Are you sure you want to overwrite {title}?"
-                values={{ title: this.state.conflictingRecord.title }}
+                values={{
+                  title: this.state.conflictingRecord.title || getDefaultTitle(this.state.conflictingRecord)
+                }}
               />
             </p>
           </EuiConfirmModal>

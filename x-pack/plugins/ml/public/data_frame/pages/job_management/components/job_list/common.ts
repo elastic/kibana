@@ -12,6 +12,7 @@ export interface DataFrameJob {
   dest: string;
   id: JobId;
   source: string;
+  sync?: object;
 }
 
 export enum DATA_FRAME_RUNNING_STATE {
@@ -26,6 +27,11 @@ export interface DataFrameJobState {
   // indexer_state is a backend internal attribute
   // and should not be considered in the UI.
   indexer_state: RunningState;
+  progress?: {
+    docs_remaining: number;
+    percent_complete: number;
+    total_docs: number;
+  };
   // task_state is the attribute to check against if a job
   // is running or not.
   task_state: RunningState;
@@ -58,3 +64,13 @@ export enum DataFrameJobListColumn {
 }
 
 export type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
+
+export function isCompletedBatchJob(item: DataFrameJobListRow) {
+  // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
+  // then this is a completed batch data frame job.
+  return (
+    item.state.checkpoint === 1 &&
+    item.config.sync === undefined &&
+    item.state.task_state === DATA_FRAME_RUNNING_STATE.STOPPED
+  );
+}

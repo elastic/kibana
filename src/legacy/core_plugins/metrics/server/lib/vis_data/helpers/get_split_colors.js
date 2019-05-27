@@ -18,7 +18,8 @@
  */
 
 import Color from 'color';
-export default function getSplitColors(inputColor, size = 10, style = 'gradient') {
+
+export function getSplitColors(inputColor, size = 10, style = 'gradient') {
   const color = new Color(inputColor);
   const colors = [];
   let workingColor = Color.hsl(color.hsl().object());

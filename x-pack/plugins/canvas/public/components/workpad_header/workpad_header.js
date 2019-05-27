@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
+import { ToolTipShortcut } from '../tool_tip_shortcut/';
 import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
@@ -33,7 +34,14 @@ export class WorkpadHeader extends React.PureComponent {
   state = { isModalVisible: false };
 
   _fullscreenButton = ({ toggleFullscreen }) => (
-    <EuiToolTip position="bottom" content="Enter fullscreen mode">
+    <EuiToolTip
+      position="bottom"
+      content={
+        <span>
+          Enter fullscreen mode <ToolTipShortcut namespace="PRESENTATION" action="FULLSCREEN" />
+        </span>
+      }
+    >
       <EuiButtonIcon
         iconType="fullScreen"
         aria-label="View fullscreen"
@@ -57,7 +65,7 @@ export class WorkpadHeader extends React.PureComponent {
         onClose={this._hideElementModal}
         className="canvasModal--fixedSize"
         maxWidth="1000px"
-        initialFocus=".canvasElements__filter"
+        initialFocus=".canvasElements__filter input"
       >
         <ElementTypes onClose={this._hideElementModal} />
         <EuiModalFooter>
@@ -73,7 +81,12 @@ export class WorkpadHeader extends React.PureComponent {
     if (!this.props.canUserWrite) {
       return "You don't have permission to edit this workpad";
     } else {
-      return this.props.isWriteable ? 'Hide editing controls' : 'Show editing controls';
+      const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
+      return (
+        <span>
+          {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
+        </span>
+      );
     }
   };
 

@@ -397,6 +397,17 @@ module.exports = {
     },
 
     /**
+     * SIEM overrides
+     */
+    {
+      files: ['x-pack/plugins/siem/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        'import/order': 'error',
+      },
+    },
+
+    /**
      * disable jsx-a11y for kbn-ui-framework
      */
     {
@@ -516,6 +527,17 @@ module.exports = {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
       env: {
         jquery: true,
+      },
+    },
+
+    /**
+     * TSVB overrides
+     */
+    {
+      files: ['src/legacy/core_plugins/metrics/**/*.js'],
+      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
+      rules: {
+        'import/no-default-export': 'error',
       },
     },
   ],
