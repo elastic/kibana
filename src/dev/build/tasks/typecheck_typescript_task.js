@@ -68,13 +68,21 @@ export const TypecheckTypescriptTask = {
       typesProjectBuild.tsConfigPath,
     ];
 
-    const buildProjects = [
+    const typecheckProjects = [
       // Browser needs to be compiled before server code so that any shared code
       // is compiled to the lowest common denominator (server's CommonJS format)
       // which can be supported by both environments.
       browserProjectBuild.tsConfigPath,
       defaultProjectBuild.tsConfigPath,
     ];
+
+    // We typecheck the repo x-pack directly in the repo
+    // as x-pack builds independently
+    if (!build.isOss()) {
+      typecheckProjects.push(
+        new Project(config.resolveFromRepo('x-pack/tsconfig.json')).tsConfigPath
+      );
+    }
 
     // Build all typescript project types and then build the project with --noEmit to check for type errors
     await Promise.all(typeProjects.map((tsConfigPath) => {
@@ -92,7 +100,7 @@ export const TypecheckTypescriptTask = {
       );
     }));
 
-    await Promise.all(buildProjects.map((tsConfigPath) => {
+    await Promise.all(typecheckProjects.map((tsConfigPath) => {
       log.info(`Type checking: ${tsConfigPath}`);
       return exec(
         log,
