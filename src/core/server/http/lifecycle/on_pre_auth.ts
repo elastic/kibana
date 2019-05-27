@@ -98,7 +98,7 @@ const toolkit: OnPreAuthToolkit = {
 
 /** @public */
 export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (
-  req: KibanaRequest<Params, Query, Body>,
+  request: KibanaRequest<Params, Query, Body>,
   t: OnPreAuthToolkit
 ) => OnPreAuthResult | Promise<OnPreAuthResult>;
 

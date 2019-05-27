@@ -95,7 +95,7 @@ const toolkit: AuthToolkit = {
 
 /** @public */
 export type AuthenticationHandler<T> = (
-  request: Request,
+  request: Readonly<Request>,
   sessionStorage: SessionStorage<T>,
   t: AuthToolkit
 ) => AuthResult | Promise<AuthResult>;

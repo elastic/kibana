@@ -88,7 +88,7 @@ export interface OnPostAuthToolkit {
 
 /** @public */
 export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (
-  req: KibanaRequest<Params, Query, Body>,
+  request: KibanaRequest<Params, Query, Body>,
   t: OnPostAuthToolkit
 ) => OnPostAuthResult | Promise<OnPostAuthResult>;
 
