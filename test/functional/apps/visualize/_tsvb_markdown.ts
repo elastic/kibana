@@ -26,9 +26,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
 
   async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
     await visualBuilder.markdownSwitchSubTab('data');
-
     await visualBuilder.setMarkdownDataVariable('', variableName);
-
     await visualBuilder.markdownSwitchSubTab('markdown');
     const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
     rerenderedTable.forEach(row => {

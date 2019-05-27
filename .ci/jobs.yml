@@ -13,7 +13,6 @@ JOB:
   - kibana-ciGroup10
   - kibana-ciGroup11
   - kibana-ciGroup12
-
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
   - x-pack-ciGroup1
   - x-pack-ciGroup2

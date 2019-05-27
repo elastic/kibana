@@ -253,13 +253,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async toggleAutoApplyChanges() {
-      const input = await find.byCssSelector('#tsvbAutoApplyInput');
-      await input.click();
+      await find.clickByCssSelector('#tsvbAutoApplyInput');
     }
 
     public async applyChanges() {
-      const applyBtn = await testSubjects.find('applyBtn');
-      await applyBtn.click();
+      await testSubjects.click('applyBtn');
     }
 
     public async selectAggType(value: string, nth = 0) {
