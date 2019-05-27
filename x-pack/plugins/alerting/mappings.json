@@ -7,11 +7,22 @@
       "interval": {
         "type": "long"
       },
-      "actionGroups": {
-        "enabled": false,
-        "type": "object"
+      "actions": {
+        "type": "nested",
+        "properties": {
+          "group": {
+            "type": "keyword"
+          },
+          "id": {
+            "type": "keyword"
+          },
+          "params": {
+            "enabled": false,
+            "type": "object"
+          }
+        }
       },
-      "checkParams": {
+      "alertTypeParams": {
         "enabled": false,
         "type": "object"
       },

@@ -6,6 +6,7 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
+import { AlertAction } from '../types';
 
 interface UpdateRequest extends Hapi.Request {
   params: {
@@ -14,14 +15,8 @@ interface UpdateRequest extends Hapi.Request {
   payload: {
     alertTypeId: string;
     interval: number;
-    actionGroups: Record<
-      string,
-      Array<{
-        id: string;
-        params: Record<string, any>;
-      }>
-    >;
-    checkParams: Record<string, any>;
+    actions: AlertAction[];
+    alertTypeParams: Record<string, any>;
   };
 }
 
@@ -38,8 +33,16 @@ export function updateAlertRoute(server: Hapi.Server) {
           .keys({
             alertTypeId: Joi.string().required(),
             interval: Joi.number().required(),
-            actionGroups: Joi.object().required(),
-            checkParams: Joi.object().required(),
+            actions: Joi.array()
+              .items(
+                Joi.object().keys({
+                  group: Joi.string().required(),
+                  id: Joi.string().required(),
+                  params: Joi.object().required(),
+                })
+              )
+              .required(),
+            alertTypeParams: Joi.object().required(),
           })
           .required(),
       },

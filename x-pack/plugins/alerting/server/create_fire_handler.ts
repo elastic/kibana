@@ -14,11 +14,10 @@ interface CreateFireHandlerOptions {
 }
 
 export function createFireHandler({ fireAction, alertSavedObject }: CreateFireHandlerOptions) {
-  return async (actionGroupId: string, context: Context, state: State) => {
-    const actions =
-      alertSavedObject.attributes.actionGroups[actionGroupId] ||
-      alertSavedObject.attributes.actionGroups.default ||
-      [];
+  return async (actionGroup: string, context: Context, state: State) => {
+    const actions = alertSavedObject.attributes.actions.filter(
+      ({ group }: { group: string }) => group === actionGroup
+    );
     for (const action of actions) {
       fireAction({
         id: action.id,

@@ -27,8 +27,8 @@ export function createAlertInstanceFactory(alertInstances: Record<string, AlertI
       getPreviousState() {
         return alertInstanceData.previousState;
       },
-      fire(actionGroupId: string, context: Context, state: State) {
-        alertInstanceData.fireOptions = { actionGroupId, context, state };
+      fire(actionGroup: string, context: Context, state: State) {
+        alertInstanceData.fireOptions = { actionGroup, context, state };
       },
       replaceState(state: State) {
         alertInstanceData.previousState = state;

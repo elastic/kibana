@@ -26,23 +26,23 @@ export interface AlertType {
   execute: (services: AlertServices, params: any) => Promise<State | void>;
 }
 
+export interface AlertAction {
+  group: string;
+  id: string;
+  params: Record<string, any>;
+}
+
 export interface Alert {
   alertTypeId: string;
   interval: number;
-  actionGroups: Record<
-    string,
-    Array<{
-      id: string;
-      params: Record<string, any>;
-    }>
-  >;
-  checkParams: Record<string, any>;
+  actions: AlertAction[];
+  alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
 }
 
 export interface AlertInstanceData {
   fireOptions?: {
-    actionGroupId: string;
+    actionGroup: string;
     context: Context;
     state: State;
   };
@@ -53,13 +53,13 @@ export interface AlertInstance {
   getFireOptions: () =>
     | undefined
     | {
-        actionGroupId: string;
+        actionGroup: string;
         context: Context;
         state: State;
       };
   clearFireOptions: () => void;
   getPreviousState: () => State;
-  fire: (actionGroupId: string, context: Context, state: State) => void;
+  fire: (actionGroup: string, context: Context, state: State) => void;
   replaceState: (state: State) => void;
 }
 

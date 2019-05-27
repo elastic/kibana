@@ -43,7 +43,7 @@ export function getCreateTaskRunnerFunction({
 
         const updatedState = await alertType.execute(
           services,
-          alertSavedObject.attributes.checkParams
+          alertSavedObject.attributes.alertTypeParams
         );
 
         for (const alertInstanceId of Object.keys(alertInstances)) {
@@ -55,8 +55,8 @@ export function getCreateTaskRunnerFunction({
             continue;
           }
 
-          const { actionGroupId, context, state } = alertInstance.getFireOptions()!;
-          await fireHandler(actionGroupId, context, state);
+          const { actionGroup, context, state } = alertInstance.getFireOptions()!;
+          await fireHandler(actionGroup, context, state);
           alertInstance.replaceState({
             ...alertInstance.getPreviousState(),
             lastFired: Date.now(),
