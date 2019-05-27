@@ -53,6 +53,8 @@ export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName =>
   inputDisplay: <ColorGradient colorRampName={colorRampName}/>
 }));
 
+export const COLOR_RAMP_NAMES = Object.keys(vislibColorMaps);
+
 export function getLinearGradient(colorStrings) {
   const intervals = colorStrings.length;
   let linearGradient = `linear-gradient(to right, ${colorStrings[0]} 0%,`;

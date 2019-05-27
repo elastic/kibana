@@ -5,14 +5,11 @@
  */
 
 import React from 'react';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { getRGBColorRangeStrings, getLinearGradient } from '../color_utils';
+import { COLOR_RAMP_NAMES, getRGBColorRangeStrings, getLinearGradient } from '../color_utils';
 import classNames from 'classnames';
 
-const COLOR_KEYS = Object.keys(vislibColorMaps);
-
 export const ColorGradient = ({ colorRamp, colorRampName, className }) => {
-  if (!colorRamp && (!colorRampName || !COLOR_KEYS.includes(colorRampName))) {
+  if (!colorRamp && (!colorRampName || !COLOR_RAMP_NAMES.includes(colorRampName))) {
     return null;
   }
 
@@ -28,5 +25,3 @@ export const ColorGradient = ({ colorRamp, colorRampName, className }) => {
     />
   );
 };
-
-
