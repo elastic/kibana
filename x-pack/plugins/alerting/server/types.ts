@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertService } from './alert_service';
+import { AlertTypeRegistry } from './alert_type_registry';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
@@ -56,6 +56,5 @@ export interface AlertInstance {
 }
 
 export interface AlertingPlugin {
-  registerType: AlertService['registerType'];
-  create: AlertService['create'];
+  register: AlertTypeRegistry['register'];
 }

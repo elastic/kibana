@@ -42,7 +42,8 @@ export function createAlertRoute(server: Hapi.Server) {
       },
     },
     async handler(request: ScheduleRequest) {
-      await server.plugins.alerting!.create(request.payload);
+      const alertsClient = request.getAlertsClient!();
+      await alertsClient.create(request.payload);
     },
   });
 }

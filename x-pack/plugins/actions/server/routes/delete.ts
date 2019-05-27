@@ -28,7 +28,7 @@ export function deleteRoute(server: Hapi.Server) {
     },
     async handler(request: DeleteRequest) {
       const { id } = request.params;
-      const actionsClient = request.getActionsClient();
+      const actionsClient = request.getActionsClient!();
       return await actionsClient.delete({ id });
     },
   });

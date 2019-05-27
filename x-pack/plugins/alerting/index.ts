@@ -7,7 +7,7 @@
 import { Root } from 'joi';
 import { init } from './server';
 
-export { AlertingPlugin } from './server';
+export { AlertingPlugin, AlertsClient } from './server';
 
 export function alerting(kibana: any) {
   return new kibana.Plugin({

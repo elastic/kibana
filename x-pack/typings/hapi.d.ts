@@ -12,14 +12,15 @@ import { XPackMainPlugin } from '../plugins/xpack_main/xpack_main';
 import { SecurityPlugin } from '../plugins/security';
 import { ActionsPlugin, ActionsClient } from '../plugins/actions';
 import { TaskManager } from '../plugins/task_manager';
-import { AlertingPlugin } from '../plugins/alerting';
+import { AlertingPlugin, AlertsClient } from '../plugins/alerting';
 
 declare module 'hapi' {
   interface Server {
     taskManager?: TaskManager;
   }
   interface Request {
-    getActionsClient: () => ActionsClient;
+    getActionsClient?: () => ActionsClient;
+    getAlertsClient?: () => AlertsClient;
   }
   interface PluginProperties {
     cloud?: CloudPlugin;

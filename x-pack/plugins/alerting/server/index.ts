@@ -6,3 +6,4 @@
 
 export { init } from './init';
 export { AlertingPlugin } from './types';
+export { AlertsClient } from './alerts_client';

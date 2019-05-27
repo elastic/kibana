@@ -5,9 +5,10 @@
  */
 
 import { Legacy } from 'kibana';
-import { AlertService } from './alert_service';
 import { createAlertRoute } from './routes';
 import { AlertingPlugin } from './types';
+import { AlertTypeRegistry } from './alert_type_registry';
+import { AlertsClient } from './alerts_client';
 
 export function init(server: Legacy.Server) {
   const alertingEnabled = server.config().get('xpack.alerting.enabled');
@@ -18,7 +19,7 @@ export function init(server: Legacy.Server) {
   }
 
   const { taskManager } = server;
-  const alertService = new AlertService({
+  const alertTypeRegistry = new AlertTypeRegistry({
     taskManager: taskManager!,
     fireAction: server.plugins.actions!.fire,
   });
@@ -27,9 +28,14 @@ export function init(server: Legacy.Server) {
   createAlertRoute(server);
 
   // Expose functions
+  server.decorate('request', 'getAlertsClient', function() {
+    const alertsClient = new AlertsClient({
+      taskManager: taskManager!,
+    });
+    return alertsClient;
+  });
   const exposedFunctions: AlertingPlugin = {
-    registerType: alertService.registerType.bind(alertService),
-    create: alertService.create.bind(alertService),
+    register: alertTypeRegistry.register.bind(alertTypeRegistry),
   };
   server.expose(exposedFunctions);
 }

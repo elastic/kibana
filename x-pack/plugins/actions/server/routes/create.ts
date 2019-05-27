@@ -57,7 +57,7 @@ export function createRoute(server: Hapi.Server) {
       },
     },
     async handler(request: CreateRequest) {
-      const actionsClient = request.getActionsClient();
+      const actionsClient = request.getActionsClient!();
 
       return await actionsClient.create({
         data: request.payload.attributes,
