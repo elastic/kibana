@@ -38,6 +38,9 @@ enum AuthStatus {
   unknown = 'unknown',
 }
 
+const requestToKey = (request: KibanaRequest | Request) =>
+  request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+
 export interface HttpServerSetup {
   server: Server;
   options: ServerOptions;
@@ -57,8 +60,10 @@ export interface HttpServerSetup {
    */
   registerOnPreAuth: (requestHandler: OnPreAuthHandler) => void;
   registerOnPostAuth: (requestHandler: OnPostAuthHandler) => void;
-  getBasePathFor: (request: KibanaRequest | Request) => string;
-  setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
+  basePath: {
+    get: (request: KibanaRequest | Request) => string;
+    set: (request: KibanaRequest | Request, basePath: string) => void;
+  };
   auth: {
     get: (
       request: KibanaRequest | Request
@@ -72,17 +77,10 @@ export interface HttpServerSetup {
 
 export class HttpServer {
   private server?: Server;
-  private registeredRouters = new Set<Router>();
   private authRegistered = false;
-  private basePathCache = new WeakMap<
-    ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
-    string
-  >();
-
-  private authState = new WeakMap<
-    ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
-    unknown
-  >();
+  private readonly registeredRouters = new Set<Router>();
+  private readonly basePathCache = new WeakMap<ReturnType<typeof requestToKey>, string>();
+  private readonly authState = new WeakMap<ReturnType<typeof requestToKey>, unknown>();
 
   constructor(private readonly log: Logger) {}
 
@@ -101,24 +99,22 @@ export class HttpServer {
 
   // passing hapi Request works for BWC. can be deleted once we remove legacy server.
   private getBasePathFor(config: HttpConfig, request: KibanaRequest | Request) {
-    const incomingMessage =
-      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+    const key = requestToKey(request);
 
-    const requestScopePath = this.basePathCache.get(incomingMessage) || '';
+    const requestScopePath = this.basePathCache.get(key) || '';
     const serverBasePath = config.basePath || '';
     return `${serverBasePath}${requestScopePath}`;
   }
 
   // should work only for KibanaRequest as soon as spaces migrate to NP
   private setBasePathFor(request: KibanaRequest | Request, basePath: string) {
-    const incomingMessage =
-      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
-    if (this.basePathCache.has(incomingMessage)) {
+    const key = requestToKey(request);
+    if (this.basePathCache.has(key)) {
       throw new Error(
         'Request basePath was previously set. Setting multiple times is not supported.'
       );
     }
-    this.basePathCache.set(incomingMessage, basePath);
+    this.basePathCache.set(key, basePath);
   }
 
   public setup(config: HttpConfig): HttpServerSetup {
@@ -136,8 +132,10 @@ export class HttpServer {
         fn: AuthenticationHandler<T>,
         cookieOptions: SessionStorageCookieOptions<T>
       ) => this.registerAuth(fn, cookieOptions, config.basePath),
-      getBasePathFor: this.getBasePathFor.bind(this, config),
-      setBasePathFor: this.setBasePathFor.bind(this),
+      basePath: {
+        get: this.getBasePathFor.bind(this, config),
+        set: this.setBasePathFor.bind(this),
+      },
       auth: {
         get: this.getAuthData.bind(this),
         isAuthenticated: this.isAuthenticated.bind(this),
@@ -255,7 +253,7 @@ export class HttpServer {
 
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, sessionStorage, (req, state) => {
-        this.authState.set(req.raw.req, state);
+        this.authState.set(requestToKey(req), state);
       }),
     }));
     this.server.auth.strategy('session', 'login');
@@ -267,11 +265,10 @@ export class HttpServer {
     this.server.auth.default('session');
   }
   private getAuthData(request: KibanaRequest | Request) {
-    const incomingMessage =
-      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+    const key = requestToKey(request);
 
-    const hasState = this.authState.has(incomingMessage);
-    const state = this.authState.get(incomingMessage);
+    const hasState = this.authState.has(key);
+    const state = this.authState.get(key);
     const status: AuthStatus = hasState
       ? AuthStatus.authenticated
       : this.authRegistered

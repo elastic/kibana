@@ -615,23 +615,19 @@ test('throws an error if starts without set up', async () => {
   );
 });
 
-test('#getBasePathFor() returns base path associated with an incoming request', async () => {
-  const {
-    getBasePathFor,
-    setBasePathFor,
-    registerRouter,
-    server: innerServer,
-    registerOnPostAuth,
-  } = await server.setup(config);
+test('#basePath.get() returns base path associated with an incoming request', async () => {
+  const { basePath, registerRouter, server: innerServer, registerOnPostAuth } = await server.setup(
+    config
+  );
 
   const path = '/base-path';
   registerOnPostAuth((req, t) => {
-    setBasePathFor(req, path);
+    basePath.set(req, path);
     return t.next();
   });
 
   const router = new Router('/');
-  router.get({ path: '/', validate: false }, (req, res) => res.ok({ key: getBasePathFor(req) }));
+  router.get({ path: '/', validate: false }, (req, res) => res.ok({ key: basePath.get(req) }));
   registerRouter(router);
 
   await server.start(config);
@@ -643,28 +639,24 @@ test('#getBasePathFor() returns base path associated with an incoming request', 
     });
 });
 
-test('#getBasePathFor() is based on server base path', async () => {
+test('#basePath.get() is based on server base path', async () => {
   const configWithBasePath = {
     ...config,
     basePath: '/bar',
   };
-  const {
-    getBasePathFor,
-    setBasePathFor,
-    registerRouter,
-    server: innerServer,
-    registerOnPostAuth,
-  } = await server.setup(configWithBasePath);
+  const { basePath, registerRouter, server: innerServer, registerOnPostAuth } = await server.setup(
+    configWithBasePath
+  );
 
   const path = '/base-path';
   registerOnPostAuth((req, t) => {
-    setBasePathFor(req, path);
+    basePath.set(req, path);
     return t.next();
   });
 
   const router = new Router('/');
   router.get({ path: '/', validate: false }, async (req, res) =>
-    res.ok({ key: getBasePathFor(req) })
+    res.ok({ key: basePath.get(req) })
   );
   registerRouter(router);
 
@@ -677,7 +669,7 @@ test('#getBasePathFor() is based on server base path', async () => {
     });
 });
 
-test('#setBasePathFor() cannot be set twice for one request', async () => {
+test('#basePath.set() cannot be set twice for one request', async () => {
   const incomingMessage = {
     url: '/',
   };
@@ -699,9 +691,9 @@ test('#setBasePathFor() cannot be set twice for one request', async () => {
     KibanaRequest: jest.fn(() => kibanaRequestFactory),
   }));
 
-  const { setBasePathFor } = await server.setup(config);
+  const { basePath } = await server.setup(config);
 
-  const setPath = () => setBasePathFor(kibanaRequestFactory.from(), '/path');
+  const setPath = () => basePath.set(kibanaRequestFactory.from(), '/path');
 
   setPath();
   expect(setPath).toThrowErrorMatchingInlineSnapshot(
