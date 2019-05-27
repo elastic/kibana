@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { getLegendColors, getColor } from 'ui/vis/map/color_util';
+import { ColorGradient } from './components/color_gradient';
 import chroma from 'chroma-js';
 
 function getColorRamp(colorRampName) {
@@ -31,3 +34,19 @@ export function getColorRampCenterColor(colorRampName) {
   const centerIndex = Math.floor(colorRamp.value.length / 2);
   return getColor(colorRamp.value, centerIndex);
 }
+
+// Returns an array of color stops
+// [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
+export function getColorRampStops(colorRampName, numberColors) {
+  return getHexColorRangeStrings(colorRampName, numberColors)
+    .reduce((accu, stopColor, idx, srcArr) => {
+      const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
+      return [ ...accu, stopNumber, stopColor ];
+    }, []);
+}
+
+export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName => ({
+  value: colorRampName,
+  text: colorRampName,
+  inputDisplay: <ColorGradient colorRampName={colorRampName}/>
+}));

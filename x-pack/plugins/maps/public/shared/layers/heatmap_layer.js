@@ -62,7 +62,6 @@ export class HeatmapLayer extends AbstractLayer {
         data: { 'type': 'FeatureCollection', 'features': [] }
       });
 
-
       mbMap.addLayer({
         id: mbLayerId,
         type: 'heatmap',

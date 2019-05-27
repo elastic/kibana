@@ -9,16 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ColorGradient } from '../../color_gradient';
 import { StyleLegendRow } from '../../style_legend_row';
-
-const DEFAULT_RGB_HEATMAP_COLOR_RAMP = [
-  'rgb(65, 105, 225)', // royalblue
-  'rgb(0, 256, 256)', // cyan
-  'rgb(0, 256, 0)', // lime
-  'rgb(256, 256, 0)', // yellow
-  'rgb(256, 0, 0)', // red
-];
-
-const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
+import {
+  DEFAULT_RGB_HEATMAP_COLOR_RAMP,
+  DEFAULT_HEATMAP_COLOR_RAMP_NAME,
+  HEATMAP_COLOR_RAMP_LABEL
+} from '../heatmap_constants';
 
 export function HeatmapLegend({ colorRampName, label }) {
   const header = colorRampName === DEFAULT_HEATMAP_COLOR_RAMP_NAME
@@ -38,11 +33,7 @@ export function HeatmapLegend({ colorRampName, label }) {
           defaultMessage: 'hot'
         })
       }
-      propertyLabel={
-        i18n.translate('xpack.maps.heatmapLegend.heatmapLabel', {
-          defaultMessage: 'heatmap color'
-        })
-      }
+      propertyLabel={HEATMAP_COLOR_RAMP_LABEL}
       fieldLabel={label}
     />
   );
