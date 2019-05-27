@@ -6,15 +6,13 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { Legacy } from 'kibana';
 import { InternalCoreSetup } from 'src/core/server';
-import { getDistribution } from '../lib/errors/distribution/get_distribution';
+import { getErrorDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroup } from '../lib/errors/get_error_group';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 
-const ROOT = '/api/apm/services/{serviceName}/errors';
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
   console.error(err.stack);
@@ -25,7 +23,7 @@ export function initErrorsApi(core: InternalCoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',
-    path: ROOT,
+    path: `/api/apm/services/{serviceName}/errors`,
     options: {
       validate: {
         query: withDefaultValidators({
@@ -54,7 +52,7 @@ export function initErrorsApi(core: InternalCoreSetup) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/{groupId}`,
+    path: `/api/apm/services/{serviceName}/errors/{groupId}`,
     options: {
       validate: {
         query: withDefaultValidators()
@@ -70,36 +68,24 @@ export function initErrorsApi(core: InternalCoreSetup) {
     }
   });
 
-  function distributionHandler(req: Legacy.Request) {
-    const setup = setupRequest(req);
-    const { serviceName, groupId } = req.params;
-
-    return getDistribution({ serviceName, groupId, setup }).catch(
-      defaultErrorHandler
-    );
-  }
-
   server.route({
     method: 'GET',
-    path: `${ROOT}/{groupId}/distribution`,
+    path: `/api/apm/services/{serviceName}/errors/distribution`,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultValidators({
+          groupId: Joi.string()
+        })
       },
       tags: ['access:apm']
     },
-    handler: distributionHandler
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/distribution`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: distributionHandler
+    handler: req => {
+      const setup = setupRequest(req);
+      const { serviceName } = req.params;
+      const { groupId } = req.query as { groupId?: string };
+      return getErrorDistribution({ serviceName, groupId, setup }).catch(
+        defaultErrorHandler
+      );
+    }
   });
 }
