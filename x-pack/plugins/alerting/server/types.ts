@@ -5,6 +5,7 @@
  */
 
 import { AlertTypeRegistry } from './alert_type_registry';
+import { AlertInstance } from './create_alert_instance_factory';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
@@ -44,29 +45,6 @@ export interface Alert {
   actions: AlertAction[];
   alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
-}
-
-export interface AlertInstanceData {
-  fireOptions?: {
-    actionGroup: string;
-    context: Context;
-    state: State;
-  };
-  previousState: State;
-}
-
-export interface AlertInstance {
-  getFireOptions: () =>
-    | undefined
-    | {
-        actionGroup: string;
-        context: Context;
-        state: State;
-      };
-  clearFireOptions: () => void;
-  getPreviousState: () => State;
-  fire: (actionGroup: string, context: Context, state: State) => void;
-  replaceState: (state: State) => void;
 }
 
 export interface AlertingPlugin {

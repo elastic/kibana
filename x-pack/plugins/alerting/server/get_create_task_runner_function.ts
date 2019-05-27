@@ -6,7 +6,7 @@
 
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ActionsPlugin } from '../../actions';
-import { AlertType, AlertInstanceData } from './types';
+import { AlertType } from './types';
 import { TaskInstance } from '../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -31,14 +31,11 @@ export function getCreateTaskRunnerFunction({
       run: async () => {
         const alertSavedObject = await savedObjectsClient.get('alert', taskInstance.params.alertId);
         const fireHandler = createFireHandler({ alertSavedObject, fireAction });
-        const alertInstances = (taskInstance.state.alertInstances || {}) as Record<
-          string,
-          AlertInstanceData
-        >;
+        const alertInstances = (taskInstance.state.alertInstances || {}) as Record<string, any>;
         const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
         const services = {
-          alertInstanceFactory: createAlertInstanceFactory(alertInstances),
+          alertInstanceFactory,
         };
 
         const alertTypeState = await alertType.execute({
