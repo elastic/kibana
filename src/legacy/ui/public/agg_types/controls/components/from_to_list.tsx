@@ -24,6 +24,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import Ipv4Address from '../../../utils/ipv4_address';
 import { InputList, InputListConfig, InputModel, InputObject } from './input_list';
 
+const EMPTY_STRING = '';
+
 export interface FromToObject extends InputObject {
   from?: string;
   to?: string;
@@ -56,13 +58,17 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
       to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
     },
     defaultEmptyValue: {
-      from: { value: '', model: '', isInvalid: false },
-      to: { value: '', model: '', isInvalid: false },
+      from: { value: EMPTY_STRING, model: EMPTY_STRING, isInvalid: false },
+      to: { value: EMPTY_STRING, model: EMPTY_STRING, isInvalid: false },
     },
     validateClass: Ipv4Address,
     getModelValue: (item: FromToObject) => ({
-      from: { value: item.from || '', model: item.from || '', isInvalid: false },
-      to: { value: item.to || '', model: item.to || '', isInvalid: false },
+      from: {
+        value: item.from || EMPTY_STRING,
+        model: item.from || EMPTY_STRING,
+        isInvalid: false,
+      },
+      to: { value: item.to || EMPTY_STRING, model: item.to || EMPTY_STRING, isInvalid: false },
     }),
     getModel: (models: FromToModel[], index, modelName: 'from' | 'to') => models[index][modelName],
     getRemoveBtnAriaLabel: (item: FromToModel) =>

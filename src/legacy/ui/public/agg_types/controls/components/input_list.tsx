@@ -155,7 +155,8 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
       return result;
     }
     try {
-      result.model = new config.validateClass(inputValue).toString();
+      const InputObject = config.validateClass;
+      result.model = new InputObject(inputValue).toString();
       result.isInvalid = false;
       return result;
     } catch (e) {
@@ -168,6 +169,7 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
     return !!modelList.find(config.hasInvalidValuesFn);
   };
 
+  // responsible for discarding changes
   useEffect(
     () => {
       setModels(getUpdatedModels(list, models));

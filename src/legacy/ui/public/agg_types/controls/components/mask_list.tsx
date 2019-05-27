@@ -24,6 +24,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CidrMask } from '../../../utils/cidr_mask';
 import { InputList, InputListConfig, InputObject } from './input_list';
 
+const EMPTY_STRING = '';
+
 export interface MaskObject extends InputObject {
   mask?: string;
 }
@@ -52,14 +54,14 @@ function MaskList({ labelledbyId, showValidation, onBlur, ...rest }: MaskListPro
       isInvalid: false,
     },
     defaultEmptyValue: {
-      model: '',
-      value: '',
+      model: EMPTY_STRING,
+      value: EMPTY_STRING,
       isInvalid: false,
     },
     validateClass: CidrMask,
     getModelValue: (item: MaskObject) => ({
-      model: item.mask || '',
-      value: item.mask || '',
+      model: item.mask || EMPTY_STRING,
+      value: item.mask || EMPTY_STRING,
       isInvalid: false,
     }),
     getModel: (models: MaskModel[], index) => models[index],
