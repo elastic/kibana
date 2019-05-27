@@ -25,12 +25,14 @@ import { createIndexPatternCache } from './_pattern_cache';
 import { indexPatternsGetProvider } from './_get';
 import { FieldsFetcher } from './fields_fetcher';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { setConfig } from './config';
 
 export class IndexPatterns {
   constructor(basePath, config, savedObjectsClient) {
     const getProvider = indexPatternsGetProvider(savedObjectsClient);
     const apiClient = new IndexPatternsApiClient(basePath);
 
+    setConfig(config);
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
 
@@ -38,7 +40,7 @@ export class IndexPatterns {
       MissingIndices: IndexPatternMissingIndices
     };
 
-    this.fieldsFetcher = new FieldsFetcher(apiClient, config);
+    this.fieldsFetcher = new FieldsFetcher(apiClient, config.get('metaFields'));
     this.cache = createIndexPatternCache();
     this.getIds = getProvider('id');
     this.getTitles = getProvider('attributes.title');
@@ -64,7 +66,14 @@ export class IndexPatterns {
   };
 
   make = (id) => {
-    return (new IndexPattern(id, this.config, this.savedObjectsClient, this.cache, this.fieldsFetcher, this.getIds)).init();
+    return (new IndexPattern(id,
+      this.savedObjectsClient,
+      this.cache,
+      this.fieldsFetcher,
+      this.getIds,
+      this.config.get('metaFields'),
+      this.config.get('shortDots:enable')
+    )).init();
   };
 
   delete = (pattern) => {

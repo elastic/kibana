@@ -84,9 +84,10 @@ function decorateFlattenedWrapper(hit, metaFields) {
   };
 }
 
-export function flattenHitWrapper(indexPattern) {
+export function flattenHitWrapper(indexPattern, metaFields = {}) {
+
   return function cachedFlatten(hit, deep = false) {
-    const decorateFlattened = decorateFlattenedWrapper(hit);
+    const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = flattenedCache.get(hit);
     const flattened = cached || flattenHit(indexPattern, hit, deep);
     if (!cached) {

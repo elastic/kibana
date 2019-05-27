@@ -38,7 +38,7 @@ export function Field(indexPattern, spec) {
     spec.type = '_source';
   }
 
-  const shortDotsEnable = indexPattern.config.get('shortDots:enable');
+  const shortDotsEnable = indexPattern.shortDotsEnable;
 
   // find the type for this field, fallback to unknown type
   let type = getKbnFieldType(spec.type);

@@ -18,12 +18,13 @@
  */
 
 export class FieldsFetcher {
-  constructor(apiClient, config) {
+  constructor(apiClient, metaFields) {
     this.apiClient = apiClient;
-    this.config = config;
+    this.metaFields = metaFields;
   }
-  fetch(indexPattern) {
+  fetch(indexPattern, options) {
     return this.fetchForWildcard(indexPattern.title, {
+      ...options,
       type: indexPattern.type,
       params: indexPattern.typeMeta && indexPattern.typeMeta.params,
     });
@@ -32,7 +33,7 @@ export class FieldsFetcher {
   fetchForWildcard(indexPatternId, options = {}) {
     return this.apiClient.getFieldsForWildcard({
       pattern: indexPatternId,
-      metaFields: this.config.get('metaFields'),
+      metaFields: this.metaFields,
       type: options.type,
       params: options.params || {},
     });

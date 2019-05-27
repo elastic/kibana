@@ -30,6 +30,7 @@ import { getRoutes } from './get_routes';
 import { formatHitProvider } from './_format_hit';
 import { FieldList } from './_field_list';
 import { flattenHitWrapper } from './_flatten_hit';
+import { getConfig } from './config';
 
 import { i18n } from '@kbn/i18n';
 
@@ -46,8 +47,7 @@ function serializeFieldFormatMap(flat, format, field) {
   }
 }
 
-function deserializeFieldFormatMap(mapping, config) {
-  const getConfig = (...args) => config.get(...args);
+function deserializeFieldFormatMap(mapping) {
   const FieldFormat = fieldFormats.byId[mapping.id];
   return FieldFormat && new FieldFormat(mapping.params, getConfig);
 }
@@ -76,7 +76,7 @@ async function indexFields(indexPattern, forceFieldRefresh = false) {
   }
 
   if (forceFieldRefresh || isFieldRefreshRequired(indexPattern)) {
-    indexPattern.refreshFields();
+    await indexPattern.refreshFields();
   }
 
   initFields(indexPattern);
@@ -101,17 +101,17 @@ function initFields(indexPattern, input) {
 const mappingSetup = mappingSetupService();
 
 export class IndexPattern {
-  constructor(id, config, savedObjectsClient, patternCache, fieldsFetcher, getIds) {
+  constructor(id, savedObjectsClient, patternCache, fieldsFetcher, getIds, metaFields, shortDotsEnable = false) {
     setId(this, id);
-    this.config = config;
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldsFetcher = fieldsFetcher;
     this.getIds = getIds;
-    this.metaFields = config.get('metaFields');
+    this.metaFields = metaFields;
+    this.shortDotsEnable = shortDotsEnable;
     this.getComputedFields = getComputedFields.bind(this);
 
-    this.flattenHit = flattenHitWrapper(this);
+    this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.formatField = this.formatHit.formatField;
 
@@ -128,7 +128,7 @@ export class IndexPattern {
           return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
         },
         _deserialize(map = '{}') {
-          return _.mapValues(JSON.parse(map), mapping => { return deserializeFieldFormatMap(mapping, config); });
+          return _.mapValues(JSON.parse(map), mapping => { return deserializeFieldFormatMap(mapping); });
         }
       },
       type: 'keyword',
@@ -292,7 +292,13 @@ export class IndexPattern {
   async create(allowOverride = false) {
     const _create = async (duplicateId) => {
       if (duplicateId) {
-        const duplicatePattern = new IndexPattern(duplicateId);
+        const duplicatePattern = new IndexPattern(duplicateId,
+          this.savedObjectsClient,
+          this.patternCache,
+          this.fieldsFetcher,
+          this.getIds,
+          this.metaFields,
+          this.shortDotsEnable);
         await duplicatePattern.destroy();
       }
 
@@ -326,7 +332,13 @@ export class IndexPattern {
       })
       .catch(err => {
         if (_.get(err, 'res.status') === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = new IndexPattern(this.id);
+          const samePattern = new IndexPattern(this.id,
+            this.savedObjectsClient,
+            this.patternCache,
+            this.fieldsFetcher,
+            this.getIds,
+            this.metaFields,
+            this.shortDotsEnable);
           return samePattern.init()
             .then(() => {
               // What keys changed from now and what the server returned

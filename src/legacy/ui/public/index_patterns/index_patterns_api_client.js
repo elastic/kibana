@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { resolve as resolveUrl, format as formatUrl } from 'url';
-
-import { pick, mapValues } from 'lodash';
+import { kfetch } from '../kfetch';
 
 import { IndexPatternMissingIndices } from './errors';
 
@@ -27,23 +25,21 @@ function join(...uriComponents) {
   return uriComponents.filter(Boolean).map(encodeURIComponent).join('/');
 }
 
-function request(method, url, body) {
-  return fetch({
+function request(method, url, query, body) {
+  return kfetch({
     method,
-    url,
-    data: body,
+    pathname: url,
+    query,
+    body,
   })
-    .then(resp => resp.json())
     .catch((resp) => {
-      const respBody = resp.json();
-
-      if (resp.status === 404 && respBody.code === 'no_matching_indices') {
-        throw new IndexPatternMissingIndices(respBody.message);
+      if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
+        throw new IndexPatternMissingIndices(resp.body.message);
       }
 
-      const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
-      err.status = resp.status;
-      err.body = respBody;
+      const err = new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
+      err.status = resp.body.statusCode;
+      err.body = resp.body.message;
       throw err;
     });
 }
@@ -53,16 +49,8 @@ export class IndexPatternsApiClient {
     this.apiBaseUrl = `${basePath}/api/index_patterns/`;
   }
 
-  _getUrl(path, query) {
-    const noNullsQuery = pick(query, value => value != null);
-    const noArraysQuery = mapValues(noNullsQuery, value => (
-      Array.isArray(value) ? JSON.stringify(value) : value
-    ));
-
-    return resolveUrl(this.apiBaseUrl, formatUrl({
-      pathname: join(...path),
-      query: noArraysQuery,
-    }));
+  _getUrl(path) {
+    return this.apiBaseUrl + join(path);
   }
 
 
@@ -73,13 +61,13 @@ export class IndexPatternsApiClient {
       metaFields,
     } = options;
 
-    const url = this._getUrl(['_fields_for_time_pattern'], {
+    const url = this._getUrl(['_fields_for_time_pattern']);
+
+    return request('GET', url, {
       pattern,
       look_back: lookBack,
       meta_fields: metaFields,
-    });
-
-    return request('GET', url).then(resp => resp.fields);
+    }).then(resp => resp.fields);
   }
 
   getFieldsForWildcard(options = {}) {
@@ -91,20 +79,23 @@ export class IndexPatternsApiClient {
     } = options;
 
     let url;
+    let query;
 
     if(type) {
-      url = this._getUrl([type, '_fields_for_wildcard'], {
+      url = this._getUrl([type, '_fields_for_wildcard']);
+      query = {
         pattern,
         meta_fields: metaFields,
         params: JSON.stringify(params),
-      });
+      };
     } else {
-      url = this._getUrl(['_fields_for_wildcard'], {
+      url = this._getUrl(['_fields_for_wildcard']);
+      query = {
         pattern,
         meta_fields: metaFields,
-      });
+      };
     }
 
-    return request('GET', url).then(resp => resp.fields);
+    return request('GET', url, query).then(resp => resp.fields);
   }
 }

@@ -17,13 +17,13 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
+let config;
 
-export { IndexPatterns, IndexPatternsProvider } from './index_patterns';
+export const getConfig = (...args) => {
+  if (!config) throw new Error('config is not defined');
+  return config.get(...args);
+};
 
-export {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
-
-export { validateIndexPattern, CONTAINS_SPACES, ILLEGAL_CHARACTERS } from './validate';
+export const setConfig = cfg => {
+  config = cfg;
+};

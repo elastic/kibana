@@ -475,7 +475,6 @@
     "common.ui.flotCharts.thuLabel": "木",
     "common.ui.flotCharts.tueLabel": "火",
     "common.ui.flotCharts.wedLabel": "水",
-    "common.ui.indexPattern.bannerLabel": "Kibana でデータの可視化と閲覧を行うには、Elasticsearch からデータを取得するためのインデックスパターンの作成が必要です。",
     "common.ui.indexPattern.unableWriteLabel": "インデックスパターンを書き込めません！このインデックスパターンへの最新の変更を取得するにな、ページを更新してください。",
     "common.ui.indexPattern.unknownFieldErrorMessage": "インデックスパターン「{title}」のフィールド「{name}」が不明なフィールドタイプを使用しています。",
     "common.ui.indexPattern.unknownFieldHeader": "不明なフィールドタイプ {type}",
