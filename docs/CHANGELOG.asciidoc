@@ -27,6 +27,8 @@ This section summarizes the changes in each release.
 
 coming[7.1.1]
 
+There were no changes for this release.
+
 [[release-notes-7.1.0]]
 == {kib} 7.1.0
 
