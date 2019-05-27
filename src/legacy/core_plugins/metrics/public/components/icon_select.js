@@ -35,7 +35,7 @@ function renderOption(option) {
   );
 }
 
-function IconSelect(props) {
+export function IconSelect(props) {
   const selectedIcon = props.icons.find(option => {
     return props.value === option.value;
   });
@@ -84,5 +84,3 @@ IconSelect.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string.isRequired
 };
-
-export default IconSelect;

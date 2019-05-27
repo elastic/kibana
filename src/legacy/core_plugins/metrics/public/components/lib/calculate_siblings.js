@@ -29,7 +29,7 @@ function getAncestors(siblings, item) {
   return ancestors;
 }
 
-export default (siblings, model) => {
+export const calculateSiblings = (siblings, model) => {
   const ancestors = getAncestors(siblings, model);
   return siblings.filter(row => !_.includes(ancestors, row.id));
 };

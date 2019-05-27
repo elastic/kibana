@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import ratios from '../filter_ratios';
+import { ratios } from '../filter_ratios';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
