@@ -78,7 +78,6 @@ export interface IncrementCounterOptions extends BaseOptions {
 }
 
 export class SavedObjectsRepository {
-  // TODO: change into readonly paramater properties
   private _migrator: KibanaMigrator;
   private _index: string | string[];
   private _mappings: IndexMapping;
@@ -525,7 +524,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: (response.docs as any[])
         .map((doc, i) => {
-          const { id, type } = supportedTypeObjects[i]; // NOTE: Was objects[i] which seems like bug?
+          const { id, type } = supportedTypeObjects[i];
 
           if (!doc.found) {
             return ({
