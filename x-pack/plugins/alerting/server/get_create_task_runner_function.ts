@@ -10,6 +10,7 @@ import { AlertType } from './types';
 import { TaskInstance } from '../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
+import { AlertInstance } from './alert_instance';
 
 interface CreateTaskRunnerFunctionOptions {
   alertType: AlertType;
@@ -31,7 +32,11 @@ export function getCreateTaskRunnerFunction({
       run: async () => {
         const alertSavedObject = await savedObjectsClient.get('alert', taskInstance.params.alertId);
         const fireHandler = createFireHandler({ alertSavedObject, fireAction });
-        const alertInstances = (taskInstance.state.alertInstances || {}) as Record<string, any>;
+        const alertInstances: Record<string, AlertInstance> = {};
+        const alertInstancesData = taskInstance.state.alertInstances || {};
+        for (const id of Object.keys(alertInstancesData)) {
+          alertInstances[id] = new AlertInstance(alertInstancesData[id]);
+        }
         const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
         const services = {
@@ -45,7 +50,7 @@ export function getCreateTaskRunnerFunction({
         });
 
         for (const alertInstanceId of Object.keys(alertInstances)) {
-          const alertInstance = alertInstanceFactory(alertInstanceId);
+          const alertInstance = alertInstances[alertInstanceId];
 
           // Unpersist any alert instances that were not explicitly fired in this alert execution
           if (!alertInstance.shouldFire()) {

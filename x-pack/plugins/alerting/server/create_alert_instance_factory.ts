@@ -6,15 +6,12 @@
 
 import { AlertInstance } from './alert_instance';
 
-export function createAlertInstanceFactory(alertInstancesData: Record<string, any>) {
-  for (const alertInstanceId of Object.keys(alertInstancesData)) {
-    alertInstancesData[alertInstanceId] = new AlertInstance(alertInstancesData[alertInstanceId]);
-  }
+export function createAlertInstanceFactory(alertInstances: Record<string, AlertInstance>) {
   return (id: string): AlertInstance => {
-    if (!alertInstancesData[id]) {
-      alertInstancesData[id] = new AlertInstance();
+    if (!alertInstances[id]) {
+      alertInstances[id] = new AlertInstance();
     }
 
-    return alertInstancesData[id];
+    return alertInstances[id];
   };
 }
