@@ -34,3 +34,5 @@ export const createContext = (core: Core, plugins?: any) => {
     Consumer: context.Consumer,
   };
 };
+
+export const useKibana = (): KibanaReactContextValue => React.useContext(context);

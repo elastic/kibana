@@ -22,6 +22,7 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
 export default {
   rootDir: '../../..',
   roots: [
+    '<rootDir>/src/plugins',
     '<rootDir>/src/legacy/ui',
     '<rootDir>/src/core',
     '<rootDir>/src/legacy/core_plugins',

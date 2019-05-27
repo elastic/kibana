@@ -21,6 +21,5 @@ import { CoreStart } from './types';
 
 export const createInMemoryCore = (): CoreStart => {
   const core: CoreStart = ({} as any) as CoreStart;
-  (core as any).isInMemoryCore = 'YES';
   return core;
 };
