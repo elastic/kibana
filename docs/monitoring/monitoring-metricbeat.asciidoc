@@ -107,7 +107,7 @@ For more information, see
 +
 --
 // tag::configure-kibana-module[]
-You must specify the following settings in the `modules.d/kibana-xpack.yml` file:
+The `modules.d/kibana-xpack.yml` file contains the following settings:
 
 [source,yaml]
 ----------------------------------
@@ -115,20 +115,18 @@ You must specify the following settings in the `modules.d/kibana-xpack.yml` file
   metricsets:
     - stats
   period: 10s
-  hosts: ["KIBANA_URL"] <1>
+  hosts: ["localhost:5601"]
   #basepath: ""
   #username: "user"
   #password: "secret"
-  xpack.enabled: true <2>
+  xpack.enabled: true
 ----------------------------------
-<1> Replace `KIBANA_URL` with the appropriate host and port number that you use
-to access {kib}. The default value is `localhost:5601`.
-<2> This setting ensures that {kib} can read the monitoring data successfully. 
-That is to say, it's stored in the same location and format as monitoring data 
-that is sent by {ref}/es-monitoring-exporters.html[exporters].
 
-If you configured {kib} to use encrypted communications, you must access it via
-HTTPS. For example, use a `hosts` setting like `https://localhost:5601`.
+By default, the module collects {kib} monitoring metrics from `localhost:5601`.
+If that host and port number are not correct, you must update the `hosts`
+setting. If you configured {kib} to use encrypted communications, you must
+access it via HTTPS. For example, use a `hosts` setting like
+`https://localhost:5601`.
 // end::configure-kibana-module[]
 
 // tag::remote-monitoring-user[]
