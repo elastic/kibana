@@ -32,6 +32,14 @@ interface FindOptions {
   };
 }
 
+interface CreateOptions {
+  data: Alert;
+  options?: {
+    migrationVersion?: Record<string, string>;
+    references?: SavedObjectReference[];
+  };
+}
+
 interface UpdateOptions {
   id: string;
   data: Alert;
@@ -49,9 +57,9 @@ export class AlertsClient {
     this.savedObjectsClient = savedObjectsClient;
   }
 
-  public async create(alert: Alert) {
-    const createdAlert = await this.savedObjectsClient.create<any>('alert', alert);
-    const scheduledTask = await this.scheduleAlert(createdAlert.id, alert);
+  public async create({ data, options }: CreateOptions) {
+    const createdAlert = await this.savedObjectsClient.create<any>('alert', data, options);
+    const scheduledTask = await this.scheduleAlert(createdAlert.id, data);
     const updatedAlert = await this.savedObjectsClient.update('alert', createdAlert.id, {
       scheduledTaskId: scheduledTask.id,
     });
