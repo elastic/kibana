@@ -28,7 +28,7 @@ import CompactColor from 'react-color/lib/components/compact/CompactColor';
 import color from 'react-color/lib/helpers/color';
 import shallowCompare from 'react-addons-shallow-compare';
 
-export class CustomColorPickerUI extends Component {
+class CustomColorPickerUI extends Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
