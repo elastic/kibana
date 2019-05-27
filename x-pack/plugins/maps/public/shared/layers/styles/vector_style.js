@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getHexColorRangeStrings } from '../../utils/color_utils';
+import { getHexColorRangeStrings } from './color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';

@@ -210,4 +210,13 @@ export class HeatmapLayer extends AbstractLayer {
     return super.getCustomIconAndTooltipContent();
   }
 
+  hasLegendDetails() {
+    return true;
+  }
+
+  getLegendDetails() {
+    const label = _.get(this._source.getMetricFields(), '[0].propertyLabel', '');
+    return this._style.getLegendDetails(label);
+  }
+
 }

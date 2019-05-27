@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { GRID_RESOLUTION } from '../grid_resolution';
 import { AbstractStyle } from './abstract_style';
+import { HeatmapLegend } from './components/heatmap/legend/heatmap_legend';
 import { i18n } from '@kbn/i18n';
 
 export class HeatmapStyle extends AbstractStyle {
@@ -29,6 +31,10 @@ export class HeatmapStyle extends AbstractStyle {
     });
   }
 
+  getLegendDetails(label) {
+    return (<HeatmapLegend colorRampName="theclassic" label={label} />);
+  }
+
   setMBPaintProperties({ mbMap, layerId, propertyName, resolution }) {
     let radius;
     if (resolution === GRID_RESOLUTION.COARSE) {
@@ -49,6 +55,19 @@ export class HeatmapStyle extends AbstractStyle {
       type: 'identity',
       property: propertyName
     });
+    /*
+    "heatmap-color": [
+                                "interpolate",
+                                ["linear"],
+                                ["heatmap-density"],
+                                0, "rgba(0, 0, 255, 0)",
+                                0.1, "royalblue",
+                                0.3, "cyan",
+                                0.5, "lime",
+                                0.7, "yellow",
+                                1, "red"
+                            ]
+    */
   }
 
 }
