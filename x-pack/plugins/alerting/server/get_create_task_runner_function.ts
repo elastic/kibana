@@ -71,7 +71,7 @@ export function getCreateTaskRunnerFunction({
           },
           // TODO: Should it be now + interval or previous runAt + interval
           runAt: alertSavedObject.attributes.interval
-            ? new Date(Date.now() + alertSavedObject.attributes.interval * 1000)
+            ? new Date(Date.now() + alertSavedObject.attributes.interval)
             : undefined,
         };
       },
