@@ -24,7 +24,7 @@ import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function YesNo(props) {
-  const { name, value } = props;
+  const { name, value, disabled } = props;
   const handleChange = value => {
     const { name } = props;
     return () => {
@@ -48,6 +48,7 @@ export function YesNo(props) {
         checked={Boolean(value)}
         value="yes"
         onChange={handleChange(1)}
+        disabled={disabled}
       />
 
       &emsp;
@@ -64,6 +65,7 @@ export function YesNo(props) {
         checked={!Boolean(value)}
         value="no"
         onChange={handleChange(0)}
+        disabled={disabled}
       />
     </div>
   );
@@ -72,4 +74,8 @@ export function YesNo(props) {
 YesNo.propTypes = {
   name: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+};
+
+YesNo.defaultProps = {
+  disabled: false,
 };

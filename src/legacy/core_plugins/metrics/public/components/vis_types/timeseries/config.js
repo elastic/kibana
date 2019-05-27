@@ -480,6 +480,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             prefix="series_"
             disabled={!model.override_index_pattern}
             with-interval={true}
+            timerange={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

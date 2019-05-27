@@ -19,6 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
@@ -29,16 +30,29 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFormLabel,
-  EuiSpacer,
+  EuiComboBox,
+  EuiTextColor,
+  EuiText
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ES_TYPES } from '../../common/es_types';
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
+const htmlId = htmlIdGenerator();
+const timeRangeOptions = [
+  {
+    label: i18n.translate('tsvb.indexPattern.timeRange.entireTimeRange', { defaultMessage: 'Entire time range' }),
+    value: 'entire_time_range'
+  },
+  {
+    label: i18n.translate('tsvb.indexPattern.timeRange.lastValue', { defaultMessage: 'Last value' }),
+    value: 'last_value'
+  },
+];
+
+const isEntireTimeRangeEnabled = (model, options, timerange) => timerange && model.time_range === options[0].value;
 
 export const IndexPattern = props => {
-  const { fields, prefix } = props;
+  const { fields, prefix, timerange } = props;
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const timeFieldName = `${prefix}time_field`;
@@ -50,28 +64,50 @@ export const IndexPattern = props => {
     default_index_pattern: '',
     [indexPatternName]: '*',
     [intervalName]: 'auto',
-    [dropBucketName]: 1
+    [dropBucketName]: 1,
+    time_range: timeRangeOptions[0].value
   };
 
-  const htmlId = htmlIdGenerator();
   const model = { ...defaults, ...props.model };
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
+  const selectedTimeRangeOption = timeRangeOptions.find(({ value }) => model.time_range === value);
 
   return (
-    <div className={props.className}>
-      <EuiFlexGroup responsive={false} wrap={true}>
+    <div className="index-pattern">
+      {timerange && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('timeRange')}
+              label={i18n.translate('tsvb.indexPattern.timeRange.label', { defaultMessage: 'Data timerange mode' })}
+            >
+              <EuiComboBox
+                isClearable={false}
+                placeholder={i18n.translate('tsvb.indexPattern.timeRange.selectTimeRange', { defaultMessage: 'Select' })}
+                options={timeRangeOptions}
+                selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
+                onChange={handleSelectChange('time_range')}
+                singleSelection={{ asPlainText: true }}
+                isDisabled={props.disabled}
+              />
+            </EuiFormRow>
+            <EuiText size="xs" style={{ margin: 0 }}>This setting controls the timespan used for matching documents.&nbsp;
+              <EuiTextColor color="danger">Entire timerange</EuiTextColor> will match all the documents selected in the timepicker.&nbsp;
+              <EuiTextColor color="danger">Last value</EuiTextColor> will match only the documents for the specified interval&nbsp;
+              from the end of the timerange.
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )
+      }
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
-            label={(<FormattedMessage
-              id="tsvb.indexPatternLabel"
-              defaultMessage="Index pattern"
-            />)}
-            helpText={isDefaultIndexPatternUsed && <FormattedMessage
-              id="tsvb.indexPattern.searchByDefaultIndex"
-              defaultMessage="Default index pattern is used. To query all indexes use *"
-            />}
-            fullWidth
+            label={i18n.translate('tsvb.indexPattern.label', { defaultMessage: 'Index pattern' })}
+            helpText={isDefaultIndexPatternUsed && i18n.translate('tsvb.indexPattern.searchByDefaultIndex', {
+              defaultMessage: 'Default index pattern is used. To query all indexes use *'
+            })}
           >
             <EuiFieldText
               data-test-subj="metricsIndexPatternInput"
@@ -79,18 +115,13 @@ export const IndexPattern = props => {
               placeholder={model.default_index_pattern}
               onChange={handleTextChange(indexPatternName, '*')}
               value={model[indexPatternName]}
-              fullWidth
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('timeField')}
-            label={(<FormattedMessage
-              id="tsvb.indexPattern.timeFieldLabel"
-              defaultMessage="Time field"
-            />)}
-            fullWidth
+            label={i18n.translate('tsvb.indexPattern.timeFieldLabel', { defaultMessage: 'Time field' })}
           >
             <FieldSelect
               data-test-subj="metricsIndexPatternFieldsSelect"
@@ -100,26 +131,20 @@ export const IndexPattern = props => {
               onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
-              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
-              fullWidth
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('interval')}
-            label={(<FormattedMessage
-              id="tsvb.indexPattern.intervalLabel"
-              defaultMessage="Interval"
-            />)}
-            helpText={(<FormattedMessage
-              id="tsvb.indexPattern.intervalHelpText"
-              defaultMessage="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
-              description="auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
-            />)}
+            label={i18n.translate('tsvb.indexPattern.intervalLabel', { defaultMessage: 'Interval' })}
+            helpText={i18n.translate('tsvb.indexPattern.intervalHelpText', {
+              defaultMessage: 'Examples: auto, 1m, 1d, 7d, 1y, >=1m',
+              description: 'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.'
+            })}
           >
             <EuiFieldText
-              disabled={props.disabled}
+              disabled={props.disabled || isEntireTimeRangeEnabled(model, timeRangeOptions, timerange)}
               onChange={handleTextChange(intervalName, 'auto')}
               value={model[intervalName]}
               placeholder={'auto'}
@@ -127,18 +152,17 @@ export const IndexPattern = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="tsvb.indexPattern.dropLastBucketLabel"
-              defaultMessage="Drop last bucket?"
+          <EuiFormRow
+            id={htmlId('dropLastBucket')}
+            label={i18n.translate('tsvb.indexPattern.dropLastBucketLabel', { defaultMessage: 'Drop last bucket?' })}
+          >
+            <YesNo
+              value={model[dropBucketName]}
+              name={dropBucketName}
+              onChange={props.onChange}
+              disabled={isEntireTimeRangeEnabled(model, timeRangeOptions, timerange)}
             />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo
-            value={model[dropBucketName]}
-            name={dropBucketName}
-            onChange={props.onChange}
-          />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -148,6 +172,7 @@ export const IndexPattern = props => {
 IndexPattern.defaultProps = {
   prefix: '',
   disabled: false,
+  timerange: true,
 };
 
 IndexPattern.propTypes = {
@@ -156,5 +181,6 @@ IndexPattern.propTypes = {
   onChange: PropTypes.func.isRequired,
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
+  timerange: PropTypes.bool,
 };
