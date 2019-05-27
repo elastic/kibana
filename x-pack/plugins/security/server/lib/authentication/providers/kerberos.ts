@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import { get } from 'lodash';
-import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -228,13 +227,6 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     state?: ProviderState | null
   ) {
     this.debug('Trying to authenticate request via SPNEGO.');
-
-    // If client can't handle redirect response, basically if it's an AJAX request, we shouldn't
-    // use SPNEGO to not log user in unintentionally (e.g. AJAX request sent from `logged_out` page).
-    if (!canRedirectRequest(request)) {
-      this.debug('SPNEGO can not be used by AJAX requests.');
-      return AuthenticationResult.notHandled();
-    }
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
     let authenticationError: Error;

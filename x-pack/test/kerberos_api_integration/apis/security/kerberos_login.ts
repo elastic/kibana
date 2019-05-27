@@ -16,6 +16,24 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
+  function checkCookieIsSet(cookie: Cookie) {
+    expect(cookie.value).to.not.be.empty();
+
+    expect(cookie.key).to.be('sid');
+    expect(cookie.path).to.be('/');
+    expect(cookie.httpOnly).to.be(true);
+    expect(cookie.maxAge).to.be(null);
+  }
+
+  function checkCookieIsCleared(cookie: Cookie) {
+    expect(cookie.value).to.be.empty();
+
+    expect(cookie.key).to.be('sid');
+    expect(cookie.path).to.be('/');
+    expect(cookie.httpOnly).to.be(true);
+    expect(cookie.maxAge).to.be(0);
+  }
+
   describe('Kerberos authentication', () => {
     before(async () => {
       // HACK: remove as soon as we have a solution for https://github.com/elastic/elasticsearch/issues/41943.
@@ -52,10 +70,13 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
+      const cookie = request.cookie(cookies[0])!;
+      checkCookieIsSet(cookie);
+
       const { body: user } = await supertest
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Cookie', request.cookie(cookies[0])!.cookieString())
+        .set('Cookie', cookie.cookieString())
         .expect(200);
 
       expect(user.username).to.eql(username);
@@ -63,21 +84,21 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     describe('initiating SPNEGO', () => {
-      it('should properly initiate SPNEGO', async () => {
+      it('non-AJAX requests should properly initiate SPNEGO', async () => {
         const spnegoResponse = await supertest.get('/abc/xyz/spnego?one=two three').expect(401);
 
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
       });
 
-      it('AJAX requests should not initiate SPNEGO', async () => {
+      it('AJAX requests should properly initiate SPNEGO', async () => {
         const ajaxResponse = await supertest
           .get('/abc/xyz/spnego?one=two three')
           .set('kbn-xsrf', 'xxx')
           .expect(401);
 
         expect(ajaxResponse.headers['set-cookie']).to.be(undefined);
-        expect(ajaxResponse.headers['www-authenticate']).to.be(undefined);
+        expect(ajaxResponse.headers['www-authenticate']).to.be('Negotiate');
       });
     });
 
@@ -92,10 +113,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(cookies).to.have.length(1);
 
         const sessionCookie = request.cookie(cookies[0])!;
-        expect(sessionCookie.key).to.be('sid');
-        expect(sessionCookie.value).to.not.be.empty();
-        expect(sessionCookie.path).to.be('/');
-        expect(sessionCookie.httpOnly).to.be(true);
+        checkCookieIsSet(sessionCookie);
 
         await supertest
           .get('/api/security/v1/me')
@@ -140,10 +158,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(cookies).to.have.length(1);
 
         sessionCookie = request.cookie(cookies[0])!;
-        expect(sessionCookie.key).to.be('sid');
-        expect(sessionCookie.value).to.not.be.empty();
-        expect(sessionCookie.path).to.be('/');
-        expect(sessionCookie.httpOnly).to.be(true);
+        checkCookieIsSet(sessionCookie);
       });
 
       it('should extend cookie on every successful non-system API call', async () => {
@@ -156,7 +171,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
         const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0])!;
 
-        expect(sessionCookieOne.value).to.not.be.empty();
+        checkCookieIsSet(sessionCookieOne);
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
 
         const apiResponseTwo = await supertest
@@ -168,7 +183,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
         const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0])!;
 
-        expect(sessionCookieTwo.value).to.not.be.empty();
+        checkCookieIsSet(sessionCookieTwo);
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
       });
 
@@ -207,10 +222,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(cookies).to.have.length(1);
 
         const sessionCookie = request.cookie(cookies[0])!;
-        expect(sessionCookie.key).to.be('sid');
-        expect(sessionCookie.value).to.not.be.empty();
-        expect(sessionCookie.path).to.be('/');
-        expect(sessionCookie.httpOnly).to.be(true);
+        checkCookieIsSet(sessionCookie);
 
         // And then log user out.
         const logoutResponse = await supertest
@@ -220,13 +232,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
         cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-
-        const logoutCookie = request.cookie(cookies[0])!;
-        expect(logoutCookie.key).to.be('sid');
-        expect(logoutCookie.value).to.be.empty();
-        expect(logoutCookie.path).to.be('/');
-        expect(logoutCookie.httpOnly).to.be(true);
-        expect(logoutCookie.maxAge).to.be(0);
+        checkCookieIsCleared(request.cookie(cookies[0])!);
 
         expect(logoutResponse.headers.location).to.be('/logged_out');
 
@@ -238,9 +244,12 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
 
-        expect(apiResponse.headers['set-cookie']).to.be(undefined);
-        // Currently we don't initiate SPNEGO for AJAX requests.
-        expect(apiResponse.headers['www-authenticate']).to.be(undefined);
+        // If Kibana detects cookie with invalid token it tries to clear it.
+        cookies = apiResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        checkCookieIsCleared(request.cookie(cookies[0])!);
+
+        expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
@@ -264,13 +273,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(cookies).to.have.length(1);
 
         sessionCookie = request.cookie(cookies[0])!;
-        expect(sessionCookie.key).to.be('sid');
-        expect(sessionCookie.value).to.not.be.empty();
-        expect(sessionCookie.path).to.be('/');
-        expect(sessionCookie.httpOnly).to.be(true);
+        checkCookieIsSet(sessionCookie);
       });
 
-      it('AJAX call should not initiate SPNEGO', async function() {
+      it('AJAX call should initiate SPNEGO and clear existing cookie', async function() {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -283,8 +289,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
 
-        expect(apiResponse.headers['set-cookie']).to.be(undefined);
-        expect(apiResponse.headers['www-authenticate']).to.be(undefined);
+        const cookies = apiResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        checkCookieIsCleared(request.cookie(cookies[0])!);
+
+        expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
       });
 
       it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function() {
@@ -301,13 +310,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
         const cookies = nonAjaxResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-
-        const clearedCookie = request.cookie(cookies[0])!;
-        expect(clearedCookie.key).to.be('sid');
-        expect(clearedCookie.value).to.be.empty();
-        expect(clearedCookie.path).to.be('/');
-        expect(clearedCookie.httpOnly).to.be(true);
-        expect(clearedCookie.maxAge).to.be(0);
+        checkCookieIsCleared(request.cookie(cookies[0])!);
 
         expect(nonAjaxResponse.headers['www-authenticate']).to.be('Negotiate');
       });
@@ -326,10 +329,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         expect(cookies).to.have.length(1);
 
         sessionCookie = request.cookie(cookies[0])!;
-        expect(sessionCookie.key).to.be('sid');
-        expect(sessionCookie.value).to.not.be.empty();
-        expect(sessionCookie.path).to.be('/');
-        expect(sessionCookie.httpOnly).to.be(true);
+        checkCookieIsSet(sessionCookie);
 
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access token document from the index after some
@@ -344,15 +344,18 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .greaterThan(0);
       });
 
-      it('AJAX call should not initiate SPNEGO', async function() {
+      it('AJAX call should initiate SPNEGO and clear existing cookie', async function() {
         const apiResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
 
-        expect(apiResponse.headers['set-cookie']).to.be(undefined);
-        expect(apiResponse.headers['www-authenticate']).to.be(undefined);
+        const cookies = apiResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        checkCookieIsCleared(request.cookie(cookies[0])!);
+
+        expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
       });
 
       it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function() {
@@ -363,13 +366,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
         const cookies = nonAjaxResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-
-        const clearedCookie = request.cookie(cookies[0])!;
-        expect(clearedCookie.key).to.be('sid');
-        expect(clearedCookie.value).to.be.empty();
-        expect(clearedCookie.path).to.be('/');
-        expect(clearedCookie.httpOnly).to.be(true);
-        expect(clearedCookie.maxAge).to.be(0);
+        checkCookieIsCleared(request.cookie(cookies[0])!);
 
         expect(nonAjaxResponse.headers['www-authenticate']).to.be('Negotiate');
       });
