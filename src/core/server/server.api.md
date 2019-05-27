@@ -25,7 +25,7 @@ export type APICaller = (endpoint: string, clientParams: Record<string, unknown>
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type AuthenticationHandler<T> = (request: Readonly<Request>, sessionStorage: SessionStorage<T>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
+export type AuthenticationHandler<T> = (request: Request, sessionStorage: SessionStorage<T>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
 export interface AuthToolkit {
@@ -86,7 +86,8 @@ export interface CoreSetup {
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        basePath: HttpServiceSetup['basePath'];
+        getBasePathFor: HttpServiceSetup['getBasePathFor'];
+        setBasePathFor: HttpServiceSetup['setBasePathFor'];
     };
 }
 
@@ -252,7 +253,7 @@ export interface LogRecord {
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPostAuthToolkit) => OnPostAuthResult | Promise<OnPostAuthResult>;
+export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnPostAuthToolkit) => OnPostAuthResult | Promise<OnPostAuthResult>;
 
 // @public
 export interface OnPostAuthToolkit {
@@ -266,7 +267,7 @@ export interface OnPostAuthToolkit {
 // Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
+export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
 
 // @public
 export interface OnPreAuthToolkit {
