@@ -14,8 +14,8 @@ export default function deleteActionTests({ getService }: KibanaFunctionalTestDe
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
-    beforeEach(() => esArchiver.load('alerting/basic'));
-    afterEach(() => esArchiver.unload('alerting/basic'));
+    beforeEach(() => esArchiver.load('actions/basic'));
+    afterEach(() => esArchiver.unload('actions/basic'));
 
     it('should return 200 when deleting an action', async () => {
       await supertest

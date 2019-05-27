@@ -13,8 +13,8 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
 
   describe('find', () => {
-    before(() => esArchiver.load('alerting/basic'));
-    after(() => esArchiver.unload('alerting/basic'));
+    before(() => esArchiver.load('actions/basic'));
+    after(() => esArchiver.unload('actions/basic'));
 
     it('should return 200 with individual responses', async () => {
       await supertest

@@ -13,8 +13,8 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
   const esArchiver = getService('esArchiver');
 
   describe('update', () => {
-    beforeEach(() => esArchiver.load('alerting/basic'));
-    afterEach(() => esArchiver.unload('alerting/basic'));
+    beforeEach(() => esArchiver.load('actions/basic'));
+    afterEach(() => esArchiver.unload('actions/basic'));
 
     it('should return 200 when updating a document', async () => {
       await supertest

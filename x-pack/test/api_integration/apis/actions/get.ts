@@ -13,8 +13,8 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
   const esArchiver = getService('esArchiver');
 
   describe('get', () => {
-    before(() => esArchiver.load('alerting/basic'));
-    after(() => esArchiver.unload('alerting/basic'));
+    before(() => esArchiver.load('actions/basic'));
+    after(() => esArchiver.unload('actions/basic'));
 
     it('should return 200 when finding a record and not return encrypted attributes', async () => {
       await supertest
