@@ -21,24 +21,14 @@ export interface EditorFrameSetup {
 // Hints the default nesting to the data source. 0 is the highest priority
 export type DimensionPriority = 0 | 1 | 2;
 
-// For switching between visualizations and correctly matching columns
-export type DimensionRole =
-  | 'splitChart'
-  | 'series'
-  | 'primary'
-  | 'secondary'
-  | 'color'
-  | 'size'
-  | string; // Some visualizations will use custom names that have other meaning
-
-export interface TableColumns {
+export interface TableColumn {
   columnId: string;
   operation: Operation;
 }
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
-  tableColumns: TableColumns[];
+  tableColumns: TableColumn[];
 }
 
 /**
@@ -139,10 +129,8 @@ export interface VisualizationProps<T = unknown> {
 }
 
 export interface SuggestionRequest<T = unknown> {
-  // Roles currently being used
-  roles: DimensionRole[];
   // It is up to the Visualization to rank these tables
-  tableColumns: { [datasourceSuggestionId: string]: TableColumns };
+  tables: TableColumn[][];
   state?: T; // State is only passed if the visualization is active
 }
 
@@ -150,7 +138,7 @@ export interface VisualizationSuggestion<T = unknown> {
   score: number;
   title: string;
   state: T;
-  datasourceSuggestionId: string;
+  tableIndex: number;
 }
 
 export interface Visualization<T = unknown, P = unknown> {
@@ -162,9 +150,6 @@ export interface Visualization<T = unknown, P = unknown> {
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
   toExpression: (state: T, datasource: DatasourcePublicAPI) => string;
-
-  // Frame will request the list of roles currently being used when calling `getInitialStateFromOtherVisualization`
-  getMappingOfTableToRoles: (state: T, datasource: DatasourcePublicAPI) => DimensionRole[];
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data

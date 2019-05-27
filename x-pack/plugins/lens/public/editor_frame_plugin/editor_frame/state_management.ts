@@ -31,6 +31,7 @@ export type Action =
       type: 'SWITCH_VISUALIZATION';
       newVisualizationId: string;
       initialState: unknown;
+      datasourceState?: unknown;
     }
   | {
       type: 'SWITCH_DATASOURCE';
@@ -78,6 +79,10 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           ...state.visualization,
           activeId: action.newVisualizationId,
           state: action.initialState,
+        },
+        datasource: {
+          ...state.datasource,
+          state: action.datasourceState ? action.datasourceState : state.datasource.state,
         },
       };
     case 'UPDATE_DATASOURCE_STATE':

@@ -10,6 +10,8 @@ import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
 import { FrameLayout } from './frame_layout';
+import { SuggestionPanel } from './suggestion_panel';
+import { WorkspacePanel } from './workspace_panel';
 
 export interface EditorFrameProps {
   datasourceMap: Record<string, Datasource>;
@@ -67,6 +69,52 @@ export function EditorFrame(props: EditorFrameProps) {
     ]
   );
 
+  if (state.datasource.activeId && !state.datasource.isLoading) {
+    return (
+      <FrameLayout
+        dataPanel={
+          <DataPanelWrapper
+            datasourceMap={props.datasourceMap}
+            activeDatasource={state.datasource.activeId}
+            datasourceState={state.datasource.state}
+            datasourceIsLoading={state.datasource.isLoading}
+            dispatch={dispatch}
+          />
+        }
+        configPanel={
+          <ConfigPanelWrapper
+            visualizationMap={props.visualizationMap}
+            activeVisualizationId={state.visualization.activeId}
+            datasourcePublicAPI={datasourcePublicAPI!}
+            dispatch={dispatch}
+            visualizationState={state.visualization.state}
+          />
+        }
+        workspacePanel={
+          <WorkspacePanel
+            activeDatasource={props.datasourceMap[state.datasource.activeId]}
+            activeVisualizationId={state.visualization.activeId}
+            datasourcePublicAPI={datasourcePublicAPI!}
+            datasourceState={state.datasource.state}
+            visualizationState={state.visualization.state}
+            visualizationMap={props.visualizationMap}
+            dispatch={dispatch}
+          />
+        }
+        suggestionsPanel={
+          <SuggestionPanel
+            activeDatasource={props.datasourceMap[state.datasource.activeId]}
+            activeVisualizationId={state.visualization.activeId}
+            datasourceState={state.datasource.state}
+            visualizationState={state.visualization.state}
+            visualizationMap={props.visualizationMap}
+            dispatch={dispatch}
+          />
+        }
+      />
+    );
+  }
+
   return (
     <FrameLayout
       dataPanel={
@@ -77,18 +125,6 @@ export function EditorFrame(props: EditorFrameProps) {
           datasourceMap={props.datasourceMap}
           dispatch={dispatch}
         />
-      }
-      configPanel={
-        state.datasource.activeId &&
-        !state.datasource.isLoading && (
-          <ConfigPanelWrapper
-            visualizationMap={props.visualizationMap}
-            activeVisualizationId={state.visualization.activeId}
-            datasourcePublicAPI={datasourcePublicAPI!}
-            dispatch={dispatch}
-            visualizationState={state.visualization.state}
-          />
-        )
       }
     />
   );

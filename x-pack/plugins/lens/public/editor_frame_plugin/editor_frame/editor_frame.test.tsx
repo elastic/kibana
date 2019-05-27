@@ -5,35 +5,18 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
 import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 import { act } from 'react-dom/test-utils';
+import { createMockVisualization, createMockDatasource } from '../mock_extensions';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
-const waitForPromises = () => new Promise(resolve => setImmediate(resolve));
+const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 describe('editor_frame', () => {
-  const getMockVisualization = () => ({
-    getMappingOfTableToRoles: jest.fn(),
-    getPersistableState: jest.fn(),
-    getSuggestions: jest.fn(),
-    initialize: jest.fn(),
-    renderConfigPanel: jest.fn(),
-    toExpression: jest.fn(),
-  });
-
-  const getMockDatasource = () => ({
-    getDatasourceSuggestionsForField: jest.fn(),
-    getDatasourceSuggestionsFromCurrentState: jest.fn(),
-    getPersistableState: jest.fn(),
-    getPublicAPI: jest.fn(),
-    initialize: jest.fn(() => Promise.resolve()),
-    renderDataPanel: jest.fn(),
-    toExpression: jest.fn(),
-  });
-
   let mockVisualization: Visualization;
   let mockDatasource: Datasource;
 
@@ -41,11 +24,11 @@ describe('editor_frame', () => {
   let mockDatasource2: Datasource;
 
   beforeEach(() => {
-    mockVisualization = getMockVisualization();
-    mockVisualization2 = getMockVisualization();
+    mockVisualization = createMockVisualization();
+    mockVisualization2 = createMockVisualization();
 
-    mockDatasource = getMockDatasource();
-    mockDatasource2 = getMockDatasource();
+    mockDatasource = createMockDatasource();
+    mockDatasource2 = createMockDatasource();
   });
 
   describe('initialization', () => {
@@ -436,6 +419,286 @@ describe('editor_frame', () => {
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: initialState })
+      );
+    });
+  });
+
+  describe('suggestions', () => {
+    it('should fetch suggestions of currently active datasource', async () => {
+      mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: mockVisualization,
+          }}
+          datasourceMap={{
+            testDatasource: mockDatasource,
+            testDatasource2: mockDatasource2,
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+        />
+      );
+
+      await waitForPromises();
+
+      expect(mockDatasource.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
+      expect(mockDatasource2.getDatasourceSuggestionsFromCurrentState).not.toHaveBeenCalled();
+    });
+
+    it('should fetch suggestions of all visualizations', async () => {
+      mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: mockVisualization,
+            testVis2: mockVisualization2,
+          }}
+          datasourceMap={{
+            testDatasource: mockDatasource,
+            testDatasource2: mockDatasource2,
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+        />
+      );
+
+      await waitForPromises();
+
+      expect(mockVisualization.getSuggestions).toHaveBeenCalled();
+      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
+    });
+
+    it('should display suggestions in descending order', async () => {
+      const instance = mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  tableIndex: 0,
+                  score: 0.5,
+                  state: {},
+                  title: 'Suggestion2',
+                },
+                {
+                  tableIndex: 0,
+                  score: 0.8,
+                  state: {},
+                  title: 'Suggestion1',
+                },
+              ],
+            },
+            testVis2: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  tableIndex: 0,
+                  score: 0.4,
+                  state: {},
+                  title: 'Suggestion4',
+                },
+                {
+                  tableIndex: 0,
+                  score: 0.45,
+                  state: {},
+                  title: 'Suggestion3',
+                },
+              ],
+            },
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+        />
+      );
+
+      await waitForPromises();
+
+      // TODO why is this necessary?
+      instance.update();
+      const suggestions = instance.find('[data-test-subj="suggestion"]');
+      expect(suggestions.map(el => el.text())).toEqual([
+        'Suggestion1',
+        'Suggestion2',
+        'Suggestion3',
+        'Suggestion4',
+      ]);
+    });
+
+    it('should switch to suggested visualization', async () => {
+      const newDatasourceState = {};
+      const suggestionVisState = {};
+      const instance = mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  tableIndex: 0,
+                  score: 0.8,
+                  state: suggestionVisState,
+                  title: 'Suggestion1',
+                },
+              ],
+            },
+            testVis2: mockVisualization2,
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsFromCurrentState: () => [
+                { state: newDatasourceState, tableColumns: [] },
+              ],
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis2"
+        />
+      );
+
+      await waitForPromises();
+
+      // TODO why is this necessary?
+      instance.update();
+
+      act(() => {
+        instance.find('[data-test-subj="suggestion"]').simulate('click');
+      });
+
+      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: suggestionVisState,
+        })
+      );
+      expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: newDatasourceState,
+        })
+      );
+    });
+
+    it('should switch to best suggested visualization on field drop', async () => {
+      const suggestionVisState = {};
+      const instance = mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  tableIndex: 0,
+                  score: 0.2,
+                  state: {},
+                  title: 'Suggestion1',
+                },
+                {
+                  tableIndex: 0,
+                  score: 0.8,
+                  state: suggestionVisState,
+                  title: 'Suggestion2',
+                },
+              ],
+            },
+            testVis2: mockVisualization2,
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsForField: () => [{ state: {}, tableColumns: [] }],
+              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+        />
+      );
+
+      await waitForPromises();
+
+      // TODO why is this necessary?
+      instance.update();
+
+      act(() => {
+        instance.find('[data-test-subj="lnsDragDrop"]').simulate('drop');
+      });
+
+      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: suggestionVisState,
+        })
+      );
+    });
+
+    it('should switch to best suggested visualization regardless extension on field drop', async () => {
+      const suggestionVisState = {};
+      const instance = mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: {
+              ...mockVisualization,
+              getSuggestions: () => [
+                {
+                  tableIndex: 0,
+                  score: 0.2,
+                  state: {},
+                  title: 'Suggestion1',
+                },
+                {
+                  tableIndex: 0,
+                  score: 0.6,
+                  state: {},
+                  title: 'Suggestion2',
+                },
+              ],
+            },
+            testVis2: {
+              ...mockVisualization2,
+              getSuggestions: () => [
+                {
+                  tableIndex: 0,
+                  score: 0.8,
+                  state: suggestionVisState,
+                  title: 'Suggestion3',
+                },
+              ],
+            },
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              getDatasourceSuggestionsForField: () => [{ state: {}, tableColumns: [] }],
+              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+        />
+      );
+
+      await waitForPromises();
+
+      // TODO why is this necessary?
+      instance.update();
+
+      act(() => {
+        instance.find('[data-test-subj="lnsDragDrop"]').simulate('drop');
+      });
+
+      expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          state: suggestionVisState,
+        })
       );
     });
   });
