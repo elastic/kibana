@@ -39,7 +39,7 @@ export const reporting = (kibana) => {
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
-      injectDefaultVars(server, options) {
+      injectDefaultVars(server, options) { // eslint-disable-line no-unused-vars
         return {
           reportingPollConfig: options.poll
         };

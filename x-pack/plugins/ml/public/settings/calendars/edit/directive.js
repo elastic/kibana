@@ -54,7 +54,7 @@ module.directive('mlNewCalendar', function ($route) {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function (element) {
       const props = {
         calendarId: $route.current.params.calendarId,
         canCreateCalendar: checkPermission('canCreateCalendar'),
