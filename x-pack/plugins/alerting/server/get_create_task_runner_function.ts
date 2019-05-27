@@ -41,10 +41,11 @@ export function getCreateTaskRunnerFunction({
           alertInstanceFactory: createAlertInstanceFactory(alertInstances),
         };
 
-        const updatedState = await alertType.execute(
+        const alertTypeState = await alertType.execute({
           services,
-          alertSavedObject.attributes.alertTypeParams
-        );
+          params: alertSavedObject.attributes.alertTypeParams,
+          state: taskInstance.state.alertTypeState,
+        });
 
         for (const alertInstanceId of Object.keys(alertInstances)) {
           const alertInstance = alertInstanceFactory(alertInstanceId);
@@ -67,7 +68,7 @@ export function getCreateTaskRunnerFunction({
 
         return {
           state: {
-            ...(updatedState || {}),
+            alertTypeState,
             alertInstances,
           },
           // TODO: Should it be now + interval or previous runAt + interval

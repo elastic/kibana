@@ -20,10 +20,16 @@ export interface AlertServices {
   alertInstanceFactory: (id: string) => AlertInstance;
 }
 
+export interface AlertExecuteOptions {
+  services: AlertServices;
+  params: Record<string, any>;
+  state: State;
+}
+
 export interface AlertType {
   id: string;
   description: string;
-  execute: (services: AlertServices, params: any) => Promise<State | void>;
+  execute: ({ services, params, state }: AlertExecuteOptions) => Promise<State | void>;
 }
 
 export interface AlertAction {
