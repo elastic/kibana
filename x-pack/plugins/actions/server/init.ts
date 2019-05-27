@@ -31,7 +31,11 @@ export function init(server: Legacy.Server) {
     attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
   });
 
-  const actionTypeService = new ActionTypeService();
+  const actionTypeService = new ActionTypeService({
+    services: {
+      log: server.log,
+    },
+  });
 
   // Routes
   createRoute(server);
