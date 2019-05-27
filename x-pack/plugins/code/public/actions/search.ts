@@ -41,6 +41,7 @@ export const repositoryTypeaheadSearchFailed = createAction<string>('REPOSITORY 
 export const saveSearchOptions = createAction<SearchOptions>('SAVE SEARCH OPTIONS');
 
 export const turnOnDefaultRepoScope = createAction<Repository>('TURN ON DEFAULT REPO SCOPE');
+export const turnOffDefaultRepoScope = createAction('TURN OFF DEFAULT REPO SCOPE');
 
 export const searchReposForScope = createAction<RepositorySearchPayload>('SEARCH REPOS FOR SCOPE');
 export const searchReposForScopeSuccess = createAction<any>('SEARCH REPOS FOR SCOPE SUCCESS');

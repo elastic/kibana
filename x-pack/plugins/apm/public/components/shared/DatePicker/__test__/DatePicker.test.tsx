@@ -16,6 +16,7 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { history } from '../../../../utils/history';
 import { mount } from 'enzyme';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { MemoryRouter } from 'react-router-dom';
 
 const mockHistoryPush = jest.spyOn(history, 'push');
 const mockRefreshTimeRange = jest.fn();
@@ -34,11 +35,13 @@ const MockUrlParamsProvider: React.FC<{
 
 function mountDatePicker(params?: IUrlParams) {
   return mount(
-    <LocationProvider history={history}>
-      <MockUrlParamsProvider params={params}>
-        <DatePicker />
-      </MockUrlParamsProvider>
-    </LocationProvider>
+    <MemoryRouter initialEntries={[history.location]}>
+      <LocationProvider>
+        <MockUrlParamsProvider params={params}>
+          <DatePicker />
+        </MockUrlParamsProvider>
+      </LocationProvider>
+    </MemoryRouter>
   );
 }
 
