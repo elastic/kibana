@@ -11,6 +11,8 @@ import { getLegendColors, getColor } from 'ui/vis/map/color_util';
 import { ColorGradient } from './components/color_gradient';
 import chroma from 'chroma-js';
 
+const GRADIENT_INTERVALS = 8;
+
 function getColorRamp(colorRampName) {
   const colorRamp = vislibColorMaps[colorRampName];
   if (!colorRamp) {
@@ -19,12 +21,12 @@ function getColorRamp(colorRampName) {
   return colorRamp;
 }
 
-export function getRGBColorRangeStrings(colorRampName, numberColors) {
+export function getRGBColorRangeStrings(colorRampName, numberColors = GRADIENT_INTERVALS) {
   const colorRamp = getColorRamp(colorRampName);
   return getLegendColors(colorRamp.value, numberColors);
 }
 
-export function getHexColorRangeStrings(colorRampName, numberColors) {
+export function getHexColorRangeStrings(colorRampName, numberColors = GRADIENT_INTERVALS) {
   return getRGBColorRangeStrings(colorRampName, numberColors)
     .map(rgbColor => chroma(rgbColor).hex());
 }
@@ -37,7 +39,7 @@ export function getColorRampCenterColor(colorRampName) {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getColorRampStops(colorRampName, numberColors) {
+export function getColorRampStops(colorRampName, numberColors = GRADIENT_INTERVALS) {
   return getHexColorRangeStrings(colorRampName, numberColors)
     .reduce((accu, stopColor, idx, srcArr) => {
       const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
@@ -50,3 +52,13 @@ export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName =>
   text: colorRampName,
   inputDisplay: <ColorGradient colorRampName={colorRampName}/>
 }));
+
+export function getLinearGradient(colorStrings) {
+  const intervals = colorStrings.length;
+  let linearGradient = `linear-gradient(to right, ${colorStrings[0]} 0%,`;
+  for (let i = 1; i < intervals - 1; i++) {
+    linearGradient = `${linearGradient} ${colorStrings[i]} \
+      ${Math.floor(100 * i / (intervals - 1))}%,`;
+  }
+  return `${linearGradient} ${colorStrings[colorStrings.length - 1]} 100%)`;
+}

@@ -6,10 +6,9 @@
 
 import React from 'react';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { getRGBColorRangeStrings } from '../color_utils';
+import { getRGBColorRangeStrings, getLinearGradient } from '../color_utils';
 import classNames from 'classnames';
 
-const GRADIENT_INTERVALS = 7;
 const COLOR_KEYS = Object.keys(vislibColorMaps);
 
 export const ColorGradient = ({ colorRamp, colorRampName, className }) => {
@@ -19,7 +18,7 @@ export const ColorGradient = ({ colorRamp, colorRampName, className }) => {
 
   const classes = classNames('mapColorGradient', className);
   const rgbColorStrings = colorRampName
-    ? getRGBColorRangeStrings(colorRampName, GRADIENT_INTERVALS)
+    ? getRGBColorRangeStrings(colorRampName)
     : colorRamp;
   const background = getLinearGradient(rgbColorStrings);
   return (
@@ -30,12 +29,4 @@ export const ColorGradient = ({ colorRamp, colorRampName, className }) => {
   );
 };
 
-function getLinearGradient(colorStrings) {
-  const intervals = colorStrings.length;
-  let linearGradient = `linear-gradient(to right, ${colorStrings[0]} 0%,`;
-  for (let i = 1; i < intervals - 1; i++) {
-    linearGradient = `${linearGradient} ${colorStrings[i]} \
-      ${Math.floor(100 * i / (intervals - 1))}%,`;
-  }
-  return `${linearGradient} ${colorStrings[colorStrings.length - 1]} 100%)`;
-}
+

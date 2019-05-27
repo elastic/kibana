@@ -372,7 +372,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
-    const colorRange = getHexColorRangeStrings(color, 8)
+    const colorRange = getHexColorRangeStrings(color)
       .reduce((accu, curColor, idx, srcArr) => {
         accu = [ ...accu, idx / srcArr.length, curColor ];
         return accu;
