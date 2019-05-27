@@ -27,12 +27,12 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '1',
+                id: '85c2d74a-a306-4d53-9c91-06773fbca869',
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],
                 attributes: {
-                  description: 'My description',
+                  description: 'My action',
                 },
               },
             ],
@@ -51,12 +51,12 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '1',
+                id: '85c2d74a-a306-4d53-9c91-06773fbca869',
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],
                 attributes: {
-                  description: 'My description',
+                  description: 'My action',
                   actionTypeId: 'test',
                   actionTypeConfig: {
                     unencrypted: 'unencrypted text',

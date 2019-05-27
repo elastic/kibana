@@ -46,7 +46,7 @@ export function getCreateTaskRunnerFunction({
         const alertTypeState = await alertType.execute({
           services,
           params: alertSavedObject.attributes.alertTypeParams,
-          state: taskInstance.state.alertTypeState,
+          state: taskInstance.state.alertTypeState || {},
         });
 
         for (const alertInstanceId of Object.keys(alertInstances)) {

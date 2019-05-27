@@ -5,5 +5,5 @@
  */
 
 export { init } from './init';
-export { AlertingPlugin } from './types';
+export { AlertingPlugin, AlertExecuteOptions } from './types';
 export { AlertsClient } from './alerts_client';

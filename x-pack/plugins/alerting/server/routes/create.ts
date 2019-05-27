@@ -46,7 +46,7 @@ export function createAlertRoute(server: Hapi.Server) {
     },
     async handler(request: ScheduleRequest) {
       const alertsClient = request.getAlertsClient!();
-      await alertsClient.create({ data: request.payload });
+      return await alertsClient.create({ data: request.payload });
     },
   });
 }

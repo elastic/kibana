@@ -65,6 +65,7 @@ export class AlertsClient {
     });
     return {
       ...createdAlert,
+      ...updatedAlert,
       attributes: {
         ...createdAlert.attributes,
         ...updatedAlert.attributes,
