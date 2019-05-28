@@ -1,16 +1,16 @@
 {
-  "groups": ["kibana_sample_logs", "kibana_sample_data"],
-  "description": "Kibana sample web logs data: find anomalies in the distinct count of client IPs",
+  "groups": ["kibana_sample_data", "kibana_sample_web_logs"],
+  "description": "Find unusually low request rates",
   "analysis_config": {
     "bucket_span": "1h",
+    "summary_count_field_name": "doc_count",
     "detectors": [
       {
-        "detector_description": "Count of distinct client IPs",
-        "function": "distinct_count",
-        "field_name": "clientip"
+        "detector_description": "Low request rates",
+        "function": "low_count"
       }
     ],
-    "influencers": ["clientip"]
+    "influencers": []
   },
   "analysis_limits": {
     "model_memory_limit": "10mb"
