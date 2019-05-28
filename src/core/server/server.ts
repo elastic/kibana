@@ -30,7 +30,7 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
-import { mapToObject } from './map_to_object';
+import { mapToObject } from '../utils/';
 
 export class Server {
   public readonly configService: ConfigService;

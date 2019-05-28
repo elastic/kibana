@@ -31,7 +31,7 @@ import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { mapToObject } from './map_to_object';
+import { mapToObject } from '../utils/';
 
 interface Params {
   rootDomElement: HTMLElement;
