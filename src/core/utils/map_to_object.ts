@@ -17,8 +17,10 @@
  * under the License.
  */
 
-export * from './get';
-export * from './map_to_object';
-export * from './pick';
-export * from './assert_never';
-export * from './url';
+export function mapToObject(map: Map<string, unknown>) {
+  const result: Record<string, unknown> = Object.create(null);
+  for (const [key, value] of map) {
+    result[key] = value;
+  }
+  return result;
+}
