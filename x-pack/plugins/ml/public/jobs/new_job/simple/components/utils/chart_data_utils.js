@@ -131,7 +131,7 @@ export function ChartDataUtilsProvider(Private) {
       )
         .then((data) => {
           let dtrIndex = 0;
-          _.each(formConfig.fields, (field, key) => {
+          _.each(formConfig.fields, (field, key) => { // eslint-disable-line no-unused-vars
 
             const dtr = chartData.detectors[key];
             const times = data.results[dtrIndex];

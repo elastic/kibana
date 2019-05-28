@@ -6,7 +6,7 @@
 
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 
@@ -56,14 +56,14 @@ function getDefaultGroupByConfig(
         aggName,
         dropDownName,
         field: fieldName,
-        interval: '1m',
+        calendar_interval: '1m',
       };
   }
 }
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
-export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
+export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
   const groupByOptionsData: PivotGroupByConfigDict = {};

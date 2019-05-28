@@ -8,9 +8,9 @@ import { ColumnHeader } from '../../components/timeline/body/column_headers/colu
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
-import { Direction } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 import { Sort } from '../../components/timeline/body/sort';
+import { Direction, PinnedEvent } from '../../graphql/types';
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -30,6 +30,7 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  savedObjectId: string | null;
   /** When true, this timeline was marked as "favorite" by the user */
   isFavorite: boolean;
   /** When true, the timeline will update as new data arrives */
@@ -51,14 +52,22 @@ export interface TimelineModel {
   noteIds: string[];
   /** Events pinned to this timeline */
   pinnedEventIds: Record<string, boolean>;
+  pinnedEventsSaveObject: Record<string, PinnedEvent>;
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
-  range: string;
+  dateRange: {
+    start: number;
+    end: number;
+  };
   /** When true, show the timeline flyover */
   show: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: Sort;
   /** Persists the UI state (width) of the timeline flyover */
   width: number;
+  /** timeline is saving */
+  isSaving: boolean;
+  isLoading: boolean;
+  version: string | null;
 }
 
 export const timelineDefaults: Readonly<
@@ -79,10 +88,15 @@ export const timelineDefaults: Readonly<
     | 'title'
     | 'noteIds'
     | 'pinnedEventIds'
-    | 'range'
+    | 'pinnedEventsSaveObject'
+    | 'dateRange'
     | 'show'
     | 'sort'
     | 'width'
+    | 'isSaving'
+    | 'isLoading'
+    | 'savedObjectId'
+    | 'version'
   >
 > = {
   columns: defaultHeaders,
@@ -93,6 +107,8 @@ export const timelineDefaults: Readonly<
   historyIds: [],
   isFavorite: false,
   isLive: false,
+  isLoading: false,
+  isSaving: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
   kqlMode: 'filter',
@@ -103,11 +119,17 @@ export const timelineDefaults: Readonly<
   title: '',
   noteIds: [],
   pinnedEventIds: {},
-  range: '1 Day',
+  pinnedEventsSaveObject: {},
+  dateRange: {
+    start: 0,
+    end: 0,
+  },
+  savedObjectId: null,
   show: false,
   sort: {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   },
   width: DEFAULT_TIMELINE_WIDTH,
+  version: null,
 };

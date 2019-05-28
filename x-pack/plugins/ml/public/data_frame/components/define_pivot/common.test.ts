@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import {
   getDataFramePreviewRequest,
@@ -22,9 +22,18 @@ describe('Data Frame: Define Pivot Common', () => {
     // The field name includes the characters []> which cannot be used for aggregation names.
     // The test results verifies that the characters should still be present in field and dropDownName values,
     // but should be stripped for aggName values.
-    const indexPattern: StaticIndexPattern = {
+    const indexPattern: IndexPattern = {
+      id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
-      fields: [{ name: 'the-f[i]e>ld', type: 'number', aggregatable: true, searchable: true }],
+      fields: [
+        {
+          name: 'the-f[i]e>ld',
+          type: 'number',
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+        },
+      ],
     };
 
     const options = getPivotDropdownOptions(indexPattern);
@@ -119,13 +128,7 @@ describe('Data Frame: Define Pivot Common', () => {
     expect(pivotPreviewDevConsoleStatement).toBe(`POST _data_frame/transforms/_preview
 {
   "source": {
-    "index": "the-index-pattern-title",
-    "query": {
-      "query_string": {
-        "query": "*",
-        "default_operator": "AND"
-      }
-    }
+    "index": "the-index-pattern-title"
   },
   "pivot": {
     "group_by": {

@@ -24,8 +24,7 @@ export const SOURCE_DATA_ID_ORIGIN = 'source';
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
-
-export const DEFAULT_EMS_TILE_LAYER = 'road_map';
+export const DEFAULT_ES_DOC_LIMIT = 2048;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 

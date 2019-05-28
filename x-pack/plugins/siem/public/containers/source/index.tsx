@@ -5,13 +5,15 @@
  */
 
 import { isUndefined } from 'lodash';
-import { get, pick, set, difference } from 'lodash/fp';
-import React from 'react';
+import { get, keyBy, pick, set } from 'lodash/fp';
 import { Query } from 'react-apollo';
+import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import chrome from 'ui/chrome';
 
 import memoizeOne from 'memoize-one';
-import { IndexField, IndexType, SourceQuery } from '../../graphql/types';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { IndexField, SourceQuery } from '../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';
 
@@ -29,89 +31,63 @@ export interface BrowserField {
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
+export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
+  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+    (acc, namespace) => [
+      ...acc,
+      ...Object.values(namespace.fields != null ? namespace.fields : {}),
+    ],
+    []
+  );
+
+export const getAllFieldsByName = (
+  browserFields: BrowserFields
+): { [fieldName: string]: Partial<BrowserField> } =>
+  keyBy('name', getAllBrowserFields(browserFields));
+
 interface WithSourceArgs {
-  auditbeatIndicesExist: boolean;
+  indicesExist: boolean;
   browserFields: BrowserFields;
-  filebeatIndicesExist: boolean;
-  winlogbeatIndicesExist: boolean;
   indexPattern: StaticIndexPattern;
 }
 
 interface WithSourceProps {
   children: (args: WithSourceArgs) => React.ReactNode;
-  indexTypes: IndexType[];
   sourceId: string;
 }
 
-const indexTypesVariables = [IndexType.ANY];
-
 export class WithSource extends React.PureComponent<WithSourceProps> {
-  private memoizedIndexFields: (
-    indexTypes: string[],
-    title: string,
-    fields: IndexField[]
-  ) => StaticIndexPattern;
-  private memoizedBrowserFields: (indexTypes: string[], fields: IndexField[]) => BrowserFields;
-  private memoizedIndexTypesLowerCase: (indexTypes: string[]) => string[];
+  private memoizedIndexFields: (title: string, fields: IndexField[]) => StaticIndexPattern;
+  private memoizedBrowserFields: (fields: IndexField[]) => BrowserFields;
 
   constructor(props: WithSourceProps) {
     super(props);
     this.memoizedIndexFields = memoizeOne(this.getIndexFields);
     this.memoizedBrowserFields = memoizeOne(this.getBrowserFields);
-    this.memoizedIndexTypesLowerCase = memoizeOne(this.getIndexTypesLowerCase);
   }
 
   public render() {
-    const { children, sourceId, indexTypes } = this.props;
+    const { children, sourceId } = this.props;
 
     return (
       <Query<SourceQuery.Query, SourceQuery.Variables>
         query={sourceQuery}
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
-        variables={{ sourceId, indexTypes: indexTypesVariables }}
+        variables={{
+          sourceId,
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        }}
       >
         {({ data }) => {
-          const logAlias = get('source.configuration.logAlias', data);
-          const auditbeatAlias = get('source.configuration.auditbeatAlias', data);
-          const packetbeatAlias = get('source.configuration.packetbeatAlias', data);
-          const winlogbeatAlias = get('source.configuration.winlogbeatAlias', data);
-          let indexPatternTitle: string[] = [];
-          if (indexTypes.includes(IndexType.ANY)) {
-            indexPatternTitle = [
-              ...indexPatternTitle,
-              logAlias,
-              auditbeatAlias,
-              packetbeatAlias,
-              winlogbeatAlias,
-            ];
-          } else {
-            if (indexTypes.includes(IndexType.AUDITBEAT)) {
-              indexPatternTitle = [...indexPatternTitle, auditbeatAlias];
-            }
-            if (indexTypes.includes(IndexType.FILEBEAT)) {
-              indexPatternTitle = [...indexPatternTitle, logAlias];
-            }
-            if (indexTypes.includes(IndexType.PACKETBEAT)) {
-              indexPatternTitle = [...indexPatternTitle, packetbeatAlias];
-            }
-            if (indexTypes.includes(IndexType.WINLOGBEAT)) {
-              indexPatternTitle = [...indexPatternTitle, winlogbeatAlias];
-            }
-          }
-          const indexTypesLowerCase = this.memoizedIndexTypesLowerCase(indexTypes);
-
           return children({
-            auditbeatIndicesExist: get('source.status.auditbeatIndicesExist', data),
-            filebeatIndicesExist: get('source.status.filebeatIndicesExist', data),
-            winlogbeatIndicesExist: get('source.status.winlogbeatIndicesExist', data),
-            browserFields: this.memoizedBrowserFields(
-              indexTypesLowerCase,
-              get('source.status.indexFields', data)
-            ),
+            indicesExist: get('source.status.indicesExist', data),
+            browserFields: this.memoizedBrowserFields(get('source.status.indexFields', data)),
             indexPattern: this.memoizedIndexFields(
-              indexTypesLowerCase,
-              indexPatternTitle.join(),
+              chrome
+                .getUiSettingsClient()
+                .get(DEFAULT_INDEX_KEY)
+                .join(),
               get('source.status.indexFields', data)
             ),
           });
@@ -120,40 +96,21 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
     );
   }
 
-  private getIndexTypesLowerCase = (indexTypes: string[]) =>
-    indexTypes.map(i => i.toLocaleLowerCase());
-
-  private getIndexFields = (
-    indexTypes: string[],
-    title: string,
-    fields: IndexField[]
-  ): StaticIndexPattern =>
+  private getIndexFields = (title: string, fields: IndexField[]): StaticIndexPattern =>
     fields && fields.length > 0
       ? {
-          fields: fields
-            .filter(
-              item =>
-                indexTypes.includes('any') ||
-                difference(item.indexes, indexTypes).length !== item.indexes.length
-            )
-            .map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field)),
+          fields: fields.map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field)),
           title,
         }
       : { fields: [], title };
 
-  private getBrowserFields = (indexTypes: string[], fields: IndexField[]): BrowserFields =>
+  private getBrowserFields = (fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
-      ? fields
-          .filter(
-            item =>
-              indexTypes.includes('any') ||
-              difference(item.indexes, indexTypes).length !== item.indexes.length
-          )
-          .reduce<BrowserFields>(
-            (accumulator: BrowserFields, field: IndexField) =>
-              set([field.category, 'fields', field.name], field, accumulator),
-            {}
-          )
+      ? fields.reduce<BrowserFields>(
+          (accumulator: BrowserFields, field: IndexField) =>
+            set([field.category, 'fields', field.name], field, accumulator),
+          {}
+        )
       : {};
 }
 

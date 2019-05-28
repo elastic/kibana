@@ -109,9 +109,9 @@ export class Properties extends React.PureComponent<Props, State> {
   }
 
   public onButtonClick = () => {
-    this.setState({
-      showActions: !this.state.showActions,
-    });
+    this.setState(prevState => ({
+      showActions: !prevState.showActions,
+    }));
   };
 
   public onToggleShowNotes = () => {
@@ -229,7 +229,7 @@ export class Properties extends React.PureComponent<Props, State> {
                   datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
                 }
               >
-                <SuperDatePicker id="timeline" />
+                <SuperDatePicker id="timeline" timelineId={timelineId} />
               </DatePicker>
             </EuiFlexGroup>
           </EuiFlexItem>

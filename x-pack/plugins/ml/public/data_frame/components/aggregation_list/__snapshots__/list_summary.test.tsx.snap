@@ -7,7 +7,11 @@ exports[`Data Frame: <AggListSummary /> Minimal initialization 1`] = `
     hasShadow={false}
     paddingSize="s"
   >
-    the-agg
+    <div
+      className="eui-textTruncate"
+    >
+      the-agg
+    </div>
   </EuiPanel>
   <EuiSpacer
     size="s"

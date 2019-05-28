@@ -14,6 +14,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
@@ -46,7 +47,11 @@ export const getNetworkDnsColumns = (
               name: dnsName,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: 'dns.question.etld_plus_one', value: escapeQueryValue(dnsName) },
+              queryMatch: {
+                field: 'dns.question.etld_plus_one',
+                value: escapeQueryValue(dnsName),
+                operator: IS_OPERATOR,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

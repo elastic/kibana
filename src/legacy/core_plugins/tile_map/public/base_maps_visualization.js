@@ -25,6 +25,7 @@ import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 import { uiModules } from 'ui/modules';
+import chrome from 'ui/chrome';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
@@ -145,7 +146,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     async _updateBaseLayer() {
 
-      const DEFAULT_EMS_BASEMAP = 'road_map';
+      const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
 
       if (!this._kibanaMap) {
         return;
@@ -158,7 +159,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
-            : tmsServices.find(s => s.id === DEFAULT_EMS_BASEMAP);
+            : tmsServices.find(s => s.id === emsTileLayerId.bright);
           if (initBasemapLayer) { this._setTmsLayer(initBasemapLayer); }
         } catch (e) {
           toastNotifications.addWarning(e.message);
@@ -198,14 +199,19 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer);
+      let isDesaturated = this._getMapsParams().isDesaturated;
+      if (typeof isDesaturated !== 'boolean') {
+        isDesaturated = true;
+      }
+      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+      const meta = await (await emsServiceSettings).getAttributesForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
-      delete options.url;
+      delete options.subdomains;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { url, showZoomMessage, ...options }
+        options: { ...options, showZoomMessage, ...meta, }
       });
     }
 
