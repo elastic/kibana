@@ -22,6 +22,7 @@ import {
   saveSearchOptions,
   searchReposForScope,
   searchReposForScopeSuccess,
+  turnOffDefaultRepoScope,
   turnOnDefaultRepoScope,
 } from '../actions';
 
@@ -178,6 +179,11 @@ export const search = handleActions<SearchState, any>(
       produce<SearchState>(state, draft => {
         draft.searchOptions.defaultRepoScope = action.payload;
         draft.searchOptions.defaultRepoScopeOn = true;
+      }),
+    [String(turnOffDefaultRepoScope)]: (state: SearchState, action: Action<any>) =>
+      produce<SearchState>(state, draft => {
+        delete draft.searchOptions.defaultRepoScope;
+        draft.searchOptions.defaultRepoScopeOn = false;
       }),
   },
   initialState

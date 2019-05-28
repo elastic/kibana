@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import uiRoutes from 'ui/routes';
 import { i18n } from '@kbn/i18n';
 
