@@ -143,7 +143,10 @@ export const spaces = (kibana: Record<string, any>) =>
         capabilities: {
           registerCapabilitiesModifier: server.registerCapabilitiesModifier,
         },
-        legacyServer: server,
+        auditLogger: {
+          create: (pluginId: string) =>
+            new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
+        },
       };
 
       const plugins = {

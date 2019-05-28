@@ -6,7 +6,6 @@
 
 import { ServerRoute } from 'hapi';
 import { Observable } from 'rxjs';
-import { Legacy } from 'kibana';
 import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
 import {
   Logger,
@@ -53,8 +52,9 @@ export interface SpacesCoreSetup {
   capabilities: {
     registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
   };
-  // TODO: Required for shared AuditLogger base class
-  legacyServer: Legacy.Server;
+  auditLogger: {
+    create: (pluginId: string) => AuditLogger;
+  };
 }
 
 export interface PluginsSetup {
@@ -100,14 +100,7 @@ export class Plugin {
     // to re-compute the license check results for this plugin.
     xpackMainPlugin.info.feature(this.pluginId).registerLicenseCheckResultsGenerator(checkLicense);
 
-    const spacesAuditLogger = new SpacesAuditLogger(
-      new AuditLogger(
-        core.legacyServer,
-        'spaces',
-        this.initializerContext.legacyConfig,
-        xpackMainPlugin.info
-      )
-    );
+    const spacesAuditLogger = new SpacesAuditLogger(core.auditLogger.create(this.pluginId));
 
     const service = new SpacesService(
       this.log,
