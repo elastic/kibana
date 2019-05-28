@@ -74,7 +74,6 @@ export interface HttpServerSetup {
 
 export class HttpServer {
   private server?: Server;
-  private serverOptions?: ServerOptions;
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
   private basePathCache = new WeakMap<
@@ -124,13 +123,13 @@ export class HttpServer {
   }
 
   public setup(config: HttpConfig): HttpServerSetup {
-    this.serverOptions = getServerOptions(config);
-    this.server = createServer(this.serverOptions);
+    const serverOptions = getServerOptions(config);
+    this.server = createServer(serverOptions);
 
     this.setupBasePathRewrite(config);
 
     return {
-      options: this.serverOptions,
+      options: serverOptions,
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
