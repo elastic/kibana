@@ -2433,7 +2433,6 @@
     "kbnVislibVisTypes.controls.gaugeOptions.styleTitle": "スタイル",
     "kbnVislibVisTypes.controls.gaugeOptions.subTextLabel": "サブテキスト",
     "kbnVislibVisTypes.controls.gaugeOptions.toTitle": "終了:",
-    "kbnVislibVisTypes.controls.gaugeOptions.verticalSplitLabel": "縦分割",
     "kbnVislibVisTypes.controls.heatmapOptions.addRangeButtonLabel": "範囲を追加",
     "kbnVislibVisTypes.controls.heatmapOptions.colorLabel": "色",
     "kbnVislibVisTypes.controls.heatmapOptions.colorScaleLabel": "カラースケール",

@@ -24,7 +24,7 @@
  */
 
 import chrome from '../../chrome';
-import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
 import { IPrivate } from '../../private';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 import { VisSavedObject, VisualizeLoaderParams } from './types';
