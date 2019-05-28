@@ -38,7 +38,7 @@ import {
 
 // @ts-ignore
 import { DocTitleProvider } from 'ui/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 // @ts-ignore
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 // @ts-ignore

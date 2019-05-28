@@ -117,6 +117,7 @@ const $http = () => {};
 $http.post = jest.fn().mockImplementation(() => ([]));
 const defaultProps = {
   goInspectObject: () => {},
+  confirmModalPromise: jest.fn(),
   savedObjectsClient: {
     find: jest.fn(),
     bulkGet: jest.fn(),

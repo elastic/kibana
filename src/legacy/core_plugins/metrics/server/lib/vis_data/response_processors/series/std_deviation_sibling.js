@@ -18,10 +18,11 @@
  */
 
 import _ from 'lodash';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
-import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
-export default function stdDeviationSibling(resp, panel, series, meta) {
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
+import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
+
+export function stdDeviationSibling(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
     if (metric.mode === 'band' && metric.type === 'std_deviation_bucket') {

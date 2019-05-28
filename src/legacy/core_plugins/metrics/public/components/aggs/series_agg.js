@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { AggSelect } from './agg_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -165,5 +165,4 @@ SeriesAggUi.propTypes = {
   siblings: PropTypes.array,
 };
 
-const SeriesAgg = injectI18n(SeriesAggUi);
-export default SeriesAgg;
+export const SeriesAgg = injectI18n(SeriesAggUi);

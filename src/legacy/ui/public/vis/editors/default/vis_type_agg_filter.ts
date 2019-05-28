@@ -17,11 +17,9 @@
  * under the License.
  */
 import { AggType } from '../../../agg_types';
-import { aggTypeFilters } from '../../../agg_types/filter';
+import { aggTypeFilters, propFilter } from '../../../agg_types/filter';
 import { IndexPattern } from '../../../index_patterns';
 import { AggConfig } from '../../../vis';
-
-import { propFilter } from '../../../filters/_prop_filter';
 
 const filterByName = propFilter('name');
 
