@@ -91,21 +91,21 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', 20000);
       });
 
       it(`navigating to search profiler redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', 20000);
       });
 
       it(`navigating to grok debugger redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', 20000);
       });
     });
   });

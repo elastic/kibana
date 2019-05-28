@@ -47,7 +47,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_index_patterns_all_user',
@@ -65,7 +65,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_index_patterns_all_role'),
           security.user.delete('global_index_patterns_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 

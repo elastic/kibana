@@ -55,7 +55,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_visualize_all_user',
@@ -67,7 +67,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_all_role');
         await security.user.delete('global_visualize_all_user');
       });
@@ -148,7 +148,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_read_role');
         await security.user.delete('global_visualize_read_user');
       });
@@ -231,7 +231,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('no_visualize_privileges_role');
         await security.user.delete('no_visualize_privileges_user');
       });
