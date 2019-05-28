@@ -28,7 +28,7 @@ import CompactColor from 'react-color/lib/components/compact/CompactColor';
 import color from 'react-color/lib/helpers/color';
 import shallowCompare from 'react-addons-shallow-compare';
 
-export class CustomColorPicker extends Component {
+class CustomColorPickerUI extends Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
@@ -132,7 +132,7 @@ export class CustomColorPicker extends Component {
   }
 }
 
-CustomColorPicker.defaultProps = {
+CustomColorPickerUI.defaultProps = {
   colors: [
     '#4D4D4D', '#999999', '#FFFFFF', '#F44E3B', '#FE9200', '#FCDC00',
     '#DBDF00', '#A4DD00', '#68CCCA', '#73D8FF', '#AEA1FF', '#FDA1FF',
@@ -143,10 +143,10 @@ CustomColorPicker.defaultProps = {
   ],
 };
 
-CustomColorPicker.propTypes = {
+CustomColorPickerUI.propTypes = {
   color: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   onChangeComplete: PropTypes.func,
   onChange: PropTypes.func
 };
 
-export default colorWrap(CustomColorPicker);
+export const CustomColorPicker = colorWrap(CustomColorPickerUI);
