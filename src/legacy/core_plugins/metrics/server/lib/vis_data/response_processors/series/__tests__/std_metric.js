@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import stdMetric from '../std_metric';
+import { stdMetric } from '../std_metric';
 
 describe('stdMetric(resp, panel, series)', () => {
   let panel;

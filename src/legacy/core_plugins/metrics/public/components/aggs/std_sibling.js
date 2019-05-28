@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggRow from './agg_row';
-import MetricSelect from './metric_select';
-import AggSelect from './agg_select';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggRow } from './agg_row';
+import { MetricSelect } from './metric_select';
+import { AggSelect } from './agg_select';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,

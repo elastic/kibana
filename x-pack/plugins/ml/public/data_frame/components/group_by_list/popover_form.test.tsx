@@ -80,7 +80,7 @@ describe('Data Frame: Group By <PopoverForm />', () => {
       aggName: 'the-agg-name',
       dropDownName: 'the-drop-down-name',
       field: 'the-field',
-      interval: '10m',
+      calendar_interval: '1m',
     };
     const otherAggNames: AggName[] = [];
     const onChange = (item: PivotGroupByConfig) => {};

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import calculateSiblings from '../calculate_siblings';
+import { calculateSiblings } from '../calculate_siblings';
 import { expect } from 'chai';
 
 describe('calculateSiblings(metrics, metric)', () => {

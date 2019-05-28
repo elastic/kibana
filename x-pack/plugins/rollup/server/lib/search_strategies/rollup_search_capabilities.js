@@ -4,15 +4,12 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 import { get, has } from 'lodash';
-import { unitsMap } from '@elastic/datemath';
-
-const leastCommonInterval = (num = 0, base = 0) => Math.max(Math.ceil(num / base) * base, base);
-const isCalendarInterval = ({ unit, value }) => value === 1 && ['calendar', 'mixed'].includes(unitsMap[unit].type);
+import { leastCommonInterval, isCalendarInterval } from './lib/interval_helper';
 
 export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
-    constructor(req, batchRequestsSupport, fieldsCapabilities, rollupIndex) {
-      super(req, batchRequestsSupport, fieldsCapabilities);
+    constructor(req, fieldsCapabilities, rollupIndex) {
+      super(req, fieldsCapabilities);
 
       this.rollupIndex = rollupIndex;
       this.availableMetrics = get(fieldsCapabilities, `${rollupIndex}.aggs`, {});
@@ -25,7 +22,12 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
     }
 
     get defaultTimeInterval() {
-      return get(this.dateHistogram, 'interval', null);
+      return this.dateHistogram.fixed_interval || this.dateHistogram.calendar_interval ||
+        /*
+          Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval] in the future.
+          We can remove the following line only for versions > 8.x
+         */
+        this.dateHistogram.interval || null;
     }
 
     get searchTimezone() {
@@ -58,17 +60,31 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
 
     getValidTimeInterval(userIntervalString) {
       const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
-      const parsedUserInterval = this.parseInterval(userIntervalString);
+      const inRollupJobUnit = this.convertIntervalToUnit(userIntervalString, parsedRollupJobInterval.unit);
 
-      let { unit } = parsedRollupJobInterval;
-      let { value } = this.convertIntervalToUnit(userIntervalString, unit);
+      const getValidCalendarInterval = () => {
+        let unit = parsedRollupJobInterval.unit;
 
-      if (isCalendarInterval(parsedRollupJobInterval) && isCalendarInterval(parsedUserInterval)) {
-        unit = value > 1 ? parsedUserInterval.unit : parsedRollupJobInterval.unit;
-        value = 1;
-      } else {
-        value = leastCommonInterval(value, parsedRollupJobInterval.value);
-      }
+        if (inRollupJobUnit.value > parsedRollupJobInterval.value) {
+          const inSeconds = this.convertIntervalToUnit(userIntervalString, 's');
+
+          unit = this.getSuitableUnit(inSeconds.value);
+        }
+
+        return {
+          value: 1,
+          unit,
+        };
+      };
+
+      const getValidFixedInterval = () => ({
+        value: leastCommonInterval(inRollupJobUnit.value, parsedRollupJobInterval.value),
+        unit: parsedRollupJobInterval.unit,
+      });
+
+      const { value, unit } = (
+        isCalendarInterval(parsedRollupJobInterval) ? getValidCalendarInterval : getValidFixedInterval
+      )();
 
       return `${value}${unit}`;
     }

@@ -64,7 +64,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateSingleMetricJob', function ($scope, $route, $filter, $timeout, Private, AppState) {
+  .controller('MlCreateSingleMetricJob', function ($scope, $route, $timeout, Private, AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
@@ -515,7 +515,7 @@ module
 
               // check to see if the percentage is past a threshold for reloading the full model
               let fullModelRefresh = false;
-              _.each(jobProgressChecks, (c, i) => {
+              _.each(jobProgressChecks, (c, i) => { // eslint-disable-line no-unused-vars
                 if (jobProgressChecks[i] === false && $scope.chartData.percentComplete >= i) {
                   jobProgressChecks[i] = true;
                   fullModelRefresh = true;
@@ -600,7 +600,7 @@ module
       $scope.jobState = JOB_STATE.NOT_STARTED;
       angular.element('.model-chart, .swimlane').css('opacity', 0);
 
-      _.each(jobProgressChecks, (c, i) => {
+      _.each(jobProgressChecks, (c, i) => { // eslint-disable-line no-unused-vars
         jobProgressChecks[i] = false;
       });
 

@@ -22,7 +22,8 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import { EuiToolTip } from '@elastic/eui';
-class Annotation extends Component {
+
+export class Annotation extends Component {
 
   constructor(props) {
     super(props);
@@ -82,5 +83,3 @@ Annotation.propTypes = {
   color: PropTypes.string,
   plot: PropTypes.object,
 };
-
-export default Annotation;

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -29,24 +28,24 @@ export async function getTopTransactions({
   transactionType,
   serviceName
 }: IOptions) {
-  const { start, end } = setup;
-  const filter: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { range: rangeFilter(start, end) }
-  ];
-
-  if (transactionType) {
-    filter.push({
-      term: { [TRANSACTION_TYPE]: transactionType }
-    });
-  }
+  const { start, end, uiFiltersES } = setup;
 
   const bodyQuery = {
     bool: {
-      filter
+      filter: [
+        { term: { [SERVICE_NAME]: serviceName } },
+        { term: { [PROCESSOR_EVENT]: 'transaction' } },
+        { range: rangeFilter(start, end) },
+        ...uiFiltersES
+      ]
     }
   };
+
+  if (transactionType) {
+    bodyQuery.bool.filter.push({
+      term: { [TRANSACTION_TYPE]: transactionType }
+    });
+  }
 
   return getTransactionGroups(setup, bodyQuery);
 }
