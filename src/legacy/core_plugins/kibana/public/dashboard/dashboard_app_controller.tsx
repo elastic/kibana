@@ -183,7 +183,9 @@ export class DashboardAppController {
     config,
     confirmModal,
     addFilter,
+    courier,
   }: {
+    courier: { fetch: () => void };
     $scope: DashboardAppScope;
     $route: any;
     $routeParams: any;
@@ -270,7 +272,6 @@ export class DashboardAppController {
     });
 
     $scope.appState = this.dashboardStateManager.getAppState();
-    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
@@ -369,6 +370,14 @@ export class DashboardAppController {
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
       this.updateState();
       this.refreshDashboardContainer();
+    });
+
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
+      // The only reason this is here is so that search embeddables work on a dashboard with
+      // a refresh interval turned on. This kicks off the search poller. It should be
+      // refactored so no embeddables need to listen to the timefilter directly but instead
+      // the container tells it when to reload.
+      courier.fetch();
     });
 
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
