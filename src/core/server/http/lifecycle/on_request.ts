@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { Url } from 'url';
+import { Url, format } from 'url';
 import Boom from 'boom';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
+import { modifyUrl } from '../../../utils';
 import { KibanaRequest } from '../router';
 
 enum ResultType {
@@ -93,12 +94,14 @@ export function adoptToHapiOnRequestFormat(fn: OnRequestHandler) {
         rejected: OnRequestResult.rejected,
         setUrl: (newUrl: string | Url) => {
           if (typeof newUrl === 'string') {
-            request.setUrl({
-              ...request.url,
-              pathname: newUrl,
-              path: newUrl,
-              href: newUrl,
+            const originalUrl = format(request.url);
+            const modifiedUrl = modifyUrl(originalUrl, parts => {
+              return {
+                ...parts,
+                pathname: newUrl,
+              };
             });
+            request.setUrl(modifiedUrl);
           } else {
             request.setUrl(newUrl);
           }
