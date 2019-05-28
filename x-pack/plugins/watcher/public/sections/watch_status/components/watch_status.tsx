@@ -10,12 +10,12 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { WatchDetail } from './components/watch_detail';
-import { WatchHistory } from './components/watch_history';
-import { listBreadcrumb, statusBreadcrumb } from '../../lib/breadcrumbs';
-import { loadWatchDetail } from '../../lib/api';
-import { WatchDetailsContext } from './watch_details_context';
-import { getPageErrorCode, PageError, SectionLoading } from '../../components';
+import { WatchDetail } from './watch_detail';
+import { WatchHistory } from './watch_history';
+import { listBreadcrumb, statusBreadcrumb } from '../../../lib/breadcrumbs';
+import { loadWatchDetail } from '../../../lib/api';
+import { WatchDetailsContext } from '../watch_details_context';
+import { getPageErrorCode, PageError, SectionLoading } from '../../../components';
 
 export const WatchStatus = ({
   match: {

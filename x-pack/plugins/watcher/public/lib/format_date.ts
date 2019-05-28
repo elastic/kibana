@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './xpack_watcher_interval_service.factory';
+export const getDateMathFormat = (timeUnit: string, timeValue: number) => {
+  const now = 'now';
+
+  if (timeValue === 0) {
+    return now;
+  }
+
+  return `${now}+${timeValue}${timeUnit}`;
+};

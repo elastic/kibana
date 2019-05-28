@@ -56,7 +56,7 @@ const WATCH_TABS: WatchTab[] = [
 
 const EXECUTE_DETAILS_INITIAL_STATE = {
   triggeredTimeValue: 0,
-  triggeredTimeUnit: TIME_UNITS.MILLISECOND,
+  triggeredTimeUnit: TIME_UNITS.SECOND,
   scheduledTimeValue: 0,
   scheduledTimeUnit: TIME_UNITS.SECOND,
   ignoreCondition: false,

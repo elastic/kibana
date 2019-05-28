@@ -868,4 +868,5 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
     </EuiPageContent>
   );
 };
+
 export const ThresholdWatchEdit = injectI18n(ThresholdWatchEditUi);

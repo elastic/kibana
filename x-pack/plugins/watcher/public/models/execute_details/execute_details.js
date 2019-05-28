@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getDateMathFormat } from '../../lib/format_date';
 
 export class ExecuteDetails {
   constructor(props = {}) {
@@ -45,17 +46,9 @@ export class ExecuteDetails {
     return errors;
   }
 
-  formatTime(timeUnit, timeValue) {
-    const now = 'now';
-    if (timeValue === 0) {
-      return now;
-    }
-    return `${now}+${timeValue}${timeUnit}`;
-  }
-
   get upstreamJson() {
-    const triggeredTime = this.triggeredTimeValue ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
-    const scheduledTime = this.scheduledTimeValue ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
+    const triggeredTime = this.triggeredTimeValue !== '' ? getDateMathFormat(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
+    const scheduledTime = this.scheduledTimeValue !== '' ?  getDateMathFormat(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
 
     return {
       triggerData: {

@@ -313,7 +313,7 @@ const WatchHistoryUi = () => {
               </h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiCodeBlock language="json">{executionDetail}</EuiCodeBlock>}
+            <EuiCodeBlock language="json">{executionDetail}</EuiCodeBlock>
           </EuiFlyoutBody>
         </EuiFlyout>
       );
