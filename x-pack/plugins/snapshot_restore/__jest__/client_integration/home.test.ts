@@ -227,11 +227,10 @@ describe('<SnapshotRestoreHome />', () => {
           });
 
           const latestRequest = server.requests[server.requests.length - 1];
+          const repositoryName = rows[0].columns[1].value;
 
           expect(latestRequest.method).toBe('DELETE');
-          expect(latestRequest.url).toBe(
-            `/api/snapshot_restore/repositories/${rows[0].columns[1].value}`
-          );
+          expect(latestRequest.url).toBe(`/api/snapshot_restore/repositories/${repositoryName}`);
         });
       });
 
@@ -307,10 +306,11 @@ describe('<SnapshotRestoreHome />', () => {
 
             const latestRequest = server.requests[server.requests.length - 1];
             const { rows } = table.getMetaData('repositoryTable');
+            const repositoryName = rows[0].columns[1].value;
 
             expect(latestRequest.method).toBe('GET');
             expect(latestRequest.url).toBe(
-              `/api/snapshot_restore/repositories/${rows[0].columns[1].value}/verify`
+              `/api/snapshot_restore/repositories/${repositoryName}/verify`
             );
           });
         });
@@ -444,7 +444,7 @@ describe('<SnapshotRestoreHome />', () => {
       });
 
       test('each row should have a link to the repository', async () => {
-        const { component, exists, table, router } = testBed;
+        const { component, find, exists, table, router } = testBed;
 
         const { rows } = table.getMetaData('snapshotTable');
         const repositoryLink = findTestSubject(rows[0].reactWrapper, 'repositoryLink');
@@ -457,10 +457,11 @@ describe('<SnapshotRestoreHome />', () => {
         });
 
         // Make sure that we navigated to the repository list
-        // and opened the detail panel
+        // and opened the detail panel for the repository
         expect(exists('snapshotList')).toBe(false);
         expect(exists('repositoryList')).toBe(true);
         expect(exists('repositoryDetail')).toBe(true);
+        expect(find('repositoryDetail.title').text()).toBe(REPOSITORY_NAME);
       });
 
       test('should have a button to reload the snapshots', async () => {
@@ -529,10 +530,11 @@ describe('<SnapshotRestoreHome />', () => {
             });
 
             // Make sure that we navigated to the repository list
-            // and opened the detail panel
+            // and opened the detail panel for the repository
             expect(exists('snapshotList')).toBe(false);
             expect(exists('repositoryList')).toBe(true);
             expect(exists('repositoryDetail')).toBe(true);
+            expect(find('repositoryDetail.title').text()).toBe(REPOSITORY_NAME);
           });
 
           test('should have a button to close the detail panel', () => {
@@ -585,8 +587,8 @@ describe('<SnapshotRestoreHome />', () => {
               test('should indicate the different snapshot states', async () => {
                 const { find, actions } = testBed;
 
-                // We need to click back and forth between 0 and 1 to trigger
-                // the HTTP request that loads the snapshot with the new state.
+                // We need to click back and forth between the first table row (0) and  the second row (1)
+                // in order to trigger the HTTP request that loads the snapshot with the new state.
                 // This varible keeps track of it.
                 let itemIndexToClickOn = 1;
 
@@ -679,6 +681,7 @@ describe('<SnapshotRestoreHome />', () => {
 
           const expected = indexFailures.map(failure => failure.index);
           const found = find('snapshotDetail.indexFailure.index').map(wrapper => wrapper.text());
+
           expect(find('snapshotDetail.indexFailure').length).toBe(2);
           expect(found).toEqual(expected);
         });
@@ -686,16 +689,17 @@ describe('<SnapshotRestoreHome />', () => {
         test('should detail the failure for each index', () => {
           const { find } = testBed;
           const index0Failure = find('snapshotDetail.indexFailure').at(0);
-          const failures = findTestSubject(index0Failure, 'failure');
+          const failuresFound = findTestSubject(index0Failure, 'failure');
 
-          expect(failures.length).toBe(failure1.failures.length);
+          expect(failuresFound.length).toBe(failure1.failures.length);
 
-          const failure0 = failures.at(0);
+          const failure0 = failuresFound.at(0);
           const shardText = findTestSubject(failure0, 'shard').text();
           const reasonText = findTestSubject(failure0, 'reason').text();
+          const [mockedFailure] = failure1.failures;
 
-          expect(shardText).toBe(`Shard ${failure1.failures[0].shard_id}`);
-          expect(reasonText).toBe(`${failure1.failures[0].status}: ${failure1.failures[0].reason}`);
+          expect(shardText).toBe(`Shard ${mockedFailure.shard_id}`);
+          expect(reasonText).toBe(`${mockedFailure.status}: ${mockedFailure.reason}`);
         });
       });
     });

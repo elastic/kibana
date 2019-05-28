@@ -105,7 +105,9 @@ describe('<RepositoryAdd />', () => {
       it('should not allow spaces in the name', () => {
         const { form, actions } = testBed;
         form.setInputValue('nameInput', 'with space');
+
         actions.clickNextButton();
+
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
