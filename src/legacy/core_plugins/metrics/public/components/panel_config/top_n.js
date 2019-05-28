@@ -71,10 +71,6 @@ export class TopNPanelConfig extends Component {
     this.props.onChange({ filter });
   }
 
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
-  }
-
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }

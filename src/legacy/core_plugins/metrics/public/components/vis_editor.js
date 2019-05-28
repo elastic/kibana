@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
-import { isEqual, isEmpty, debounce, get } from 'lodash';
+import { isEqual, isEmpty, debounce } from 'lodash';
 import { fromKueryExpression } from '@kbn/es-query';
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { Visualization } from './visualization';
@@ -211,22 +211,11 @@ export class VisEditor extends Component {
     return null;
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this.props.renderComplete();
   }
 
-  componentDidUpdate(prevProps) {
-    if (
-      prevProps &&
-      prevProps.timeRange &&
-      (prevProps.timeRange.from !== this.props.timeRange.from ||
-        prevProps.timeRange.to !== this.props.timeRange.to)
-    ) {
-      this.setState({
-        dateRangeFrom: get(this.props, 'timeRange.from', 'now-15m'),
-        dateRangeTo: get(this.props, 'timeRange.to', 'now'),
-      });
-    }
+  componentDidUpdate() {
     this.props.renderComplete();
   }
 
