@@ -66,8 +66,7 @@ export function getDefaultPivotState(kibanaContext: KibanaContextValue): DefineP
     valid: false,
   };
 }
-
-function isNameConflict(
+export function isAggNameConflict(
   aggName: AggName,
   aggList: PivotAggsConfigDict,
   groupByList: PivotGroupByConfigDict
@@ -205,7 +204,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     const config: PivotGroupByConfig = groupByOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (isNameConflict(aggName, aggList, groupByList)) {
+    if (isAggNameConflict(aggName, aggList, groupByList)) {
       return;
     }
 
@@ -217,7 +216,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     const groupByListWithoutPrevious = { ...groupByList };
     delete groupByListWithoutPrevious[previousAggName];
 
-    if (isNameConflict(item.aggName, aggList, groupByListWithoutPrevious)) {
+    if (isAggNameConflict(item.aggName, aggList, groupByListWithoutPrevious)) {
       return;
     }
 
@@ -238,7 +237,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     const config: PivotAggsConfig = aggOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (isNameConflict(aggName, aggList, groupByList)) {
+    if (isAggNameConflict(aggName, aggList, groupByList)) {
       return;
     }
 
@@ -250,7 +249,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     const aggListWithoutPrevious = { ...aggList };
     delete aggListWithoutPrevious[previousAggName];
 
-    if (isNameConflict(item.aggName, aggListWithoutPrevious, groupByList)) {
+    if (isAggNameConflict(item.aggName, aggListWithoutPrevious, groupByList)) {
       return;
     }
 
