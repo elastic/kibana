@@ -95,7 +95,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await input.clearValueWithKeyboard();
     }
 
-    public async getMarkdownText() {
+    public async getMarkdownText(): Promise<string> {
       const el = await find.byCssSelector('.tvbEditorVisualization');
       const text = await el.getVisibleText();
       return text;
@@ -115,7 +115,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     > {
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
-      const exists = await find.existsByDisplayedByCssSelector(variablesSelector);
+      const exists = await find.existsByCssSelector(variablesSelector);
       if (!exists) {
         log.debug('variable list is empty');
         return [];
@@ -166,6 +166,23 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async markdownSwitchSubTab(subTab: 'data' | 'options' | 'markdown') {
       const element = await testSubjects.find(`${subTab}-subtab`);
       await element.click();
+    }
+
+    /**
+     * setting label for markdown visualization
+     *
+     * @param {string} variableName
+     * @param type
+     * @memberof VisualBuilderPage
+     */
+    public async setMarkdownDataVariable(variableName: string, type: 'variable' | 'label') {
+      const SELECTOR = type === 'label' ? '[placeholder="Label"]' : '[placeholder="Variable name"]';
+      if (variableName) {
+        await find.setValue(SELECTOR, variableName);
+      } else {
+        const input = await find.byCssSelector(SELECTOR);
+        await input.clearValueWithKeyboard({ charByChar: true });
+      }
     }
 
     public async clickSeriesOption(nth = 0) {
@@ -235,7 +252,15 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       });
     }
 
-    public async selectAggType(value: string, nth: number = 0): Promise<void> {
+    public async toggleAutoApplyChanges() {
+      await find.clickByCssSelector('#tsvbAutoApplyInput');
+    }
+
+    public async applyChanges() {
+      await testSubjects.click('applyBtn');
+    }
+
+    public async selectAggType(value: string, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
       await comboBox.setElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
@@ -314,7 +339,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const isDataExists = await testSubjects.exists('tableView');
       log.debug(`data is already rendered: ${isDataExists}`);
       if (!isDataExists) {
-        await testSubjects.existOrFail('noTSVBDataMessage');
+        await this.checkPreviewIsDisabled();
       }
     }
 
@@ -343,6 +368,42 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const label = labels[aggNth];
       const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
       await comboBox.setElement(fieldEl, field);
+    }
+
+    public async clickColorPicker(): Promise<void> {
+      await testSubjects.click('tvbColorPicker');
+    }
+
+    public async checkColorPickerPopUpIsPresent(): Promise<void> {
+      log.debug(`Check color picker popup is present`);
+      await testSubjects.existOrFail('tvbColorPickerPopUp', { timeout: 5000 });
+    }
+
+    public async changePanelPreview(nth: number = 0): Promise<void> {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const changePreviewBtnArray = await testSubjects.findAll('AddActivatePanelBtn');
+      await changePreviewBtnArray[nth].click();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    public async checkPreviewIsDisabled(): Promise<void> {
+      log.debug(`Check no data message is present`);
+      await testSubjects.existOrFail('noTSVBDataMessage', { timeout: 5000 });
+    }
+
+    public async cloneSeries(nth: number = 0): Promise<void> {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
+      await cloneBtnArray[nth].click();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    public async getLegentItems(): Promise<WebElementWrapper[]> {
+      return await testSubjects.findAll('tsvbLegendItem');
+    }
+
+    public async getSeries(): Promise<WebElementWrapper[]> {
+      return await find.allByCssSelector('.tvbSeriesEditor');
     }
   }
 
