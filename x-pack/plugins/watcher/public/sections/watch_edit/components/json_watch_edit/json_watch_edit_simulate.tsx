@@ -60,10 +60,6 @@ const scheduledTimeUnitOptions = [
 
 const triggeredTimeUnitOptions = [
   {
-    value: TIME_UNITS.MILLISECOND,
-    text: timeUnits[TIME_UNITS.MILLISECOND].labelPlural,
-  },
-  {
     value: TIME_UNITS.SECOND,
     text: timeUnits[TIME_UNITS.SECOND].labelPlural,
   },
