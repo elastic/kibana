@@ -14,13 +14,21 @@ import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
 import { MemoryRouterConfig } from './types';
 
-export const mountComponent = async (
-  Component: ComponentType,
-  memoryRouter: MemoryRouterConfig,
-  store: Store | null,
-  props: any,
-  onRouter: (router: any) => void
-): Promise<ReactWrapper> => {
+interface Config {
+  Component: ComponentType;
+  memoryRouter: MemoryRouterConfig;
+  store: Store | null;
+  props: any;
+  onRouter: (router: any) => void;
+}
+
+const getCompFromConfig = ({
+  Component,
+  memoryRouter,
+  store,
+  props,
+  onRouter,
+}: Config): ComponentType => {
   const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
   let Comp: ComponentType;
@@ -41,6 +49,17 @@ export const mountComponent = async (
     Comp = store !== null ? WithStore(store)(Component) : Component;
   }
 
+  return Comp;
+};
+
+export const mountComponentSync = (config: Config): ReactWrapper => {
+  const Comp = getCompFromConfig(config);
+  return mountWithIntl(<Comp {...config.props} />);
+};
+
+export const mountComponentAsync = async (config: Config): Promise<ReactWrapper> => {
+  const Comp = getCompFromConfig(config);
+
   /**
    * In order for hooks with effects to work in our tests
    * we need to wrap the mounting under the new act "async"
@@ -53,7 +72,7 @@ export const mountComponent = async (
 
   // @ts-ignore
   await act(async () => {
-    component = mountWithIntl(<Comp {...props} />);
+    component = mountWithIntl(<Comp {...config.props} />);
   });
 
   // @ts-ignore

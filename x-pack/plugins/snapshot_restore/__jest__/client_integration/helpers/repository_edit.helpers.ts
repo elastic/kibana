@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { RepositoryEdit } from '../../../public/app/sections/repository_edit';
 import { WithProviders } from './providers';
 import { REPOSITORY_NAME } from './constant';
 
-const testBedConfig = {
+const testBedConfig: TestBedConfig = {
   memoryRouter: {
     initialEntries: [`/${REPOSITORY_NAME}`],
     componentRoutePath: '/:name',
   },
+  doMountAsync: true,
 };
 
 export const setup = registerTestBed<TestSubjects>(WithProviders(RepositoryEdit), testBedConfig);

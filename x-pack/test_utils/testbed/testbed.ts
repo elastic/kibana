@@ -7,7 +7,11 @@
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
-import { mountComponent, getJSXComponentWithProps } from './mount_component';
+import {
+  mountComponentSync,
+  mountComponentAsync,
+  getJSXComponentWithProps,
+} from './mount_component';
 import { TestBedConfig, TestBed, SetupFunc } from './types';
 
 const defaultConfig: TestBedConfig = {
@@ -48,6 +52,7 @@ export const registerTestBed = <T extends string = string>(
     defaultProps = defaultConfig.defaultProps,
     memoryRouter = defaultConfig.memoryRouter!,
     store = defaultConfig.store,
+    doMountAsync = false,
   } = config || {};
 
   // Keep a reference to the React Router
@@ -70,176 +75,189 @@ export const registerTestBed = <T extends string = string>(
    */
   onRouter(reactRouterMock);
 
-  const setup: SetupFunc<T> = async props => {
+  const setup: SetupFunc<T> = props => {
     // If a function is provided we execute it
     const storeToMount = typeof store === 'function' ? store() : store!;
-
-    const component = await mountComponent(
+    const mountConfig = {
       Component,
       memoryRouter,
-      storeToMount,
-      {
+      store: storeToMount,
+      props: {
         ...defaultProps,
         ...props,
       },
-      onRouter
-    );
+      onRouter,
+    };
 
-    /**
-     * ----------------------------------------------------------------
-     * Utils
-     * ----------------------------------------------------------------
-     */
+    if (doMountAsync) {
+      return mountComponentAsync(mountConfig).then(onComponentMounted);
+    }
 
-    const find: TestBed<T>['find'] = (testSubject: T) => {
-      const testSubjectToArray = testSubject.split('.');
+    return onComponentMounted(mountComponentSync(mountConfig));
 
-      return testSubjectToArray.reduce((reactWrapper, subject, i) => {
-        const target = findTestSubject(reactWrapper, subject);
-        if (!target.length && i < testSubjectToArray.length - 1) {
+    // ---------------------
+
+    function onComponentMounted(component: ReactWrapper) {
+      /**
+       * ----------------------------------------------------------------
+       * Utils
+       * ----------------------------------------------------------------
+       */
+
+      const find: TestBed<T>['find'] = (testSubject: T) => {
+        const testSubjectToArray = testSubject.split('.');
+
+        return testSubjectToArray.reduce((reactWrapper, subject, i) => {
+          const target = findTestSubject(reactWrapper, subject);
+          if (!target.length && i < testSubjectToArray.length - 1) {
+            throw new Error(
+              `Can't access nested test subject "${
+                testSubjectToArray[i + 1]
+              }" of unknown node "${subject}"`
+            );
+          }
+          return target;
+        }, component);
+      };
+
+      const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
+        find(testSubject).length === count;
+
+      const setProps: TestBed<T>['setProps'] = updatedProps => {
+        if (memoryRouter.wrapComponent !== false) {
           throw new Error(
-            `Can't access nested test subject "${
-              testSubjectToArray[i + 1]
-            }" of unknown node "${subject}"`
+            'setProps() can only be called on a component **not** wrapped by a router route.'
           );
         }
-        return target;
-      }, component);
-    };
+        if (store === null) {
+          return component.setProps({ ...defaultProps, ...updatedProps });
+        }
+        // Update the props on the Redux Provider children
+        return component.setProps({
+          children: getJSXComponentWithProps(Component, { ...defaultProps, ...updatedProps }),
+        });
+      };
 
-    const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
-      find(testSubject).length === count;
+      /**
+       * ----------------------------------------------------------------
+       * Forms
+       * ----------------------------------------------------------------
+       */
 
-    const setProps: TestBed<T>['setProps'] = updatedProps => {
-      if (memoryRouter.wrapComponent !== false) {
-        throw new Error(
-          'setProps() can only be called on a component **not** wrapped by a router route.'
-        );
-      }
-      if (store === null) {
-        return component.setProps({ ...defaultProps, ...updatedProps });
-      }
-      // Update the props on the Redux Provider children
-      return component.setProps({
-        children: getJSXComponentWithProps(Component, { ...defaultProps, ...updatedProps }),
-      });
-    };
+      const setInputValue: TestBed<T>['form']['setInputValue'] = (
+        input,
+        value,
+        isAsync = false
+      ) => {
+        const formInput = typeof input === 'string' ? find(input) : (input as ReactWrapper);
 
-    /**
-     * ----------------------------------------------------------------
-     * Forms
-     * ----------------------------------------------------------------
-     */
+        if (!formInput.length) {
+          throw new Error(`Input "${input}" was not found.`);
+        }
+        formInput.simulate('change', { target: { value } });
+        component.update();
 
-    const setInputValue: TestBed<T>['form']['setInputValue'] = (input, value, isAsync = false) => {
-      const formInput = typeof input === 'string' ? find(input) : (input as ReactWrapper);
+        if (!isAsync) {
+          return;
+        }
+        return new Promise(resolve => setTimeout(resolve));
+      };
 
-      if (!formInput.length) {
-        throw new Error(`Input "${input}" was not found.`);
-      }
-      formInput.simulate('change', { target: { value } });
-      component.update();
+      const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
+        testSubject,
+        isChecked = true
+      ) => {
+        const checkBox = find(testSubject);
+        if (!checkBox.length) {
+          throw new Error(`"${testSubject}" was not found.`);
+        }
+        checkBox.simulate('change', { target: { checked: isChecked } });
+      };
 
-      if (!isAsync) {
-        return;
-      }
-      return new Promise(resolve => setTimeout(resolve));
-    };
+      const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = selectCheckBox; // Same API as "selectCheckBox"
 
-    const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
-      testSubject,
-      isChecked = true
-    ) => {
-      const checkBox = find(testSubject);
-      if (!checkBox.length) {
-        throw new Error(`"${testSubject}" was not found.`);
-      }
-      checkBox.simulate('change', { target: { checked: isChecked } });
-    };
+      const setComboBoxValue: TestBed<T>['form']['setComboBoxValue'] = (
+        comboBoxTestSubject,
+        value
+      ) => {
+        const comboBox = find(comboBoxTestSubject);
+        const formInput = findTestSubject(comboBox, 'comboBoxSearchInput');
+        setInputValue(formInput, value);
 
-    const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = selectCheckBox; // Same API as "selectCheckBox"
+        // keyCode 13 === ENTER
+        comboBox.simulate('keydown', { keyCode: 13 });
+        component.update();
+      };
 
-    const setComboBoxValue: TestBed<T>['form']['setComboBoxValue'] = (
-      comboBoxTestSubject,
-      value
-    ) => {
-      const comboBox = find(comboBoxTestSubject);
-      const formInput = findTestSubject(comboBox, 'comboBoxSearchInput');
-      setInputValue(formInput, value);
+      const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = () => {
+        const errorMessagesWrappers = component.find('.euiFormErrorText');
+        return errorMessagesWrappers.map(err => err.text());
+      };
 
-      // keyCode 13 === ENTER
-      comboBox.simulate('keydown', { keyCode: 13 });
-      component.update();
-    };
+      /**
+       * ----------------------------------------------------------------
+       * Tables
+       * ----------------------------------------------------------------
+       */
 
-    const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = () => {
-      const errorMessagesWrappers = component.find('.euiFormErrorText');
-      return errorMessagesWrappers.map(err => err.text());
-    };
+      /**
+       * Parse an EUI table and return meta data information about its rows and colum content.
+       *
+       * @param tableTestSubject The data test subject of the EUI table
+       */
+      const getMetaData: TestBed<T>['table']['getMetaData'] = tableTestSubject => {
+        const table = find(tableTestSubject);
 
-    /**
-     * ----------------------------------------------------------------
-     * Tables
-     * ----------------------------------------------------------------
-     */
+        if (!table.length) {
+          throw new Error(`Eui Table "${tableTestSubject}" not found.`);
+        }
 
-    /**
-     * Parse an EUI table and return meta data information about its rows and colum content.
-     *
-     * @param tableTestSubject The data test subject of the EUI table
-     */
-    const getMetaData: TestBed<T>['table']['getMetaData'] = tableTestSubject => {
-      const table = find(tableTestSubject);
+        const rows = table
+          .find('tr')
+          .slice(1) // we remove the first row as it is the table header
+          .map(row => ({
+            reactWrapper: row,
+            columns: row.find('td').map(col => ({
+              reactWrapper: col,
+              // We can't access the td value with col.text() because
+              // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
+              value: col.find('.euiTableCellContent').text(),
+            })),
+          }));
 
-      if (!table.length) {
-        throw new Error(`Eui Table "${tableTestSubject}" not found.`);
-      }
+        // Also output the raw cell values, in the following format: [[td0, td1, td2], [td0, td1, td2]]
+        const tableCellsValues = rows.map(({ columns }) => columns.map(col => col.value));
+        return { rows, tableCellsValues };
+      };
 
-      const rows = table
-        .find('tr')
-        .slice(1) // we remove the first row as it is the table header
-        .map(row => ({
-          reactWrapper: row,
-          columns: row.find('td').map(col => ({
-            reactWrapper: col,
-            // We can't access the td value with col.text() because
-            // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
-            value: col.find('.euiTableCellContent').text(),
-          })),
-        }));
+      const navigateTo = (_url: string) => {
+        const url =
+          _url[0] === '#'
+            ? _url.replace('#', '') // remove the begging hash as the memory router does not understand them
+            : _url;
+        router.history.push(url);
+      };
 
-      // Also output the raw cell values, in the following format: [[td0, td1, td2], [td0, td1, td2]]
-      const tableCellsValues = rows.map(({ columns }) => columns.map(col => col.value));
-      return { rows, tableCellsValues };
-    };
-
-    const navigateTo = (_url: string) => {
-      const url =
-        _url[0] === '#'
-          ? _url.replace('#', '') // remove the begging hash as the memory router does not understand them
-          : _url;
-      router.history.push(url);
-    };
-
-    return {
-      component,
-      exists,
-      find,
-      setProps,
-      table: {
-        getMetaData,
-      },
-      form: {
-        setInputValue,
-        selectCheckBox,
-        toggleEuiSwitch,
-        setComboBoxValue,
-        getErrorsMessages,
-      },
-      router: {
-        navigateTo,
-      },
-    };
+      return {
+        component,
+        exists,
+        find,
+        setProps,
+        table: {
+          getMetaData,
+        },
+        form: {
+          setInputValue,
+          selectCheckBox,
+          toggleEuiSwitch,
+          setComboBoxValue,
+          getErrorsMessages,
+        },
+        router: {
+          navigateTo,
+        },
+      };
+    }
   };
 
   return setup;

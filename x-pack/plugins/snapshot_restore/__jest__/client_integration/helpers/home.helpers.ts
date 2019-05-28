@@ -22,6 +22,7 @@ const testBedConfig: TestBedConfig = {
     initialEntries: [`${BASE_PATH}/repositories`],
     componentRoutePath: `${BASE_PATH}/:section(repositories|snapshots)/:repositoryName?/:snapshotId*`,
   },
+  doMountAsync: true,
 };
 
 const initTestBed = registerTestBed(WithProviders(SnapshotRestoreHome), testBedConfig);

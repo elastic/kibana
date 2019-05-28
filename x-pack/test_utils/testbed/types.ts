@@ -7,7 +7,7 @@
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 
-export type SetupFunc<T> = (props?: any) => Promise<TestBed<T>>;
+export type SetupFunc<T> = (props?: any) => TestBed<T> | Promise<TestBed<T>>;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */
@@ -117,6 +117,8 @@ export interface TestBedConfig {
   memoryRouter?: MemoryRouterConfig;
   /** An optional redux store. You can also provide a function that returns a store. */
   store?: (() => Store) | Store | null;
+  /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
+  doMountAsync?: boolean;
 }
 
 export interface MemoryRouterConfig {

@@ -9,7 +9,9 @@ import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/app/sections/repository_add';
 import { WithProviders } from './providers';
 
-const initTestBed = registerTestBed<TestSubjects>(WithProviders(RepositoryAdd));
+const initTestBed = registerTestBed<TestSubjects>(WithProviders(RepositoryAdd), {
+  doMountAsync: true,
+});
 
 export interface RepositoryAddTestBed extends TestBed<TestSubjects> {
   actions: {
