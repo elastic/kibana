@@ -128,13 +128,7 @@ describe('Data Frame: Define Pivot Common', () => {
     expect(pivotPreviewDevConsoleStatement).toBe(`POST _data_frame/transforms/_preview
 {
   "source": {
-    "index": "the-index-pattern-title",
-    "query": {
-      "query_string": {
-        "query": "*",
-        "default_operator": "AND"
-      }
-    }
+    "index": "the-index-pattern-title"
   },
   "pivot": {
     "group_by": {
