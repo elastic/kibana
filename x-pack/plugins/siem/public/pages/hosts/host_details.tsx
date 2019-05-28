@@ -10,12 +10,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import chrome, { Breadcrumb } from 'ui/chrome';
-import { documentationLinks } from 'ui/documentation_links';
+import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
-import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -34,11 +32,11 @@ import { LastEventIndexKey } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
+import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
 import { UrlStateContainer } from '../../components/url_state';
 
-const basePath = chrome.getBasePath();
 const type = hostsModel.HostsType.details;
 
 const HostOverviewManage = manageQuery(HostOverview);
@@ -194,17 +192,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
           <>
             <HeaderPage title={hostName} />
 
-            <EmptyPage
-              actionPrimaryIcon="gear"
-              actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-              actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-              actionSecondaryIcon="popout"
-              actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
-              actionSecondaryTarget="_blank"
-              actionSecondaryUrl={documentationLinks.siem}
-              data-test-subj="empty-page"
-              title={i18n.EMPTY_TITLE}
-            />
+            <HostsEmptyPage />
           </>
         )
       }

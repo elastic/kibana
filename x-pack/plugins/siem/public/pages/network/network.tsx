@@ -10,10 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import chrome from 'ui/chrome';
-import { documentationLinks } from 'ui/documentation_links';
 
-import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -29,10 +26,9 @@ import { LastEventIndexKey } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
+import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { UrlStateContainer } from '../../components/url_state';
-
-const basePath = chrome.getBasePath();
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -135,17 +131,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
         <>
           <HeaderPage title={i18n.PAGE_TITLE} />
 
-          <EmptyPage
-            actionPrimaryIcon="gear"
-            actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-            actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-            actionSecondaryIcon="popout"
-            actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
-            actionSecondaryTarget="_blank"
-            actionSecondaryUrl={documentationLinks.siem}
-            data-test-subj="empty-page"
-            title={i18n.EMPTY_TITLE}
-          />
+          <NetworkEmptyPage />
         </>
       )
     }
