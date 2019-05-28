@@ -39,34 +39,34 @@ export class IndexSettings extends Component {
     if (this.props.indexName !== indexName) {
       this._setIndexName(this.props.indexName);
     }
-    this._getIndexNames();
-    this._getIndexPatterns();
   }
 
-  _getIndexNames() {
-    if (!this.state.indexNames) {
-      getExistingIndices().then(indices => {
-        const indexNames = indices
-          ? indices.map(({ name }) => name)
-          : [];
-        this.setState({ indexNames });
-      });
+  async _getIndexNames() {
+    if (this.state.indexNames) {
+      return this.state.indexNames;
     }
+    const indices = await getExistingIndices();
+    const indexNames = indices
+      ? indices.map(({ name }) => name)
+      : [];
+    this.setState({ indexNames });
+    return indexNames;
   }
 
-  _getIndexPatterns() {
-    if (!this.state.indexPatterns) {
-      getExistingIndexPatterns().then(patterns => {
-        const indexPatterns = patterns
-          ? patterns.map(({ name }) => name)
-          : [];
-        this.setState({ indexPatterns });
-      });
+  async _getIndexPatterns() {
+    if (this.state.indexPatterns) {
+      return this.state.indexPatterns;
     }
+    const patterns = await getExistingIndexPatterns();
+    const indexPatterns = patterns
+      ? patterns.map(({ name }) => name)
+      : [];
+    this.setState({ indexPatterns });
+    return indexPatterns;
   }
 
   _setIndexName = async name => {
-    const errorMessage = this._isIndexNameAndPatternValid(name);
+    const errorMessage = await this._isIndexNameAndPatternValid(name);
     return this.setState({
       indexName: name,
       indexNameError: errorMessage
@@ -79,8 +79,9 @@ export class IndexSettings extends Component {
     this.props.setIndexName(name);
   }
 
-  _isIndexNameAndPatternValid = name => {
-    const { indexNames, indexPatterns } = this.state;
+  _isIndexNameAndPatternValid = async name => {
+    const indexNames = await this._getIndexNames();
+    const indexPatterns = await this._getIndexPatterns();
     if (indexNames.find(i => i === name) || indexPatterns.find(i => i === name)) {
       return (
         <FormattedMessage
