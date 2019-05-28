@@ -37,6 +37,11 @@ export interface LocationMappedToModel {
   [CONSTANTS.hostsPage]: hostsModel.HostsType.page;
   [CONSTANTS.networkDetails]: networkModel.NetworkType.details;
   [CONSTANTS.networkPage]: networkModel.NetworkType.page;
+  [key: string]:
+    | networkModel.NetworkType.page
+    | networkModel.NetworkType.details
+    | hostsModel.HostsType.details
+    | hostsModel.HostsType.page;
 }
 
 export type LocationKeysType = keyof LocationMappedToModel;

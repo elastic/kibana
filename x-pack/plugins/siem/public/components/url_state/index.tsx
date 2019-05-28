@@ -99,7 +99,6 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
         location,
         replaceStateKeyInQueryString(urlStateKey, urlState)(getQueryStringFromLocation(location))
       );
-
       if (newLocation !== location) {
         history.replace(newLocation);
       }
@@ -176,9 +175,9 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
                 this.props.indexPattern
               ),
             };
-
             if (
-              kqlQueryStateData.queryLocation === (CONSTANTS.hostsPage || CONSTANTS.hostsDetails)
+              kqlQueryStateData.queryLocation === CONSTANTS.hostsPage ||
+              kqlQueryStateData.queryLocation === CONSTANTS.hostsDetails
             ) {
               const hostsType = LOCATION_MAPPED_TO_MODEL[kqlQueryStateData.queryLocation];
               this.props.setHostsKql({
@@ -187,8 +186,8 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
               });
             }
             if (
-              kqlQueryStateData.queryLocation ===
-              (CONSTANTS.networkPage || CONSTANTS.networkDetails)
+              kqlQueryStateData.queryLocation === CONSTANTS.networkPage ||
+              kqlQueryStateData.queryLocation === CONSTANTS.networkDetails
             ) {
               const networkType = LOCATION_MAPPED_TO_MODEL[kqlQueryStateData.queryLocation];
               this.props.setNetworkKql({
