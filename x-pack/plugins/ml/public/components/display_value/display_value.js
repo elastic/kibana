@@ -22,7 +22,7 @@ export function DisplayValue({ value }) {
     formattedValue = value;
   } else {
     formattedValue = (
-      <EuiToolTip content={value}>
+      <EuiToolTip content={value} anchorClassName="valueWrapper">
         <span>
           {value}
         </span>
