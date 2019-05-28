@@ -191,6 +191,11 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     ]
   );
 
+  // TODO This should use the actual value of `indices.query.bool.max_clause_count`
+  const maxIndexFields = 1024;
+  const numIndexFields = indexPattern.fields.length;
+  const disabledQuery = numIndexFields > maxIndexFields;
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
@@ -201,28 +206,42 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                 label={i18n.translate('xpack.ml.dataframe.definePivotForm.indexPatternLabel', {
                   defaultMessage: 'Index pattern',
                 })}
+                helpText={
+                  disabledQuery
+                    ? i18n.translate('xpack.ml.dataframe.definePivotForm.indexPatternHelpText', {
+                        defaultMessage:
+                          'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
+                        values: {
+                          maxIndexFields,
+                          numIndexFields,
+                        },
+                      })
+                    : ''
+                }
               >
                 <span>{kibanaContext.currentIndexPattern.title}</span>
               </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.definePivotForm.queryLabel', {
-                  defaultMessage: 'Query',
-                })}
-                helpText={i18n.translate('xpack.ml.dataframe.definePivotForm.queryHelpText', {
-                  defaultMessage: 'Use a query string to filter the source data (optional).',
-                })}
-              >
-                <EuiFieldSearch
-                  placeholder={i18n.translate(
-                    'xpack.ml.dataframe.definePivotForm.queryPlaceholder',
-                    {
-                      defaultMessage: 'Search...',
-                    }
-                  )}
-                  onChange={searchHandler}
-                  value={search === defaultSearch ? emptySearch : search}
-                />
-              </EuiFormRow>
+              {!disabledQuery && (
+                <EuiFormRow
+                  label={i18n.translate('xpack.ml.dataframe.definePivotForm.queryLabel', {
+                    defaultMessage: 'Query',
+                  })}
+                  helpText={i18n.translate('xpack.ml.dataframe.definePivotForm.queryHelpText', {
+                    defaultMessage: 'Use a query string to filter the source data (optional).',
+                  })}
+                >
+                  <EuiFieldSearch
+                    placeholder={i18n.translate(
+                      'xpack.ml.dataframe.definePivotForm.queryPlaceholder',
+                      {
+                        defaultMessage: 'Search...',
+                      }
+                    )}
+                    onChange={searchHandler}
+                    value={search === defaultSearch ? emptySearch : search}
+                  />
+                </EuiFormRow>
+              )}
             </Fragment>
           )}
 
