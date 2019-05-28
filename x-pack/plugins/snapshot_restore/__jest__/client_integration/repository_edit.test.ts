@@ -8,15 +8,16 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers, nextTick, TestBed, getRandomString } from './helpers';
 import { RepositoryForm } from '../../public/app/components/repository_form';
-import { TestSubjects } from './helpers/repository_edit.helpers';
+import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
+import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
 import { REPOSITORY_EDIT } from './helpers/constant';
 
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
 
 describe('<RepositoryEdit />', () => {
-  let testBed: TestBed<TestSubjects>;
-  let testBedRepositoryAdd: TestBed;
+  let testBed: TestBed<RepositoryEditTestSubjects>;
+  let testBedRepositoryAdd: TestBed<RepositoryAddTestSubjects>;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
