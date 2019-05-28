@@ -63,17 +63,11 @@ export class AlertsClient {
       references,
     });
     const scheduledTask = await this.scheduleAlert(createdAlert.id, data);
-    const updatedAlert = await this.savedObjectsClient.update('alert', createdAlert.id, {
+    await this.savedObjectsClient.update('alert', createdAlert.id, {
       scheduledTaskId: scheduledTask.id,
     });
-    return {
-      ...createdAlert,
-      ...updatedAlert,
-      attributes: {
-        ...createdAlert.attributes,
-        ...updatedAlert.attributes,
-      },
-    };
+    createdAlert.attributes.scheduledTaskId = scheduledTask.id;
+    return createdAlert;
   }
 
   public async get({ id }: { id: string }) {
@@ -89,29 +83,37 @@ export class AlertsClient {
 
   public async delete({ id }: { id: string }) {
     const alertSavedObject = await this.savedObjectsClient.get('alert', id);
+    const removeResult = await this.savedObjectsClient.delete('alert', id);
     await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
-    return await this.savedObjectsClient.delete('alert', id);
+    return removeResult;
   }
 
   public async update({ id, data, options = {} }: UpdateOptions) {
-    const { alertTypeId, interval } = data;
     // Throws an error if alert type is invalid
-    this.alertTypeRegistry.get(alertTypeId);
+    this.alertTypeRegistry.get(data.alertTypeId);
     // Re-create scheduled task if alertTypeId or interval changed
     const currentSavedObject = await this.savedObjectsClient.get('alert', id);
-    if (
-      currentSavedObject.attributes.alertTypeId !== alertTypeId ||
-      currentSavedObject.attributes.interval !== interval
-    ) {
-      await this.taskManager.remove(currentSavedObject.attributes.scheduledTaskId);
-      const scheduledTask = await this.scheduleAlert(id, data);
-      data.scheduledTaskId = scheduledTask.id;
-    }
     const references = this.extractReferences(data);
-    return await this.savedObjectsClient.update<any>('alert', id, data, {
+    const updatedObject = await this.savedObjectsClient.update<any>('alert', id, data, {
       ...options,
       references,
     });
+    if (this.shouldRescheduleTask(currentSavedObject.attributes, data)) {
+      await this.taskManager.remove(currentSavedObject.attributes.scheduledTaskId);
+      const scheduledTask = await this.scheduleAlert(id, data);
+      await this.savedObjectsClient.update<any>('alert', id, {
+        scheduledTaskId: scheduledTask.id,
+      });
+      updatedObject.attributes.scheduledTaskId = scheduledTask.id;
+    }
+    return updatedObject;
+  }
+
+  private shouldRescheduleTask(previousAlert: Alert, updatedAlert: Alert) {
+    return (
+      previousAlert.alertTypeId !== updatedAlert.alertTypeId ||
+      previousAlert.interval !== updatedAlert.interval
+    );
   }
 
   private async scheduleAlert(id: string, alert: Alert) {
