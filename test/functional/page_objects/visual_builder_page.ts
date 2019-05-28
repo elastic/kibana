@@ -294,6 +294,84 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await el.pressKeys(browser.keys.RETURN);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+
+    /**
+     * check that table visualization is visible and ready for interact
+     *
+     * @returns {Promise<void>}
+     * @memberof VisualBuilderPage
+     */
+    public async checkTableTabIsPresent(): Promise<void> {
+      await testSubjects.existOrFail('visualizationLoader');
+      const isDataExists = await testSubjects.exists('tableView');
+      log.debug(`data is already rendered: ${isDataExists}`);
+      if (!isDataExists) {
+        await this.checkPreviewIsDisabled();
+      }
+    }
+
+    /**
+     * set label name for aggregation
+     *
+     * @param {string} labelName
+     * @param {number} [nth=0]
+     * @memberof VisualBuilderPage
+     */
+    public async setLabel(labelName: string, nth: number = 0): Promise<void> {
+      const input = (await find.allByCssSelector('[placeholder="Label"]'))[nth];
+      await input.type(labelName);
+    }
+
+    /**
+     * set field for type of aggregation
+     *
+     * @param {string} field name of field
+     * @param {number} [aggNth=0] number of aggregation. Start by zero
+     * @default 0
+     * @memberof VisualBuilderPage
+     */
+    public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
+      const labels = await testSubjects.findAll('aggRow');
+      const label = labels[aggNth];
+      const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
+      await comboBox.setElement(fieldEl, field);
+    }
+
+    public async clickColorPicker(): Promise<void> {
+      await testSubjects.click('tvbColorPicker');
+    }
+
+    public async checkColorPickerPopUpIsPresent(): Promise<void> {
+      log.debug(`Check color picker popup is present`);
+      await testSubjects.existOrFail('tvbColorPickerPopUp', { timeout: 5000 });
+    }
+
+    public async changePanelPreview(nth: number = 0): Promise<void> {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const changePreviewBtnArray = await testSubjects.findAll('AddActivatePanelBtn');
+      await changePreviewBtnArray[nth].click();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    public async checkPreviewIsDisabled(): Promise<void> {
+      log.debug(`Check no data message is present`);
+      await testSubjects.existOrFail('noTSVBDataMessage', { timeout: 5000 });
+    }
+
+    public async cloneSeries(nth: number = 0): Promise<void> {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
+      await cloneBtnArray[nth].click();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    public async getLegentItems(): Promise<WebElementWrapper[]> {
+      return await testSubjects.findAll('tsvbLegendItem');
+    }
+
+    public async getSeries(): Promise<WebElementWrapper[]> {
+      return await find.allByCssSelector('.tvbSeriesEditor');
+    }
   }
 
   return new VisualBuilderPage();
