@@ -36,14 +36,13 @@ interface CreateOptions {
   data: Alert;
   options?: {
     migrationVersion?: Record<string, string>;
-    references?: SavedObjectReference[];
   };
 }
 
 interface UpdateOptions {
   id: string;
   data: Alert;
-  options?: { version?: string; references?: SavedObjectReference[] };
+  options?: { version?: string };
 }
 
 export class AlertsClient {
@@ -58,7 +57,11 @@ export class AlertsClient {
   }
 
   public async create({ data, options }: CreateOptions) {
-    const createdAlert = await this.savedObjectsClient.create<any>('alert', data, options);
+    const references = this.extractReferences(data);
+    const createdAlert = await this.savedObjectsClient.create<any>('alert', data, {
+      ...options,
+      references,
+    });
     const scheduledTask = await this.scheduleAlert(createdAlert.id, data);
     const updatedAlert = await this.savedObjectsClient.update('alert', createdAlert.id, {
       scheduledTaskId: scheduledTask.id,
@@ -104,7 +107,11 @@ export class AlertsClient {
       const scheduledTask = await this.scheduleAlert(id, data);
       data.scheduledTaskId = scheduledTask.id;
     }
-    return await this.savedObjectsClient.update<any>('alert', id, data, options);
+    const references = this.extractReferences(data);
+    return await this.savedObjectsClient.update<any>('alert', id, data, {
+      ...options,
+      references,
+    });
   }
 
   private async scheduleAlert(id: string, alert: Alert) {
@@ -115,5 +122,17 @@ export class AlertsClient {
       },
       state: {},
     });
+  }
+
+  private extractReferences(alert: Alert) {
+    const references: SavedObjectReference[] = [];
+    for (let i = 0; i < alert.actions.length; i++) {
+      references.push({
+        name: `action_${i}`,
+        type: 'action',
+        id: alert.actions[i].id,
+      });
+    }
+    return references;
   }
 }

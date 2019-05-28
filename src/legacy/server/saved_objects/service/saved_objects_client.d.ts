@@ -63,6 +63,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
 
 export interface UpdateOptions extends BaseOptions {
   version?: string;
+  references?: SavedObjectReference[];
 }
 
 export interface BulkGetObject {
