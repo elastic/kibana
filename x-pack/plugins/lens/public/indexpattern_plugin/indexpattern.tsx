@@ -10,7 +10,7 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import { Datasource, DataType } from '..';
-import { DatasourceDimensionPanelProps, DatasourceDataPanelProps, Operation } from '../types';
+import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
 import { getIndexPatterns } from './loader';
 
 type OperationType = 'value' | 'terms' | 'date_histogram';
@@ -20,7 +20,7 @@ interface IndexPatternColumn {
   operationId: string;
   label: string;
   dataType: DataType;
-  isBucketed: false;
+  isBucketed: boolean;
 
   // Private
   operationType: OperationType;
@@ -106,7 +106,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
     dataType: field.type as DataType,
     isBucketed: false,
 
-    operationType: 'value',
+    operationType: 'value' as OperationType,
   }));
 
   const filteredColumns = columns.filter(col => {
@@ -120,10 +120,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
     });
   });
 
-  let selectedColumn: IndexPatternColumn | null = null;
-  if (props.columnId && props.state.columns[props.columnId]) {
-    selectedColumn = props.state.columns[props.columnId];
-  }
+  const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
 
   return (
     <div>
@@ -147,10 +144,6 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
         singleSelection={{ asPlainText: true }}
         isClearable={false}
         onChange={choices => {
-          if (!props.columnId) {
-            return;
-          }
-
           const column: IndexPatternColumn = columns.find(
             ({ operationId }) => operationId === choices[0].value
           )!;
@@ -220,16 +213,13 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         },
         getOperationForColumnId: (columnId: string) => {
           const column = state.columns[columnId];
-          if (columnId) {
-            const { dataType, label, isBucketed, operationId } = column;
-            return {
-              id: operationId,
-              label,
-              dataType,
-              isBucketed,
-            };
-          }
-          return null;
+          const { dataType, label, isBucketed, operationId } = column;
+          return {
+            id: operationId,
+            label,
+            dataType,
+            isBucketed,
+          };
         },
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
