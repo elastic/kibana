@@ -19,7 +19,9 @@ export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex:
 export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => {}) => (
   WrappedComponent: ComponentType
 ) => {
-  return withRouter(
+  // Create a class component that will catch the router
+  // and forward it to our "onRouter()" handler.
+  const CatchRouter = withRouter(
     class extends Component<any> {
       componentDidMount() {
         const { match, location, history } = this.props;
@@ -27,14 +29,16 @@ export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => 
       }
 
       render() {
-        return (
-          <Route
-            path={componentRoutePath}
-            render={props => <WrappedComponent {...props} {...this.props} />}
-          />
-        );
+        return <WrappedComponent {...this.props} />;
       }
     }
+  );
+
+  return (props: any) => (
+    <Route
+      path={componentRoutePath}
+      render={routerProps => <CatchRouter {...routerProps} {...props} />}
+    />
   );
 };
 

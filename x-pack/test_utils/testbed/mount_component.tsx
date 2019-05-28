@@ -31,22 +31,15 @@ const getCompFromConfig = ({
 }: Config): ComponentType => {
   const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
-  let Comp: ComponentType;
+  let Comp: ComponentType = store !== null ? WithStore(store)(Component) : Component;
 
   if (wrapWithRouter) {
     const { componentRoutePath, initialEntries, initialIndex } = memoryRouter!;
 
     // Wrap the componenet with a MemoryRouter and attach it to a react-router <Route />
     Comp = WithMemoryRouter(initialEntries, initialIndex)(
-      WithRoute(componentRoutePath, onRouter)(Component)
+      WithRoute(componentRoutePath, onRouter)(Comp)
     );
-
-    // Add the Redux Provider
-    if (store !== null) {
-      Comp = WithStore(store)(Comp);
-    }
-  } else {
-    Comp = store !== null ? WithStore(store)(Component) : Component;
   }
 
   return Comp;
