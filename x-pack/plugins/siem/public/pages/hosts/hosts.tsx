@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
+import { documentationLinks } from 'ui/documentation_links';
 
 import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
@@ -63,7 +64,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
 
           <HeaderPage
             subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-            title={i18n.HOSTS}
+            title={i18n.PAGE_TITLE}
           />
 
           <GlobalTime>
@@ -200,12 +201,20 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
           </GlobalTime>
         </StickyContainer>
       ) : (
-        <EmptyPage
-          title={i18n.NO_AUDITBEAT_INDICES}
-          message={i18n.LETS_ADD_SOME}
-          actionLabel={i18n.SETUP_INSTRUCTIONS}
-          actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-        />
+        <>
+          <HeaderPage title={i18n.PAGE_TITLE} />
+
+          <EmptyPage
+            actionPrimaryIcon="gear"
+            actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
+            actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+            actionSecondaryIcon="popout"
+            actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
+            actionSecondaryTarget="_blank"
+            actionSecondaryUrl={documentationLinks.siem}
+            title={i18n.EMPTY_TITLE}
+          />
+        </>
       )
     }
   </WithSource>
