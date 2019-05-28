@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 
 interface EmptyPageProps {
-  actionPrimaryIcon?: string;
+  actionPrimaryIcon?: IconType;
   actionPrimaryLabel: string;
   actionPrimaryTarget?: string;
   actionPrimaryUrl: string;
-  actionSecondaryIcon?: string;
+  actionSecondaryIcon?: IconType;
   actionSecondaryLabel?: string;
   actionSecondaryTarget?: string;
   actionSecondaryUrl?: string;
