@@ -29,23 +29,23 @@ interface ExecuteOptions {
   params: Record<string, any>;
 }
 
-export class ActionTypeService {
+export class ActionTypeRegistry {
   private actionTypes: Record<string, ActionType> = {};
 
   /**
-   * Returns if the action type service has the given action type registered
+   * Returns if the action type registry has the given action type registered
    */
   public has(id: string) {
     return !!this.actionTypes[id];
   }
 
   /**
-   * Registers an action type to the action type service
+   * Registers an action type to the action type registry
    */
   public register(actionType: ActionType) {
     if (this.has(actionType.id)) {
       throw new Error(
-        i18n.translate('xpack.actions.actionTypeService.register.duplicateActionTypeError', {
+        i18n.translate('xpack.actions.actionTypeRegistry.register.duplicateActionTypeError', {
           defaultMessage: 'Action type "{id}" is already registered.',
           values: {
             id: actionType.id,
@@ -62,7 +62,7 @@ export class ActionTypeService {
   public get(id: string) {
     if (!this.has(id)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.actions.actionTypeService.get.missingActionTypeError', {
+        i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeError', {
           defaultMessage: 'Action type "{id}" is not registered.',
           values: {
             id,

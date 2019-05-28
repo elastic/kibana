@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { ActionTypeService } from '../action_type_service';
+import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from '../actions_client';
 
 const savedObjectsClient = {
@@ -24,18 +24,18 @@ beforeEach(() => jest.resetAllMocks());
 describe('create()', () => {
   test('creates an action with all given properties', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry();
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.create({
+    const result = await actionsClient.create({
       data: {
         description: 'my description',
         actionTypeId: 'my-action-type',
@@ -75,12 +75,12 @@ describe('create()', () => {
   });
 
   test('validates actionTypeConfig', async () => {
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
-    actionTypeService.register({
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
@@ -93,7 +93,7 @@ describe('create()', () => {
       async executor() {},
     });
     await expect(
-      actionService.create({
+      actionsClient.create({
         data: {
           description: 'my description',
           actionTypeId: 'my-action-type',
@@ -106,13 +106,13 @@ describe('create()', () => {
   });
 
   test(`throws an error when an action type doesn't exist`, async () => {
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     await expect(
-      actionService.create({
+      actionsClient.create({
         data: {
           description: 'my description',
           actionTypeId: 'unregistered-action-type',
@@ -126,19 +126,19 @@ describe('create()', () => {
 
   test('encrypts action type options unless specified not to', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry();
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
       async executor() {},
     });
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.create({
+    const result = await actionsClient.create({
       data: {
         description: 'my description',
         actionTypeId: 'my-action-type',
@@ -183,13 +183,13 @@ describe('create()', () => {
 describe('get()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     savedObjectsClient.get.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.get({ id: '1' });
+    const result = await actionsClient.get({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.get).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -213,13 +213,13 @@ describe('get()', () => {
 describe('find()', () => {
   test('calls savedObjectsClient with parameters', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.find({});
+    const result = await actionsClient.find({});
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.find).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -244,13 +244,13 @@ describe('find()', () => {
 describe('delete()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.delete({ id: '1' });
+    const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.delete).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -274,18 +274,18 @@ describe('delete()', () => {
 describe('update()', () => {
   test('updates an action with all given properties', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry();
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.update({
+    const result = await actionsClient.update({
       id: 'my-action',
       data: {
         description: 'my description',
@@ -321,12 +321,12 @@ describe('update()', () => {
   });
 
   test('validates actionTypeConfig', async () => {
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
-    actionTypeService.register({
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
@@ -339,7 +339,7 @@ describe('update()', () => {
       async executor() {},
     });
     await expect(
-      actionService.update({
+      actionsClient.update({
         id: 'my-action',
         data: {
           description: 'my description',
@@ -354,13 +354,13 @@ describe('update()', () => {
   });
 
   test(`throws an error when action type doesn't exist`, async () => {
-    const actionTypeService = new ActionTypeService();
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     await expect(
-      actionService.update({
+      actionsClient.update({
         id: 'my-action',
         data: {
           description: 'my description',
@@ -376,19 +376,19 @@ describe('update()', () => {
 
   test('encrypts action type options unless specified not to', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry();
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
       async executor() {},
     });
-    const actionService = new ActionsClient({
-      actionTypeService,
+    const actionsClient = new ActionsClient({
+      actionTypeRegistry,
       savedObjectsClient,
     });
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.update({
+    const result = await actionsClient.update({
       id: 'my-action',
       data: {
         description: 'my description',

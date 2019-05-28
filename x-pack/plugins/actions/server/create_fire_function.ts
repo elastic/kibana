@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeService } from './action_type_service';
+import { ActionTypeRegistry } from './action_type_registry';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
 interface CreateFireFunctionOptions {
-  actionTypeService: ActionTypeService;
+  actionTypeRegistry: ActionTypeRegistry;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 }
 
@@ -19,7 +19,7 @@ interface FireOptions {
 }
 
 export function createFireFunction({
-  actionTypeService,
+  actionTypeRegistry,
   encryptedSavedObjectsPlugin,
 }: CreateFireFunctionOptions) {
   return async function fire({ id, params, namespace }: FireOptions) {
@@ -30,7 +30,7 @@ export function createFireFunction({
       ...action.attributes.actionTypeConfig,
       ...action.attributes.actionTypeConfigSecrets,
     };
-    return await actionTypeService.execute({
+    return await actionTypeRegistry.execute({
       id: action.attributes.actionTypeId,
       actionTypeConfig: mergedActionTypeConfig,
       params,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeService } from '../action_type_service';
+import { ActionTypeRegistry } from '../action_type_registry';
 import { createFireFunction } from '../create_fire_function';
 
 const mockEncryptedSavedObjects = {
@@ -15,13 +15,13 @@ const mockEncryptedSavedObjects = {
 
 describe('fire()', () => {
   test('fires an action with all given parameters', async () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeRegistry = new ActionTypeRegistry();
     const fireFn = createFireFunction({
-      actionTypeService,
+      actionTypeRegistry,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
     });
     const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
-    actionTypeService.register({
+    actionTypeRegistry.register({
       id: 'mock',
       name: 'Mock',
       executor: mockActionType,
@@ -68,9 +68,9 @@ describe('fire()', () => {
   });
 
   test(`throws an error when the action type isn't registered`, async () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeRegistry = new ActionTypeRegistry();
     const fireFn = createFireFunction({
-      actionTypeService,
+      actionTypeRegistry,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
     });
     mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -90,13 +90,13 @@ describe('fire()', () => {
   });
 
   test('merges encrypted and unencrypted attributes', async () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeRegistry = new ActionTypeRegistry();
     const fireFn = createFireFunction({
-      actionTypeService,
+      actionTypeRegistry,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
     });
     const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
-    actionTypeService.register({
+    actionTypeRegistry.register({
       id: 'mock',
       name: 'Mock',
       unencryptedAttributes: ['a', 'c'],

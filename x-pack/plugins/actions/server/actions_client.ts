@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
-import { ActionTypeService } from './action_type_service';
+import { ActionTypeRegistry } from './action_type_registry';
 import { SavedObjectReference } from './types';
 
 interface Action {
@@ -39,7 +39,7 @@ interface FindOptions {
 }
 
 interface ConstructorOptions {
-  actionTypeService: ActionTypeService;
+  actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClient;
 }
 
@@ -51,10 +51,10 @@ interface UpdateOptions {
 
 export class ActionsClient {
   private savedObjectsClient: SavedObjectsClient;
-  private actionTypeService: ActionTypeService;
+  private actionTypeRegistry: ActionTypeRegistry;
 
-  constructor({ actionTypeService, savedObjectsClient }: ConstructorOptions) {
-    this.actionTypeService = actionTypeService;
+  constructor({ actionTypeRegistry, savedObjectsClient }: ConstructorOptions) {
+    this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
   }
 
@@ -63,7 +63,7 @@ export class ActionsClient {
    */
   public async create({ data, options }: CreateOptions) {
     const { actionTypeId } = data;
-    this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
+    this.actionTypeRegistry.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
     const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
     return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
   }
@@ -98,9 +98,9 @@ export class ActionsClient {
   public async update({ id, data, options = {} }: UpdateOptions) {
     const { actionTypeId } = data;
     // Throws an error if action type is invalid
-    this.actionTypeService.get(actionTypeId);
+    this.actionTypeRegistry.get(actionTypeId);
     if (data.actionTypeConfig) {
-      this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
+      this.actionTypeRegistry.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
       data = this.moveEncryptedAttributesToSecrets(data);
     }
     return await this.savedObjectsClient.update<any>('action', id, data, options);
@@ -110,7 +110,7 @@ export class ActionsClient {
    * Set actionTypeConfigSecrets values on a given action
    */
   private moveEncryptedAttributesToSecrets(action: Action) {
-    const unencryptedAttributes = this.actionTypeService.getUnencryptedAttributes(
+    const unencryptedAttributes = this.actionTypeRegistry.getUnencryptedAttributes(
       action.actionTypeId
     );
     const config = { ...action.actionTypeConfig };
