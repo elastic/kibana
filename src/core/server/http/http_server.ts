@@ -74,6 +74,7 @@ export interface HttpServerSetup {
 
 export class HttpServer {
   private server?: Server;
+  private serverOptions?: ServerOptions;
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
   private basePathCache = new WeakMap<
@@ -123,13 +124,13 @@ export class HttpServer {
   }
 
   public setup(config: HttpConfig): HttpServerSetup {
-    const serverOptions = getServerOptions(config);
-    this.server = createServer(serverOptions);
+    this.serverOptions = getServerOptions(config);
+    this.server = createServer(this.serverOptions);
 
     this.setupBasePathRewrite(config);
 
     return {
-      options: serverOptions,
+      options: this.serverOptions,
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
@@ -150,11 +151,15 @@ export class HttpServer {
     };
   }
 
-  public async start(config: HttpConfig) {
+  public async start(config?: HttpConfig) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
     this.log.debug('starting http server');
+
+    if (config && config.basePath && !config.rewriteBasePath) {
+      this.setupBasePathRewrite(config);
+    }
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
@@ -171,12 +176,9 @@ export class HttpServer {
     }
 
     await this.server.start();
+    const serverPath = config ? config.rewriteBasePath || config.basePath : '';
 
-    this.log.debug(
-      `http server running at ${this.server.info.uri}${
-        config.rewriteBasePath ? config.basePath : ''
-      }`
-    );
+    this.log.debug(`http server running at ${this.server.info.uri}${serverPath}`);
   }
 
   public async stop() {

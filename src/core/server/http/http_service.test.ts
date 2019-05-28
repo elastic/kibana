@@ -76,27 +76,23 @@ test('creates and sets up http server', async () => {
   expect(httpServer.start).toHaveBeenCalledTimes(1);
 });
 
+// this is an integration test!
 test('creates and sets up second http server', async () => {
   const configService = createConfigService({
-    host: 'example.org',
+    host: 'localhost',
     port: 1234,
   });
+  const { HttpServer } = jest.requireActual('./http_server');
 
-  const httpServer = {
-    isListening: () => false,
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: noop,
-  };
-  mockHttpServer.mockImplementation(() => httpServer);
+  mockHttpServer.mockImplementation((...args) => new HttpServer(...args));
 
   const service = new HttpService({ configService, env, logger });
   const serverSetup = await service.setup();
-  await service.start();
-
   const cfg = { port: 2345 };
   await serverSetup.createNewServer(cfg);
-  expect(mockHttpServer.mock.instances.length).toBe(2);
+  const server = await service.start();
+  expect(server.isListening()).toBeTruthy();
+  expect(server.isListening(cfg.port)).toBeTruthy();
 
   try {
     await serverSetup.createNewServer(cfg);
@@ -115,6 +111,9 @@ test('creates and sets up second http server', async () => {
   } catch (err) {
     expect(err.message).toBe('port must be defined');
   }
+  await service.stop();
+  expect(server.isListening()).toBeFalsy();
+  expect(server.isListening(cfg.port)).toBeFalsy();
 });
 
 test('logs error if already set up', async () => {

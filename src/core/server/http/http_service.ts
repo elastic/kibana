@@ -97,11 +97,16 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
         await this.httpsRedirectServer.start(config);
       }
 
-      await this.httpServer.start(config);
+      this.httpServer.start(config);
+      await Promise.all([...this.secondaryServers.values()].map(server => server.start()));
     }
 
     return {
-      isListening: () => this.httpServer.isListening(),
+      isListening: (port = 0) => {
+        const server = this.secondaryServers.get(port);
+        if (server) return server.isListening();
+        return this.httpServer.isListening();
+      },
     };
   }
 
