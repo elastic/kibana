@@ -114,10 +114,10 @@ export function isAggNameConflict(
   }
 
   // check all aggs against new aggName
-  Object.keys(aggList).forEach(aggListName => {
+  conflict = Object.keys(aggList).some(aggListName => {
     const aggListNameSplit = aggListName.split('.');
     let aggListNameCheck: string;
-    aggListNameSplit.forEach(aggListNamePart => {
+    return aggListNameSplit.some(aggListNamePart => {
       aggListNameCheck =
         aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
       if (aggListNameCheck === aggName) {
@@ -127,8 +127,9 @@ export function isAggNameConflict(
             values: { aggName, aggListName },
           })
         );
-        conflict = true;
+        return true;
       }
+      return false;
     });
   });
 
@@ -137,10 +138,10 @@ export function isAggNameConflict(
   }
 
   // check all group-bys against new aggName
-  Object.keys(groupByList).forEach(groupByListName => {
+  conflict = Object.keys(groupByList).some(groupByListName => {
     const groupByListNameSplit = groupByListName.split('.');
     let groupByListNameCheck: string;
-    groupByListNameSplit.forEach(groupByListNamePart => {
+    return groupByListNameSplit.some(groupByListNamePart => {
       groupByListNameCheck =
         groupByListNameCheck === undefined
           ? groupByListNamePart
@@ -152,8 +153,9 @@ export function isAggNameConflict(
             values: { aggName, groupByListName },
           })
         );
-        conflict = true;
+        return true;
       }
+      return false;
     });
   });
 
