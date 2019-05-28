@@ -452,11 +452,13 @@ module.exports = {
       // typescript only for front and back end
       files: ['x-pack/plugins/siem/**/*.{ts,tsx}'],
       rules: {
-        '@typescript-eslint/explicit-member-accessibility': 'warn',
+        // This will be turned on after bug fixes are complete
+        // '@typescript-eslint/explicit-member-accessibility': 'warn',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/no-object-literal-type-assertion': 'warn',
+        // This will be turned on after bug fixes are complete
+        // '@typescript-eslint/no-object-literal-type-assertion': 'warn',
         '@typescript-eslint/unified-signatures': 'error',
 
         // eventually we want this to be a warn and then an error since this is a recommended linter rule
@@ -488,10 +490,16 @@ module.exports = {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
-        'arrow-body-style': ['warn', 'as-needed'],
-        complexity: ['warn', 15],
-        'consistent-return': 'warn',
-        'func-style': ['warn', 'expression'],
+        // This will be turned on after bug fixes are mostly completed
+        // 'arrow-body-style': ['warn', 'as-needed'],
+        complexity: 'warn',
+        // This will be turned on after bug fixes are mostly completed
+        // 'consistent-return': 'warn',
+        // This will be turned on after bug fixes are mostly completed
+        // 'func-style': ['warn', 'expression'],
+        // These will be turned on after bug fixes are mostly completed and we can
+        // run a fix-lint
+        /*
         'import/order': [
           'warn',
           {
@@ -499,11 +507,13 @@ module.exports = {
             'newlines-between': 'always',
           },
         ],
+        */
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'warn',
+        // This will be turned on after bug fixes are mostly completed
+        // 'no-duplicate-imports': 'warn',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -522,40 +532,54 @@ module.exports = {
         'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
-        'no-param-reassign': 'warn',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-param-reassign': 'warn',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        'no-return-await': 'warn',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-return-await': 'warn',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        'no-undef': 'warn',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-undef': 'warn',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
-        'no-useless-catch': 'warn',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-useless-catch': 'warn',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
-        'no-useless-escape': 'warn',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-useless-escape': 'warn',
         'no-useless-rename': 'error',
-        'no-useless-return': 'warn',
-        'no-void': 'warn',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-useless-return': 'warn',
+        // This will be turned on after bug fixers are mostly complete
+        // 'no-void': 'warn',
         'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
-        'prefer-template': 'warn',
-        quotes: ['warn', 'single', { avoidEscape: true }],
+        // This style will be turned on after most bugs are fixed
+        // 'prefer-template': 'warn',
+        // This style will be turned on after most bugs are fixed
+        // quotes: ['warn', 'single', { avoidEscape: true }],
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
         'react/forbid-dom-props': 'error',
+        // This will go from warn to error when this is fixed:
+        // https://github.com/elastic/ingest-dev/issues/468
         'react/no-access-state-in-setstate': 'warn',
-        'react/no-children-prop': 'warn',
+        // This style will be turned on after most bugs are fixed
+        // 'react/no-children-prop': 'warn',
         'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
         'react/no-did-mount-set-state': 'error',
+        // This will go from warn to error when this is fixed:
+        // https://github.com/elastic/ingest-dev/issues/468
         'react/no-did-update-set-state': 'warn',
         'react/no-direct-mutation-state': 'error',
         'react/no-find-dom-node': 'error',
@@ -564,6 +588,8 @@ module.exports = {
         'react/no-typos': 'error',
         'react/no-string-refs': 'error',
         'react/no-this-in-sfc': 'error',
+        // This can go from warn to error once this is fixed
+        // https://github.com/elastic/ingest-dev/issues/467
         'react/no-unescaped-entities': 'warn',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
@@ -575,7 +601,8 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',
-        'react/jsx-no-literals': 'warn',
+        // will be introduced to fix missing i18n keys
+        // 'react/jsx-no-literals': 'warn',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',
