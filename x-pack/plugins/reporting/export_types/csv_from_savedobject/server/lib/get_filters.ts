@@ -35,8 +35,8 @@ export function getFilters(
       range: {
         [indexPatternTimeField]: {
           format: 'strict_date_time',
-          gte: moment(gte).format(),
-          lte: moment(lte).format(),
+          gte: moment.tz(moment(gte), timezone).format(),
+          lte: moment.tz(moment(lte), timezone).format(),
         },
       },
     };
