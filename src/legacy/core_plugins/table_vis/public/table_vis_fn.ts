@@ -55,30 +55,41 @@ export const kibanaTable = () => ({
       types: ['string'],
       default: '"sum"',
     },
-    sort: {
-      types: ['datatable'],
+    sortColumn: {
+      types: ['number', 'null'],
+      default: null,
+    },
+    sortDirection: {
+      types: ['string', 'null'],
+      default: null,
     },
     dimensions: {
       types: ['string', 'null'],
     },
-    /*
-    "dimensions":{
-      "metrics":[
-        {
-          "accessor":0,
-          "format":{
-            "id":"number"
-          },
-          "params":{},
-          "aggType":"count"
-        }
-      ],
-      "buckets":[]
-    }}'
-    */
+    metric: {
+      types: ['vis_dimension'],
+      help: i18n.translate('metricVis.function.metric.help', {
+        defaultMessage: 'metric dimension configuration'
+      }),
+      // required: true,
+      multi: true,
+    },
+    bucket: {
+      types: ['vis_dimension'],
+      help: i18n.translate('metricVis.function.bucket.help', {
+        defaultMessage: 'bucket dimension configuration'
+      }),
+      multi: true,
+    },
   },
   async fn(context: any, args: any) {
-    const { perPage, showPartialRows, showMetricsAtAllLevels, showTotal, totalFunc } = args;
+    const { perPage, showPartialRows, showMetricsAtAllLevels, showTotal, totalFunc, sortColumn, sortDirection, metric, bucket } = args;
+    const dimensions: any = {
+      metrics: metric,
+    };
+    if (bucket) {
+      dimensions.bucket = args.bucket;
+    }
     const visConfig = {
       perPage,
       showPartialRows,
@@ -86,29 +97,12 @@ export const kibanaTable = () => ({
       showTotal,
       totalFunc,
       sort: {
-        columnIndex: null,
-        direction: null,
+        columnIndex: sortColumn,
+        direction: sortDirection,
       },
-      dimensions: JSON.parse(args.visConfig).dimensions,
-      /*
-      dimensions: {
-        "metrics":[
-          {
-            accessor: 0,
-            format: {
-              id: "number",
-            },
-            params: {},
-            aggType: "count",
-          }
-        ],
-        buckets: [],
-      },
-      */
+      dimensions,
     };
     const convertedData = convert(context, visConfig.dimensions);
-
-    console.log('visConfig', visConfig)
 
     return {
       type: 'render',

@@ -76,7 +76,10 @@ export const table = (visState: any, schemas: any) => {
   if (sort) {
     const { columnIndex, direction } = sort;
     if (typeof columnIndex === 'number') {
-      expr += ` sort={sort ${columnIndex}${direction === 'asc' ? ' reverse=true' : ''}}`;
+      expr += ` sortColumn="${columnIndex}"`;
+    }
+    if (direction && typeof direction === 'string') {
+      expr += ` sortDirection="${direction}"`;
     }
   }
 
