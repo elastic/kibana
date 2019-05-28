@@ -35,7 +35,7 @@ const aggFilter = [
   '!sum_bucket',
 ];
 
-// Returns true if the agg is not compatible with the terms bucket
+// Returns true if the agg is compatible with the terms bucket
 function isCompatibleAgg(agg: AggConfig) {
   return !aggFilter.includes(`!${agg.type.name}`);
 }
