@@ -24,7 +24,7 @@ import { Ast } from '@kbn/interpreter/common';
 // the interpreter plugin itself once they are ready
 import { Registry } from '@kbn/interpreter/common';
 import { Adapters } from 'ui/inspector';
-import { Query, Filters, TimeRange } from 'ui/embeddable';
+import { Query, Filters, TimeRange } from 'plugins/embeddable_api/index';
 import { createRenderer } from './expression_renderer';
 import { createRunFn } from './expression_runner';
 
