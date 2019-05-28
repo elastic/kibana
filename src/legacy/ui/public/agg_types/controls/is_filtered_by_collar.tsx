@@ -32,7 +32,7 @@ function IsFilteredByCollarParamEditor(props: AggParamEditorProps<boolean>) {
         defaultMessage:
           'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar',
       })}
-      data-test-subj="isFilteredByCollarCheckbox"
+      dataTestSubj="isFilteredByCollarCheckbox"
       {...props}
     />
   );
