@@ -8,7 +8,7 @@ import { EuiSelect, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { loadServiceEnvironments } from '../../../services/rest/apm/services';
+import { loadEnvironmentsFilter } from '../../../services/rest/apm/ui_filters';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
@@ -33,48 +33,42 @@ function updateEnvironmentUrl(
   });
 }
 
+const ALL_OPTION = {
+  value: ENVIRONMENT_ALL,
+  text: i18n.translate('xpack.apm.filter.environment.allLabel', {
+    defaultMessage: 'All'
+  })
+};
+
+const NOT_DEFINED_OPTION = {
+  value: ENVIRONMENT_NOT_DEFINED,
+  text: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+    defaultMessage: 'Not defined'
+  })
+};
+
+const SEPARATOR_OPTION = {
+  text: `- ${i18n.translate(
+    'xpack.apm.filter.environment.selectEnvironmentLabel',
+    { defaultMessage: 'Select environment' }
+  )} -`,
+  disabled: true
+};
+
 function getOptions(environments: string[]) {
-  const ALL_OPTION = {
-    value: ENVIRONMENT_ALL,
-    text: i18n.translate('xpack.apm.filter.environment.allLabel', {
-      defaultMessage: 'All'
-    })
-  };
-
-  const NOT_DEFINED_OPTION = {
-    value: ENVIRONMENT_NOT_DEFINED,
-    text: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-      defaultMessage: 'Not defined'
-    })
-  };
-
-  const hasUndefinedEnv = environments.includes(ENVIRONMENT_NOT_DEFINED);
-  const commonOptions = hasUndefinedEnv
-    ? [ALL_OPTION, NOT_DEFINED_OPTION]
-    : [ALL_OPTION];
-  const definedEnvs = environments.filter(
-    env => env !== ENVIRONMENT_NOT_DEFINED
-  );
-  const environmentOptions = definedEnvs.map(environment => ({
-    value: environment,
-    text: environment
-  }));
+  const environmentOptions = environments
+    .filter(env => env !== ENVIRONMENT_NOT_DEFINED)
+    .map(environment => ({
+      value: environment,
+      text: environment
+    }));
 
   return [
-    ...commonOptions, // all, not defined
-    ...(environmentOptions.length // separate common and environment options
-      ? [
-          {
-            text: `- ${i18n.translate(
-              'xpack.apm.filter.environment.selectEnvironmentLabel',
-              {
-                defaultMessage: 'Select environment'
-              }
-            )} -`,
-            disabled: true
-          }
-        ]
+    ALL_OPTION,
+    ...(environments.includes(ENVIRONMENT_NOT_DEFINED)
+      ? [NOT_DEFINED_OPTION]
       : []),
+    ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
     ...environmentOptions
   ];
 }
@@ -84,24 +78,18 @@ export const EnvironmentFilter: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end, serviceName } = urlParams;
 
-  // TODO fix the bug in urlParams that this code defensively overcomes
-  let realServiceName = serviceName;
-  if (serviceName === 'services') {
-    realServiceName = undefined;
-  }
-
   const { environment } = uiFilters;
   const { data: environments = [], status = 'loading' } = useFetcher(
     () => {
       if (start && end) {
-        return loadServiceEnvironments({
+        return loadEnvironmentsFilter({
           start,
           end,
-          serviceName: realServiceName
+          serviceName
         });
       }
     },
-    [start, end, realServiceName]
+    [start, end, serviceName]
   );
 
   return (
