@@ -79,13 +79,13 @@ export function initAuthenticateApi(server) {
       auth: false,
       validate: {
         query: Joi.object().keys({
-          iss: Joi.string(),
+          iss: Joi.string().uri({ scheme: 'https' }),
           login_hint: Joi.string(),
-          target_link_uri: Joi.uri(),
+          target_link_uri: Joi.string().uri(),
           code: Joi.string(),
           error: Joi.string(),
           error_description: Joi.string(),
-          error_uri: Joi.uri(),
+          error_uri: Joi.string().uri(),
           state: Joi.string()
         }).unknown()
       }
