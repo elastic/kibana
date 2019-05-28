@@ -23,7 +23,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { EuiIconTip, } from '@elastic/eui';
-import { CustomColorPickerUI as Picker } from './custom_color_picker';
+import { CustomColorPicker } from './custom_color_picker';
 import { injectI18n } from '@kbn/i18n/react';
 
 class ColorPickerUI extends Component {
@@ -109,7 +109,7 @@ class ColorPickerUI extends Component {
       );
     }
     return (
-      <div className="tvbColorPicker">
+      <div className="tvbColorPicker" data-test-subj="tvbColorPicker">
         { swatch }
         { clear }
         {
@@ -120,7 +120,7 @@ class ColorPickerUI extends Component {
                   className="tvbColorPicker__cover"
                   onClick={this.handleClose}
                 />
-                <Picker
+                <CustomColorPicker
                   color={value}
                   onChangeComplete={this.handleChange}
                 />
