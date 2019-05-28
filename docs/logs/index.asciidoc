@@ -62,8 +62,8 @@ multiple spaces with different data source configurations.
 [float]
 [[logs-read-only-access]]
 === Read only access
-When you have insufficient privileges to change source configuration, the following
-indicator in Kibana will be displayed. The buttons to change source configuration
+When you have insufficient privileges to change the source configuration, the following
+indicator in Kibana will be displayed. The buttons to change the source configuration
 won't be visible. For more information on granting access to
 Kibana see <<xpack-security-authorization>>.
 
