@@ -7,7 +7,7 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function alertingTests({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
+export default function actionsTests({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('Actions', () => {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));

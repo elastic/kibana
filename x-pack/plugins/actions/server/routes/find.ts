@@ -64,7 +64,7 @@ export function findRoute(server: Hapi.Server) {
     },
     async handler(request: FindRequest) {
       const query = request.query;
-      const actionsClient = request.getActionsClient();
+      const actionsClient = request.getActionsClient!();
       return await actionsClient.find({
         options: {
           perPage: query.per_page,

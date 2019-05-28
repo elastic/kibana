@@ -28,7 +28,7 @@ export function getRoute(server: Hapi.Server) {
     },
     async handler(request: GetRequest) {
       const { id } = request.params;
-      const actionsClient = request.getActionsClient();
+      const actionsClient = request.getActionsClient!();
       return await actionsClient.get({ id });
     },
   });

@@ -14,7 +14,7 @@ import { ActionsPlugin, ActionsClient } from '../plugins/actions';
 
 declare module 'hapi' {
   interface Request {
-    getActionsClient: () => ActionsClient;
+    getActionsClient?: () => ActionsClient;
   }
   interface PluginProperties {
     cloud?: CloudPlugin;
