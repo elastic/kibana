@@ -51,7 +51,7 @@
     return output.sort();
   };
 
-  chrome.storage.sync.get(['domTreeRoot', 'outputType'], ({ domTreeRoot, outputType }) => {
+  chrome.storage.sync.get(['domTreeRoot', 'outputType', 'depth'], ({ domTreeRoot, outputType, depth = 2 }) => {
     const datasetKey = 'testSubj';
 
     if (domTreeRoot && !document.querySelector(domTreeRoot)) {
@@ -72,6 +72,13 @@
       }, '')
     );
 
+    const addTestSubject = (testSubject) => {
+      const subjectDepth = testSubject.split('.').length;
+      if (subjectDepth <= parseInt(depth, 10)) {
+        window.__test_utils__.dataTestSubjects.add(testSubject);
+      }
+    };
+
     const findTestSubjects = (
       node = domTreeRoot ? document.querySelector(domTreeRoot) : document.querySelector('body'),
       path = []
@@ -80,7 +87,6 @@
         // We probably navigated outside the initial DOM root
         return;
       }
-      const { dataTestSubjects } = window.__test_utils__;
       const testSubjectOnNode = node.dataset[datasetKey];
 
       const updatedPath = testSubjectOnNode
@@ -92,12 +98,12 @@
 
         if (pathToString) {
           // Add the complete nested path ('a.b.c.d')
-          dataTestSubjects.add(pathToString);
+          addTestSubject(pathToString);
           // Add each item separately
-          updatedPath.forEach(dataTestSubjects.add.bind(dataTestSubjects));
+          updatedPath.forEach(addTestSubject);
           // Add all the combination ('a.b', 'a.c', 'a.e', ...)
           const nestedPaths = getAllNestedPathsFromArray(updatedPath);
-          nestedPaths.forEach(dataTestSubjects.add.bind(dataTestSubjects));
+          nestedPaths.forEach(addTestSubject);
         }
 
         return;

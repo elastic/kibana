@@ -33,9 +33,10 @@ const onStopTracking = () => {
   document.body.classList.remove('is-tracking');
 };
 
-chrome.storage.sync.get(['outputType', 'domTreeRoot'], async ({ outputType, domTreeRoot }) => {
+chrome.storage.sync.get(['outputType', 'domTreeRoot', 'depth'], async ({ outputType, domTreeRoot, depth }) => {
   const domRootInput = document.getElementById('domRootInput');
   const outputTypeSelect = document.getElementById('outputTypeSelect');
+  const depthInput = document.getElementById('depthInput');
   const startTrackButton = document.getElementById('startTrackingButton');
   const stopTrackButton = document.getElementById('stopTrackingButton');
 
@@ -53,6 +54,10 @@ chrome.storage.sync.get(['outputType', 'domTreeRoot'], async ({ outputType, domT
     domRootInput.value = domTreeRoot;
   }
 
+  if (depth) {
+    depthInput.value = depth;
+  }
+
   document.querySelectorAll('#outputTypeSelect option').forEach((node) => {
     if (node.value === outputType) {
       node.setAttribute('selected', 'selected');
@@ -63,6 +68,13 @@ chrome.storage.sync.get(['outputType', 'domTreeRoot'], async ({ outputType, domT
   domRootInput.addEventListener('change', (e) => {
     const { value } = e.target;
     chrome.storage.sync.set({ domTreeRoot: value });
+  });
+
+  depthInput.addEventListener('change', (e) => {
+    const { value } = e.target;
+    if (value) {
+      chrome.storage.sync.set({ depth: value });
+    }
   });
 
   outputTypeSelect.addEventListener('change', (e) => {
