@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertExecuteOptions } from '../../../../../plugins/alerting';
-
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
@@ -23,7 +21,7 @@ export default function(kibana: any) {
       server.plugins.alerting.registerType({
         id: 'cpu-check',
         description: 'Check CPU Usage',
-        async execute({ services, params, state }: AlertExecuteOptions) {
+        async execute({ services, params, state }: any) {
           const cpuUsage = 100;
           if (cpuUsage >= params.threshold) {
             services.alertInstanceFactory(params.server).fire(
