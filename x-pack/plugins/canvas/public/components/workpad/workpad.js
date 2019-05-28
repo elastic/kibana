@@ -106,14 +106,14 @@ export class Workpad extends React.PureComponent {
               const scale = Math.min(windowSize.height / height, windowSize.width / width);
               const fsStyle = isFullscreen
                 ? {
-                  transform: `scale3d(${scale}, ${scale}, 1)`,
-                  WebkitTransform: `scale3d(${scale}, ${scale}, 1)`,
-                  msTransform: `scale3d(${scale}, ${scale}, 1)`,
-                  // height,
-                  // width,
-                  height: windowSize.height < height ? 'auto' : height,
-                  width: windowSize.width < width ? 'auto' : width,
-                }
+                    transform: `scale3d(${scale}, ${scale}, 1)`,
+                    WebkitTransform: `scale3d(${scale}, ${scale}, 1)`,
+                    msTransform: `scale3d(${scale}, ${scale}, 1)`,
+                    // height,
+                    // width,
+                    height: windowSize.height < height ? 'auto' : height,
+                    width: windowSize.width < width ? 'auto' : width,
+                  }
                 : {};
 
               // NOTE: the data-shared-* attributes here are used for reporting
