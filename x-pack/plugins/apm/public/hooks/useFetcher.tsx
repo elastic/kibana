@@ -16,7 +16,8 @@ export enum FETCH_STATUS {
 
 export function useFetcher<Response>(
   fn: () => Promise<Response> | undefined,
-  useEffectKey: any[]
+  useEffectKey: any[],
+  options = { preservePreviousResponse: true }
 ) {
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
@@ -36,8 +37,9 @@ export function useFetcher<Response>(
       }
 
       dispatchStatus({ id, isLoading: true });
+
       setResult({
-        data: result.data, // preserve data from previous state while loading next state
+        data: options.preservePreviousResponse ? result.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
         error: undefined
       });

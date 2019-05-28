@@ -37,6 +37,13 @@ export async function saveCMConfiguration(
   });
 }
 
+export async function deleteCMConfiguration(configId: string) {
+  return callApi({
+    pathname: `/api/apm/settings/cm/${configId}`,
+    method: 'DELETE'
+  });
+}
+
 export async function loadCMList() {
   return callApi<CMListAPIResponse>({
     pathname: `/api/apm/settings/cm`

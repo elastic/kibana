@@ -11,12 +11,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiButton,
-  EuiFlexItem,
-  EuiFieldNumber,
-  EuiTitle
+  EuiFieldNumber
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   loadCMServices,
@@ -24,7 +21,6 @@ import {
   saveCMConfiguration
 } from '../../../../services/rest/apm/settings';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { history } from '../../../../utils/history';
 
 const ENVIRONMENT_NOT_SET = 'ENVIRONMENT_NOT_SET';
 
@@ -32,20 +28,25 @@ export function AddSetting() {
   const [environment, setEnvironment] = useState<string | undefined>(undefined);
   const [serviceName, setServiceName] = useState<string | undefined>(undefined);
   const [sampleRate, setSampleRate] = useState<number | undefined>(undefined);
-  const { data: serviceNames = [] } = useFetcher(loadCMServices, []);
+  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
+    loadCMServices,
+    [],
+    { preservePreviousResponse: false }
+  );
   const { data: environments = [], status: environmentStatus } = useFetcher(
     () => {
       if (serviceName) {
         return loadCMEnvironments({ serviceName });
       }
     },
-    [serviceName]
+    [serviceName],
+    { preservePreviousResponse: false }
   );
 
   useEffect(
     () => {
       if (!isEmpty(environments)) {
-        setEnvironment(undefined);
+        setEnvironment(environments[0].name);
       }
     },
     [environments]
@@ -54,24 +55,24 @@ export function AddSetting() {
   useEffect(
     () => {
       if (!isEmpty(serviceNames)) {
-        setServiceName(undefined);
+        setServiceName(serviceNames[0]);
       }
     },
     [serviceNames]
   );
 
-  const hasAnyAvailableEnvironments = environments.some(env => env.available);
   const environmentOptions = environments.map(({ name, available }) => ({
     disabled: !available,
     text: name === ENVIRONMENT_NOT_SET ? 'Not set' : name,
     value: name
   }));
 
+  const isSelectedEnvironmentValid = environments.some(
+    env => env.name === environment && env.available
+  );
+
   return (
     <EuiForm>
-      <EuiTitle>
-        <h2>Agent configuration</h2>
-      </EuiTitle>
       <form
         onSubmit={async event => {
           event.preventDefault();
@@ -100,10 +101,6 @@ export function AddSetting() {
                 { defaultMessage: 'Config was created' }
               )
             });
-            history.push({
-              ...history.location,
-              pathname: `/settings`
-            });
           } catch (error) {
             toastNotifications.addDanger({
               title: i18n.translate(
@@ -114,68 +111,69 @@ export function AddSetting() {
           }
         }}
       >
-        <EuiFlexGroup justifyContent="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiFormRow label="Service name">
-              <EuiSelect
-                hasNoInitialSelection
-                options={serviceNames.map(text => ({ text }))}
-                value={serviceName}
-                onChange={e => {
-                  setServiceName(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              label="Service environment"
-              error={
-                'You have created configurations for all environments in this service'
-              }
-              isInvalid={
-                !hasAnyAvailableEnvironments &&
-                (environmentStatus === 'success' ||
-                  environmentStatus === 'failure')
-              }
-            >
-              <EuiSelect
-                hasNoInitialSelection
-                options={environmentOptions}
-                value={environment}
-                onChange={e => {
-                  setEnvironment(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow label="Transaction sample rate">
-              <EuiFieldNumber
-                min={0}
-                max={1}
-                step={0.1}
-                placeholder="0.2"
-                value={sampleRate}
-                onChange={e => {
-                  const parsedValue = parseFloat(e.target.value);
-                  setSampleRate(parsedValue);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow label="&nbsp;">
-              <EuiButton
-                type="submit"
-                fill
-                disabled={!hasAnyAvailableEnvironments}
-              >
-                Save configuration
-              </EuiButton>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFormRow label="Service name">
+          <EuiSelect
+            isLoading={serviceNamesStatus === 'loading'}
+            options={serviceNames.map(text => ({ text }))}
+            value={serviceName}
+            onChange={e => {
+              e.preventDefault();
+              setServiceName(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label="Service environment"
+          error={
+            'The selected environment is not allowed, because a configuration for the selected service name and environment already exists'
+          }
+          isInvalid={
+            !isSelectedEnvironmentValid &&
+            (environmentStatus === 'success' || environmentStatus === 'failure')
+          }
+        >
+          <EuiSelect
+            isLoading={environmentStatus === 'loading'}
+            options={environmentOptions}
+            value={environment}
+            onChange={e => {
+              e.preventDefault();
+              setEnvironment(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label="Transaction sample rate">
+          <EuiFieldNumber
+            min={0}
+            max={1}
+            step={0.1}
+            placeholder="Sample rate... (E.g. 0.2)"
+            value={sampleRate}
+            onChange={e => {
+              e.preventDefault();
+              const parsedValue = parseFloat(e.target.value);
+
+              setSampleRate(isNaN(parsedValue) ? undefined : parsedValue);
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label="&nbsp;">
+          <EuiButton
+            type="submit"
+            fill
+            disabled={
+              serviceName == null ||
+              sampleRate == null ||
+              environment == null ||
+              !isSelectedEnvironmentValid
+            }
+          >
+            Save configuration
+          </EuiButton>
+        </EuiFormRow>
 
         {/* <p>serviceName: {serviceName}</p>
         <p>sampleRate: {sampleRate}</p>

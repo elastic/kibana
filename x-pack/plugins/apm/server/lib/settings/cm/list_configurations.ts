@@ -17,5 +17,8 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
   };
 
   const resp = await client<CentralConfiguration>('search', params);
-  return resp.hits.hits.map(item => item._source);
+  return resp.hits.hits.map(item => ({
+    id: item._id,
+    ...item._source
+  }));
 }

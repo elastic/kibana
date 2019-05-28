@@ -8,7 +8,8 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiPortal
+  EuiPortal,
+  EuiTitle
 } from '@elastic/eui';
 
 import React from 'react';
@@ -25,11 +26,17 @@ export function AddSettingsFlyout({ onClose, isOpen }: Props) {
     return null;
   }
   return (
-    <EuiFlyout onClose={onClose} ownFocus={true}>
-      <EuiFlyoutHeader hasBorder>yo</EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <AddSetting />
-      </EuiFlyoutBody>
-    </EuiFlyout>
+    <EuiPortal>
+      <EuiFlyout size="s" onClose={onClose} ownFocus={true}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle>
+            <h2>Agent configuration</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <AddSetting />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    </EuiPortal>
   );
 }

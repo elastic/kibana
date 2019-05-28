@@ -14,6 +14,7 @@ import { CentralConfigurationIntake } from '../lib/settings/cm/configuration';
 import { searchConfigurations } from '../lib/settings/cm/search';
 import { listConfigurations } from '../lib/settings/cm/list_configurations';
 import { getEnvironments } from '../lib/settings/cm/get_environments';
+import { deleteConfiguration } from '../lib/settings/cm/delete_configuration';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
@@ -39,6 +40,28 @@ export function initSettingsApi(core: CoreSetup) {
     handler: async req => {
       const setup = setupRequest(req);
       return await listConfigurations({
+        setup
+      }).catch(defaultErrorHandler);
+    }
+  });
+
+  // delete configuration
+  server.route({
+    method: 'DELETE',
+    path: `/api/apm/settings/cm/{configurationId}`,
+    options: {
+      validate: {
+        query: {
+          _debug: Joi.bool()
+        }
+      },
+      tags: ['access:apm']
+    },
+    handler: async req => {
+      const setup = setupRequest(req);
+      const { configurationId } = req.params;
+      return await deleteConfiguration({
+        configurationId,
         setup
       }).catch(defaultErrorHandler);
     }

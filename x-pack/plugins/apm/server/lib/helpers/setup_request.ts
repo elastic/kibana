@@ -24,7 +24,7 @@ export interface APMSearchParams extends SearchParams {
 }
 
 export type ESClient = <T = void, U = void>(
-  type: 'search' | 'index',
+  type: 'search' | 'index' | 'delete',
   params: APMSearchParams
 ) => Promise<AggregationSearchResponse<T, U>>;
 
@@ -90,7 +90,7 @@ function addFilterForLegacyData(
 }
 
 // add additional params for search (aka: read) requests
-async function getParamsForSearchRequest(
+async function getParamsForReadRequest(
   req: Legacy.Request,
   params: APMSearchParams
 ) {
@@ -112,7 +112,7 @@ export function setupRequest(req: Legacy.Request): Setup {
 
   const client: ESClient = async (type, params) => {
     const nextParams =
-      type === 'search' ? await getParamsForSearchRequest(req, params) : params;
+      type === 'search' ? await getParamsForReadRequest(req, params) : params;
 
     if (query._debug) {
       console.log(`--DEBUG ES QUERY--`);

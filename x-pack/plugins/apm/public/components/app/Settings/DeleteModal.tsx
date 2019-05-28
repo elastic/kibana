@@ -10,7 +10,10 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
   EuiOverlayMask
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import { CMListAPIResponse } from '../../../../server/lib/settings/cm/list_configurations';
+import { deleteCMConfiguration } from '../../../services/rest/apm/settings';
 
 type Config = CMListAPIResponse[0];
 
@@ -36,7 +39,26 @@ export function DeleteModal({
             : '(no environment)'
         }`}
         onCancel={onCancel}
-        onConfirm={onConfirm}
+        onConfirm={async () => {
+          onConfirm();
+          try {
+            await deleteCMConfiguration(configToBeDeleted.id);
+
+            toastNotifications.addSuccess({
+              title: i18n.translate(
+                'xpack.apm.settings.cm.deleteConfigSucceeded',
+                { defaultMessage: 'Config was deleted' }
+              )
+            });
+          } catch (error) {
+            toastNotifications.addDanger({
+              title: i18n.translate(
+                'xpack.apm.settings.cm.deleteConfigFailed',
+                { defaultMessage: 'Config could not be deleted' }
+              )
+            });
+          }
+        }}
         cancelButtonText="Cancel"
         confirmButtonText="Delete configuration"
         buttonColor="danger"
