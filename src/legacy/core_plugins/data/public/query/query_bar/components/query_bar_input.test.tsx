@@ -17,10 +17,12 @@
  * under the License.
  */
 
+jest.mock('../lib/fetch_index_patterns', () => ({
+  fetchIndexPatterns: jest.fn(),
+}));
+
 import {
   mockFetchIndexPatterns,
-  mockGetAutocompleteProvider,
-  mockGetAutocompleteSuggestions,
   mockPersistedLog,
   mockPersistedLogFactory,
 } from './query_bar_input.test.mocks';
@@ -224,24 +226,6 @@ describe('QueryBarInput', () => {
     mockPersistedLog.get.mockClear();
     inputWrapper.simulate('change', { target: { value: 'extensi' } });
     expect(mockPersistedLog.get).toHaveBeenCalled();
-  });
-
-  it('Should get suggestions from the autocomplete provider for the current language', () => {
-    mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-      />
-    );
-
-    expect(mockGetAutocompleteProvider).toHaveBeenCalledWith('kuery');
-    expect(mockGetAutocompleteSuggestions).toHaveBeenCalled();
   });
 
   it('Should accept index pattern strings and fetch the full object', () => {
