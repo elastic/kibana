@@ -68,6 +68,14 @@ export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
   return search;
 }
 
+export function isSimpleQuery(arg: any): arg is SimpleQuery {
+  return arg.query_string !== undefined;
+}
+
+export function isDefaultQuery(query: PivotQuery): boolean {
+  return isSimpleQuery(query) && query.query_string.query === '*';
+}
+
 export function getDataFramePreviewRequest(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
@@ -77,13 +85,16 @@ export function getDataFramePreviewRequest(
   const request: DataFramePreviewRequest = {
     source: {
       index: indexPatternTitle,
-      query,
     },
     pivot: {
       group_by: {},
       aggregations: {},
     },
   };
+
+  if (!isDefaultQuery(query)) {
+    request.source.query = query;
+  }
 
   groupBy.forEach(g => {
     if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS) {
@@ -105,7 +116,7 @@ export function getDataFramePreviewRequest(
       const dateHistogramAgg: DateHistogramAgg = {
         date_histogram: {
           field: g.field,
-          interval: g.interval,
+          calendar_interval: g.calendar_interval,
         },
       };
 
@@ -113,7 +124,7 @@ export function getDataFramePreviewRequest(
       // date_histrogram aggregation formats like 'yyyy-MM-dd'. The following code extracts
       // the interval unit from the configurations interval and adds a matching
       // aggregation format to the configuration.
-      const timeUnitMatch = g.interval.match(dateHistogramIntervalFormatRegex);
+      const timeUnitMatch = g.calendar_interval.match(dateHistogramIntervalFormatRegex);
       if (timeUnitMatch !== null && Array.isArray(timeUnitMatch) && timeUnitMatch.length === 2) {
         // the following is just a TS compatible way of using the
         // matched string like `d` as the property to access the enum.
