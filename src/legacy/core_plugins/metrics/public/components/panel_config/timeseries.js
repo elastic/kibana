@@ -46,7 +46,6 @@ import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
 import chrome from 'ui/chrome';
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
-import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 class TimeseriesPanelConfigUi extends Component {
@@ -54,32 +53,9 @@ class TimeseriesPanelConfigUi extends Component {
     super(props);
     this.state = {
       selectedTab: 'data',
-      indexPatternForQuery: {},
     };
   }
 
-  async componentDidMount() {
-    await this.fetchIndexPatternsForQuery();
-  }
-
-  async componentDidUpdate(prevProps) {
-    if (
-      prevProps &&
-      prevProps.model &&
-      (prevProps.model.index_pattern !== this.props.model.index_pattern ||
-        prevProps.model.default_index_pattern !== this.props.model.default_index_pattern)
-    ) {
-      await this.fetchIndexPatternsForQuery();
-    }
-  }
-
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern
-      ? this.props.model.index_pattern
-      : this.props.model.default_index_pattern;
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatternForQuery: indexPatternObject });
-  }
   handleQueryChange = filter => {
     this.props.onChange({ filter });
   }
@@ -180,7 +156,6 @@ class TimeseriesPanelConfigUi extends Component {
           name={this.props.name}
           visData$={this.props.visData$}
           onChange={this.props.onChange}
-          indexPatterns={this.state.indexPatternForQuery}
         />
       );
     } else if (selectedTab === 'annotations') {
@@ -224,13 +199,13 @@ class TimeseriesPanelConfigUi extends Component {
                 >
                   <QueryBarInput
                     query={{
-                      language: model.filter.language ? model.filter.language : 'kuery',
+                      language: model.filter.language || uiSettingsQueryLanguage,
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TimeseriesPanelConfigQuery'}
                     onChange={this.handleQueryChange}
                     appName={'VisEditor'}
-                    indexPatterns={[this.state.indexPatternForQuery]}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
                     store={localStorage || {}}
                   />
                 </EuiFormRow>

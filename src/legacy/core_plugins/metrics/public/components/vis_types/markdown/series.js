@@ -191,7 +191,7 @@ MarkdownSeriesUi.propTypes = {
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
-  indexPatternForQuery: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const MarkdownSeries = injectI18n(MarkdownSeriesUi);

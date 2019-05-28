@@ -203,7 +203,7 @@ MetricSeriesUi.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
-  indexPatternForQuery: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const MetricSeries = injectI18n(MetricSeriesUi);

@@ -41,7 +41,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
-import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
 import chrome from 'ui/chrome';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
@@ -51,8 +50,7 @@ export class MetricPanelConfig extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedTab: 'data',
-      indexPatternForQuery: {}
+      selectedTab: 'data'
     };
   }
 
@@ -66,29 +64,6 @@ export class MetricPanelConfig extends Component {
         background_color_rules: [{ id: uuid.v1() }],
       });
     }
-  }
-
-  async componentDidMount() {
-    await this.fetchIndexPatternsForQuery();
-  }
-
-  async componentDidUpdate(prevProps) {
-    if (
-      prevProps &&
-      prevProps.model &&
-      (prevProps.model.index_pattern !== this.props.model.index_pattern ||
-        prevProps.model.default_index_pattern !== this.props.model.default_index_pattern)
-    ) {
-      await this.fetchIndexPatternsForQuery();
-    }
-  }
-
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern
-      ? this.props.model.index_pattern
-      : this.props.model.default_index_pattern;
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatternForQuery: indexPatternObject });
   }
 
   handleQueryChange = filter => {
@@ -115,7 +90,6 @@ export class MetricPanelConfig extends Component {
           name={this.props.name}
           visData$={this.props.visData$}
           onChange={this.props.onChange}
-          indexPatterns={this.state.indexPatternForQuery}
         />
       );
     } else {
@@ -157,7 +131,7 @@ export class MetricPanelConfig extends Component {
                     screenTitle={'MetricPanelConfigQuery'}
                     onChange={this.handleQueryChange}
                     appName={'VisEditor'}
-                    indexPatterns={[this.state.indexPatternForQuery]}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
                     store={localStorage || {}}
                   />
                 </EuiFormRow>

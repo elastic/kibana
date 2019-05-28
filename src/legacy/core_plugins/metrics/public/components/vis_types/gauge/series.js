@@ -197,7 +197,7 @@ GaugeSeriesUi.propTypes = {
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
-  indexPatternForQuery: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const GaugeSeries = injectI18n(GaugeSeriesUi);

@@ -509,5 +509,5 @@ TimeseriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };

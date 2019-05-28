@@ -32,7 +32,7 @@ const uiSettings = chrome.getUiSettingsClient();
 const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 export const SplitByFilter = props => {
-  const { onChange, uiRestrictions } = props;
+  const { onChange, uiRestrictions, indexPattern } = props;
   const defaults = { filter: { language: uiSettingsQueryLanguage, query: '' } };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
@@ -73,7 +73,7 @@ export const SplitByFilter = props => {
             screenTitle={'DataMetricsGroupByFilter'}
             onChange={handleQueryChange}
             appName={'VisEditor'}
-            indexPatterns={props.indexPatterns}
+            indexPatterns={[indexPattern]}
             store={localStorage || {}}
           />
         </EuiFormRow>
@@ -86,5 +86,5 @@ SplitByFilter.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
-  indexPatterns: PropTypes.array,
+  indexPatterns: PropTypes.string,
 };

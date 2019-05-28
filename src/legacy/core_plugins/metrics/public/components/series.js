@@ -28,7 +28,6 @@ import { TableSeries as table } from './vis_types/table/series';
 import { GaugeSeries as gauge } from './vis_types/gauge/series';
 import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 const lookup = {
   top_n: topN,
@@ -46,8 +45,7 @@ export class Series extends Component {
     this.state = {
       visible: true,
       selectedTab: 'metrics',
-      uiRestrictions: undefined,
-      indexPatternForQuery: {},
+      uiRestrictions: undefined
     };
 
     this.visDataSubscription = null;
@@ -81,7 +79,7 @@ export class Series extends Component {
     });
   };
 
-  async componentDidMount() {
+  componentDidMount() {
     if (this.props.visData$) {
       this.visDataSubscription = this.props.visData$.subscribe(visData =>
         this.setState({
@@ -89,16 +87,8 @@ export class Series extends Component {
         })
       );
     }
-    await this.fetchIndexPatternsForQuery();
   }
 
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.panel.index_pattern
-      ? this.props.panel.index_pattern
-      : this.props.panel.default_index_pattern;
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatternForQuery: indexPatternObject });
-  }
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
@@ -129,7 +119,7 @@ export class Series extends Component {
         toggleVisible: this.toggleVisible,
         togglePanelActivation: this.togglePanelActivation,
         visible: this.state.visible,
-        indexPatternForQuery: this.state.indexPatternForQuery,
+        indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
       };
       return <Component {...params} />;
     }

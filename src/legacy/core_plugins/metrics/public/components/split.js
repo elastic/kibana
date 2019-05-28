@@ -28,7 +28,6 @@ import { SplitByFilters } from './splits/filters';
 import { SplitByEverything } from './splits/everything';
 import { SplitUnsupported } from './splits/unsupported_split';
 import { isGroupByFieldsEnabled } from '../lib/check_ui_restrictions';
-import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
@@ -40,15 +39,6 @@ const SPLIT_MODES = {
 };
 
 export class Split extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      indexPatternForQuery: {},
-    };
-  }
-  async componentDidMount() {
-    await this.fetchIndexPatternsForQuery();
-  }
 
   componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
@@ -66,22 +56,6 @@ export class Split extends Component {
         ],
       });
     }
-  }
-
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.indexPatternFromProps();
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatternForQuery: indexPatternObject });
-  }
-
-  indexPatternFromProps() {
-    let searchIndexPattern = this.props.panel.default_index_pattern;
-    if (this.props.model.override_index_pattern && this.props.model.series_index_pattern) {
-      searchIndexPattern = this.props.model.series_index_pattern;
-    } else if (this.props.panel.index_pattern) {
-      searchIndexPattern = this.props.panel.index_pattern;
-    }
-    return searchIndexPattern;
   }
 
   getComponent(splitMode, uiRestrictions) {
@@ -103,24 +77,14 @@ export class Split extends Component {
 
   render() {
     const { model, panel, uiRestrictions } = this.props;
-    const indexPattern =
-      (model.override_index_pattern && model.series_index_pattern) || panel.index_pattern;
+    const indexPattern = model.override_index_pattern &&
+      model.series_index_pattern ||
+      panel.index_pattern;
 
     const splitMode = get(this.props, 'model.split_mode', SPLIT_MODES.EVERYTHING);
 
     const Component = this.getComponent(splitMode, uiRestrictions);
-    if (splitMode === SPLIT_MODES.FILTER || splitMode === SPLIT_MODES.FILTERS) {
-      return (
-        <Component
-          model={model}
-          indexPattern={this.state.indexPattern}
-          fields={this.props.fields}
-          onChange={this.props.onChange}
-          uiRestrictions={uiRestrictions}
-          indexPatterns={[this.state.indexPatternForQuery]}
-        />
-      );
-    }
+
     return (
       <Component
         model={model}
@@ -128,7 +92,6 @@ export class Split extends Component {
         fields={this.props.fields}
         onChange={this.props.onChange}
         uiRestrictions={uiRestrictions}
-        indexPatterns={this.state.indexPatternForQuery}
       />
     );
   }

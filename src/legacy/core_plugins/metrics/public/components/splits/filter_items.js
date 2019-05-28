@@ -64,7 +64,7 @@ class FilterItemsUi extends Component {
     const newFilter = () => ({
       color: this.props.model.color,
       id: uuid.v1(),
-      filter: { language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage, query: '' },
+      filter: { language: model.filter.language || uiSettingsQueryLanguage, query: '' },
     });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
@@ -93,7 +93,7 @@ class FilterItemsUi extends Component {
             aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
             onChange={(query) => this.handleQueryChange(model, query)}
             appName={'VisEditor'}
-            indexPatterns={indexPatterns}
+            indexPatterns={[indexPatterns]}
             store={localStorage || {}}
           />
         </EuiFlexItem>
@@ -135,7 +135,7 @@ FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatterns: PropTypes.array,
+  indexPatterns: PropTypes.string,
 };
 
 export const FilterItems = injectI18n(FilterItemsUi);

@@ -29,7 +29,6 @@ import uuid from 'uuid';
 import { IconSelect } from './icon_select';
 import { YesNo } from './yes_no';
 import { Storage } from 'ui/storage';
-import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { data } from 'plugins/data';
 import chrome from 'ui/chrome';
 const { QueryBarInput } = data.query.ui;
@@ -68,20 +67,7 @@ const localStorage = new Storage(window.localStorage);
 export class AnnotationsEditor extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      indexPatternForQuery: {}
-    };
     this.renderRow = this.renderRow.bind(this);
-
-  }
-
-  async componentDidMount() {
-    await this.fetchIndexPatternsForQuery();
-  }
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern || this.props.model.default_index_pattern;
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatternForQuery: indexPatternObject });
   }
 
   handleChange(item, name) {
@@ -103,7 +89,7 @@ export class AnnotationsEditor extends Component {
       query_string: { query: '', language: uiSettingsQueryLanguage }
     };
     const model = { ...defaults, ...row };
-    const indexPatternForQuery = this.state.indexPatternForQuery;
+    const indexPatternForQuery = (model.index_pattern && model.index_pattern !== '*') ? model.index_pattern : model.default_index_pattern;
     const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));

@@ -202,7 +202,7 @@ TimeseriesSeriesUI.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
-  indexPatternForQuery: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const TimeseriesSeries = injectI18n(TimeseriesSeriesUI);
