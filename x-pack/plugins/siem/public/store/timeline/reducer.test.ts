@@ -7,7 +7,11 @@
 import { cloneDeep, set } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
-import { IS_OPERATOR, DataProvider } from '../../components/timeline/data_providers/data_provider';
+import {
+  IS_OPERATOR,
+  DataProvider,
+  DataProvidersAnd,
+} from '../../components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -1705,6 +1709,351 @@ describe('Timeline', () => {
         },
       };
       expect(update).toEqual(expected);
+    });
+
+    test('should remove only first provider and not nested andProvider', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          id: '111',
+          name: 'data provider 1',
+          enabled: true,
+          queryMatch: {
+            field: '',
+            value: '',
+            operator: IS_OPERATOR,
+          },
+
+          excluded: false,
+          kqlQuery: '',
+        },
+        {
+          and: [],
+          id: '222',
+          name: 'data provider 2',
+          enabled: true,
+          queryMatch: {
+            field: '',
+            value: '',
+            operator: IS_OPERATOR,
+          },
+
+          excluded: false,
+          kqlQuery: '',
+        },
+        {
+          and: [],
+          id: '333',
+          name: 'data provider 3',
+          enabled: true,
+          queryMatch: {
+            field: '',
+            value: '',
+            operator: IS_OPERATOR,
+          },
+
+          excluded: false,
+          kqlQuery: '',
+        },
+      ];
+
+      const multiDataProviderMock = set('foo.dataProviders', dataProviders, timelineByIdMock);
+
+      const andDataProvider: DataProvidersAnd = {
+        id: '211',
+        name: 'And Data Provider',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+          operator: IS_OPERATOR,
+        },
+
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      const nestedMultiAndDataProviderMock = set(
+        'foo.dataProviders[1].and',
+        [andDataProvider],
+        multiDataProviderMock
+      );
+
+      const update = removeTimelineProvider({
+        id: 'foo',
+        providerId: '222',
+        timelineById: nestedMultiAndDataProviderMock,
+      });
+      expect(update).toEqual(
+        set(
+          'foo.dataProviders',
+          [
+            nestedMultiAndDataProviderMock.foo.dataProviders[0],
+            { ...andDataProvider, and: [] },
+            nestedMultiAndDataProviderMock.foo.dataProviders[2],
+          ],
+          timelineByIdMock
+        )
+      );
+    });
+
+    test('should remove only the first provider and keep multiple nested andProviders', () => {
+      const multiDataProvider: DataProvider[] = [
+        {
+          and: [
+            {
+              enabled: true,
+              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+              name: 'root',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'user.name',
+                value: 'root',
+                operator: ':',
+              },
+            },
+            {
+              enabled: true,
+              id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+              name: 'success',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'auditd.result',
+                value: 'success',
+                operator: ':',
+              },
+            },
+          ],
+          enabled: true,
+          excluded: false,
+          id: 'hosts-table-hostName-suricata-iowa',
+          name: 'suricata-iowa',
+          kqlQuery: '',
+          queryMatch: {
+            field: 'host.name',
+            value: 'suricata-iowa',
+            operator: ':',
+          },
+        },
+      ];
+
+      const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
+
+      const update = removeTimelineProvider({
+        id: 'foo',
+        providerId: 'hosts-table-hostName-suricata-iowa',
+        timelineById: multiDataProviderMock,
+      });
+
+      expect(update).toEqual(
+        set(
+          'foo.dataProviders',
+          [
+            {
+              enabled: true,
+              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+              name: 'root',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'user.name',
+                value: 'root',
+                operator: ':',
+              },
+              and: [
+                {
+                  enabled: true,
+                  id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+                  name: 'success',
+                  excluded: false,
+                  kqlQuery: '',
+                  queryMatch: {
+                    field: 'auditd.result',
+                    value: 'success',
+                    operator: ':',
+                  },
+                },
+              ],
+            },
+          ],
+          timelineByIdMock
+        )
+      );
+    });
+    test('should remove only the first AND provider when the first AND is deleted, and there are multiple andProviders', () => {
+      const multiDataProvider: DataProvider[] = [
+        {
+          and: [
+            {
+              enabled: true,
+              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+              name: 'root',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'user.name',
+                value: 'root',
+                operator: ':',
+              },
+            },
+            {
+              enabled: true,
+              id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+              name: 'success',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'auditd.result',
+                value: 'success',
+                operator: ':',
+              },
+            },
+          ],
+          enabled: true,
+          excluded: false,
+          id: 'hosts-table-hostName-suricata-iowa',
+          name: 'suricata-iowa',
+          kqlQuery: '',
+          queryMatch: {
+            field: 'host.name',
+            value: 'suricata-iowa',
+            operator: ':',
+          },
+        },
+      ];
+
+      const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
+
+      const update = removeTimelineProvider({
+        andProviderId: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+        id: 'foo',
+        providerId: 'hosts-table-hostName-suricata-iowa',
+        timelineById: multiDataProviderMock,
+      });
+
+      expect(update).toEqual(
+        set(
+          'foo.dataProviders',
+          [
+            {
+              and: [
+                {
+                  enabled: true,
+                  id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+                  name: 'success',
+                  excluded: false,
+                  kqlQuery: '',
+                  queryMatch: {
+                    field: 'auditd.result',
+                    value: 'success',
+                    operator: ':',
+                  },
+                },
+              ],
+              enabled: true,
+              excluded: false,
+              id: 'hosts-table-hostName-suricata-iowa',
+              name: 'suricata-iowa',
+              kqlQuery: '',
+              queryMatch: {
+                field: 'host.name',
+                value: 'suricata-iowa',
+                operator: ':',
+              },
+            },
+          ],
+          timelineByIdMock
+        )
+      );
+    });
+
+    test('should remove only the second AND provider when the second AND is deleted, and there are multiple andProviders', () => {
+      const multiDataProvider: DataProvider[] = [
+        {
+          and: [
+            {
+              enabled: true,
+              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+              name: 'root',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'user.name',
+                value: 'root',
+                operator: ':',
+              },
+            },
+            {
+              enabled: true,
+              id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+              name: 'success',
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'auditd.result',
+                value: 'success',
+                operator: ':',
+              },
+            },
+          ],
+          enabled: true,
+          excluded: false,
+          id: 'hosts-table-hostName-suricata-iowa',
+          name: 'suricata-iowa',
+          kqlQuery: '',
+          queryMatch: {
+            field: 'host.name',
+            value: 'suricata-iowa',
+            operator: ':',
+          },
+        },
+      ];
+
+      const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
+
+      const update = removeTimelineProvider({
+        andProviderId: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+        id: 'foo',
+        providerId: 'hosts-table-hostName-suricata-iowa',
+        timelineById: multiDataProviderMock,
+      });
+
+      expect(update).toEqual(
+        set(
+          'foo.dataProviders',
+          [
+            {
+              and: [
+                {
+                  enabled: true,
+                  id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+                  name: 'root',
+                  excluded: false,
+                  kqlQuery: '',
+                  queryMatch: {
+                    field: 'user.name',
+                    value: 'root',
+                    operator: ':',
+                  },
+                },
+              ],
+              enabled: true,
+              excluded: false,
+              id: 'hosts-table-hostName-suricata-iowa',
+              name: 'suricata-iowa',
+              kqlQuery: '',
+              queryMatch: {
+                field: 'host.name',
+                value: 'suricata-iowa',
+                operator: ':',
+              },
+            },
+          ],
+          timelineByIdMock
+        )
+      );
     });
   });
 });
