@@ -34,11 +34,11 @@ export const CreateArchivesTask = {
 
       switch (path.extname(destination)) {
         case '.zip':
-          await compress('zip', { zlib: { level: 9 } }, source, destination);
+          await compress('zip', { zlib: { level: 9 } }, source, destination, true);
           break;
 
         case '.gz':
-          await compress('tar', { gzip: true, gzipOptions: { level: 9 } }, source, destination);
+          await compress('tar', { gzip: true, gzipOptions: { level: 9 } }, source, destination, true);
           break;
 
         default:

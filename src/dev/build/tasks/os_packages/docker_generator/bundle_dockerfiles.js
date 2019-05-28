@@ -65,6 +65,7 @@ export async function bundleDockerFiles(config, log, build, scope) {
       }
     },
     dockerFilesBuildDir,
-    dockerFilesOutputDir
+    dockerFilesOutputDir,
+    false
   );
 }
