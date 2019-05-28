@@ -123,6 +123,7 @@ export class AlertsClient {
         alertId: id,
       },
       state: {},
+      scope: ['alerting'],
     });
   }
 
