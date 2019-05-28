@@ -11,7 +11,6 @@ export * from './dataurl';
 export * from './errors';
 export * from './expression_form_handlers';
 export * from './fetch';
-export * from './find_in_object';
 export * from './fonts';
 export * from './get_colors_from_palette';
 export * from './get_field_type';
