@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-export default function splitByFilter(req, panel, series) {
+
+export function splitByFilter(req, panel, series) {
   return next => doc => {
     if (series.split_mode !== 'filter') return next(doc);
     _.set(doc, `aggs.${series.id}.filter.query_string.query`, series.filter || '*');

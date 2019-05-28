@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import VerticalLegend from './vertical_legend';
-import HorizontalLegend from './horizontal_legend';
+import { VerticalLegend } from './vertical_legend';
+import { HorizontalLegend } from './horizontal_legend';
 
-function Legend(props) {
+export function Legend(props) {
   if (props.legendPosition === 'bottom') {
     return (<HorizontalLegend {...props}/>);
   }
@@ -39,5 +39,3 @@ Legend.propTypes = {
   seriesFilter: PropTypes.array,
   tickFormatter: PropTypes.func
 };
-
-export default Legend;

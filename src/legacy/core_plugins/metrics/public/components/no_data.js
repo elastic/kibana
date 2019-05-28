@@ -21,7 +21,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 
-function NoDataComponent() {
+export function NoDataComponent() {
   return (
     <div className="visError" data-test-subj="noTSVBDataMessage">
       <EuiText size="xs" color="subdued">
@@ -39,4 +39,3 @@ function NoDataComponent() {
     </div>
   );
 }
-export default NoDataComponent;

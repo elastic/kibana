@@ -19,14 +19,16 @@
 
 import { isFunction } from 'lodash';
 
+type FilterFunc<P extends keyof T, T> = (item: T[P]) => boolean;
+
 /**
  * Filters out a list by a given filter. This is currently used to implement:
  *   - fieldType filters a list of fields by their type property
  *   - aggFilter filters a list of aggs by their name property
  *
- * @returns {function} - the filter function which can be registered with angular
+ * @returns the filter function which can be registered with angular
  */
-export function propFilter(prop) {
+function propFilter<P extends string>(prop: P) {
   /**
    * List filtering function which accepts an array or list of values that a property
    * must contain
@@ -37,9 +39,12 @@ export function propFilter(prop) {
    *   - Can be also an array, a single value as a string, or a comma-separated list of items
    * @return {array} - the filtered list
    */
-  return function (list, filters = []) {
+  return function filterByName<T extends { [key in P]: T[P] }>(
+    list: T[],
+    filters: string[] | string | FilterFunc<P, T> = []
+  ): T[] {
     if (isFunction(filters)) {
-      return list.filter((item) => filters(item[prop]));
+      return list.filter(item => (filters as FilterFunc<P, T>)(item[prop]));
     }
 
     if (!Array.isArray(filters)) {
@@ -54,21 +59,26 @@ export function propFilter(prop) {
       return list;
     }
 
-    const options = filters.reduce(function (options, filter) {
-      let type = 'include';
-      let value = filter;
+    const options = filters.reduce(
+      (acc, filter) => {
+        let type = 'include';
+        let value = filter;
 
-      if (filter.charAt(0) === '!') {
-        type = 'exclude';
-        value = filter.substr(1);
-      }
+        if (filter.charAt(0) === '!') {
+          type = 'exclude';
+          value = filter.substr(1);
+        }
 
-      if (!options[type]) options[type] = [];
-      options[type].push(value);
-      return options;
-    }, {});
+        if (!acc[type]) {
+          acc[type] = [];
+        }
+        acc[type].push(value);
+        return acc;
+      },
+      {} as { [type: string]: string[] }
+    );
 
-    return list.filter(function (item) {
+    return list.filter(item => {
       const value = item[prop];
 
       const excluded = options.exclude && options.exclude.includes(value);
@@ -85,3 +95,5 @@ export function propFilter(prop) {
     });
   };
 }
+
+export { propFilter };

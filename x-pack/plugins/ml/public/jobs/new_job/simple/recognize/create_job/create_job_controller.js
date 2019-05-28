@@ -56,7 +56,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateRecognizerJobs', function ($scope, $window, $route, Private) {
+  .controller('MlCreateRecognizerJobs', function ($scope, $route, Private) {
 
     const mlCreateRecognizerJobsService = Private(CreateRecognizerJobsServiceProvider);
     timefilter.disableTimeRangeSelector();

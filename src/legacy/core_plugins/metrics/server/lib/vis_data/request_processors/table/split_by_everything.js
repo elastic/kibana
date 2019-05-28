@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-export default function splitByEverything(req, panel) {
+
+export function splitByEverything(req, panel) {
   return next => doc => {
     panel.series.filter(c => !(c.aggregate_by && c.aggregate_function)).forEach(column => {
       if (column.filter) {
