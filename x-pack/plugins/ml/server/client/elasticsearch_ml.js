@@ -6,7 +6,7 @@
 
 
 
-export const elasticsearchJsPlugin = (Client, config, components) => {
+export const elasticsearchJsPlugin = (Client, config, components) => { // eslint-disable-line no-unused-vars
   const ca = components.clientAction.factory;
 
   Client.prototype.ml = components.clientAction.namespaceFactory();
@@ -187,10 +187,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.stopDataFrameTransformsJob = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stop',
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>',
         req: {
           jobId: {
             type: 'string'
+          },
+          force: {
+            type: 'boolean'
           }
         }
       }

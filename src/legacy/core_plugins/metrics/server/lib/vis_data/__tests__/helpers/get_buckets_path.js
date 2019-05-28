@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getBucketsPath from '../../helpers/get_buckets_path';
+import { getBucketsPath } from '../../helpers/get_buckets_path';
 
 describe('getBucketsPath', () => {
 

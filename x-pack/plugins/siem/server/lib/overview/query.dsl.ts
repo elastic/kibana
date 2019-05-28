@@ -9,12 +9,9 @@ import { RequestBasicOptions } from '../framework';
 export const buildOverviewNetworkQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
-    logAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
 }: RequestBasicOptions) => {
   const filter = [
@@ -31,7 +28,7 @@ export const buildOverviewNetworkQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [auditbeatAlias, logAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {
@@ -77,11 +74,9 @@ export const buildOverviewNetworkQuery = ({
 export const buildOverviewHostQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
-    logAlias,
-    packetbeatAlias,
   },
 }: RequestBasicOptions) => {
   const filter = [
@@ -98,7 +93,7 @@ export const buildOverviewHostQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [auditbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

@@ -13,7 +13,7 @@ const aField = mockDetailItemData[0];
 describe('helpers', () => {
   describe('getExampleText', () => {
     test('it returns the expected example text when the field contains an example', () => {
-      expect(getExampleText(aField)).toEqual('Example: Y-6TfmcB0WOhS6qyMv3s');
+      expect(getExampleText(aField.example)).toEqual('Example: Y-6TfmcB0WOhS6qyMv3s');
     });
 
     test(`it returns an empty string when the field's example is an empty string`, () => {
@@ -22,7 +22,7 @@ describe('helpers', () => {
         example: '',
       };
 
-      expect(getExampleText(fieldWithEmptyExample)).toEqual('');
+      expect(getExampleText(fieldWithEmptyExample.example)).toEqual('');
     });
   });
 

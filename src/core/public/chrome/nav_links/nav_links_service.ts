@@ -22,17 +22,17 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, NavLinkUpdateableFields } from './nav_link';
 import { ApplicationStart } from '../../application';
-import { BasePathStart } from '../../base_path';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
   application: ApplicationStart;
-  basePath: BasePathStart;
+  http: HttpStart;
 }
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
-  public start({ application, basePath }: StartDeps) {
+  public start({ application, http }: StartDeps) {
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
       new Map(
         application.availableApps.map(
@@ -42,7 +42,7 @@ export class NavLinksService {
               new NavLinkWrapper({
                 ...app,
                 // Either rootRoute or appUrl must be defined.
-                baseUrl: relativeToAbsolute(basePath.addToPath((app.rootRoute || app.appUrl)!)),
+                baseUrl: relativeToAbsolute(http.prependBasePath((app.rootRoute || app.appUrl)!)),
               }),
             ] as [string, NavLinkWrapper]
         )

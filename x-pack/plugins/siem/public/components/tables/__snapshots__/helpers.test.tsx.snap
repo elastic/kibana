@@ -12,7 +12,9 @@ exports[`Table Helpers #getRowItemDraggable it returns correctly against snapsho
         "kqlQuery": "",
         "name": "item1",
         "queryMatch": Object {
+          "displayValue": "item1",
           "field": "attrName",
+          "operator": ":",
           "value": "item1",
         },
       }
@@ -35,7 +37,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "kqlQuery": "",
         "name": "item1",
         "queryMatch": Object {
+          "displayValue": "item1",
           "field": "attrName",
+          "operator": ":",
           "value": "item1",
         },
       }
@@ -54,7 +58,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "kqlQuery": "",
         "name": "item2",
         "queryMatch": Object {
+          "displayValue": "item2",
           "field": "attrName",
+          "operator": ":",
           "value": "item2",
         },
       }
@@ -73,7 +79,9 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         "kqlQuery": "",
         "name": "item3",
         "queryMatch": Object {
+          "displayValue": "item3",
           "field": "attrName",
+          "operator": ":",
           "value": "item3",
         },
       }

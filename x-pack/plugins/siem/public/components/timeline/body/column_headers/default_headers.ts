@@ -52,3 +52,6 @@ export const defaultHeaders: ColumnHeader[] = [
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];
+
+/** The default category of fields shown in the Timeline */
+export const DEFAULT_CATEGORY_NAME = 'default ECS';

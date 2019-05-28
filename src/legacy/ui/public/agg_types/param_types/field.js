@@ -24,7 +24,7 @@ import { BaseParamType } from './base';
 import { IndexedArray } from '../../indexed_array';
 import { toastNotifications } from '../../notify';
 import { createLegacyClass } from '../../utils/legacy_class';
-import { propFilter } from '../../filters/_prop_filter';
+import { propFilter } from '../filter';
 import { i18n } from '@kbn/i18n';
 
 const filterByType = propFilter('type');
