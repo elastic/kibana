@@ -31,7 +31,7 @@ import { getSpacesUsageCollector } from '../lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SecurityPlugin } from '../../../security';
 import { SpacesServiceSetup } from './spaces_service/spaces_service';
-import { SpacesConfig } from './config';
+import { SpacesConfigType } from './config';
 import { getActiveSpace } from '../lib/get_active_space';
 import { toggleUICapabilities } from '../lib/toggle_ui_capabilities';
 
@@ -78,12 +78,12 @@ export interface SpacesInitializerContext extends PluginInitializerContext {
 export class Plugin {
   private readonly pluginId = 'spaces';
 
-  private config$: Observable<SpacesConfig>;
+  private config$: Observable<SpacesConfigType>;
 
   private log: Logger;
 
   constructor(private readonly initializerContext: SpacesInitializerContext) {
-    this.config$ = initializerContext.config.create<SpacesConfig>();
+    this.config$ = initializerContext.config.create<SpacesConfigType>();
     this.log = initializerContext.logger.get();
   }
 

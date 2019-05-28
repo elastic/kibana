@@ -15,7 +15,6 @@ import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 import { elasticsearchServiceMock, httpServiceMock } from '../../../../../../src/core/server/mocks';
-import { SpacesConfig } from '../../new_platform/config';
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
 import { HttpServiceSetup } from 'src/core/server';
 import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
@@ -199,7 +198,7 @@ describe('onPostAuthRequestInterceptor', () => {
         savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
         getSecurity: () => ({} as SecurityPlugin),
         spacesAuditLogger: {} as SpacesAuditLogger,
-        config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
+        config$: Rx.of({ maxSpaces: 1000 }),
       });
 
       spacesService.scopedClient = jest.fn().mockReturnValue({

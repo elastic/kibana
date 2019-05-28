@@ -18,7 +18,7 @@ import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
-import { SpacesConfig } from '../config';
+import { SpacesConfigType } from '../config';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -40,7 +40,7 @@ interface SpacesServiceDeps {
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
   getSecurity: () => SecurityPlugin | undefined;
-  config$: Observable<SpacesConfig>;
+  config$: Observable<SpacesConfigType>;
   spacesAuditLogger: any;
 }
 
@@ -61,7 +61,7 @@ export class SpacesService {
     config$,
     spacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
-    let config: SpacesConfig = await config$.pipe(first()).toPromise();
+    let config: SpacesConfigType = await config$.pipe(first()).toPromise();
 
     this.configSubscription$ = config$.subscribe({
       next: updatedConfig => {

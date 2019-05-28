@@ -6,15 +6,10 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-/** @internal */
-export class SpacesConfig {
-  public static schema = schema.object({
+export const config = {
+  schema: schema.object({
     maxSpaces: schema.number({ defaultValue: 1000 }),
-  });
+  }),
+};
 
-  public readonly maxSpaces: number;
-
-  constructor(config: TypeOf<typeof SpacesConfig['schema']>) {
-    this.maxSpaces = config.maxSpaces;
-  }
-}
+export type SpacesConfigType = TypeOf<typeof config.schema>;

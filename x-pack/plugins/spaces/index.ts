@@ -24,7 +24,6 @@ import {
   SpacesHttpServiceSetup,
 } from './server/new_platform/plugin';
 import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
-import { SpacesConfig } from './server/new_platform/config';
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
@@ -112,11 +111,9 @@ export const spaces = (kibana: Record<string, any>) =>
         legacyConfig: server.config(),
         config: {
           create: () => {
-            return Rx.of(
-              new SpacesConfig({
-                maxSpaces: server.config().get('xpack.spaces.maxSpaces'),
-              })
-            );
+            return Rx.of({
+              maxSpaces: server.config().get('xpack.spaces.maxSpaces'),
+            });
           },
         },
         logger: {

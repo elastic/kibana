@@ -11,7 +11,6 @@ import { SpacesService } from '../new_platform/spaces_service';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../security';
 import { SpacesAuditLogger } from './audit_logger';
-import { SpacesConfig } from '../new_platform/config';
 import { elasticsearchServiceMock, httpServiceMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
 
@@ -65,7 +64,7 @@ describe('createSpacesTutorialContextFactory', () => {
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
+      config$: Rx.of({ maxSpaces: 1000 }),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 

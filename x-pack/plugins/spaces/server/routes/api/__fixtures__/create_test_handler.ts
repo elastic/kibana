@@ -17,7 +17,6 @@ import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { InternalRouteDeps } from '../v1';
 import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
-import { SpacesConfig } from '../../../new_platform/config';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -164,7 +163,7 @@ export function createTestHandler(
       savedObjects: server.savedObjects,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
+      config$: Rx.of({ maxSpaces: 1000 }),
     });
 
     spacesService.scopedClient = jest.fn((req: any) => {
@@ -173,7 +172,7 @@ export function createTestHandler(
         () => null,
         null,
         mockSavedObjectsRepository,
-        new SpacesConfig({ maxSpaces: 1000 }),
+        { maxSpaces: 1000 },
         mockSavedObjectsRepository,
         req
       );

@@ -7,7 +7,6 @@ import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
 import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../../lib/audit_logger';
-import { SpacesConfig } from '../config';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { KibanaRequest } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
@@ -39,7 +38,7 @@ const createService = async () => {
   const spacesServiceSetup = await spacesService.setup({
     http: httpSetup,
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
-    config$: Rx.of(new SpacesConfig({ maxSpaces: 10 })),
+    config$: Rx.of({ maxSpaces: 10 }),
     getSecurity: () => undefined,
     savedObjects: ({
       getSavedObjectsRepository: jest.fn().mockReturnValue(null),

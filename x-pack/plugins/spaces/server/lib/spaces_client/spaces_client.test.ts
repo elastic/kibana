@@ -7,8 +7,7 @@
 import { SpacesClient } from './spaces_client';
 import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
 import { actionsFactory } from '../../../../security/server/lib/authorization/actions';
-import { SpacesConfig } from '../../new_platform/config';
-import { TypeOf } from '@kbn/config-schema';
+import { SpacesConfigType, config } from '../../new_platform/config';
 
 const createMockAuditLogger = () => {
   return {
@@ -64,8 +63,8 @@ const createMockAuthorization = () => {
   };
 };
 
-const createMockConfig = (config: TypeOf<typeof SpacesConfig['schema']> = { maxSpaces: 1000 }) => {
-  return new SpacesConfig(config);
+const createMockConfig = (mockConfig: SpacesConfigType = { maxSpaces: 1000 }) => {
+  return config.schema.validate(mockConfig);
 };
 
 describe('#getAll', () => {

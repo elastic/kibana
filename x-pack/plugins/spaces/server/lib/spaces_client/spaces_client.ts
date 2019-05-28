@@ -10,7 +10,7 @@ import { AuthorizationService } from '../../../../security/server/lib/authorizat
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
-import { SpacesConfig } from '../../new_platform/config';
+import { SpacesConfigType } from '../../new_platform/config';
 
 interface SpacesClientRequestFacade {
   headers?: Headers;
@@ -21,7 +21,7 @@ export class SpacesClient {
     private readonly debugLogger: (message: string) => void,
     private readonly authorization: AuthorizationService | null,
     private readonly callWithRequestSavedObjectRepository: any,
-    private readonly config: SpacesConfig,
+    private readonly config: SpacesConfigType,
     private readonly internalSavedObjectRepository: any,
     private readonly request: SpacesClientRequestFacade
   ) {}
