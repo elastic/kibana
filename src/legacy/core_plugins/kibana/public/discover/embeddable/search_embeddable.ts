@@ -270,18 +270,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
     searchScope.sort = this.input.sort || this.savedSearch.sort;
     searchScope.sharedItemTitle = this.panelTitle;
 
-    // Awful hack to get search sources to send out an initial query. Angular should be going away
-    // soon and we can get rid of this.
-    if (searchScope.searchSource) {
-      if (!searchScope.$$phase) {
-        searchScope.$apply(() => {
-          searchScope.searchSource.triggerFetch = searchScope.searchSource.triggerFetch
-            ? searchScope.searchSource.triggerFetch + 1
-            : 1;
-        });
-      }
-    }
-
     this.filtersSearchSource.setField('filter', this.input.filters);
     this.filtersSearchSource.setField('query', this.input.query);
 
