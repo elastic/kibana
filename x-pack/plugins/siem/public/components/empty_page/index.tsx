@@ -7,6 +7,11 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
+const EmptyPrompt = styled(EuiEmptyPrompt)`
+  align-self: center; // Corrects horizontal centering in IE11
+`;
 
 interface EmptyPageProps {
   actionPrimaryIcon?: IconType;
@@ -36,7 +41,7 @@ export const EmptyPage = pure<EmptyPageProps>(
     title,
     ...rest
   }) => (
-    <EuiEmptyPrompt
+    <EmptyPrompt
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={
