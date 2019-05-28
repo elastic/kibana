@@ -67,6 +67,100 @@ export function getDefaultPivotState(kibanaContext: KibanaContextValue): DefineP
   };
 }
 
+function isNameConflict(
+  aggName: AggName,
+  aggList: PivotAggsConfigDict,
+  groupByList: PivotGroupByConfigDict
+) {
+  if (aggList[aggName] !== undefined) {
+    toastNotifications.addDanger(
+      i18n.translate('xpack.ml.dataframe.definePivot.aggExistsErrorMessage', {
+        defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
+        values: { aggName },
+      })
+    );
+    return true;
+  }
+
+  if (groupByList[aggName] !== undefined) {
+    toastNotifications.addDanger(
+      i18n.translate('xpack.ml.dataframe.definePivot.groupByExistsErrorMessage', {
+        defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
+        values: { aggName },
+      })
+    );
+    return true;
+  }
+
+  let conflict = false;
+
+  // check the new aggName against existing aggs and groupbys
+  const aggNameSplit = aggName.split('.');
+  let aggNameCheck: string;
+  aggNameSplit.forEach(aggNamePart => {
+    aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
+    if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.definePivot.nestedConflictErrorMessage', {
+          defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggNameCheck}'.`,
+          values: { aggName, aggNameCheck },
+        })
+      );
+      conflict = true;
+    }
+  });
+
+  if (conflict) {
+    return true;
+  }
+
+  // check all aggs against new aggName
+  Object.keys(aggList).forEach(aggListName => {
+    const aggListNameSplit = aggListName.split('.');
+    let aggListNameCheck: string;
+    aggListNameSplit.forEach(aggListNamePart => {
+      aggListNameCheck =
+        aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
+      if (aggListNameCheck === aggName) {
+        toastNotifications.addDanger(
+          i18n.translate('xpack.ml.dataframe.definePivot.nestedAggListConflictErrorMessage', {
+            defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggListName}'.`,
+            values: { aggName, aggListName },
+          })
+        );
+        conflict = true;
+      }
+    });
+  });
+
+  if (conflict) {
+    return true;
+  }
+
+  // check all group-bys against new aggName
+  Object.keys(groupByList).forEach(groupByListName => {
+    const groupByListNameSplit = groupByListName.split('.');
+    let groupByListNameCheck: string;
+    groupByListNameSplit.forEach(groupByListNamePart => {
+      groupByListNameCheck =
+        groupByListNameCheck === undefined
+          ? groupByListNamePart
+          : `${groupByListNameCheck}.${groupByListNamePart}`;
+      if (groupByListNameCheck === aggName) {
+        toastNotifications.addDanger(
+          i18n.translate('xpack.ml.dataframe.definePivot.nestedAggListConflictErrorMessage', {
+            defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{groupByListName}'.`,
+            values: { aggName, groupByListName },
+          })
+        );
+        conflict = true;
+      }
+    });
+  });
+
+  return conflict;
+}
+
 interface Props {
   overrides?: DefinePivotExposedState;
   onChange(s: DefinePivotExposedState): void;
@@ -111,23 +205,24 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     const config: PivotGroupByConfig = groupByOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (groupByList[aggName] === undefined) {
-      groupByList[aggName] = config;
-      setGroupByList({ ...groupByList });
-    } else {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.ml.dataframe.definePivot.groupByExistsErrorMessage', {
-          defaultMessage: `A group by configuration with the name '{aggName}' already exists.`,
-          values: { aggName },
-        })
-      );
+    if (isNameConflict(aggName, aggList, groupByList)) {
+      return;
     }
+
+    groupByList[aggName] = config;
+    setGroupByList({ ...groupByList });
   };
 
   const updateGroupBy = (previousAggName: AggName, item: PivotGroupByConfig) => {
-    delete groupByList[previousAggName];
-    groupByList[item.aggName] = item;
-    setGroupByList({ ...groupByList });
+    const groupByListWithoutPrevious = { ...groupByList };
+    delete groupByListWithoutPrevious[previousAggName];
+
+    if (isNameConflict(item.aggName, aggList, groupByListWithoutPrevious)) {
+      return;
+    }
+
+    groupByListWithoutPrevious[item.aggName] = item;
+    setGroupByList({ ...groupByListWithoutPrevious });
   };
 
   const deleteGroupBy = (aggName: AggName) => {
@@ -143,21 +238,22 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     const config: PivotAggsConfig = aggOptionsData[label];
     const aggName: AggName = config.aggName;
 
-    if (aggList[aggName] === undefined) {
-      aggList[aggName] = config;
-      setAggList({ ...aggList });
-    } else {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.ml.dataframe.definePivot.aggExistsErrorMessage', {
-          defaultMessage: `An aggregation configuration with the name '{aggName}' already exists.`,
-          values: { aggName },
-        })
-      );
+    if (isNameConflict(aggName, aggList, groupByList)) {
+      return;
     }
+
+    aggList[aggName] = config;
+    setAggList({ ...aggList });
   };
 
   const updateAggregation = (previousAggName: AggName, item: PivotAggsConfig) => {
-    delete aggList[previousAggName];
+    const aggListWithoutPrevious = { ...aggList };
+    delete aggListWithoutPrevious[previousAggName];
+
+    if (isNameConflict(item.aggName, aggListWithoutPrevious, groupByList)) {
+      return;
+    }
+
     aggList[item.aggName] = item;
     setAggList({ ...aggList });
   };
