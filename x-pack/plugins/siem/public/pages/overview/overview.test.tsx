@@ -14,8 +14,6 @@ import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 
-import * as i18n from './translations';
-
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',
