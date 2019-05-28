@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import buildProcessorFunction from '../build_processor_function';
+import { buildProcessorFunction } from '../build_processor_function';
 
 describe('buildProcessorFunction(chain, ...args)', () => {
   const req = {};

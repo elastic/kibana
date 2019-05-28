@@ -56,7 +56,7 @@ export class Plugin {
     ReactDOM.render(
       <i18n.Context>
         <Router history={history}>
-          <LocationProvider history={history}>
+          <LocationProvider>
             <App />
           </LocationProvider>
         </Router>

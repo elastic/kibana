@@ -13,9 +13,11 @@ import { initMetricsApi } from '../routes/metrics';
 import { initServicesApi } from '../routes/services';
 import { initTracesApi } from '../routes/traces';
 import { initTransactionGroupsApi } from '../routes/transaction_groups';
+import { initUIFiltersApi } from '../routes/ui_filters';
 
 export class Plugin {
   public setup(core: InternalCoreSetup) {
+    initUIFiltersApi(core);
     initTransactionGroupsApi(core);
     initTracesApi(core);
     initServicesApi(core);

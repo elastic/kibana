@@ -21,7 +21,7 @@ import _ from 'lodash';
 import handlebars from 'handlebars/dist/handlebars';
 import { i18n } from '@kbn/i18n';
 
-export default function replaceVars(str, args = {}, vars = {}) {
+export function replaceVars(str, args = {}, vars = {}) {
   try {
     const template = handlebars.compile(str, { strict: true, knownHelpersOnly: true });
 
