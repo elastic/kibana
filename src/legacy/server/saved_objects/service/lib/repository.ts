@@ -745,7 +745,7 @@ export class SavedObjectsRepository {
   }
 
   private _getCurrentTime() {
-    return new Date();
+    return new Date().toISOString();
   }
 
   // The internal representation of the saved object that the serializer returns

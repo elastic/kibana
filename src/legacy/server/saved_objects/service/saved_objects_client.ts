@@ -41,7 +41,6 @@ export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
   attributes: T;
   references?: SavedObjectReference[];
   migrationVersion?: MigrationVersion;
-  // extraDocumentProperties?: string[];
 }
 
 export interface BulkResponse<T extends SavedObjectAttributes = any> {
@@ -91,6 +90,10 @@ export interface UpdateResponse<T extends SavedObjectAttributes = any>
   attributes: Partial<T>;
 }
 
+/**
+ * A dictionary of saved object type -> version used to determine
+ * what migrations need to be applied to a saved object.
+ */
 export interface MigrationVersion {
   [pluginName: string]: string;
 }
@@ -107,7 +110,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
   version?: string;
-  updated_at?: Date;
+  updated_at?: string;
   error?: {
     message: string;
     statusCode: number;
@@ -117,6 +120,9 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   migrationVersion?: MigrationVersion;
 }
 
+/**
+ * A reference to another saved object.
+ */
 export interface SavedObjectReference {
   name: string;
   type: string;
