@@ -132,7 +132,7 @@ export class ToastsApi {
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
       text: (
         <ErrorToast
-          openModal={this.openModal}
+          openModal={this.openModal.bind(this)}
           error={error}
           title={options.title}
           toastMessage={message}

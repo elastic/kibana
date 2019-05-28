@@ -716,7 +716,7 @@ function discoverController(
       })
       .catch((error) => {
         toastNotifications.addError(error, {
-          title: i18n('kbn.discover.discoverError', {
+          title: i18n.translate('kbn.discover.discoverError', {
             defaultMessage: 'Discover error',
           }),
         });
@@ -802,7 +802,7 @@ function discoverController(
           $scope.fetchError = fetchError;
         } else {
           toastNotifications.addError(error, {
-            title: i18n('kbn.discover.errorLoadingData', {
+            title: i18n.translate('kbn.discover.errorLoadingData', {
               defaultMessage: 'Error loading data',
             }),
           });
