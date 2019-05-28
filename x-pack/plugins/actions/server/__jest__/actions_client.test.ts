@@ -11,6 +11,9 @@ import { ActionsClient } from '../actions_client';
 const services = {
   log: jest.fn(),
 };
+const actionTypeServiceParams = {
+  services,
+};
 
 const savedObjectsClient = {
   errors: {} as any,
@@ -28,7 +31,7 @@ beforeEach(() => jest.resetAllMocks());
 describe('create()', () => {
   test('creates an action with all given properties', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -79,7 +82,7 @@ describe('create()', () => {
   });
 
   test('validates actionTypeConfig', async () => {
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const actionService = new ActionsClient({
       actionTypeService,
       savedObjectsClient,
@@ -110,7 +113,7 @@ describe('create()', () => {
   });
 
   test(`throws an error when an action type doesn't exist`, async () => {
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const actionService = new ActionsClient({
       actionTypeService,
       savedObjectsClient,
@@ -187,7 +190,7 @@ describe('create()', () => {
 describe('get()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const actionService = new ActionsClient({
       actionTypeService,
       savedObjectsClient,
@@ -217,7 +220,7 @@ describe('get()', () => {
 describe('find()', () => {
   test('calls savedObjectsClient with parameters', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const actionService = new ActionsClient({
       actionTypeService,
       savedObjectsClient,
@@ -248,7 +251,7 @@ describe('find()', () => {
 describe('delete()', () => {
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const actionService = new ActionsClient({
       actionTypeService,
       savedObjectsClient,
@@ -278,7 +281,7 @@ describe('delete()', () => {
 describe('update()', () => {
   test('updates an action with all given properties', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -325,7 +328,7 @@ describe('update()', () => {
   });
 
   test('validates actionTypeConfig', async () => {
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const actionService = new ActionsClient({
       actionTypeService,
       savedObjectsClient,
@@ -358,7 +361,7 @@ describe('update()', () => {
   });
 
   test(`throws an error when action type doesn't exist`, async () => {
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const actionService = new ActionsClient({
       actionTypeService,
       savedObjectsClient,
@@ -380,7 +383,7 @@ describe('update()', () => {
 
   test('encrypts action type options unless specified not to', async () => {
     const expectedResult = Symbol();
-    const actionTypeService = new ActionTypeService({ services });
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
