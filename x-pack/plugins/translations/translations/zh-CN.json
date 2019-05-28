@@ -9289,7 +9289,6 @@
     "xpack.siem.notes.addNoteButtonLabel": "添加备注",
     "xpack.siem.notes.cancelButtonLabel": "取消",
     "xpack.siem.notes.copyToClipboardButtonLabel": "复制到剪贴板",
-    "xpack.siem.notes.noteTitle": "{totalCount, plural, =1 {Note} other {Notes}}",
     "xpack.siem.notes.previewMarkdownTitle": "预览 (Markdown)",
     "xpack.siem.notes.search.FilterByUserOrNotePlaceholder": "按用户或备注筛选",
     "xpack.siem.open.timeline.cancelButton": "取消",
