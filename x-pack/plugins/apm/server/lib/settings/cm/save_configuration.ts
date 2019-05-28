@@ -21,6 +21,7 @@ export async function saveConfiguration({
   const { client, config } = setup;
 
   const params = {
+    refresh: true,
     index: config.get<string>('apm_oss.cmIndex'),
     body: {
       timestamp: {

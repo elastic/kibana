@@ -17,7 +17,7 @@ import { DeleteModal } from './DeleteModal';
 type Config = CMListAPIResponse[0];
 
 export function ListSettings() {
-  const { data = [] } = useFetcher(loadCMList, []);
+  const { data = [], refresh } = useFetcher(loadCMList, []);
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
   );
@@ -75,11 +75,16 @@ export function ListSettings() {
         }}
         onConfirm={() => {
           setConfigToBeDeleted(null);
+          refresh();
         }}
       />
       <AddSettingsFlyout
         isOpen={isFlyoutOpen}
         onClose={() => setIsFlyoutOpen(false)}
+        onSubmit={() => {
+          setIsFlyoutOpen(false);
+          refresh();
+        }}
       />
       <EuiTitle>
         <h2>Agent configuration</h2>

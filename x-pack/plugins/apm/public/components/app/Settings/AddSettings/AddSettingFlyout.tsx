@@ -11,17 +11,16 @@ import {
   EuiPortal,
   EuiTitle
 } from '@elastic/eui';
-
 import React from 'react';
-
-import { AddSetting } from './AddSetting';
+import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 
 interface Props {
   onClose: () => void;
+  onSubmit: () => void;
   isOpen: boolean;
 }
 
-export function AddSettingsFlyout({ onClose, isOpen }: Props) {
+export function AddSettingsFlyout({ onClose, isOpen, onSubmit }: Props) {
   if (!isOpen) {
     return null;
   }
@@ -34,7 +33,7 @@ export function AddSettingsFlyout({ onClose, isOpen }: Props) {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <AddSetting />
+          <AddSettingFlyoutBody onSubmit={onSubmit} />
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>

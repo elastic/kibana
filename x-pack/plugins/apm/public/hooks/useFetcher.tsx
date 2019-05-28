@@ -16,7 +16,7 @@ export enum FETCH_STATUS {
 
 export function useFetcher<Response>(
   fn: () => Promise<Response> | undefined,
-  useEffectKey: any[],
+  effectKey: any[],
   options = { preservePreviousResponse: true }
 ) {
   const id = useComponentId();
@@ -26,53 +26,63 @@ export function useFetcher<Response>(
     status?: FETCH_STATUS;
     error?: Error;
   }>({});
+  const [counter, setCounter] = useState(0);
 
-  useEffect(() => {
-    let didCancel = false;
+  useEffect(
+    () => {
+      let didCancel = false;
 
-    async function doFetch() {
-      const promise = fn();
-      if (!promise) {
-        return;
+      async function doFetch() {
+        const promise = fn();
+        if (!promise) {
+          return;
+        }
+
+        dispatchStatus({ id, isLoading: true });
+
+        setResult({
+          data: options.preservePreviousResponse ? result.data : undefined, // preserve data from previous state while loading next state
+          status: FETCH_STATUS.LOADING,
+          error: undefined
+        });
+
+        try {
+          const data = await promise;
+          if (!didCancel) {
+            dispatchStatus({ id, isLoading: false });
+            setResult({
+              data,
+              status: FETCH_STATUS.SUCCESS,
+              error: undefined
+            });
+          }
+        } catch (e) {
+          if (!didCancel) {
+            dispatchStatus({ id, isLoading: false });
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: e
+            });
+          }
+        }
       }
 
-      dispatchStatus({ id, isLoading: true });
+      doFetch();
 
-      setResult({
-        data: options.preservePreviousResponse ? result.data : undefined, // preserve data from previous state while loading next state
-        status: FETCH_STATUS.LOADING,
-        error: undefined
-      });
+      return () => {
+        dispatchStatus({ id, isLoading: false });
+        didCancel = true;
+      };
+    },
+    [...effectKey, counter]
+  );
 
-      try {
-        const data = await promise;
-        if (!didCancel) {
-          dispatchStatus({ id, isLoading: false });
-          setResult({
-            data,
-            status: FETCH_STATUS.SUCCESS,
-            error: undefined
-          });
-        }
-      } catch (e) {
-        if (!didCancel) {
-          dispatchStatus({ id, isLoading: false });
-          setResult({
-            data: undefined,
-            status: FETCH_STATUS.FAILURE,
-            error: e
-          });
-        }
-      }
+  return {
+    ...result,
+    refresh: () => {
+      // this will invalidate the effectKey and will result in a new request
+      setCounter(counter + 1);
     }
-
-    doFetch();
-
-    return () => {
-      dispatchStatus({ id, isLoading: false });
-      didCancel = true;
-    };
-  }, useEffectKey);
-
-  return result || {};
+  };
 }
