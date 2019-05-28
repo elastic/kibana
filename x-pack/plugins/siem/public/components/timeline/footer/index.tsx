@@ -159,18 +159,18 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
     const { paginationLoading, updatedAt } = this.state;
     const { isLoading, getUpdatedAt } = this.props;
     if (paginationLoading && prevProps.isLoading && !isLoading) {
-      this.setState({
-        ...this.state,
+      this.setState(prevState => ({
+        ...prevState,
         paginationLoading: false,
         updatedAt: getUpdatedAt(),
-      });
+      }));
     }
 
     if (updatedAt === null || (prevProps.isLoading && !isLoading)) {
-      this.setState({
-        ...this.state,
+      this.setState(prevState => ({
+        ...prevState,
         updatedAt: getUpdatedAt(),
-      });
+      }));
     }
   }
 
@@ -298,24 +298,24 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
   }
 
   private loadMore = () => {
-    this.setState({
-      ...this.state,
+    this.setState(prevState => ({
+      ...prevState,
       paginationLoading: true,
-    });
+    }));
     this.props.onLoadMore(this.props.nextCursor, this.props.tieBreaker);
   };
 
   private onButtonClick = () => {
-    this.setState({
-      ...this.state,
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState(prevState => ({
+      ...prevState,
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   };
 
   private closePopover = () => {
-    this.setState({
-      ...this.state,
+    this.setState(prevState => ({
+      ...prevState,
       isPopoverOpen: false,
-    });
+    }));
   };
 }

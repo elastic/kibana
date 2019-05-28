@@ -160,7 +160,7 @@ export class WebElementWrapper {
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }): Promise<void> {
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
-      for (let i = 1; i <= value.length; i++) {
+      for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
         await delay(100);
       }

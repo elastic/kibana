@@ -12,7 +12,7 @@ import { IndexPattern } from 'ui/index_patterns';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { PivotQuery } from '../../common';
+import { isDefaultQuery, PivotQuery } from '../../common';
 import { EsDoc, EsFieldName, getDefaultSelectableFields } from './common';
 
 const SEARCH_SIZE = 1000;
@@ -48,7 +48,8 @@ export const useSourceIndexData = (
       const resp: SearchResponse<any> = await ml.esSearch({
         index: indexPattern.title,
         size: SEARCH_SIZE,
-        body: { query },
+        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
+        body: { query: isDefaultQuery(query) ? { match_all: {} } : query },
       });
 
       const docs = resp.hits.hits;
