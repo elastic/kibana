@@ -21,12 +21,25 @@ export default function(kibana: any) {
         },
       });
       server.plugins.alerting.registerType({
-        id: 'test',
-        description: 'Test',
+        id: 'cpu-check',
+        description: 'Check CPU Usage',
         async execute({ services, params, state }: AlertExecuteOptions) {
-          services
-            .alertInstanceFactory('1')
-            .fire('default', { contextAttr: true }, { stateAttr: true });
+          const cpuUsage = 100;
+          if (cpuUsage >= params.threshold) {
+            services.alertInstanceFactory(params.server).fire(
+              'default',
+              {
+                server: params.server,
+                threshold: params.threshold,
+              },
+              {
+                lastCpuUsage: cpuUsage,
+              }
+            );
+          }
+          return {
+            lastCpuUsage: cpuUsage,
+          };
         },
       });
     },
