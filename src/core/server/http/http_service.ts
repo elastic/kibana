@@ -78,7 +78,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     const httpSetup = (this.httpServer.setup(config) || {}) as HttpServiceSetup;
     const setup = {
       ...httpSetup,
-      ...{ createNewServer: (cfg: Partial<HttpConfig>) => this.createServer(cfg) },
+      ...{ createNewServer: this.createServer.bind(this) },
     };
     return setup;
   }
@@ -107,12 +107,14 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
   private async createServer(cfg: Partial<HttpConfig>) {
     const { port } = cfg;
+    const config = await this.config$.pipe(first()).toPromise();
 
     if (!port) {
       throw new Error('port must be defined');
     }
 
-    if (this.secondaryServers.has(port)) {
+    // verify that main server and none of the secondary servers are already using this port
+    if (this.secondaryServers.has(port) || config.port === port) {
       throw new Error(`port ${port} is already in use`);
     }
 
