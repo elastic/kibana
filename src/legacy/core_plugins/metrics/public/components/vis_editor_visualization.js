@@ -229,7 +229,7 @@ class VisEditorVisualizationUI extends Component {
 
         {!autoApply &&
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="play" fill size="s" onClick={onCommit} disabled={!dirty}>
+          <EuiButton iconType="play" fill size="s" onClick={onCommit} disabled={!dirty} data-test-subj="applyBtn">
             <FormattedMessage
               id="tsvb.visEditorVisualization.applyChangesLabel"
               defaultMessage="Apply changes"
