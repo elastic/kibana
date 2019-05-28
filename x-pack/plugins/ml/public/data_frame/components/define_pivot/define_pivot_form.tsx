@@ -148,7 +148,7 @@ function isNameConflict(
           : `${groupByListNameCheck}.${groupByListNamePart}`;
       if (groupByListNameCheck === aggName) {
         toastNotifications.addDanger(
-          i18n.translate('xpack.ml.dataframe.definePivot.nestedAggListConflictErrorMessage', {
+          i18n.translate('xpack.ml.dataframe.definePivot.nestedGroupByListConflictErrorMessage', {
             defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{groupByListName}'.`,
             values: { aggName, groupByListName },
           })
