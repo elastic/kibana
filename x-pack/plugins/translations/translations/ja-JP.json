@@ -9277,7 +9277,6 @@
     "xpack.siem.notes.addNoteButtonLabel": "Add Note",
     "xpack.siem.notes.cancelButtonLabel": "キャンセル",
     "xpack.siem.notes.copyToClipboardButtonLabel": "クリップボードにコピー",
-    "xpack.siem.notes.noteTitle": "{totalCount, plural, =1 {Note} other {Notes}}",
     "xpack.siem.notes.previewMarkdownTitle": "Preview (Markdown)",
     "xpack.siem.notes.search.FilterByUserOrNotePlaceholder": "Filter by User or Note",
     "xpack.siem.open.timeline.cancelButton": "キャンセル",
