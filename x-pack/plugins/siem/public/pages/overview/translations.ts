@@ -15,7 +15,7 @@ export const PAGE_SUBTITLE = i18n.translate('xpack.siem.overview.pageSubtitle', 
 });
 
 export const EMPTY_TITLE = i18n.translate('xpack.siem.overview.emptyTitle', {
-  defaultMessage: "It looks like you don't have any indices relevant to the SIEM application",
+  defaultMessage: 'It looks like you don’t have any indices relevant to the SIEM application',
 });
 
 export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.overview.emptyActionPrimary', {

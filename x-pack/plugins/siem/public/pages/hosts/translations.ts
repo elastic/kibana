@@ -16,7 +16,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.hosts.pageTitle', {
 
 export const EMPTY_TITLE = i18n.translate('xpack.siem.hosts.emptyTitle', {
   defaultMessage:
-    "It looks like you don't have any indices relevant to hosts in the SIEM application",
+    'It looks like you don’t have any indices relevant to hosts in the SIEM application',
 });
 
 export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.hosts.emptyActionPrimary', {
