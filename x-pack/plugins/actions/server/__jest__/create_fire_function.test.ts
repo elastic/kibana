@@ -7,6 +7,13 @@
 import { ActionTypeService } from '../action_type_service';
 import { createFireFunction } from '../create_fire_function';
 
+const services = {
+  log: jest.fn(),
+};
+const actionTypeServiceParams = {
+  services,
+};
+
 const mockEncryptedSavedObjects = {
   isEncryptionError: jest.fn(),
   registerType: jest.fn(),
@@ -15,7 +22,7 @@ const mockEncryptedSavedObjects = {
 
 describe('fire()', () => {
   test('fires an action with all given parameters', async () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const fireFn = createFireFunction({
       actionTypeService,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
@@ -51,6 +58,9 @@ describe('fire()', () => {
         "params": Object {
           "baz": false,
         },
+        "services": Object {
+          "log": [MockFunction],
+        },
       },
     ],
   ],
@@ -68,7 +78,7 @@ describe('fire()', () => {
   });
 
   test(`throws an error when the action type isn't registered`, async () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const fireFn = createFireFunction({
       actionTypeService,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
@@ -90,7 +100,7 @@ describe('fire()', () => {
   });
 
   test('merges encrypted and unencrypted attributes', async () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     const fireFn = createFireFunction({
       actionTypeService,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
@@ -132,6 +142,9 @@ describe('fire()', () => {
         },
         "params": Object {
           "baz": false,
+        },
+        "services": Object {
+          "log": [MockFunction],
         },
       },
     ],

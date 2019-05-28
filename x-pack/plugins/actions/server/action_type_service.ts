@@ -7,9 +7,14 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 
+interface Services {
+  log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
+}
+
 interface ExecutorOptions {
   actionTypeConfig: Record<string, any>;
   params: Record<string, any>;
+  services: Services;
 }
 
 interface ActionType {
@@ -20,7 +25,11 @@ interface ActionType {
     params?: Record<string, any>;
     actionTypeConfig?: Record<string, any>;
   };
-  executor({ actionTypeConfig, params }: ExecutorOptions): Promise<any>;
+  executor({ actionTypeConfig, params, services }: ExecutorOptions): Promise<any>;
+}
+
+interface ConstructorOptions {
+  services: Services;
 }
 
 interface ExecuteOptions {
@@ -30,7 +39,12 @@ interface ExecuteOptions {
 }
 
 export class ActionTypeService {
+  private services: Services;
   private actionTypes: Record<string, ActionType> = {};
+
+  constructor({ services }: ConstructorOptions) {
+    this.services = services;
+  }
 
   /**
    * Returns if the action type service has the given action type registered
@@ -126,6 +140,6 @@ export class ActionTypeService {
     const actionType = this.get(id);
     this.validateActionTypeConfig(id, actionTypeConfig);
     this.validateParams(id, params);
-    return await actionType.executor({ actionTypeConfig, params });
+    return await actionType.executor({ actionTypeConfig, params, services: this.services });
   }
 }
