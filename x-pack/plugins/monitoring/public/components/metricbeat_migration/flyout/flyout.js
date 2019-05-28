@@ -18,11 +18,13 @@ import {
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty
+  EuiButtonEmpty,
+  EuiLink,
+  EuiText
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 import { Storage } from '../../../../../../../src/legacy/ui/public/storage/storage';
-import { STORAGE_KEY } from '../../../../common/constants';
+import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,6 +32,7 @@ import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
+import { KIBANA_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
@@ -146,7 +149,7 @@ export class Flyout extends Component {
           checkForMigrationStatus: this.checkForMigrationStatus,
           checkingMigrationStatus,
           hasCheckedStatus: checkedStatusByStep[activeStep],
-          autoCheckIntervalInMs: AUTO_CHECK_INTERVAL_IN_MS
+          autoCheckIntervalInMs: AUTO_CHECK_INTERVAL_IN_MS,
         });
 
         return (
@@ -161,7 +164,7 @@ export class Flyout extends Component {
   }
 
   renderActiveStepNextButton() {
-    const { product } = this.props;
+    const { product, productName } = this.props;
     const { activeStep, esMonitoringUrl } = this.state;
 
     // It is possible that, during the migration steps, products are not reporting
@@ -172,7 +175,15 @@ export class Flyout extends Component {
       return null;
     }
 
-    if (activeStep !== INSTRUCTION_STEP_DISABLE_INTERNAL) {
+    let willDisableDoneButton = !product.isFullyMigrated;
+    let willShowNextButton = activeStep !== INSTRUCTION_STEP_DISABLE_INTERNAL;
+
+    if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT && productName === ELASTICSEARCH_CUSTOM_ID) {
+      willShowNextButton = false;
+      willDisableDoneButton = !product.isPartiallyMigrated;
+    }
+
+    if (willShowNextButton) {
       let isDisabled = false;
       let nextStep = null;
       if (activeStep === INSTRUCTION_STEP_SET_MONITORING_URL) {
@@ -209,13 +220,37 @@ export class Flyout extends Component {
       <EuiButton
         type="submit"
         fill
-        isDisabled={!product.isFullyMigrated}
+        isDisabled={willDisableDoneButton}
         onClick={this.props.onClose}
       >
         {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.doneButtonLabel', {
           defaultMessage: 'Done'
         })}
       </EuiButton>
+    );
+  }
+
+  getDocumentationTitle() {
+    const { productName } = this.props;
+
+    let documentationUrl = null;
+    if (productName === KIBANA_SYSTEM_ID) {
+      documentationUrl = 'https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html';
+    }
+    else if (productName === ELASTICSEARCH_CUSTOM_ID) {
+      documentationUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html`;
+    }
+
+    if (!documentationUrl) {
+      return null;
+    }
+
+    return (
+      <EuiText size="s">
+        <EuiLink href={documentationUrl}>
+          Read more about this migration.
+        </EuiLink>
+      </EuiText>
     );
   }
 
@@ -235,6 +270,7 @@ export class Flyout extends Component {
               })}
             </h2>
           </EuiTitle>
+          {this.getDocumentationTitle()}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {this.renderActiveStep()}

@@ -112,6 +112,11 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           {`
 output.elasticsearch:
   hosts: ["${esMonitoringUrl}"] ## Monitoring cluster
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
 `}
         </EuiCodeBlock>
       </Fragment>
