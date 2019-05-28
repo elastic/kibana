@@ -4,23 +4,27 @@
 
 # Summary
 
-Handlers are asynchronous functions that get passed a context object including
-capabilities and observables that can be provided by the service that owns the
-handler (aka service owner) or other services that are not necessarily known to
-the service owner.
+Handlers are asynchronous functions registered with core services invoked to
+respond to events like a HTTP request, or mounting an application. _Handler
+context_ is a pattern that would allow APIs and values to be provided to handler
+functions by the service that owns the handler (aka service owner) or other
+services that are not necessarily known to the service owner.
 
 # Basic example
 
-If the proposal involves a new or changed API, include a basic code example.
-Omit this section if it's not applicable.
-
 ```js
+// services can register context providers to route handlers
+http.registerContext('myApi', request => ({ getId() { return request.params.myApiId } }));
+
 http.router.route({
   method: 'GET',
   path: '/saved_object/:id',
   // routeHandler implements the "handler" interface
   async routeHandler(context, request) {
-    return context.core.savedObjects.find(request.params.id);
+    // returned value of the context registered above is exposed on the `myApi` key of context
+    const objectId = context.myApi.getId();
+    // core context is always present in the `context.core` key
+    return context.core.savedObjects.find(objectId);
   },
 });
 ```
@@ -34,7 +38,7 @@ Without a formal definition, each handler interface varies slightly and
 different solutions are developed per handler for managing complexity and
 enabling extensibility.
 
-The official handler interface seeks to address five key problems:
+The official handler context convention seeks to address five key problems:
 
 1. Different services and plugins should be able to expose functionality that
    is configured for the particular context where the handler is invoked, such
@@ -45,7 +49,7 @@ The official handler interface seeks to address five key problems:
    or plugins that extend its handler context, such as the security plugin
    providing a currentUser function to an HTTP router handler.
 
-3. Many capabilities in a handler should be "fixed" for the life of that
+3. Functionality in a handler should be "fixed" for the life of that
    handler's context rather than changing configuration under the hood in
    mid-execution. For example, while Elasticsearch clients can technically
    be replaced throughout the course of the Kibana process, an HTTP route
@@ -56,7 +60,7 @@ The official handler interface seeks to address five key problems:
    their business logic just so they can access them within the context of a
    handler.
 
-5. Many capabilities provided by services should not be arbitrarily used in
+5. Functionality provided by services should not be arbitrarily used in
    unconstrained execution such as in the plugin lifecycle hooks. For example,
    it's appropriate for an Elasticsearch client to throw an error if it's used
    inside an API route and Elasticsearch isn't available, however it's not
@@ -75,6 +79,7 @@ their handlers extensible.
 
 ```ts
 interface Context {
+  core: unknown;
   [contextName: string]: unknown;
 }
 
@@ -85,6 +90,8 @@ type Handler = (context: Partial<Context>, ...args: unknown[]) => Promise<unknow
   http route handler, this would include the incoming request object.
 - The context object is marked as `Partial<Context>` because the contexts
   available will vary depending on which plugins are enabled.
+- This type is a convention, not a concrete type. The `core` key should have a
+  known interface that is declared in the service owner's specific Context type.
 
 ## Registering new contexts
 
@@ -134,7 +141,10 @@ For example, if the HTTP service defined a setup type like this:
 ```ts
 // http_service.ts
 interface RequestContext {
-  [contextName: string]: unknown;
+  core: {
+    elasticsearch: ScopedClusterClient;
+  };
+  [contextName: string]?: unknown;
 }
 
 interface HttpSetup {
@@ -142,7 +152,7 @@ interface HttpSetup {
 
   registerRequestContext<T extends keyof RequestContext>(
     contextName: T,
-    provider: (request: Request) => RequestContext[T]
+    provider: (request: Request) => RequestContext[T] | Promise<RequestContext[T]>
   ): void;
 
   // ...
@@ -155,7 +165,7 @@ A consuming plugin could extend the `RequestContext` to be type-safe like this:
 // my_plugin/server/index.ts
 import { RequestContext } from '../../core/server';
 
-// The plugin *has to* add a new property to the RequestContext interface from
+// The plugin *should* add a new property to the RequestContext interface from
 // core to represent whatever type its context provider returns. This will be
 // available to any module that imports this type and will ensure that the
 // registered context provider returns the expected type.
@@ -171,7 +181,7 @@ class MyPlugin {
   setup(core) {
     // This will be type-safe!
     core.http.registerRequestContext('myPlugin', (request) => ({
-      getFoo() { return 'foo' }
+      getFoo() { return 'foo!' }
     }))
   }
 };
@@ -185,29 +195,37 @@ class MyPlugin {
   of those types might need to define which properties are present manually to
   match their required plugin dependencies. Example:
   ```ts
-  type RequiredDependencies = 'elasticsearch';
-  type OptionalDependencies = 'data' | 'telemetry';
-  type KnownContext = Required<Pick<RequestContext, RequiredDependencies>> & Pick<RequestContext, OptionalDependencies>;
-  // => { elasticsearch: ESClient, data?: Data, telemetry?: Telemetry };
+  type RequiredDependencies = 'data' | 'timepicker';
+  type OptionalDependencies = 'telemetry';
+  type MyPluginContext = Pick<RequestContext, 'core'> & Pick<RequestContext, RequiredDependencies> & Pick<Partial<RequestContext>, OptionalDependencies>;
+  // => { core: {}, data: Data, timepicker: Timepicker, telemetry?: Telemetry };
+  ```
+  This could even be provided as a generic type:
+  ```ts
+  type AvailableContext<C, Req extends keyof C = never, Opt extends keyof C = never>
+    = Pick<C, 'core'> & Required<Pick<C, Req>> & Partial<Pick<C, Opt>>;
+  type MyPluginContext = AvailableContext<RequestContext, RequiredDependencies, OptionalDependencies>;
+  // => { core: {}, data: Data, timepicker: Timepicker, telemetry?: Telemetry };
   ```
 - Extending types with `declare module` merging is not a typical pattern for
-  developers and it's not immediately obvious that you need to this to call the
-  `registerContext` function.
+  developers and it's not immediately obvious that you need to do this to type
+  the `registerContext` function. We do already use this pattern with extending
+  Hapi and EUI though, so it's not completely foreign.
 - The longer we wait to implement this, the more refactoring of newer code
   we'll need to do to roll this out.
 - It's a new formal concept and set of terminology that developers will need to
   learn relative to other new platform terminology.
 - Handlers are a common pattern for HTTP route handlers, but people don't
   necessarily associate similar patterns elsewhere as the same set of problems.
-- "Chicken and egg" questions will arise around where capabilities should be
+- "Chicken and egg" questions will arise around where context providers should be
   registered. For example, does the `http` service invoke its
   registerCapabilities for `elasticsearch`, or does the `elasticsearch` service
   invoke `http.registerCapabilities`, or does core itself register the
-  capability so neither service depends directly on the other.
+  provider so neither service depends directly on the other.
 
 # Alternatives
 
-The obvious alternative is what we've always done: expose all capabilities at
+The obvious alternative is what we've always done: expose all functionality at
 the plugin level and then leave it up to the consumer to build a "context" for
 their particular handler. This creates a lot of inconsistency and makes
 creating simple but useful handlers more complicated. This can also lead to
