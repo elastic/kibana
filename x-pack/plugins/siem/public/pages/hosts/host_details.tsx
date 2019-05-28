@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import chrome, { Breadcrumb } from 'ui/chrome';
+import { documentationLinks } from 'ui/documentation_links';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
@@ -190,12 +191,21 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
             </GlobalTime>
           </StickyContainer>
         ) : (
-          <EmptyPage
-            title={i18n.NO_AUDITBEAT_INDICES}
-            message={i18n.LETS_ADD_SOME}
-            actionLabel={i18n.SETUP_INSTRUCTIONS}
-            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-          />
+          <>
+            <HeaderPage title={hostName} />
+
+            <EmptyPage
+              actionPrimaryIcon="gear"
+              actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
+              actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+              actionSecondaryIcon="popout"
+              actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
+              actionSecondaryTarget="_blank"
+              actionSecondaryUrl={documentationLinks.siem}
+              data-test-subj="empty-page"
+              title={i18n.EMPTY_TITLE}
+            />
+          </>
         )
       }
     </WithSource>
@@ -213,7 +223,7 @@ export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
 
 export const getBreadcrumbs = (hostId: string): Breadcrumb[] => [
   {
-    text: i18n.HOSTS,
+    text: i18n.PAGE_TITLE,
     href: getHostsUrl(),
   },
   {

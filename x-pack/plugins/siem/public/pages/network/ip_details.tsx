@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import chrome, { Breadcrumb } from 'ui/chrome';
+import { documentationLinks } from 'ui/documentation_links';
 
 import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
@@ -183,12 +184,21 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
             </GlobalTime>
           </StickyContainer>
         ) : (
-          <EmptyPage
-            title={i18n.NO_FILEBEAT_INDICES}
-            message={i18n.LETS_ADD_SOME}
-            actionLabel={i18n.SETUP_INSTRUCTIONS}
-            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-          />
+          <>
+            <HeaderPage title={ip} />
+
+            <EmptyPage
+              actionPrimaryIcon="gear"
+              actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
+              actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+              actionSecondaryIcon="popout"
+              actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
+              actionSecondaryTarget="_blank"
+              actionSecondaryUrl={documentationLinks.siem}
+              data-test-subj="empty-page"
+              title={i18n.EMPTY_TITLE}
+            />
+          </>
         )
       }
     </WithSource>
@@ -208,7 +218,7 @@ export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
 
 export const getBreadcrumbs = (ip: string): Breadcrumb[] => [
   {
-    text: i18n.NETWORK,
+    text: i18n.PAGE_TITLE,
     href: getNetworkUrl(),
   },
   {
