@@ -17,26 +17,10 @@
  * under the License.
  */
 
-import { PluginsService } from './plugins_service';
-
-type ServiceContract = PublicMethodsOf<PluginsService>;
-const createServiceMock = () => {
-  const mocked: jest.Mocked<ServiceContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  mocked.setup.mockResolvedValue({
-    contracts: new Map(),
-    uiPlugins: {
-      public: new Map(),
-      internal: new Map(),
-    },
-  });
-  mocked.start.mockResolvedValue({ contracts: new Map() });
-  return mocked;
-};
-
-export const pluginServiceMock = {
-  create: createServiceMock,
-};
+export function mapToObject(map: Map<string, unknown>) {
+  const result: Record<string, unknown> = Object.create(null);
+  for (const [key, value] of map) {
+    result[key] = value;
+  }
+  return result;
+}
