@@ -91,8 +91,7 @@ export class SpacesService {
           adminClient.callAsInternalUser
         );
 
-        const callCluster = (endpoint: string, ...args: any[]) =>
-          adminClient.asScoped(request).callAsCurrentUser(endpoint, ...args);
+        const callCluster = adminClient.asScoped(request).callAsCurrentUser;
 
         const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
 
