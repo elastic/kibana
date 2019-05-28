@@ -277,7 +277,6 @@ export const TimeseriesConfig = injectI18n(function (props) {
           <DataFormatPicker
             onChange={handleSelectChange('formatter')}
             value={model.formatter}
-            data-test-subj={'tsvb_series_formatter_' + model.formatter}
           />
         </EuiFlexItem>
         <EuiFlexItem>
