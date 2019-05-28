@@ -17,13 +17,12 @@ import { MyApp } from './components';
 
 class MyPlugin {
   setup({ application }) {
-    application.registerApp({
+    application.register({
       id: 'my-app',
       title: 'My Application',
-      rootRoute: '/myapp',
-      mount(targetDomElement, pluginStartContext, pluginStart) {
+      mount(context, targetDomElement) {
         ReactDOM.render(
-          <MyAppRoot core={pluginStartContext} deps={pluginStart} />,
+          <MyAppRoot mountContext={context} deps={pluginStart} />,
           targetDomElement
         );
 
@@ -57,9 +56,27 @@ defined here.
 ## Interface
 
 ```ts
-export type Unmount = () => void;
+/** A context type that implements the Handler Context pattern from RFC-0003 */
+export interface MountContext {
+  core: {
+    chrome: ChromeStart;
+    http: HttpStart;
+    i18n: I18nStart;
+    notifications: NotificationStart;
+    overlays: OverlayStart;
+    uiSettings: UISettingsStart;
+  }
+  // Other plugins can inject context by registering additional context providers
+  [contextName: string]: unknown;
+}
+
+export type Unmount = () => Promise<void> | void;
 
 export interface AppSpec {
+  /**
+   * A unique identifier for this application. Used to build the route for this
+   * application in the browser.
+   */
   id: string;
 
   /**
@@ -68,17 +85,12 @@ export interface AppSpec {
   title: string;
 
   /**
-   * The root route to mount this application at. Must be unique across all
-   * registered applications.
-   */
-  rootRoute: string;
-
-  /**
    * A mount function called when the user navigates to this app's `rootRoute`.
+   * @param context the `MountContext generated for this app
    * @param targetDomElement An HTMLElement to mount the application onto.
    * @returns An unmounting function that will be called to unmount the application.
    */
-  mount(targetDomElement: HTMLElement): Unmount
+  mount(context: MountContext, targetDomElement: HTMLElement): Unmount;
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
@@ -102,7 +114,11 @@ export interface ApplicationSetup {
   /**
    * Registers an application with the system.
    */
-  registerApp(app: AppSpec): void;
+  register(app: AppSpec): void;
+  registerMountContext<T extends keyof MountContext>(
+    contextName: T,
+    provider: () => MountContext[T] | Promise<MountContext[T]>
+  ): void;
 }
 
 export interface ApplicationStart {
@@ -119,7 +135,7 @@ When an app is registered via `registerApp`, it must provide a `mount` function
 that will be invoked whenever the window's location has changed from another app
 to this app.
 
-This function is called with an `HTMLELement` for the application
+This function is called with an `HTMLElement` for the application
 to render itself to. The application must also return a function that can be
 called by the ApplicationService to unmount the application at the given DOM
 node.
@@ -128,10 +144,10 @@ The ApplicationService's `registerApp` method will only be available during the
 *setup* lifecycle event. This allows the system to know when all applications
 have been registered.
 
-However, the `mount` function will also get access to the `PluginStartContext`
-that is normally provided during the *start* lifecycle event, as well as the
-*start* contracts for any plugin dependencies. (Note: applications can only be
-mounted during *start*).
+However, the `mount` function will also get access to the `MountContext`
+that has many of the same core services available during the `start` lifecycle.
+Plugins can also register additional context attributes via the
+`registerMountContext` function.
 
 ## Routing
 
@@ -141,14 +157,14 @@ only manage top-level routes. Applications themselves will need to implement
 their own routing as subroutes of the top-level route.
 
 An example:
-- "MyApp" is registered with `rootRoute: '/myApp'`
-- User navigates from mykibana.com/app/home to mykibana.com/app/myApp
+- "MyApp" is registered with `id: 'my-app'`
+- User navigates from mykibana.com/app/home to mykibana.com/app/my-app
 - ApplicationService sees the root app has changed and mounts the new
   application:
   - Calls the `Unmount` function returned my "Home"'s `mount`
   - Calls the `mount` function registered by "MyApp"
 - MyApp's internal router takes over rest of routing. Redirects to initial
-  "overview" page: mykibana.com/app/myApp/overview
+  "overview" page: mykibana.com/app/my-app/overview
 
 ### Legacy Applications
 
@@ -176,8 +192,9 @@ have a bundle for.
   from `ui/chrome`
 - Making Kibana a single page application may lead to problems if applications
   do not clean themselves up properly when unmounted
-- Application `mount` functions will have access to *setup* and *start* core
-  services and plugins simultaneously.
+- Application `mount` functions will have access to *setup* via the closure. We
+  may want to lock down these APIs from being used after *setup* to encourage
+  usage of the `MountContext` instead.
 - In order to support new applications being registered in the legacy platform,
   we will need to create a new `uiExport` that is imported during the new
   platform's *setup* lifecycle event. This is necessary because app registration
@@ -186,48 +203,9 @@ have a bundle for.
 
 # Alternatives
 
-To prevent applications from having access to *setup* and *start* simultaneously
-we could restrict `mount` having access to `setup` via the closure, with either:
-- Register import promises instead of mount functions. The ApplicationService
-  could then import the module dynamically and call it's exported `mount`
-  function. Example:
-  ```ts
-  // my_plugin/index.ts
-  class MyPlugin {
-    setup({ application }) {
-      application.registerApp({
-        id: '...',
-        mountModule: import('./mount_app')
-      });
-    }
-  }
-  
-  // my_plugin/mount_app.ts
-  export const mount = (targetDomElement, pluginStartContext, pluginStart) => {
-    ReactDOM.render(...);
-    return () => ReactDOM.unmountComponentAtNode(...);
-  };
-  ```
-- Require plugins to register applications in *setup* and their corresponding
-  `mount` functions in *start*. Example:
-  ```ts
-  // my_plugin/index.ts
-  class MyPlugin {
-    setup({ application }) {
-      this.myApp = application.registerApp({
-        id: '...',
-      });
-    }
-
-    start() {
-      this.myApp.setMounter((targetDomElement) => {
-        ReactDOM.render(...)
-        return () => ReactDOM.unmountComponentAtNode(...);
-      })
-    }
-  }
-  ```
-
+- We could provide a full featured react-router instance that plugins could
+  plug directly into. The downside is this locks us more into React and makes
+  code splitting a bit more challenging.
 
 # Adoption strategy
 
