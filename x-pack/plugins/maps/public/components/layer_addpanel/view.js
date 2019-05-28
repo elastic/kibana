@@ -14,7 +14,7 @@ import {
   EuiTitle,
   EuiFlyoutHeader,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 export class AddLayerPanel extends Component {
 
@@ -25,28 +25,24 @@ export class AddLayerPanel extends Component {
     indexingSuccess: false,
     importIndexingReady: false,
     importView: false,
-    panelDescription: 'Select source',
+    panelDescription: i18n.translate('xpack.maps.addLayerPanel.selectSource',
+      { defaultMessage: 'Select source' }),
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    this._updatePanelDescription(prevState.sourceType, prevState.indexingSuccess);
-  }
-
-  _updatePanelDescription(prevSourceType, previndexingSuccess) {
+  _getPanelDescription() {
     const { sourceType, importView, indexingSuccess } = this.state;
-    if (
-      prevSourceType !== sourceType || indexingSuccess !== previndexingSuccess
-    ) {
-      let panelDescription;
-      if (!sourceType) {
-        panelDescription = 'Select source';
-      } else if (importView && !indexingSuccess) {
-        panelDescription = 'Import file';
-      } else {
-        panelDescription = 'Add layer';
-      }
-      this.setState({ panelDescription });
+    let panelDescription;
+    if (!sourceType) {
+      panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource',
+        { defaultMessage: 'Select source' });
+    } else if (importView && !indexingSuccess) {
+      panelDescription = i18n.translate('xpack.maps.addLayerPanel.importFile',
+        { defaultMessage: 'Import file' });
+    } else {
+      panelDescription = i18n.translate('xpack.maps.addLayerPanel.addLayer',
+        { defaultMessage: 'Add layer' });
     }
+    return panelDescription;
   }
 
   _viewLayer = (source, fitToExtent = false) => {
@@ -139,14 +135,14 @@ export class AddLayerPanel extends Component {
     );
   }
 
-  _renderFooter() {
+  _renderFooter(buttonDescription) {
     if (!this.state.sourceType) {
       return null;
     }
 
     const {
       indexingTriggered, indexingSuccess, importView, layer,
-      importIndexingReady, panelDescription
+      importIndexingReady
     } = this.state;
 
     let buttonEnabled;
@@ -162,13 +158,14 @@ export class AddLayerPanel extends Component {
       <FlyoutFooter
         onClick={this._layerAddHandler}
         disableNextButton={!buttonEnabled}
-        buttonText={panelDescription}
+        buttonText={buttonDescription}
       />
     );
   }
 
   _renderFlyout() {
-    const { panelDescription } = this.state;
+    const panelDescription = this._getPanelDescription();
+
     return (
       <EuiFlexGroup
         direction="column"
@@ -177,11 +174,7 @@ export class AddLayerPanel extends Component {
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
             <h2>
-              <FormattedMessage
-                id="xpack.maps.addLayerPanel.panelTitle"
-                defaultMessage="{panelDescription}"
-                values={{ panelDescription }}
-              />
+              {panelDescription}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
@@ -191,7 +184,7 @@ export class AddLayerPanel extends Component {
             { this._renderAddLayerPanel() }
           </div>
         </div>
-        { this._renderFooter() }
+        { this._renderFooter(panelDescription) }
       </EuiFlexGroup>
     );
   }
