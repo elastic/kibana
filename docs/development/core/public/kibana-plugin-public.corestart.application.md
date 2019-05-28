@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-application: ApplicationStart;
+application: Pick<ApplicationStart, 'capabilities'>;
 ```

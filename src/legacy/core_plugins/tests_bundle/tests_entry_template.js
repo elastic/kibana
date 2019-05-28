@@ -100,6 +100,7 @@ const coreSystem = new CoreSystem({
     csp: {
       warnLegacyBrowsers: false,
     },
+    capabilities: uiCapabilities,
     uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',

@@ -1,0 +1,12 @@
+{
+  "tilejson": "2.0.0",
+  "name": "OSM Bright",
+  "attribution": "<a href=\"https://www.maptiler.com/copyright/\" target=\"_blank\">&copy; MapTiler</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>",
+  "minzoom": 0,
+  "maxzoom": 10,
+  "bounds": [-180, -85.0511, 180, 85.0511],
+  "format": "png",
+  "type": "baselayer",
+  "tiles": ["https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png"],
+  "center": [0, 0, 2]
+}

@@ -95,7 +95,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await input.clearValueWithKeyboard();
     }
 
-    public async getMarkdownText() {
+    public async getMarkdownText(): Promise<string> {
       const el = await find.byCssSelector('.tvbEditorVisualization');
       const text = await el.getVisibleText();
       return text;
@@ -115,7 +115,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     > {
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
-      const exists = await find.existsByDisplayedByCssSelector(variablesSelector);
+      const exists = await find.existsByCssSelector(variablesSelector);
       if (!exists) {
         log.debug('variable list is empty');
         return [];
@@ -166,6 +166,23 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async markdownSwitchSubTab(subTab: 'data' | 'options' | 'markdown') {
       const element = await testSubjects.find(`${subTab}-subtab`);
       await element.click();
+    }
+
+    /**
+     * setting label for markdown visualization
+     *
+     * @param {string} variableName
+     * @param type
+     * @memberof VisualBuilderPage
+     */
+    public async setMarkdownDataVariable(variableName: string, type: 'variable' | 'label') {
+      const SELECTOR = type === 'label' ? '[placeholder="Label"]' : '[placeholder="Variable name"]';
+      if (variableName) {
+        await find.setValue(SELECTOR, variableName);
+      } else {
+        const input = await find.byCssSelector(SELECTOR);
+        await input.clearValueWithKeyboard({ charByChar: true });
+      }
     }
 
     public async clickSeriesOption(nth = 0) {
@@ -235,6 +252,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       });
     }
 
+    public async toggleAutoApplyChanges() {
+      await find.clickByCssSelector('#tsvbAutoApplyInput');
+    }
+
+    public async applyChanges() {
+      await testSubjects.click('applyBtn');
+    }
+
     public async selectAggType(value: string, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
       await comboBox.setElement(elements[nth], value);
@@ -262,14 +287,22 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await comboBox.set('groupByField', fieldName);
     }
 
-    public async setLabelValue(value: string) {
+    public async setColumnLabelValue(value: string) {
       const el = await testSubjects.find('columnLabelName');
       await el.clearValue();
       await el.type(value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    public async getViewTable() {
+    /**
+     * get values for rendered table
+     *
+     * **Note:** this work only for table visualization
+     *
+     * @returns {Promise<string>}
+     * @memberof VisualBuilderPage
+     */
+    public async getViewTable(): Promise<string> {
       const tableView = await testSubjects.find('tableView');
       return await tableView.getVisibleText();
     }
@@ -293,6 +326,48 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await el.type(timeField);
       await el.pressKeys(browser.keys.RETURN);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    /**
+     * check that table visualization is visible and ready for interact
+     *
+     * @returns {Promise<void>}
+     * @memberof VisualBuilderPage
+     */
+    public async checkTableTabIsPresent(): Promise<void> {
+      await testSubjects.existOrFail('visualizationLoader');
+      const isDataExists = await testSubjects.exists('tableView');
+      log.debug(`data is already rendered: ${isDataExists}`);
+      if (!isDataExists) {
+        await testSubjects.existOrFail('noTSVBDataMessage');
+      }
+    }
+
+    /**
+     * set label name for aggregation
+     *
+     * @param {string} labelName
+     * @param {number} [nth=0]
+     * @memberof VisualBuilderPage
+     */
+    public async setLabel(labelName: string, nth: number = 0): Promise<void> {
+      const input = (await find.allByCssSelector('[placeholder="Label"]'))[nth];
+      await input.type(labelName);
+    }
+
+    /**
+     * set field for type of aggregation
+     *
+     * @param {string} field name of field
+     * @param {number} [aggNth=0] number of aggregation. Start by zero
+     * @default 0
+     * @memberof VisualBuilderPage
+     */
+    public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
+      const labels = await testSubjects.findAll('aggRow');
+      const label = labels[aggNth];
+      const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
+      await comboBox.setElement(fieldEl, field);
     }
   }
 

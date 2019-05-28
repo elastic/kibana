@@ -6,6 +6,8 @@
 
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
+import { RequestAuth } from 'hapi';
+import { Legacy } from 'kibana';
 
 import { ESQuery } from '../../../common/typed_json';
 import {
@@ -50,6 +52,7 @@ export interface FrameworkAdapter {
   ): Promise<DatabaseGetIndicesResponse>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getIndexPatternsService(req: FrameworkRequest<any>): FrameworkIndexPatternsService;
+  getSavedObjectsService(): Legacy.SavedObjectsService;
 }
 
 export interface FrameworkRequest<InternalRequest extends WrappableRequest = WrappableRequest> {
@@ -57,6 +60,7 @@ export interface FrameworkRequest<InternalRequest extends WrappableRequest = Wra
   payload: InternalRequest['payload'];
   params: InternalRequest['params'];
   query: InternalRequest['query'];
+  auth: InternalRequest['auth'];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,6 +68,7 @@ export interface WrappableRequest<Payload = any, Params = any, Query = any> {
   payload: Payload;
   params: Params;
   query: Query;
+  auth: RequestAuth;
 }
 
 export interface DatabaseResponse {
@@ -146,10 +151,11 @@ export interface RequestBasicOptions {
   sourceConfiguration: SourceConfiguration;
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
+  defaultIndex: string[];
 }
 
 export interface RequestOptions extends RequestBasicOptions {
   pagination: PaginationInput;
-  fields: string[];
+  fields: ReadonlyArray<string>;
   sortField?: SortField;
 }

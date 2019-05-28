@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { getPageData } from './get_page_data';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -24,9 +25,9 @@ uiRoutes.when('/elasticsearch/ccr', {
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       super({
-        title: i18n('xpack.monitoring.elasticsearch.ccr.routeTitle', {
+        title: i18n.translate('xpack.monitoring.elasticsearch.ccr.routeTitle', {
           defaultMessage: 'Elasticsearch - Ccr'
         }),
         reactNodeId: 'elasticsearchCcrReact',

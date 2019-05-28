@@ -20,9 +20,9 @@
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
-import AddDeleteButtons from './add_delete_buttons';
-import * as collectionActions from './lib/collection_actions';
-import ColorPicker from './color_picker';
+import { AddDeleteButtons } from './add_delete_buttons';
+import { collectionActions } from './lib/collection_actions';
+import { ColorPicker } from './color_picker';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -34,7 +34,7 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class ColorRules extends Component {
+class ColorRulesUI extends Component {
 
   constructor(props) {
     super(props);
@@ -181,7 +181,7 @@ class ColorRules extends Component {
 
 }
 
-ColorRules.defaultProps = {
+ColorRulesUI.defaultProps = {
   name: 'color_rules',
   primaryName: i18n.translate('tsvb.colorRules.defaultPrimaryNameLabel', { defaultMessage: 'background' }),
   primaryVarName: 'background_color',
@@ -190,7 +190,7 @@ ColorRules.defaultProps = {
   hideSecondary: false
 };
 
-ColorRules.propTypes = {
+ColorRulesUI.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func,
@@ -201,4 +201,4 @@ ColorRules.propTypes = {
   hideSecondary: PropTypes.bool
 };
 
-export default injectI18n(ColorRules);
+export const ColorRules = injectI18n(ColorRulesUI);

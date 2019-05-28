@@ -30,6 +30,7 @@ import { IndexScheduler, UpdateScheduler } from './scheduler';
 import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
+import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
 
 async function retryUntilAvailable<T>(
   func: () => Promise<T>,
@@ -151,10 +152,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   const queueIndex: string = server.config().get('xpack.code.queueIndex');
   const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
   const devMode: boolean = server.config().get('env.dev');
-  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
-  // @ts-ignore
-  const esClient: EsClient = adminCluster.clusterClient.client;
+  const esClient: EsClient = new EsClientWithInternalRequest(server);
   const repoConfigController = new RepositoryConfigController(esClient);
 
   server.injectUiAppVars('code', () => ({

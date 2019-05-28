@@ -8,6 +8,8 @@ import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetLastEventTimeQuery, LastEventIndexKey, LastTimeDetails } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
@@ -43,7 +45,12 @@ export function useLastEventTimeQuery<TCache = object>(
       .query<GetLastEventTimeQuery.Query, GetLastEventTimeQuery.Variables>({
         query: LastEventTimeGqlQuery,
         fetchPolicy: 'cache-first',
-        variables: { sourceId, indexKey, details },
+        variables: {
+          sourceId,
+          indexKey,
+          details,
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        },
       })
       .then(
         result => {

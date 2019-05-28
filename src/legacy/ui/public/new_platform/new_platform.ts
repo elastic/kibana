@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
 
 const runtimeContext = {
   setup: {
-    core: (null as unknown) as CoreSetup,
+    core: (null as unknown) as InternalCoreSetup,
     plugins: {},
   },
   start: {
-    core: (null as unknown) as CoreStart,
+    core: (null as unknown) as InternalCoreStart,
     plugins: {},
   },
 };
@@ -34,11 +34,11 @@ const runtimeContext = {
  * @internal
  */
 export function __reset__() {
-  runtimeContext.setup.core = (null as unknown) as CoreSetup;
-  runtimeContext.start.core = (null as unknown) as CoreStart;
+  runtimeContext.setup.core = (null as unknown) as InternalCoreSetup;
+  runtimeContext.start.core = (null as unknown) as InternalCoreStart;
 }
 
-export async function __newPlatformSetup__(core: CoreSetup) {
+export async function __newPlatformSetup__(core: InternalCoreSetup) {
   if (runtimeContext.setup.core) {
     throw new Error('New platform core api was already set up');
   }
@@ -52,7 +52,7 @@ export async function __newPlatformSetup__(core: CoreSetup) {
   }
 }
 
-export async function __newPlatformStart__(core: CoreStart) {
+export async function __newPlatformStart__(core: InternalCoreStart) {
   if (runtimeContext.start.core) {
     throw new Error('New platform core api was already started');
   }

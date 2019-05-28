@@ -7,9 +7,11 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import {
+  UICapabilitiesService,
+  GetUICapabilitiesFailureReason,
+} from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
-import { assertDeeplyFalse } from '../../common/lib/assert_deeply_false';
 
 const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder(true);
 
@@ -28,8 +30,6 @@ export default function savedObjectsManagementTests({
           credentials: { username: user.username, password: user.password },
           spaceId: space.id,
         });
-        expect(uiCapabilities.success).to.be(true);
-        expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
         switch (scenario.id) {
           case 'superuser at everything_space':
           case 'global_all at everything_space':
@@ -76,7 +76,10 @@ export default function savedObjectsManagementTests({
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
-            assertDeeplyFalse(uiCapabilities.value!.savedObjectsManagement);
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(
+              GetUICapabilitiesFailureReason.RedirectedToRoot
+            );
             break;
 
           default:

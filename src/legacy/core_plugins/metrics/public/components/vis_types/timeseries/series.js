@@ -19,17 +19,17 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import ColorPicker from '../../color_picker';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { ColorPicker } from '../../color_picker';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 import { Aggs } from '../../../components/aggs/aggs';
-import SeriesConfig from './config';
+import { TimeseriesConfig as SeriesConfig } from './config';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import Split from '../../split';
-import createTextHandler from '../../lib/create_text_handler';
+import { Split } from '../../split';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-const TimeseriesSeries = injectI18n(function (props) {
+const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
     panel,
     fields,
@@ -182,7 +182,7 @@ const TimeseriesSeries = injectI18n(function (props) {
 
 });
 
-TimeseriesSeries.propTypes = {
+TimeseriesSeriesUI.propTypes = {
   className: PropTypes.string,
   colorPicker: PropTypes.bool,
   disableAdd: PropTypes.bool,
@@ -205,4 +205,4 @@ TimeseriesSeries.propTypes = {
   dragHandleProps: PropTypes.object,
 };
 
-export default injectI18n(TimeseriesSeries);
+export const TimeseriesSeries = injectI18n(TimeseriesSeriesUI);
