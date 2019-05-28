@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import calculateAuto from './calculate_auto';
+import { calculateAuto } from './calculate_auto';
 import moment from 'moment';
 import { getUnitValue } from './unit_to_seconds';
 import {
@@ -50,7 +50,7 @@ const getTimeRangeBucketSize = ({ min, max }) => {
   return calculateAuto.near(100, duration).asSeconds();
 };
 
-export default (req, interval, capabilities) => {
+export const getBucketSize = (req, interval, capabilities) => {
   const bucketSize = getTimeRangeBucketSize(req.payload.timerange);
   let intervalString = `${bucketSize}s`;
 

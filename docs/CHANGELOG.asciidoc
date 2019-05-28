@@ -10,6 +10,8 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.1.1>>
+* <<release-notes-7.1.0>>
 * <<release-notes-7.0.1>>
 * <<release-notes-7.0.0>>
 * <<release-notes-7.0.0-rc2>>
@@ -20,6 +22,35 @@ This section summarizes the changes in each release.
 
 --
 
+[[release-notes-7.1.1]]
+== {kib} 7.1.1
+
+There were no changes for this release.
+
+[[release-notes-7.1.0]]
+== {kib} 7.1.0
+
+
+See <<breaking-changes, breaking changes>> for the changes to be aware of 
+when migrating your application from one version of {kib} to another.
+
+[float]
+[[enhancements-7.1.0]]
+=== Enhancements
+Security:: 
+* Updates {kib} to support changes to licensing of security features {pull}35890[#35890]
+
+[float]
+[[bug-7.1.0]]
+=== Bug fixes
+Geo::
+* Improves ES search decoding to deal with large geometries {pull}36062[#36062]
+Index Lifecycle Management:: 
+* Fixes surface shrink action in edit form if it's already been set on the policy {pull}35987[#35987]
+Machine Learning::
+* Fixes URL of link to detector function reference docs {pull}35734[#35734]
+Monitoring:: 
+* Fixes default timestamp sort and added tests {pull}35640[#35640]
 
 [[release-notes-7.0.1]]
 == {kib} 7.0.1

@@ -28,8 +28,11 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState, config) {
+import { getNewPlatform } from 'ui/new_platform';
+
+export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState) {
   const queryFilter = {};
+  const { uiSettings } = getNewPlatform().setup.core;
 
   const update$ = new Subject();
   const fetch$ = new Subject();
@@ -75,19 +78,14 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
    * @param {bool} global Whether the filter should be added to global state
    * @returns {Promise} filter map promise
    */
-  queryFilter.addFilters = function (filters, global) {
-
-    if (global === undefined) {
-      const configDefault = config.get('filters:pinnedByDefault');
-
-      if (configDefault === false || configDefault === true) {
-        global = configDefault;
-      }
+  queryFilter.addFilters = function (filters, addToGlobalState) {
+    if (addToGlobalState === undefined) {
+      addToGlobalState = uiSettings.get('filters:pinnedByDefault');
     }
 
     // Determine the state for the new filter (whether to pass the filter through other apps or not)
     const appState = getAppState();
-    const filterState = (global) ? globalState : appState;
+    const filterState = addToGlobalState ? globalState : appState;
 
     if (!Array.isArray(filters)) {
       filters = [filters];

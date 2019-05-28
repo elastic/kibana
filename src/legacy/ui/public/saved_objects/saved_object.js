@@ -207,7 +207,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       }
 
       // If index is not an IndexPattern object at this point, then it's a string id of an index.
-      if (!(index instanceof indexPatterns.IndexPattern)) {
+      if (typeof index === 'string') {
         index = indexPatterns.get(index);
       }
 
