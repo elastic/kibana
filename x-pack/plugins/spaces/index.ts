@@ -119,7 +119,15 @@ export const spaces = (kibana: Record<string, any>) =>
             );
           },
         },
-        logger: kbnServer.newPlatform.coreContext.logger,
+        logger: {
+          get(...contextParts: string[]) {
+            return kbnServer.newPlatform.coreContext.logger.get(
+              'plugins',
+              'spaces',
+              ...contextParts
+            );
+          },
+        },
       } as unknown) as SpacesInitializerContext;
 
       const spacesHttpService: SpacesHttpServiceSetup = {

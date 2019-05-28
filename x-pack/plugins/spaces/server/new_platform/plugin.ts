@@ -84,7 +84,7 @@ export class Plugin {
 
   constructor(private readonly initializerContext: SpacesInitializerContext) {
     this.config$ = initializerContext.config.create<SpacesConfig>();
-    this.log = initializerContext.logger.get('spaces');
+    this.log = initializerContext.logger.get();
   }
 
   public async setup(core: SpacesCoreSetup, plugins: PluginsSetup): Promise<SpacesPluginSetup> {
