@@ -27,7 +27,7 @@ import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { aggFilter, isCompatibleAgg } from './_terms_helper';
+import { aggFilter } from './_terms_helper';
 import orderAggTemplate from '../controls/order_agg.html';
 import { OrderParamEditor } from '../controls/order';
 import { OrderAggParamEditor } from '../controls/order_agg';
@@ -152,11 +152,6 @@ export const termsBucketAgg = new BucketAggType({
           // we aren't creating a custom aggConfig
           if (!orderBy || orderBy !== 'custom') {
             params.orderAgg = null;
-            // ensure that orderBy is set to a valid agg
-            const respAgg = $scope.responseValueAggs.filter(isCompatibleAgg).find(agg => agg.id === orderBy);
-            if (!respAgg) {
-              params.orderBy = '_key';
-            }
             return;
           }
 

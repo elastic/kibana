@@ -34,7 +34,7 @@ function OrderAggParamEditor({
   responseValueAggs,
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.orderAgg.orderByLabel', {
-    defaultMessage: 'Order By',
+    defaultMessage: 'Order by',
   });
   const isValid = !!value;
 
@@ -58,10 +58,26 @@ function OrderAggParamEditor({
     }
   }, []);
 
+  useEffect(
+    () => {
+      if (responseValueAggs && value && value !== 'custom') {
+        // ensure that orderBy is set to a valid agg
+        const respAgg = responseValueAggs
+          .filter(isCompatibleAgg)
+          .find(aggregation => aggregation.id === value);
+
+        if (!respAgg) {
+          setValue('_key');
+        }
+      }
+    },
+    [responseValueAggs]
+  );
+
   const defaultOptions = [
     {
       text: i18n.translate('common.ui.aggTypes.orderAgg.customMetricLabel', {
-        defaultMessage: 'Custom Metric',
+        defaultMessage: 'Custom metric',
       }),
       value: 'custom',
     },
@@ -87,14 +103,9 @@ function OrderAggParamEditor({
     : [];
 
   return (
-    <EuiFormRow
-      label={label}
-      fullWidth={true}
-      isInvalid={showValidation ? !isValid : false}
-      className="visEditorSidebar__aggParamFormRow"
-    >
+    <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation ? !isValid : false}>
       <EuiSelect
-        options={defaultOptions.concat(options)}
+        options={[...options, ...defaultOptions]}
         value={value}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
