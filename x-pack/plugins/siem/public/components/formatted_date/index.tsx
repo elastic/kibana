@@ -8,6 +8,7 @@ import moment from 'moment-timezone';
 import * as React from 'react';
 import { pure } from 'recompose';
 
+import { isString } from 'lodash/fp';
 import { AppKibanaFrameworkAdapter } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
@@ -26,6 +27,12 @@ export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => (
   </KibanaConfigContext.Consumer>
 ));
 
+export const isEpochString = (possibleEpoch: string): boolean =>
+  possibleEpoch.trim() !== '' && !isNaN(+possibleEpoch);
+
+export const getMaybeDate = (value: string | number): moment.Moment =>
+  isString(value) && isEpochString(value) ? moment(new Date(+value)) : moment(new Date(value));
+
 /**
  * Renders the specified date value in a format determined by the user's preferences,
  * with a tooltip that renders:
@@ -37,18 +44,18 @@ export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => (
 export const FormattedDate = pure<{
   fieldName: string;
   value?: string | number | null;
-}>(({ value, fieldName }) => {
-  if (value == null) {
-    return getOrEmptyTagFromValue(value);
+}>(
+  ({ value, fieldName }): JSX.Element => {
+    if (value == null) {
+      return getOrEmptyTagFromValue(value);
+    }
+    const maybeDate = getMaybeDate(value);
+    return maybeDate.isValid() ? (
+      <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName}>
+        <PreferenceFormattedDate value={maybeDate.toDate()} />
+      </LocalizedDateTooltip>
+    ) : (
+      getOrEmptyTagFromValue(value)
+    );
   }
-
-  const maybeDate = moment(new Date(value));
-
-  return maybeDate.isValid() ? (
-    <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName}>
-      <PreferenceFormattedDate value={new Date(value)} />
-    </LocalizedDateTooltip>
-  ) : (
-    getOrEmptyTagFromValue(value)
-  );
-});
+);
