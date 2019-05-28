@@ -81,11 +81,11 @@ export function initAuthenticateApi(server) {
         query: Joi.object().keys({
           iss: Joi.string(),
           login_hint: Joi.string(),
-          target_link_uri: Joi.string(),
+          target_link_uri: Joi.uri(),
           code: Joi.string(),
           error: Joi.string(),
           error_description: Joi.string(),
-          error_uri: Joi.string(),
+          error_uri: Joi.uri(),
           state: Joi.string()
         }).unknown()
       }
