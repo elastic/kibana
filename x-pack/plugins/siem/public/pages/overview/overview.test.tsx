@@ -53,7 +53,7 @@ describe('Overview', () => {
       // Why => https://github.com/apollographql/react-apollo/issues/1711
       await new Promise(resolve => setTimeout(resolve));
       wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
+      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
     });
 
     test('it DOES NOT render the Getting started text when an index is available', async () => {
@@ -68,7 +68,7 @@ describe('Overview', () => {
       // Why => https://github.com/apollographql/react-apollo/issues/1711
       await new Promise(resolve => setTimeout(resolve));
       wrapper.update();
-      expect(wrapper.text()).not.toContain(i18n.SETUP_INSTRUCTIONS);
+      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
     });
   });
 });

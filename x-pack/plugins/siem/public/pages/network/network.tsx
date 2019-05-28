@@ -143,6 +143,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
             actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
             actionSecondaryTarget="_blank"
             actionSecondaryUrl={documentationLinks.siem}
+            data-test-subj="empty-page"
             title={i18n.EMPTY_TITLE}
           />
         </>
