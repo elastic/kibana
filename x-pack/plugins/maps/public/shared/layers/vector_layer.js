@@ -441,17 +441,38 @@ export class VectorLayer extends AbstractLayer {
     if (!pointLayer) {
       mbMap.addLayer({
         id: pointLayerId,
-        type: 'circle',
+        type: 'symbol',
         source: sourceId,
         paint: {}
       });
       mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
     }
-    this._style.setMBPaintPropertiesForPoints({
+    /*this._style.setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
       pointLayerId: pointLayerId,
-    });
+    });*/
+
+    /*const DOMURL = window.URL || window.webkitURL || window;
+    const svg = new Blob([renderedElement.innerHTML], {type: 'image/svg+xml'});
+    const symbolUrl = DOMURL.createObjectURL(svg);*/
+
+    const imageId = 'test';
+    if (mbMap.hasImage(imageId)) {
+      mbMap.setLayoutProperty(pointLayerId, 'icon-image', imageId);
+    } else {
+      const img = new Image(11, 11);
+      img.onload = () => {
+        //mbMap.setLayoutProperty(pointLayerId, 'icon-image', imageId);
+        mbMap.addImage(imageId, img);
+        mbMap.setLayoutProperty(pointLayerId, 'icon-image', imageId);
+      };
+      img.onerror = (e) => {
+        console.log(e);
+      };
+      img.src = '../api/maps/symbol/airfield-15/blue';
+    }
+
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
