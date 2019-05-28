@@ -555,7 +555,7 @@ module.exports = {
         'react/no-this-in-sfc': 'error',
         // This can go from warn to error once this is fixed
         // https://github.com/elastic/ingest-dev/issues/467
-        'react/no-unescaped-entities': 'warn',
+        'react/no-unescaped-entities': 'error',
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
