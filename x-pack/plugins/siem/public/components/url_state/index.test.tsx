@@ -368,7 +368,7 @@ describe('UrlStateContainer', () => {
         hash: '',
         pathname: '/network',
         search:
-          "?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page,type:page)",
+          "?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page,type:page)",
         state: '',
       });
     });
