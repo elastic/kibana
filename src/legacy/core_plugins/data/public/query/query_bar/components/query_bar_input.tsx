@@ -397,7 +397,7 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);
-    } else {
+    } else if (!isEqual(prevProps.query, this.props.query)) {
       this.updateSuggestions();
     }
 
