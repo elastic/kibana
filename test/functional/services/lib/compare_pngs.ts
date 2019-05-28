@@ -68,7 +68,7 @@ export async function comparePngs(
   // will still show up as diffs, but upping this will not help that.  Instead we keep the threshold low, and expect
   // some the diffCount to be lower than our own threshold value.
   const THRESHOLD = 0.1;
-  const { image, percent } = Jimp.diff(session, baseline, THRESHOLD);
+  const { diff: image, percent } = Jimp.diff(session, baseline, THRESHOLD);
   log.debug(`percent different: ${percent}`);
   if (percent > 0) {
     image.write(diffPath);
