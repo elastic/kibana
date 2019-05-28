@@ -5,6 +5,7 @@
  */
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 
 import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
@@ -76,10 +77,11 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     const searchEmbeddable = embeddable;
     const searchRequestBody = await this.getSearchRequestBody({ searchEmbeddable });
     const state = _.pick(searchRequestBody, ['sort', 'docvalue_fields', 'query']);
+    const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
 
     const id = `search:${embeddable.savedSearch.id}`;
     const filename = embeddable.getPanelTitle();
-    const timezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+    const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const fromTime = dateMath.parse(from);
     const toTime = dateMath.parse(to);
 
