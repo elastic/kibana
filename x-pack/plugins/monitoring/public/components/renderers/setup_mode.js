@@ -6,6 +6,7 @@
 import React from 'react';
 import { setAngularState, getSetupModeState, initSetupModeState, updateSetupModeData } from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
+import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
 
 export class SetupModeRenderer extends React.Component {
   state = {
@@ -27,7 +28,13 @@ export class SetupModeRenderer extends React.Component {
       return null;
     }
 
-    const product = data.byUuid[instanceUuid];
+    let product = data.byUuid[instanceUuid];
+    const isFullyOrPartiallyMigrated = data.totalUniquePartiallyMigratedCount === data.totalUniqueInstanceCount
+      || data.totalUniqueFullyMigratedCount === data.totalUniqueInstanceCount;
+    if (!product && productName === ELASTICSEARCH_CUSTOM_ID && isFullyOrPartiallyMigrated) {
+      product = Object.values(data.byUuid)[0];
+    }
+
     return (
       <Flyout
         onClose={() => this.setState({ isFlyoutOpen: false })}
@@ -49,6 +56,7 @@ export class SetupModeRenderer extends React.Component {
       setupMode: {
         data,
         enabled: setupModeState.enabled,
+        productName,
         updateSetupModeData,
         openFlyout: (instanceUuid) => this.setState({ isFlyoutOpen: true, instanceUuid }),
         closeFlyout: () => this.setState({ isFlyoutOpen: false }),

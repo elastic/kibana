@@ -11,6 +11,8 @@ import {
   EuiButton,
   EuiBadge
 } from '@elastic/eui';
+import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class EuiMonitoringTable extends React.PureComponent {
   render() {
@@ -50,10 +52,22 @@ export class EuiMonitoringTable extends React.PureComponent {
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[uuid] || {};
 
+          if (setupMode.productName === ELASTICSEARCH_CUSTOM_ID && status.isPartiallyMigrated) {
+            return (
+              <EuiBadge color="warning" iconType="check">
+                {i18n.translate('xpack.monitoring.euiTable.monitoringUsingMetricbeatLabel', {
+                  defaultMessage: 'Monitored using Metricbeat'
+                })}
+              </EuiBadge>
+            );
+          }
+
           if (status.isInternalCollector || status.isPartiallyMigrated) {
             return (
               <EuiButton color="danger" onClick={() => setupMode.openFlyout(uuid)}>
-                Migrate
+                {i18n.translate('xpack.monitoring.euiTable.migrateButtonLabel', {
+                  defaultMessage: 'Migrate'
+                })}
               </EuiButton>
             );
           }
@@ -61,12 +75,16 @@ export class EuiMonitoringTable extends React.PureComponent {
           if (status.isFullyMigrated) {
             return (
               <EuiBadge color="secondary" iconType="check">
-                Migrated
+                {i18n.translate('xpack.monitoring.euiTable.migratedStatusLabel', {
+                  defaultMessage: 'Migrated'
+                })}
               </EuiBadge>
             );
           }
 
-          return 'N/A';
+          return i18n.translate('xpack.monitoring.euiTable.migrationStatusUnknown', {
+            defaultMessage: 'N/A'
+          });
         }
       });
     }

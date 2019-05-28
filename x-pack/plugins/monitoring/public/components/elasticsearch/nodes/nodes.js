@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
@@ -18,6 +18,8 @@ import {
   EuiPageContent,
   EuiPageBody,
   EuiPanel,
+  EuiCallOut,
+  EuiButton
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
@@ -205,6 +207,36 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
   const columns = getColumns(showCgroupMetricsElasticsearch);
   const { sorting, pagination, onTableChange, setupMode } = props;
 
+  let disableInternalCollectionForMigrationMessage = null;
+  if (setupMode.data) {
+    if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+      disableInternalCollectionForMigrationMessage = (
+        <Fragment>
+          <EuiCallOut
+            title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionTitle', {
+              defaultMessage: 'Disable internal collection to finish the migration',
+            })}
+            color="warning"
+            iconType="help"
+          >
+            <p>
+              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionDescription', {
+                defaultMessage: `All of your Elasticsearch servers are monitored using Metricbeat,
+                but you need to disable internal collection to finish the migration.`
+              })}
+            </p>
+            <EuiButton fill color="danger" onClick={() => setupMode.openFlyout()}>
+              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionMigrationButtonLabel', {
+                defaultMessage: 'Finish migration'
+              })}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m"/>
+        </Fragment>
+      );
+    }
+  }
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -212,6 +244,7 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
           <ClusterStatus stats={clusterStatus} />
         </EuiPanel>
         <EuiSpacer size="m" />
+        {disableInternalCollectionForMigrationMessage}
         <EuiPageContent>
           <EuiMonitoringTable
             className="elasticsearchNodesTable"

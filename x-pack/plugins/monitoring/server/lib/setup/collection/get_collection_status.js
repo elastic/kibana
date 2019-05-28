@@ -5,12 +5,11 @@
  */
 
 import { get, uniq } from 'lodash';
-import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
+import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 const APM_CUSTOM_ID = 'apm';
-const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
 
 const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
   const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
@@ -310,6 +309,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
@@ -364,6 +364,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
         ...Object.keys(fullyMigratedUuidsMap),
         ...Object.keys(partiallyMigratedUuidsMap)
       ]).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({

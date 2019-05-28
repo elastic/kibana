@@ -46,8 +46,13 @@ export class Flyout extends Component {
 
     this.checkInterval = null;
 
+    let activeStep = INSTRUCTION_STEP_SET_MONITORING_URL;
+    if (props.product && props.product.isPartiallyMigrated) {
+      activeStep = INSTRUCTION_STEP_DISABLE_INTERNAL;
+    }
+
     this.state = {
-      activeStep: INSTRUCTION_STEP_SET_MONITORING_URL,
+      activeStep,
       esMonitoringUrl,
       checkedStatusByStep: {
         [INSTRUCTION_STEP_ENABLE_METRICBEAT]: false,
