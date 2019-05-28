@@ -118,7 +118,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     });
   };
 
-  public render(dom: React.ReactNode) {
+  public render(dom: HTMLElement) {
     ReactDOM.render(
       // @ts-ignore - hitting https://github.com/DefinitelyTyped/DefinitelyTyped/issues/27805
       <I18nProvider>
