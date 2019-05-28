@@ -17,10 +17,6 @@
  * under the License.
  */
 
-jest.mock('../lib/fetch_index_patterns', () => ({
-  fetchIndexPatterns: jest.fn(),
-}));
-
 import {
   mockFetchIndexPatterns,
   mockPersistedLog,
