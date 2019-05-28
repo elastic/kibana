@@ -535,8 +535,6 @@ module.exports = {
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
         'react/forbid-dom-props': 'error',
-        // This will go from warn to error when this is fixed:
-        // https://github.com/elastic/ingest-dev/issues/468
         'react/no-access-state-in-setstate': 'error',
         // This style will be turned on after most bugs are fixed
         // 'react/no-children-prop': 'warn',
