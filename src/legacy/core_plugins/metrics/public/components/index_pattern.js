@@ -160,7 +160,7 @@ export const IndexPattern = props => {
               value={model[dropBucketName]}
               name={dropBucketName}
               onChange={props.onChange}
-              disabled={isEntireTimeRangeEnabled(model, timeRangeOptions, timerange)}
+              disabled={isEntireTimeRangeEnabled(model, timeRangeOptions, timerange) || props.disabled}
             />
           </EuiFormRow>
         </EuiFlexItem>
