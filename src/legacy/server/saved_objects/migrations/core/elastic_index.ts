@@ -24,7 +24,7 @@
 
 import _ from 'lodash';
 import { IndexMapping } from '../../../mappings';
-import { MigrationVersion } from '../../serialization';
+import { MigrationVersion } from '../../';
 import { AliasAction, CallCluster, NotFound, RawDoc, ShardsInfo } from './call_cluster';
 
 // @ts-ignore untyped dependency

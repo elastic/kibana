@@ -469,7 +469,7 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map((hit: any) => this._rawToSavedObject(hit)),
+      saved_objects: response.hits.hits.map((hit: RawDoc) => this._rawToSavedObject(hit)),
     };
   }
 

@@ -354,7 +354,8 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('createEsAutoCreateIndexError', () => {
       it('does not take an error argument', () => {
         const error = new Error();
-        expect(createEsAutoCreateIndexError()).not.toBe(error);
+        // @ts-ignore
+        expect(createEsAutoCreateIndexError(error)).not.toBe(error);
       });
 
       it('returns a new Error', () => {
