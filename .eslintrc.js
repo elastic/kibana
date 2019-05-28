@@ -537,15 +537,15 @@ module.exports = {
         'react/forbid-dom-props': 'error',
         // This will go from warn to error when this is fixed:
         // https://github.com/elastic/ingest-dev/issues/468
-        'react/no-access-state-in-setstate': 'warn',
+        'react/no-access-state-in-setstate': 'error',
         // This style will be turned on after most bugs are fixed
         // 'react/no-children-prop': 'warn',
         'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
         'react/no-did-mount-set-state': 'error',
-        // This will go from warn to error when this is fixed:
-        // https://github.com/elastic/ingest-dev/issues/468
-        'react/no-did-update-set-state': 'warn',
+        // Re-enable once we have better options per this issue:
+        // https://github.com/airbnb/javascript/issues/1875
+        // 'react/no-did-update-set-state': 'error',
         'react/no-direct-mutation-state': 'error',
         'react/no-find-dom-node': 'error',
         'react/no-redundant-should-component-update': 'error',
