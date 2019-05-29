@@ -18,6 +18,7 @@ import {
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { statusTitle } from './common_elasticsearch_instructions';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
@@ -38,7 +39,10 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
             defaultMessage="Follow {link}."
             values={{
               link: (
-                <EuiLink href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html" target="_blank">
+                <EuiLink
+                  href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation.html`}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
                     defaultMessage="the instructions here"
@@ -129,16 +133,27 @@ output.elasticsearch:
       defaultMessage: 'Start Metricbeat'
     }),
     children: (
-      <Fragment>
-        <EuiCodeBlock
-          isCopyable
-        >
-          {`
-metricbeat -e
-`}
-        </EuiCodeBlock>
-      </Fragment>
-
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatDescription"
+            defaultMessage="Follow {link}."
+            values={{
+              link: (
+                <EuiLink
+                  href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
+                    defaultMessage="the instructions here"
+                  />
+                </EuiLink>
+              )
+            }}
+          />
+        </p>
+      </EuiText>
     )
   };
 

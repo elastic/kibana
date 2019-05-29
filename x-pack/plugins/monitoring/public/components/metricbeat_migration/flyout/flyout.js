@@ -36,6 +36,7 @@ import {
 } from '../constants';
 import { KIBANA_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
 import { Monospace } from '../instruction_steps/components/monospace';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
@@ -48,7 +49,7 @@ export class Flyout extends Component {
 
     let esMonitoringUrl = storage.get(ES_MONITORING_URL_KEY);
     if (!esMonitoringUrl) {
-      esMonitoringUrl = props.monitoringHosts ? props.monitoringHosts[0] : '';
+      esMonitoringUrl = props.monitoringHosts ? props.monitoringHosts[0] : DEFAULT_ES_MONITORING_URL;
     }
 
     this.checkInterval = null;
@@ -139,7 +140,6 @@ export class Flyout extends Component {
             >
               <EuiFieldText
                 value={esMonitoringUrl}
-                placeholder={DEFAULT_ES_MONITORING_URL}
                 onChange={e => this.setEsMonitoringUrl(e.target.value)}
               />
             </EuiFormRow>
@@ -259,10 +259,10 @@ export class Flyout extends Component {
 
     let documentationUrl = null;
     if (productName === KIBANA_SYSTEM_ID) {
-      documentationUrl = 'https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html';
+      documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`;
     }
     else if (productName === ELASTICSEARCH_CUSTOM_ID) {
-      documentationUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html`;
+      documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`;
     }
 
     if (!documentationUrl) {
