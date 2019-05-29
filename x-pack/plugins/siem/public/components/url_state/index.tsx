@@ -43,8 +43,8 @@ import {
   KeyUrlState,
   KqlQuery,
   KqlQueryObject,
+  LocationKeysType,
   LocationTypes,
-  LocationTypesNoNull,
   UrlStateContainerPropTypes,
   UrlStateProps,
 } from './types';
@@ -66,7 +66,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevUrlState[urlKey])
         ) {
           if (urlKey === CONSTANTS.kqlQuery) {
-            LOCATION_KEYS.forEach((queryLocation: LocationTypesNoNull) => {
+            LOCATION_KEYS.forEach((queryLocation: LocationKeysType) => {
               if (
                 !!urlState[CONSTANTS.kqlQuery][queryLocation] &&
                 JSON.stringify(urlState[CONSTANTS.kqlQuery][queryLocation]) !==
@@ -197,18 +197,15 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
             }
           }
         }
-      } else {
-        if (urlKey === CONSTANTS.timerange) {
-          this.replaceStateInLocation(this.props.urlState[urlKey], urlKey);
-        }
-        if (urlKey === CONSTANTS.kqlQuery) {
-          const currentLocation: LocationTypes = getCurrentLocation(location.pathname);
-          if (currentLocation !== null) {
-            this.replaceStateInLocation(
-              this.props.urlState[CONSTANTS.kqlQuery][currentLocation],
-              urlKey
-            );
-          }
+      } else if (urlKey === CONSTANTS.timerange) {
+        this.replaceStateInLocation(this.props.urlState[urlKey], urlKey);
+      } else if (urlKey === CONSTANTS.kqlQuery) {
+        const currentLocation: LocationTypes = getCurrentLocation(location.pathname);
+        if (currentLocation !== null) {
+          this.replaceStateInLocation(
+            this.props.urlState[CONSTANTS.kqlQuery][currentLocation],
+            urlKey
+          );
         }
       }
     });
