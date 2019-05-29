@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getDashboardModeAuthScope } from './dashboard_mode_auth_scope';
 export { createDashboardModeRequestInterceptor } from './dashboard_mode_request_interceptor';
