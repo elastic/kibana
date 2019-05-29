@@ -1,9 +1,16 @@
 {
   /**
+   * Skip any package file whose path matches one of these. Can be string or glob pattern
+   */
+  ignorePaths: [
+    '__fixtures__',
+    'core_plugins'
+  ],
+
+  /**
    * Only submit PRs to these branches, we will manually backport PRs for now
    */
   baseBranches: ['master'],
-
 
   /**
    * Tell renovate to always use yarn
@@ -67,5 +74,5 @@
    */
   vulnerabilityAlerts: {
     enabled: false
-  }
+  },
 }
