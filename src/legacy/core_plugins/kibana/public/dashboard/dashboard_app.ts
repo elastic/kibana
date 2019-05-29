@@ -29,11 +29,8 @@ import { IInjector } from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { KbnUrl } from 'ui/url/kbn_url';
 import { IndexPattern } from 'ui/index_patterns';
-import { data } from 'plugins/data';
 import { DashboardAppController } from './dashboard_app_controller';
 import { DashboardAppState } from './types';
-
-data.search.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

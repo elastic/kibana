@@ -25,8 +25,6 @@ import chrome from 'ui/chrome';
 import { IndexPattern } from 'ui/index_patterns';
 import { toastNotifications } from 'ui/notify';
 
-import 'ui/apply_filters';
-
 import { i18n } from '@kbn/i18n';
 
 import {
