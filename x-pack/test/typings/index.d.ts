@@ -9,3 +9,9 @@ declare module '*.html' {
   // eslint-disable-next-line import/no-default-export
   export default template;
 }
+
+declare module '*.json' {
+  const json: any;
+  // eslint-disable-next-line import/no-default-export
+  export default json;
+}
