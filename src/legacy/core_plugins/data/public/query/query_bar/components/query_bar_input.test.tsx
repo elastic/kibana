@@ -18,6 +18,7 @@
  */
 
 import {
+  mockFetchIndexPatterns,
   mockGetAutocompleteProvider,
   mockGetAutocompleteSuggestions,
   mockPersistedLog,
@@ -131,6 +132,8 @@ describe('QueryBarInput', () => {
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
+    mockPersistedLogFactory.mockClear();
+
     mountWithIntl(
       <QueryBarInput.WrappedComponent
         query={kqlQuery}
@@ -239,5 +242,24 @@ describe('QueryBarInput', () => {
 
     expect(mockGetAutocompleteProvider).toHaveBeenCalledWith('kuery');
     expect(mockGetAutocompleteSuggestions).toHaveBeenCalled();
+  });
+
+  it('Should accept index pattern strings and fetch the full object', () => {
+    mockFetchIndexPatterns.mockClear();
+
+    mountWithIntl(
+      <QueryBarInput.WrappedComponent
+        query={kqlQuery}
+        onSubmit={noop}
+        appName={'discover'}
+        screenTitle={'Another Screen'}
+        indexPatterns={['logstash-*']}
+        store={createMockStorage()}
+        disableAutoFocus={true}
+        intl={null as any}
+      />
+    );
+
+    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(['logstash-*']);
   });
 });
