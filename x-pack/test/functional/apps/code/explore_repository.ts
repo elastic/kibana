@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function exploreRepositoryFunctionalTests({
+export default function exploreRepositoryFunctonalTests({
   getService,
   getPageObjects,
 }: TestInvoker) {
@@ -24,7 +24,7 @@ export default function exploreRepositoryFunctionalTests({
   const FIND_TIME = config.get('timeouts.find');
 
   // FLAKY https://github.com/elastic/kibana/issues/35944
-  describe('Explore Repository', () => {
+  describe.skip('Explore Repository', () => {
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
