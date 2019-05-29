@@ -73,7 +73,7 @@ import {
 } from '../../../../__test__/index';
 
 import { AddPanelFlyout } from './add_panel_flyout';
-import { Container, EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
+import { Container, EmbeddableFactoryRegistry } from '../../../..';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';

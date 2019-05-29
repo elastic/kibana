@@ -39,7 +39,7 @@ import {
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel, Pre61SavedDashboardPanel } from '../types';
 import { DashboardPanelState } from 'plugins/dashboard_embeddable';
-import { EmbeddableInput } from 'plugins/embeddable_api';
+import { EmbeddableInput } from '../../../../embeddable_api/public';
 
 interface CustomInput extends EmbeddableInput {
   something: string;

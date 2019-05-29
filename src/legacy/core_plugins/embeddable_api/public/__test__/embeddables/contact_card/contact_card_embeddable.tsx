@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Embeddable, EmbeddableInput } from 'plugins/embeddable_api';
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Container } from '../../../containers';
 import { triggerRegistry } from '../../../triggers';
-import { EmbeddableOutput } from '../../../embeddables';
+import { EmbeddableOutput, Embeddable, EmbeddableInput } from '../../../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 import { ContactCardEmbeddableComponent } from './contact_card';
 import { SEND_MESSAGE_ACTION } from '../../actions/send_message_action';

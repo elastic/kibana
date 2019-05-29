@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Embeddable, EmbeddableInput, IContainer } from 'plugins/embeddable_api';
+import { Embeddable, EmbeddableInput, IContainer } from '../../..';
 
 export const HELLO_WORLD_EMBEDDABLE_TYPE = 'HELLO_WORLD_EMBEDDABLE_TYPE';
 

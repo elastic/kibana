@@ -27,7 +27,7 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constant
 import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
 import { CONTACT_CARD_EMBEDDABLE } from '../../../../embeddable_api/public/__test__';
-import { EmbeddableInput } from 'plugins/embeddable_api';
+import { EmbeddableInput } from '../../../../embeddable_api/public';
 
 interface TestInput extends EmbeddableInput {
   test: string;

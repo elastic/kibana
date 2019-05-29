@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import {
-  IContainer,
-  EmbeddableInput,
-  embeddableFactories,
-  EmbeddableFactory,
-} from 'plugins/embeddable_api';
 import { i18n } from '@kbn/i18n';
+import { IContainer, EmbeddableInput, embeddableFactories, EmbeddableFactory } from '../../..';
 import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE_TYPE } from './hello_world_embeddable';
 
 export class HelloWorldEmbeddableFactory extends EmbeddableFactory {

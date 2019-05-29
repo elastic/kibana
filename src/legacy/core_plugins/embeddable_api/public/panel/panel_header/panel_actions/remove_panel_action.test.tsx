@@ -41,9 +41,8 @@ import {
   FILTERABLE_EMBEDDABLE,
 } from '../../../__test__';
 
-import { EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../';
+import { Filter, EmbeddableOutput, EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
-import { Filter, EmbeddableOutput } from 'plugins/embeddable_api';
 
 const embeddableFactories = new EmbeddableFactoryRegistry();
 embeddableFactories.registerFactory(new FilterableEmbeddableFactory());

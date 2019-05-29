@@ -40,7 +40,7 @@ import {
   actionRegistry,
   triggerRegistry,
   EmbeddablePanel,
-} from 'plugins/embeddable_api';
+} from '../../../embeddable_api/public';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 

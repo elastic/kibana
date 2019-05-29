@@ -41,7 +41,7 @@ import {
   ContactCardEmbeddableInput,
 } from '../../../../__test__/index';
 
-import { Container, EmbeddableFactoryRegistry, isErrorEmbeddable } from 'plugins/embeddable_api';
+import { Container, EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../..';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';

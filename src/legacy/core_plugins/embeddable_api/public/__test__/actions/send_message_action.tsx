@@ -26,7 +26,7 @@ import {
   IncompatibleActionError,
   triggerRegistry,
   CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api';
+} from '../..';
 import { attachAction } from '../../triggers/attach_action';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';

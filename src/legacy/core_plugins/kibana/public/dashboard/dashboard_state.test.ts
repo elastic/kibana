@@ -19,7 +19,7 @@
 
 import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
-import { ViewMode, TimeRange, QueryLanguageType } from 'plugins/embeddable_api';
+import { ViewMode, TimeRange, QueryLanguageType } from '../../../embeddable_api/public';
 import { IAppState } from 'ui/state_management/app_state';
 import { DashboardAppState } from './types';
 

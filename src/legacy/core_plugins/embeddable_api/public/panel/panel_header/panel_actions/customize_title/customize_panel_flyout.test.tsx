@@ -45,7 +45,7 @@ import {
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { CustomizePanelFlyout } from './customize_panel_flyout';
-import { Container, EmbeddableFactoryRegistry, isErrorEmbeddable } from 'plugins/embeddable_api';
+import { Container, EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 let container: Container;

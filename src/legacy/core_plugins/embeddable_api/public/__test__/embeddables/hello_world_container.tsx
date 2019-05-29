@@ -16,15 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Container,
-  EmbeddableFactoryRegistry,
-  ViewMode,
-  ContainerInput,
-} from 'plugins/embeddable_api';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { Container, EmbeddableFactoryRegistry, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';

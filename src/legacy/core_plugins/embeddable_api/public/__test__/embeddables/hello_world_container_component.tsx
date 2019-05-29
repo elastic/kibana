@@ -20,7 +20,7 @@ import React, { Component, RefObject } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { IContainer, PanelState, EmbeddableChildPanel } from 'plugins/embeddable_api';
+import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
 
 interface Props {
   container: IContainer;

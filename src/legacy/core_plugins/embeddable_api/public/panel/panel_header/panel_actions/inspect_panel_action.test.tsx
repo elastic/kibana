@@ -52,10 +52,9 @@ import {
   FILTERABLE_EMBEDDABLE,
 } from '../../../__test__';
 
-import { EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../..';
+import { EmbeddableOutput, Filter, EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../..';
 import { InspectPanelAction } from './inspect_panel_action';
 import { Inspector, Adapters } from 'ui/inspector';
-import { EmbeddableOutput, Filter } from 'plugins/embeddable_api';
 
 const embeddableFactories = new EmbeddableFactoryRegistry();
 embeddableFactories.registerFactory(new FilterableEmbeddableFactory());

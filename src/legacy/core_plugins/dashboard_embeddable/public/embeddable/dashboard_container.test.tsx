@@ -32,7 +32,7 @@ import {
   triggerRegistry,
   CONTEXT_MENU_TRIGGER,
   attachAction,
-} from 'plugins/embeddable_api';
+} from '../../../embeddable_api/public';
 import { DashboardContainer } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../__test__';
 import { mount } from 'enzyme';
@@ -40,7 +40,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EmbeddablePanel } from 'plugins/embeddable_api';
+import { EmbeddablePanel } from '../../../embeddable_api/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   ContactCardEmbeddableOutput,

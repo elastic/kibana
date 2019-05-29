@@ -22,7 +22,7 @@ import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_help
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
+import { EmbeddableFactoryRegistry } from '../../../../embeddable_api/public';
 
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import {

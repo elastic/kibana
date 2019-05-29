@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
+import { EmbeddableFactoryRegistry } from '../../../../embeddable_api/public';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import {
   ContactCardEmbeddableFactory,
