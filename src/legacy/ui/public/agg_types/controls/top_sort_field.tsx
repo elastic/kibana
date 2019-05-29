@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import { uiModules } from '../../modules';
-const module = uiModules.get('kibana');
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { AggParamEditorProps } from '../../vis/editors/default';
+import { FieldParamType } from '../param_types';
+import { FieldParamEditor } from './field';
 
-module.directive('autoSelectIfOnlyOne', function () {
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    link: function (scope, element, attributes, ngModelCtrl) {
-      scope.$watchCollection(attributes.autoSelectIfOnlyOne, (options) => {
-        if (options && options.length === 1) {
-          ngModelCtrl.$setViewValue(options[0]);
-          ngModelCtrl.$render();
-        }
-      });
-    }
-  };
-});
+function TopSortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
+  const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {
+    defaultMessage: 'Sort on',
+  });
+
+  return <FieldParamEditor {...props} customLabel={customLabel} />;
+}
+
+export { TopSortFieldParamEditor };
