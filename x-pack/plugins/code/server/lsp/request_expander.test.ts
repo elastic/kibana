@@ -16,7 +16,6 @@ import { InitializingError, RequestExpander } from './request_expander';
 const options: ServerOptions = {
   workspacePath: '/tmp/test/workspace',
 };
-
 beforeEach(async () => {
   sinon.reset();
   if (!fs.existsSync(options.workspacePath)) {
@@ -31,6 +30,7 @@ afterEach(() => {
 });
 
 test('requests should be sequential', async () => {
+  const clock = sinon.useFakeTimers();
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
     handleRequest: sinon.stub().callsFake(() => {
@@ -53,22 +53,28 @@ test('requests should be sequential', async () => {
   };
   const response1Promise = expander.handleRequest(request1);
   const response2Promise = expander.handleRequest(request2);
+  clock.tick(100);
+  process.nextTick(() => clock.runAll());
   const response1 = await response1Promise;
   const response2 = await response2Promise;
   // response2 should not be started before response1 ends.
   expect(response1.result.end).toBeLessThanOrEqual(response2.result.start);
+  clock.restore();
 });
 
 test('requests should throw error after lsp init timeout', async () => {
+  const clock = sinon.useFakeTimers();
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
-    handleRequest: sinon.stub().callsFake(() => Promise.resolve('ok')),
+    handleRequest: sinon.stub().callsFake(() => {
+      Promise.resolve('ok');
+    }),
     initialize: sinon.stub().callsFake(
       () =>
         new Promise(resolve => {
           setTimeout(() => {
             resolve();
-          }, 200);
+          }, 300);
         })
     ),
   });
@@ -89,8 +95,11 @@ test('requests should throw error after lsp init timeout', async () => {
   mkdirp.sync(request2.workspacePath);
   const response1Promise = expander.handleRequest(request1);
   const response2Promise = expander.handleRequest(request2);
+  clock.tick(400);
+  process.nextTick(() => clock.runAll());
   await expect(response1Promise).rejects.toEqual(InitializingError);
   await expect(response2Promise).rejects.toEqual(InitializingError);
+  clock.restore();
 });
 
 test('be able to open multiple workspace', async () => {

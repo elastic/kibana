@@ -36,7 +36,7 @@ const LanguageServerLi = (props: {
   const { status, name } = props.languageServer;
 
   const languageIcon = () => {
-    if (name === 'Typescript') {
+    if (name === 'TypeScript') {
       return <TypeScriptIcon />;
     } else if (name === 'Java') {
       return <JavaIcon />;

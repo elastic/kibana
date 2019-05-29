@@ -301,6 +301,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               onChange={handleTextChange('value_template')}
               value={model.value_template}
               fullWidth
+              data-test-subj="tsvb_series_value"
             />
           </EuiFormRow>
         </EuiFlexItem>

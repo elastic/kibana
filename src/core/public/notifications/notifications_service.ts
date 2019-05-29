@@ -20,17 +20,19 @@
 import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
-import { I18nStart } from '../i18n';
-import { ToastsService } from './toasts';
-import { ToastsApi } from './toasts/toasts_api';
+import { I18nStart, I18nSetup } from '../i18n';
+import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { UiSettingsSetup } from '../ui_settings';
+import { OverlayStart } from '../overlays';
 
 interface SetupDeps {
+  i18n: I18nSetup;
   uiSettings: UiSettingsSetup;
 }
 
 interface StartDeps {
   i18n: I18nStart;
+  overlays: OverlayStart;
   targetDomElement: HTMLElement;
 }
 
@@ -44,8 +46,8 @@ export class NotificationsService {
     this.toasts = new ToastsService();
   }
 
-  public setup({ uiSettings }: SetupDeps): NotificationsSetup {
-    const notificationSetup = { toasts: this.toasts.setup() };
+  public setup({ i18n: i18nSetup, uiSettings }: SetupDeps): NotificationsSetup {
+    const notificationSetup = { toasts: this.toasts.setup({ i18n: i18nSetup, uiSettings }) };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
       notificationSetup.toasts.addDanger({
@@ -59,13 +61,13 @@ export class NotificationsService {
     return notificationSetup;
   }
 
-  public start({ i18n: i18nDep, targetDomElement }: StartDeps): NotificationsStart {
+  public start({ i18n: i18nDep, overlays, targetDomElement }: StartDeps): NotificationsStart {
     this.targetDomElement = targetDomElement;
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
     return {
-      toasts: this.toasts.start({ i18n: i18nDep, targetDomElement: toastsContainer }),
+      toasts: this.toasts.start({ i18n: i18nDep, overlays, targetDomElement: toastsContainer }),
     };
   }
 
@@ -84,8 +86,10 @@ export class NotificationsService {
 
 /** @public */
 export interface NotificationsSetup {
-  toasts: ToastsApi;
+  toasts: ToastsSetup;
 }
 
 /** @public */
-export type NotificationsStart = NotificationsSetup;
+export interface NotificationsStart {
+  toasts: ToastsStart;
+}
