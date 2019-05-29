@@ -20,7 +20,7 @@ export function CanvasPageProvider({ getService }: KibanaFunctionalTestDefaultPr
     },
 
     async expectCreateWorkpadButtonDisabled() {
-      const button = await testSubjects.find('create-workpad-button');
+      const button = await testSubjects.find('create-workpad-button', 20000);
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be('true');
     },
