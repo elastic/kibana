@@ -39,19 +39,30 @@ export interface HttpServerSetup {
   registerRouter: (router: Router) => void;
   /**
    * Define custom authentication and/or authorization mechanism for incoming requests.
-   * Applied to all resources by default. Only one AuthenticationHandler can be registered.
+   * A handler should return a state to associate with the incoming request.
+   * The state can be retrieved later via http.auth.get(..)
+   * Only one AuthenticationHandler can be registered.
    */
   registerAuth: <T>(
-    authenticationHandler: AuthenticationHandler<T>,
+    handler: AuthenticationHandler<T>,
     cookieOptions: SessionStorageCookieOptions<T>
   ) => Promise<void>;
   /**
-   * Define custom logic to perform for incoming requests.
-   * Applied to all resources by default.
-   * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
+   * Define custom logic to perform for incoming requests. Runs the handler before Auth
+   * hook performs a check that user has access to requested resources, so it's the only
+   * place when you can forward a request to another URL right on the server.
+   * Can register any number of registerOnPostAuth, which are called in sequence
+   * (from the first registered to the last).
    */
-  registerOnPreAuth: (requestHandler: OnPreAuthHandler) => void;
-  registerOnPostAuth: (requestHandler: OnPostAuthHandler) => void;
+  registerOnPreAuth: (handler: OnPreAuthHandler) => void;
+  /**
+   * Define custom logic to perform for incoming requests. Runs the handler after Auth hook
+   * did make sure a user has access to the requested resource.
+   * The auth state is available at stage via http.auth.get(..)
+   * Can register any number of registerOnPreAuth, which are called in sequence
+   * (from the first registered to the last).
+   */
+  registerOnPostAuth: (handler: OnPostAuthHandler) => void;
   getBasePathFor: (request: KibanaRequest | Request) => string;
   setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
   auth: {
