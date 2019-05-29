@@ -110,22 +110,19 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler) {
   ): Promise<Lifecycle.ReturnValue> {
     try {
       const result = await fn(KibanaRequest.from(request, undefined), toolkit);
-      if (postAuthResult.isValid(result)) {
-        if (postAuthResult.isNext(result)) {
-          return h.continue;
-        }
-        if (postAuthResult.isRedirected(result)) {
-          return h.redirect(result.url).takeover();
-        }
-        if (postAuthResult.isRejected(result)) {
-          const { error, statusCode } = result;
-          return Boom.boomify(error, { statusCode });
-        }
+      if (!postAuthResult.isValid(result)) {
+        throw new Error(
+          `Unexpected result from OnPostAuth. Expected OnPostAuthResult, but given: ${result}.`
+        );
       }
-
-      throw new Error(
-        `Unexpected result from OnPostAuth. Expected OnPostAuthResult, but given: ${result}.`
-      );
+      if (postAuthResult.isNext(result)) {
+        return h.continue;
+      }
+      if (postAuthResult.isRedirected(result)) {
+        return h.redirect(result.url).takeover();
+      }
+      const { error, statusCode } = result;
+      return Boom.boomify(error, { statusCode });
     } catch (error) {
       return Boom.internal(error.message, { statusCode: 500 });
     }

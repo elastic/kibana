@@ -112,22 +112,20 @@ export function adoptToHapiAuthFormat<T = any>(
   ): Promise<Lifecycle.ReturnValue> {
     try {
       const result = await fn(req, sessionStorage.asScoped(req), toolkit);
-      if (authResult.isValid(result)) {
-        if (authResult.isAuthenticated(result)) {
-          onSuccess(req, result.state);
-          return h.authenticated({ credentials: result.state });
-        }
-        if (authResult.isRedirected(result)) {
-          return h.redirect(result.url).takeover();
-        }
-        if (authResult.isRejected(result)) {
-          const { error, statusCode } = result;
-          return Boom.boomify(error, { statusCode });
-        }
+      if (!authResult.isValid(result)) {
+        throw new Error(
+          `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
+        );
       }
-      throw new Error(
-        `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
-      );
+      if (authResult.isAuthenticated(result)) {
+        onSuccess(req, result.state);
+        return h.authenticated({ credentials: result.state });
+      }
+      if (authResult.isRedirected(result)) {
+        return h.redirect(result.url).takeover();
+      }
+      const { error, statusCode } = result;
+      return Boom.boomify(error, { statusCode });
     } catch (error) {
       return Boom.internal(error.message, { statusCode: 500 });
     }

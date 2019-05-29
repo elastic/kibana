@@ -116,31 +116,28 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler) {
     try {
       const result = await fn(KibanaRequest.from(request, undefined), toolkit);
 
-      if (preAuthResult.isValid(result)) {
-        if (preAuthResult.isNext(result)) {
-          return h.continue;
-        }
-
-        if (preAuthResult.isRedirected(result)) {
-          const { url, forward } = result;
-          if (forward) {
-            request.setUrl(url);
-            // We should update raw request as well since it can be proxied to the old platform
-            request.raw.req.url = url;
-            return h.continue;
-          }
-          return h.redirect(url).takeover();
-        }
-
-        if (preAuthResult.isRejected(result)) {
-          const { error, statusCode } = result;
-          return Boom.boomify(error, { statusCode });
-        }
+      if (!preAuthResult.isValid(result)) {
+        throw new Error(
+          `Unexpected result from OnPreAuth. Expected OnPreAuthResult, but given: ${result}.`
+        );
+      }
+      if (preAuthResult.isNext(result)) {
+        return h.continue;
       }
 
-      throw new Error(
-        `Unexpected result from OnPreAuth. Expected OnPreAuthResult, but given: ${result}.`
-      );
+      if (preAuthResult.isRedirected(result)) {
+        const { url, forward } = result;
+        if (forward) {
+          request.setUrl(url);
+          // We should update raw request as well since it can be proxied to the old platform
+          request.raw.req.url = url;
+          return h.continue;
+        }
+        return h.redirect(url).takeover();
+      }
+
+      const { error, statusCode } = result;
+      return Boom.boomify(error, { statusCode });
     } catch (error) {
       return Boom.internal(error.message, { statusCode: 500 });
     }
