@@ -72,6 +72,48 @@ export function initAuthenticateApi(server) {
   });
 
   server.route({
+    // POST is only allowed for Third Party initiated authentication
+    method: ['GET', 'POST'],
+    path: '/api/security/v1/oidc',
+    config: {
+      auth: false,
+      validate: {
+        query: Joi.object().keys({
+          iss: Joi.string().uri({ scheme: 'https' }),
+          login_hint: Joi.string(),
+          target_link_uri: Joi.string().uri(),
+          code: Joi.string(),
+          error: Joi.string(),
+          error_description: Joi.string(),
+          error_uri: Joi.string().uri(),
+          state: Joi.string()
+        }).unknown()
+      }
+    },
+    async handler(request, h) {
+      try {
+        // We handle the fact that the user might get redirected to Kibana while already having an session
+        // Return an error notifying the user they are already logged in.
+        const authenticationResult = await server.plugins.security.authenticate(request);
+        if (authenticationResult.succeeded()) {
+          return Boom.forbidden(
+            'Sorry, you already have an active Kibana session. ' +
+            'If you want to start a new one, please logout from the existing session first.'
+          );
+        }
+
+        if (authenticationResult.redirected()) {
+          return h.redirect(authenticationResult.redirectURL);
+        }
+
+        throw Boom.unauthorized(authenticationResult.error);
+      } catch (err) {
+        throw wrapError(err);
+      }
+    }
+  });
+
+  server.route({
     method: 'GET',
     path: '/api/security/v1/logout',
     config: {

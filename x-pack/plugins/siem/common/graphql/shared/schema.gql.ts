@@ -56,12 +56,4 @@ export const sharedSchema = gql`
     endCursor: CursorType
     hasNextPage: Boolean
   }
-
-  enum IndexType {
-    ANY
-    FILEBEAT
-    AUDITBEAT
-    PACKETBEAT
-    WINLOGBEAT
-  }
 `;

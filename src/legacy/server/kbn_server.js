@@ -55,21 +55,13 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    const { setupDeps, startDeps, serverOptions, handledConfigPaths } = core;
+    const { setupDeps, startDeps, serverOptions, handledConfigPaths, logger } = core;
     this.newPlatform = {
-      setup: {
-        core: {
-          elasticsearch: setupDeps.elasticsearch,
-          http: setupDeps.http,
-        },
-        plugins: setupDeps.plugins,
+      coreContext: {
+        logger,
       },
-      start: {
-        core: {
-          http: startDeps.http,
-        },
-        plugins: startDeps.plugins,
-      },
+      setup: setupDeps,
+      start: startDeps,
       stop: null,
       params: {
         serverOptions,

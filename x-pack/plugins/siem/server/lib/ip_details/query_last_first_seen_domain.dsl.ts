@@ -10,13 +10,7 @@ export const buildFirstLastSeenDomainQuery = ({
   ip,
   domainName,
   flowTarget,
-  sourceConfiguration: {
-    fields: { timestamp },
-    logAlias,
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
-  },
+  defaultIndex,
 }: DomainFirstLastSeenRequestOptions) => {
   const filter = [
     { term: { [`${flowTarget}.ip`]: ip } },
@@ -25,7 +19,7 @@ export const buildFirstLastSeenDomainQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

@@ -9,6 +9,8 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
 import { networkModel } from '../../store';
 import { createFilter } from '../helpers';
@@ -38,6 +40,7 @@ export const IpOverviewQuery = pure<IpOverviewProps>(
         sourceId,
         filterQuery: createFilter(filterQuery),
         ip,
+        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       }}
     >
       {({ data, loading }) => {

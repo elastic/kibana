@@ -21,10 +21,10 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
-import calculateCoordinates from '../lib/calculate_coordinates';
-import colors from '../lib/colors';
+import { calculateCoordinates } from '../lib/calculate_coordinates';
+import { COLORS } from '../lib/colors';
 
-class GaugeVis extends Component {
+export class GaugeVis extends Component {
 
   constructor(props) {
     super(props);
@@ -125,7 +125,7 @@ class GaugeVis extends Component {
         cx: 60,
         cy: 60,
         fill: 'rgba(0,0,0,0)',
-        stroke: colors.lineColor,
+        stroke: COLORS.lineColor,
         strokeDasharray: `${sliceSize * size} ${size}`,
         strokeWidth: this.props.innerLine
       }
@@ -186,6 +186,3 @@ GaugeVis.propTypes = {
   value: PropTypes.number,
   type: PropTypes.oneOf(['half', 'circle'])
 };
-
-export default GaugeVis;
-

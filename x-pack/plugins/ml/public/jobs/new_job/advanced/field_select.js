@@ -28,7 +28,7 @@ export class FieldSelect extends Component {
 
     function getOptions() {
       const ops = [];
-      _.each(options, (op, key) => {
+      _.each(options, (op, key) => { // eslint-disable-line no-unused-vars
         ops.push({ label: key, value: key });
       });
       return ops;

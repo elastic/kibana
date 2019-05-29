@@ -8,7 +8,7 @@
 import { Importer } from './importer';
 
 export class NdjsonImporter extends Importer {
-  constructor(results, settings) {
+  constructor(results, settings) { // eslint-disable-line no-unused-vars
     super(settings);
   }
 

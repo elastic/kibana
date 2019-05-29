@@ -21,4 +21,16 @@ describe('IntegrationLink component', () => {
     );
     expect(component).toMatchSnapshot();
   });
+  it('renders a disabled link when href is undefined', () => {
+    const component = shallowWithIntl(
+      <IntegrationLink
+        ariaLabel="foo"
+        href={undefined}
+        iconType="apmApp"
+        message="click for bar"
+        tooltipContent="info for bar"
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });
