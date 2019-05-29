@@ -160,12 +160,6 @@ export const createTimelineEpic = <State>(): Epic<
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
         } else if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
-          if (
-            action.type === addProvider.type &&
-            columns.filter(col => col.type != null).length === 0
-          ) {
-            return false;
-          }
           return true;
         }
         return false;
