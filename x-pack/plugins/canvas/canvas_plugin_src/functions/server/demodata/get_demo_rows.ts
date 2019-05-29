@@ -14,7 +14,7 @@ export enum DemoRows {
   SHIRTS = 'shirts',
 }
 
-export function getDemoRows(arg: DemoRows | null) {
+export function getDemoRows(arg: string | null) {
   if (arg === DemoRows.CI) {
     return cloneDeep(ci);
   }

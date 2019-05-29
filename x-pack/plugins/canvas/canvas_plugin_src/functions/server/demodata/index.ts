@@ -7,8 +7,7 @@
 import { sortBy } from 'lodash';
 // @ts-ignore
 import { queryDatatable } from '../../../../common/lib/datatable/query';
-// @ts-ignore
-import { getDemoRows } from './get_demo_rows';
+import { DemoRows, getDemoRows } from './get_demo_rows';
 import { ContextFunction, Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 import { getFunctionHelp } from '../../../strings';
 
@@ -41,7 +40,7 @@ export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datat
 
       let set = {} as { columns: DatatableColumn[]; rows: DatatableRow[] };
 
-      if (args.type === 'ci') {
+      if (args.type === DemoRows.CI) {
         set = {
           columns: [
             { name: '@timestamp', type: 'date' },
@@ -57,7 +56,7 @@ export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datat
           ],
           rows: sortBy(demoRows, 'time'),
         };
-      } else if (args.type === 'shirts') {
+      } else if (args.type === DemoRows.SHIRTS) {
         set = {
           columns: [
             { name: 'size', type: 'string' },
