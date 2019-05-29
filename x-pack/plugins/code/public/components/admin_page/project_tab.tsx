@@ -161,7 +161,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
                   value={this.state.repoURL}
                   onChange={this.onChange}
                   onBlur={this.updateIsInvalid}
-                  placeholder="https://github.com/elastic/elasticsearch"
+                  placeholder="https://github.com/elastic/eui"
                   aria-label="input project url"
                   data-test-subj="importRepositoryUrlInputBox"
                   isLoading={this.props.importLoading}
