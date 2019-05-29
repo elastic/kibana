@@ -148,8 +148,6 @@
     "common.ui.aggTypes.ipRanges.cidrMaskLabel": "CIDR マスク",
     "common.ui.aggTypes.ipRanges.fromLabel": "開始:",
     "common.ui.aggTypes.ipRanges.toLabel": "終了:",
-    "common.ui.aggTypes.ipRanges.useCidrMasksButtonLabel": "CIDR マスクを使用",
-    "common.ui.aggTypes.ipRanges.useFromToButtonLabel": "開始/終了を使用",
     "common.ui.aggTypes.jsonInputLabel": "JSON インプット",
     "common.ui.aggTypes.jsonInputTooltip": "ここに追加された JSON フォーマットのプロパティは、すべてこのセクションの Elasticsearch アグリゲーション定義に融合されます。用語集約における「shard_size」がその例です。",
     "common.ui.aggTypes.metricLabel": "メトリック",

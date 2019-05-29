@@ -65,7 +65,6 @@ export type InputModel =
 
 interface InputListProps {
   config: InputListConfig;
-  header: React.ReactNode;
   list: InputObject[];
   onChange(list: InputObject[]): void;
   setValidity(isValid: boolean): void;
@@ -73,7 +72,7 @@ interface InputListProps {
 
 const generateId = htmlIdGenerator();
 
-function InputList({ config, header, list, onChange, setValidity }: InputListProps) {
+function InputList({ config, list, onChange, setValidity }: InputListProps) {
   const [models, setModels] = useState(
     list.length
       ? list.map(
@@ -195,9 +194,6 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        {header}
-      </EuiFlexGroup>
       {models.map((item, index) => (
         <Fragment key={item.id}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -221,7 +217,7 @@ function InputList({ config, header, list, onChange, setValidity }: InputListPro
         <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
           <FormattedMessage
             id="common.ui.aggTypes.ipRanges.addRangeButtonLabel"
-            defaultMessage="Add Range"
+            defaultMessage="Add range"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

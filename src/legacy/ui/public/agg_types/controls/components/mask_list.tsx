@@ -95,18 +95,8 @@ function MaskList({ labelledbyId, showValidation, onBlur, ...rest }: MaskListPro
       validateFn(object.mask, model);
     },
   };
-  const header = (
-    <EuiFlexItem>
-      <EuiFormLabel htmlFor={`visEditorIpRangeCidrLabel${labelledbyId}`}>
-        <FormattedMessage
-          id="common.ui.aggTypes.ipRanges.cidrMaskLabel"
-          defaultMessage="CIDR Mask"
-        />
-      </EuiFormLabel>
-    </EuiFlexItem>
-  );
 
-  return <InputList config={maskListConfig} header={header} {...rest} />;
+  return <InputList config={maskListConfig} {...rest} />;
 }
 
 export { MaskList };

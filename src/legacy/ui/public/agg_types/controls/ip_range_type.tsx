@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../../vis/editors/default';
 
@@ -29,22 +29,36 @@ enum IpRangeTypes {
 }
 
 function IpRangeTypeParamEditor({ value, setValue }: AggParamEditorProps<IpRangeTypes>) {
-  const useFromToLabel = i18n.translate('common.ui.aggTypes.ipRanges.useFromToButtonLabel', {
-    defaultMessage: 'Use From/To',
-  });
-  const useCidrMasksLabel = i18n.translate('common.ui.aggTypes.ipRanges.useCidrMasksButtonLabel', {
-    defaultMessage: 'Use CIDR Masks',
-  });
+  const options = [
+    {
+      id: IpRangeTypes.FROM_TO,
+      label: i18n.translate('common.ui.aggTypes.ipRanges.fromToButtonLabel', {
+        defaultMessage: 'From/to',
+      }),
+    },
+    {
+      id: IpRangeTypes.MASK,
+      label: i18n.translate('common.ui.aggTypes.ipRanges.cidrMasksButtonLabel', {
+        defaultMessage: 'CIDR masks',
+      }),
+    },
+  ];
 
-  const onClick = () => {
-    setValue(value === IpRangeTypes.MASK ? IpRangeTypes.FROM_TO : IpRangeTypes.MASK);
+  const onClick = (optionId: string) => {
+    setValue(optionId as IpRangeTypes);
   };
 
   return (
     <>
-      <EuiButton onClick={onClick}>
-        {value === IpRangeTypes.MASK ? useFromToLabel : useCidrMasksLabel}
-      </EuiButton>
+      <EuiButtonGroup
+        isFullWidth={true}
+        onChange={onClick}
+        idSelected={value}
+        options={options}
+        legend={i18n.translate('common.ui.aggTypes.ipRangesAriaLabel', {
+          defaultMessage: 'IP ranges',
+        })}
+      />
       <EuiSpacer size="s" />
     </>
   );

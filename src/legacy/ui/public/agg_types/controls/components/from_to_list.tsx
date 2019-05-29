@@ -120,22 +120,8 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
       validateFn(object.to, model.to);
     },
   };
-  const header = (
-    <>
-      <EuiFlexItem>
-        <EuiFormLabel htmlFor={`visEditorIpRangeFromLabel${labelledbyId}`}>
-          <FormattedMessage id="common.ui.aggTypes.ipRanges.fromLabel" defaultMessage="From" />
-        </EuiFormLabel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFormLabel htmlFor={`visEditorIpRangeToLabel${labelledbyId}`}>
-          <FormattedMessage id="common.ui.aggTypes.ipRanges.toLabel" defaultMessage="To" />
-        </EuiFormLabel>
-      </EuiFlexItem>
-    </>
-  );
 
-  return <InputList config={fromToListConfig} header={header} {...rest} />;
+  return <InputList config={fromToListConfig} {...rest} />;
 }
 
 export { FromToList };
