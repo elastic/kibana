@@ -257,8 +257,6 @@
     "common.ui.aggTypes.sizeLabel": "サイズ",
     "common.ui.aggTypes.sizeTooltip": "トップ K のヒットをリクエスト。複数ヒットは「集約基準」でまとめられます。",
     "common.ui.aggTypes.sortOnLabel": "並べ替えオン",
-    "common.ui.aggTypes.sortOnPlaceholder": "フィールドを選択",
-    "common.ui.aggTypes.sortOnTooltip": "並べ替えオン",
     "common.ui.aggTypes.string.customLabel": "カスタムラベル",
     "common.ui.aggTypes.timeInterval.createsTooLargeBucketsTooltip": "この間隔は、選択された時間範囲に表示するには大きすぎるバケットが作成されるため、にスケーリングされています。",
     "common.ui.aggTypes.timeInterval.createsTooManyBucketsTooltip": "この間隔は選択された時間範囲に表示しきれない数のバケットが作成されるため、にスケーリングされています。",

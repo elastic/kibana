@@ -19,11 +19,9 @@
 
 import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
-import '../directives/auto_select_if_only_one';
-import '../directives/scroll_bottom';
-import '../filters/sort_prefix_first';
-import topSortEditor from '../controls/top_sort.html';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
+import { TopSortFieldParamEditor } from '../controls/top_sort_field';
+import { OrderParamEditor } from '../controls/order';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { i18n } from '@kbn/i18n';
 
@@ -57,7 +55,7 @@ export const topHitMetricAgg = new MetricAggType({
     const firstPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.firstPrefixLabel', {
       defaultMessage: 'First'
     });
-    let prefix = aggConfig.params.sortOrder.val === 'desc' ? lastPrefixLabel : firstPrefixLabel;
+    let prefix = aggConfig.params.sortOrder.value === 'desc' ? lastPrefixLabel : firstPrefixLabel;
     if (aggConfig.params.size !== 1) {
       prefix += ` ${aggConfig.params.size}`;
     }
@@ -171,7 +169,7 @@ export const topHitMetricAgg = new MetricAggType({
     {
       name: 'sortField',
       type: 'field',
-      editor: null,
+      editorComponent: TopSortFieldParamEditor,
       filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
       default: function (agg) {
         return agg.getIndexPattern().timeFieldName;
@@ -180,21 +178,21 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'sortOrder',
-      type: 'optioned',
+      type: 'select',
       default: 'desc',
-      editor: topSortEditor,
+      editorComponent: OrderParamEditor,
       options: [
         {
-          display: i18n.translate('common.ui.aggTypes.metrics.topHit.descendingLabel', {
+          text: i18n.translate('common.ui.aggTypes.metrics.topHit.descendingLabel', {
             defaultMessage: 'Descending'
           }),
-          val: 'desc'
+          value: 'desc'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.metrics.topHit.ascendingLabel', {
+          text: i18n.translate('common.ui.aggTypes.metrics.topHit.ascendingLabel', {
             defaultMessage: 'Ascending'
           }),
-          val: 'asc'
+          value: 'asc'
         }
       ],
       write(agg, output) {
@@ -210,7 +208,7 @@ export const topHitMetricAgg = new MetricAggType({
                   lang: sortField.lang
                 },
                 type: sortField.type,
-                order: sortOrder.val
+                order: sortOrder.value
               }
             }
           ];
@@ -218,7 +216,7 @@ export const topHitMetricAgg = new MetricAggType({
           output.params.sort = [
             {
               [ sortField.name ]: {
-                order: sortOrder.val
+                order: sortOrder.value
               }
             }
           ];
