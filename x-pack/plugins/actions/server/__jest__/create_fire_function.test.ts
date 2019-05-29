@@ -7,6 +7,13 @@
 import { ActionTypeRegistry } from '../action_type_registry';
 import { createFireFunction } from '../create_fire_function';
 
+const services = {
+  log: jest.fn(),
+};
+const actionTypeRegistryParams = {
+  services,
+};
+
 const mockEncryptedSavedObjects = {
   isEncryptionError: jest.fn(),
   registerType: jest.fn(),
@@ -15,7 +22,7 @@ const mockEncryptedSavedObjects = {
 
 describe('fire()', () => {
   test('fires an action with all given parameters', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     const fireFn = createFireFunction({
       actionTypeRegistry,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
@@ -51,6 +58,9 @@ describe('fire()', () => {
         "params": Object {
           "baz": false,
         },
+        "services": Object {
+          "log": [MockFunction],
+        },
       },
     ],
   ],
@@ -68,7 +78,7 @@ describe('fire()', () => {
   });
 
   test(`throws an error when the action type isn't registered`, async () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     const fireFn = createFireFunction({
       actionTypeRegistry,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
@@ -90,7 +100,7 @@ describe('fire()', () => {
   });
 
   test('merges encrypted and unencrypted attributes', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     const fireFn = createFireFunction({
       actionTypeRegistry,
       encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
@@ -132,6 +142,9 @@ describe('fire()', () => {
         },
         "params": Object {
           "baz": false,
+        },
+        "services": Object {
+          "log": [MockFunction],
         },
       },
     ],

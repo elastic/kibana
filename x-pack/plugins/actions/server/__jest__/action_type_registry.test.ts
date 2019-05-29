@@ -7,10 +7,17 @@
 import Joi from 'joi';
 import { ActionTypeRegistry } from '../action_type_registry';
 
+const services = {
+  log: jest.fn(),
+};
+const actionTypeRegistryParams = {
+  services,
+};
+
 describe('register()', () => {
   test('able to register action types', () => {
     const executor = jest.fn();
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -21,7 +28,7 @@ describe('register()', () => {
 
   test('throws error if action type already registered', () => {
     const executor = jest.fn();
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -41,7 +48,7 @@ describe('register()', () => {
 
 describe('get()', () => {
   test('returns action type', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -58,7 +65,7 @@ Object {
   });
 
   test(`throws an error when action type doesn't exist`, () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     expect(() => actionTypeRegistry.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"my-action-type\\" is not registered."`
     );
@@ -67,7 +74,7 @@ Object {
 
 describe('getUnencryptedAttributes()', () => {
   test('returns empty array when unencryptedAttributes is undefined', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -78,7 +85,7 @@ describe('getUnencryptedAttributes()', () => {
   });
 
   test('returns values inside unencryptedAttributes array when it exists', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -92,7 +99,7 @@ describe('getUnencryptedAttributes()', () => {
 
 describe('list()', () => {
   test('returns list of action types', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -110,7 +117,7 @@ describe('list()', () => {
 
 describe('validateParams()', () => {
   test('should pass when validation not defined', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -120,7 +127,7 @@ describe('validateParams()', () => {
   });
 
   test('should validate and pass when params is valid', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -137,7 +144,7 @@ describe('validateParams()', () => {
   });
 
   test('should validate and throw error when params is invalid', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -160,7 +167,7 @@ describe('validateParams()', () => {
 
 describe('validateActionTypeConfig()', () => {
   test('should pass when validation not defined', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -170,7 +177,7 @@ describe('validateActionTypeConfig()', () => {
   });
 
   test('should validate and pass when actionTypeConfig is valid', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -187,7 +194,7 @@ describe('validateActionTypeConfig()', () => {
   });
 
   test('should validate and throw error when actionTypeConfig is invalid', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -210,13 +217,13 @@ describe('validateActionTypeConfig()', () => {
 
 describe('has()', () => {
   test('returns false for unregistered action types', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     expect(actionTypeRegistry.has('my-action-type')).toEqual(false);
   });
 
   test('returns true after registering an action type', () => {
     const executor = jest.fn();
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -229,7 +236,7 @@ describe('has()', () => {
 describe('execute()', () => {
   test('calls the executor with proper params', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -251,6 +258,9 @@ describe('execute()', () => {
         "params": Object {
           "bar": false,
         },
+        "services": Object {
+          "log": [MockFunction],
+        },
       },
     ],
   ],
@@ -266,7 +276,7 @@ describe('execute()', () => {
 
   test('validates params', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -292,7 +302,7 @@ describe('execute()', () => {
 
   test('validates actionTypeConfig', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -317,7 +327,7 @@ describe('execute()', () => {
   });
 
   test('throws error if action type not registered', async () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     await expect(
       actionTypeRegistry.execute({
         id: 'my-action-type',
