@@ -8,6 +8,11 @@ import { API_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 import { getFollowerIndexPayload } from './fixtures';
 
+const arrayToEncodedString = (value) => {
+  const toArray = Array.isArray(value) ? value : [value];
+  return toArray.map(index => encodeURIComponent(index)).join(',');
+};
+
 export const registerHelpers = (supertest) => {
   let followerIndicesCreated = [];
 
@@ -24,14 +29,18 @@ export const registerHelpers = (supertest) => {
       .send({ ...payload, name });
   };
 
-  const unfollowLeaderIndex = (followerIndex) => {
-    const followerIndices = Array.isArray(followerIndex) ? followerIndex : [followerIndex];
-    const followerIndicesToEncodedString = followerIndices.map(index => encodeURIComponent(index)).join(',');
+  const updateFollowerIndex = (name, payload) => (
+    supertest
+      .put(`${API_BASE_PATH}/follower_indices/${name}`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ...payload, name })
+  );
 
-    return supertest
-      .put(`${API_BASE_PATH}/follower_indices/${followerIndicesToEncodedString}/unfollow`)
-      .set('kbn-xsrf', 'xxx');
-  };
+  const unfollowLeaderIndex = (followerIndex) => (
+    supertest
+      .put(`${API_BASE_PATH}/follower_indices/${arrayToEncodedString(followerIndex)}/unfollow`)
+      .set('kbn-xsrf', 'xxx')
+  );
 
   const unfollowAll = (indices = followerIndicesCreated) => (
     unfollowLeaderIndex(indices)
@@ -46,10 +55,26 @@ export const registerHelpers = (supertest) => {
       })
   );
 
+  const pauseFollowerIndex = (name) => (
+    supertest
+      .put(`${API_BASE_PATH}/follower_indices/${arrayToEncodedString(name)}/pause`)
+      .set('kbn-xsrf', 'xxx')
+  );
+
+  const resumeFollowerIndex = (name) => (
+    supertest
+      .put(`${API_BASE_PATH}/follower_indices/${arrayToEncodedString(name)}/resume`)
+      .set('kbn-xsrf', 'xxx')
+  );
+
   return {
     loadFollowerIndices,
     getFollowerIndex,
     createFollowerIndex,
+    updateFollowerIndex,
+    pauseFollowerIndex,
+    resumeFollowerIndex,
+    unfollowLeaderIndex,
     unfollowAll,
   };
 };

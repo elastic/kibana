@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
 import { getFollowerIndexPayload } from './fixtures';
-import { registerHelpers as registerElasticSearchHelpers, getRandomString } from './lib';
+import { registerHelpers as registerElasticSearchHelpers, getRandomString, getRandomNumber, wait } from './lib';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
 import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_indices.helpers';
 
@@ -21,6 +21,10 @@ export default function ({ getService }) {
     loadFollowerIndices,
     getFollowerIndex,
     createFollowerIndex,
+    updateFollowerIndex,
+    pauseFollowerIndex,
+    resumeFollowerIndex,
+    unfollowLeaderIndex,
     unfollowAll,
   } = registerFollowerIndicesnHelpers(supertest);
 
@@ -93,13 +97,74 @@ export default function ({ getService }) {
       });
     });
 
+    describe('update()', () => {
+      it('should update the settings of a follower index', async () => {
+        const leaderIndex = await createIndex();
+        const followerIndex = getRandomString();
+        const updatedCount = getRandomNumber();
+        const payload = getFollowerIndexPayload(leaderIndex);
+
+        await createFollowerIndex(followerIndex, payload).expect(200);
+        // Wait to make sure the follower index has started before trying to update it
+        await wait(500);
+        await updateFollowerIndex(followerIndex, { ...payload, maxReadRequestOperationCount: updatedCount  });
+        // As an update means a "pause" followed by a "resume",
+        // we also need to wait to make sure the follower has started
+        await wait(500);
+        const { body } = await getFollowerIndex(followerIndex);
+        expect(body.maxReadRequestOperationCount).to.equal(updatedCount);
+      });
+    });
+
+    describe('pause() and resume()', () => {
+      it('should pause and then resume following a leader index', async () => {
+        const leaderIndex = await createIndex();
+        const name = getRandomString();
+        await createFollowerIndex(name, getFollowerIndexPayload(leaderIndex));
+        await wait(500);
+
+        const { body } = await getFollowerIndex(name);
+        expect(body.status).to.equal('active');
+
+        // Pause follower index
+        await pauseFollowerIndex(name).expect(200);
+        await wait(500);
+
+        // Make sure it is paused
+        const { body: body2 } = await getFollowerIndex(name);
+        expect(body2.status).to.equal('paused');
+
+        // Resume follower index
+        await resumeFollowerIndex(name).expect(200);
+        await wait(500);
+
+        // Make sure it is active
+        const { body: body3 } = await getFollowerIndex(name);
+        expect(body3.status).to.equal('active');
+      });
+    });
+
+    describe('unfollow()', () => {
+      it('should stop following a leader index', async () => {
+        const leaderIndex = await createIndex();
+        const name = getRandomString();
+        await createFollowerIndex(name, getFollowerIndexPayload(leaderIndex));
+        await wait(500);
+
+        await unfollowLeaderIndex(name);
+
+        await getFollowerIndex(name).expect(404);
+      });
+    });
+
     describe('Advanced settings', () => {
       it('hard-coded values should match Elasticsearch default values', async () => {
         /**
-         * To make sure that the hard-coded values in the client match the default
-         * from Elasticsearch, we will create a follower index without any advanced settings.
-         * When we then retrieve the follower index it will have all the advanced settings
-         * coming from ES. We can then compare those settings with our hard-coded values.
+         * In the UI we present the "default" values for the advanced settings. As those
+         * are hard-coded in the client, this test makes sure the values are up-to-date.
+         * For that, we will create a follower index without any advanced settings and ES
+         * will return the follower index and with the default values for the advanced settings.
+         * We can then compare those settings with our hard-coded values.
          */
         const leaderIndex = await createIndex();
 

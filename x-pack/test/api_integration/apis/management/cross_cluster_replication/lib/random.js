@@ -10,3 +10,5 @@ const chance = new Chance();
 const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
 
 export const getRandomString = () => `${chance.string({ pool: CHARS_POOL })}-${Date.now()}`;
+
+export const getRandomNumber = ({ min, max } = { min: 1, max: 500 }) => chance.integer({ min, max });

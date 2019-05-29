@@ -180,7 +180,7 @@ export const registerFollowerIndexRoutes = (server) => {
           await callWithRequest('ccr.pauseFollowerIndex', { id });
         }
 
-        // Resume follower
+        // Resume follower with the new settings
         const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
         return await callWithRequest('ccr.resumeFollowerIndex', { id, body });
       } catch(err) {
