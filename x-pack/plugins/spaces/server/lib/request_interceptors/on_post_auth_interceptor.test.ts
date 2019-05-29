@@ -19,6 +19,7 @@ import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
 import { HttpServiceSetup } from 'src/core/server';
 import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
+import { parse } from 'url';
 
 // TODO: re-implement on NP
 describe('onPostAuthRequestInterceptor', () => {
@@ -179,16 +180,17 @@ describe('onPostAuthRequestInterceptor', () => {
       httpMock.setBasePathFor = jest.fn().mockImplementation((req: any, newPath: string) => {
         basePath = newPath;
       });
-      httpMock.registerOnRequest = jest.fn().mockImplementation(async handler => {
-        await handler(
-          { path },
-          {
-            setUrl: jest.fn().mockImplementation(url => {
-              path = url;
-            }),
-            next: jest.fn(),
-          }
-        );
+      httpMock.registerOnPreAuth = jest.fn().mockImplementation(async handler => {
+        const preAuthRequest = {
+          path,
+          url: parse(path),
+        };
+        await handler(preAuthRequest, {
+          redirected: jest.fn().mockImplementation(url => {
+            path = url;
+          }),
+          next: jest.fn(),
+        });
       });
 
       const service = new SpacesService(log, configFn().get('server.basePath'));
