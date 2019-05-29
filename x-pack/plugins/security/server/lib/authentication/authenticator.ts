@@ -34,7 +34,7 @@ const providerMap = new Map<
   string,
   new (
     options: AuthenticationProviderOptions,
-    providerSpecificOptions: AuthenticationProviderSpecificOptions
+    providerSpecificOptions?: AuthenticationProviderSpecificOptions
   ) => BaseAuthenticationProvider
 >([
   ['basic', BasicAuthenticationProvider],
@@ -78,29 +78,25 @@ function getProviderOptions(server: Legacy.Server) {
 function getProviderSpecificOptions(
   server: Legacy.Server,
   providerType: string
-): AuthenticationProviderSpecificOptions {
+): AuthenticationProviderSpecificOptions | undefined {
   const config = server.config();
-  // we can't use `config.has` here as it doesn't currently work with Joi's "alternatives" syntax which we
-  // are using to make the provider specific configuration required when the auth provider is specified
-  const authc = config.get<Record<string, AuthenticationProviderSpecificOptions | undefined>>(
-    `xpack.security.authc`
-  );
-  if (authc && authc[providerType] !== undefined) {
-    return authc[providerType] as AuthenticationProviderSpecificOptions;
-  }
 
-  return {};
+  const providerOptionsConfigKey = `xpack.security.authc.${providerType}`;
+  if (config.has(providerOptionsConfigKey)) {
+    return config.get<AuthenticationProviderSpecificOptions>(providerOptionsConfigKey);
+  }
 }
 
 /**
  * Instantiates authentication provider based on the provider key from config.
  * @param providerType Provider type key.
  * @param options Options to pass to provider's constructor.
+ * @param providerSpecificOptions Options that are specific to {@param providerType}.
  */
 function instantiateProvider(
   providerType: string,
   options: AuthenticationProviderOptions,
-  providerSpecificOptions: AuthenticationProviderSpecificOptions
+  providerSpecificOptions?: AuthenticationProviderSpecificOptions
 ) {
   const ProviderClassName = providerMap.get(providerType);
   if (!ProviderClassName) {
@@ -136,10 +132,10 @@ class Authenticator {
    */
   constructor(private readonly server: Legacy.Server, private readonly session: Session) {
     const config = this.server.config();
-    const authProviders = config.get<string[]>('xpack.security.authProviders');
+    const authProviders = config.get<string[]>('xpack.security.authc.providers');
     if (authProviders.length === 0) {
       throw new Error(
-        'No authentication provider is configured. Verify `xpack.security.authProviders` config value.'
+        'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
       );
     }
 

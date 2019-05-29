@@ -41,8 +41,14 @@ export const security = (kibana) => new kibana.Plugin({
   require: ['kibana', 'elasticsearch', 'xpack_main'],
 
   config(Joi) {
+    const providerOptionsSchema = (providerName, schema) => Joi.any()
+      .when('providers', {
+        is: Joi.array().items(Joi.string().valid(providerName).required(), Joi.string()),
+        then: schema,
+        otherwise: Joi.any().forbidden(),
+      });
+
     return Joi.object({
-      authProviders: Joi.array().items(Joi.string()).default(['basic']),
       enabled: Joi.boolean().default(true),
       cookieName: Joi.string().default('sid'),
       encryptionKey: Joi.when(Joi.ref('$dist'), {
@@ -65,21 +71,18 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
-      authc: Joi.object({})
-        .when('authProviders', {
-          is: Joi.array().items(Joi.string().valid('oidc').required(), Joi.string()),
-          then: Joi.object({
-            oidc: Joi.object({
-              realm: Joi.string().required(),
-            }).default()
-          }).default()
-        })
+      authc: Joi.object({
+        providers: Joi.array().items(Joi.string()).default(['basic']),
+        oidc: providerOptionsSchema('oidc', Joi.object({ realm: Joi.string().required() }).required()),
+        saml: providerOptionsSchema('saml', Joi.object({ realm: Joi.string() })),
+      }).default()
     }).default();
   },
 
-  deprecations: function ({ unused }) {
+  deprecations: function ({ unused, rename }) {
     return [
       unused('authorization.legacyFallback.enabled'),
+      rename('authProviders', 'authc.providers'),
     ];
   },
 

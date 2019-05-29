@@ -53,15 +53,15 @@ describe('Authenticator', () => {
 
   describe('initialization', () => {
     it('fails if authentication providers are not configured.', async () => {
-      config.get.withArgs('xpack.security.authProviders').returns([]);
+      config.get.withArgs('xpack.security.authc.providers').returns([]);
 
       await expect(initAuthenticator(server as any)).rejects.toThrowError(
-        'No authentication provider is configured. Verify `xpack.security.authProviders` config value.'
+        'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
       );
     });
 
     it('fails if configured authentication provider is not known.', async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['super-basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['super-basic']);
 
       await expect(initAuthenticator(server as any)).rejects.toThrowError(
         'Unsupported authentication provider name: super-basic.'
@@ -72,7 +72,7 @@ describe('Authenticator', () => {
   describe('`authenticate` method', () => {
     let authenticate: (request: ReturnType<typeof requestFixture>) => Promise<AuthenticationResult>;
     beforeEach(async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['basic']);
       server.plugins.kibana.systemApi.isSystemApiRequest.returns(true);
       session.clear.throws(new Error('`Session.clear` is not supposed to be called!'));
 
@@ -329,7 +329,7 @@ describe('Authenticator', () => {
 
     it('clears session if provider requested it via setting state to `null`.', async () => {
       // Use `token` provider for this test as it's the only one that does what we want.
-      config.get.withArgs('xpack.security.authProviders').returns(['token']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['token']);
       await initAuthenticator(server as any);
       authenticate = server.expose.withArgs('authenticate').lastCall.args[1];
 
@@ -472,7 +472,7 @@ describe('Authenticator', () => {
       request: ReturnType<typeof requestFixture>
     ) => Promise<DeauthenticationResult>;
     beforeEach(async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['basic']);
       config.get.withArgs('server.basePath').returns('/base-path');
 
       await initAuthenticator(server as any);
@@ -532,7 +532,7 @@ describe('Authenticator', () => {
   describe('`isAuthenticated` method', () => {
     let isAuthenticated: (request: ReturnType<typeof requestFixture>) => Promise<boolean>;
     beforeEach(async () => {
-      config.get.withArgs('xpack.security.authProviders').returns(['basic']);
+      config.get.withArgs('xpack.security.authc.providers').returns(['basic']);
 
       await initAuthenticator(server as any);
 

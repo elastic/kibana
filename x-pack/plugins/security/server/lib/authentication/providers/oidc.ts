@@ -116,10 +116,10 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
-    oidcOptions: Readonly<AuthenticationProviderSpecificOptions>
+    oidcOptions?: Readonly<AuthenticationProviderSpecificOptions>
   ) {
     super(options);
-    if (!oidcOptions.realm) {
+    if (!oidcOptions || !oidcOptions.realm) {
       throw new Error('Realm name must be specified');
     }
 

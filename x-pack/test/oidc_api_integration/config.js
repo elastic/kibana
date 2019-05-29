@@ -49,7 +49,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
-        '--xpack.security.authProviders=[\"oidc\"]',
+        '--xpack.security.authc.providers=[\"oidc\"]',
         '--xpack.security.authc.oidc.realm=\"oidc1\"',
         '--server.xsrf.whitelist', JSON.stringify(['/api/security/v1/oidc',
           '/api/oidc_provider/token_endpoint',

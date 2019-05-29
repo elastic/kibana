@@ -51,7 +51,7 @@ export default async function({ readConfigFile }: KibanaFunctionalTestDefaultPro
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.security.authProviders=${JSON.stringify(['kerberos', 'basic'])}`,
+        `--xpack.security.authc.providers=${JSON.stringify(['kerberos', 'basic'])}`,
       ],
     },
   };
