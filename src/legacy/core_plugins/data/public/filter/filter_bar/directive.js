@@ -17,6 +17,15 @@
  * under the License.
  */
 
-import './directive';
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+import { FilterBar } from './filter_bar';
 
-export { FilterBar } from './filter_bar';
+const app = uiModules.get('app/kibana', ['react']);
+
+export function setupDirective() {
+  app.directive('filterBar', reactDirective => {
+    return reactDirective(wrapInI18nContext(FilterBar));
+  });
+}
