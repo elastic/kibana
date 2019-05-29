@@ -47,11 +47,7 @@ interface SpacesServiceDeps {
 export class SpacesService {
   private configSubscription$?: Subscription;
 
-  private readonly contextCache: WeakMap<any, CacheEntry> = new WeakMap();
-
-  constructor(private readonly log: Logger, private readonly serverBasePath: string) {
-    this.contextCache = new WeakMap();
-  }
+  constructor(private readonly log: Logger, private readonly serverBasePath: string) {}
 
   public async setup({
     http,
@@ -70,21 +66,25 @@ export class SpacesService {
     });
 
     const adminClient = await elasticsearch.adminClient$.pipe(first()).toPromise();
+
+    const getSpaceId = (request: RequestFacade) => {
+      const isLegacyRequest = typeof (request as any).getBasePath === 'function';
+
+      const basePath = isLegacyRequest
+        ? (request as Record<string, any>).getBasePath()
+        : http.getBasePathFor(request);
+
+      const spaceId = getSpaceIdFromPath(basePath, this.serverBasePath);
+
+      return spaceId;
+    };
+
     return {
-      getSpaceId: (request: RequestFacade) => {
-        if (!this.contextCache.has(request)) {
-          this.populateCache(http, request);
-        }
-
-        const { spaceId } = this.contextCache.get(request) as CacheEntry;
-        return spaceId;
-      },
+      getSpaceId,
       isInDefaultSpace: (request: RequestFacade) => {
-        if (!this.contextCache.has(request)) {
-          this.populateCache(http, request);
-        }
+        const spaceId = getSpaceId(request);
 
-        return this.contextCache.get(request)!.isInDefaultSpace;
+        return spaceId === DEFAULT_SPACE_ID;
       },
       scopedClient: (request: RequestFacade) => {
         const internalRepository = savedObjects.getSavedObjectsRepository(
@@ -118,20 +118,5 @@ export class SpacesService {
       this.configSubscription$.unsubscribe();
       this.configSubscription$ = undefined;
     }
-  }
-
-  private populateCache(http: HttpServiceSetup, request: RequestFacade) {
-    const isLegacyRequest = typeof (request as any).getBasePath === 'function';
-
-    const basePath = isLegacyRequest
-      ? (request as Record<string, any>).getBasePath()
-      : http.getBasePathFor(request);
-
-    const spaceId = getSpaceIdFromPath(basePath, this.serverBasePath);
-
-    this.contextCache.set(request, {
-      spaceId,
-      isInDefaultSpace: spaceId === DEFAULT_SPACE_ID,
-    });
   }
 }
