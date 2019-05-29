@@ -11,4 +11,10 @@
       top: $euiSizeM;
     }
   }
+
+  .euiFilePicker__wrap {
+    @include euiBreakpoint('xs', 's') {
+      max-width: none;
+    }
+  }
 }
