@@ -2,9 +2,8 @@
   /**
    * Skip any package file whose path matches one of these. Can be string or glob pattern
    */
-  ignorePaths: [
-    '__fixtures__',
-    'core_plugins'
+  includePaths: [
+    'package.json',
   ],
 
   /**
