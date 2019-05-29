@@ -36,7 +36,7 @@ import chrome from 'ui/chrome';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
-import { ExpressionFunction } from '../types';
+import { ExpressionFunction } from '../../types';
 import { KibanaContext, KibanaDatatable } from '../../common/types';
 
 const name = 'esaggs';
