@@ -82,7 +82,7 @@ export class ApplyFiltersPopover extends Component<Props, State> {
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
-                id="common.ui.applyFilters.popupHeader"
+                id="data.filter.applyFilters.popupHeader"
                 defaultMessage="Select filters to apply"
               />
             </EuiModalHeaderTitle>
@@ -93,13 +93,13 @@ export class ApplyFiltersPopover extends Component<Props, State> {
           <EuiModalFooter>
             <EuiButtonEmpty onClick={this.props.onCancel}>
               <FormattedMessage
-                id="common.ui.applyFiltersPopup.cancelButtonLabel"
+                id="data.filter.applyFiltersPopup.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
             <EuiButton onClick={this.onSubmit} fill>
               <FormattedMessage
-                id="common.ui.applyFiltersPopup.saveButtonLabel"
+                id="data.filter.applyFiltersPopup.saveButtonLabel"
                 defaultMessage="Apply"
               />
             </EuiButton>
