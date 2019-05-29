@@ -12,7 +12,7 @@ interface Arguments {
   format: string;
 }
 
-export function formatdate(): ContextFunction<'formatdate', number, Arguments, string> {
+export function formatdate(): ContextFunction<'formatdate', number | string, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().formatdate;
 
   return {
