@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { IntegrationLink } from './integration_link';
 import {
   getApmHref,
@@ -43,7 +44,7 @@ export const IntegrationGroup = ({
   const podUid = get<string | undefined>(ping, 'kubernetes.pod.uid', undefined);
   const containerId = get<string | undefined>(ping, 'container.id', undefined);
   const ip = get<string | undefined>(ping, 'monitor.ip');
-  return (
+  return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
       {isApmAvailable ? (
         <EuiFlexItem>
@@ -223,5 +224,11 @@ export const IntegrationGroup = ({
         </React.Fragment>
       ) : null}
     </EuiFlexGroup>
+  ) : (
+    <FormattedMessage
+      defaultMessage="No integrated applications available"
+      description="This message is shown when no applications that Uptime links to are enabled in the current space"
+      id="xpack.uptime.monitorList.integrationGroup.emptyMessage"
+    />
   );
 };
