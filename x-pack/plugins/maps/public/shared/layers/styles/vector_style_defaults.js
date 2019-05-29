@@ -5,7 +5,7 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { SYMBOLIZE_AS_CIRCLE } from './vector_constants';
+import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
 import { COLOR_GRADIENTS } from './components/vector/color/color_ramp_select';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
@@ -54,7 +54,7 @@ export function getDefaultStaticProperties(mapColors = []) {
     iconSize: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: 10
+        size: DEFAULT_ICON_SIZE
       }
     }
   };
@@ -78,7 +78,7 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
-        maxSize: 64
+        maxSize: DEFAULT_MAX_SIZE
       }
     },
     iconSize: {

@@ -15,7 +15,7 @@ import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constan
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
-import { SYMBOLIZE_AS_CIRCLE } from './vector_constants';
+import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
 import { getSymbolSvg, buildSrcUrl, styleSvg } from './symbols/symbols';
 
 export class VectorStyle extends AbstractStyle {
@@ -500,6 +500,7 @@ export class VectorStyle extends AbstractStyle {
     const fillColor = this._descriptor.properties.fillColor;
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
     const symbolSize = symbolId.includes('11') ? 11 : 15;
+    const iconSize = this._descriptor.properties.iconSize;
 
     function getImageId(symbolId, color) {
       return `${symbolId}_${color}`;
@@ -516,6 +517,8 @@ export class VectorStyle extends AbstractStyle {
       const styledSvg = await styleSvg(symbolSvg, color);
       return buildSrcUrl(styledSvg);
     }
+
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
 
     if (fillColor.type === VectorStyle.STYLE_TYPE.STATIC) {
       const color = fillColor.options.color;
@@ -534,6 +537,14 @@ export class VectorStyle extends AbstractStyle {
         const imageUrl = await getImageUrl(symbolId, color);
         img.src = imageUrl;
       }
+    } else {
+      // TODO handle dynamic color
+    }
+
+    if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / DEFAULT_ICON_SIZE);
+    } else {
+      // TODO handle dynamic size
     }
   }
 
