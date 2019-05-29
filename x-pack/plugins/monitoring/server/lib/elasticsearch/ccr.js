@@ -28,7 +28,6 @@ export async function checkCcrEnabled(req, esIndexPattern) {
   const params = {
     index: esIndexPattern,
     size: 1,
-    terminate_after: 1,
     ignoreUnavailable: true,
     body: {
       query: createQuery({
