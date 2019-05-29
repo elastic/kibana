@@ -88,8 +88,15 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         {prefix}
         {operator !== EXISTS_OPERATOR ? (
           <>
-            <span className="field-value">{field}: </span>
-            <span className="field-value">&quot;{val}&quot;</span>
+            <span className="field-value">
+              {field}
+              {': '}
+            </span>
+            <span className="field-value">
+              {'"'}
+              {val}
+              {'"'}
+            </span>
           </>
         ) : (
           <span className="field-value">

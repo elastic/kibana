@@ -229,9 +229,16 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
   }
 >
   <pure(Component)
+    link="10.10.10.10"
+  >
+    View at virustotal.com
+  </pure(Component)>
+  <pure(Component) />
+  <br />
+  <pure(Component)
     domain="10.10.10.10"
   >
-    View at iana.org
+    View at talosIntelligence.com
   </pure(Component)>
   <pure(Component) />
 </Component>
