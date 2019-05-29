@@ -10,6 +10,7 @@ import React from 'react';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
@@ -19,12 +20,14 @@ export const getRowItemDraggable = ({
   attrName,
   idPrefix,
   render,
+  dragDisplayValue,
 }: {
   rowItem: string | null | undefined;
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
+  dragDisplayValue?: string;
   maxOverflow?: number;
 }): JSX.Element => {
   if (rowItem != null) {
@@ -39,7 +42,12 @@ export const getRowItemDraggable = ({
           name: rowItem,
           excluded: false,
           kqlQuery: '',
-          queryMatch: { field: attrName, value: rowItem },
+          queryMatch: {
+            field: attrName,
+            value: rowItem,
+            displayValue: dragDisplayValue || rowItem,
+            operator: IS_OPERATOR,
+          },
         }}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
@@ -62,6 +70,7 @@ export const getRowItemDraggables = ({
   attrName,
   idPrefix,
   render,
+  dragDisplayValue,
   displayCount = 5,
   maxOverflow = 5,
 }: {
@@ -70,6 +79,7 @@ export const getRowItemDraggables = ({
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
+  dragDisplayValue?: string;
   maxOverflow?: number;
 }): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
@@ -87,7 +97,12 @@ export const getRowItemDraggables = ({
               name: rowItem,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: attrName, value: rowItem },
+              queryMatch: {
+                field: attrName,
+                value: rowItem,
+                displayValue: dragDisplayValue || rowItem,
+                operator: IS_OPERATOR,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

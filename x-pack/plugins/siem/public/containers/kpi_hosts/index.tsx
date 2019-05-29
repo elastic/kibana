@@ -9,13 +9,15 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiHostsQuery } from './index.gql_query';
-import { ChartData } from '../../components/stat_items';
+import { ChartData } from '../../components/charts/common';
 
 export interface KpiHostsArgs {
   id: string;
@@ -56,6 +58,7 @@ export const KpiHostsQuery = pure<KpiHostsProps>(
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
+        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       }}
     >
       {({ data, loading, refetch }) => {

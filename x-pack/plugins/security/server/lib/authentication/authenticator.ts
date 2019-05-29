@@ -12,13 +12,17 @@ import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
   BasicAuthenticationProvider,
+  KerberosAuthenticationProvider,
+  RequestWithLoginAttempt,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
+  OIDCAuthenticationProvider,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
 import { LoginAttempt } from './login_attempt';
+import { AuthenticationProviderSpecificOptions } from './providers/base';
 
 interface ProviderSession {
   provider: string;
@@ -29,11 +33,16 @@ interface ProviderSession {
 // provider class that can handle specific authentication mechanism.
 const providerMap = new Map<
   string,
-  new (options: AuthenticationProviderOptions) => BaseAuthenticationProvider
+  new (
+    options: AuthenticationProviderOptions,
+    providerSpecificOptions: AuthenticationProviderSpecificOptions
+  ) => BaseAuthenticationProvider
 >([
   ['basic', BasicAuthenticationProvider],
+  ['kerberos', KerberosAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
+  ['oidc', OIDCAuthenticationProvider],
 ]);
 
 function assertRequest(request: Legacy.Request) {
@@ -63,17 +72,43 @@ function getProviderOptions(server: Legacy.Server) {
 }
 
 /**
+ * Prepares options object that is specific only to an authentication provider.
+ * @param server Server instance.
+ * @param providerType the type of the provider to get the options for.
+ */
+function getProviderSpecificOptions(
+  server: Legacy.Server,
+  providerType: string
+): AuthenticationProviderSpecificOptions {
+  const config = server.config();
+  // we can't use `config.has` here as it doesn't currently work with Joi's "alternatives" syntax which we
+  // are using to make the provider specific configuration required when the auth provider is specified
+  const authc = config.get<Record<string, AuthenticationProviderSpecificOptions | undefined>>(
+    `xpack.security.authc`
+  );
+  if (authc && authc[providerType] !== undefined) {
+    return authc[providerType] as AuthenticationProviderSpecificOptions;
+  }
+
+  return {};
+}
+
+/**
  * Instantiates authentication provider based on the provider key from config.
  * @param providerType Provider type key.
  * @param options Options to pass to provider's constructor.
  */
-function instantiateProvider(providerType: string, options: AuthenticationProviderOptions) {
+function instantiateProvider(
+  providerType: string,
+  options: AuthenticationProviderOptions,
+  providerSpecificOptions: AuthenticationProviderSpecificOptions
+) {
   const ProviderClassName = providerMap.get(providerType);
   if (!ProviderClassName) {
     throw new Error(`Unsupported authentication provider name: ${providerType}.`);
   }
 
-  return new ProviderClassName(options);
+  return new ProviderClassName(options, providerSpecificOptions);
 }
 
 /**
@@ -117,13 +152,13 @@ class Authenticator {
     const providerOptions = Object.freeze(getProviderOptions(server));
 
     this.providers = new Map(
-      authProviders.map(
-        providerType =>
-          [providerType, instantiateProvider(providerType, providerOptions)] as [
-            string,
-            BaseAuthenticationProvider
-          ]
-      )
+      authProviders.map(providerType => {
+        const providerSpecificOptions = getProviderSpecificOptions(server, providerType);
+        return [
+          providerType,
+          instantiateProvider(providerType, providerOptions, providerSpecificOptions),
+        ] as [string, BaseAuthenticationProvider];
+      })
     );
   }
 
@@ -131,7 +166,7 @@ class Authenticator {
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: Legacy.Request) {
+  async authenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const isSystemApiRequest = this.server.plugins.kibana.systemApi.isSystemApiRequest(request);
@@ -195,7 +230,7 @@ class Authenticator {
    * Deauthenticates current request.
    * @param request Request instance.
    */
-  async deauthenticate(request: Legacy.Request) {
+  async deauthenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const sessionValue = await this.getSessionValue(request);
@@ -275,8 +310,10 @@ export async function initAuthenticator(server: Legacy.Server) {
     return loginAttempts.get(request);
   });
 
-  server.expose('authenticate', (request: Legacy.Request) => authenticator.authenticate(request));
-  server.expose('deauthenticate', (request: Legacy.Request) =>
+  server.expose('authenticate', (request: RequestWithLoginAttempt) =>
+    authenticator.authenticate(request)
+  );
+  server.expose('deauthenticate', (request: RequestWithLoginAttempt) =>
     authenticator.deauthenticate(request)
   );
   server.expose('registerAuthScopeGetter', (scopeExtender: ScopesGetter) =>

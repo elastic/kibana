@@ -27,13 +27,13 @@ import { ScaleType } from '@elastic/charts';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { startsWith, get, cloneDeep, map } from 'lodash';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
-import replaceVars from '../../lib/replace_vars';
+import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { isBackgroundDark } from '../../../../common/set_is_reversed';
 
-class TimeseriesVisualization extends Component {
+export class TimeseriesVisualization extends Component {
   xAxisFormatter = interval => val => {
     const { scaledDataFormat, dateFormat } = this.props.visData;
 
@@ -202,5 +202,3 @@ TimeseriesVisualization.propTypes = {
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func
 };
-
-export default TimeseriesVisualization;

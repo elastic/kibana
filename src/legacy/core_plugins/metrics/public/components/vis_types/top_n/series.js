@@ -19,17 +19,17 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import ColorPicker from '../../color_picker';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { ColorPicker } from '../../color_picker';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import Split from '../../split';
+import { Split } from '../../split';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import createTextHandler from '../../lib/create_text_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 
-const TopNSeries = injectI18n(function (props) {
+export const TopNSeries = injectI18n(function (props) {
   const {
     panel,
     model,
@@ -198,5 +198,3 @@ TopNSeries.propTypes = {
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
 };
-
-export default TopNSeries;

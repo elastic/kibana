@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import createTextHandler from '../lib/create_text_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';

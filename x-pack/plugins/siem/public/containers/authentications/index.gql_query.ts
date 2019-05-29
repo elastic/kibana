@@ -12,10 +12,16 @@ export const authenticationsQuery = gql`
     $timerange: TimerangeInput!
     $pagination: PaginationInput!
     $filterQuery: String
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
-      Authentications(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+      Authentications(
+        timerange: $timerange
+        pagination: $pagination
+        filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
+      ) {
         totalCount
         edges {
           node {

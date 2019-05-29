@@ -19,6 +19,7 @@
 
 import color from 'color';
 import chrome from '../../../ui/public/chrome';
+
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 /**

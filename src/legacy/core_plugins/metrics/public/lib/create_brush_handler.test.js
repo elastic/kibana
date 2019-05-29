@@ -20,7 +20,7 @@
 import { createBrushHandler } from './create_brush_handler';
 import moment from 'moment';
 
-describe('createBrushHandler', () => {
+describe('brushHandler', () => {
   let mockTimefilter;
   let onBrush;
 
