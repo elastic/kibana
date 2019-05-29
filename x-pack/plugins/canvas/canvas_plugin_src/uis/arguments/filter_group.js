@@ -22,7 +22,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   const [addMode, setAddMode] = useState(false);
 
   // make sure the argValue is always included in the filter group list
-  const argValueChoice = !filterGroups.includes(argValue) ? [{ text: argValue }] : [];
+  const argValueChoice = argValue && !filterGroups.includes(argValue) ? [{ text: argValue }] : [];
 
   const choices = [{ text: 'No group', value: '' }].concat(
     argValueChoice,
