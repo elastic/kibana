@@ -27,7 +27,7 @@ export interface Operator {
 }
 
 export const isOperator = {
-  message: i18n.translate('common.ui.filterEditor.isOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.isOperatorOptionLabel', {
     defaultMessage: 'is',
   }),
   type: 'phrase',
@@ -35,7 +35,7 @@ export const isOperator = {
 };
 
 export const isNotOperator = {
-  message: i18n.translate('common.ui.filterEditor.isNotOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.isNotOperatorOptionLabel', {
     defaultMessage: 'is not',
   }),
   type: 'phrase',
@@ -43,7 +43,7 @@ export const isNotOperator = {
 };
 
 export const isOneOfOperator = {
-  message: i18n.translate('common.ui.filterEditor.isOneOfOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.isOneOfOperatorOptionLabel', {
     defaultMessage: 'is one of',
   }),
   type: 'phrases',
@@ -52,7 +52,7 @@ export const isOneOfOperator = {
 };
 
 export const isNotOneOfOperator = {
-  message: i18n.translate('common.ui.filterEditor.isNotOneOfOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
     defaultMessage: 'is not one of',
   }),
   type: 'phrases',
@@ -61,7 +61,7 @@ export const isNotOneOfOperator = {
 };
 
 export const isBetweenOperator = {
-  message: i18n.translate('common.ui.filterEditor.isBetweenOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.isBetweenOperatorOptionLabel', {
     defaultMessage: 'is between',
   }),
   type: 'range',
@@ -70,7 +70,7 @@ export const isBetweenOperator = {
 };
 
 export const isNotBetweenOperator = {
-  message: i18n.translate('common.ui.filterEditor.isNotBetweenOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
     defaultMessage: 'is not between',
   }),
   type: 'range',
@@ -79,7 +79,7 @@ export const isNotBetweenOperator = {
 };
 
 export const existsOperator = {
-  message: i18n.translate('common.ui.filterEditor.existsOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.existsOperatorOptionLabel', {
     defaultMessage: 'exists',
   }),
   type: 'exists',
@@ -87,7 +87,7 @@ export const existsOperator = {
 };
 
 export const doesNotExistOperator = {
-  message: i18n.translate('common.ui.filterEditor.doesNotExistOperatorOptionLabel', {
+  message: i18n.translate('data.filter.filterEditor.doesNotExistOperatorOptionLabel', {
     defaultMessage: 'does not exist',
   }),
   type: 'exists',
