@@ -354,6 +354,10 @@ export function jobsProvider(callWithRequest) {
         const exists = allJobIds.some(existsJobId => regexp.test(existsJobId));
         results[jobId] = exists;
       });
+    } else {
+      jobIds.forEach((jobId) => {
+        results[jobId] = false;
+      });
     }
 
     return results;
