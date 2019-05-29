@@ -76,9 +76,8 @@ describe('Kuery value suggestions', function () {
     expect(lastCall[1]).to.eql({
       method: 'POST',
       body: '{"query":"","field":"machine.os.raw","boolFilter":[]}',
-      credentials: 'same-origin',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         'kbn-version': '1.2.3',
       },
     });
