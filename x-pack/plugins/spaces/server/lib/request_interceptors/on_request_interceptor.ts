@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaRequest, OnRequestToolkit, HttpServiceSetup } from 'src/core/server';
+import { KibanaRequest, OnPreAuthToolkit, HttpServiceSetup } from 'src/core/server';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { format } from 'url';
+import { modifyUrl } from '../../../../../../src/core/utils';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../spaces_url_parser';
 
@@ -15,9 +17,9 @@ export interface OnRequestInterceptorDeps {
 export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterceptorDeps) {
   const serverBasePath: string = config.get('server.basePath');
 
-  http.registerOnRequest(async function spacesOnRequestHandler(
+  http.registerOnPreAuth(async function spacesOnPreAuthHandler(
     request: KibanaRequest,
-    toolkit: OnRequestToolkit
+    toolkit: OnPreAuthToolkit
   ) {
     const path = request.path;
 
@@ -32,7 +34,14 @@ export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterc
 
       const newLocation = path.substr(reqBasePath.length) || '/';
 
-      toolkit.setUrl(newLocation);
+      const newUrl = modifyUrl(format(request.url), parts => {
+        return {
+          ...parts,
+          pathname: newLocation,
+        };
+      });
+
+      return toolkit.redirected(newUrl, { forward: true });
     }
 
     return toolkit.next();
