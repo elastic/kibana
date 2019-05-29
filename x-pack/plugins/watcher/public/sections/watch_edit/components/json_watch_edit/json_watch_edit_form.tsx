@@ -23,11 +23,9 @@ import { ConfirmWatchesModal, ErrableFormRow } from '../../../../components';
 import { putWatchApiUrl } from '../../../../lib/documentation_links';
 import { onWatchSave, saveWatch } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
-import { LicenseServiceContext } from '../../../../license_service_context';
 
 export const JsonWatchEditForm = () => {
   const { watch, setWatchProperty } = useContext(WatchContext);
-  const licenseService = useContext(LicenseServiceContext);
 
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
@@ -65,7 +63,7 @@ export const JsonWatchEditForm = () => {
           modalOptions={validationResult}
           callback={async isConfirmed => {
             if (isConfirmed) {
-              saveWatch(watch, licenseService);
+              saveWatch(watch);
             }
             setValidationResult(null);
           }}
@@ -176,7 +174,7 @@ export const JsonWatchEditForm = () => {
               isDisabled={hasErrors}
               onClick={async () => {
                 setIsSaving(true);
-                const savedWatch = await onWatchSave(watch, licenseService);
+                const savedWatch = await onWatchSave(watch);
                 if (savedWatch && savedWatch.validationError) {
                   setIsSaving(false);
                   return setValidationResult(savedWatch.validationError);

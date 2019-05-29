@@ -7,11 +7,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
+import { LICENSE_STATUS_VALID } from '../../../common/constants';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 class ShareRouter extends Component {
   static contextTypes = {
@@ -37,7 +40,32 @@ class ShareRouter extends Component {
     return this.props.children;
   }
 }
-export const App = () => {
+export const App = ({ licenseStatus }) => {
+  const { status, message } = licenseStatus;
+
+  if (status !== LICENSE_STATUS_VALID) {
+    return (
+      <EuiCallOut
+        title={(
+          <FormattedMessage
+            id="xpack.watchern.app.licenseErrorTitle"
+            defaultMessage="License error"
+          />
+        )}
+        color="warning"
+        iconType="help"
+      >
+        {message}{' '}
+        <EuiLink href="#/management/elasticsearch/license_management/home">
+          <FormattedMessage
+            id="xpack.watcher.app.licenseErrorLinkText"
+            defaultMessage="Manage your license."
+          />
+        </EuiLink>
+      </EuiCallOut>
+    );
+  }
+
   return (
     <HashRouter>
       <ShareRouter>

@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
+import { LICENSE_STATUS_VALID, LICENSE_STATUS_EXPIRED } from '../../../../../../common/constants/license_status';
 
 describe('license_pre_routing_factory', () => {
   describe('#reportingFeaturePreRoutingFactory', () => {
@@ -33,10 +34,10 @@ describe('license_pre_routing_factory', () => {
       expect(firstInstance).to.be(secondInstance);
     });
 
-    describe('isAvailable is false', () => {
+    describe('status is not valid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: false
+          status: LICENSE_STATUS_EXPIRED
         };
       });
 
@@ -51,10 +52,10 @@ describe('license_pre_routing_factory', () => {
       });
     });
 
-    describe('isAvailable is true', () => {
+    describe('status is valid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: true
+          status: LICENSE_STATUS_VALID
         };
       });
 
