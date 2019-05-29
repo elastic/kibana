@@ -1,0 +1,71 @@
+{
+  /**
+   * Only submit PRs to these branches, we will manually backport PRs for now
+   */
+  baseBranches: ['master'],
+
+
+  /**
+   * Tell renovate to always use yarn
+   */
+  enabledManagers: ['yarn'],
+
+  /**
+   * Labels added to PRs opened by renovate
+   */
+  labels: [
+    'renovate',
+    'release_note:skip',
+    ':Operations',
+  ],
+
+  /**
+   * This deletes and re-creates the lock file, which we will only want
+   * to turn on once we've updated all our deps
+   */
+  lockFileMaintenance: { enabled: false },
+
+  /**
+   * Enable creation of a "Master Issue" within the repository. This
+   * Master Issue is akin to a mini dashboard and contains a list of all
+   * PRs pending, open, closed (unmerged) or in error.
+   */
+  masterIssue: true,
+
+  /**
+   * Disable package updates globally, overridden by the packageRules below
+   * so that we can slowly enable updates
+   */
+  enabled: false,
+
+  /**
+   * Define groups of packages that should be updated/configured together
+   */
+  packageRules: [
+    {
+      packagePatterns: ['^eslint'],
+      groupName: 'eslint related packages',
+      groupSlug: 'eslint',
+      enabled: true,
+    }
+  ],
+
+  /**
+   * Limit the number of active PRs renovate will allow
+   */
+  prConcurrentLimit: 6,
+
+  /**
+   * Set the version spec to the exact version installed, ranges are the default
+   * and don't cause problems since we use yarn.lock, but pinning makes things
+   * less ambiguous
+   */
+  rangeStrategy: 'pin',
+
+  /**
+   * Disable vulnerability alert handling, we handle that separately
+   */
+  vulnerabilityAlerts: {
+    enabled: false
+  },
+}
