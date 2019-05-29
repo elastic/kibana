@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { docValidator } from './index';
 
 describe('docValidator', () => {
@@ -41,15 +40,15 @@ describe('docValidator', () => {
 
   test('validates various props', () => {
     const validators = {
-      a: sinon.stub(),
-      b: sinon.stub(),
-      c: sinon.stub(),
+      a: jest.fn(),
+      b: jest.fn(),
+      c: jest.fn(),
     };
     docValidator(validators)({ type: 'a', b: 'foo' });
 
-    sinon.assert.notCalled(validators.c);
+    expect(validators.c).not.toHaveBeenCalled();
 
-    expect(validators.a.args).toEqual([[{ type: 'a', b: 'foo' }]]);
-    expect(validators.b.args).toEqual([[{ type: 'a', b: 'foo' }]]);
+    expect(validators.a.mock.calls).toEqual([[{ type: 'a', b: 'foo' }]]);
+    expect(validators.b.mock.calls).toEqual([[{ type: 'a', b: 'foo' }]]);
   });
 });

@@ -108,10 +108,22 @@ input[type="checkbox"],
   font-size: $euiFontSizeS;
 }
 
-// EUITODO: Move to EUI to ensure this doesn't happen elsewhere
+// We apply brute force focus states to anything not coming from Eui
+// which has focus states designed at the component level.
+// You can also use "kbn-resetFocusState" to not apply the default focus
+// state. This is useful when you've already hand crafted your own
+// focus states in Kibana.
+:focus {
+  &:not([class^="eui"]):not(.kbn-resetFocusState) {
+    @include euiFocusRing;
+  }
+}
+
+// A neccessary hack so that the above focus policy doesn't polute some EUI
+// entrenched inputs.
 .euiComboBox {
   input:focus {
-    box-shadow: none;
+    animation: none !important;
   }
 }
 

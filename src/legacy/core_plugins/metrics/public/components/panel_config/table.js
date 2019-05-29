@@ -19,13 +19,13 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import FieldSelect from '../aggs/field_select';
-import SeriesEditor from '../series_editor';
+import { FieldSelect } from '../aggs/field_select';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createTextHandler from '../lib/create_text_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { get } from 'lodash';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -44,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class TablePanelConfig extends Component {
+export class TablePanelConfig extends Component {
 
   constructor(props) {
     super(props);
@@ -64,11 +64,22 @@ class TablePanelConfig extends Component {
     this.setState({ selectedTab });
   }
 
+  handlePivotChange = (selectedOption) => {
+    const { fields, model } = this.props;
+    const pivotId = get(selectedOption, '[0].value', null);
+    const field = fields[model.index_pattern].find(field => field.name === pivotId);
+    const pivotType = get(field, 'type', model.pivot_type);
+
+    this.props.onChange({
+      pivot_id: pivotId,
+      pivot_type: pivotType
+    });
+  };
+
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '', pivot_label: '', pivot_rows: 10 };
+    const defaults = { drilldown_url: '', filter: '', pivot_label: '', pivot_rows: 10, pivot_type: '' };
     const model = { ...defaults, ...this.props.model };
-    const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
     let view;
@@ -100,7 +111,7 @@ class TablePanelConfig extends Component {
                       fields={this.props.fields}
                       value={model.pivot_id}
                       indexPattern={model.index_pattern}
-                      onChange={handleSelectChange('pivot_id')}
+                      onChange={this.handlePivotChange}
                       fullWidth
                     />
                   </EuiFormRow>
@@ -150,6 +161,7 @@ class TablePanelConfig extends Component {
             fields={this.props.fields}
             model={this.props.model}
             name={this.props.name}
+            visData$={this.props.visData$}
             onChange={this.props.onChange}
           />
         </div>
@@ -269,6 +281,5 @@ TablePanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  visData$: PropTypes.object,
 };
-
-export default TablePanelConfig;

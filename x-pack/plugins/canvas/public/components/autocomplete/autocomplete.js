@@ -254,7 +254,9 @@ export class Autocomplete extends React.Component {
         ) : (
           ''
         )}
-        <div onMouseDown={this.onMouseDown}>{this.props.children}</div>
+        <div className="canvasAutocomplete--inner" onMouseDown={this.onMouseDown}>
+          {this.props.children}
+        </div>
       </div>
     );
   }

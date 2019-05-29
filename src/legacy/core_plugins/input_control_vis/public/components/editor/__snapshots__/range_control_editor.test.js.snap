@@ -27,6 +27,7 @@ exports[`renders RangeControlEditor 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
       compressed={false}
@@ -49,6 +50,7 @@ exports[`renders RangeControlEditor 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
       compressed={false}

@@ -1,0 +1,73 @@
+[role="xpack"]
+[[uptime-security]]
+
+== Use with Elasticsearch Security
+
+If you use Elasticsearch security, you'll need to enable certain privileges for users 
+that would like to access the Uptime app. Below is an example of creating 
+a user and support role to implement those privileges.
+
+[float]
+=== Create a role
+
+You'll need a role that lets you access the Heartbeat indices, which by default are `heartbeat-*`.
+You can create this with the following request:
+
+["source","sh",subs="attributes,callouts"]
+---------------------------------------------------------------
+PUT /_security/role/uptime
+{ "indices" : [
+    {
+      "names" : [
+        "heartbeat-*"
+      ],
+      "privileges" : [
+        "read",
+        "view_index_metadata"
+      ],
+      "field_security" : {
+        "grant" : [
+          "*"
+        ]
+      },
+      "allow_restricted_indices" : false
+    }
+  ],
+  "applications" : [
+    {
+      "application" : "kibana-.kibana",
+      "privileges" : [
+        "all"
+      ],
+      "resources" : [
+        "*"
+      ]
+    }
+  ],
+  "transient_metadata" : {
+    "enabled" : true
+  }
+}
+---------------------------------------------------------------
+// CONSOLE
+
+[float]
+=== Assign the role to a user
+
+Next, you'll need to create a user with both the `kibana_user`, and `uptime` roles. 
+You can do this with the following request:
+
+["source","sh",subs="attributes,callouts"]
+---------------------------------------------------------------
+PUT /_security/user/jacknich
+{
+  "password" : "j@rV1s",
+  "roles" : [ "uptime", "kibana_user" ],
+  "full_name" : "Jack Nicholson",
+  "email" : "jacknich@example.com",
+  "metadata" : {
+    "intelligence" : 7
+  }
+}
+---------------------------------------------------------------
+// CONSOLE

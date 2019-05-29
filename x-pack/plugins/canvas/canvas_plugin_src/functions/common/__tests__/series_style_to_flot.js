@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { seriesStyleToFlot } from '../plot/series_style_to_flot';
 
 describe('seriesStyleToFlot', () => {

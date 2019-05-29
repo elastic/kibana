@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { patternToIngest, ingestToPattern } from '../convert_pattern_and_ingest_name';
 
 describe('convertPatternAndTemplateName', function () {

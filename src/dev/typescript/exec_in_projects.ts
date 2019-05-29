@@ -64,7 +64,9 @@ export function execInProjects(
     for (const e of error.errors) {
       if (e instanceof ProjectFailure) {
         log.write('');
-        log.error(`${e.project.name} failed\n${e.error.stdout}`);
+        // stdout contains errors from tsc
+        // stderr conatins tsc crash report
+        log.error(`${e.project.name} failed\n${e.error.stdout || e.error.stderr}`);
       } else {
         log.error(e);
       }

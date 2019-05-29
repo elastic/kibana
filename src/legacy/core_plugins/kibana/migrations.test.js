@@ -19,7 +19,164 @@
 
 import { migrations } from './migrations';
 
+describe('index-pattern', () => {
+  describe('6.5.0', () => {
+    const migrate = doc => migrations['index-pattern']['6.5.0'](doc);
+
+    it('adds "type" and "typeMeta" properties to object when not declared', () => {
+      expect(
+        migrate({
+          attributes: {},
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": undefined,
+    "typeMeta": undefined,
+  },
+}
+`);
+    });
+
+    it('keeps "type" and "typeMeta" properties as is when declared', () => {
+      expect(
+        migrate({
+          attributes: {
+            type: '123',
+            typeMeta: '123',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": "123",
+    "typeMeta": "123",
+  },
+}
+`);
+    });
+  });
+});
+
 describe('visualization', () => {
+  describe('date histogram time zone removal', () => {
+    const migrate = doc => migrations.visualization['6.7.2'](doc);
+    let doc;
+    beforeEach(() => {
+      doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                'enabled': true,
+                'id': '1',
+                'params': {
+                  // Doesn't make much sense but we want to test it's not removing it from anything else
+                  time_zone: 'Europe/Berlin',
+                },
+                'schema': 'metric',
+                'type': 'count'
+              },
+              {
+                'enabled': true,
+                'id': '2',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'time_zone': 'Europe/Berlin',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '4',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '3',
+                'params': {
+                  'customBucket': {
+                    'enabled': true,
+                    'id': '1-bucket',
+                    'params': {
+                      'customInterval': '2h',
+                      'drop_partials': false,
+                      'extended_bounds': {},
+                      'field': 'timestamp',
+                      'interval': 'auto',
+                      'min_doc_count': 1,
+                      'time_zone': 'Europe/Berlin',
+                      'useNormalizedEsInterval': true
+                    },
+                    'type': 'date_histogram'
+                  },
+                  'customMetric': {
+                    'enabled': true,
+                    'id': '1-metric',
+                    'params': {},
+                    'type': 'count'
+                  }
+                },
+                'schema': 'metric',
+                'type': 'max_bucket'
+              },
+            ]
+          }),
+        }
+      };
+    });
+
+    it('should remove time_zone from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.time_zone');
+    });
+
+    it('should not remove time_zone from non date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[0]).toHaveProperty('params.time_zone');
+    });
+
+    it('should remove time_zone from nested aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
+    });
+
+    it('should not fail on date histograms without a time_zone', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
+    });
+
+    it('should be able to apply the migration twice, since we need it for 6.7.2 and 7.0.1', () => {
+      const migratedDoc = migrate(migrate(doc));
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.time_zone');
+      expect(aggs[0]).toHaveProperty('params.time_zone');
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
+    });
+  });
+
   describe('7.0.0', () => {
     const migrate = doc => migrations.visualization['7.0.0'](doc);
     const generateDoc = ({ type, aggs }) => ({
@@ -354,7 +511,7 @@ Object {
   "type": "visualization",
 }
 `);
-    /* eslint-enable max-len */
+      /* eslint-enable max-len */
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -557,6 +714,181 @@ Object {
         },
       };
       expect(() => migrate(doc)).toThrowError(/My Vis/);
+    });
+  });
+
+  describe('date histogram custom interval removal', () => {
+    const migrate = doc => migrations.visualization['7.2.0'](doc);
+    let doc;
+    beforeEach(() => {
+      doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                'enabled': true,
+                'id': '1',
+                'params': {
+                  'customInterval': '1h'
+                },
+                'schema': 'metric',
+                'type': 'count'
+              },
+              {
+                'enabled': true,
+                'id': '2',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '4',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'custom',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '3',
+                'params': {
+                  'customBucket': {
+                    'enabled': true,
+                    'id': '1-bucket',
+                    'params': {
+                      'customInterval': '2h',
+                      'drop_partials': false,
+                      'extended_bounds': {},
+                      'field': 'timestamp',
+                      'interval': 'custom',
+                      'min_doc_count': 1,
+                      'useNormalizedEsInterval': true
+                    },
+                    'type': 'date_histogram'
+                  },
+                  'customMetric': {
+                    'enabled': true,
+                    'id': '1-metric',
+                    'params': {},
+                    'type': 'count'
+                  }
+                },
+                'schema': 'metric',
+                'type': 'max_bucket'
+              },
+            ]
+          }),
+        }
+      };
+    });
+
+    it('should remove customInterval from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.customInterval');
+    });
+
+    it('should not change interval from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1].params.interval).toBe(JSON.parse(doc.attributes.visState).aggs[1].params.interval);
+    });
+
+    it('should not remove customInterval from non date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[0]).toHaveProperty('params.customInterval');
+    });
+
+    it('should set interval with customInterval value and remove customInterval when interval equals "custom"', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2].params.interval).toBe(JSON.parse(doc.attributes.visState).aggs[2].params.customInterval);
+      expect(aggs[2]).not.toHaveProperty('params.customInterval');
+    });
+
+    it('should remove customInterval from nested aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.customInterval');
+    });
+
+    it('should remove customInterval from nested aggregations and set interval with customInterval value', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3].params.customBucket.params.interval)
+        .toBe(JSON.parse(doc.attributes.visState).aggs[3].params.customBucket.params.customInterval);
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.customInterval');
+    });
+
+    it('should not fail on date histograms without a customInterval', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customInterval');
+    });
+  });
+  describe('7.3.0', () => {
+    const migrate = doc => migrations.visualization['7.3.0'](doc);
+
+    it('migrates type = gauge verticalSplit: false to alignment: vertical', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge', params: { gauge: { verticalSplit: false } } }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"horizontal\\"}}}",
+  },
+}
+`);
+    });
+
+    it('migrates type = gauge verticalSplit: false to alignment: horizontal', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge', params: { gauge: { verticalSplit: true } } }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"vertical\\"}}}",
+  },
+}
+`);
+    });
+
+    it('doesnt migrate type = gauge containing invalid visState object', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge' }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\"}",
+  },
+}
+`);
     });
   });
 });

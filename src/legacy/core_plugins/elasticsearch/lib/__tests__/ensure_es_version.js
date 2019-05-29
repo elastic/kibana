@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { esTestConfig } from '@kbn/test';
 import { ensureEsVersion } from '../ensure_es_version';

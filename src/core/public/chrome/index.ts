@@ -18,9 +18,12 @@
  */
 
 export {
-  Breadcrumb,
+  ChromeBadge,
+  ChromeBreadcrumb,
   ChromeService,
-  ChromeStartContract,
-  Brand,
-  HelpExtension,
+  ChromeSetup,
+  ChromeStart,
+  ChromeBrand,
+  ChromeHelpExtension,
 } from './chrome_service';
+export { ChromeNavLink } from './nav_links';

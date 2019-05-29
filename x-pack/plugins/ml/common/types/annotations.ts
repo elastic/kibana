@@ -84,6 +84,7 @@ export function isAnnotation(arg: any): arg is Annotation {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Annotations extends Array<Annotation> {}
 
 export function isAnnotations(arg: any): arg is Annotations {

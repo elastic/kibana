@@ -23,18 +23,19 @@ import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
 import { UsageCollector } from './usage_collector';
 
+let _waitingForAllCollectorsTimestamp = null;
+
 /*
  * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
  * and optionally, how to combine it into a unified payload for bulk upload.
  */
 export class CollectorSet {
-
   /*
    * @param {Object} server - server object
    * @param {Array} collectors to initialize, usually as a result of filtering another CollectorSet instance
    */
-  constructor(server, collectors = []) {
+  constructor(server, collectors = [], config = null) {
     this._log = getCollectorLogger(server);
     this._collectors = collectors;
 
@@ -44,7 +45,9 @@ export class CollectorSet {
      */
     this.makeStatsCollector = options => new Collector(server, options);
     this.makeUsageCollector = options => new UsageCollector(server, options);
-    this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
+    this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray, config);
+
+    this._maximumWaitTimeForAllCollectorsInS = config ? config.get('stats.maximumWaitTimeForAllCollectorsInS') : 60;
   }
 
   /*
@@ -66,6 +69,45 @@ export class CollectorSet {
 
   getCollectorByType(type) {
     return this._collectors.find(c => c.type === type);
+  }
+
+  // isUsageCollector(x: UsageCollector | any): x is UsageCollector {
+  isUsageCollector(x) {
+    return x instanceof UsageCollector;
+  }
+
+  async areAllCollectorsReady(collectorSet = this) {
+    if (!(collectorSet instanceof CollectorSet)) {
+      throw new Error(`areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet);
+    }
+
+    const collectorTypesNotReady = [];
+    let allReady = true;
+    await collectorSet.asyncEach(async collector => {
+      if (!await collector.isReady()) {
+        allReady = false;
+        collectorTypesNotReady.push(collector.type);
+      }
+    });
+
+    if (!allReady && this._maximumWaitTimeForAllCollectorsInS >= 0) {
+      const nowTimestamp = +new Date();
+      _waitingForAllCollectorsTimestamp = _waitingForAllCollectorsTimestamp || nowTimestamp;
+      const timeWaitedInMS = nowTimestamp - _waitingForAllCollectorsTimestamp;
+      const timeLeftInMS = (this._maximumWaitTimeForAllCollectorsInS * 1000) - timeWaitedInMS;
+      if (timeLeftInMS <= 0) {
+        this._log.debug(`All collectors are not ready (waiting for ${collectorTypesNotReady.join(',')}) `
+        + `but we have waited the required `
+        + `${this._maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`);
+        return true;
+      } else {
+        this._log.debug(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
+      }
+    } else {
+      _waitingForAllCollectorsTimestamp = null;
+    }
+
+    return allReady;
   }
 
   /*
@@ -107,6 +149,7 @@ export class CollectorSet {
 
   // convert an array of fetched stats results into key/object
   toObject(statsData) {
+    if (!statsData) return {};
     return statsData.reduce((accumulatedStats, { type, result }) => {
       return {
         ...accumulatedStats,
@@ -148,5 +191,15 @@ export class CollectorSet {
 
   map(mapFn) {
     return this._collectors.map(mapFn);
+  }
+
+  some(someFn) {
+    return this._collectors.some(someFn);
+  }
+
+  async asyncEach(eachFn) {
+    for (const collector of this._collectors) {
+      await eachFn(collector);
+    }
   }
 }

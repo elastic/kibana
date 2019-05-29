@@ -7,7 +7,7 @@
 import { map } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './action_type_select.html';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 import { Action } from 'plugins/watcher/models/action';
 import 'plugins/watcher/services/settings';
 

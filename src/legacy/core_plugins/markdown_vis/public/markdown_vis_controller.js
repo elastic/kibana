@@ -82,9 +82,9 @@ class MarkdownVisComponent extends Component {
 export function MarkdownVisWrapper(props) {
   return (
     <MarkdownVisComponent
-      fontSize={props.vis.params.fontSize}
-      markdown={props.vis.params.markdown}
-      openLinksInNewTab={props.vis.params.openLinksInNewTab}
+      fontSize={props.visParams.fontSize}
+      markdown={props.visParams.markdown}
+      openLinksInNewTab={props.visParams.openLinksInNewTab}
       renderComplete={props.renderComplete}
     />
   );

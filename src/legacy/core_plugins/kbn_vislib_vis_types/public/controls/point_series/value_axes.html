@@ -284,6 +284,7 @@
                   class="kuiInput visEditorSidebar__input"
                   type="number"
                   step="0.1"
+                  greater-than="axis.scale.min"
                   ng-model="axis.scale.max"
                 >
               </div>
@@ -301,7 +302,8 @@
                   class="kuiInput visEditorSidebar__input"
                   type="number"
                   step="0.1"
-                  greater-than="{{axis.scale.type === 'log' ? 0 : ''}}"
+                  greater-than="axis.scale.type === 'log' ? 0 : undefined"
+                  less-than="axis.scale.max"
                   ng-model="axis.scale.min"
                 >
               </div>

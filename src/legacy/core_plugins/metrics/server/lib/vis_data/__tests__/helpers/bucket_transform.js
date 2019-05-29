@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import bucketTransform from '../../helpers/bucket_transform';
+import { bucketTransform } from '../../helpers/bucket_transform';
 
 describe('bucketTransform', () => {
   describe('count', () => {
@@ -108,6 +108,28 @@ describe('bucketTransform', () => {
         percentiles: {
           field: 'cpu.pct',
           percents: [50, 10, 90]
+        }
+      });
+    });
+
+    it('define a default 0 value if it was not provided', () => {
+      const metric = {
+        id: 'test',
+        type: 'percentile',
+        field: 'cpu.pct',
+        percentiles: [
+          { value: 50, mode: 'line' },
+          { mode: 'line' },
+          { value: undefined, mode: 'line' },
+          { value: '', mode: 'line' },
+          { value: null, mode: 'line' },
+          { value: 0, mode: 'line' }
+        ]
+      };
+      expect(bucketTransform.percentile(metric)).to.eql({
+        percentiles: {
+          field: 'cpu.pct',
+          percents: [50, 0, 0, 0, 0, 0]
         }
       });
     });

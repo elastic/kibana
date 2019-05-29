@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import nodesListingFixtureGreen from './fixtures/nodes_listing_green';
 import nodesListingFixtureRed from './fixtures/nodes_listing_red';
 import nodesListingFixtureCgroup from './fixtures/nodes_listing_cgroup';

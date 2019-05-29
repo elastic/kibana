@@ -20,14 +20,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import * as collectionActions from '../lib/collection_actions';
-import AddDeleteButtons from '../add_delete_buttons';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { collectionActions } from '../lib/collection_actions';
+import { AddDeleteButtons } from '../add_delete_buttons';
 import uuid from 'uuid';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiSpacer,
@@ -39,17 +39,15 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
 
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
 
-class PercentilesUi extends Component {
+const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
 
-  constructor(props) {
-    super(props);
-    this.renderRow = this.renderRow.bind(this);
-  }
+class PercentilesUi extends Component {
 
   handleTextChange(item, name) {
     return (e) => {
@@ -60,12 +58,31 @@ class PercentilesUi extends Component {
     };
   }
 
-  renderRow(row, i, items) {
+  renderRow = (row, i, items) => {
     const defaults = { value: '', percentile: '', shade: '' };
     const model = { ...defaults, ...row };
+    const { intl, panel } = this.props;
+
+    const percentileFieldNumber = (
+      <EuiFlexItem grow={false}>
+        <EuiFieldNumber
+          aria-label={intl.formatMessage({ id: 'tsvb.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
+          placeholder={0}
+          max={100}
+          min={0}
+          step={1}
+          onChange={this.handleTextChange(model, 'value')}
+          value={model.value === '' ? '' : Number(model.value)}
+        />
+      </EuiFlexItem>
+    );
+
+    if (panel.type === 'table') {
+      return percentileFieldNumber;
+    }
+
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newPercentile);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const { intl } = this.props;
     const modeOptions = [
       {
         label: intl.formatMessage({ id: 'tsvb.percentile.modeOptions.lineLabel', defaultMessage: 'Line' }),
@@ -88,15 +105,8 @@ class PercentilesUi extends Component {
     return  (
       <EuiFlexItem key={model.id}>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiFieldNumber
-              aria-label={intl.formatMessage({ id: 'tsvb.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
-              placeholder={intl.formatMessage({ id: 'tsvb.percentile.percentilePlaceholder', defaultMessage: 'Percentile' })}
-              step={1}
-              onChange={this.handleTextChange(model, 'value')}
-              value={Number(model.value)}
-            />
-          </EuiFlexItem>
+
+          { percentileFieldNumber }
 
           <EuiFlexItem grow={false}>
             <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>
@@ -167,10 +177,15 @@ class PercentilesUi extends Component {
   }
 
   render() {
-    const { model, name } = this.props;
+    const { model, name, panel } = this.props;
     if (!model[name]) return (<div/>);
+    let rows;
+    if (panel.type === 'table') {
+      rows = this.renderRow(_.last(model[name]));
+    } else {
+      rows = model[name].map(this.renderRow);
+    }
 
-    const rows = model[name].map(this.renderRow);
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         { rows }
@@ -186,12 +201,13 @@ PercentilesUi.defaultProps = {
 PercentilesUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
+  panel: PropTypes.object,
   onChange: PropTypes.func
 };
 
 const Percentiles = injectI18n(PercentilesUi);
 
-class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
+export class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
   componentWillMount() {
     if (!this.props.model.percentiles) {
@@ -216,6 +232,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
+        dragHandleProps={this.props.dragHandleProps}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
@@ -244,7 +261,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
               <FieldSelect
                 fields={fields}
                 type={model.type}
-                restrict="numeric"
+                restrict={RESTRICT_FIELDS}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}
@@ -259,6 +276,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
           onChange={handleChange}
           name="percentiles"
           model={model}
+          panel={panel}
         />
 
       </AggRow>
@@ -278,5 +296,3 @@ PercentileAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
-
-export default PercentileAgg;

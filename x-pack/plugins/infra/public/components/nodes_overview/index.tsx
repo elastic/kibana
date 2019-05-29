@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../common/eui_styled_components';
 import {
-  InfraMetricType,
-  InfraNode,
+  InfraSnapshotMetricType,
+  InfraSnapshotNode,
   InfraNodeType,
   InfraTimerangeInput,
 } from '../../graphql/types';
@@ -26,7 +28,7 @@ import { TableView } from './table';
 interface Props {
   options: InfraWaffleMapOptions;
   nodeType: InfraNodeType;
-  nodes: InfraNode[];
+  nodes: InfraSnapshotNode[];
   loading: boolean;
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
@@ -34,6 +36,8 @@ interface Props {
   onViewChange: (view: string) => void;
   view: string;
   intl: InjectedIntl;
+  boundsOverride: InfraWaffleMapBounds;
+  autoBounds: boolean;
 }
 
 interface MetricFormatter {
@@ -47,39 +51,51 @@ interface MetricFormatters {
 }
 
 const METRIC_FORMATTERS: MetricFormatters = {
-  [InfraMetricType.count]: { formatter: InfraFormatterType.number, template: '{{value}}' },
-  [InfraMetricType.cpu]: {
+  [InfraSnapshotMetricType.count]: { formatter: InfraFormatterType.number, template: '{{value}}' },
+  [InfraSnapshotMetricType.cpu]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
-    bounds: { min: 0, max: 1 },
   },
-  [InfraMetricType.memory]: {
+  [InfraSnapshotMetricType.memory]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
-    bounds: { min: 0, max: 1 },
   },
-  [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  [InfraMetricType.logRate]: {
+  [InfraSnapshotMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraSnapshotMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraSnapshotMetricType.logRate]: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
 };
 
-const calculateBoundsFromNodes = (nodes: InfraNode[]): InfraWaffleMapBounds => {
-  const values = nodes.map(node => node.metric.value);
-  // if there is only one value then we need to set the bottom range to zero
-  if (values.length === 1) {
-    values.unshift(0);
+const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {
+  const maxValues = nodes.map(node => node.metric.max);
+  const minValues = nodes.map(node => node.metric.value);
+  // if there is only one value then we need to set the bottom range to zero for min
+  // otherwise the legend will look silly since both values are the same for top and
+  // bottom.
+  if (minValues.length === 1) {
+    minValues.unshift(0);
   }
-  return { min: min(values) || 0, max: max(values) || 0 };
+  return { min: min(minValues) || 0, max: max(maxValues) || 0 };
 };
 
 export const NodesOverview = injectI18n(
   class extends React.Component<Props, {}> {
     public static displayName = 'Waffle';
     public render() {
-      const { loading, nodes, nodeType, reload, intl, view, options, timeRange } = this.props;
+      const {
+        autoBounds,
+        boundsOverride,
+        loading,
+        nodes,
+        nodeType,
+        reload,
+        intl,
+        view,
+        options,
+        timeRange,
+      } = this.props;
       if (loading) {
         return (
           <InfraLoadingPanel
@@ -113,17 +129,26 @@ export const NodesOverview = injectI18n(
           />
         );
       }
-      const { metric } = this.props.options;
-      const metricFormatter = get(
-        METRIC_FORMATTERS,
-        metric.type,
-        METRIC_FORMATTERS[InfraMetricType.count]
-      );
-      const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromNodes(nodes);
+      const dataBounds = calculateBoundsFromNodes(nodes);
+      const bounds = autoBounds ? dataBounds : boundsOverride;
       return (
         <MainContainer>
           <ViewSwitcherContainer>
-            <ViewSwitcher view={view} onChange={this.handleViewChange} />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <ViewSwitcher view={view} onChange={this.handleViewChange} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
+                      defaultMessage="Showing the last 1 minute of data from the time period"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </ViewSwitcherContainer>
           {view === 'table' ? (
             <TableContainer>
@@ -146,6 +171,7 @@ export const NodesOverview = injectI18n(
                 timeRange={timeRange}
                 onFilter={this.handleDrilldown}
                 bounds={bounds}
+                dataBounds={dataBounds}
               />
             </MapContainer>
           )}
@@ -161,7 +187,7 @@ export const NodesOverview = injectI18n(
       const metricFormatter = get(
         METRIC_FORMATTERS,
         metric.type,
-        METRIC_FORMATTERS[InfraMetricType.count]
+        METRIC_FORMATTERS[InfraSnapshotMetricType.count]
       );
       if (val == null) {
         return '';
@@ -180,23 +206,23 @@ export const NodesOverview = injectI18n(
   }
 );
 
-const MainContainer = styled.div`
+const MainContainer = euiStyled.div`
   position: relative;
   flex: 1 1 auto;
 `;
 
-const TableContainer = styled.div`
+const TableContainer = euiStyled.div`
   padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
-const ViewSwitcherContainer = styled.div`
+const ViewSwitcherContainer = euiStyled.div`
   padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
-const MapContainer = styled.div`
+const MapContainer = euiStyled.div`
   position: absolute;
   display: flex;
-  top: 0;
+  top: 70px;
   right: 0;
   bottom: 0;
   left: 0;

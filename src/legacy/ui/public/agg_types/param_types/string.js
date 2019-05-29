@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import editorHtml from '../controls/string.html';
-import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';
+import { StringParamEditor } from '../controls/string';
+import { BaseParamType } from './base';
 
 createLegacyClass(StringParamType).inherits(BaseParamType);
 function StringParamType(config) {
   StringParamType.Super.call(this, config);
 }
 
-StringParamType.prototype.editor = editorHtml;
+StringParamType.prototype.editorComponent = StringParamEditor;
 
 /**
  * Write the aggregation parameter.
@@ -45,3 +45,4 @@ StringParamType.prototype.write = function (aggConfig, output) {
 };
 
 export { StringParamType };
+

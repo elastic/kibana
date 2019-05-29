@@ -5,6 +5,7 @@
  */
 
 import { AbstractStyle } from './abstract_style';
+import { i18n } from '@kbn/i18n';
 
 export class TileStyle extends AbstractStyle {
 
@@ -13,10 +14,6 @@ export class TileStyle extends AbstractStyle {
   constructor(styleDescriptor = {}) {
     super();
     this._descriptor = TileStyle.createDescriptor(styleDescriptor.properties);
-  }
-
-  static canEdit(styleInstance) {
-    return styleInstance.constructor === TileStyle;
   }
 
   static createDescriptor(properties = {}) {
@@ -29,6 +26,8 @@ export class TileStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return 'Tile style';
+    return i18n.translate('xpack.maps.style.tile.displayNameLabel', {
+      defaultMessage: 'Tile style'
+    });
   }
 }

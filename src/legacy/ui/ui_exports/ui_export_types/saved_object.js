@@ -30,12 +30,33 @@ export const mappings = wrap(
   flatConcatAtType
 );
 
+const pluginId = (pluginSpec) => pluginSpec.id ? pluginSpec.id() : pluginSpec.getId();
+
 // Combines the `migrations` property of each plugin,
-// ensuring that properties are unique across plugins.
+// ensuring that properties are unique across plugins
+// and has migrations defined where the mappings are defined.
 // See saved_objects/migrations for more details.
-export const migrations = wrap(alias('savedObjectMigrations'), uniqueKeys(), mergeAtType);
+export const migrations = wrap(
+  alias('savedObjectMigrations'),
+  (next) => (acc, spec, type, pluginSpec) => {
+    const mappings = pluginSpec.getExportSpecs().mappings || {};
+    const invalidMigrationTypes = Object.keys(spec)
+      .filter(type => !mappings[type]);
+    if (invalidMigrationTypes.length) {
+      throw new Error(
+        'Migrations and mappings must be defined together in the uiExports of a single plugin. ' +
+        `${pluginId(pluginSpec)} defines migrations for types ${invalidMigrationTypes.join(', ')} but does not define their mappings.`
+      );
+    }
+    return next(acc, spec, type, pluginSpec);
+  },
+  uniqueKeys(),
+  mergeAtType,
+);
 
 export const savedObjectSchemas = wrap(uniqueKeys(), mergeAtType);
+
+export const savedObjectsManagement = wrap(uniqueKeys(), mergeAtType);
 
 // Combines the `validations` property of each plugin,
 // ensuring that properties are unique across plugins.

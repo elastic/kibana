@@ -35,7 +35,7 @@ function help() {
     usage: kbn <command> [<args>]
 
     By default commands are run for Kibana itself, all packages in the 'packages/'
-    folder and for all plugins in '../kibana-extra'.
+    folder and for all plugins in './plugins' and '../kibana-extra'.
 
     Available commands:
 
@@ -43,10 +43,10 @@ function help() {
 
     Global options:
 
-       -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
-       -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
-       --oss                Do not include the x-pack when running command.
-       --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
+       -e, --exclude          Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+       -i, --include          Include only specified projects. If left unspecified, it defaults to including all projects.
+       --oss                  Do not include the x-pack when running command.
+       --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
   `);
 }
 

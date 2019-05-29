@@ -5,26 +5,27 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useContext } from 'react';
 
-import { WithSource } from '../../containers/with_source';
-import { WithSourceConfigurationFlyoutState } from './source_configuration_flyout_state';
+import { SourceConfigurationFlyoutState } from './source_configuration_flyout_state';
 
-export const SourceConfigurationButton: React.SFC = () => (
-  <WithSourceConfigurationFlyoutState>
-    {({ toggle }) => (
-      <WithSource>
-        {({ configuration }) => (
-          <EuiButtonEmpty
-            aria-label="Configure source"
-            color="text"
-            iconType="gear"
-            onClick={toggle}
-          >
-            {configuration && configuration.name}
-          </EuiButtonEmpty>
-        )}
-      </WithSource>
-    )}
-  </WithSourceConfigurationFlyoutState>
-);
+export const SourceConfigurationButton: React.FunctionComponent = () => {
+  const { toggleIsVisible } = useContext(SourceConfigurationFlyoutState.Context);
+
+  return (
+    <EuiButtonEmpty
+      aria-label="Configure source"
+      color="text"
+      data-test-subj="configureSourceButton"
+      iconType="gear"
+      onClick={toggleIsVisible}
+      size="xs"
+    >
+      <FormattedMessage
+        id="xpack.infra.sourceConfiguration.sourceConfigurationButtonLabel"
+        defaultMessage="Configuration"
+      />
+    </EuiButtonEmpty>
+  );
+};

@@ -46,7 +46,7 @@ function ParamClassStub(parent, body) {
  * @param  {PrivateLoader} Private - The private module loader, inject by passing this function to ngMock.inject()
  * @return {undefined}
  */
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function stubParamClasses(Private) {
   const BaseAggParam = Private.stub(
     BaseParamType,

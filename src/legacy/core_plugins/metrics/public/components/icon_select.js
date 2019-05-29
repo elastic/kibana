@@ -35,7 +35,7 @@ function renderOption(option) {
   );
 }
 
-function IconSelect(props) {
+export function IconSelect(props) {
   const selectedIcon = props.icons.find(option => {
     return props.value === option.value;
   });
@@ -46,7 +46,7 @@ function IconSelect(props) {
       options={props.icons}
       selectedOptions={selectedIcon ? [selectedIcon] : []}
       onChange={props.onChange}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
       renderOption={renderOption}
     />
   );
@@ -84,5 +84,3 @@ IconSelect.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string.isRequired
 };
-
-export default IconSelect;

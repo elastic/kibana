@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('InfraOps GraphQL Endpoints', () => {
+  describe('InfraOps Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./log_entries'));
     loadTestFile(require.resolve('./log_summary'));
@@ -14,5 +14,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./sources'));
     loadTestFile(require.resolve('./waffle'));
     loadTestFile(require.resolve('./log_item'));
+    loadTestFile(require.resolve('./metrics_explorer'));
+    loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./ip_to_hostname'));
   });
 }

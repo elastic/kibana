@@ -23,10 +23,12 @@
  */
 
 import { once } from 'lodash';
+import { MappingProperties } from '../../../mappings';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectsManagementDefinition } from '../../management';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator, LogFn, MappingProperties } from '../core';
+import { buildActiveMappings, CallCluster, IndexMigrator, LogFn } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 
 export interface KbnServer {
@@ -38,6 +40,7 @@ export interface KbnServer {
     savedObjectMigrations: any;
     savedObjectValidations: any;
     savedObjectSchemas: SavedObjectsSchemaDefinition;
+    savedObjectsManagement: SavedObjectsManagementDefinition;
   };
 }
 

@@ -24,9 +24,7 @@ export class PipelineDataLoader {
   constructor(private readonly vis: Vis) {}
 
   public async fetch(params: RequestHandlerParams): Promise<any> {
-    this.vis.requestError = undefined;
-    this.vis.showRequestError = false;
-    this.vis.pipelineExpression = buildPipeline(this.vis, params);
+    this.vis.pipelineExpression = await buildPipeline(this.vis, params);
 
     return await runPipeline(
       this.vis.pipelineExpression,

@@ -17,5 +17,5 @@ const handler = async (request, callWithRequest, h) => {
   return h.response();
 };
 export function registerClearCacheRoute(router) {
-  router.post('indices/clear_caches', handler);
+  router.post('indices/clear_cache', handler);
 }

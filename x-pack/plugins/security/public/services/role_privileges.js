@@ -15,6 +15,8 @@ const clusterPrivileges = [
   'transport_client',
   'manage_ml',
   'monitor_ml',
+  'manage_data_frame_transforms',
+  'monitor_data_frame_transforms',
   'manage_watcher',
   'monitor_watcher',
   'read_ccr',
@@ -26,6 +28,7 @@ const clusterPrivileges = [
   'manage_token',
   'manage_saml',
   'create_snapshot',
+  'manage_oidc',
 ];
 const indexPrivileges = [
   'all',
@@ -42,6 +45,7 @@ const indexPrivileges = [
   'read_cross_cluster',
   'manage_follow_index',
   'manage_ilm',
+  'manage_leader_index',
 ];
 
 export function getClusterPrivileges() {

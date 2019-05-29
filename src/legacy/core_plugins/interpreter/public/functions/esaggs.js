@@ -25,7 +25,7 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 // need to get rid of angular from these
 import { IndexPatternsProvider } from 'ui/index_patterns';
 import { SearchSourceProvider } from 'ui/courier/search_source';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import chrome from 'ui/chrome';
 
@@ -83,7 +83,7 @@ export const esaggs = () => ({
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       forceFetch: true,
-      isHierarchical: args.metricsAtAllLevels,
+      metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       inspectorAdapters: handlers.inspectorAdapters,
       queryFilter,

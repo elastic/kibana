@@ -25,7 +25,6 @@ export class UiNavLink {
       order = 0,
       url,
       subUrlBase,
-      description,
       icon,
       euiIconType,
       linkToLastSubUrl = true,
@@ -39,7 +38,6 @@ export class UiNavLink {
     this._order = order;
     this._url = url;
     this._subUrlBase = subUrlBase || url;
-    this._description = description;
     this._icon = icon;
     this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
@@ -59,7 +57,6 @@ export class UiNavLink {
       order: this._order,
       url: this._url,
       subUrlBase: this._subUrlBase,
-      description: this._description,
       icon: this._icon,
       euiIconType: this._euiIconType,
       linkToLastSubUrl: this._linkToLastSubUrl,

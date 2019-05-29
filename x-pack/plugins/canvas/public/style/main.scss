@@ -1,3 +1,8 @@
+/*
+  Canvas global SASS varialbes
+*/
+$canvasElementCardWidth: 210px;
+
 .canvas.canvasContainer {
   display: flex;
   flex-grow: 1;
@@ -14,6 +19,7 @@
 }
 
 .canvasCheckered {
+  background-color: $euiColorGhost;
   background-image: linear-gradient(45deg, #ddd 25%, transparent 25%),
     linear-gradient(-45deg, #ddd 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #ddd 75%),

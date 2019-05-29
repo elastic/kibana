@@ -22,17 +22,18 @@ import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
+import { setup as httpSetup } from '../../../test_utils/public/http_test_setup';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const basePath: any = {
-    addToPath: jest.fn(path => `/foo/bar${path}`),
-  };
+  const { http } = httpSetup(injectedMetadata => {
+    injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
+  });
 
-  const uiSettingsApi = new UiSettingsApi(basePath, 'v9.9.9');
+  const uiSettingsApi = new UiSettingsApi(http);
 
   return {
-    basePath,
+    http,
     uiSettingsApi,
   };
 }

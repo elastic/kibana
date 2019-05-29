@@ -31,11 +31,14 @@ class VisController {
     this.controls = [];
 
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
-    this.vis.API.queryFilter.on('update', this.queryBarUpdateHandler);
+
+    this.updateSubsciption = this.vis.API.queryFilter.getUpdates$()
+      .subscribe(this.queryBarUpdateHandler);
   }
 
-  async render(visData, status) {
-    if (status.params || (this.vis.params.useTimeFilter && status.time)) {
+  async render(visData, visParams, status) {
+    if (status.params || (visParams.useTimeFilter && status.time)) {
+      this.visParams = visParams;
       this.controls = [];
       this.controls = await this.initControls();
       this.drawVis();
@@ -45,7 +48,7 @@ class VisController {
   }
 
   destroy() {
-    this.vis.API.queryFilter.off('update', this.queryBarUpdateHandler);
+    this.updateSubsciption.unsubscribe();
     unmountComponentAtNode(this.el);
   }
 
@@ -53,7 +56,7 @@ class VisController {
     render(
       <I18nContext>
         <InputControlVis
-          updateFiltersOnChange={this.vis.params.updateFiltersOnChange}
+          updateFiltersOnChange={this.visParams.updateFiltersOnChange}
           controls={this.controls}
           stageFilter={this.stageFilter}
           submitFilters={this.submitFilters}
@@ -68,14 +71,14 @@ class VisController {
   }
 
   async initControls() {
-    const controlParamsList = this.vis.params.controls.filter((controlParams) => {
+    const controlParamsList = this.visParams.controls.filter((controlParams) => {
       // ignore controls that do not have indexPattern or field
       return controlParams.indexPattern && controlParams.fieldName;
     });
 
     const controlFactoryPromises = controlParamsList.map((controlParams) => {
       const factory = controlFactory(controlParams);
-      return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
+      return factory(controlParams, this.vis.API, this.visParams.useTimeFilter);
     });
     const controls = await Promise.all(controlFactoryPromises);
 
@@ -104,7 +107,7 @@ class VisController {
 
   stageFilter = async (controlIndex, newValue) => {
     this.controls[controlIndex].set(newValue);
-    if (this.vis.params.updateFiltersOnChange) {
+    if (this.visParams.updateFiltersOnChange) {
       // submit filters on each control change
       this.submitFilters();
     } else {
@@ -143,7 +146,7 @@ class VisController {
       });
     });
 
-    this.vis.API.queryFilter.addFilters(newFilters, this.vis.params.pinFilters);
+    this.vis.API.queryFilter.addFilters(newFilters, this.visParams.pinFilters);
   }
 
   clearControls = async () => {

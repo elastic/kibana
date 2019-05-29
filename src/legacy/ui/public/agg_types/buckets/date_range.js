@@ -18,8 +18,8 @@
  */
 
 import { dateRange } from '../../utils/date_range';
-import '../../directives/validate_date_math';
-import '../../directives/documentation_href';
+import '../directives/validate_date_math';
+import '../directives/documentation_href';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { fieldFormats } from '../../registry/field_formats';

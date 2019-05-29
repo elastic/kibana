@@ -196,9 +196,7 @@ export function VislibVisualizationsLineChartProvider(Private) {
             .interpolate(interpolate)
             .x(isHorizontal ? cx : cy)
             .y(isHorizontal ? cy : cx);
-          return d3Line(data.values.filter(function (d) {
-            return !_.isNull(d.y);
-          }));
+          return d3Line(data.values);
         })
         .attr('fill', 'none')
         .attr('stroke', () => {

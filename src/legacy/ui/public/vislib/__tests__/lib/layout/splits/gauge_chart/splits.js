@@ -19,7 +19,7 @@
 
 import d3 from 'd3';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import $ from 'jquery';
 import VislibLibLayoutSplitsGaugeChartChartSplitProvider from '../../../../../lib/layout/splits/gauge_chart/chart_split';
 import VislibLibLayoutSplitsGaugeChartChartTitleSplitProvider from '../../../../../lib/layout/splits/gauge_chart/chart_title_split';

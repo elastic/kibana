@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
-import { statSync, lstatSync, realpathSync } from 'fs';
+import { statSync } from 'fs';
 import { resolve } from 'path';
 
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
@@ -41,17 +41,6 @@ function canRequire(path) {
   }
 }
 
-function isSymlinkTo(link, dest) {
-  try {
-    const stat = lstatSync(link);
-    return stat.isSymbolicLink() && realpathSync(link) === dest;
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
-    }
-  }
-}
-
 const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
 const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
 
@@ -60,10 +49,8 @@ const CAN_REPL = canRequire(REPL_PATH);
 
 // xpack is installed in both dev and the distributable, it's optional if
 // install is a link to the source, not an actual install
-const XPACK_INSTALLED_DIR = resolve(__dirname, '../../../node_modules/x-pack');
-const XPACK_SOURCE_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(XPACK_INSTALLED_DIR);
-const XPACK_OPTIONAL = isSymlinkTo(XPACK_INSTALLED_DIR, XPACK_SOURCE_DIR);
+const XPACK_DIR = resolve(__dirname, '../../../x-pack');
+const XPACK_INSTALLED = canRequire(XPACK_DIR);
 
 const pathCollector = function () {
   const paths = [];
@@ -83,12 +70,16 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
 
+  if (opts.oss) {
+    delete rawConfig.xpack;
+  }
+
   if (opts.dev) {
     set('env', 'development');
     set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'elastic');
+      set('elasticsearch.username', 'kibana');
     }
 
     if (!has('elasticsearch.password')) {
@@ -127,8 +118,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     get('plugins.paths'),
     opts.pluginPath,
 
-    XPACK_INSTALLED && (!XPACK_OPTIONAL || !opts.oss)
-      ? [XPACK_INSTALLED_DIR]
+    XPACK_INSTALLED && !opts.oss
+      ? [XPACK_DIR]
       : [],
   )));
 
@@ -147,8 +138,7 @@ export default function (program) {
     .option('-e, --elasticsearch <uri1,uri2>', 'Elasticsearch instances')
     .option(
       '-c, --config <path>',
-      'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
-    'Use multiple --config args to include multiple config files.',
+      'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
       [ getConfig() ]
     )
@@ -183,7 +173,7 @@ export default function (program) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
   }
 
-  if (XPACK_OPTIONAL) {
+  if (!IS_KIBANA_DISTRIBUTABLE) {
     command
       .option('--oss', 'Start Kibana without X-Pack');
   }
@@ -194,19 +184,20 @@ export default function (program) {
       .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
-      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
   command
     .action(async function (opts) {
-      if (opts.dev) {
+      if (opts.dev && opts.devConfig !== false) {
         try {
           const kbnDevConfig = fromRoot('config/kibana.dev.yml');
           if (statSync(kbnDevConfig).isFile()) {
             opts.config.push(kbnDevConfig);
           }
         } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+          // ignore, kibana.dev.yml does not exist
         }
       }
 
@@ -226,8 +217,6 @@ export default function (program) {
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
-          isOssModeSupported: XPACK_OPTIONAL,
-          isXPackInstalled: XPACK_INSTALLED,
           isReplModeSupported: CAN_REPL,
         },
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),

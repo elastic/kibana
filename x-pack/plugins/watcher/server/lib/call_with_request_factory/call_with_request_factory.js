@@ -8,10 +8,7 @@ import { once } from 'lodash';
 import { elasticsearchJsPlugin } from '../elasticsearch_js_plugin';
 
 const callWithRequest = once((server) => {
-  const config = {
-    plugins: [ elasticsearchJsPlugin ],
-    ...server.config().get('elasticsearch')
-  };
+  const config = { plugins: [ elasticsearchJsPlugin ] };
   const cluster = server.plugins.elasticsearch.createCluster('watcher', config);
 
   return cluster.callWithRequest;

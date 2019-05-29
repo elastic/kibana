@@ -5,7 +5,7 @@
  */
 
 import 'react-vis/dist/style.css';
-import 'ui-bootstrap';
+import 'ui/angular-bootstrap';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import 'ui/courier';

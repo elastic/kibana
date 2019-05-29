@@ -76,24 +76,14 @@ exports[`renders ControlsTab 1`] = `
     hasShadow={false}
     paddingSize="m"
   >
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiFormRow
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
           id="selectControlType"
+          labelType="label"
         >
           <EuiSelect
             aria-label="Select control type"
@@ -119,7 +109,6 @@ exports[`renders ControlsTab 1`] = `
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiFormRow
@@ -127,6 +116,7 @@ exports[`renders ControlsTab 1`] = `
           fullWidth={false}
           hasEmptyLabelSpace={false}
           id="addControl"
+          labelType="label"
         >
           <EuiButton
             aria-label="Add control"
@@ -136,6 +126,7 @@ exports[`renders ControlsTab 1`] = `
             iconSide="left"
             iconType="plusInCircle"
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <FormattedMessage

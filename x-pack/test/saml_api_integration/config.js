@@ -18,6 +18,7 @@ export default async function ({ readConfigFile }) {
     servers: xPackAPITestsConfig.get('servers'),
     services: {
       chance: kibanaAPITestsConfig.get('services.chance'),
+      es: kibanaAPITestsConfig.get('services.es'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {

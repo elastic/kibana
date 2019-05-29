@@ -1,3 +1,8 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 /* tslint:disable */
 
 // ====================================================
@@ -24,8 +29,8 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
-  getMonitorChartsData?: (MonitorChartEntry | null)[] | null;
-
+  getMonitorChartsData?: MonitorChart | null;
+  /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
 
   getFilterBar?: FilterBar | null;
@@ -45,9 +50,11 @@ export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
   /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: number | null;
+  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
+
+  container?: Container | null;
 
   docker?: Docker | null;
 
@@ -66,6 +73,8 @@ export interface Ping {
   meta?: Meta | null;
 
   monitor?: Monitor | null;
+
+  observer?: Observer | null;
 
   resolve?: Resolve | null;
 
@@ -90,6 +99,22 @@ export interface Beat {
   timezone?: string | null;
 
   type?: string | null;
+}
+
+export interface Container {
+  id?: string | null;
+
+  image?: ContainerImage | null;
+
+  name?: string | null;
+
+  runtime?: string | null;
+}
+
+export interface ContainerImage {
+  name?: string | null;
+
+  tag?: string | null;
 }
 
 export interface Docker {
@@ -243,6 +268,30 @@ export interface Monitor {
 
   check_group?: string | null;
 }
+/** Metadata added by a proccessor, which is specified in its configuration. */
+export interface Observer {
+  /** Geolocation data for the agent. */
+  geo?: Geo | null;
+}
+/** Geolocation data added via processors to enrich events. */
+export interface Geo {
+  /** Name of the city in which the agent is running. */
+  city_name?: string | null;
+  /** The name of the continent on which the agent is running. */
+  continent_name?: string | null;
+  /** ISO designation for the agent's country. */
+  country_iso_code?: string | null;
+  /** The name of the agent's country. */
+  country_name?: string | null;
+  /** The lat/long of the agent. */
+  location?: string | null;
+  /** A name for the host's location, e.g. 'us-east-1' or 'LAX'. */
+  name?: string | null;
+  /** ISO designation of the agent's region. */
+  region_iso_code?: string | null;
+  /** Name of the region hosting the agent. */
+  region_name?: string | null;
+}
 
 export interface Resolve {
   host?: string | null;
@@ -307,15 +356,16 @@ export interface DocCount {
 export interface LatestMonitorsResult {
   monitors?: LatestMonitor[] | null;
 }
-
+/** Represents the latest recorded information about a monitor. */
 export interface LatestMonitor {
+  /** The ID of the monitor represented by this data. */
   id: MonitorKey;
-
+  /** Information from the latest document. */
   ping?: Ping | null;
-
-  upSeries?: (MonitorSeriesPoint | null)[] | null;
-
-  downSeries?: (MonitorSeriesPoint | null)[] | null;
+  /** Buckets of recent up count status data. */
+  upSeries?: MonitorSeriesPoint[] | null;
+  /** Buckets of recent down count status data. */
+  downSeries?: MonitorSeriesPoint[] | null;
 }
 
 export interface MonitorKey {
@@ -351,69 +401,79 @@ export interface HistogramDataPoint {
 
   y?: UnsignedInteger | null;
 }
-
-export interface MonitorChartEntry {
-  maxContent?: DataPoint | null;
-
-  maxResponse?: DataPoint | null;
-
-  maxValidate?: DataPoint | null;
-
-  maxTotal?: DataPoint | null;
-
-  maxWriteRequest?: DataPoint | null;
-
-  maxTcpRtt?: DataPoint | null;
-
-  maxDuration?: DataPoint | null;
-
-  minDuration?: DataPoint | null;
-
-  avgDuration?: DataPoint | null;
-
-  status?: StatusData | null;
+/** The data used to populate the monitor charts. */
+export interface MonitorChart {
+  /** The max and min values for the monitor duration. */
+  durationArea: MonitorDurationAreaPoint[];
+  /** The average values for the monitor duration. */
+  durationLine: MonitorDurationAveragePoint[];
+  /** The counts of up/down checks for the monitor. */
+  status: StatusData[];
+  /** The maximum status doc count in this chart. */
+  statusMaxCount: number;
+  /** The maximum duration value in this chart. */
+  durationMaxValue: number;
 }
-
-export interface DataPoint {
-  x?: UnsignedInteger | null;
-
+/** Represents a monitor's duration performance in microseconds at a point in time. */
+export interface MonitorDurationAreaPoint {
+  /** The timeseries value for this point in time. */
+  x: UnsignedInteger;
+  /** The min duration value in microseconds at this time. */
+  yMin?: number | null;
+  /** The max duration value in microseconds at this point. */
+  yMax?: number | null;
+}
+/** Represents the average monitor duration ms at a point in time. */
+export interface MonitorDurationAveragePoint {
+  /** The timeseries value for this point. */
+  x: UnsignedInteger;
+  /** The average duration ms for the monitor. */
   y?: number | null;
 }
-
+/** Represents a bucket of monitor status information. */
 export interface StatusData {
-  x?: UnsignedInteger | null;
-
+  /** The timeseries point for this status data. */
+  x: UnsignedInteger;
+  /** The value of up counts for this point. */
   up?: number | null;
-
+  /** The value for down counts for this point. */
   down?: number | null;
-
+  /** The total down counts for this point. */
   total?: number | null;
 }
-
+/** The data used to enrich the filter bar. */
 export interface FilterBar {
+  /** A series of monitor IDs in the heartbeat indices. */
   ids?: MonitorKey[] | null;
-
+  /** The location values users have configured for the agents. */
+  locations?: string[] | null;
+  /** The names users have configured for the monitors. */
   names?: string[] | null;
-
+  /** The ports of the monitored endpoints. */
   ports?: number[] | null;
-
+  /** The schemes used by the monitors. */
   schemes?: string[] | null;
-
+  /** The possible status values contained in the indices. */
   statuses?: string[] | null;
 }
-
+/** A representation of an error state for a monitor. */
 export interface ErrorListItem {
+  /** The number of times this error has occurred. */
+  count: number;
+  /** The most recent message associated with this error type. */
   latestMessage?: string | null;
-
+  /** The location assigned to the agent reporting this error. */
+  location?: string | null;
+  /** The ID of the monitor reporting the error. */
   monitorId?: string | null;
-
-  type: string;
-
-  count?: number | null;
-
+  /** The name configured for the monitor by the user. */
+  name?: string | null;
+  /** The status code, if available, of the error request. */
   statusCode?: string | null;
-
+  /** When the most recent error state occurred. */
   timestamp?: string | null;
+  /** What kind of error the monitor reported. */
+  type: string;
 }
 
 export interface MonitorPageTitle {
@@ -424,22 +484,31 @@ export interface MonitorPageTitle {
   name?: string | null;
 }
 
+export interface DataPoint {
+  x?: UnsignedInteger | null;
+
+  y?: number | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
 
 export interface AllPingsQueryArgs {
+  /** Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'. */
   sort?: string | null;
-
+  /** Optional: the number of results to return. */
   size?: number | null;
-
+  /** Optional: the monitor ID filter. */
   monitorId?: string | null;
-
+  /** Optional: the check status to filter by. */
   status?: string | null;
-
+  /** The lower limit of the date range. */
   dateRangeStart: string;
-
+  /** The upper limit of the date range. */
   dateRangeEnd: string;
+  /** Optional: agent location to filter by. */
+  location?: string | null;
 }
 export interface GetMonitorsQueryArgs {
   dateRangeStart: string;
@@ -461,13 +530,18 @@ export interface GetMonitorChartsDataQueryArgs {
   dateRangeStart: string;
 
   dateRangeEnd: string;
+
+  location?: string | null;
 }
 export interface GetLatestMonitorsQueryArgs {
+  /** The lower limit of the date range. */
   dateRangeStart: string;
-
+  /** The upper limit of the date range. */
   dateRangeEnd: string;
-
+  /** Optional: a specific monitor ID filter. */
   monitorId?: string | null;
+  /** Optional: a specific instance location filter. */
+  location?: string | null;
 }
 export interface GetFilterBarQueryArgs {
   dateRangeStart: string;

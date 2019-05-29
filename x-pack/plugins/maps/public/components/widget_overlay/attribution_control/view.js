@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import _ from 'lodash';
 import {
   EuiText,
-  EuiPanel,
   EuiLink,
 } from '@elastic/eui';
 
@@ -21,7 +20,7 @@ export class AttributionControl  extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this._syncMbMapWithAttribution();
+    this._loadAttributions();
   }
 
   componentWillUnmount() {
@@ -29,11 +28,10 @@ export class AttributionControl  extends React.Component {
   }
 
   componentDidUpdate() {
-    this._syncMbMapWithAttribution();
+    this._loadAttributions();
   }
 
-  _syncMbMapWithAttribution = async () => {
-
+  _loadAttributions = async () => {
     const attributionPromises = this.props.layerList.map(async (layer) => {
       try {
         return await layer.getAttributions();
@@ -63,11 +61,21 @@ export class AttributionControl  extends React.Component {
     }
   };
 
+  _renderAttribution({ url, label }) {
+    if (!url) {
+      return label;
+    }
+
+    return (
+      <EuiLink color="text" href={url} target="_blank">{label}</EuiLink>
+    );
+  }
+
   _renderAttributions() {
     return this.state.uniqueAttributions.map((attribution, index) => {
       return (
         <Fragment key={index}>
-          <EuiLink color="subdued" href={attribution.url} target="_blank">{attribution.label}</EuiLink>
+          {this._renderAttribution(attribution)}
           {index < (this.state.uniqueAttributions.length - 1) && ', '}
         </Fragment>
       );
@@ -79,11 +87,11 @@ export class AttributionControl  extends React.Component {
       return null;
     }
     return (
-      <EuiPanel className="mapWidgetControl mapAttributionControl" paddingSize="none" grow={false}>
-        <EuiText color="subdued" size="xs">
-          <small>{this._renderAttributions()}</small>
+      <div className="mapAttributionControl">
+        <EuiText size="xs">
+          <small><strong>{this._renderAttributions()}</strong></small>
         </EuiText>
-      </EuiPanel>
+      </div>
     );
   }
 }

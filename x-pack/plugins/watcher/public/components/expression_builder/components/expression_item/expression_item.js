@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'ui/fancy_forms';
 import { uiModules } from 'ui/modules';
 import { keyMap } from 'ui/utils/key_map';
 import template from './expression_item.html';

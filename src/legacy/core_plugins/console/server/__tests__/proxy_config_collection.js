@@ -19,7 +19,7 @@
 
 /* eslint-env mocha */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import fs from 'fs';
 import { Agent as HttpsAgent } from 'https';

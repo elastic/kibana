@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { VisProvider } from 'ui/vis';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -46,16 +46,22 @@ describe('metric vis', () => {
         aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
       });
 
-      vis.params.metric.metrics = [{ accessor: 0, format: { id: 'url', params: {
-        urlTemplate: 'http://ip.info?address={{value}}',
-        labelTemplate: 'ip[{{value}}]'
-      } } }];
+      vis.params.dimensions = {
+        metrics: [{
+          accessor: 0, format: {
+            id: 'url', params: {
+              urlTemplate: 'http://ip.info?address={{value}}',
+              labelTemplate: 'ip[{{value}}]'
+            }
+          }
+        }]
+      };
 
       const el = document.createElement('div');
       const Controller = metricVisType.visualization;
       const controller = new Controller(el, vis);
       const render = (esResponse) => {
-        controller.render(esResponse);
+        controller.render(esResponse, vis.params);
       };
 
       return { el, render };

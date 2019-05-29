@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { createPack$ } from '../create_pack';
 import { PluginPack } from '../plugin_pack';

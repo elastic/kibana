@@ -12,7 +12,7 @@ export const filebeatTraefikRules = [
     },
     format: [
       {
-        constant: '[Traefik][access] ',
+        constant: '[traefik][access] ',
       },
       {
         field: 'traefik.access.remote_ip',

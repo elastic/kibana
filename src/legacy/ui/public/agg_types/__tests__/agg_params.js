@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { AggParams } from '../agg_params';
 import { BaseParamType } from '../param_types/base';
 import { FieldParamType } from '../param_types/field';
 import { OptionedParamType } from '../param_types/optioned';
-import { RegexParamType } from '../param_types/regex';
+import { SelectParamType } from '../param_types/select';
 
 describe('AggParams class', function () {
 
@@ -64,17 +64,17 @@ describe('AggParams class', function () {
       expect(aggParams[0]).to.be.a(OptionedParamType);
     });
 
-    it('Uses the RegexParamType class for params of type "regex"', function () {
+    it('Uses the SelectParamType class for params of type "select"', function () {
       const params = [
         {
-          name: 'exclude',
-          type: 'regex'
+          name: 'order',
+          type: 'select'
         }
       ];
       const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
-      expect(aggParams[0]).to.be.a(RegexParamType);
+      expect(aggParams[0]).to.be.a(SelectParamType);
     });
 
     it('Always converts the params to a BaseParamType', function () {

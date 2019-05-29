@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
 import { LicenseType } from '../../../../common/constants/security';
@@ -168,6 +171,6 @@ export interface FrameworkRouteOptions<
 export type FrameworkRouteHandler<
   RouteRequest extends KibanaServerRequest,
   RouteResponse extends FrameworkResponse
-> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => void;
+> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => Promise<RouteResponse>;
 
 export type FrameworkResponse = Lifecycle.ReturnValue;

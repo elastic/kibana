@@ -24,7 +24,12 @@ export const loadEntriesReducer = createGraphqlOperationReducer(
   operationKey,
   initialLogEntriesState,
   loadEntriesActionCreators,
-  (state, action) => action.payload.result.data.source.logEntriesAround
+  (state, action) => action.payload.result.data.source.logEntriesAround,
+  () => ({
+    entries: [],
+    hasMoreAfter: false,
+    hasMoreBefore: false,
+  })
 );
 
 export const loadEntriesEpic = createGraphqlQueryEpic(logEntriesQuery, loadEntriesActionCreators);

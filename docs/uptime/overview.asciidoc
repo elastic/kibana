@@ -1,0 +1,61 @@
+[role="xpack"]
+[[uptime-overview]]
+
+== Overview
+
+The Uptime overview is intended to help you quickly identify and diagnose outages and
+other connectivity issues within your network or environment. There is a date range
+selection that is global to the Uptime UI; you can use this selection to highlight
+an absolute date range, or a relative one, similar to other areas of Kibana.
+
+[float]
+=== Filter bar
+
+[role="screenshot"]
+image::uptime/images/filter-bar.png[Filter bar]
+
+The filter bar is designed to let you quickly view specific groups of monitors, or even
+an individual monitor, if you have defined many.
+
+This control allows you to use automated filter options, as well as input custom filter
+text to select specific monitors by field, URL, ID, and other attributes.
+
+[float]
+=== Snapshot view
+
+[role="screenshot"]
+image::uptime/images/snapshot-view.png[Snapshot view]
+
+This view is intended to quickly give you a sense of the overall
+status of the environment you're monitoring, or a subset of those monitors.
+Here, you can see the total number of detected monitors within the selected
+Uptime date range. In addition to the total, the counts for the number of monitors
+in an `up` or `down` state are displayed, based on the last check reported by Heartbeat
+for each monitor.
+
+Next to the counts, there is a histogram displaying the change over time throughout the
+selected date range. 
+
+[float]
+=== Monitor list
+
+[role="screenshot"]
+image::uptime/images/monitor-list.png[Monitor list]
+
+The Monitor list displays information at the level of individual monitors.
+The data shown here will flesh out your individual monitors, and provide a quick
+way to navigate to a more in-depth visualization for interesting hosts or endpoints.
+
+This table includes information like the most recent status, when the monitor was last checked, its
+ID and URL, its IP address, and a dedicated sparkline showing its check status over time.
+
+[float]
+=== Error list
+
+[role="screenshot"]
+image::uptime/images/error-list.png[Error list]
+
+The Error list displays aggregations of errors that Heartbeat has logged. Errors are
+displayed by Error type, monitor ID, and message. Clicking a monitor's ID will take you
+to the corresponding Monitor view, which can provide you richer information about the individual
+data points that are resulting in the displayed errors.

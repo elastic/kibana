@@ -16,23 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
-import { isBackgroundInverted } from '../../../../common/set_is_reversed';
-import _ from 'lodash';
-import Markdown from 'react-markdown';
-import replaceVars from '../../lib/replace_vars';
-import convertSeriesToVars from '../../lib/convert_series_to_vars';
-import ErrorComponent from '../../error';
 import uuid from 'uuid';
+import { get } from 'lodash';
+import { Markdown } from 'ui/markdown/markdown';
+
+import { ErrorComponent } from '../../error';
+import { replaceVars } from '../../lib/replace_vars';
+import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
+import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 
 const getMarkdownId = id => `markdown-${id}`;
 
-function MarkdownVisualization(props) {
+export function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
-  const series = _.get(visData, `${model.id}.series`, []);
+  const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
   const markdownElementId = getMarkdownId(uuid.v1());
 
@@ -74,7 +74,9 @@ function MarkdownVisualization(props) {
         {markdownError && <ErrorComponent error={markdownError} />}
         <style type="text/css">{markdownCss}</style>
         <div className={contentClasses}>
-          <div id={markdownElementId}>{!markdownError && <Markdown escapeHtml={true} source={markdownSource} />}</div>
+          <div id={markdownElementId}>
+            { !markdownError && <Markdown markdown={markdownSource} openLinksInNewTab={model.markdown_openLinksInNewTab} /> }
+          </div>
         </div>
       </div>
     );
@@ -96,5 +98,3 @@ MarkdownVisualization.propTypes = {
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func
 };
-
-export default MarkdownVisualization;

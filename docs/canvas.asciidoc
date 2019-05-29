@@ -1,10 +1,10 @@
+
+[role="xpack"]
 [[canvas]]
 = Canvas
 
 [partintro]
 --
-
-beta[]
 
 Congratulations on finding the Canvas application in {kib}. You are in for a treat. 
 Canvas is a whole new way of making data look amazing. Canvas combines data with 

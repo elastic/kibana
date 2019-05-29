@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { __newPlatformInit__, initChromeInjectedVarsApi } from './injected_vars';
+import { __newPlatformSetup__, initChromeInjectedVarsApi } from './injected_vars';
 
 function initChrome() {
   const chrome: any = {};
@@ -29,7 +29,7 @@ const newPlatformInjectedMetadata: any = {
   getInjectedVars: jest.fn(),
   getInjectedVar: jest.fn(),
 };
-__newPlatformInit__(newPlatformInjectedMetadata);
+__newPlatformSetup__(newPlatformInjectedMetadata);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -42,43 +42,22 @@ describe('#getInjected()', () => {
     chrome.getInjected();
     chrome.getInjected('foo');
     chrome.getInjected('foo', 'bar');
-
-    expect(newPlatformInjectedMetadata).toMatchInlineSnapshot(`
-Object {
-  "getInjectedVar": [MockFunction] {
-    "calls": Array [
-      Array [
-        "foo",
-        undefined,
-      ],
-      Array [
-        "foo",
-        "bar",
-      ],
-    ],
-    "results": Array [
-      Object {
-        "isThrow": false,
-        "value": undefined,
-      },
-      Object {
-        "isThrow": false,
-        "value": undefined,
-      },
-    ],
-  },
-  "getInjectedVars": [MockFunction] {
-    "calls": Array [
-      Array [],
-    ],
-    "results": Array [
-      Object {
-        "isThrow": false,
-        "value": undefined,
-      },
-    ],
-  },
-}
+    expect(newPlatformInjectedMetadata.getInjectedVars.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [],
+]
+`);
+    expect(newPlatformInjectedMetadata.getInjectedVar.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "foo",
+    undefined,
+  ],
+  Array [
+    "foo",
+    "bar",
+  ],
+]
 `);
   });
 

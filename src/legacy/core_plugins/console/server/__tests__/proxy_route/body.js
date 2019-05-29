@@ -18,8 +18,8 @@
  */
 
 import sinon from 'sinon';
-import Wreck from 'wreck';
-import expect from 'expect.js';
+import Wreck from '@hapi/wreck';
+import expect from '@kbn/expect';
 import { Server } from 'hapi';
 
 import { createProxyRoute } from '../../';
@@ -36,9 +36,11 @@ describe('Console Proxy Route', () => {
       sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub(response));
 
       const server = new Server();
-      server.route(createProxyRoute({
-        baseUrl: 'http://localhost:9200'
-      }));
+      server.route(
+        createProxyRoute({
+          baseUrl: 'http://localhost:9200',
+        })
+      );
 
       teardowns.push(() => server.stop());
 

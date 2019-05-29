@@ -66,11 +66,12 @@ export function onBrushEvent(event, $state) {
     const min = event.range[0];
     const max = event.range[event.range.length - 1];
     let range;
+
     if (isDate) {
       range = {
-        gte: moment(min).valueOf(),
-        lt: moment(max).valueOf(),
-        format: 'epoch_millis'
+        gte: moment(min).toISOString(),
+        lt: moment(max).toISOString(),
+        format: 'strict_date_optional_time'
       };
     } else {
       range = {
@@ -81,17 +82,17 @@ export function onBrushEvent(event, $state) {
 
     if (_.has(existingFilter, 'range')) {
       existingFilter.range[fieldName] = range;
-    } else if (_.has(existingFilter, 'script.script.params.gte')
-      && _.has(existingFilter, 'script.script.params.lt')) {
-      existingFilter.script.script.params.gte = min;
-      existingFilter.script.script.params.lt = max;
     } else {
       const newFilter = buildRangeFilter(
         field,
         range,
         indexPattern,
         event.data.xAxisFormatter);
-      $state.$newFilters = [newFilter];
+      if (existingFilter) {
+        Object.assign(existingFilter, newFilter);
+      } else {
+        $state.$newFilters = [newFilter];
+      }
     }
   }
 }

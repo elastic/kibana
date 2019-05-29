@@ -29,7 +29,6 @@ export const withLogPosition = connect(
     jumpToTargetPosition: logPositionActions.jumpToTargetPosition,
     jumpToTargetPositionTime: logPositionActions.jumpToTargetPositionTime,
     reportVisiblePositions: logPositionActions.reportVisiblePositions,
-    reportVisibleSummary: logPositionActions.reportVisibleSummary,
     startLiveStreaming: logPositionActions.startAutoReload,
     stopLiveStreaming: logPositionActions.stopAutoReload,
   })

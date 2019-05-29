@@ -5,5 +5,6 @@
  */
 
 export enum InfraMetricsErrorCodes {
+  // eslint-disable-next-line @typescript-eslint/camelcase
   invalid_node = 'METRICS_INVALID_NODE',
 }

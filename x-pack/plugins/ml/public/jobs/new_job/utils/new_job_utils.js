@@ -15,28 +15,27 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 
 // Provider for creating the items used for searching and job creation.
 // Uses the $route object to retrieve the indexPattern and savedSearch from the url
-export function SearchItemsProvider(Private, $route, config) {
+export function SearchItemsProvider($route, config) {
 
   function createSearchItems() {
     let indexPattern = $route.current.locals.indexPattern;
 
+    // query is only used by the data visualizer as it needs
+    // a lucene query_string.
+    // Using a blank query will cause match_all:{} to be used
+    // when passed through luceneStringToDsl
     let query = {
-      query: '*',
+      query: '',
       language: 'lucene'
     };
 
     let combinedQuery = {
       bool: {
         must: [{
-          query_string: {
-            analyze_wildcard: true,
-            query: '*'
-          }
+          match_all: {}
         }]
       }
     };
-
-    let filters = [];
 
     const savedSearch = $route.current.locals.savedSearch;
     if (indexPattern.id === undefined && savedSearch.id !== undefined) {
@@ -46,9 +45,8 @@ export function SearchItemsProvider(Private, $route, config) {
       query = searchSource.getField('query');
       const fs = searchSource.getField('filter');
 
-      if (fs.length) {
-        filters = fs;
-      }
+      const filters = (fs.length) ? fs : [];
+
       const esQueryConfigs = getEsQueryConfig(config);
       combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
@@ -56,9 +54,8 @@ export function SearchItemsProvider(Private, $route, config) {
     return {
       indexPattern,
       savedSearch,
-      filters,
       query,
-      combinedQuery
+      combinedQuery,
     };
   }
 

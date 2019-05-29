@@ -8,7 +8,7 @@ import { Location } from 'history';
 import { last } from 'lodash';
 import React from 'react';
 import chrome from 'ui/chrome';
-import { toQuery } from '../../shared/Links/url_helpers';
+import { getAPMHref } from '../../shared/Links/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
 import { routes } from './routeConfig';
 
@@ -19,10 +19,9 @@ interface Props {
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
-    const { _g = '', kuery = '' } = toQuery(this.props.location.search);
     const breadcrumbs = this.props.breadcrumbs.map(({ value, match }) => ({
       text: value,
-      href: `#${match.url}?_g=${_g}&kuery=${kuery}`
+      href: getAPMHref(match.url, this.props.location.search)
     }));
 
     const current = last(breadcrumbs) || { text: '' };

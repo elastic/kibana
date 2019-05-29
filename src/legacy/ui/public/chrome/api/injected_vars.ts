@@ -18,11 +18,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { InjectedMetadataStartContract } from '../../../../../core/public/injected_metadata';
+import { InternalCoreSetup } from '../../../../../core/public';
 
-let newPlatformInjectedVars: InjectedMetadataStartContract;
+let newPlatformInjectedVars: InternalCoreSetup['injectedMetadata'];
 
-export function __newPlatformInit__(instance: InjectedMetadataStartContract) {
+export function __newPlatformSetup__(instance: InternalCoreSetup['injectedMetadata']) {
   if (newPlatformInjectedVars) {
     throw new Error('ui/chrome/api/injected_vars is already initialized');
   }
@@ -31,7 +31,7 @@ export function __newPlatformInit__(instance: InjectedMetadataStartContract) {
 }
 
 export function initChromeInjectedVarsApi(chrome: { [key: string]: any }) {
-  chrome.getInjected = (name: string, defaultValue: any) =>
+  chrome.getInjected = (name?: string, defaultValue?: any) =>
     cloneDeep(
       name
         ? newPlatformInjectedVars.getInjectedVar(name, defaultValue)

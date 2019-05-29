@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService }) {
@@ -47,7 +47,7 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      const configurationBlocks = apiResponse.configuration_blocks;
+      const configurationBlocks = apiResponse.list;
 
       expect(configurationBlocks).to.be.an(Array);
       expect(configurationBlocks.length).to.be(0);
@@ -64,7 +64,7 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      const configurationBlocks = apiResponse.configuration_blocks;
+      const configurationBlocks = apiResponse.list;
 
       expect(configurationBlocks).to.be.an(Array);
       expect(configurationBlocks.length).to.be(3);

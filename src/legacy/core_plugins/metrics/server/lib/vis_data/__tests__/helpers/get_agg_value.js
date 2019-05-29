@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getAggValue from '../../helpers/get_agg_value';
+import { getAggValue } from '../../helpers/get_agg_value';
 
 function testAgg(row, metric, expected) {
   let name = metric.type;
@@ -130,6 +130,15 @@ describe('getAggValue', () => {
       normalized_value: -15.806451612903226,
     },
   };
+
+
+  describe('count', () => {
+    testAgg(
+      basicWithDerv,
+      { id: 'test', type: 'count' },
+      2
+    );
+  });
 
   describe('derivative', () => {
     testAgg(

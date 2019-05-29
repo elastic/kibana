@@ -117,7 +117,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 >
   <EuiTitle
     size="l"
-    textTransform="none"
   >
     <h2
       className="euiTitle euiTitle--large"
@@ -132,17 +131,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
     </h2>
   </EuiTitle>
   <EuiHorizontalRule
-    margin="l"
     size="half"
   >
     <hr
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <div
       className="euiText euiText--medium"
     >
@@ -157,9 +152,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       </p>
     </div>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  >
+  <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
     />
@@ -167,7 +160,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   <EuiLoadingSpinner
     size="l"
   >
-    <div
+    <span
       className="euiLoadingSpinner euiLoadingSpinner--large"
     />
   </EuiLoadingSpinner>
@@ -289,10 +282,9 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   isCollectionIntervalUpdating={true}
   property="xpack.monitoring.collection.interval"
 >
-  <Component>
+  <WhatIs>
     <EuiTitle
       size="l"
-      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -308,15 +300,11 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
     </EuiTitle>
     <EuiTextColor
       color="subdued"
-      component="span"
     >
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText
-          grow={true}
-          size="m"
-        >
+        <EuiText>
           <div
             className="euiText euiText--medium"
           >
@@ -333,19 +321,15 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
         </EuiText>
       </span>
     </EuiTextColor>
-  </Component>
+  </WhatIs>
   <EuiHorizontalRule
-    margin="l"
     size="half"
   >
     <hr
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <div
       className="euiText euiText--medium"
     >
@@ -430,27 +414,20 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       </p>
     </div>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  >
+  <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
-    responsive={true}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -463,6 +440,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
             iconSide="left"
             isLoading={true}
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button
@@ -479,7 +457,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
                   className="euiButton__spinner"
                   size="m"
                 >
-                  <div
+                  <span
                     className="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
                   />
                 </EuiLoadingSpinner>
@@ -619,10 +597,9 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   isCollectionIntervalUpdating={false}
   property="xpack.monitoring.collection.interval"
 >
-  <Component>
+  <WhatIs>
     <EuiTitle
       size="l"
-      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -638,15 +615,11 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
     </EuiTitle>
     <EuiTextColor
       color="subdued"
-      component="span"
     >
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText
-          grow={true}
-          size="m"
-        >
+        <EuiText>
           <div
             className="euiText euiText--medium"
           >
@@ -663,19 +636,15 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
         </EuiText>
       </span>
     </EuiTextColor>
-  </Component>
+  </WhatIs>
   <EuiHorizontalRule
-    margin="l"
     size="half"
   >
     <hr
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <div
       className="euiText euiText--medium"
     >
@@ -760,27 +729,20 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       </p>
     </div>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  >
+  <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
-    responsive={true}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -793,6 +755,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
             iconSide="left"
             isLoading={false}
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button

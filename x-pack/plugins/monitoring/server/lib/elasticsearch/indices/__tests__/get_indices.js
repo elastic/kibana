@@ -5,7 +5,7 @@
  */
 
 import { handleResponse } from '../get_indices';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('Get Elasticsearch Indices', () => {
   it('handle an empty response', () => {

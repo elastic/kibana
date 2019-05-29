@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { flatten } from 'lodash';
+import chrome from 'ui/chrome';
 import { fetch } from '../../common/lib/fetch';
 import { buildBoolArray } from '../../server/lib/build_bool_array';
 

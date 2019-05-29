@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { percentileRanksMetricAgg } from '../../metrics/percentile_ranks';
 import { VisProvider } from '../../../vis';

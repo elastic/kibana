@@ -7,7 +7,7 @@
 import { CMTokensAdapter } from './adapter_types';
 
 export class MemoryTokensAdapter implements CMTokensAdapter {
-  public async createEnrollmentToken(): Promise<string> {
-    return '2jnwkrhkwuehriauhweair';
+  public async createEnrollmentTokens(): Promise<string[]> {
+    return ['2jnwkrhkwuehriauhweair'];
   }
 }

@@ -18,14 +18,13 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { migrateRawDocs } from './migrate_raw_docs';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
-    const transform = sinon.spy((doc: any) => _.set(doc, 'attributes.name', 'HOI!'));
+    const transform = jest.fn<any, any>((doc: any) => _.set(doc, 'attributes.name', 'HOI!'));
     const result = migrateRawDocs(new SavedObjectsSerializer(new SavedObjectsSchema()), transform, [
       { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
       { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
@@ -42,11 +41,13 @@ describe('migrateRawDocs', () => {
       },
     ]);
 
-    sinon.assert.calledTwice(transform);
+    expect(transform).toHaveBeenCalled();
   });
 
   test('passes invalid docs through untouched', async () => {
-    const transform = sinon.spy((doc: any) => _.set(_.cloneDeep(doc), 'attributes.name', 'TADA'));
+    const transform = jest.fn<any, any>((doc: any) =>
+      _.set(_.cloneDeep(doc), 'attributes.name', 'TADA')
+    );
     const result = migrateRawDocs(new SavedObjectsSerializer(new SavedObjectsSchema()), transform, [
       { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
       { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
@@ -60,7 +61,7 @@ describe('migrateRawDocs', () => {
       },
     ]);
 
-    expect(transform.args).toEqual([
+    expect(transform.mock.calls).toEqual([
       [
         {
           id: 'd',

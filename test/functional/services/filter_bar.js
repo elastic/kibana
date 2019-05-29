@@ -26,7 +26,10 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     hasFilter(key, value, enabled = true) {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
       return testSubjects.exists(
-        `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`
+        `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`,
+        {
+          allowHidden: true
+        }
       );
     }
 
@@ -126,6 +129,18 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       if (cancelSaveFilterModalButtonExists) {
         await testSubjects.click('cancelSaveFilter');
       }
+    }
+
+    async getIndexPatterns() {
+      await testSubjects.click('addFilter');
+      const indexPatterns = await comboBox.getOptionsList('filterIndexPatternsSelect');
+      await this.ensureFieldEditorModalIsClosed();
+      return indexPatterns.trim().split('\n').join(',');
+    }
+
+    async selectIndexPattern(indexPatternTitle) {
+      await testSubjects.click('addFilter');
+      await comboBox.set('filterIndexPatternsSelect', indexPatternTitle);
     }
   }
 

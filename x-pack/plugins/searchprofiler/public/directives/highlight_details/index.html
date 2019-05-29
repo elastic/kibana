@@ -1,49 +1,65 @@
-<div>
-  <b>{{detailRow.indexName}}</b>
-  <p>[{{detailRow.shardID}}][{{detailRow.shardNumber}}]</p>
-  <br/>
-  <b
-    i18n-id="xpack.searchProfiler.highlightDetails.typeTitle"
-    i18n-default-message="Type"
-  ></b>
-  <p>{{detailRow.query_type}}</p>
-  <b
-    i18n-id="xpack.searchProfiler.highlightDetails.descriptionTitle"
-    i18n-default-message="Description"
-  ></b>
-  <p>{{detailRow.lucene}}</p>
-  <b>
-    <span
-      tooltip="{{:: 'xpack.searchProfiler.highlightDetails.totalTimeTooltip' | i18n: { defaultMessage: 'The total time spent at this query component, inclusive of children' } }}"
-      tooltip-placement="left"
-      i18n-id="xpack.searchProfiler.highlightDetails.totalTimeTitle"
-      i18n-default-message="Total Time"
-    ></span>
-  </b>
-  <p>{{detailRow.time | msToPretty:3 }}</p>
-  <b>
-    <span
-      tooltip="{{:: 'xpack.searchProfiler.highlightDetails.selfTimeTooltip' | i18n: { defaultMessage: 'The time spent by this query component alone, exclusive of children' } }}"
-      tooltip-placement="left"
-      i18n-id="xpack.searchProfiler.highlightDetails.selfTimeTitle"
-      i18n-default-message="Self Time"
-    ></span>
-  </b>
-  <p>{{detailRow.selfTime | msToPretty:3 }}</p>
-  <b
+<div class="euiFlyoutHeader euiFlyoutHeader--hasBorder">
+  <h2 id="flyoutTitle">
+    <small class="prfDevTool__flyoutSubtitle">{{detailRow.indexName}}</small> <br>
+    <strong>[{{detailRow.shardID}}][{{detailRow.shardNumber}}]</strong>
+  </h2>
+</div>
+
+<div class="euiFlyoutBody">
+  <div class="euiFlyoutBody__overflow">
+    <div class="euiText">
+      <dl>
+        <dt
+          i18n-id="xpack.searchProfiler.highlightDetails.typeTitle"
+          i18n-default-message="Type"
+        ></dt>
+        <dd>{{detailRow.query_type}}</dd>
+        <dt
+          i18n-id="xpack.searchProfiler.highlightDetails.descriptionTitle"
+          i18n-default-message="Description"
+        ></dt>
+        <dd><code>{{detailRow.lucene}}</code></dd>
+        <dt>
+          <span
+            tooltip="{{:: 'xpack.searchProfiler.highlightDetails.totalTimeTooltip' | i18n: { defaultMessage: 'The total time spent at this query component, inclusive of children' } }}"
+            tooltip-placement="left"
+            i18n-id="xpack.searchProfiler.highlightDetails.totalTimeTitle"
+            i18n-default-message="Total Time"
+          ></span>
+        </dt>
+        <dd>{{detailRow.time | msToPretty:3 }}</dd>
+        <dt>
+          <span
+            tooltip="{{:: 'xpack.searchProfiler.highlightDetails.selfTimeTooltip' | i18n: { defaultMessage: 'The time spent by this query component alone, exclusive of children' } }}"
+            tooltip-placement="left"
+            i18n-id="xpack.searchProfiler.highlightDetails.selfTimeTitle"
+            i18n-default-message="Self Time"
+          ></span>
+        </dt>
+        <dd>{{detailRow.selfTime | msToPretty:3 }}</dd>
+      </dl>
+    </div>
+    <br>
+    <h3><strong
     i18n-id="xpack.searchProfiler.highlightDetails.timingBreakdownTitle"
     i18n-default-message="Timing Breakdown"
-  ></b>
-  <table class="prfDevTool__breakdown">
-    <tr style="background-color:{{breakdown.color}}" ng-repeat="breakdown in detailRow.breakdown">
-      <td><span tooltip="{{breakdown.tip}}" tooltip-placement="left">{{breakdown.key}}</span></td>
-      <td>{{breakdown.time | nsToPretty: 1}}</td>
-      <td style="width:33%; background-color:white;">
-        <div class="prfDevTool__graph progress">
-          <div class="prfDevTool__bar" style="width:{{breakdown.relative}}%"></div>
-          <p class="prfDevTool__graphLabel">{{breakdown.relative}}%</p>
-        </div>
-      </td>
-    </tr>
-  </table>
+    ></strong></h3>
+    <br>
+    <table class="prfDevTool__breakdown" width="100%">
+      <tr ng-repeat="breakdown in detailRow.breakdown">
+        <td class="prfDevTool__cell prfDevTool__description"><span tooltip="{{breakdown.tip}}" tooltip-placement="left">{{breakdown.key}}</span></td>
+        <td class="prfDevTool__cell prfDevTool__time">
+          <span class="euiBadge prfDevTool__badge" ng-style="{'background-color': breakdown.color}">
+            {{breakdown.time | nsToPretty: 1}}
+          </span>
+        </td>
+        <td class="prfDevTool__cell prfDevTool__percentage">
+          <span class="euiBadge euiBadge--default prfDevTool__progress--percent" style="--prfDevToolProgressPercentage: {{breakdown.relative}}%">
+            <span class="prfDevTool__progress--percent-ie" ng-style="{'width': breakdown.relative + '%'}"></span>
+            <span class="prfDevTool__progressText">{{breakdown.relative}}%</span>
+          </span>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>

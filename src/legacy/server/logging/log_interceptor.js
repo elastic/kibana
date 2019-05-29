@@ -32,11 +32,13 @@ function doesMessageMatch(errorMessage, match) {
   if (isRegExp) return match.test(errorMessage);
   return errorMessage === match;
 }
-// converts the given event into a debug log if it's an error of the given type
-function downgradeIfErrorType(errorType, event, field = 'errno') {
-  const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-  const matchesErrorType = isClientError && get(event, `error.${field}`) === errorType;
 
+// converts the given event into a debug log if it's an error of the given type
+function downgradeIfErrorType(errorType, event) {
+  const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
+  if (!isClientError) return null;
+
+  const matchesErrorType = get(event, 'error.code') === errorType || get(event, 'error.errno') === errorType;
   if (!matchesErrorType) return null;
 
   const errorTypeTag = errorType.toLowerCase();
@@ -117,7 +119,7 @@ export class LogInterceptor extends Stream.Transform {
   }
 
   downgradeIfHTTPSWhenHTTP(event) {
-    return downgradeIfErrorType('HPE_INVALID_METHOD', event, 'code');
+    return downgradeIfErrorType('HPE_INVALID_METHOD', event);
   }
 
   downgradeIfHTTPWhenHTTPS(event) {

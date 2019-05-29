@@ -19,7 +19,7 @@
 
 // Load the kibana app dependencies.
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { timefilter } from 'ui/timefilter';
@@ -46,7 +46,7 @@ const init = function (index, type, id) {
       };
     });
 
-    $provide.service('es', function (Private, $q) {
+    $provide.service('es', function ($q) {
       this.search = function (config) {
         const deferred = $q.defer();
 

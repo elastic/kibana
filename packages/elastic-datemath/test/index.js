@@ -20,7 +20,7 @@
 import dateMath from '../src/index';
 import moment from 'moment';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 /**
  * Require a new instance of the moment library, bypassing the require cache.

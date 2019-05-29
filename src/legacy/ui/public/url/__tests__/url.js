@@ -19,7 +19,7 @@
 
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import faker from 'faker';
 import _ from 'lodash';
@@ -210,7 +210,7 @@ describe('kbnUrl', function () {
       const wrappers = [ ['{{', '}}'], ['{{ ', ' }}'], ['{{', '  }}'], ['{{    ', '}}'], ['{{    ', '         }}']];
       // make sure filters are evaluated via angular expressions
       const objIndex = 4; // used to case one replace as an object
-      const filters = ['', 'uppercase', '', 'uppercase', 'rison'];
+      const filters = ['', 'uppercase', '', 'uppercase', ''];
 
       // the words (template keys) used must all be unique
       const words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {

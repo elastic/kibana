@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import { get } from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from '../../utils/simple_emitter';
 
@@ -49,8 +49,8 @@ export function VislibLibDispatchProvider(Private, config) {
         dataPointer = dataPointer.parent;
       }
 
-      if (data.rawData.table.$parent) {
-        const { table, column, row, key } = data.rawData.table.$parent;
+      if (get(data, 'rawData.table.$parent')) {
+        const { table, column, row, key } = get(data, 'rawData.table.$parent');
         points.push({ table, column, row, value: key });
       }
 
@@ -61,7 +61,7 @@ export function VislibLibDispatchProvider(Private, config) {
       const points = [];
 
       ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
-        if (data[val]) {
+        if (data[val] && data[val].column !== undefined && data[val].row !== undefined) {
           points.push(data[val]);
         }
       });
@@ -75,10 +75,13 @@ export function VislibLibDispatchProvider(Private, config) {
      * @param d {Object} Data point
      * @returns event with list of data points related to the click
      */
-    clickEventResponse(d) {
-      const _data = d3.event.target.nearestViewportElement ?
-        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-      const isSlices = !!(_data && _data.slices);
+    clickEventResponse(d, props = {}) {
+      let isSlices = props.isSlices;
+      if (isSlices === undefined) {
+        const _data = d3.event.target.nearestViewportElement ?
+          d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
+        isSlices = !!(_data && _data.slices);
+      }
 
       const data = d.input || d;
 
@@ -107,7 +110,7 @@ export function VislibLibDispatchProvider(Private, config) {
       const series = isSeries ? data.series : undefined;
       const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
-      const color = _.get(handler, 'data.color');
+      const color = get(handler, 'data.color');
 
       const eventData = {
         value: d.y,
@@ -241,33 +244,9 @@ export function VislibLibDispatchProvider(Private, config) {
     addBrushEvent(svg) {
       if (!this.isBrushable()) return;
 
-      const self = this;
       const xScale = this.handler.categoryAxes[0].getScale();
-      const brush = this.createBrush(xScale, svg);
+      this.createBrush(xScale, svg);
 
-      function simulateClickWithBrushEnabled(d, i) {
-        if (!validBrushClick(d3.event)) return;
-
-        if (isQuantitativeScale(xScale)) {
-          const bar = d3.select(this);
-          const startX = d3.mouse(svg.node());
-          const startXInv = xScale.invert(startX[0]);
-
-          // Reset the brush value
-          brush.extent([startXInv, startXInv]);
-
-          // Magic!
-          // Need to call brush on svg to see brush when brushing
-          // while on top of bars.
-          // Need to call brush on bar to allow the click event to be registered
-          svg.call(brush);
-          bar.call(brush);
-        } else {
-          self.emit('click', self.eventResponse(d, i));
-        }
-      }
-
-      return this.addEvent('mousedown', simulateClickWithBrushEnabled);
     }
 
     /**
@@ -372,22 +351,6 @@ export function VislibLibDispatchProvider(Private, config) {
 
         return brush;
       }
-    }
-  }
-
-  /**
-   * Determine if d3.Scale is quantitative
-   *
-   * @param element {d3.Scale}
-   * @method isQuantitativeScale
-   * @returns {boolean}
-   */
-  function isQuantitativeScale(scale) {
-    //Invert is a method that only exists on quantitative scales
-    if (scale.invert) {
-      return true;
-    } else {
-      return false;
     }
   }
 

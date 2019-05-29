@@ -5,23 +5,26 @@
  */
 
 import { get } from 'lodash';
-import { APMError } from '../typings/es_schemas/Error';
-import { Span } from '../typings/es_schemas/Span';
-import { Transaction } from '../typings/es_schemas/Transaction';
+import { AllowUnknownProperties } from '../typings/common';
+import { APMError } from '../typings/es_schemas/ui/APMError';
+import { Span } from '../typings/es_schemas/ui/Span';
+import { Transaction } from '../typings/es_schemas/ui/Transaction';
 import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {
-  const transaction: Transaction = {
+  const transaction: AllowUnknownProperties<Transaction> = {
     '@timestamp': new Date().toString(),
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     http: {
       request: { method: 'GET' },
       response: { status_code: 200 }
     },
-    url: { full: 'http://www.elastic.co' },
+    url: { full: 'http://www.elastic.co', domain: 'www.elastic.co' },
     service: {
       name: 'service name',
       language: { name: 'nodejs', version: 'v1337' }
@@ -56,10 +59,12 @@ describe('Transaction', () => {
 });
 
 describe('Span', () => {
-  const span: Span = {
+  const span: AllowUnknownProperties<Span> = {
     '@timestamp': new Date().toString(),
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     processor: {
@@ -99,9 +104,11 @@ describe('Span', () => {
 });
 
 describe('Error', () => {
-  const errorDoc: APMError = {
+  const errorDoc: AllowUnknownProperties<APMError> = {
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     error: {
@@ -142,14 +149,17 @@ describe('Error', () => {
       id: 'parentId'
     },
     transaction: {
-      id: 'transaction id'
+      id: 'transaction id',
+      type: 'request'
     }
   };
 
   matchSnapshot(errorDoc);
 });
 
-function matchSnapshot(obj: Span | Transaction | APMError) {
+function matchSnapshot(
+  obj: AllowUnknownProperties<Span | Transaction | APMError>
+) {
   Object.entries(fieldnames).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {

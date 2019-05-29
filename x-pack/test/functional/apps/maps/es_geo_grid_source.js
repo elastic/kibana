@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
 
@@ -20,7 +20,8 @@ export default function ({ getPageObjects, getService }) {
     const DATA_CENTER_LAT = 38;
 
     async function getRequestTimestamp() {
-      await PageObjects.maps.openInspectorRequestsView();
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
       const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
@@ -122,7 +123,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           await inspector.close();
@@ -136,7 +138,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
@@ -195,7 +198,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           await inspector.close();
@@ -209,7 +213,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');

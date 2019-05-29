@@ -8,26 +8,42 @@ import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
+import { SearchSource } from '../../../../kibana_services';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE, DEFAULT_ES_DOC_LIMIT } from '../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
+import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
+import { getTermsFields } from '../../../utils/get_terms_fields';
 
-const DEFAULT_LIMIT = 2048;
+import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 export class ESSearchSource extends AbstractESSource {
 
-  static type = 'ES_SEARCH';
-  static title = 'Documents';
-  static description = 'Geospatial data from a Kibana index pattern';
+  static type = ES_SEARCH;
+  static title = i18n.translate('xpack.maps.source.esSearchTitle', {
+    defaultMessage: 'Documents'
+  });
+  static description = i18n.translate('xpack.maps.source.esSearchDescription', {
+    defaultMessage: 'Geospatial data from a Kibana index pattern'
+  });
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSelect = (layerConfig) => {
-      const layerSource = new ESSearchSource({
+    const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const source = new ESSearchSource({
         id: uuid(),
-        ...layerConfig
+        ...sourceConfig
       }, inspectorAdapters);
-      onPreviewSource(layerSource);
+      onPreviewSource(source);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
@@ -38,8 +54,7 @@ export class ESSearchSource extends AbstractESSource {
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
-      limit: _.get(descriptor, 'limit', DEFAULT_LIMIT),
-      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', true),
+      filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     }, inspectorAdapters);
   }
@@ -66,11 +81,12 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
+  getMetricFields() {
+    return [];
+  }
+
   getFieldNames() {
-    return [
-      this._descriptor.geoField,
-      ...this._descriptor.tooltipProperties
-    ];
+    return [this._descriptor.geoField];
   }
 
   async getImmutableProperties() {
@@ -86,15 +102,33 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     return [
-      { label: 'Data source', value: ESSearchSource.title },
-      { label: 'Index pattern', value: indexPatternTitle },
-      { label: 'Geospatial field', value: this._descriptor.geoField },
-      { label: 'Geospatial field type', value: geoFieldType },
+      {
+        label: getDataSourceLabel(),
+        value: ESSearchSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
+          defaultMessage: `Index pattern`,
+        }),
+        value: indexPatternTitle
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
+          defaultMessage: 'Geospatial field',
+        }),
+        value: this._descriptor.geoField
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esSearch.geoFieldTypeLabel', {
+          defaultMessage: 'Geospatial field type',
+        }),
+        value: geoFieldType
+      },
     ];
   }
 
-  async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    const searchSource = await this._makeSearchSource(searchFilters, this._descriptor.limit);
+  async getGeoJsonWithMeta(layerName, searchFilters) {
+    const searchSource = await this._makeSearchSource(searchFilters, DEFAULT_ES_DOC_LIMIT);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
     // 1) all scripted fields
@@ -104,10 +138,13 @@ export class ESSearchSource extends AbstractESSource {
 
     let featureCollection;
     const indexPattern = await this._getIndexPattern();
+    const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
+      return metaField !== '_id';
+    });
     const flattenHit = hit => {
       const properties = indexPattern.flattenHit(hit);
       // remove metaFields
-      indexPattern.metaFields.forEach(metaField => {
+      unusedMetaFields.forEach(metaField => {
         delete properties[metaField];
       });
       return properties;
@@ -118,7 +155,12 @@ export class ESSearchSource extends AbstractESSource {
       const geoField = await this._getGeoField();
       featureCollection = hitsToGeoJson(resp.hits.hits, flattenHit, geoField.name, geoField.type);
     } catch(error) {
-      throw new Error(`Unable to convert search response to geoJson feature collection, error: ${error.message}`);
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {
+          defaultMessage: 'Unable to convert search response to geoJson feature collection, error: {errorMsg}',
+          values: { errorMsg: error.message }
+        })
+      );
     }
 
     return {
@@ -133,43 +175,95 @@ export class ESSearchSource extends AbstractESSource {
     return this._descriptor.tooltipProperties.length > 0;
   }
 
-  async filterAndFormatProperties(properties) {
-    const filteredProperties = {};
-    this._descriptor.tooltipProperties.forEach(propertyName => {
-      filteredProperties[propertyName] = _.get(properties, propertyName, '-');
-    });
-
-    let indexPattern;
-    try {
-      indexPattern = await this._getIndexPattern();
-    } catch(error) {
-      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
-      return filteredProperties;
+  async _loadTooltipProperties(docId, indexPattern) {
+    if (this._descriptor.tooltipProperties.length === 0) {
+      return {};
     }
 
-    this._descriptor.tooltipProperties.forEach(propertyName => {
-      const field = indexPattern.fields.byName[propertyName];
-      if (!field) {
-        return;
-      }
+    const searchSource = new SearchSource();
+    searchSource.setField('index', indexPattern);
+    searchSource.setField('size', 1);
+    const query = {
+      language: 'kuery',
+      query: `_id:${docId}`
+    };
+    searchSource.setField('query', query);
+    searchSource.setField('fields', this._descriptor.tooltipProperties);
 
-      filteredProperties[propertyName] = field.format.convert(filteredProperties[propertyName]);
+    const resp = await searchSource.fetch();
+
+    const hit = _.get(resp, 'hits.hits[0]');
+    if (!hit) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg', {
+          defaultMessage: 'Unable to find document, _id: {docId}',
+          values: { docId }
+        })
+      );
+    }
+
+    const properties = indexPattern.flattenHit(hit);
+    indexPattern.metaFields.forEach(metaField => {
+      delete properties[metaField];
     });
+    return properties;
+  }
 
-    return filteredProperties;
+  async filterAndFormatPropertiesToHtml(properties) {
+    const indexPattern = await this._getIndexPattern();
+    const propertyValues = await this._loadTooltipProperties(properties._id, indexPattern);
+
+    return this._descriptor.tooltipProperties.map(propertyName => {
+      return new ESTooltipProperty(propertyName, propertyValues[propertyName], indexPattern);
+    });
   }
 
   isFilterByMapBounds() {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     const indexPattern = await this._getIndexPattern();
-    const stringFields = indexPattern.fields.filter(field => {
-      return field.type === 'string';
-    });
-    return stringFields.map(stringField => {
-      return { name: stringField.name, label: stringField.name };
+    return getTermsFields(indexPattern.fields)
+      .map(field => {
+        return { name: field.name, label: field.name };
+      });
+  }
+
+  async getSupportedShapeTypes() {
+    let geoFieldType;
+    try {
+      const geoField = await this._getGeoField();
+      geoFieldType = geoField.type;
+    } catch(error) {
+      // ignore exeception
+    }
+
+    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      return [VECTOR_SHAPE_TYPES.POINT];
+    }
+
+    return [
+      VECTOR_SHAPE_TYPES.POINT,
+      VECTOR_SHAPE_TYPES.LINE,
+      VECTOR_SHAPE_TYPES.POLYGON
+    ];
+  }
+
+  getSourceTooltipContent(sourceDataRequest) {
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
+
+    if (meta.areResultsTrimmed) {
+      return i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
+        defaultMessage: `Results limited to first {count} matching documents.`,
+        values: { count: featureCollection.features.length }
+      });
+    }
+
+    return i18n.translate('xpack.maps.esSearch.featureCountMsg', {
+      defaultMessage: `Found {count} documents.`,
+      values: { count: featureCollection.features.length }
     });
   }
 }

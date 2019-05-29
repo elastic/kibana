@@ -8,6 +8,7 @@
  * Controller for Node Detail
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { partial } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -30,13 +31,13 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
   },
   controllerAs: 'monitoringElasticsearchNodeApp',
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const kbnUrl = $injector.get('kbnUrl');
       const nodeName = $route.current.params.node;
 
       super({
-        title: i18n('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+        title: i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
           defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
           values: {
             nodeName,
@@ -79,6 +80,8 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
             <Node
               scope={$scope}
               kbnUrl={kbnUrl}
+              nodeId={this.nodeName}
+              clusterUuid={$scope.cluster.cluster_uuid}
               onBrush={this.onBrush}
               {...data}
             />

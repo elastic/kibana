@@ -28,7 +28,7 @@ import { DeprecationList } from './list';
 
 // exported only for testing
 export const filterDeps = (level: LevelFilterOption, search: string = '') => {
-  const conditions: Array<(dep: DeprecationInfo) => boolean> = [];
+  const conditions: Array<(dep: EnrichedDeprecationInfo) => boolean> = [];
 
   if (level !== LevelFilterOption.all) {
     conditions.push((dep: DeprecationInfo) => dep.level === level);
@@ -41,7 +41,9 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
         const searchReg = new RegExp(search.toLowerCase());
         return Boolean(
           dep.message.toLowerCase().match(searchReg) ||
-            (dep.details && dep.details.match(searchReg))
+            (dep.details && dep.details.toLowerCase().match(searchReg)) ||
+            (dep.index && dep.index.toLowerCase().match(searchReg)) ||
+            (dep.node && dep.node.toLowerCase().match(searchReg))
         );
       } catch (e) {
         // ignore any regexp errors.
@@ -51,7 +53,7 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
   }
 
   // Return true if every condition function returns true (boolean AND)
-  return (dep: DeprecationInfo) => conditions.map(c => c(dep)).every(t => t);
+  return (dep: EnrichedDeprecationInfo) => conditions.map(c => c(dep)).every(t => t);
 };
 
 /**

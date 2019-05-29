@@ -19,7 +19,7 @@
 
 
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { areTimePickerValsDifferent } from './diff_time_picker_vals';
 
 describe('Diff Time Picker Values', () => {

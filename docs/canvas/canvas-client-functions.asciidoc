@@ -1,7 +1,8 @@
+[role="xpack"]
 [[canvas-client-functions]]
 === Canvas client functions
 
-beta[]These functions must execute in a browser. They are only available
+These functions must execute in a browser. They are only available
 from within the Canvas application, not via the Canvas HTTP API. These functions must 
 execute in the browser because they use browser specific APIs, such as location, 
 or interact with the workpad to read filters.
@@ -17,9 +18,7 @@ Uses Canvas workpad asset objects to provide argument values. Usually images.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |string
@@ -66,9 +65,7 @@ Accesses URL parameters and use them in expressions. This will always return a s
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*  (Aliases: `var`, `variable`)
 |string

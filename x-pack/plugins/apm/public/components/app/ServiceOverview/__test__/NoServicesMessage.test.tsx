@@ -14,7 +14,7 @@ describe('NoServicesMessage', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('should show a "no services installed" message, a link to the set up instructions page, a message about upgrading APM server, and a link to the migration assistant when NO historical data is found', () => {
+  it('should show a "no services installed" message, a link to the set up instructions page, a message about upgrading APM server, and a link to the upgrade assistant when NO historical data is found', () => {
     const wrapper = shallow(<NoServicesMessage historicalDataFound={false} />);
     expect(wrapper).toMatchSnapshot();
   });

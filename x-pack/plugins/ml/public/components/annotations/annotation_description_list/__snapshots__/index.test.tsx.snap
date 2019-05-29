@@ -2,9 +2,7 @@
 
 exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
 <EuiDescriptionList
-  align="left"
   className="ml-annotation-description-list"
-  compressed={false}
   listItems={
     Array [
       Object {
@@ -37,7 +35,6 @@ exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
       },
     ]
   }
-  textStyle="normal"
   type="column"
 />
 `;

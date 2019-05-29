@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import { toArray } from 'rxjs/operators';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { isEqual } from 'lodash';
 import { findPluginSpecs } from '../find_plugin_specs';
 import { PluginSpec } from '../plugin_spec';

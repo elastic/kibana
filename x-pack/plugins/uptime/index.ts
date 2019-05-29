@@ -5,10 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { initServerWithKibana } from './server';
+import { initServerWithKibana, KibanaServer } from './server';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
@@ -24,14 +23,16 @@ export const uptime = (kibana: any) =>
         }),
         icon: 'plugins/uptime/icons/heartbeat_white.svg',
         euiIconType: 'uptimeApp',
-        title: 'Uptime',
+        title: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', {
+          defaultMessage: 'Uptime',
+        }),
         main: 'plugins/uptime/app',
         order: 8900,
         url: '/app/uptime#/',
       },
       home: ['plugins/uptime/register_feature'],
     },
-    init(server: Server) {
+    init(server: KibanaServer) {
       initServerWithKibana(server);
     },
   });

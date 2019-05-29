@@ -10,6 +10,7 @@ import { RENDER_AS } from './render_as';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
+import { i18n } from '@kbn/i18n';
 
 export class UpdateSourceEditor extends Component {
 
@@ -33,7 +34,12 @@ export class UpdateSourceEditor extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: `Unable to find Index pattern ${this.props.indexPatternId}`
+          loadError: i18n.translate('xpack.maps.source.esGrid.noIndexPatternErrorMessage', {
+            defaultMessage: `Unable to find Index pattern {id}`,
+            values: {
+              id: this.props.indexPatternId
+            }
+          })
         });
       }
       return;

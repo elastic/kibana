@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header renders correctly against snapshot 1`] = `
+<Styled(EuiFlexGroup)
+  data-test-subj="header-container"
+  gutterSize="none"
+  key="@timestamp"
+  width="240px"
+>
+  <Resizeable
+    handle={
+      <Styled(EuiFlexItem)
+        grow={false}
+      >
+        <Styled(styled.div) />
+      </Styled(EuiFlexItem)>
+    }
+    height="35px"
+    id="@timestamp"
+    onResize={[Function]}
+    render={[Function]}
+  />
+</Styled(EuiFlexGroup)>
+`;

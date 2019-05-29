@@ -31,9 +31,13 @@ export interface Vis {
 
 export type VisProvider = (...dependencies: any[]) => Vis;
 
+export interface VisParams {
+  [key: string]: any;
+}
+
 export interface VisState {
   title: string;
   type: VisType;
-  params: any;
+  params: VisParams;
   aggs: any[];
 }

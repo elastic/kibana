@@ -195,8 +195,13 @@ export class VegaBaseView {
     const heightExtraPadding = 6;
     const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
     const height = Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
-    if (view.width() !== width || view.height() !== height) {
-      view.width(width).height(height);
+    // Somehow the `height` signal in vega becomes zero if the height is set exactly to
+    // an even number. This is a dirty workaround for this.
+    // when vega itself is updated again, it should be checked whether this is still
+    // necessary.
+    const adjustedHeight = height + 0.00000001;
+    if (view.width() !== width || view.height() !== adjustedHeight) {
+      view.width(width).height(adjustedHeight);
       return true;
     }
     return false;

@@ -114,7 +114,6 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
   </EuiSpacer>
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h4
       className="euiTitle euiTitle--small"
@@ -173,8 +172,6 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               >
                 <EuiText
                   className="licManagement__narrowText"
-                  grow={true}
-                  size="m"
                 >
                   <p>
                     <FormattedMessage
@@ -267,8 +264,6 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 >
                   <EuiText
                     className="licManagement__narrowText"
-                    grow={true}
-                    size="m"
                   >
                     <p>
                       <FormattedMessage
@@ -339,8 +334,11 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 <div
                   className="euiPopover euiPopover--anchorDownCenter eui-AlignBaseline"
                   id="readMorePopover"
-                  onClick={[Function]}
                   onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
                 >
                   <div
                     className="euiPopover__anchor"

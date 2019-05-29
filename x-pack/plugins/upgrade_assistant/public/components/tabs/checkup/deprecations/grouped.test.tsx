@@ -22,10 +22,46 @@ describe('filterDeps', () => {
     expect(fd({ level: 'warning' } as DeprecationInfo)).toBe(false);
   });
 
-  test('filters on search', () => {
+  test('filters on title search', () => {
     const fd = filterDeps(LevelFilterOption.critical, 'wow');
     expect(fd({ level: 'critical', message: 'the wow error' } as DeprecationInfo)).toBe(true);
     expect(fd({ level: 'critical', message: 'other error' } as DeprecationInfo)).toBe(false);
+  });
+
+  test('filters on index search', () => {
+    const fd = filterDeps(LevelFilterOption.critical, 'myIndex');
+    expect(
+      fd({
+        level: 'critical',
+        message: 'the wow error',
+        index: 'myIndex-2',
+      } as EnrichedDeprecationInfo)
+    ).toBe(true);
+    expect(
+      fd({
+        level: 'critical',
+        message: 'other error',
+        index: 'notIndex',
+      } as EnrichedDeprecationInfo)
+    ).toBe(false);
+  });
+
+  test('filters on node search', () => {
+    const fd = filterDeps(LevelFilterOption.critical, 'myNode');
+    expect(
+      fd({
+        level: 'critical',
+        message: 'the wow error',
+        index: 'myNode-123',
+      } as EnrichedDeprecationInfo)
+    ).toBe(true);
+    expect(
+      fd({
+        level: 'critical',
+        message: 'other error',
+        index: 'notNode',
+      } as EnrichedDeprecationInfo)
+    ).toBe(false);
   });
 });
 

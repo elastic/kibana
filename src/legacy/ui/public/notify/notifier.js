@@ -87,19 +87,11 @@ function restartNotifTimer(notif, cb) {
 
 const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
-  info: 'kuiButton--primary',
-};
-const buttonHierarchyClass = index => {
-  if (index === 0) {
-    // first action: primary className
-    return 'kuiButton--primary';
-  }
-  // subsequent actions: secondary/default className
-  return 'kuiButton--basic';
+  info: 'kuiButton--secondary',
 };
 const typeToAlertClassMap = {
-  danger: `alert-danger`,
-  info: `alert-info`,
+  danger: `kbnToast--danger`,
+  info: `kbnToast--info`,
 };
 
 function add(notif, cb) {
@@ -114,14 +106,14 @@ function add(notif, cb) {
     });
   } else if (notif.customActions) {
     // wrap all of the custom functions in a close
-    notif.customActions = notif.customActions.map((action, index) => {
+    notif.customActions = notif.customActions.map((action) => {
       return {
         key: action.text,
         dataTestSubj: action.dataTestSubj,
         callback: closeNotif(notif, action.callback, action.text),
         getButtonClass() {
           const buttonTypeClass = typeToButtonClassMap[notif.type];
-          return `${buttonHierarchyClass(index)} ${buttonTypeClass}`;
+          return `${buttonTypeClass}`;
         },
       };
     });
@@ -134,11 +126,11 @@ function add(notif, cb) {
   };
 
   // decorate the notification with helper functions for the template
-  notif.getButtonClass = () => typeToButtonClassMap[notif.type];
-  notif.getAlertClassStack = () => `kbnToast__stack alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getButtonClass = () => `${typeToButtonClassMap[notif.type]}`;
+  notif.getAlertClassStack = () => `kbnToast kbnToast-isStack ${typeToAlertClassMap[notif.type]}`;
   notif.getIconClass = () => `fa fa-${notif.icon}`;
   notif.getToastMessageClass = () => 'kbnToast__message';
-  notif.getAlertClass = () => `kbnToast alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getAlertClass = () => `kbnToast ${typeToAlertClassMap[notif.type]}`;
   notif.getButtonGroupClass = () => 'kbnToast__controls';
 
   let dup = null;

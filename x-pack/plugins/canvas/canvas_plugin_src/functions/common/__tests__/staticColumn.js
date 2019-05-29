@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { staticColumn } from '../staticColumn';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from './fixtures/test_tables';
+import { testTable, emptyTable } from './fixtures/test_tables';
 
 describe('staticColumn', () => {
   const fn = functionWrapper(staticColumn);
@@ -36,5 +36,13 @@ describe('staticColumn', () => {
     expect(result.type).to.be('datatable');
     expect(result.columns).to.eql([...testTable.columns, { name: 'empty', type: 'null' }]);
     expect(result.rows.every(row => row.empty === null)).to.be(true);
+  });
+
+  it('adds a column to empty tables', () => {
+    const result = fn(emptyTable, { name: 'empty', value: 1 });
+
+    expect(result.type).to.be('datatable');
+    expect(result.columns).to.eql([{ name: 'empty', type: 'number' }]);
+    expect(result.rows.length).to.be(0);
   });
 });

@@ -19,6 +19,7 @@
 
 export function SharePageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const PageObjects = getPageObjects(['visualize', 'common']);
   const log = getService('log');
 
@@ -43,18 +44,27 @@ export function SharePageProvider({ getService, getPageObjects }) {
         // and then re-open the menu
         await this.clickShareTopNavButton();
       }
-
-      return testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
+      const menuPanel = await find.byCssSelector('div.euiContextMenuPanel');
+      testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
+      await testSubjects.waitForDeleted(menuPanel);
     }
 
     async getSharedUrl() {
       return await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
     }
 
+    async createShortUrlExistOrFail() {
+      await testSubjects.existOrFail('createShortUrl');
+    }
+
+    async createShortUrlMissingOrFail() {
+      await testSubjects.missingOrFail('createShortUrl');
+    }
+
     async checkShortenUrl() {
       const shareForm = await testSubjects.find('shareUrlForm');
       await PageObjects.visualize.checkCheckbox('useShortUrl');
-      await shareForm.waitForDeletedByClassName('euiLoadingSpinner');
+      await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 
     async exportAsSavedObject() {

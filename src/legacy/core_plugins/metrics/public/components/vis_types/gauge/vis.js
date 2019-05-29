@@ -20,10 +20,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
-import tickFormatter from '../../lib/tick_formatter';
+import { tickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Gauge from '../../../visualizations/components/gauge';
-import getLastValue from '../../../../common/get_last_value';
+import { Gauge } from '../../../visualizations/components/gauge';
+import { getLastValue } from '../../../../common/get_last_value';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -48,6 +48,7 @@ function getColors(props) {
 function GaugeVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const colors = getColors(props);
+
   const series = _.get(visData, `${model.id}.series`, [])
     .filter(row => row)
     .map((row, i) => {
@@ -97,4 +98,4 @@ GaugeVisualization.propTypes = {
   getConfig: PropTypes.func
 };
 
-export default visWithSplits(GaugeVisualization);
+export const gauge = visWithSplits(GaugeVisualization);

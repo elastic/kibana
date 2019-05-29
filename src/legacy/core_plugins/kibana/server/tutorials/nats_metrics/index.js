@@ -39,7 +39,7 @@ export function natsMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
       },
     }),
-    euiIconType: 'logoNats',
+    // euiIconType: 'logoNats',
     artifacts: {
       dashboards: [
         {

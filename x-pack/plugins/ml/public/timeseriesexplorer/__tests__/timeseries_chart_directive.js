@@ -5,7 +5,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { TimeseriesChart } from '../components/timeseries_chart/timeseries_chart';

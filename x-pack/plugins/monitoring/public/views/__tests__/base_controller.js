@@ -5,9 +5,10 @@
  */
 
 import { spy, stub } from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { MonitoringViewBaseController } from '../';
 import { timefilter } from 'ui/timefilter';
+import { PromiseWithCancel,  Status } from '../../../common/cancel_promise';
 
 /*
  * Mostly copied from base_table_controller test, with modifications
@@ -20,6 +21,7 @@ describe('MonitoringViewBaseController', function () {
   let opts;
   let titleService;
   let executorService;
+  const httpCall = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
   before(() => {
     titleService = spy();
@@ -36,7 +38,8 @@ describe('MonitoringViewBaseController', function () {
 
     $scope = {
       cluster: { cluster_uuid: 'foo' },
-      $on: stub()
+      $on: stub(),
+      $apply: stub()
     };
 
     opts = {
@@ -73,17 +76,15 @@ describe('MonitoringViewBaseController', function () {
     let counter = 0;
     const opts = {
       title: 'testo',
-      getPageData: () => Promise.resolve(++counter),
+      getPageData: (ms) => httpCall(ms),
       $injector,
       $scope
     };
 
     const ctrl = new MonitoringViewBaseController(opts);
-    Promise.all([
-      ctrl.updateData(),
-      ctrl.updateData(),
-    ]).then(() => {
-      expect(counter).to.be(1);
+    ctrl.updateData(30).then(() => ++counter);
+    ctrl.updateData(60).then(() => {
+      expect(counter).to.be(0);
       done();
     });
   });
@@ -139,6 +140,29 @@ describe('MonitoringViewBaseController', function () {
 
       expect(timefilter.isTimeRangeSelectorEnabled).to.be(false);
       expect(timefilter.isAutoRefreshSelectorEnabled).to.be(false);
+    });
+
+    it('disables timepicker and auto refresh', (done) => {
+      opts = {
+        title: 'test',
+        getPageData: () => httpCall(60),
+        $injector,
+        $scope
+      };
+
+      ctrl = new MonitoringViewBaseController({ ...opts });
+      ctrl.updateDataPromise = new PromiseWithCancel(httpCall(50));
+
+      let shouldBeFalse = false;
+      ctrl.updateDataPromise.promise().then(() => (shouldBeFalse = true));
+
+      const lastUpdateDataPromise = ctrl.updateDataPromise;
+
+      ctrl.updateData().then(() => {
+        expect(shouldBeFalse).to.be(false);
+        expect(lastUpdateDataPromise.status()).to.be(Status.Canceled);
+        done();
+      });
     });
   });
 

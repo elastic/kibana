@@ -18,7 +18,7 @@
  */
 
 import { unset } from '../unset';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('unset(obj, key)', function () {
   describe('invalid input', function () {

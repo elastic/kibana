@@ -56,15 +56,6 @@
  * 4. Fix an IE bug which causes the last child to overflow the container.
  * 5. Fixing this bug means we now need to align the children to the right.
  */
-:focus:not([class^="eui"]) {
-  z-index: 1;
-  /* 1 */
-  outline: none !important;
-  /* 2 */
-  -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #4DA1C0;
-          box-shadow: 0 0 0 1px #222, 0 0 0 2px #4DA1C0;
-  /* 3 */ }
-
 /**
  * 1. Required for IE11.
  */
@@ -144,7 +135,7 @@ main {
           appearance: none;
   cursor: pointer;
   padding: 4px 12px 5px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
   height: 30px;
@@ -205,26 +196,26 @@ main {
  * 1. Override Bootstrap.
  */
 .kuiButton--basic {
-  color: #DDD;
-  background-color: #242424; }
+  color: #DFE5EF;
+  background-color: #25262E; }
   .kuiButton--basic:not(a):enabled:focus {
-    color: #DDD; }
+    color: #DFE5EF; }
   a.kuiButton--basic:not(.kuiButton-isDisabled):focus {
     /* 1 */
-    color: #DDD; }
+    color: #DFE5EF; }
   .kuiButton--basic:enabled:hover {
-    background-color: #0b0b0b !important;
+    background-color: #0e0f12 !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    background-color: #0b0b0b !important;
+    background-color: #0e0f12 !important;
     /* 1 */ }
   .kuiButton--basic:enabled:active {
-    background-color: #0b0b0b !important;
+    background-color: #0e0f12 !important;
     /* 1 */ }
   a.kuiButton--basic:not(.kuiButton-isDisabled):active {
     /* 1 */
-    background-color: #0b0b0b !important;
+    background-color: #0e0f12 !important;
     /* 1 */ }
 
 /**
@@ -232,7 +223,7 @@ main {
  */
 .kuiButton--primary {
   color: #FFF;
-  background-color: #4DA1C0; }
+  background-color: #1BA9F5; }
   .kuiButton--primary:not(a):enabled:focus {
     color: #FFF; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):focus {
@@ -241,28 +232,28 @@ main {
   .kuiButton--primary:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #3985a1; }
+    background-color: #098dd4; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #3985a1; }
+    background-color: #098dd4; }
   .kuiButton--primary:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #3985a1; }
+    background-color: #098dd4; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #3985a1; }
+    background-color: #098dd4; }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiButton--success {
   color: #FFF;
-  background-color: #017D73; }
+  background-color: #7DE2D1; }
   .kuiButton--success:not(a):enabled:focus {
     color: #FFF; }
   a.kuiButton--success:not(.kuiButton-isDisabled):focus {
@@ -271,79 +262,79 @@ main {
   .kuiButton--success:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #014a44; }
+    background-color: #53d9c2; }
   a.kuiButton--success:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #014a44; }
+    background-color: #53d9c2; }
   .kuiButton--success:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #014a44; }
+    background-color: #53d9c2; }
   a.kuiButton--success:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #014a44; }
+    background-color: #53d9c2; }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: #BF4D4D;
-  border: solid 1px #BF4D4D; }
+  color: #F66;
+  border: solid 1px #F66; }
   .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #BF4D4D;
-            box-shadow: 0 0 0 1px #222, 0 0 0 2px #BF4D4D;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
     /* 3 */
-    color: #BF4D4D; }
+    color: #F66; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #BF4D4D;
-            box-shadow: 0 0 0 1px #222, 0 0 0 2px #BF4D4D;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
     /* 3 */
-    color: #BF4D4D; }
+    color: #F66; }
   .kuiButton--danger:enabled:hover {
-    color: #a03939 !important;
-    border: solid 1px #a03939;
-    background-color: rgba(191, 77, 77, 0.1); }
+    color: #ff3333 !important;
+    border: solid 1px #ff3333;
+    background-color: rgba(255, 102, 102, 0.1); }
   a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #a03939 !important;
-    border: solid 1px #a03939;
-    background-color: rgba(191, 77, 77, 0.1); }
+    color: #ff3333 !important;
+    border: solid 1px #ff3333;
+    background-color: rgba(255, 102, 102, 0.1); }
   .kuiButton--danger:enabled:active {
-    color: #a03939 !important;
-    border: solid 1px #a03939;
-    background-color: rgba(191, 77, 77, 0.1); }
+    color: #ff3333 !important;
+    border: solid 1px #ff3333;
+    background-color: rgba(255, 102, 102, 0.1); }
   a.kuiButton--danger:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #a03939 !important;
-    border: solid 1px #a03939;
-    background-color: rgba(191, 77, 77, 0.1); }
+    color: #ff3333 !important;
+    border: solid 1px #ff3333;
+    background-color: rgba(255, 102, 102, 0.1); }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiButton--warning {
   color: #FFF;
-  background-color: #C06C4C; }
+  background-color: #FFCE7A; }
   .kuiButton--warning:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #C06C4C;
-            box-shadow: 0 0 0 1px #222, 0 0 0 2px #C06C4C;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
     /* 3 */
     color: #FFF; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
@@ -352,89 +343,89 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #C06C4C;
-            box-shadow: 0 0 0 1px #222, 0 0 0 2px #C06C4C;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
     /* 3 */
     color: #FFF; }
   .kuiButton--warning:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #a15538; }
+    background-color: #ffbb47; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #a15538; }
+    background-color: #ffbb47; }
   .kuiButton--warning:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #a15538; }
+    background-color: #ffbb47; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #a15538; }
+    background-color: #ffbb47; }
   .kuiButton--warning:disabled {
-    background-color: #cd8b72; }
+    background-color: #ffe1ad; }
   a.kuiButton--warning.kuiButton-isDisabled {
-    background-color: #cd8b72; }
+    background-color: #ffe1ad; }
 
 /**
  * 1. Override Bootstrap.
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: #4DA1C0 !important;
+  color: #1BA9F5 !important;
   /* 2 */
   background-color: transparent; }
   .kuiButton--hollow:enabled:hover {
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
     text-decoration: underline; }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
     text-decoration: underline; }
   .kuiButton--hollow:enabled:active {
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
     text-decoration: underline; }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
     text-decoration: underline; }
 
 .kuiButton--secondary {
-  color: #4DA1C0 !important;
+  color: #1BA9F5 !important;
   /* 2 */
-  border: solid 1px #4DA1C0; }
+  border: solid 1px #1BA9F5; }
   .kuiButton--secondary:enabled:hover {
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
-    border: solid 1px #3985a1;
-    background-color: rgba(77, 161, 192, 0.1);
+    border: solid 1px #098dd4;
+    background-color: rgba(27, 169, 245, 0.1);
     text-decoration: underline; }
   a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
-    border: solid 1px #3985a1;
-    background-color: rgba(77, 161, 192, 0.1);
+    border: solid 1px #098dd4;
+    background-color: rgba(27, 169, 245, 0.1);
     text-decoration: underline; }
   .kuiButton--secondary:enabled:active {
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
-    border: solid 1px #3985a1;
-    background-color: rgba(77, 161, 192, 0.1);
+    border: solid 1px #098dd4;
+    background-color: rgba(27, 169, 245, 0.1);
     text-decoration: underline; }
   a.kuiButton--secondary:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 1 */
-    border: solid 1px #3985a1;
-    background-color: rgba(77, 161, 192, 0.1);
+    border: solid 1px #098dd4;
+    background-color: rgba(27, 169, 245, 0.1);
     text-decoration: underline; }
 
 .kuiButtonGroup {
@@ -494,7 +485,7 @@ main {
   border: none;
   line-height: 1;
   font-size: 16px;
-  color: #DDD !important;
+  color: #DFE5EF !important;
   /* 1 */
   cursor: pointer;
   opacity: 0.35; }
@@ -509,20 +500,20 @@ main {
   background-color: transparent;
   padding: 5px 0px;
   border: none;
-  border-bottom: dotted 2px #333;
-  font-size: 14px;
+  border-bottom: dotted 2px #343741;
+  font-size: 16px;
   cursor: pointer; }
 
 .kuiExpressionButton__description {
-  color: #017D73;
+  color: #7DE2D1;
   text-transform: uppercase; }
 
 .kuiExpressionButton__value {
-  color: #DDD;
+  color: #DFE5EF;
   text-transform: lowercase; }
 
 .kuiExpressionButton-isActive {
-  border-bottom: solid 2px #017D73; }
+  border-bottom: solid 2px #7DE2D1; }
 
 /**
  * 1. Set inline-block so this wrapper shrinks to fit the input.
@@ -553,7 +544,7 @@ main {
 .kuiCheckBox {
   -webkit-appearance: none;
   /* 1 */
-  background-color: #1b1b1b;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   width: 16px;
@@ -562,9 +553,9 @@ main {
   /* 2 */
   margin: 0 !important;
   /* 2 */
-  font: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+  font: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
   /* 2 */
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
   /* 2 */
   font-size: 10px !important;
   /* 2 */
@@ -581,8 +572,8 @@ main {
     -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
-    border-color: #4DA1C0;
-    background-color: #4DA1C0; }
+    border-color: #1BA9F5;
+    background-color: #1BA9F5; }
     .kuiCheckBox:checked:before {
       opacity: 1; }
   .kuiCheckBox:focus {
@@ -590,12 +581,12 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #222, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   .kuiCheckBox:disabled {
-    background-color: #1f1f1f !important;
-    border-color: #1f1f1f !important;
+    background-color: #202128 !important;
+    border-color: #202128 !important;
     cursor: not-allowed !important; }
 
 .kuiCheckBoxLabel {
@@ -611,14 +602,14 @@ main {
   line-height: 1.5; }
 
 .kuiCheckBoxLabel__text {
-  font-size: 14px;
+  font-size: 16px;
   margin-left: 8px; }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiLabel {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   font-weight: bold;
   margin-bottom: 0;
@@ -628,17 +619,17 @@ main {
   width: 180px;
   display: inline-block;
   position: relative;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5; }
   .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
 
 .kuiSearchInput__icon {
   position: absolute;
   top: 0.5em;
   left: 0.7em;
   font-size: 1em;
-  color: #494E51; }
+  color: #535966; }
 
 /**
    * 1. Make space for search icon.
@@ -648,13 +639,13 @@ main {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding: 4px 12px 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DDD;
-  background-color: #1b1b1b;
+  color: #DFE5EF;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -666,10 +657,10 @@ main {
   width: 100%;
   /* 2 */ }
   .kuiSearchInput__input:invalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
   .kuiSearchInput__input:focus {
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
   .kuiSearchInput__input:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -687,13 +678,13 @@ main {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding: 4px 12px 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DDD;
-  background-color: #1b1b1b;
+  color: #DFE5EF;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -709,10 +700,10 @@ main {
   background-position: calc(100% - 8px);
   /* 2 */ }
   .kuiSelect:invalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
   .kuiSelect:focus {
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
   .kuiSelect:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -720,12 +711,12 @@ main {
     text-shadow: 0 0 0;
     /* 3 */ }
   .kuiSelect.kuiSelect-isInvalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
   .kuiSelect:focus {
     -webkit-box-shadow: none;
             box-shadow: none;
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
 
 .kuiSelect--small {
   width: 60px; }
@@ -744,12 +735,12 @@ main {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding: 4px 12px 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DDD;
+  color: #DFE5EF;
   border: 1px solid transparent;
   /* 1 */
   background-color: transparent; }
@@ -759,13 +750,13 @@ main {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding: 4px 12px 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DDD;
-  background-color: #1b1b1b;
+  color: #DFE5EF;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -773,10 +764,10 @@ main {
   min-height: 32px;
   /* 1 */ }
   .kuiTextArea:invalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
   .kuiTextArea:focus {
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
   .kuiTextArea:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -784,9 +775,9 @@ main {
     -webkit-box-shadow: none;
             box-shadow: none;
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
   .kuiTextArea.kuiTextArea-isInvalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
 
 .kuiTextArea--nonResizable {
   resize: none; }
@@ -802,13 +793,13 @@ main {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding: 4px 12px 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DDD;
-  background-color: #1b1b1b;
+  color: #DFE5EF;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -816,15 +807,15 @@ main {
   min-height: 32px;
   /* 1 */ }
   .kuiTextInput:invalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
   .kuiTextInput:focus {
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
   .kuiTextInput:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
   .kuiTextInput.kuiTextInput-isInvalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
 
 .kuiTextInput--small {
   width: 60px; }
@@ -884,22 +875,22 @@ main {
   /* 1 */ }
 
 .kuiIcon--info {
-  color: #4DA1C0; }
+  color: #1BA9F5; }
 
 .kuiIcon--success {
-  color: #017D73; }
+  color: #7DE2D1; }
 
 .kuiIcon--warning {
-  color: #C06C4C; }
+  color: #FFCE7A; }
 
 .kuiIcon--error {
-  color: #BF4D4D; }
+  color: #F66; }
 
 .kuiIcon--inactive {
-  color: #333; }
+  color: #343741; }
 
 .kuiIcon--basic {
-  color: #8A8A8A; }
+  color: #98A2B3; }
 
 .kuiInfoPanel {
   padding: 14px 20px 18px;
@@ -910,28 +901,28 @@ main {
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--info {
-  border-color: rgba(77, 161, 192, 0.25);
+  border-color: rgba(27, 169, 245, 0.25);
   /* 1 */ }
 
 /**
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--success {
-  border-color: rgba(1, 125, 115, 0.25);
+  border-color: rgba(125, 226, 209, 0.25);
   /* 1 */ }
 
 /**
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--warning {
-  border-color: rgba(192, 108, 76, 0.25);
+  border-color: rgba(255, 206, 122, 0.25);
   /* 1 */ }
 
 /**
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--error {
-  border-color: rgba(191, 77, 77, 0.25);
+  border-color: rgba(255, 102, 102, 0.25);
   /* 1 */ }
 
 /**
@@ -950,11 +941,11 @@ main {
 
 .kuiInfoPanelHeader__icon {
   margin-right: 10px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5; }
 
 .kuiInfoPanelHeader__title {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   font-weight: 700; }
 
@@ -964,11 +955,11 @@ main {
     margin-top: 8px; }
 
 .kuiInfoPanelBody__message {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5; }
 
 .kuiLink {
-  color: #4DA1C0;
+  color: #1BA9F5;
   text-decoration: none;
   cursor: pointer;
   /* 1 */
@@ -985,9 +976,9 @@ main {
   line-height: inherit;
   /* 2 */ }
   .kuiLink:visited, .kuiLink:active {
-    color: #4DA1C0; }
+    color: #1BA9F5; }
   .kuiLink:hover {
-    color: #3985a1;
+    color: #098dd4;
     text-decoration: underline; }
 
 /**
@@ -1005,7 +996,7 @@ main {
           align-items: center;
   padding: 12px 8px;
   /* 1 */
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #343741;
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
@@ -1013,7 +1004,7 @@ main {
   -webkit-flex-basis: 100%;
       -ms-flex-preferred-size: 100%;
           flex-basis: 100%;
-  background-color: #222; }
+  background-color: #1D1E24; }
 
 .kuiLocalBreadcrumb {
   font-size: 14px;
@@ -1028,13 +1019,13 @@ main {
           -ms-user-select: none;
               user-select: none;
       margin-right: 4px;
-      color: #333; }
+      color: #343741; }
 
 /**
  * 1. Make it a bit darker to contrast with the gray background.
  */
 .kuiLocalBreadcrumb__link {
-  color: #4DA1C0;
+  color: #1BA9F5;
   text-decoration: none;
   cursor: pointer;
   /* 1 */
@@ -1050,13 +1041,13 @@ main {
   /* 2 */
   line-height: inherit;
   /* 2 */
-  color: #4DA1C0;
+  color: #1BA9F5;
   /* 1 */
-  font-size: 14px; }
+  font-size: 16px; }
   .kuiLocalBreadcrumb__link:visited, .kuiLocalBreadcrumb__link:active {
-    color: #4DA1C0; }
+    color: #1BA9F5; }
   .kuiLocalBreadcrumb__link:hover {
-    color: #3985a1;
+    color: #098dd4;
     text-decoration: underline; }
 
 .kuiLocalBreadcrumb__emphasis {
@@ -1096,27 +1087,27 @@ main {
   background-color: transparent;
   border: none;
   font-size: 14px;
-  color: #DDD;
+  color: #DFE5EF;
   padding: 3px 6px;
   border-radius: 4px; }
   .kuiDatePickerNavigationButton:hover, .kuiDatePickerNavigationButton:active {
     cursor: pointer;
-    color: #242424;
-    background-color: #4DA1C0; }
+    color: #25262E;
+    background-color: #1BA9F5; }
   .kuiDatePickerNavigationButton:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
     /* 3 */
-    color: #DDD;
+    color: #DFE5EF;
     /* 1 */ }
 
 .kuiDatePickerHeaderCell {
   padding: 9px 0;
-  color: #DDD;
+  color: #DFE5EF;
   font-size: 14px;
   font-weight: bold;
   text-align: center;
@@ -1145,7 +1136,7 @@ main {
   background-color: transparent;
   width: 100%;
   border: 1px solid transparent;
-  color: #DDD;
+  color: #DFE5EF;
   font-size: 14px;
   padding: 8px;
   border-radius: 4px;
@@ -1155,10 +1146,10 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
     /* 3 */
-    color: #DDD;
+    color: #DFE5EF;
     /* 1 */ }
   .kuiDatePickerRowCellContent:disabled {
     pointer-events: none;
@@ -1167,14 +1158,14 @@ main {
     visibility: hidden;
     pointer-events: none; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
-    color: #4DA1C0; }
+    color: #1BA9F5; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
-    background-color: #8A8A8A;
-    color: #DDD; }
+    background-color: #98A2B3;
+    color: #DFE5EF; }
   .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
     cursor: pointer;
-    color: #242424;
-    background-color: #4DA1C0; }
+    color: #25262E;
+    background-color: #1BA9F5; }
 
 .kuiLocalDropdown {
   position: relative;
@@ -1192,7 +1183,7 @@ main {
   border: none;
   line-height: 1;
   font-size: 16px;
-  color: #DDD !important;
+  color: #DFE5EF !important;
   /* 1 */
   cursor: pointer;
   opacity: 0.35;
@@ -1228,7 +1219,7 @@ main {
   /* 1 */
   margin-bottom: 12px;
   font-size: 18px;
-  color: #DDD; }
+  color: #DFE5EF; }
 
 .kuiLocalDropdownSection {
   margin-bottom: 16px; }
@@ -1258,7 +1249,7 @@ main {
   font-weight: 700;
   margin-bottom: 0;
   /* 1 */
-  color: #DDD; }
+  color: #DFE5EF; }
 
 .kuiLocalDropdownHeader__actions {
   display: -webkit-box;
@@ -1267,14 +1258,14 @@ main {
   display: flex; }
 
 .kuiLocalDropdownHeader__action {
-  color: #4DA1C0;
+  color: #1BA9F5;
   font-size: 12px;
   text-decoration: none;
   cursor: pointer; }
   .kuiLocalDropdownHeader__action + .kuiLocalDropdownHeader__action {
     margin-left: 10px; }
   .kuiLocalDropdownHeader__action:hover, .kuiLocalDropdownHeader__action:active {
-    color: #3985a1; }
+    color: #098dd4; }
 
 .kuiLocalDropdownInput {
   display: block;
@@ -1282,29 +1273,29 @@ main {
   margin-bottom: 12px;
   padding: 5px 15px;
   font-size: 14px;
-  color: #DDD;
-  background-color: #1b1b1b;
+  color: #DFE5EF;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px; }
   .kuiLocalDropdownInput:focus {
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
 
 .kuiLocalDropdownFormNote {
   font-size: 14px;
-  color: #8A8A8A; }
+  color: #98A2B3; }
 
 .kuiLocalDropdownWarning {
   margin-bottom: 16px;
   padding: 6px 10px;
   font-size: 14px;
-  color: #DDD;
-  background-color: #222;
-  border-left: solid 2px #BF4D4D; }
+  color: #DFE5EF;
+  background-color: #1D1E24;
+  border-left: solid 2px #F66; }
 
 .kuiLocalDropdownHelpText {
   margin-bottom: 16px;
   font-size: 14px;
-  color: #8A8A8A; }
+  color: #98A2B3; }
 
 .kuiLocalMenu {
   display: -webkit-box;
@@ -1328,19 +1319,19 @@ main {
       -ms-flex-align: center;
           align-items: center;
   padding: 2px 8px;
-  font-size: 14px;
+  font-size: 16px;
   background-color: transparent;
-  color: #DDD;
+  color: #DFE5EF;
   border: 0;
   cursor: pointer;
   border-bottom: solid 2px transparent; }
   .kuiLocalMenuItem:hover, .kuiLocalMenuItem:focus {
-    background-color: rgba(77, 161, 192, 0.15);
+    background-color: rgba(27, 169, 245, 0.15);
     text-decoration: underline; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
-    color: #4DA1C0;
+    color: #1BA9F5;
     background-color: transparent;
-    border-color: #4DA1C0;
+    border-color: #1BA9F5;
     z-index: 2; }
     .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:hover, .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:focus {
       text-decoration: none; }
@@ -1375,10 +1366,10 @@ main {
           justify-content: space-between;
   min-height: 69px;
   /* 1 */
-  color: #DDD;
-  background-color: #222;
+  color: #DFE5EF;
+  background-color: #1D1E24;
   line-height: 1.5;
-  border-bottom: solid 1px #333; }
+  border-bottom: solid 1px #343741; }
 
 /**
  * 1. Allow row to expand if the content is so long that it wraps.
@@ -1435,13 +1426,13 @@ main {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding: 4px 12px 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DDD;
-  background-color: #1b1b1b;
+  color: #DFE5EF;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -1453,13 +1444,13 @@ main {
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
   border-color: #FFF;
-  border-color: #333;
+  border-color: #343741;
   border-radius: 4px 0 0 4px; }
   .kuiLocalSearchInput:invalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
   .kuiLocalSearchInput:focus {
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
   .kuiLocalSearchInput:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -1467,7 +1458,7 @@ main {
     -webkit-box-shadow: none;
             box-shadow: none; }
   .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
 
 .kuiLocalSearchInput--secondary {
   height: 32px;
@@ -1516,13 +1507,13 @@ main {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding: 4px 12px 4px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DDD;
-  background-color: #1b1b1b;
+  color: #DFE5EF;
+  background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -1540,10 +1531,10 @@ main {
   border-left-width: 0;
   border-radius: 0; }
   .kuiLocalSearchSelect:invalid {
-    border-color: #BF4D4D; }
+    border-color: #F66; }
   .kuiLocalSearchSelect:focus {
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
   .kuiLocalSearchSelect:disabled {
     opacity: 0.4;
     cursor: not-allowed; }
@@ -1557,11 +1548,11 @@ main {
 .kuiLocalSearchButton {
   width: 43px;
   height: 32px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 0;
   /* 1 */
   color: #FFF;
-  background-color: #4DA1C0;
+  background-color: #1BA9F5;
   border: 0;
   border-radius: 0 4px 4px 0; }
   .kuiLocalSearchButton:focus {
@@ -1569,8 +1560,8 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
 
 /**
@@ -1593,7 +1584,7 @@ main {
 .kuiLocalTab {
   padding: 5px 0 6px 0;
   font-size: 18px;
-  color: #F5F5F5;
+  color: #D4DAE5;
   border-bottom: 2px solid transparent;
   text-decoration: none;
   cursor: pointer;
@@ -1606,10 +1597,10 @@ main {
      *    a regular cursor instead of setting pointer-events: none.
      */ }
   .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
-    color: #4DA1C0; }
+    color: #1BA9F5; }
   .kuiLocalTab.kuiLocalTab-isSelected {
-    color: #4DA1C0;
-    border-bottom-color: #4DA1C0;
+    color: #1BA9F5;
+    border-bottom-color: #1BA9F5;
     cursor: default; }
   .kuiLocalTab.kuiLocalTab-isDisabled {
     opacity: 0.5;
@@ -1629,9 +1620,9 @@ main {
           align-items: center;
   height: 100%;
   padding: 12px 8px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #343741;
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
@@ -1639,7 +1630,7 @@ main {
   -webkit-flex-basis: 100%;
       -ms-flex-preferred-size: 100%;
           flex-basis: 100%;
-  background-color: #222; }
+  background-color: #1D1E24; }
   .kuiLocalTitle:empty {
     padding: 0;
     display: none; }
@@ -1652,7 +1643,7 @@ main {
   /* 1 */ }
 
 .kuiMenu--contained {
-  border: 1px solid #333; }
+  border: 1px solid #343741; }
   .kuiMenu--contained .kuiMenuItem {
     padding: 6px 10px; }
 
@@ -1664,7 +1655,7 @@ main {
   /* 1 */
   padding: 6px 0; }
   .kuiMenuItem + .kuiMenuItem {
-    border-top: 1px solid #333; }
+    border-top: 1px solid #343741; }
 
 /**
  * 1. Setting to inline-block guarantees the same height when applied to both
@@ -1699,8 +1690,8 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #222, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #1BA9F5;
     /* 3 */ }
 
 .kuiMenuButton--iconText .kuiMenuButton__icon:first-child {
@@ -1714,18 +1705,18 @@ main {
  * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--basic {
-  color: #DDD;
-  background-color: #222; }
+  color: #DFE5EF;
+  background-color: #1D1E24; }
   .kuiMenuButton--basic:focus {
-    color: #DDD !important;
+    color: #DFE5EF !important;
     /* 1 */ }
   .kuiMenuButton--basic:hover, .kuiMenuButton--basic:active {
     /* 2 */
-    color: #DDD !important;
+    color: #DFE5EF !important;
     /* 1 */
-    background-color: #242424; }
+    background-color: #25262E; }
   .kuiMenuButton--basic:disabled {
-    color: #494E51;
+    color: #535966;
     cursor: not-allowed; }
 
 /**
@@ -1734,7 +1725,7 @@ main {
  */
 .kuiMenuButton--primary {
   color: #FFF;
-  background-color: #4DA1C0; }
+  background-color: #1BA9F5; }
   .kuiMenuButton--primary:focus {
     color: #FFF !important;
     /* 1 */ }
@@ -1742,9 +1733,9 @@ main {
     /* 2 */
     color: #FFF !important;
     /* 1 */
-    background-color: #3985a1; }
+    background-color: #098dd4; }
   .kuiMenuButton--primary:disabled {
-    background-color: #494E51;
+    background-color: #535966;
     cursor: not-allowed; }
 
 /**
@@ -1753,23 +1744,23 @@ main {
  */
 .kuiMenuButton--danger {
   color: #FFF;
-  background-color: #BF4D4D; }
+  background-color: #F66; }
   .kuiMenuButton--danger:hover, .kuiMenuButton--danger:active {
     /* 2 */
     color: #FFF !important;
     /* 1 */
-    background-color: #a03939; }
+    background-color: #ff3333; }
   .kuiMenuButton--danger:disabled {
     color: #FFF;
-    background-color: #494E51;
+    background-color: #535966;
     cursor: not-allowed; }
   .kuiMenuButton--danger:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #222, 0 0 0 2px #BF4D4D;
-            box-shadow: 0 0 0 1px #222, 0 0 0 2px #BF4D4D;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
     /* 3 */ }
 
 .kuiMenuButtonGroup {
@@ -1806,14 +1797,14 @@ main {
       -ms-flex-pack: center;
           justify-content: center;
   padding-bottom: 10vh;
-  background: rgba(51, 51, 51, 0.8); }
+  background: rgba(52, 55, 65, 0.8); }
 
 .kuiModal {
   -webkit-box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.1), 0 6px 12px 0 rgba(0, 0, 0, 0.1), 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 2px 2px 0 rgba(0, 0, 0, 0.1);
           box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.1), 0 6px 12px 0 rgba(0, 0, 0, 0.1), 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 2px 2px 0 rgba(0, 0, 0, 0.1);
   line-height: 1.5;
-  background-color: #222;
-  border: 1px solid #333;
+  background-color: #1D1E24;
+  border: 1px solid #343741;
   border-radius: 4px;
   z-index: 1001;
   -webkit-animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
@@ -1838,10 +1829,10 @@ main {
           align-items: center;
   padding: 10px;
   padding-left: 20px;
-  border-bottom: 1px solid #333; }
+  border-bottom: 1px solid #343741; }
 
 .kuiModalHeader__title {
-  font-size: 18.0px; }
+  font-size: 20px; }
 
 .kuiModalHeaderCloseButton {
   display: inline-block;
@@ -1852,13 +1843,13 @@ main {
   cursor: pointer;
   padding: 2px 5px;
   border: 1px solid transparent;
-  color: #8A8A8A;
+  color: #98A2B3;
   background-color: transparent;
   line-height: 1;
   /* 2 */
-  font-size: 18.0px; }
+  font-size: 20px; }
   .kuiModalHeaderCloseButton:hover {
-    color: #DDD; }
+    color: #DFE5EF; }
 
 .kuiModalBody {
   padding: 20px; }
@@ -1917,17 +1908,17 @@ main {
     /* 1 */ }
 
 .kuiPagerText {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
-  color: #8A8A8A;
+  color: #98A2B3;
   white-space: nowrap;
   /* 1 */ }
 
 .kuiPanel {
   -webkit-box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
           box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
-  background-color: #222;
-  border: 1px solid #333;
+  background-color: #1D1E24;
+  border: 1px solid #343741;
   border-radius: 4px; }
 
 .kuiPanel--prompt {
@@ -1992,14 +1983,14 @@ main {
   /* 1 */
   padding: 10px;
   height: 50px;
-  border-bottom: 1px solid #333; }
+  border-bottom: 1px solid #343741; }
   .kuiPanelHeader .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2007,16 +1998,16 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   .kuiPanelHeader .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   a.kuiPanelHeader .kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2024,24 +2015,24 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   .kuiPanelHeader .kuiSelect {
-    border-color: #1b1b1b; }
+    border-color: #16171c; }
     .kuiPanelHeader .kuiSelect:not(a):enabled:focus {
       outline: none;
-      border-color: #4DA1C0; }
+      border-color: #1BA9F5; }
     a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {
       /* 1 */
       outline: none;
-      border-color: #4DA1C0; }
+      border-color: #1BA9F5; }
 
 /**
    * 1. This way we can use h1, h2, etc.
    */
 .kuiPanelHeader__title {
-  font-size: 18.0px;
+  font-size: 20px;
   line-height: 1.5;
   margin: 0;
   /* 1 */ }
@@ -2102,8 +2093,8 @@ main {
 .kuiPanelSimple {
   -webkit-box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
           box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
-  background-color: #222;
-  border: 1px solid #333;
+  background-color: #1D1E24;
+  border: 1px solid #343741;
   border-radius: 4px;
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
@@ -2160,7 +2151,7 @@ main {
     margin-left: -16px;
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
-    border-bottom: 16px solid #333; }
+    border-bottom: 16px solid #343741; }
   .kuiPopover__panel:after {
     position: absolute;
     content: "";
@@ -2172,10 +2163,10 @@ main {
     width: 0;
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
-    border-bottom: 16px solid #222; }
+    border-bottom: 16px solid #1D1E24; }
 
 .kuiPopover--withTitle .kuiPopover__panel:after {
-  border-bottom-color: #242424; }
+  border-bottom-color: #25262E; }
 
 .kuiPopover--anchorLeft .kuiPopover__panel {
   left: 0;
@@ -2195,10 +2186,10 @@ main {
     left: auto; }
 
 .kuiPopoverTitle {
-  background-color: #242424;
-  border-bottom: 1px solid #333;
+  background-color: #25262E;
+  border-bottom: 1px solid #343741;
   padding: 12px;
-  font-size: 14px; }
+  font-size: 16px; }
 
 .kuiEmptyTablePrompt {
   display: -webkit-box;
@@ -2217,8 +2208,8 @@ main {
   padding: 30px; }
 
 .kuiEmptyTablePrompt__message {
-  font-size: 18.0px;
-  color: #8A8A8A;
+  font-size: 20px;
+  color: #98A2B3;
   line-height: 1.5; }
 
 .kuiEmptyTablePrompt__actions {
@@ -2235,16 +2226,16 @@ main {
           align-items: baseline; }
 
 .kuiStatusText--info {
-  color: #4DA1C0; }
+  color: #1BA9F5; }
 
 .kuiStatusText--success {
-  color: #017D73; }
+  color: #7DE2D1; }
 
 .kuiStatusText--warning {
-  color: #C06C4C; }
+  color: #FFCE7A; }
 
 .kuiStatusText--error {
-  color: #BF4D4D; }
+  color: #F66; }
 
 /**
  * 1. Set the image to be the same size as a font icon at 14px.
@@ -2262,7 +2253,7 @@ main {
  * 1. Make seamless transition from Table to ToolBarFooter header.
  */
 .kuiControlledTable {
-  background: #222; }
+  background: #1D1E24; }
   .kuiControlledTable .kuiTable {
     border-top: none;
     /* 1 */ }
@@ -2282,9 +2273,9 @@ main {
  */
 .kuiTable {
   width: 100%;
-  border: 1px solid #333;
+  border: 1px solid #343741;
   border-collapse: collapse;
-  background-color: #222; }
+  background-color: #1D1E24; }
 
 /**
  * 1. Allow contents of cells to determine table's width.
@@ -2298,13 +2289,13 @@ main {
     /* 1 */ }
 
 .kuiTableHeaderCell {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   text-align: left;
   max-width: 20px;
   /* 1 */
   line-height: 1.5;
-  color: #8A8A8A; }
+  color: #98A2B3; }
 
 .kuiTableHeaderCell__liner {
   display: inline-block;
@@ -2372,13 +2363,13 @@ main {
   display: none; }
 
 .kuiTableRowCell {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   text-align: left;
   max-width: 20px;
   /* 1 */
-  color: #DDD;
-  border-top: 1px solid #333;
+  color: #DFE5EF;
+  border-top: 1px solid #343741;
   vertical-align: middle; }
 
 /**
@@ -2414,7 +2405,7 @@ main {
  *    that contains its expanded details.
  */
 .kuiTableRowCell--expanded {
-  border-top-color: #222;
+  border-top-color: #1D1E24;
   /* 1 */ }
 
 .kuiTableRowCell--alignRight {
@@ -2445,8 +2436,8 @@ main {
 
 .kuiTableInfo {
   padding: 30px;
-  font-size: 18.0px;
-  color: #8A8A8A;
+  font-size: 20px;
+  color: #98A2B3;
   line-height: 1.5; }
 
 .kuiTabs {
@@ -2454,7 +2445,7 @@ main {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  border-bottom: 1px solid #333; }
+  border-bottom: 1px solid #343741; }
 
 /**
  * 1. Override button styles (some of which are from Bootstrap).
@@ -2470,11 +2461,11 @@ main {
   /* 1 */
   cursor: pointer;
   padding: 10px 30px;
-  font-size: 14px;
-  color: #8A8A8A;
+  font-size: 16px;
+  color: #98A2B3;
   background-color: transparent;
   /* 1 */
-  border: 1px solid #333;
+  border: 1px solid #343741;
   border-radius: 0;
   /* 1 */
   margin-bottom: -1px;
@@ -2495,14 +2486,14 @@ main {
     /* 1 */ }
   .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
     z-index: 1;
-    color: #4DA1C0;
-    border: 1px solid #4DA1C0 !important; }
+    color: #1BA9F5;
+    border: 1px solid #1BA9F5 !important; }
   .kuiTab:hover:not(.kuiTab-isSelected) {
-    color: #3985a1;
-    background-color: #242424; }
+    color: #098dd4;
+    background-color: #25262E; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;
-    color: #DDD;
+    color: #DFE5EF;
     background-color: transparent;
     border-bottom-color: transparent; }
 
@@ -2522,14 +2513,14 @@ main {
   /* 1 */
   line-height: inherit;
   /* 1 */
-  color: #DDD; }
+  color: #DFE5EF; }
   .kuiToggleButton:focus {
-    color: #DDD; }
+    color: #DFE5EF; }
   .kuiToggleButton:active {
-    color: #4DA1C0 !important;
+    color: #1BA9F5 !important;
     /* 2 */ }
   .kuiToggleButton:hover:not(:disabled) {
-    color: #3985a1 !important;
+    color: #098dd4 !important;
     /* 2 */
     text-decoration: underline; }
   .kuiToggleButton:disabled {
@@ -2547,7 +2538,7 @@ main {
 .kuiTogglePanelHeader {
   padding-bottom: 4px;
   margin-bottom: 15px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #343741;
   /**
    * 1. Allow the user to click anywhere on the header, not just on the button text.
    */ }
@@ -2575,14 +2566,14 @@ main {
   padding: 10px;
   height: 50px;
   background-color: transparent;
-  border: solid 1px #333; }
+  border: solid 1px #343741; }
   .kuiToolBar .kuiButton:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2590,16 +2581,16 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2607,18 +2598,18 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
-            box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
+    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   .kuiToolBar .kuiSelect {
-    border-color: #1b1b1b; }
+    border-color: #16171c; }
     .kuiToolBar .kuiSelect:not(a):enabled:focus {
       outline: none;
-      border-color: #4DA1C0; }
+      border-color: #1BA9F5; }
     a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {
       /* 1 */
       outline: none;
-      border-color: #4DA1C0; }
+      border-color: #1BA9F5; }
 
 .kuiToolBarSection {
   display: -webkit-box;
@@ -2686,7 +2677,7 @@ main {
   /* 1 */
   padding: 10px;
   height: 40px;
-  background-color: #222; }
+  background-color: #1D1E24; }
 
 .kuiToolBarFooterSection {
   display: -webkit-box;
@@ -2767,7 +2758,7 @@ main {
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   position: relative;
-  font-size: 14px;
+  font-size: 16px;
   max-width: 800px; }
 
 .kuiToolBarSearchBox__icon {
@@ -2784,28 +2775,28 @@ main {
   width: 100%;
   min-width: 200px;
   padding: 4px 12px 5px 28px;
-  font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   /* 1 */
-  background-color: #222;
-  color: #DDD;
+  background-color: #1D1E24;
+  color: #DFE5EF;
   border-radius: 4px;
   font-size: 1em;
-  border: 1px solid #333;
+  border: 1px solid #343741;
   line-height: normal;
   /* 1 */
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
-    border-color: #4DA1C0; }
+    border-color: #1BA9F5; }
 
 /*
  * 1. We don't want the text to take up two lines and overflow the ToolBar.
  */
 .kuiToolBarText {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
-  color: #8A8A8A;
+  color: #98A2B3;
   white-space: nowrap;
   /* 1 */ }
 
@@ -2827,7 +2818,7 @@ main {
   /* 1 */
   font-weight: 400;
   /* 1 */
-  font-size: 18.0px; }
+  font-size: 20px; }
 
 /**
  * 1. Override p.
@@ -2838,7 +2829,7 @@ main {
   font-weight: 700;
   /* 1 */
   line-height: 1.5;
-  font-size: 14px; }
+  font-size: 16px; }
 
 /**
  * 1. Override p.
@@ -2849,7 +2840,7 @@ main {
   font-weight: 400;
   /* 1 */
   line-height: 1.5;
-  font-size: 14px; }
+  font-size: 16px; }
 
 .kuiSubText {
   margin: 0;
@@ -2860,7 +2851,7 @@ main {
   font-size: 14px; }
 
 .kuiSubduedText {
-  color: #8A8A8A !important; }
+  color: #98A2B3 !important; }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 16px; }

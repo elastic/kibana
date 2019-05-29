@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getUrlPrefix } from '../lib/space_test_utils';
@@ -40,7 +40,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to create ${type}, missing action:saved_objects/${type}/create`,
+      message: `Unable to create ${type}`,
     });
   };
 
@@ -58,9 +58,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     expect(resp.body).to.eql({
       id: resp.body.id,
-      migrationVersion: {
-        visualization: '7.0.0',
-      },
+      migrationVersion: resp.body.migrationVersion,
       type: spaceAwareType,
       updated_at: resp.body.updated_at,
       version: resp.body.version,

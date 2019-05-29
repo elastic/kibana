@@ -92,3 +92,7 @@ export {
 export {
   sortTable,
 } from './sort_table';
+
+export {
+  trackUiMetric,
+} from './track_ui_metric';

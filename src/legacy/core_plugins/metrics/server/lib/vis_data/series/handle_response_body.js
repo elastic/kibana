@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import buildProcessorFunction from '../build_processor_function';
-import processors from '../response_processors/series';
+import { buildProcessorFunction } from '../build_processor_function';
+import { processors } from '../response_processors/series';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export default function handleResponseBody(panel) {
+export function handleResponseBody(panel) {
   return resp => {
     if (resp.error) {
       const err = new Error(resp.error.type);
@@ -44,9 +44,11 @@ export default function handleResponseBody(panel) {
         })
       );
     }
-    const seriesId = keys[0];
-    const series = panel.series.find(s => s.id === seriesId);
-    const processor = buildProcessorFunction(processors, resp, panel, series);
+    const [ seriesId ] = keys;
+    const meta = get(resp, `aggregations.${seriesId}.meta`, {});
+    const series = panel.series.find(s => s.id === (meta.seriesId || seriesId));
+    const processor = buildProcessorFunction(processors, resp, panel, series, meta);
+
     return processor([]);
   };
 }

@@ -20,6 +20,7 @@ import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/mod
 import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
 import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
+import { vertexFactory } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { I18nContext } from 'ui/i18n';
 import {
@@ -27,6 +28,9 @@ import {
   EuiPage,
   EuiPageContent,
 } from '@elastic/eui';
+
+let previousPipelineHash = undefined;
+let detailVertexId = undefined;
 
 function getPageData($injector) {
   const $route = $injector.get('$route');
@@ -38,11 +42,20 @@ function getPageData($injector) {
   const { ccs, cluster_uuid: clusterUuid } = globalState;
   const pipelineId = $route.current.params.id;
   const pipelineHash = $route.current.params.hash || '';
+
+  // Pipeline version was changed, so clear out detailVertexId since that vertex won't
+  // exist in the updated pipeline version
+  if (pipelineHash !== previousPipelineHash) {
+    previousPipelineHash = pipelineHash;
+    detailVertexId = undefined;
+  }
+
   const url = pipelineHash
     ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
     : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
   return $http.post(url, {
-    ccs
+    ccs,
+    detailVertexId
   })
     .then(response => response.data)
     .then(data => {
@@ -86,12 +99,12 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
     pageData: getPageData
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const config = $injector.get('config');
       const dateFormat = config.get('dateFormat');
 
       super({
-        title: i18n('xpack.monitoring.logstash.pipeline.routeTitle', {
+        title: i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
           defaultMessage: 'Logstash - Pipeline'
         }),
         storageKey: 'logstash.pipelines',
@@ -107,11 +120,22 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
       const timeseriesTooltipXValueFormatter = xValue =>
         moment(xValue).format(dateFormat);
 
+      const setDetailVertexId = vertex => {
+        if (!vertex) {
+          detailVertexId = undefined;
+        } else {
+          detailVertexId = vertex.id;
+        }
+
+        return this.updateData();
+      };
+
       $scope.$watch(() => this.data, data => {
         if (!data || !data.pipeline) {
           return;
         }
         this.pipelineState = new PipelineState(data.pipeline);
+        this.detailVertex = data.vertex ? vertexFactory(null, data.vertex) : null;
         this.renderReact(
           <I18nContext>
             <EuiPage>
@@ -122,12 +146,19 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
                       Pipeline.fromPipelineGraph(this.pipelineState.config.graph)
                     )}
                     timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+                    setDetailVertexId={setDetailVertexId}
+                    detailVertex={this.detailVertex}
                   />
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
           </I18nContext>
         );
+      });
+
+      $scope.$on('$destroy', () => {
+        previousPipelineHash = undefined;
+        detailVertexId = undefined;
       });
     }
   }

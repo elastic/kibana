@@ -5,13 +5,19 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { showApiError } from '../../services/api_errors';
-import { saveLifecycle as saveLifecycleApi } from '../../services/api';
 
+import {
+  UIM_POLICY_CREATE,
+  UIM_POLICY_UPDATE,
+} from '../../../common/constants';
+
+import { showApiError } from '../../services/api_errors';
+import { savePolicy as savePolicyApi } from '../../services/api';
+import { trackUiMetric, getUiMetricsForPhases } from '../../services';
 
 export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
   try {
-    await saveLifecycleApi(lifecycle);
+    await savePolicyApi(lifecycle);
   }
   catch (err) {
     const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage',
@@ -23,6 +29,11 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
     showApiError(err, title);
     return false;
   }
+
+  const uiMetrics = getUiMetricsForPhases(lifecycle.phases);
+  uiMetrics.push(isNew ? UIM_POLICY_CREATE : UIM_POLICY_UPDATE);
+  trackUiMetric(uiMetrics);
+
   const message = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage',
     {
       defaultMessage: '{verb} lifecycle policy "{lifecycleName}"',

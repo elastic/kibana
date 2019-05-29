@@ -35,7 +35,7 @@ This will prompt you for some input. Generally, you can answer as follows:
 Once this has completed, go to your plugin directory:
 
 ```bash
-cd ../kibana-extra/canvas_example
+cd plugins/canvas_example
 ```
 
 Open that folder in your code editor of choice: `code .`
@@ -113,7 +113,7 @@ kbnInterpreter.register({
 In the terminal, in your plugin's directory, run:
 
 ```bash
-# In kibana-extra/canvas_example
+# In plugins/canvas_example
 yarn start
 ```
 

@@ -23,6 +23,9 @@ contains the following properties:
 `id` (required)::
   (string) ID of object to retrieve
 
+`fields` (optional)::
+  (array) The fields to return in the object's response
+
 ==== Response body
 
 The response body will have a top level `saved_objects` property that contains

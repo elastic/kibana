@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withState } from 'recompose';
-import { TimeFilter as Component } from './time_filter';
-
-export const TimeFilter = compose(withState('filter', 'setFilter', ({ filter }) => filter))(
-  Component
-);
+export { TimeFilter } from './time_filter';

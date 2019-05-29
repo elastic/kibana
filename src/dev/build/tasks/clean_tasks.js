@@ -29,6 +29,7 @@ export const CleanTask = {
     await deleteAll([
       config.resolveFromRepo('build'),
       config.resolveFromRepo('target'),
+      config.resolveFromRepo('.node_binaries'),
     ], log);
   },
 };
@@ -40,11 +41,11 @@ export const CleanPackagesTask = {
   async run(config, log, build) {
     await deleteAll([
       build.resolvePath('packages'),
-      build.resolvePath('x-pack'),
       build.resolvePath('yarn.lock'),
     ], log);
   },
 };
+
 
 export const CleanTypescriptTask = {
   description:
@@ -70,103 +71,112 @@ export const CleanExtraFilesFromModulesTask = {
         minimatch.makeRe(pattern, { nocase: true })
       );
 
+    const regularExpressions = makeRegexps([
+      // tests
+      '**/test',
+      '**/tests',
+      '**/__tests__',
+      '**/mocha.opts',
+      '**/*.test.js',
+      '**/*.snap',
+      '**/coverage',
+
+      // docs
+      '**/doc',
+      '**/docs',
+      '**/CONTRIBUTING.md',
+      '**/Contributing.md',
+      '**/contributing.md',
+      '**/History.md',
+      '**/HISTORY.md',
+      '**/history.md',
+      '**/CHANGELOG.md',
+      '**/Changelog.md',
+      '**/changelog.md',
+
+      // examples
+      '**/example',
+      '**/examples',
+      '**/demo',
+      '**/samples',
+
+      // bins
+      '**/.bin',
+
+      // linters
+      '**/.eslintrc',
+      '**/.eslintrc.js',
+      '**/.eslintrc.yml',
+      '**/.prettierrc',
+      '**/.jshintrc',
+      '**/.babelrc',
+      '**/.jscs.json',
+      '**/.lint',
+
+      // hints
+      '**/*.flow',
+      '**/*.webidl',
+      '**/*.map',
+      '**/@types',
+
+      // scripts
+      '**/*.sh',
+      '**/*.bat',
+      '**/*.exe',
+      '**/Gruntfile.js',
+      '**/gulpfile.js',
+      '**/Makefile',
+
+      // untranspiled sources
+      '**/*.coffee',
+      '**/*.scss',
+      '**/*.sass',
+      '**/.ts',
+      '**/.tsx',
+
+      // editors
+      '**/.editorconfig',
+      '**/.vscode',
+
+      // git
+      '**/.gitattributes',
+      '**/.gitkeep',
+      '**/.gitempty',
+      '**/.gitmodules',
+      '**/.keep',
+      '**/.empty',
+
+      // ci
+      '**/.travis.yml',
+      '**/.coveralls.yml',
+      '**/.instanbul.yml',
+      '**/appveyor.yml',
+      '**/.zuul.yml',
+
+      // metadata
+      '**/package-lock.json',
+      '**/component.json',
+      '**/bower.json',
+      '**/yarn.lock',
+
+      // misc
+      '**/.*ignore',
+      '**/.DS_Store',
+      '**/Dockerfile',
+      '**/docker-compose.yml',
+    ]);
+
     log.info('Deleted %d files', await scanDelete({
       directory: build.resolvePath('node_modules'),
-      regularExpressions: makeRegexps([
-        // tests
-        '**/test',
-        '**/tests',
-        '**/__tests__',
-        '**/mocha.opts',
-        '**/*.test.js',
-        '**/*.snap',
-        '**/coverage',
-
-        // docs
-        '**/doc',
-        '**/docs',
-        '**/CONTRIBUTING.md',
-        '**/Contributing.md',
-        '**/contributing.md',
-        '**/History.md',
-        '**/HISTORY.md',
-        '**/history.md',
-        '**/CHANGELOG.md',
-        '**/Changelog.md',
-        '**/changelog.md',
-
-        // examples
-        '**/example',
-        '**/examples',
-        '**/demo',
-        '**/samples',
-
-        // bins
-        '**/.bin',
-
-        // linters
-        '**/.eslintrc',
-        '**/.eslintrc.js',
-        '**/.eslintrc.yml',
-        '**/.prettierrc',
-        '**/.jshintrc',
-        '**/.babelrc',
-        '**/.jscs.json',
-        '**/.lint',
-
-        // hints
-        '**/*.flow',
-        '**/*.webidl',
-        '**/*.map',
-        '**/@types',
-
-        // scripts
-        '**/*.sh',
-        '**/*.bat',
-        '**/*.exe',
-        '**/Gruntfile.js',
-        '**/gulpfile.js',
-        '**/Makefile',
-
-        // untranspiled sources
-        '**/*.coffee',
-        '**/*.scss',
-        '**/*.sass',
-        '**/.ts',
-        '**/.tsx',
-
-        // editors
-        '**/.editorconfig',
-        '**/.vscode',
-
-        // git
-        '**/.gitattributes',
-        '**/.gitkeep',
-        '**/.gitempty',
-        '**/.gitmodules',
-        '**/.keep',
-        '**/.empty',
-
-        // ci
-        '**/.travis.yml',
-        '**/.coveralls.yml',
-        '**/.instanbul.yml',
-        '**/appveyor.yml',
-        '**/.zuul.yml',
-
-        // metadata
-        '**/package-lock.json',
-        '**/component.json',
-        '**/bower.json',
-        '**/yarn.lock',
-
-        // misc
-        '**/.*ignore',
-        '**/.DS_Store',
-        '**/Dockerfile',
-        '**/docker-compose.yml'
-      ])
+      regularExpressions
     }));
+
+    if (!build.isOss()) {
+      log.info('Deleted %d files', await scanDelete({
+        directory: build.resolvePath('x-pack/node_modules'),
+        regularExpressions
+      }));
+    }
   },
 };
 
@@ -194,7 +204,7 @@ export const CleanExtraBrowsersTask = {
 
   async run(config, log, build) {
     const getBrowserPathsForPlatform = platform => {
-      const reportingDir = 'node_modules/x-pack/plugins/reporting';
+      const reportingDir = 'x-pack/plugins/reporting';
       const chromiumDir = '.chromium';
       const chromiumPath = p =>
         build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);

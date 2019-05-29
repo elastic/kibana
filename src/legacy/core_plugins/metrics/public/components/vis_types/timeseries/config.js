@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import DataFormatPicker from '../../data_format_picker';
-import createSelectHandler from '../../lib/create_select_handler';
-import YesNo from '../../yes_no';
-import createTextHandler from '../../lib/create_text_handler';
+import { DataFormatPicker } from '../../data_format_picker';
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { YesNo } from '../../yes_no';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
 import {
   htmlIdGenerator,
@@ -39,7 +39,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-const TimeseriesConfig = injectI18n(function (props) {
+export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
 
@@ -62,6 +62,13 @@ const TimeseriesConfig = injectI18n(function (props) {
   const stackedOptions = [
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }), value: 'none' },
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }), value: 'stacked' },
+    {
+      label: intl.formatMessage({
+        id: 'tsvb.timeSeries.stackedWithinSeriesLabel',
+        defaultMessage: 'Stacked within series'
+      }),
+      value: 'stacked_within_series'
+    },
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }), value: 'percent' }
   ];
   const selectedStackedOption = stackedOptions.find(option => {
@@ -109,7 +116,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -126,7 +133,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -206,7 +213,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -223,7 +230,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -366,7 +373,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={splitColorOptions}
               selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
               onChange={handleSelectChange('split_color_mode')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -444,7 +451,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={positionOptions}
               selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}
               onChange={handleSelectChange('axis_position')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -487,5 +494,3 @@ TimeseriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func
 };
-
-export default TimeseriesConfig;

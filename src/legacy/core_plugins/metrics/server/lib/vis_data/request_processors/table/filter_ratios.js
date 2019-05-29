@@ -19,11 +19,12 @@
 
 /* eslint max-len:0 */
 const filter = metric => metric.type === 'filter_ratio';
-import bucketTransform from '../../helpers/bucket_transform';
+import { bucketTransform } from '../../helpers/bucket_transform';
 import _ from 'lodash';
 import { calculateAggRoot } from './calculate_agg_root';
-export default function ratios(req, panel) {
-  return () => doc => {
+
+export function ratios(req, panel) {
+  return next => doc => {
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
       if (column.metrics.some(filter)) {
@@ -63,6 +64,6 @@ export default function ratios(req, panel) {
         });
       }
     });
-    return doc;
+    return next(doc);
   };
 }

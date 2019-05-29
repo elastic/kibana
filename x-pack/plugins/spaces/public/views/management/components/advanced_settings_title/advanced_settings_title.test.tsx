@@ -12,6 +12,7 @@ describe('AdvancedSettingsTitle', () => {
     const space = {
       id: 'my-space',
       name: 'My Space',
+      disabledFeatures: [],
     };
     expect(shallowWithIntl(<AdvancedSettingsTitle space={space} />)).toMatchSnapshot();
   });

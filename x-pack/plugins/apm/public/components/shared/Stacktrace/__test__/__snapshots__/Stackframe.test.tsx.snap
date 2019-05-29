@@ -2,7 +2,7 @@
 
 exports[`Stackframe when stackframe has source lines should render correctly 1`] = `
 .c2 {
-  color: rgb(152,162,179);
+  color: #98a2b3;
   padding: 8px;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
   font-size: 14px;
@@ -10,7 +10,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 
 .c3 {
   font-weight: bold;
-  color: rgb(0,0,0);
+  color: #000000;
 }
 
 .c4 {
@@ -32,7 +32,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   top: 0;
   left: 0;
   border-radius: 0 0 0 5px;
-  background: rgb(245,247,250);
+  background: #f5f7fa;
 }
 
 .c7 {
@@ -40,10 +40,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: rgb(152,162,179);
+  color: #98a2b3;
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid rgb(211,218,230);
+  border-right: 1px solid #d3dae6;
 }
 
 .c7:last-of-type {
@@ -55,10 +55,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: rgb(152,162,179);
+  color: #98a2b3;
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid rgb(211,218,230);
+  border-right: 1px solid #d3dae6;
   background-color: #fef6e5;
 }
 
@@ -70,7 +70,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   overflow: auto;
   margin: 0 0 0 42px;
   padding: 0;
-  background-color: rgb(255,255,255);
+  background-color: #ffffff;
 }
 
 .c9:last-of-type {
@@ -97,7 +97,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 .c1 {
-  border-bottom: 1px solid rgb(211,218,230);
+  border-bottom: 1px solid #d3dae6;
   border-radius: 5px 5px 0 0;
 }
 
@@ -105,9 +105,9 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   position: relative;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
   font-size: 14px;
-  border: 1px solid rgb(211,218,230);
+  border: 1px solid #d3dae6;
   border-radius: 5px;
-  background: rgb(245,247,250);
+  background: #f5f7fa;
 }
 
 <Stackframe

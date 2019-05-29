@@ -18,7 +18,7 @@
  */
 
 import { SearchSource } from '../../courier';
-import { QueryFilter } from '../../filter_bar/query_filter';
+import { QueryFilter } from '../../filter_manager/query_filter';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { Filters, Query, TimeRange } from '../../visualize';
@@ -36,7 +36,7 @@ export interface RequestHandlerParams {
   uiState?: PersistedState;
   partialRows?: boolean;
   inspectorAdapters?: Adapters;
-  isHierarchical?: boolean;
+  metricsAtAllLevels?: boolean;
   visParams?: any;
 }
 

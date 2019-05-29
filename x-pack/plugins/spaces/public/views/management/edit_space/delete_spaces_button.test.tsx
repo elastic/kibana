@@ -13,6 +13,7 @@ import { DeleteSpacesButton } from './delete_spaces_button';
 const space = {
   id: 'my-space',
   name: 'My Space',
+  disabledFeatures: [],
 };
 const buildMockChrome = () => {
   return {

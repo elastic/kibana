@@ -22,13 +22,13 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
-import getLastValue from '../../../common/get_last_value';
-import getValueBy from '../lib/get_value_by';
-import GaugeVis from './gauge_vis';
+import { getLastValue } from '../../../common/get_last_value';
+import { getValueBy } from '../lib/get_value_by';
+import { GaugeVis } from './gauge_vis';
 import reactcss from 'reactcss';
-import calculateCoordinates from '../lib/calculate_coordinates';
+import { calculateCoordinates } from '../lib/calculate_coordinates';
 
-class Gauge extends Component {
+export class Gauge extends Component {
 
   constructor(props) {
     super(props);
@@ -172,6 +172,7 @@ class Gauge extends Component {
         <div
           ref={(el) => this.resize = el}
           className={`tvbVisGauge__resize`}
+          data-test-subj="tvbVisGaugeContainer"
         >
           { metrics }
           <GaugeVis {...gaugeProps}/>
@@ -199,6 +200,3 @@ Gauge.propTypes = {
   valueColor: PropTypes.string,
   additionalLabel: PropTypes.string
 };
-
-export default Gauge;
-

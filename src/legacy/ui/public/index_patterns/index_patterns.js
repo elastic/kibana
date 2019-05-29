@@ -21,13 +21,12 @@ import { IndexPatternMissingIndices } from '../errors';
 import { IndexPatternProvider } from './_index_pattern';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { IndexPatternsGetProvider } from './_get';
-import { IndexPatternsIntervalsProvider } from './_intervals';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { fieldFormats } from '../registry/field_formats';
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana/index_patterns');
 
-export function IndexPatternsProvider(Notifier, Private, config) {
+export function IndexPatternsProvider(Private, config) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternProvider);
@@ -68,10 +67,8 @@ export function IndexPatternsProvider(Notifier, Private, config) {
   self.getIds = getProvider('id');
   self.getTitles = getProvider('attributes.title');
   self.getFields = getProvider.multiple;
-  self.intervals = Private(IndexPatternsIntervalsProvider);
   self.fieldsFetcher = Private(FieldsFetcherProvider);
   self.fieldFormats = fieldFormats;
-  self.IndexPattern = IndexPattern;
 }
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));

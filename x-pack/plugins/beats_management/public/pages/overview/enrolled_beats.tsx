@@ -127,9 +127,9 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 enrollmentToken={this.props.urlState.enrollmentToken}
                 getBeatWithToken={this.props.containers.beats.getBeatWithToken}
                 createEnrollmentToken={async () => {
-                  const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
+                  const enrollmentTokens = await this.props.libs.tokens.createEnrollmentTokens();
                   this.props.setUrlState({
-                    enrollmentToken,
+                    enrollmentToken: enrollmentTokens[0],
                   });
                 }}
                 onBeatEnrolled={() => {

@@ -33,6 +33,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['success', 'info', 'security', 'error', 'warning'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
@@ -79,6 +80,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['success', 'info', 'security', 'error', 'warning'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
@@ -125,6 +127,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['success', 'info', 'security', 'error', 'warning'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
@@ -171,6 +174,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['success', 'info', 'security', 'error', 'warning'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
@@ -217,6 +221,7 @@ export default {
           ]
         }
       ],
+      'xAxisOrderedValues': ['success', 'info', 'security', 'error', 'warning'],
       'xAxisFormatter': function (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);

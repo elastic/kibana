@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import AggParamWriterProvider from '../../agg_param_writer';
@@ -31,7 +31,7 @@ import { timefilter } from 'ui/timefilter';
 
 const config = chrome.getUiSettingsClient();
 
-describe('params', function () {
+describe('date_histogram params', function () {
 
   let paramWriter;
   let writeInterval;
@@ -68,9 +68,8 @@ describe('params', function () {
       expect(output.params).to.have.property('interval', '1d');
     });
 
-    it('ignores invalid intervals', function () {
-      const output = writeInterval('foo');
-      expect(output.params).to.have.property('interval', '0ms');
+    it('throws error when interval is invalid', function () {
+      expect(() => writeInterval('foo')).to.throw('TypeError: "foo" is not a valid interval.');
     });
 
     it('automatically picks an interval', function () {
@@ -150,6 +149,12 @@ describe('params', function () {
       config.get.withArgs('dateFormat:tz').returns('Europe/Riga');
       const output = paramWriter.write({});
       expect(output.params).to.have.property('time_zone', 'Europe/Riga');
+    });
+
+    it('should use the fixed time_zone from the index pattern typeMeta', () => {
+      _.set(paramWriter.indexPattern, ['typeMeta', 'aggs', 'date_histogram', timeField, 'time_zone'], 'Europe/Rome');
+      const output = paramWriter.write({ field: timeField });
+      expect(output.params).to.have.property('time_zone', 'Europe/Rome');
     });
 
     afterEach(() => {

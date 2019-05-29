@@ -141,5 +141,6 @@ export default {
       }
     }
   ],
+  'xAxisOrderedValues': ['jpg', 'css', 'png', 'gif', 'php'],
   'hits': 171462
 };

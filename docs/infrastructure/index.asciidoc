@@ -4,8 +4,6 @@
 
 [partintro]
 --
-beta[]
- 
 Use the interactive Infrastructure UI to monitor your infrastructure and
 identify problems in real time. You can explore metrics and logs for common
 servers, containers, and services. 
@@ -15,15 +13,71 @@ image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
 
 
 [float]
-== Add data sources
-Kibana provides step-by-step instructions to help you add your data sources.
-The {infra-guide}[Infrastructure Monitoring Guide] is a good source for more detailed
-instructions and information.
+== Add data
+
+Kibana provides step-by-step instructions to help you add log data. The
+{infra-guide}[Infrastructure Monitoring Guide] is a good source for more
+detailed information and instructions.
 
 [float]
 == Configure data sources 
 
-By default the Infrastructure UI uses the `metricbeat-*` index pattern to query the data. If you configured Metricbeat to export data to a different set of indices, you will need to set `xpack.infra.sources.default.metricAlias` in `config/kibana.yml` to match your index pattern. You can also configure the timestamp field by overriding `xpack.infra.sources.default.fields.timestamp`. See <<infrastructure-ui-settings-kb>> for a complete list.
+The `metricbeat-*` index pattern is used to query the data by default.
+If your metrics are located in a different set of indices, or use a
+different timestamp field, you can adjust the source configuration via the user
+interface or the {kib} configuration file.
+
+NOTE: Logs and Infrastructure share a common data source definition in
+each space. Changes in one of them can influence the data displayed in the
+other.
+
+[float]
+=== Configure source
+
+Configure source can be accessed via the corresponding
+image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
+button in the toolbar:
+
+[role="screenshot"]
+image::infrastructure/images/infrastructure-configure-source.png[Configure Infrastructure UI source button in Kibana]
+
+This opens the source configuration fly-out dialog, in which the following
+configuration items can be inspected and adjusted:
+
+* *Name*: The name of the source configuration.
+* *Indices*: The patterns of the elasticsearch indices to read metrics and logs
+  from.
+* *Fields*: The names of particular fields in the indices that need to be known
+  to the Infrastructure and Logs UIs in order to query and interpret the data
+  correctly.
+
+[role="screenshot"]
+image::infrastructure/images/infrastructure-configure-source-dialog.png[Configure Infrastructure UI source dialog in Kibana]
+
+TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration
+changes performed via Configure source are specific to that space. You can
+therefore easily make different subsets of the data available by creating
+multiple spaces with different data source configurations.
+
+[float]
+[[infra-read-only-access]]
+=== Read only access
+When you have insufficient privileges to change the source configuration, the following
+indicator in Kibana will be displayed. The buttons to change the source configuration
+won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::infrastructure/images/read-only-badge.png[Example of Infrastructure's read only access indicator in Kibana's header]
+
+
+[float]
+=== Configuration file
+
+The settings in the configuration file are used as a fallback when no other
+configuration for that space has been defined. They are located in the
+configuration namespace `xpack.infra.sources.default`. See
+<<infrastructure-ui-settings-kb>> for a complete list of the possible entries.
 
 --
 

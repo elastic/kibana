@@ -26,6 +26,10 @@ import aggGroupTemplate from './agg_group.html';
 import { move } from '../../../utils/collection';
 import { aggGroupNameMaps } from './agg_group_names';
 
+import '../../draggable/draggable_container';
+import '../../draggable/draggable_item';
+import '../../draggable/draggable_handle';
+
 uiModules
   .get('app/visualize')
   .directive('visEditorAggGroup', function () {
@@ -39,6 +43,12 @@ uiModules
         $scope.groupNameLabel = aggGroupNameMaps()[$scope.groupName];
         $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
         $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
+        // We use `editorState` to access the state of the editor in the options panels.
+        // There are some aggregations (dot size metric) that needs to set parameters on the
+        // editorState too. Since we have the editor state here available as `state`, we're just
+        // binding it to the same name `editorState` so the controls look the same if they are in
+        // the data tab or within any other options tab.
+        $scope.$bind('editorState', 'state');
 
         $scope.$watchMulti([
           'schemas',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
@@ -71,15 +71,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchRoles();
       const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
-      expect(roles.ingest_admin.reserved).to.be(true);
+      // This only contains the first page of alphabetically sorted results, so the assertions are only for the first handful of expected roles.
+      expect(roles.apm_system.reserved).to.be(true);
+      expect(roles.apm_user.reserved).to.be(true);
+      expect(roles.beats_admin.reserved).to.be(true);
+      expect(roles.beats_system.reserved).to.be(true);
       expect(roles.kibana_user.reserved).to.be(true);
-      expect(roles.monitoring_user.reserved).to.be(true);
-      expect(roles.remote_monitoring_agent.reserved).to.be(true);
-      expect(roles.reporting_user.reserved).to.be(true);
-      expect(roles.logstash_system.reserved).to.be(true);
-      expect(roles.superuser.reserved).to.be(true);
       expect(roles.kibana_system.reserved).to.be(true);
-      expect(roles.transport_client.reserved).to.be(true);
+      expect(roles.logstash_system.reserved).to.be(true);
+      expect(roles.monitoring_user.reserved).to.be(true);
     });
   });
 }

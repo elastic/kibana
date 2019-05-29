@@ -72,8 +72,8 @@ export class HistogramInner extends PureComponent {
         ...item,
         color:
           item === selectedItem
-            ? theme.euiColorPrimary
-            : tint(0.5, theme.euiColorPrimary),
+            ? theme.euiColorVis1
+            : tint(0.5, theme.euiColorVis1),
         x0: item.x0 + padding,
         x: item.x - padding,
         y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0
@@ -110,6 +110,7 @@ export class HistogramInner extends PureComponent {
     const x = scaleLinear()
       .domain([xMin, xMax])
       .range([XY_MARGIN.left, XY_WIDTH - XY_MARGIN.right]);
+
     const y = scaleLinear()
       .domain([yMin, yMax])
       .range([XY_HEIGHT, 0])
@@ -170,7 +171,7 @@ export class HistogramInner extends PureComponent {
               header={tooltipHeader(hoveredBucket)}
               footer={tooltipFooter(hoveredBucket)}
               tooltipPoints={[{ value: formatYLong(hoveredBucket.y) }]}
-              x={hoveredBucket.x}
+              x={hoveredBucket.xCenter}
               y={yDomain[1] / 2}
             />
           )}
@@ -181,7 +182,7 @@ export class HistogramInner extends PureComponent {
               width={x(bucketSize) - x(0)}
               style={{
                 fill: 'transparent',
-                stroke: theme.euiColorPrimary,
+                stroke: theme.euiColorVis1,
                 rx: '0px',
                 ry: '0px'
               }}
@@ -206,13 +207,13 @@ export class HistogramInner extends PureComponent {
             nodes={this.props.buckets.map(bucket => {
               return {
                 ...bucket,
-                x: (bucket.x0 + bucket.x) / 2
+                xCenter: (bucket.x0 + bucket.x) / 2
               };
             })}
             onClick={this.onClick}
             onHover={this.onHover}
             onBlur={this.onBlur}
-            x={d => x(d.x)}
+            x={d => x(d.xCenter)}
             y={() => 1}
           />
         </XYPlot>

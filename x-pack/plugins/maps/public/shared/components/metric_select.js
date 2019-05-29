@@ -6,15 +6,30 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
 
 const AGG_OPTIONS = [
-  { label: 'Average', value: 'avg' },
-  { label: 'Count', value: 'count' },
-  { label: 'Max', value: 'max' },
-  { label: 'Min', value: 'min' },
-  { label: 'Sum', value: 'sum' },
+  { label: i18n.translate('xpack.maps.metricSelect.averageDropDownOptionLabel', {
+    defaultMessage: 'Average'
+  }),
+  value: 'avg' },
+  { label: i18n.translate('xpack.maps.metricSelect.countDropDownOptionLabel', {
+    defaultMessage: 'Count'
+  }),
+  value: 'count' },
+  { label: i18n.translate('xpack.maps.metricSelect.maxDropDownOptionLabel', {
+    defaultMessage: 'Max'
+  }),
+  value: 'max' },
+  { label: i18n.translate('xpack.maps.metricSelect.minDropDownOptionLabel', {
+    defaultMessage: 'Min'
+  }),
+  value: 'min' },
+  { label: i18n.translate('xpack.maps.metricSelect.sumDropDownOptionLabel', {
+    defaultMessage: 'Sum'
+  }),
+  value: 'sum' },
 ];
 
 export const METRIC_AGGREGATION_VALUES = AGG_OPTIONS.map(({ value }) => { return value; });
@@ -34,7 +49,11 @@ export function MetricSelect({ value, onChange, metricsFilter }) {
 
   return (
     <EuiComboBox
-      placeholder="Select aggregation"
+      placeholder={
+        i18n.translate('xpack.maps.metricSelect.selectAggregationPlaceholder', {
+          defaultMessage: 'Select aggregation'
+        })
+      }
       singleSelection={true}
       isClearable={false}
       options={options}

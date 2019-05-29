@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { handleResponse } from '../get_shard_stats';
 import { shardStatsFixture, clusterFixture } from './fixtures';
 

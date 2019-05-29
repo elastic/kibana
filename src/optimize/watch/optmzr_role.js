@@ -30,15 +30,17 @@ export default async (kbnServer, kibanaHapiServer, config) => {
   const watchOptimizer = new WatchOptimizer({
     logWithMetadata,
     uiBundles: kbnServer.uiBundles,
+    discoveredPlugins: kbnServer.newPlatform.setup.core.plugins.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
+    workers: config.get('optimize.workers'),
     prebuild: config.get('optimize.watchPrebuild'),
     watchCache: new WatchCache({
       logWithMetadata,
       outputPath: config.get('path.data'),
       dllsPath: DllCompiler.getRawDllConfig().outputPath,
       cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../'),
-    })
+    }),
   });
 
   const server = new WatchServer(

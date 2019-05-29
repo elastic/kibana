@@ -39,6 +39,12 @@ run(
       );
     }
 
+    if (typeof path === 'boolean' || typeof includeConfig === 'boolean') {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
+      );
+    }
+
     const config = await mergeConfigs(includeConfig);
     const defaultMessages = await extractDefaultMessages({ path, config });
 
@@ -52,5 +58,10 @@ run(
       resolve(outputDir, 'en.json'),
       outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
     );
+  },
+  {
+    flags: {
+      allowUnexpected: true,
+    },
   }
 );

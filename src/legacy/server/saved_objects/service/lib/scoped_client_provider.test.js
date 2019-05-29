@@ -25,7 +25,7 @@ test(`uses default client factory when one isn't set`, () => {
   const request = Symbol();
 
   const clientProvider = new ScopedSavedObjectsClientProvider({
-    defaultClientFactory: defaultClientFactoryMock
+    defaultClientFactory: defaultClientFactoryMock,
   });
   const result = clientProvider.getClient(request);
 
@@ -43,7 +43,7 @@ test(`uses custom client factory when one is set`, () => {
   const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
 
   const clientProvider = new ScopedSavedObjectsClientProvider({
-    defaultClientFactory: defaultClientFactoryMock
+    defaultClientFactory: defaultClientFactoryMock,
   });
   clientProvider.setClientFactory(customClientFactoryMock);
   const result = clientProvider.getClient(request);
@@ -58,9 +58,9 @@ test(`uses custom client factory when one is set`, () => {
 
 test(`throws error when more than one scoped saved objects client factory is set`, () => {
   const clientProvider = new ScopedSavedObjectsClientProvider({});
-  clientProvider.setClientFactory(() => { });
+  clientProvider.setClientFactory(() => {});
   expect(() => {
-    clientProvider.setClientFactory(() => { });
+    clientProvider.setClientFactory(() => {});
   }).toThrowErrorMatchingSnapshot();
 });
 
@@ -68,7 +68,7 @@ test(`invokes and uses wrappers in specified order`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
   const clientProvider = new ScopedSavedObjectsClientProvider({
-    defaultClientFactory: defaultClientFactoryMock
+    defaultClientFactory: defaultClientFactoryMock,
   });
   const firstWrappedClient = Symbol('first client');
   const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
@@ -83,10 +83,10 @@ test(`invokes and uses wrappers in specified order`, () => {
   expect(actualClient).toBe(firstWrappedClient);
   expect(firstClientWrapperFactoryMock).toHaveBeenCalledWith({
     request,
-    client: secondWrapperClient
+    client: secondWrapperClient,
   });
   expect(secondClientWrapperFactoryMock).toHaveBeenCalledWith({
     request,
-    client: defaultClient
+    client: defaultClient,
   });
 });

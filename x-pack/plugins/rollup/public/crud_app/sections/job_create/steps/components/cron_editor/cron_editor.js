@@ -352,6 +352,7 @@ export class CronEditor extends Component {
                 </strong>
               </EuiText>
             )}
+            data-test-subj="rollupJobCreateFrequencySelect"
           />
         </EuiFormRow>
 

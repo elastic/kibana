@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorSparkline component renders a series when there are down items 1`] = `
+<FlexibleEuiSeriesChart
+  animateData={false}
+  height={70}
+  showCrosshair={false}
+  showDefaultAxis={false}
+  stackBy="y"
+  style={
+    Object {
+      "marginBottom": -24,
+    }
+  }
+  width={180}
+  xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+  xType="time"
+>
+  <EuiHistogramSeries
+    color="A danger color"
+    data={
+      Array [
+        Object {
+          "x": 124,
+          "x0": 123,
+          "y": 1,
+        },
+        Object {
+          "x": 125,
+          "x0": 124,
+          "y": 1,
+        },
+        Object {
+          "x": 126,
+          "x0": 125,
+          "y": 1,
+        },
+      ]
+    }
+    name="Down"
+  />
+</FlexibleEuiSeriesChart>
+`;

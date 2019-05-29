@@ -54,7 +54,7 @@ describe('Filebeat Rules', () => {
       expect(format(flattenedDocument)).toMatchInlineSnapshot(`
 Array [
   Object {
-    "constant": "[Traefik][access] ",
+    "constant": "[traefik][access] ",
   },
   Object {
     "field": "traefik.access.remote_ip",

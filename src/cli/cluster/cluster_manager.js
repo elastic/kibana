@@ -163,6 +163,7 @@ export default class ClusterManager {
     const { fromRoot } = require('../../legacy/utils');
 
     const watchPaths = [
+      fromRoot('src/core'),
       fromRoot('src/legacy/core_plugins'),
       fromRoot('src/legacy/server'),
       fromRoot('src/legacy/ui'),
@@ -170,7 +171,6 @@ export default class ClusterManager {
       fromRoot('x-pack/common'),
       fromRoot('x-pack/plugins'),
       fromRoot('x-pack/server'),
-      fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));
@@ -181,6 +181,7 @@ export default class ClusterManager {
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
         /\.test\.js$/,
         ...extraIgnores,
+        'plugins/java_languageserver'
       ],
     });
 
@@ -251,9 +252,13 @@ export default class ClusterManager {
   }
 
   shouldRedirectFromOldBasePath(path) {
+    // strip `s/{id}` prefix when checking for need to redirect
+    if (path.startsWith('s/')) {
+      path = path.split('/').slice(2).join('/');
+    }
+
     const isApp = path.startsWith('app/');
     const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
-
     return isApp || isKnownShortPath;
   }
 

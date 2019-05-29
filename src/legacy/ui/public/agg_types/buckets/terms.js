@@ -24,12 +24,16 @@ import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
 import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
-import orderAndSizeTemplate from '../controls/order_and_size.html';
-import otherBucketTemplate from '../controls/other_bucket.html';
+import { OrderParamEditor } from '../controls/order';
+import { SizeParamEditor } from '../controls/size';
+import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import { i18n } from '@kbn/i18n';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
+import { MissingBucketParamEditor } from '../controls/missing_bucket';
+import { OtherBucketParamEditor } from '../controls/other_bucket';
+import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 const aggFilter = [
   '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -41,35 +45,12 @@ const orderAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'orderAgg',
-    title: i18n.translate('common.ui.aggTypes.buckets.terms.orderAggTitle', {
-      defaultMessage: 'Order Agg',
-    }),
+    // This string is never visible to the user so it doesn't need to be translated
+    title: 'Order Agg',
     hideCustomLabel: true,
     aggFilter: aggFilter
   }
 ])).all[0];
-
-function isNotType(type) {
-  return function (agg) {
-    const field = agg.params.field;
-    return !field || field.type !== type;
-  };
-}
-
-const migrateIncludeExcludeFormat = {
-  serialize: function (value) {
-    if (!value || _.isString(value)) return value;
-    else return value.pattern;
-  },
-  write: function (aggConfig, output) {
-    const value = aggConfig.params[this.name];
-    if (_.isObject(value)) {
-      output.params[this.name] = value.pattern;
-    } else if (value) {
-      output.params[this.name] = value;
-    }
-  }
-};
 
 export const termsBucketAgg = new BucketAggType({
   name: 'terms',
@@ -78,7 +59,7 @@ export const termsBucketAgg = new BucketAggType({
   }),
   makeLabel: function (agg) {
     const params = agg.params;
-    return agg.getFieldDisplayName() + ': ' + params.order.display;
+    return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
   getFormat: function (bucket) {
     return {
@@ -138,10 +119,6 @@ export const termsBucketAgg = new BucketAggType({
       name: 'field',
       type: 'field',
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
-    },
-    {
-      name: 'size',
-      default: 5
     },
     {
       name: 'orderAgg',
@@ -225,7 +202,7 @@ export const termsBucketAgg = new BucketAggType({
         }
       },
       write: function (agg, output, aggs) {
-        const dir = agg.params.order.val;
+        const dir = agg.params.order.value;
         const order = output.params.order = {};
 
         let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
@@ -234,7 +211,7 @@ export const termsBucketAgg = new BucketAggType({
         // thus causing issues with filtering. This probably causes other issues since float might not
         // be able to contain the number on the elasticsearch side
         if (output.params.script) {
-          output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
+          output.params.value_type = agg.getField().type === 'number' ? 'float' : agg.getField().type;
         }
 
         if (agg.params.missingBucket && agg.params.field.type === 'string') {
@@ -262,24 +239,29 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'order',
-      type: 'optioned',
+      type: 'select',
       default: 'desc',
-      editor: orderAndSizeTemplate,
+      editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
             defaultMessage: 'Descending',
           }),
-          val: 'desc'
+          value: 'desc'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
             defaultMessage: 'Ascending',
           }),
-          val: 'asc'
+          value: 'asc'
         }
       ],
       write: _.noop // prevent default write, it's handled by orderAgg
+    },
+    {
+      name: 'size',
+      editorComponent: wrapWithInlineComp(SizeParamEditor),
+      default: 5
     },
     {
       name: 'orderBy',
@@ -288,37 +270,55 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'otherBucket',
       default: false,
-      editor: otherBucketTemplate,
-      write: _.noop
-    }, {
+      editorComponent: OtherBucketParamEditor,
+      write: _.noop,
+    },
+    {
       name: 'otherBucketLabel',
+      type: 'string',
       default: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketLabel', {
         defaultMessage: 'Other',
       }),
-      write: _.noop
-    }, {
+      displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
+        defaultMessage: 'Label for other bucket',
+      }),
+      shouldShow: agg => agg.params.otherBucket,
+      write: _.noop,
+    },
+    {
       name: 'missingBucket',
       default: false,
-      write: _.noop
-    }, {
+      editorComponent: MissingBucketParamEditor,
+      write: _.noop,
+    },
+    {
       name: 'missingBucketLabel',
       default: i18n.translate('common.ui.aggTypes.buckets.terms.missingBucketLabel', {
         defaultMessage: 'Missing',
+        description: `Default label used in charts when documents are missing a field.
+          Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
       }),
-      write: _.noop
+      type: 'string',
+      displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
+        defaultMessage: 'Label for missing values',
+      }),
+      shouldShow: agg => agg.params.missingBucket,
+      write: _.noop,
     },
     {
       name: 'exclude',
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', { defaultMessage: 'Exclude' }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
+      shouldShow: isStringType,
       ...migrateIncludeExcludeFormat
     },
     {
       name: 'include',
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', { defaultMessage: 'Include' }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
+      shouldShow: isStringType,
       ...migrateIncludeExcludeFormat
     },
   ]

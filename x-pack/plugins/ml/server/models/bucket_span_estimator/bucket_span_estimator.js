@@ -14,7 +14,6 @@ import { polledDataCheckerFactory } from './polled_data_checker';
 
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 import { isSecurityDisabled } from '../../lib/security_utils';
-import { isBasicLicense } from '../../lib/check_license';
 
 export function estimateBucketSpanFactory(callWithRequest, server) {
   const callWithInternalUser = callWithInternalUserFactory(server);
@@ -317,10 +316,6 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
       throw new Error('Invalid formConfig: Missing fields.');
     }
 
-    if (typeof formConfig.filters === 'undefined') {
-      throw new Error('Invalid formConfig: Missing filters.');
-    }
-
     if (typeof formConfig.query === 'undefined') {
       throw new Error('Invalid formConfig: Missing query.');
     }
@@ -377,7 +372,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
           });
       }
 
-      if (isBasicLicense(server) || isSecurityDisabled(server)) {
+      if (isSecurityDisabled(server)) {
         getBucketSpanEstimation();
       } else {
         // if security is enabled, check that the user has permission to

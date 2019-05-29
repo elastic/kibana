@@ -5,7 +5,7 @@
  */
 
 import { spy, stub } from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { MonitoringViewBaseTableController } from '../';
 
 describe('MonitoringViewBaseTableController', function () {

@@ -5,12 +5,16 @@
  */
 import {
   EuiBasicTable,
+  EuiButton,
+  EuiCodeBlock,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiModalBody,
   // @ts-ignore
   EuiSelect,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -87,6 +91,11 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
     if (this.props.enrollmentToken && !this.state.enrolledBeat) {
       this.waitForTokenToEnrollBeat();
     }
+    const cmdText = `${this.state.command
+      .replace('{{beatType}}', this.state.beatType)
+      .replace('{{beatTypeInCaps}}', capitalize(this.state.beatType))} enroll ${
+      window.location.protocol
+    }//${window.location.host}${this.props.frameworkBasePath} ${this.props.enrollmentToken}`;
 
     return (
       <React.Fragment>
@@ -166,7 +175,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
             {this.state.command && (
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
                         <h3>
@@ -180,23 +189,27 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
+                    <EuiFlexItem className="homTutorial__instruction" grow={false}>
+                      <EuiCopy textToCopy={cmdText}>
+                        {(copy: any) => (
+                          <EuiButton size="s" onClick={copy}>
+                            <FormattedMessage
+                              id="xpack.beatsManagement.enrollBeat.copyButtonLabel"
+                              defaultMessage="Copy command"
+                            />
+                          </EuiButton>
+                        )}
+                      </EuiCopy>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
-                  <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
-                    <div
-                      className="euiFieldText euiFieldText--fullWidth"
-                      style={{ textAlign: 'left' }}
-                    >
-                      {`$ ${this.state.command
-                        .replace('{{beatType}}', this.state.beatType)
-                        .replace('{{beatTypeInCaps}}', capitalize(this.state.beatType))} enroll ${
-                        window.location.protocol
-                      }//${window.location.host}${this.props.frameworkBasePath} ${
-                        this.props.enrollmentToken
-                      }`}
-                    </div>
+
+                  <div className="eui-textBreakAll">
+                    <EuiSpacer size="m" />
+                    <EuiCodeBlock language="sh">{`$ ${cmdText}`}</EuiCodeBlock>
                   </div>
-                  <br />
-                  <br />
+
+                  <EuiSpacer size="m" />
+
                   <EuiFlexGroup>
                     <EuiFlexItem>
                       <EuiFlexGroup gutterSize="s" alignItems="center">

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getNodeTypeClassLabel } from '../get_node_type_class_label';
 
 describe('Node Type and Label', () => {

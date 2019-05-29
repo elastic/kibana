@@ -18,34 +18,45 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
-import { Logger, LoggerFactory } from '../logging';
-import { HttpConfig } from './http_config';
-import { HttpServer, HttpServerInfo } from './http_server';
+import { Logger } from '../logging';
+import { CoreContext } from '../core_context';
+import { HttpConfig, HttpConfigType } from './http_config';
+import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
-import { Router } from './router';
+
+/** @public */
+export type HttpServiceSetup = HttpServerSetup;
+/** @public */
+export interface HttpServiceStart {
+  /** Indicates if http server is listening on a port */
+  isListening: () => boolean;
+}
 
 /** @internal */
-export type HttpServiceStartContract = HttpServerInfo;
-
-/** @internal */
-export class HttpService implements CoreService<HttpServerInfo> {
+export class HttpService implements CoreService<HttpServiceSetup, HttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
+  private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
 
   private readonly log: Logger;
 
-  constructor(private readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
-    this.log = logger.get('http');
+  constructor(private readonly coreContext: CoreContext) {
+    this.log = coreContext.logger.get('http');
+    this.config$ = coreContext.configService
+      .atPath<HttpConfigType>('server')
+      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
 
-    this.httpServer = new HttpServer(logger.get('http', 'server'));
-    this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
+    this.httpServer = new HttpServer(coreContext.logger.get('http', 'server'));
+    this.httpsRedirectServer = new HttpsRedirectServer(
+      coreContext.logger.get('http', 'redirect', 'server')
+    );
   }
 
-  public async start() {
+  public async setup() {
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
@@ -58,13 +69,29 @@ export class HttpService implements CoreService<HttpServerInfo> {
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    // If a redirect port is specified, we start an HTTP server at this port and
-    // redirect all requests to the SSL port.
-    if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
-      await this.httpsRedirectServer.start(config);
+    return this.httpServer.setup(config);
+  }
+
+  public async start() {
+    const config = await this.config$.pipe(first()).toPromise();
+
+    // We shouldn't set up http service in two cases:`
+    // 1. If `server.autoListen` is explicitly set to `false`.
+    // 2. When the process is run as dev cluster master in which case cluster manager
+    // will fork a dedicated process where http service will be set up instead.
+    if (!this.coreContext.env.isDevClusterMaster && config.autoListen) {
+      // If a redirect port is specified, we start an HTTP server at this port and
+      // redirect all requests to the SSL port.
+      if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
+        await this.httpsRedirectServer.start(config);
+      }
+
+      await this.httpServer.start(config);
     }
 
-    return await this.httpServer.start(config);
+    return {
+      isListening: () => this.httpServer.isListening(),
+    };
   }
 
   public async stop() {
@@ -77,20 +104,5 @@ export class HttpService implements CoreService<HttpServerInfo> {
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
-  }
-
-  public registerRouter(router: Router): void {
-    if (this.httpServer.isListening()) {
-      // If the server is already running we can't make any config changes
-      // to it, so we warn and don't allow the config to pass through.
-      // TODO Should we throw instead?
-      this.log.error(
-        `Received new router [${router.path}] after server was started. ` +
-          'Router will **not** be applied.'
-      );
-    } else {
-      this.log.debug(`registering route handler for [${router.path}]`);
-      this.httpServer.registerRouter(router);
-    }
   }
 }

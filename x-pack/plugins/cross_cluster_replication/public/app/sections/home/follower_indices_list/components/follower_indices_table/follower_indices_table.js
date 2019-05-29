@@ -16,13 +16,14 @@ import {
   EuiLoadingKibana,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { API_STATUS } from '../../../../../constants';
+import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
   FollowerIndexPauseProvider,
   FollowerIndexResumeProvider,
   FollowerIndexUnfollowProvider
 } from '../../../../../components';
 import routing from '../../../../../services/routing';
+import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
 
 export class FollowerIndicesTable extends PureComponent {
@@ -93,7 +94,7 @@ export class FollowerIndicesTable extends PureComponent {
               {(resumeFollowerIndex) => (
                 <span
                   onClick={() => resumeFollowerIndex(name)}
-                  data-test-subj="ccrFollowerIndexListPauseActionButton"
+                  data-test-subj="resumeButton"
                 >
                   <EuiIcon
                     aria-label={label}
@@ -109,7 +110,7 @@ export class FollowerIndicesTable extends PureComponent {
               {(pauseFollowerIndex) => (
                 <span
                   onClick={() => pauseFollowerIndex(followerIndex)}
-                  data-test-subj="ccrFollowerIndexListResumeActionButton"
+                  data-test-subj="pauseButton"
                 >
                   <EuiIcon
                     aria-label={label}
@@ -136,7 +137,7 @@ export class FollowerIndicesTable extends PureComponent {
           return (
             <span
               onClick={() => this.editFollowerIndex(name)}
-              data-test-subj="ccrFollowerIndexListEditActionButton"
+              data-test-subj="editButton"
             >
               <EuiIcon
                 aria-label={label}
@@ -163,7 +164,7 @@ export class FollowerIndicesTable extends PureComponent {
               {(unfollowLeaderIndex) => (
                 <span
                   onClick={() => unfollowLeaderIndex(name)}
-                  data-test-subj="ccrFollowerIndexListUnfollowActionButton"
+                  data-test-subj="unfollowButton"
                 >
                   <EuiIcon
                     aria-label={label}
@@ -189,8 +190,11 @@ export class FollowerIndicesTable extends PureComponent {
       render: (name) => {
         return (
           <EuiLink
-            onClick={() => selectFollowerIndex(name)}
-            data-test-subj="ccrFollowerIndexListFollowerIndexLink"
+            onClick={() => {
+              trackUiMetric(UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
+              selectFollowerIndex(name);
+            }}
+            data-test-subj="followerIndexLink"
           >
             {name}
           </EuiLink>
@@ -293,7 +297,7 @@ export class FollowerIndicesTable extends PureComponent {
       toolsLeft: selectedItems.length ? (
         <ContextMenu
           followerIndices={selectedItems}
-          testSubj="ccrFollowerIndexListContextMenuButton"
+          testSubj="contextMenuButton"
         />
       ) : undefined,
       onChange: this.onSearch,
@@ -314,11 +318,12 @@ export class FollowerIndicesTable extends PureComponent {
           selection={selection}
           isSelectable={true}
           rowProps={() => ({
-            'data-test-subj': 'ccrFollowerIndexListTableRow'
+            'data-test-subj': 'row'
           })}
           cellProps={(item, column) => ({
-            'data-test-subj': `ccrFollowerIndexListTableCell-${column.field}`
+            'data-test-subj': `cell-${column.field}`
           })}
+          data-test-subj="followerIndexListTable"
         />
         {this.renderLoading()}
       </Fragment>

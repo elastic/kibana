@@ -42,6 +42,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
             compressed={false}
@@ -100,6 +101,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
             compressed={false}
@@ -158,6 +160,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
             compressed={false}

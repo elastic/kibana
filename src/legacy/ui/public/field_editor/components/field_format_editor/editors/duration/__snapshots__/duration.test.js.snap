@@ -15,6 +15,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -45,6 +46,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -127,6 +129,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -157,6 +160,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -192,6 +196,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
       compressed={false}

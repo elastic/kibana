@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-import { QUEUE_DOCTYPE } from '../../common/constants';
 import { oncePerServer } from './once_per_server';
 
 const defaultSize = 10;
@@ -18,7 +17,7 @@ function jobsQueryFn(server) {
     return get(user, 'username', false);
   }
 
-  function execQuery(type, body) {
+  function execQuery(queryType, body) {
     const defaultBody = {
       search: {
         _source: {
@@ -33,11 +32,10 @@ function jobsQueryFn(server) {
 
     const query = {
       index: `${index}-*`,
-      type: QUEUE_DOCTYPE,
-      body: Object.assign(defaultBody[type] || {}, body)
+      body: Object.assign(defaultBody[queryType] || {}, body)
     };
 
-    return callWithInternalUser(type, query)
+    return callWithInternalUser(queryType, query)
       .catch((err) => {
         if (err instanceof esErrors['401']) return;
         if (err instanceof esErrors['403']) return;
@@ -73,7 +71,7 @@ function jobsQueryFn(server) {
 
       if (jobIds) {
         body.query.constant_score.filter.bool.must.push({
-          ids: { type: QUEUE_DOCTYPE, values: jobIds }
+          ids: { values: jobIds }
         });
       }
 

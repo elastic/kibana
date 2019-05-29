@@ -24,25 +24,25 @@ import { filter, map } from 'rxjs/operators';
 import { UiSettingsState } from './types';
 import { UiSettingsApi } from './ui_settings_api';
 
-interface Params {
+/** @public */
+interface UiSettingsClientParams {
   api: UiSettingsApi;
-  onUpdateError: UiSettingsClient['onUpdateError'];
   defaults: UiSettingsState;
   initialSettings?: UiSettingsState;
 }
 
+/** @public */
 export class UiSettingsClient {
   private readonly update$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
   private readonly saved$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
+  private readonly updateErrors$ = new Rx.Subject<Error>();
 
   private readonly api: UiSettingsApi;
-  private readonly onUpdateError: (error: Error) => void;
   private readonly defaults: UiSettingsState;
   private cache: UiSettingsState;
 
-  constructor(readonly params: Params) {
+  constructor(params: UiSettingsClientParams) {
     this.api = params.api;
-    this.onUpdateError = params.onUpdateError;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
   }
@@ -205,6 +205,14 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   /**
+   * Returns an Observable that notifies subscribers of each error while trying to update
+   * the settings, containing the actual Error class.
+   */
+  public getUpdateErrors$() {
+    return this.updateErrors$.asObservable();
+  }
+
+  /**
    * Prepares the uiSettingsClient to be discarded, completing any update$ observables
    * that have been created.
    */
@@ -244,7 +252,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
       return true;
     } catch (error) {
       this.setLocally(key, initialVal);
-      this.onUpdateError(error);
+      this.updateErrors$.next(error);
       return false;
     }
   }

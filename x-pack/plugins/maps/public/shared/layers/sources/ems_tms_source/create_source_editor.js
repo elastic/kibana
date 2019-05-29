@@ -13,6 +13,7 @@ import {
 
 import { getEmsTMSServices } from '../../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
+import { i18n } from '@kbn/i18n';
 
 export class EMSTMSCreateSourceEditor extends React.Component {
 
@@ -47,13 +48,15 @@ export class EMSTMSCreateSourceEditor extends React.Component {
 
     const emsTileOptions = this.state.emsTmsOptionsRaw.map((service) => ({
       value: service.id,
-      text: service.id //due to not having human readable names
+      text: service.name || service.id
     }));
 
 
     return (
       <EuiFormRow
-        label="Tile service"
+        label={i18n.translate('xpack.maps.source.emsTile.label', {
+          defaultMessage: 'Tile service',
+        })}
         helpText={this.state.emsTmsOptionsRaw.length === 0 ? getEmsUnavailableMessage() : null}
       >
         <EuiSelect

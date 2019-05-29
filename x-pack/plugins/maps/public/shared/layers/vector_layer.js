@@ -4,33 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mapboxgl from 'mapbox-gl';
 import turf from 'turf';
 import React from 'react';
-import ReactDOM from 'react-dom';
-
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-
-import { FeatureTooltip } from '../../components/map/feature_tooltip';
+import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
 import _ from 'lodash';
+import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
+import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: []
 };
 
+const CLOSED_SHAPE_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
+];
+
+const ALL_SHAPE_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
+];
+
+
+let idCounter = 0;
+function generateNumericalId() {
+  const newId = idCounter < Number.MAX_SAFE_INTEGER ? idCounter : 0;
+  idCounter = newId + 1;
+  return newId;
+}
+
+
 export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
-
-  static popup = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-  });
-
-  static tooltipContainer = document.createElement('div');
 
   static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);
@@ -73,21 +89,40 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  getSupportedStyles() {
-    return [VectorStyle];
-  }
+  getCustomIconAndTooltipContent() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    if (!featureCollection || featureCollection.features.length === 0) {
+      return {
+        icon: (
+          <EuiIcon
+            size="m"
+            color="subdued"
+            type="minusInCircle"
+          />
+        ),
+        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
+          defaultMessage: `No results found.`
+        })
+      };
+    }
 
-  getIcon() {
-    const isPointsOnly = this._isPointsOnly();
-    return this._style.getIcon(isPointsOnly);
+    return {
+      icon: this._style.getIcon(),
+      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
+    };
   }
 
   getLayerTypeIconName() {
     return 'vector';
   }
 
-  getTOCDetails() {
-    return this._style.getTOCDetails();
+  hasLegendDetails() {
+    return this._style.getDynamicPropertiesArray().length > 0;
+  }
+
+  getLegendDetails() {
+    return this._style.getLegendDetails();
   }
 
   _getBoundsBasedOnData() {
@@ -104,15 +139,16 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async getBounds(filters) {
+  async getBounds(dataFilters) {
     if (this._source.isBoundsAware()) {
-      return await this._source.getBoundsForFilters(filters);
+      const searchFilters = this._getSearchFilters(dataFilters);
+      return await this._source.getBoundsForFilters(searchFilters);
     }
     return this._getBoundsBasedOnData();
   }
 
-  async getStringFields() {
-    return await this._source.getStringFields();
+  async getLeftJoinFields() {
+    return await this._source.getLeftJoinFields();
   }
 
   async getSourceName() {
@@ -125,7 +161,7 @@ export class VectorLayer extends AbstractLayer {
       return {
         label,
         name,
-        origin: 'source'
+        origin: SOURCE_DATA_ID_ORIGIN
       };
     });
     const joinFields = [];
@@ -155,6 +191,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _canSkipSourceUpdate(source, sourceDataId, searchFilters) {
+
     const timeAware = await source.isTimeAware();
     const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
@@ -171,10 +208,7 @@ export class VectorLayer extends AbstractLayer {
       !isGeoGridPrecisionAware
     ) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-      if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
-        return true;
-      }
-      return false;
+      return (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress());
     }
 
     const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
@@ -202,8 +236,20 @@ export class VectorLayer extends AbstractLayer {
     }
 
     let updateDueToQuery = false;
+    let updateDueToFilters = false;
+    let updateDueToLayerQuery = false;
+    let updateDueToApplyGlobalQuery = false;
     if (isQueryAware) {
-      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+      updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
+      updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+      if (searchFilters.applyGlobalQuery) {
+        updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+        updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      } else {
+        // Global filters and query are not applied to layer search request so no re-fetch required.
+        // Exception is "Refresh" query.
+        updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+      }
     }
 
     let updateDueToPrecisionChange = false;
@@ -218,40 +264,51 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToExtentChange
       && !updateDueToFields
       && !updateDueToQuery
+      && !updateDueToFilters
+      && !updateDueToLayerQuery
+      && !updateDueToApplyGlobalQuery
       && !updateDueToPrecisionChange;
   }
 
-  async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const joinSource = join.getJoinSource();
+    const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
+    const searchFilters = {
+      ...dataFilters,
+      applyGlobalQuery: this.getApplyGlobalQuery(),
+    };
+    const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
+    if (canSkip) {
+      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+      const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
+      return {
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: propertiesMap
+      };
+    }
+
     try {
-      const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
-      if (canSkip) {
-        return {
-          shouldJoin: false,
-          join: join
-        };
-      }
-      startLoading(sourceDataId, requestToken, dataFilters);
+      startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this.getSourceName();
       const {
-        rawData,
         propertiesMap
-      } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
-      stopLoading(sourceDataId, requestToken, rawData);
+      } = await joinSource.getPropertiesMap(searchFilters, leftSourceName, join.getLeftFieldName());
+      stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
-        shouldJoin: true,
+        dataHasChanged: true,
         join: join,
         propertiesMap: propertiesMap,
       };
     } catch(e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
-        shouldJoin: false,
-        join: join
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: null
       };
     }
   }
@@ -259,8 +316,9 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const joinSyncs = this.getValidJoins().map(async join => {
-      return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
+      return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
     });
+
     return await Promise.all(joinSyncs);
   }
 
@@ -277,16 +335,17 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
+      layerQuery: this.getQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
     };
   }
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
     const searchFilters = this._getSearchFilters(dataFilters);
-    const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, searchFilters);
+    const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
       const sourceDataRequest = this.getSourceDataRequest();
       return {
@@ -296,55 +355,57 @@ export class VectorLayer extends AbstractLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data, meta } = await this._source.getGeoJsonWithMeta({
-        layerName,
-      }, searchFilters);
-      stopLoading(sourceDataId, requestToken, data, meta);
+      const { data: featureCollection, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
+      this._assignIdsToFeatures(featureCollection);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
       return {
         refreshed: true,
-        featureCollection: data
+        featureCollection: featureCollection
       };
     } catch (error) {
-      onLoadError(sourceDataId, requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
       return  {
         refreshed: false
       };
     }
   }
 
-  _joinToFeatureCollection(sourceResult, joinState) {
-    if (!sourceResult.refreshed && !joinState.shouldJoin) {
-      return false;
+  _assignIdsToFeatures(featureCollection) {
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      const id = generateNumericalId();
+      feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
+      feature.id = id;
     }
-    if (!sourceResult.featureCollection || !joinState.propertiesMap) {
-      return false;
-    }
-
-    joinState.join.joinPropertiesToFeatureCollection(
-      sourceResult.featureCollection,
-      joinState.propertiesMap);
-    return true;
   }
 
-  async _performJoins(sourceResult, joinStates) {
-    const hasJoined = joinStates.map(joinState => {
-      return this._joinToFeatureCollection(sourceResult, joinState);
-    });
-
-    return hasJoined.some(shouldRefresh => shouldRefresh === true);
-  }
-
-  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
+
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-    const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    const shouldRefresh = await this._performJoins(sourceResult, joinResults);
-    if (shouldRefresh) {
-      onRefreshStyle();
+
+    if (sourceResult.featureCollection && sourceResult.featureCollection.features.length) {
+      const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+      const activeJoinStates = joinStates.filter(joinState => {
+        // Perform join when
+        // - source data changed but join data has not
+        // - join data changed but source data has not
+        // - both source and join data changed
+        return sourceResult.refreshed || joinState.dataHasChanged;
+      });
+
+      if (activeJoinStates.length) {
+        activeJoinStates.forEach(joinState => {
+          joinState.join.joinPropertiesToFeatureCollection(
+            sourceResult.featureCollection,
+            joinState.propertiesMap);
+        });
+        updateSourceData(sourceResult.featureCollection);
+      }
     }
   }
 
@@ -353,48 +414,29 @@ export class VectorLayer extends AbstractLayer {
     return sourceDataRequest ? sourceDataRequest.getData() : null;
   }
 
-  _isPointsOnly() {
-    const featureCollection = this._getSourceFeatureCollection();
-    if (!featureCollection) {
-      return false;
-    }
-    let isPointsOnly = true;
-    if (featureCollection) {
-      for (let i = 0; i < featureCollection.features.length; i++) {
-        if (featureCollection.features[i].geometry.type !== 'Point') {
-          isPointsOnly = false;
-          break;
-        }
-      }
-    } else {
-      isPointsOnly = false;
-    }
-    return isPointsOnly;
-  }
-
   _syncFeatureCollectionWithMb(mbMap) {
-    const mbGeoJSONSource = mbMap.getSource(this.getId());
 
+    const mbGeoJSONSource = mbMap.getSource(this.getId());
     const featureCollection = this._getSourceFeatureCollection();
+    const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
+
     if (!featureCollection) {
+      if (featureCollectionOnMap) {
+        this._style.clearFeatureState(featureCollectionOnMap, mbMap, this.getId());
+      }
       mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
       return;
     }
 
-    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
-    if (featureCollection !== dataBoundToMap) {
+    if (featureCollection !== featureCollectionOnMap) {
       mbGeoJSONSource.setData(featureCollection);
     }
-
-    const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
-    if (shouldRefresh) {
-      mbGeoJSONSource.setData(featureCollection);
-    }
+    this._style.setFeatureState(featureCollection, mbMap, this.getId());
   }
 
   _setMbPointsProperties(mbMap) {
     const sourceId = this.getId();
-    const pointLayerId = this.getId() +  '_circle';
+    const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
     if (!pointLayer) {
       mbMap.addLayer({
@@ -412,13 +454,12 @@ export class VectorLayer extends AbstractLayer {
     });
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._addTooltipListeners(mbMap, pointLayerId);
   }
 
   _setMbLinePolygonProperties(mbMap) {
     const sourceId = this.getId();
-    const fillLayerId = this.getId() + '_fill';
-    const lineLayerId = this.getId() + '_line';
+    const fillLayerId = this._getMbPolygonLayerId();
+    const lineLayerId = this._getMbLineLayerId();
     if (!mbMap.getLayer(fillLayerId)) {
       mbMap.addLayer({
         id: fillLayerId,
@@ -426,13 +467,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(fillLayerId, [
-        'any',
-        ['==', ['geometry-type'], 'Polygon'],
-        ['==', ['geometry-type'], 'MultiPolygon'],
-        ['==', ['geometry-type'], 'LineString'],
-        ['==', ['geometry-type'], 'MultiLineString']
-      ]);
+      mbMap.setFilter(fillLayerId, CLOSED_SHAPE_MB_FILTER);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       mbMap.addLayer({
@@ -441,13 +476,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(lineLayerId, [
-        'any',
-        ['==', ['geometry-type'], 'Polygon'],
-        ['==', ['geometry-type'], 'MultiPolygon'],
-        ['==', ['geometry-type'], 'LineString'],
-        ['==', ['geometry-type'], 'MultiLineString']
-      ]);
+      mbMap.setFilter(lineLayerId, ALL_SHAPE_MB_FILTER);
     }
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -459,7 +488,6 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._addTooltipListeners(mbMap, fillLayerId);
   }
 
   _syncStylePropertiesWithMb(mbMap) {
@@ -483,108 +511,65 @@ export class VectorLayer extends AbstractLayer {
     this._syncStylePropertiesWithMb(mbMap);
   }
 
-  renderStyleEditor(Style, options) {
-    return Style.renderEditor({
-      layer: this,
-      ...options
-    });
+  _getMbPointLayerId() {
+    return this.getId() +  '_circle';
   }
 
-  _canShowTooltips() {
-    return this._source.canFormatFeatureProperties();
+  _getMbLineLayerId() {
+    return this.getId() + '_line';
   }
 
-  async _getPropertiesForTooltip(feature) {
-    const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);
-
-    //add tooltips from joins
-    const allProps = this._joins.reduce((acc, join) => {
-      const propsFromJoin = join.filterAndFormatPropertiesForTooltip(feature.properties);
-      return {
-        ...propsFromJoin,
-        ...acc,
-      };
-    }, { ...tooltipsFromSource });
-
-    return allProps;
+  _getMbPolygonLayerId() {
+    return this.getId() + '_fill';
   }
 
-  _addTooltipListeners(mbMap, mbLayerId) {
+  getMbLayerIds() {
+    return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
+  }
 
-    if (!this._canShowTooltips()) {
+
+  _addJoinsToSourceTooltips(tooltipsFromSource) {
+    for (let i = 0; i < tooltipsFromSource.length; i++) {
+      const tooltipProperty = tooltipsFromSource[i];
+      const matchingJoins = [];
+      for (let j = 0; j < this._joins.length; j++) {
+        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyName()) {
+          matchingJoins.push(this._joins[j]);
+        }
+      }
+      if (matchingJoins.length) {
+        tooltipsFromSource[i] = new JoinTooltipProperty(tooltipProperty, matchingJoins);
+      }
+    }
+  }
+
+
+  async getPropertiesForTooltip(properties) {
+
+    let allTooltips =  await this._source.filterAndFormatPropertiesToHtml(properties);
+    this._addJoinsToSourceTooltips(allTooltips);
+
+
+    for (let i = 0; i < this._joins.length; i++) {
+      const propsFromJoin = await this._joins[i].filterAndFormatPropertiesForTooltip(properties);
+      allTooltips = [...allTooltips, ...propsFromJoin];
+    }
+    return allTooltips;
+  }
+
+  canShowTooltip() {
+    return this.isVisible() && this._source.canFormatFeatureProperties();
+  }
+
+  getFeatureById(id) {
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
       return;
     }
 
-    const showTooltip = async (feature, eventLngLat) => {
-      let popupAnchorLocation = eventLngLat; // default popup location to mouse location
-      if (feature.geometry.type === 'Point') {
-        const coordinates = feature.geometry.coordinates.slice();
-
-        // Ensure that if the map is zoomed out such that multiple
-        // copies of the feature are visible, the popup appears
-        // over the copy being pointed to.
-        while (Math.abs(eventLngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += eventLngLat.lng > coordinates[0] ? 360 : -360;
-        }
-
-        popupAnchorLocation = coordinates;
-      }
-
-      const properties = await this._getPropertiesForTooltip(feature);
-
-      ReactDOM.render(
-        React.createElement(
-          FeatureTooltip, {
-            properties: properties,
-          }
-        ),
-        VectorLayer.tooltipContainer
-      );
-
-      VectorLayer.popup.setLngLat(popupAnchorLocation)
-        .setDOMContent(VectorLayer.tooltipContainer)
-        .addTo(mbMap);
-    };
-
-    let activeFeature;
-    let isTooltipOpen = false;
-    mbMap.on('mousemove', mbLayerId, _.debounce((e) => {
-      if (!isTooltipOpen) {
-        return;
-      }
-
-      const features = mbMap.queryRenderedFeatures(e.point)
-        .filter(feature => {
-          return feature.layer.source === this.getId();
-        });
-      if (features.length === 0) {
-        return;
-      }
-
-      const propertiesUnchanged = _.isEqual(activeFeature.properties, features[0].properties);
-      const geometryUnchanged = _.isEqual(activeFeature.geometry, features[0].geometry);
-      if(propertiesUnchanged && geometryUnchanged) {
-        // mouse over same feature, no need to update tooltip
-        return;
-      }
-
-      activeFeature = features[0];
-      showTooltip(activeFeature, e.lngLat);
-    }, 100));
-
-    mbMap.on('mouseenter', mbLayerId, (e) => {
-      isTooltipOpen = true;
-      mbMap.getCanvas().style.cursor = 'pointer';
-
-      activeFeature = e.features[0];
-      showTooltip(activeFeature, e.lngLat);
-    });
-
-    mbMap.on('mouseleave', mbLayerId, () => {
-      isTooltipOpen = false;
-      mbMap.getCanvas().style.cursor = '';
-      VectorLayer.popup.remove();
-      ReactDOM.unmountComponentAtNode(VectorLayer.tooltipContainer);
+    return featureCollection.features.find((feature) => {
+      return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
   }
+
 }

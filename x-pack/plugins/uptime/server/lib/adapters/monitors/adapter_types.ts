@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorPageTitle } from 'x-pack/plugins/uptime/common/graphql/types';
+import { MonitorChart, MonitorPageTitle } from '../../../../common/graphql/types';
 
 export interface UMMonitorsAdapter {
   getMonitorChartsData(
     request: any,
     monitorId: string,
     dateRangeStart: string,
-    dateRangeEnd: string
-  ): Promise<any>;
+    dateRangeEnd: string,
+    location?: string | null
+  ): Promise<MonitorChart>;
   getMonitors(
     request: any,
     dateRangeStart: string,

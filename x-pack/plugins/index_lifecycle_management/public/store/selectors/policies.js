@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { createSelector } from 'reselect';
 import { Pager } from '@elastic/eui';
-import {
-  defaultColdPhase,
-  defaultDeletePhase,
-  defaultHotPhase,
-  defaultWarmPhase,
-} from '../defaults';
+
 import {
   PHASE_HOT,
   PHASE_WARM,
@@ -33,14 +26,21 @@ import {
   PHASE_REPLICA_COUNT,
   PHASE_ENABLED,
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
-  MAX_SIZE_TYPE_DOCUMENT,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_SHRINK_ENABLED,
   PHASE_FREEZE_ENABLED,
-  PHASE_INDEX_PRIORITY
-} from '../constants';
+  PHASE_INDEX_PRIORITY,
+  PHASE_ROLLOVER_MAX_DOCUMENTS
+} from '../../constants';
+
 import { filterItems, sortTable } from '../../services';
 
+import {
+  defaultEmptyDeletePhase,
+  defaultEmptyColdPhase,
+  defaultEmptyWarmPhase,
+  defaultEmptyHotPhase
+} from '../defaults';
 
 export const getPolicies = state => state.policies.policies;
 export const getPolicyByName = (state, name) => getPolicies(state).find((policy) => policy.name === name) || {};
@@ -97,8 +97,10 @@ export const getSelectedPolicyName = state => {
 };
 
 export const getPhases = state => state.policies.selectedPolicy.phases;
+
 export const getPhase = (state, phase) =>
   getPhases(state)[phase];
+
 export const getPhaseData = (state, phase, key) => {
   if (PHASE_ATTRIBUTES_THAT_ARE_NUMBERS.includes(key)) {
     return parseInt(getPhase(state, phase)[key]);
@@ -123,16 +125,18 @@ export const splitSizeAndUnits = field => {
 };
 
 export const isNumber = value => typeof value === 'number';
+export const isEmptyObject = (obj) => {
+  return !obj || (Object.entries(obj).length === 0 && obj.constructor === Object);
+};
 
-export const phaseFromES = (phase, phaseName, defaultPolicy) => {
-  const policy = { ...defaultPolicy };
-
+const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
+  const policy = { ...defaultEmptyPolicy };
   if (!phase) {
     return policy;
   }
 
   policy[PHASE_ENABLED] = true;
-  policy[PHASE_ROLLOVER_ENABLED] = false;
+
 
   if (phase.min_age) {
     if (phaseName === PHASE_WARM && phase.min_age === '0ms') {
@@ -146,7 +150,8 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     }
   }
   if (phaseName === PHASE_WARM) {
-    policy[PHASE_SHRINK_ENABLED] = !!(phase.actions && phase.actions.shrink);
+    policy[PHASE_SHRINK_ENABLED] = false;
+    policy[PHASE_FORCE_MERGE_ENABLED] = false;
   }
   if (phase.actions) {
     const actions = phase.actions;
@@ -169,8 +174,7 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
       }
       if (rollover.max_docs) {
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = rollover.max_docs;
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = MAX_SIZE_TYPE_DOCUMENT;
+        policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = rollover.max_docs;
       }
     }
 
@@ -194,11 +198,14 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     }
 
     if (actions.shrink) {
+      policy[PHASE_SHRINK_ENABLED] = true;
       policy[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
     }
+
     if (actions.freeze) {
       policy[PHASE_FREEZE_ENABLED] = true;
     }
+
     if (actions.set_priority) {
       policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
     }
@@ -208,13 +215,14 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
 
 export const policyFromES = (policy) => {
   const { name, policy: { phases } } = policy;
+
   return {
     name,
     phases: {
-      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultHotPhase),
-      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultWarmPhase),
-      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultColdPhase),
-      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultDeletePhase)
+      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultEmptyHotPhase),
+      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultEmptyWarmPhase),
+      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultEmptyColdPhase),
+      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultEmptyDeletePhase)
     },
     isNew: false,
     saveAsNew: false
@@ -242,13 +250,12 @@ export const phaseToES = (phase, originalEsPhase) => {
       }`;
     }
     if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])) {
-      if (phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] === MAX_SIZE_TYPE_DOCUMENT) {
-        esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_SIZE_STORED];
-      } else {
-        esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${
-          phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]
-        }`;
-      }
+      esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${
+        phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]
+      }`;
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS])) {
+      esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_DOCUMENTS];
     }
   } else {
     delete esPhase.actions.rollover;
@@ -259,14 +266,28 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.allocate.require = {
       [name]: value
     };
+  } else {
+    if (esPhase.actions.allocate) {
+      delete esPhase.actions.allocate.require;
+    }
   }
   if (isNumber(phase[PHASE_REPLICA_COUNT])) {
     esPhase.actions.allocate = esPhase.actions.allocate || {};
     esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
   } else {
     if (esPhase.actions.allocate) {
-      delete esPhase.actions.allocate.require;
+      delete esPhase.actions.allocate.number_of_replicas;
     }
+  }
+  if (esPhase.actions.allocate
+      && !esPhase.actions.allocate.require
+      && !isNumber(esPhase.actions.allocate.number_of_replicas)
+      && isEmptyObject(esPhase.actions.allocate.include)
+      && isEmptyObject(esPhase.actions.allocate.exclude)
+  ) {
+    // remove allocate action if it does not define require or number of nodes
+    // and both include and exclude are empty objects (ES will fail to parse if we don't)
+    delete esPhase.actions.allocate;
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {

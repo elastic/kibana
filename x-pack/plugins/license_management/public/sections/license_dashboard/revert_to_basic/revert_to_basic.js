@@ -16,6 +16,7 @@ import {
   EuiText
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EXTERNAL_LINKS } from '../../../../common/constants';
 
 export class RevertToBasic extends React.PureComponent {
   cancel = () => {
@@ -76,12 +77,12 @@ export class RevertToBasic extends React.PureComponent {
       <span>
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.revertToBasic.revertToFreeFeaturesDescription"
-          defaultMessage="You’ll revert to our free features and lose access to security,
-          machine learning and other {platinumLicenseFeaturesLinkText}."
+          defaultMessage="You’ll revert to our free features and lose access to
+          machine learning, advanced security, and other {platinumLicenseFeaturesLinkText}."
           values={{
             platinumLicenseFeaturesLinkText: (
               <EuiLink
-                href="https://www.elastic.co/subscriptions/xpack"
+                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
                 target="_blank"
               >
                 <FormattedMessage

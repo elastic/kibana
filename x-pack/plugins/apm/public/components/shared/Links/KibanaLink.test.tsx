@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import { Location } from 'history';
 import React from 'react';
-import { UnconnectedKibanaLink } from './KibanaLink';
+import { getRenderedHref } from '../../../utils/testHelpers';
+import { KibanaLink } from './KibanaLink';
+import chrome from 'ui/chrome';
 
-describe('UnconnectedKibanaLink', () => {
-  it('should render correct markup', () => {
-    const wrapper = shallow(
-      <UnconnectedKibanaLink
-        location={{ search: '' } as Location}
-        pathname={'/app/kibana'}
-        hash={'/discover'}
-      >
-        Go to Discover
-      </UnconnectedKibanaLink>
-    );
+jest
+  .spyOn(chrome, 'addBasePath')
+  .mockImplementation(path => `/basepath${path}`);
 
-    expect(wrapper).toMatchSnapshot();
-  });
+test('KibanaLink produces the correct URL', async () => {
+  const href = await getRenderedHref(() => <KibanaLink path="/some/path" />, {
+    search: '?rangeFrom=now-5h&rangeTo=now-2h'
+  } as Location);
+
+  expect(href).toMatchInlineSnapshot(`"/basepath/app/kibana#/some/path"`);
 });

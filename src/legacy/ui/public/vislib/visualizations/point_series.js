@@ -105,8 +105,7 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
     addEvents(svg) {
       const isBrushable = this.events.isBrushable();
       if (isBrushable) {
-        const brush = this.events.addBrushEvent(svg);
-        return svg.call(brush);
+        this.events.addBrushEvent(svg);
       }
     }
 

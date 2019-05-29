@@ -25,6 +25,7 @@ export default kibana => new kibana.Plugin({
 
   uiExports: {
     visTypes: ['plugins/vega/vega_type'],
+    interpreter: ['plugins/vega/vega_fn'],
     injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),
     styleSheetPaths: resolve(__dirname, 'public/index.scss'),
   },

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { createUrlFormat } from '../url';
 import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
 

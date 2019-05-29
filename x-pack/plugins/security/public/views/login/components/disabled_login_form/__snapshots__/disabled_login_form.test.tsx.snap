@@ -8,8 +8,6 @@ exports[`DisabledLoginForm renders as expected 1`] = `
 >
   <EuiText
     color="danger"
-    grow={true}
-    size="m"
     style={
       Object {
         "textAlign": "center",
@@ -21,8 +19,6 @@ exports[`DisabledLoginForm renders as expected 1`] = `
     </p>
   </EuiText>
   <EuiText
-    grow={true}
-    size="m"
     style={
       Object {
         "textAlign": "center",

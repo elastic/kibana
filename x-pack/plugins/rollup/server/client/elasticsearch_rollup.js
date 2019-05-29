@@ -1,10 +1,10 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-export const elasticsearchJsPlugin = (Client, config, components) => {
+export const elasticsearchJsPlugin = (Client, config, components) => { // eslint-disable-line no-unused-vars
   const ca = components.clientAction.factory;
 
   Client.prototype.rollup = components.clientAction.namespaceFactory();
@@ -91,6 +91,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   });
 
   rollup.stopJob = ca({
+    params: {
+      waitForCompletion: {
+        type: 'boolean',
+        name: 'wait_for_completion'
+      }
+    },
     urls: [
       {
         fmt: '/_rollup/job/<%=id%>/_stop',

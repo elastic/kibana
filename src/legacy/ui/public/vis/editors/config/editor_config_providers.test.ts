@@ -29,6 +29,7 @@ describe('EditorConfigProvider', () => {
       {
         name: 'response',
         type: 'number',
+        esTypes: ['integer'],
         aggregatable: true,
         filterable: true,
         searchable: true,
@@ -41,7 +42,7 @@ describe('EditorConfigProvider', () => {
   });
 
   it('should call registered providers with given parameters', () => {
-    const provider = jest.fn(() => ({}));
+    const provider = jest.fn<any, any>(() => ({}));
     registry.register(provider);
     expect(provider).not.toHaveBeenCalled();
     const aggType = {};
@@ -51,8 +52,8 @@ describe('EditorConfigProvider', () => {
   });
 
   it('should call all registered providers with given parameters', () => {
-    const provider = jest.fn(() => ({}));
-    const provider2 = jest.fn(() => ({}));
+    const provider = jest.fn<any, any>(() => ({}));
+    const provider2 = jest.fn<any, any>(() => ({}));
     registry.register(provider);
     registry.register(provider2);
     expect(provider).not.toHaveBeenCalled();

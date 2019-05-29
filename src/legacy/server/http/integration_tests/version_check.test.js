@@ -30,6 +30,7 @@ describe('version_check request filter', function () {
   beforeAll(async () => {
     root = kbnTestServer.createRoot();
 
+    await root.setup();
     await root.start();
 
     kbnTestServer.getKbnServer(root).server.route({

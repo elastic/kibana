@@ -5,15 +5,16 @@
  */
 
 import { EuiCode, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { InputFieldProps } from './source_configuration_form_state';
+import { InputFieldProps } from './input_fields';
 
 interface FieldsConfigurationPanelProps {
   containerFieldProps: InputFieldProps;
   hostFieldProps: InputFieldProps;
   isLoading: boolean;
+  readOnly: boolean;
   podFieldProps: InputFieldProps;
   tiebreakerFieldProps: InputFieldProps;
   timestampFieldProps: InputFieldProps;
@@ -23,6 +24,7 @@ export const FieldsConfigurationPanel = ({
   containerFieldProps,
   hostFieldProps,
   isLoading,
+  readOnly,
   podFieldProps,
   tiebreakerFieldProps,
   timestampFieldProps,
@@ -57,7 +59,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...timestampFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...timestampFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={tiebreakerFieldProps.error}
@@ -82,6 +90,7 @@ export const FieldsConfigurationPanel = ({
       <EuiFieldText
         fullWidth
         disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...tiebreakerFieldProps}
       />
@@ -106,7 +115,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...containerFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...containerFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={hostFieldProps.error}
@@ -128,7 +143,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...hostFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...hostFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={podFieldProps.error}
@@ -150,7 +171,13 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...podFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading}
+        readOnly={readOnly}
+        isLoading={isLoading}
+        {...podFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );

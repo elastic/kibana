@@ -27,10 +27,16 @@ const getColumn = (agg, i) => {
   };
 };
 
-export function tabifyGetColumns(aggs, minimal) {
+/**
+ * Builds tabify columns.
+ *
+ * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
+ * @param {boolean} minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
+ */
+export function tabifyGetColumns(aggs, minimalColumns) {
 
   // pick the columns
-  if (minimal) {
+  if (minimalColumns) {
     return aggs.map((agg, i) => getColumn(agg, i));
   }
 

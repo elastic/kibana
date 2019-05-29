@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { get } from  'lodash';
 
 export async function getIndexPatternObject(req, indexPatternString) {
   let defaultIndex;
@@ -28,7 +29,7 @@ export async function getIndexPatternObject(req, indexPatternString) {
   const savedObjectClient = req.getSavedObjectsClient();
   const indexPatternObjects = await savedObjectClient.find({
     type: 'index-pattern',
-    fields: ['title', 'fields'],
+    fields: ['title', 'fields', 'timeFieldName'],
     search: indexPatternString ? `"${indexPatternString}"` : null,
     search_fields: ['title'],
   });
@@ -37,9 +38,10 @@ export async function getIndexPatternObject(req, indexPatternString) {
   const indexPatterns = indexPatternObjects.saved_objects
     .filter(obj => obj.attributes.title === indexPatternString || (defaultIndex && obj.id === defaultIndex))
     .map(indexPattern => {
-      const { title, fields } = indexPattern.attributes;
+      const { title, fields, timeFieldName } = indexPattern.attributes;
       return {
         title,
+        timeFieldName,
         fields: JSON.parse(fields),
       };
     });
@@ -48,6 +50,6 @@ export async function getIndexPatternObject(req, indexPatternString) {
 
   return {
     indexPatternObject,
-    indexPatternString: indexPatternString || indexPatternObject.title
+    indexPatternString: indexPatternString || get(indexPatternObject, 'title', '')
   };
 }

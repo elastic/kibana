@@ -16,6 +16,7 @@ export default {
     }
   ],
   'hits': 274,
+  'xAxisOrderedValues': ['_all'],
   'xAxisFormatter': function (val) {
     if (_.isObject(val)) {
       return JSON.stringify(val);

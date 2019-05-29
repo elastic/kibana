@@ -15,6 +15,9 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 
 const DETAILS_TAB_ID = 'details';
 const STYLE_TAB_ID = 'mapStyle';
@@ -23,11 +26,15 @@ class MapDetails extends Component {
 
   tabs = [{
     id: DETAILS_TAB_ID,
-    name: 'Map details',
+    name: i18n.translate('xpack.maps.inspector.mapDetailsTitle', {
+      defaultMessage: 'Map details'
+    }),
     dataTestSubj: 'mapDetailsTab',
   }, {
     id: STYLE_TAB_ID,
-    name: 'Mapbox style',
+    name: i18n.translate('xpack.maps.inspector.mapboxStyleTitle', {
+      defaultMessage: 'Mapbox style'
+    }),
     dataTestSubj: 'mapboxStyleTab',
   }];
 
@@ -60,21 +67,30 @@ class MapDetails extends Component {
         <EuiTableBody>
           <EuiTableRow>
             <EuiTableRowCell>
-              Center lon
+              <FormattedMessage
+                id="xpack.maps.inspector.centerLonLabel"
+                defaultMessage="Center lon"
+              />
             </EuiTableRowCell>
             <EuiTableRowCell data-test-subj="centerLon">{this.props.centerLon}</EuiTableRowCell>
           </EuiTableRow>
 
           <EuiTableRow>
             <EuiTableRowCell>
-              Center lat
+              <FormattedMessage
+                id="xpack.maps.inspector.centerLatLabel"
+                defaultMessage="Center lat"
+              />
             </EuiTableRowCell>
             <EuiTableRowCell data-test-subj="centerLat">{this.props.centerLat}</EuiTableRowCell>
           </EuiTableRow>
 
           <EuiTableRow>
             <EuiTableRowCell>
-              Zoom
+              <FormattedMessage
+                id="xpack.maps.inspector.zoomLabel"
+                defaultMessage="Zoom"
+              />
             </EuiTableRowCell>
             <EuiTableRowCell data-test-subj="zoom">{this.props.zoom}</EuiTableRowCell>
           </EuiTableRow>

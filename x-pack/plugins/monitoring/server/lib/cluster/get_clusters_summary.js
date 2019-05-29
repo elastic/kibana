@@ -23,6 +23,7 @@ export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
       alerts,
       ccs,
       cluster_settings: clusterSettings,
+      logs,
     } = cluster;
 
     const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
@@ -64,7 +65,8 @@ export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
           indices,
           nodes,
           status
-        }
+        },
+        logs
       },
       logstash,
       kibana: omit(kibana, 'uuids'),
@@ -78,7 +80,7 @@ export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
         status,
         kibana && kibana.status || null
       ]),
-      isCcrEnabled
+      isCcrEnabled,
     };
   });
 }

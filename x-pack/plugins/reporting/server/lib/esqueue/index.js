@@ -8,7 +8,6 @@ import { EventEmitter } from 'events';
 import { Job } from './job';
 import { Worker } from './worker';
 import { constants } from './constants';
-import { createClient } from './helpers/create_client';
 import { indexTimestamp } from './helpers/index_timestamp';
 import { omit } from 'lodash';
 
@@ -23,11 +22,10 @@ export class Esqueue extends EventEmitter {
     this.settings = {
       interval: constants.DEFAULT_SETTING_INTERVAL,
       timeout: constants.DEFAULT_SETTING_TIMEOUT,
-      doctype: constants.DEFAULT_SETTING_DOCTYPE,
       dateSeparator: constants.DEFAULT_SETTING_DATE_SEPARATOR,
       ...omit(options, [ 'client' ])
     };
-    this.client = createClient(options.client || {});
+    this.client = options.client;
     this._logger = options.logger || function () {};
     this._workers = [];
     this._initTasks().catch((err) => this.emit(constants.EVENT_QUEUE_ERROR, err));
@@ -35,7 +33,7 @@ export class Esqueue extends EventEmitter {
 
   _initTasks() {
     const initTasks = [
-      this.client.ping(),
+      this.client.callWithInternalUser('ping'),
     ];
 
     return Promise.all(initTasks).catch((err) => {
@@ -44,7 +42,7 @@ export class Esqueue extends EventEmitter {
     });
   }
 
-  addJob(type, payload, opts = {}) {
+  addJob(jobtype, payload, opts = {}) {
     const timestamp = indexTimestamp(this.settings.interval, this.settings.dateSeparator);
     const index = `${this.index}-${timestamp}`;
     const defaults = {
@@ -52,12 +50,11 @@ export class Esqueue extends EventEmitter {
     };
 
     const options = Object.assign(defaults, opts, {
-      doctype: this.settings.doctype,
       indexSettings: this.settings.indexSettings,
       logger: this._logger
     });
 
-    return new Job(this, index, type, payload, options);
+    return new Job(this, index, jobtype, payload, options);
   }
 
   registerWorker(type, workerFn, opts) {

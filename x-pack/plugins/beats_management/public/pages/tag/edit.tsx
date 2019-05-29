@@ -10,7 +10,7 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import { flatten } from 'lodash';
 import React from 'react';
-import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
+import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';
@@ -22,7 +22,7 @@ interface TagPageState {
   beatsTags: BeatTag[];
   configuration_blocks: {
     error?: string | undefined;
-    blocks: ConfigurationBlock[];
+    list: ConfigurationBlock[];
     page: number;
     total: number;
   };
@@ -47,7 +47,7 @@ class TagEditPageComponent extends React.PureComponent<
         hasConfigurationBlocksTypes: [],
       },
       configuration_blocks: {
-        blocks: [],
+        list: [],
         page: 0,
         total: 0,
       },
@@ -103,7 +103,7 @@ class TagEditPageComponent extends React.PureComponent<
               this.props.libs.configBlocks
                 .upsert([{ ...block, tag: this.state.tag.id }])
                 .catch((e: any) => {
-                  // tslint:disable-next-line
+                  // eslint-disable-next-line
                   console.error('Error upseting config block', e);
                 })
                 .then(() => {
@@ -117,7 +117,7 @@ class TagEditPageComponent extends React.PureComponent<
                   alert(
                     'Error removing block, please check your browsers console logs for more details'
                   );
-                  // tslint:disable-next-line
+                  // eslint-disable-next-line
                   console.error(`Error removing block ${block.id}`, e);
                 })
                 .then(() => {
@@ -160,7 +160,12 @@ class TagEditPageComponent extends React.PureComponent<
     const blocksResponse = await this.props.libs.configBlocks.getForTags([this.state.tag.id], page);
 
     this.setState({
-      configuration_blocks: blocksResponse,
+      configuration_blocks: blocksResponse as {
+        error?: string | undefined;
+        list: ConfigurationBlock[];
+        page: number;
+        total: number;
+      },
     });
   };
 
@@ -189,7 +194,7 @@ class TagEditPageComponent extends React.PureComponent<
     this.props.goTo(`/overview/configuration_tags`);
   };
   private getNumExclusiveConfigurationBlocks = () =>
-    this.state.configuration_blocks.blocks
+    this.state.configuration_blocks.list
       .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }

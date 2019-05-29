@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { flagSupportedClusters } from '../flag_supported_clusters';
 
@@ -59,7 +59,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found all non-basic cluster licenses. All clusters will be supported.'
           );
         });
@@ -95,12 +95,12 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Detected all clusters in monitoring data have basic license. Checking for supported admin cluster UUID for Kibana kibana-1234.'
           );
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found basic license admin cluster UUID for Monitoring UI support: supported_cluster_uuid.'
           );
         });
@@ -137,7 +137,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found some basic license clusters in monitoring data. Only non-basic will be supported.'
           );
         });
@@ -177,7 +177,7 @@ describe('Flag Supported Clusters', () => {
             ]);
             sinon.assert.calledWith(
               logStub,
-              ['debug', 'monitoring-ui', 'supported-clusters'],
+              ['debug', 'monitoring', 'supported-clusters'],
               'Found basic license admin cluster UUID for Monitoring UI support: supported_cluster_uuid.'
             );
           });
@@ -212,7 +212,7 @@ describe('Flag Supported Clusters', () => {
             ]);
             sinon.assert.calledWith(
               logStub,
-              ['debug', 'monitoring-ui', 'supported-clusters'],
+              ['debug', 'monitoring', 'supported-clusters'],
               'Found some basic license clusters in monitoring data. Only non-basic will be supported.'
             );
           });
@@ -248,7 +248,7 @@ describe('Flag Supported Clusters', () => {
             ]);
             sinon.assert.calledWith(
               logStub,
-              ['debug', 'monitoring-ui', 'supported-clusters'],
+              ['debug', 'monitoring', 'supported-clusters'],
               'Found all non-basic cluster licenses. All clusters will be supported.'
             );
           });
@@ -271,7 +271,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found single cluster in monitoring data.'
           );
         });
@@ -288,7 +288,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found single cluster in monitoring data.'
           );
         });
@@ -306,7 +306,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found single cluster in monitoring data.'
           );
         });
@@ -324,7 +324,7 @@ describe('Flag Supported Clusters', () => {
             ]);
             sinon.assert.calledWith(
               logStub,
-              ['debug', 'monitoring-ui', 'supported-clusters'],
+              ['debug', 'monitoring', 'supported-clusters'],
               'Found single cluster in monitoring data.'
             );
           });

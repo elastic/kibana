@@ -19,7 +19,7 @@
 
 
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from '../phrase';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';
@@ -53,7 +53,7 @@ describe('Filter Manager', function () {
       const field = getField(indexPattern, 'script number');
       expected.meta.field = 'script number';
       _.set(expected, 'script.script', {
-        inline: '(' + field.script + ') == value',
+        source: '(' + field.script + ') == value',
         lang: 'expression',
         params: {
           value: 5,

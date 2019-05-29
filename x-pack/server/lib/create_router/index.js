@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import Boom from 'boom';
 import { callWithRequestFactory } from './call_with_request_factory';
 import { isEsErrorFactory } from './is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from './error_wrappers';
@@ -16,8 +16,12 @@ export const createRouter = (server, pluginId, apiBasePath = '') => {
   const requestHandler = (handler) => async (request, h) => {
     const callWithRequest = callWithRequestFactory(server, request);
     try {
-      return handler(request, callWithRequest, h);
+      return await handler(request, callWithRequest, h);
     } catch (err) {
+      if (err instanceof Boom) {
+        throw err;
+      }
+
       if (isEsError(err)) {
         throw wrapEsError(err);
       }

@@ -19,11 +19,23 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import {
   DashboardAddPanel,
 } from './add_panel';
+
+jest.mock('ui/capabilities',
+  () => ({
+    capabilities: {
+      get: () => ({
+        visualize: {
+          show: true,
+          save: true
+        }
+      })
+    }
+  }), { virtual: true });
 
 jest.mock('ui/notify',
   () => ({
@@ -38,11 +50,12 @@ beforeEach(() => {
 });
 
 test('render', () => {
-  const component = shallowWithIntl(<DashboardAddPanel.WrappedComponent
+  const component = shallow(<DashboardAddPanel
     onClose={onClose}
     visTypes={{}}
     addNewPanel={() => {}}
     addNewVis={() => {}}
+    embeddableFactories={[]}
   />);
   expect(component).toMatchSnapshot();
 });

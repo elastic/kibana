@@ -1,7 +1,6 @@
 JOB:
   - kibana-intake
   - x-pack-intake
-  # make sure all kibana-ciGRoups are listed in tasks/function_test_groups.js
   - kibana-ciGroup1
   - kibana-ciGroup2
   - kibana-ciGroup3
@@ -22,6 +21,9 @@ JOB:
   - x-pack-ciGroup5
   - x-pack-ciGroup6
   - x-pack-ciGroup7
+  - x-pack-ciGroup8
+  - x-pack-ciGroup9
+  - x-pack-ciGroup10
 
 # `~` is yaml for `null`
 exclude: ~

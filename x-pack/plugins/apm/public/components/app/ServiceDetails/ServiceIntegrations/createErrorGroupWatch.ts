@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash';
 import chrome from 'ui/chrome';
 import url from 'url';
 import uuid from 'uuid';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -19,6 +18,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../../common/elasticsearch_fieldnames';
+import { StringMap } from '../../../../../typings/common';
 // @ts-ignore
 import { createWatch } from '../../../../services/rest/watcher';
 

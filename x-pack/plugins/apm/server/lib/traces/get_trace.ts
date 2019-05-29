@@ -4,27 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ErrorsPerTransaction,
-  getTraceErrorsPerTransaction
-} from '../errors/get_trace_errors_per_transaction';
+import { PromiseReturnType } from '../../../typings/common';
+import { getTraceErrorsPerTransaction } from '../errors/get_trace_errors_per_transaction';
 import { Setup } from '../helpers/setup_request';
-import { getTraceItems, TraceItem } from './get_trace_items';
+import { getTraceItems } from './get_trace_items';
 
-export interface TraceAPIResponse {
-  trace: TraceItem[];
-  errorsPerTransaction: ErrorsPerTransaction;
-}
-
-export async function getTrace(
-  traceId: string,
-  setup: Setup
-): Promise<TraceAPIResponse> {
-  return Promise.all([
+export type TraceAPIResponse = PromiseReturnType<typeof getTrace>;
+export async function getTrace(traceId: string, setup: Setup) {
+  const [trace, errorsPerTransaction] = await Promise.all([
     getTraceItems(traceId, setup),
     getTraceErrorsPerTransaction(traceId, setup)
-  ]).then(([trace, errorsPerTransaction]) => ({
+  ]);
+
+  return {
     trace,
     errorsPerTransaction
-  }));
+  };
 }

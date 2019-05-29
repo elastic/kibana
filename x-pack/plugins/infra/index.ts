@@ -8,12 +8,7 @@ import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import {
-  getConfigSchema,
-  // getDeprecations,
-  initServerWithKibana,
-  KbnServer,
-} from './server/kibana.index';
+import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
 const APP_ID = 'infra';
@@ -23,7 +18,7 @@ export function infra(kibana: any) {
     id: APP_ID,
     configPrefix: 'xpack.infra',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'metrics'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.infra.infrastructureDescription', {
@@ -35,7 +30,7 @@ export function infra(kibana: any) {
           defaultMessage: 'Infrastructure',
         }),
         listed: false,
-        url: `/app/${APP_ID}#/home`,
+        url: `/app/${APP_ID}#/infrastructure`,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/infra/register_feature'],
@@ -51,7 +46,7 @@ export function infra(kibana: any) {
           title: i18n.translate('xpack.infra.linkInfrastructureTitle', {
             defaultMessage: 'Infrastructure',
           }),
-          url: `/app/${APP_ID}#/home`,
+          url: `/app/${APP_ID}#/infrastructure`,
         },
         {
           description: i18n.translate('xpack.infra.linkLogsDescription', {
@@ -72,9 +67,6 @@ export function infra(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    // deprecations(helpers: any) {
-    //   return getDeprecations(helpers);
-    // },
     init(server: KbnServer) {
       initServerWithKibana(server);
     },

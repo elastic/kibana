@@ -5,5 +5,5 @@
  */
 
 export interface CMTokensAdapter {
-  createEnrollmentToken(): Promise<string>;
+  createEnrollmentTokens(numTokens?: number): Promise<string[]>;
 }

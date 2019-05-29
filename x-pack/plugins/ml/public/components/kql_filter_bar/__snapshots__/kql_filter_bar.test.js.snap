@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KqlFilterBar snapshot 1`] = `
+<Fragment>
+  <FilterBar
+    disabled={false}
+    initialValue=""
+    isLoading={false}
+    onChange={[Function]}
+    onSubmit={[Function]}
+    placeholder="tag : engineering OR tag : marketing"
+    suggestions={Array []}
+  />
+</Fragment>
+`;

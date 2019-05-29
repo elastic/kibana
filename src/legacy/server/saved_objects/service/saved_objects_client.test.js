@@ -22,7 +22,7 @@ import { SavedObjectsClient } from './saved_objects_client';
 test(`#create`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    create: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+    create: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -38,7 +38,7 @@ test(`#create`, async () => {
 test(`#bulkCreate`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    bulkCreate: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+    bulkCreate: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -53,7 +53,7 @@ test(`#bulkCreate`, async () => {
 test(`#delete`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    delete: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+    delete: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -69,7 +69,7 @@ test(`#delete`, async () => {
 test(`#find`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    find: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+    find: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -83,7 +83,7 @@ test(`#find`, async () => {
 test(`#bulkGet`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    bulkGet: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+    bulkGet: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -98,7 +98,7 @@ test(`#bulkGet`, async () => {
 test(`#get`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    get: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+    get: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -114,7 +114,7 @@ test(`#get`, async () => {
 test(`#update`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    update: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
+    update: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 

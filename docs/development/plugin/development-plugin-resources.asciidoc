@@ -20,7 +20,7 @@ Many Kibana developers hang out on `irc.freenode.net` in the `#kibana` channel. 
 [float]
 ==== Plugin Generator
 
-It is recommended that you kick-start your plugin by generating it with the {repo}tree/{branch}/packages/kbn-plugin-generator[Kibana Plugin Generator]. Run the following within the Kibana repo and you will be asked a couple questions, see some progress bars, and have a freshly generated plugin ready for you to play within Kibana's sibling `kibana-extra` folder.
+It is recommended that you kick-start your plugin by generating it with the {repo}tree/{branch}/packages/kbn-plugin-generator[Kibana Plugin Generator]. Run the following within the Kibana repo and you will be asked a couple questions, see some progress bars, and have a freshly generated plugin ready for you to play within Kibana's `plugins` folder.
 
 ["source","shell"]
 -----------
@@ -31,14 +31,15 @@ node scripts/generate_plugin my_plugin_name # replace "my_plugin_name" with your
 [float]
 ==== Directory structure for plugins
 
-The Kibana directory must be named `kibana`, and your plugin directory must be located within the sibling `kibana-extra` folder, for example:
+The Kibana directory must be named `kibana`, and your plugin directory should be located in the root of `kibana` in a `plugins` directory, for example:
 
 ["source","shell"]
 -----------
 .
-├── kibana
-├── kibana-extra/foo-plugin
-└── kibana-extra/bar-plugin
+└── kibana
+    └── plugins
+        ├── foo-plugin
+        └── bar-plugin
 -----------
 
 [float]

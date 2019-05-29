@@ -70,8 +70,9 @@ module.exports = function (grunt) {
     grunt.task.run(
       _.compact([
         !grunt.option('quick') && 'run:eslint',
-        !grunt.option('quick') && 'run:tslint',
         !grunt.option('quick') && 'run:sasslint',
+        !grunt.option('quick') && 'run:checkTsProjects',
+        !grunt.option('quick') && 'run:checkCoreApiChanges',
         !grunt.option('quick') && 'run:typeCheck',
         !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',
@@ -91,7 +92,7 @@ module.exports = function (grunt) {
   function runProjectsTests() {
     const serverCmd = {
       cmd: 'yarn',
-      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-extra'],
+      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-plugins'],
       opts: { stdio: 'inherit' },
     };
 

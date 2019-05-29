@@ -84,6 +84,7 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -178,6 +179,7 @@ exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}

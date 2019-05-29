@@ -4,34 +4,20 @@ exports[`Filter Lists Header renders header 1`] = `
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
               <FormattedMessage
                 defaultMessage="Filter Lists"
@@ -42,12 +28,10 @@ exports[`Filter Lists Header renders header 1`] = `
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
               <FormattedMessage
@@ -65,20 +49,14 @@ exports[`Filter Lists Header renders header 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
@@ -102,14 +80,10 @@ exports[`Filter Lists Header renders header 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <p>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.

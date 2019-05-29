@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as selector from '../workpad';
 
 describe('workpad selectors', () => {
@@ -33,11 +33,44 @@ describe('workpad selectors', () => {
           },
         ],
       },
+      'element-3': {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'demodata',
+            arguments: {},
+          },
+          {
+            type: 'function',
+            function: 'dropdownControl',
+            arguments: {
+              valueColumn: ['project'],
+              filterColumn: ['project'],
+            },
+          },
+          {
+            type: 'function',
+            function: 'render',
+            arguments: {},
+          },
+        ],
+      },
+      'element-4': {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'timefilterControl',
+            arguments: { compact: [true], column: ['@timestamp'] },
+          },
+        ],
+      },
     };
 
     state = {
       transient: {
-        selectedElement: 'element-1',
+        selectedToplevelNodes: ['element-1'],
         resolvedArgs: {
           'element-0': 'test resolved arg, el 0',
           'element-1': 'test resolved arg, el 1',
@@ -63,10 +96,23 @@ describe('workpad selectors', () => {
                 {
                   id: 'element-0',
                   expression: 'markdown',
+                  filter: '',
                 },
                 {
                   id: 'element-1',
                   expression: 'demodata',
+                  filter: '',
+                },
+                {
+                  id: 'element-3',
+                  expression:
+                    'demodata | dropdownControl valueColumn=project filterColumn=project | render',
+                  filter: 'exactly value="beats" column="project"',
+                },
+                {
+                  id: 'element-4',
+                  expression: 'timefilterControl compact=true column=@timestamp',
+                  filter: 'timefilter filterGroup=one column=@timestamp from=now-24h to=now',
                 },
               ],
             },
@@ -82,7 +128,6 @@ describe('workpad selectors', () => {
       expect(selector.getSelectedPage({})).to.be(undefined);
       expect(selector.getPageById({}, 'page-1')).to.be(undefined);
       expect(selector.getSelectedElement({})).to.be(undefined);
-      expect(selector.getSelectedElementId({})).to.be(undefined);
       expect(selector.getElementById({}, 'element-1')).to.be(undefined);
       expect(selector.getResolvedArgs({}, 'element-1')).to.be(undefined);
       expect(selector.getSelectedResolvedArgs({})).to.be(undefined);
@@ -122,12 +167,6 @@ describe('workpad selectors', () => {
     });
   });
 
-  describe('getSelectedElementId', () => {
-    it('returns selected element id', () => {
-      expect(selector.getSelectedElementId(state)).to.equal('element-1');
-    });
-  });
-
   describe('getElements', () => {
     it('is an empty array with no state', () => {
       expect(selector.getElements({})).to.eql([]);
@@ -135,6 +174,7 @@ describe('workpad selectors', () => {
 
     it('returns all elements on the page', () => {
       const { elements } = state.persistent.workpad.pages[0];
+
       const expected = elements.map(element => ({
         ...element,
         ast: asts[element.id],
@@ -178,7 +218,7 @@ describe('workpad selectors', () => {
         ...state,
         transient: {
           ...state.transient,
-          selectedElement: 'element-2',
+          selectedToplevelNodes: ['element-2'],
         },
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, 'example2');
@@ -190,11 +230,88 @@ describe('workpad selectors', () => {
         ...state,
         transient: {
           ...state.transient,
-          selectedElement: 'element-2',
+          selectedToplevelNodes: ['element-2'],
         },
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, ['example3', 'deeper', 'object']);
       expect(arg).to.be(true);
+    });
+  });
+
+  describe('getGlobalFilters', () => {
+    it('gets filters from all elements', () => {
+      const filters = selector.getGlobalFilters(state);
+      expect(filters).to.eql([
+        'exactly value="beats" column="project"',
+        'timefilter filterGroup=one column=@timestamp from=now-24h to=now',
+      ]);
+    });
+
+    it('gets returns empty array with no elements', () => {
+      const filters = selector.getGlobalFilters({});
+      expect(filters).to.be.an(Array);
+      expect(filters).to.have.length(0);
+    });
+  });
+
+  describe('getGlobalFilterGroups', () => {
+    it('gets filter group from elements', () => {
+      const filterGroups = selector.getGlobalFilterGroups(state);
+      expect(filterGroups).to.be.an(Array);
+      expect(filterGroups).to.have.length(1);
+      expect(filterGroups[0]).to.equal('one');
+    });
+
+    it('gets all unique filter groups', () => {
+      const filterGroups = selector.getGlobalFilterGroups({
+        persistent: {
+          workpad: {
+            pages: [
+              {
+                elements: [
+                  { filter: 'exactly value=beats column=project' },
+                  { filter: 'exactly filterGroup=one value=complete column=state' },
+                  { filter: 'timefilter filterGroup=one column=@timestamp from=now-24h to=now' },
+                  { filter: 'timefilter filterGroup=two column=timestamp from=now-15m to=now' },
+                  { filter: 'timefilter column=_timestamp from=now-30m to=now' },
+                ],
+              },
+            ],
+          },
+        },
+      });
+
+      // filters are alphabetical
+      expect(filterGroups).to.eql(['one', 'two']);
+    });
+
+    it('gets filter groups in filter function args', () => {
+      const filterGroups = selector.getGlobalFilterGroups({
+        persistent: {
+          workpad: {
+            pages: [
+              {
+                elements: [
+                  { filter: 'exactly filterGroup=one value=complete column=state' },
+                  { filter: 'timefilter column=timestamp from=now-15m to=now' },
+                  {
+                    expression: 'filters {string two} | demodata {filters three}',
+                    filter: 'exactly filterGroup=four value=pending column=state',
+                  },
+                  {
+                    expression: 'demodata {filters one}',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+
+      // {string two} is skipped, only primitive values are extracted
+      // filterGroup=one and {filters one} are de-duped
+      // filters are alphabetical
+      expect(filterGroups).to.eql(['four', 'one', 'three']);
     });
   });
 

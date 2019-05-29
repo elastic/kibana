@@ -20,8 +20,8 @@
 import { Agent } from 'http';
 
 import sinon from 'sinon';
-import Wreck from 'wreck';
-import expect from 'expect.js';
+import Wreck from '@hapi/wreck';
+import expect from '@kbn/expect';
 import { Server } from 'hapi';
 
 import { createProxyRoute } from '../../';
@@ -53,12 +53,11 @@ describe('Console Proxy Route', () => {
       describe('no matches', () => {
         it('rejects with 403', async () => {
           const { server } = setup();
-          server.route(createProxyRoute({
-            pathFilters: [
-              /^\/foo\//,
-              /^\/bar\//,
-            ]
-          }));
+          server.route(
+            createProxyRoute({
+              pathFilters: [/^\/foo\//, /^\/bar\//],
+            })
+          );
 
           const { statusCode } = await server.inject({
             method: 'POST',
@@ -71,12 +70,11 @@ describe('Console Proxy Route', () => {
       describe('one match', () => {
         it('allows the request', async () => {
           const { server } = setup();
-          server.route(createProxyRoute({
-            pathFilters: [
-              /^\/foo\//,
-              /^\/bar\//,
-            ]
-          }));
+          server.route(
+            createProxyRoute({
+              pathFilters: [/^\/foo\//, /^\/bar\//],
+            })
+          );
 
           const { statusCode } = await server.inject({
             method: 'POST',
@@ -90,12 +88,11 @@ describe('Console Proxy Route', () => {
       describe('all match', () => {
         it('allows the request', async () => {
           const { server } = setup();
-          server.route(createProxyRoute({
-            pathFilters: [
-              /^\/foo\//,
-              /^\/bar\//,
-            ]
-          }));
+          server.route(
+            createProxyRoute({
+              pathFilters: [/^\/foo\//, /^\/bar\//],
+            })
+          );
 
           const { statusCode } = await server.inject({
             method: 'POST',
@@ -124,7 +121,9 @@ describe('Console Proxy Route', () => {
         const args = getConfigForReq.getCall(0).args;
         expect(args[0]).to.have.property('path', '/api/console/proxy');
         expect(args[0]).to.have.property('method', 'post');
-        expect(args[0]).to.have.property('query').eql({ method: 'HEAD', path: '/index/type/id' });
+        expect(args[0])
+          .to.have.property('query')
+          .eql({ method: 'HEAD', path: '/index/type/id' });
         expect(args[1]).to.be('/index/type/id?pretty');
       });
 
@@ -136,17 +135,19 @@ describe('Console Proxy Route', () => {
         const rejectUnauthorized = !!Math.round(Math.random());
         const headers = {
           foo: 'bar',
-          baz: 'bop'
+          baz: 'bop',
         };
 
-        server.route(createProxyRoute({
-          getConfigForReq: () => ({
-            timeout,
-            agent,
-            rejectUnauthorized,
-            headers
+        server.route(
+          createProxyRoute({
+            getConfigForReq: () => ({
+              timeout,
+              agent,
+              rejectUnauthorized,
+              headers,
+            }),
           })
-        }));
+        );
 
         await server.inject({
           method: 'POST',

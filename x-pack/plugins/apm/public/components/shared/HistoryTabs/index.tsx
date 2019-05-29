@@ -6,12 +6,9 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
-import {
-  matchPath,
-  Route,
-  RouteComponentProps,
-  withRouter
-} from 'react-router-dom';
+import { matchPath, Route, RouteComponentProps } from 'react-router-dom';
+import { useLocation } from '../../../hooks/useLocation';
+import { history } from '../../../utils/history';
 
 export interface IHistoryTab {
   path: string;
@@ -20,7 +17,7 @@ export interface IHistoryTab {
   render?: (props: RouteComponentProps) => React.ReactNode;
 }
 
-export interface HistoryTabsProps extends RouteComponentProps {
+export interface HistoryTabsProps {
   tabs: IHistoryTab[];
 }
 
@@ -31,11 +28,8 @@ function isTabSelected(tab: IHistoryTab, currentPath: string) {
   return currentPath === tab.path;
 }
 
-const HistoryTabsWithoutRouter = ({
-  tabs,
-  history,
-  location
-}: HistoryTabsProps) => {
+export function HistoryTabs({ tabs }: HistoryTabsProps) {
+  const location = useLocation();
   return (
     <React.Fragment>
       <EuiTabs>
@@ -61,8 +55,4 @@ const HistoryTabsWithoutRouter = ({
       )}
     </React.Fragment>
   );
-};
-
-const HistoryTabs = withRouter(HistoryTabsWithoutRouter);
-
-export { HistoryTabsWithoutRouter, HistoryTabs };
+}

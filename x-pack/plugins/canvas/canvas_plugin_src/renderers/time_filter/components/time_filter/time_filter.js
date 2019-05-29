@@ -11,31 +11,30 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { TimePicker } from '../time_picker';
 import { TimePickerMini } from '../time_picker_mini';
 
-export const TimeFilter = ({ compact, filter, setFilter, commit }) => {
+function getFilterMeta(filter) {
   const ast = fromExpression(filter);
-
+  const column = get(ast, 'chain[0].arguments.column[0]');
   const from = get(ast, 'chain[0].arguments.from[0]');
   const to = get(ast, 'chain[0].arguments.to[0]');
-  const column = get(ast, 'chain[0].arguments.column[0]');
+  return { column, from, to };
+}
 
-  function doSetFilter(from, to) {
-    const filter = `timefilter from="${from}" to=${to} column=${column}`;
+export const TimeFilter = ({ filter, commit, compact }) => {
+  const setFilter = column => (from, to) => {
+    commit(`timefilter from="${from}" to=${to} column=${column}`);
+  };
 
-    // TODO: Changes to element.filter do not cause a re-render
-    setFilter(filter);
-    commit(filter);
-  }
+  const { column, from, to } = getFilterMeta(filter);
 
   if (compact) {
-    return <TimePickerMini from={from} to={to} onSelect={doSetFilter} />;
+    return <TimePickerMini from={from} to={to} onSelect={setFilter(column)} />;
   } else {
-    return <TimePicker from={from} to={to} onSelect={doSetFilter} />;
+    return <TimePicker from={from} to={to} onSelect={setFilter(column)} />;
   }
 };
 
 TimeFilter.propTypes = {
   filter: PropTypes.string,
-  setFilter: PropTypes.func, // Local state
   commit: PropTypes.func, // Canvas filter
   compact: PropTypes.bool,
 };

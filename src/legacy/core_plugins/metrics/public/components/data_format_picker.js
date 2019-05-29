@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
-class DataFormatPicker extends Component {
+class DataFormatPickerUI extends Component {
 
   constructor(props) {
     super(props);
@@ -117,12 +117,9 @@ class DataFormatPicker extends Component {
     let custom;
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
-      const selectedFrom = durationInputOptions.find(option => {
-        return from === option.value;
-      });
-      const selectedTo = durationOutputOptions.find(option => {
-        return to === option.value;
-      });
+      const selectedFrom = durationInputOptions.find(option => from === option.value);
+      const selectedTo = durationOutputOptions.find(option =>  to === option.value);
+
       return (
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -132,7 +129,7 @@ class DataFormatPicker extends Component {
                 options={options}
                 selectedOptions={selectedOption ? [selectedOption] : []}
                 onChange={this.handleChange}
-                singleSelection={true}
+                singleSelection={{ asPlainText: true }}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -149,7 +146,7 @@ class DataFormatPicker extends Component {
                 options={durationInputOptions}
                 selectedOptions={selectedFrom ? [selectedFrom] : []}
                 onChange={this.handleDurationChange('from')}
-                singleSelection={true}
+                singleSelection={{ asPlainText: true }}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -166,7 +163,7 @@ class DataFormatPicker extends Component {
                 options={durationOutputOptions}
                 selectedOptions={selectedTo ? [selectedTo] : []}
                 onChange={this.handleDurationChange('to')}
-                singleSelection={true}
+                singleSelection={{ asPlainText: true }}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -224,7 +221,7 @@ class DataFormatPicker extends Component {
               options={options}
               selectedOptions={selectedOption ? [selectedOption] : []}
               onChange={this.handleChange}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -232,17 +229,16 @@ class DataFormatPicker extends Component {
       </EuiFlexGroup>
     );
   }
-
 }
 
-DataFormatPicker.defaultProps = {
+DataFormatPickerUI.defaultProps = {
   label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' })
 };
 
-DataFormatPicker.propTypes = {
+DataFormatPickerUI.propTypes = {
   value: PropTypes.string,
   label: PropTypes.string,
   onChange: PropTypes.func
 };
 
-export default injectI18n(DataFormatPicker);
+export const DataFormatPicker = injectI18n(DataFormatPickerUI);

@@ -9,8 +9,10 @@
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
-import { get } from 'lodash';
+
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiSelect
@@ -18,6 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 
 const OPTIONS = [
   {
@@ -52,35 +55,16 @@ function optionValueToInterval(value) {
   return interval;
 }
 
-// This service will be populated by the corresponding angularjs based one.
-export const mlSelectIntervalService = {
-  intialized: false,
-  state: null
-};
+export const interval$ = new BehaviorSubject(optionValueToInterval(OPTIONS[0].value));
 
-class SelectInterval extends Component {
-  constructor(props) {
-    super(props);
-
-    // Restore the interval from the state, or default to auto.
-    this.mlSelectIntervalService = mlSelectIntervalService;
-    const intervalState = this.mlSelectIntervalService.state.get('interval');
-    const intervalValue = get(intervalState, 'val', 'auto');
-    const interval = optionValueToInterval(intervalValue);
-    this.mlSelectIntervalService.state.set('interval', interval);
-
-    this.state = {
-      value: interval.val
-    };
-  }
+class SelectIntervalUnwrapped extends Component {
+  static propTypes = {
+    interval: PropTypes.object.isRequired,
+  };
 
   onChange = (e) => {
-    this.setState({
-      value: e.target.value,
-    });
-
     const interval = optionValueToInterval(e.target.value);
-    this.mlSelectIntervalService.state.set('interval', interval).changed();
+    interval$.next(interval);
   };
 
   render() {
@@ -88,11 +72,16 @@ class SelectInterval extends Component {
       <EuiSelect
         options={OPTIONS}
         className="ml-select-interval"
-        value={this.state.value}
+        value={this.props.interval.val}
         onChange={this.onChange}
       />
     );
   }
 }
+
+const SelectInterval = injectObservablesAsProps(
+  { interval: interval$ },
+  SelectIntervalUnwrapped
+);
 
 export { SelectInterval };

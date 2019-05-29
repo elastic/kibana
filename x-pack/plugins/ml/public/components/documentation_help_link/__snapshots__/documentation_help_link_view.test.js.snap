@@ -10,7 +10,6 @@ exports[`DocumentationHelpLink renders the link 1`] = `
   Label Text
    
   <EuiIcon
-    size="m"
     type="popout"
   />
 </a>

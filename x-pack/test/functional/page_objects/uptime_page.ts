@@ -10,13 +10,43 @@ export const UptimePageProvider = ({
   getPageObjects,
   getService,
 }: KibanaFunctionalTestDefaultProviders) => {
-  const pageObject = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
 
-  return {
-    async goToUptimeOverview() {
-      await pageObject.common.navigateToApp('uptime');
-      await uptimeService.assertExists();
-    },
-  };
+  return new class UptimePage {
+    public async goToUptimeOverviewAndLoadData(
+      datePickerStartValue: string,
+      datePickerEndValue: string,
+      monitorIdToCheck: string
+    ) {
+      await pageObjects.common.navigateToApp('uptime');
+      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+      await uptimeService.monitorIdExists(monitorIdToCheck);
+    }
+
+    public async loadDataAndGoToMonitorPage(
+      datePickerStartValue: string,
+      datePickerEndValue: string,
+      monitorId: string,
+      monitorName: string
+    ) {
+      await pageObjects.common.navigateToApp('uptime');
+      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+      await uptimeService.navigateToMonitorWithId(monitorId);
+      if ((await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName) {
+        throw new Error('Expected monitor name not found');
+      }
+    }
+
+    public async inputFilterQuery(
+      datePickerStartValue: string,
+      datePickerEndValue: string,
+      filterQuery: string
+    ) {
+      await pageObjects.common.navigateToApp('uptime');
+      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+      await uptimeService.setFilterText(filterQuery);
+      await uptimeService.monitorIdExists('monitor-page-link-auto-http-0X131221E73F825974');
+    }
+  }();
 };

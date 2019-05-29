@@ -7,122 +7,179 @@ import { SuperTest } from 'supertest';
 import { AUTHENTICATION } from './authentication';
 
 export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) => {
-  await supertest.put('/api/security/role/kibana_legacy_user').send({
-    elasticsearch: {
-      indices: [
+  await supertest
+    .put('/api/security/role/kibana_legacy_user')
+    .send({
+      elasticsearch: {
+        indices: [
+          {
+            names: ['.kibana*'],
+            privileges: ['manage', 'read', 'index', 'delete'],
+          },
+        ],
+      },
+    })
+    .expect(204);
+
+  await supertest
+    .put('/api/security/role/kibana_dual_privileges_user')
+    .send({
+      elasticsearch: {
+        indices: [
+          {
+            names: ['.kibana*'],
+            privileges: ['manage', 'read', 'index', 'delete'],
+          },
+        ],
+      },
+      kibana: [
         {
-          names: ['.kibana*'],
-          privileges: ['manage', 'read', 'index', 'delete'],
+          base: ['all'],
+          spaces: ['*'],
         },
       ],
-    },
-  });
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_dual_privileges_user').send({
-    elasticsearch: {
-      indices: [
+  await supertest
+    .put('/api/security/role/kibana_dual_privileges_dashboard_only_user')
+    .send({
+      elasticsearch: {
+        indices: [
+          {
+            names: ['.kibana*'],
+            privileges: ['read', 'view_index_metadata'],
+          },
+        ],
+      },
+      kibana: [
         {
-          names: ['.kibana*'],
-          privileges: ['manage', 'read', 'index', 'delete'],
+          base: ['read'],
+          spaces: ['*'],
         },
       ],
-    },
-    kibana: {
-      global: ['all'],
-    },
-  });
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_dual_privileges_dashboard_only_user').send({
-    elasticsearch: {
-      indices: [
+  await supertest
+    .put('/api/security/role/kibana_rbac_user')
+    .send({
+      kibana: [
         {
-          names: ['.kibana*'],
-          privileges: ['read', 'view_index_metadata'],
+          base: ['all'],
+          spaces: ['*'],
         },
       ],
-    },
-    kibana: {
-      global: ['read'],
-    },
-  });
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_user').send({
-    kibana: {
-      global: ['all'],
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_dashboard_only_user')
+    .send({
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['*'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_dashboard_only_user').send({
-    kibana: {
-      global: ['read'],
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_default_space_all_user')
+    .send({
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['default'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_default_space_all_user').send({
-    kibana: {
-      space: {
-        default: ['all'],
-      },
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_default_space_read_user')
+    .send({
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['default'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_default_space_read_user').send({
-    kibana: {
-      space: {
-        default: ['read'],
-      },
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_1_all_user')
+    .send({
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['space_1'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_space_1_all_user').send({
-    kibana: {
-      space: {
-        space_1: ['all'],
-      },
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_1_read_user')
+    .send({
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['space_1'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_space_1_read_user').send({
-    kibana: {
-      space: {
-        space_1: ['read'],
-      },
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_2_all_user')
+    .send({
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['space_2'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_space_2_all_user').send({
-    kibana: {
-      space: {
-        space_2: ['all'],
-      },
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_2_read_user')
+    .send({
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['space_2'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_space_2_read_user').send({
-    kibana: {
-      space: {
-        space_2: ['read'],
-      },
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_1_2_all_user')
+    .send({
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['space_1', 'space_2'],
+        },
+      ],
+    })
+    .expect(204);
 
-  await supertest.put('/api/security/role/kibana_rbac_space_1_2_all_user').send({
-    kibana: {
-      space: {
-        space_1: ['all'],
-        space_2: ['all'],
-      },
-    },
-  });
-
-  await supertest.put('/api/security/role/kibana_rbac_space_1_2_read_user').send({
-    kibana: {
-      space: {
-        space_1: ['read'],
-        space_2: ['read'],
-      },
-    },
-  });
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_1_2_read_user')
+    .send({
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['space_1', 'space_2'],
+        },
+      ],
+    })
+    .expect(204);
 
   await es.shield.putUser({
     username: AUTHENTICATION.NOT_A_KIBANA_USER.username,
@@ -261,6 +318,46 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
       roles: ['kibana_rbac_space_1_2_read_user'],
       full_name: 'a kibana rbac space 1 and 2 read-only user',
       email: 'a_kibana_rbac_space_1_2_readonly_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.APM_USER.username,
+    body: {
+      password: AUTHENTICATION.APM_USER.password,
+      roles: ['apm_user'],
+      full_name: 'a apm user',
+      email: 'a_apm_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.MACHINE_LEARING_ADMIN.username,
+    body: {
+      password: AUTHENTICATION.MACHINE_LEARING_ADMIN.password,
+      roles: ['machine_learning_admin'],
+      full_name: 'a machine learning admin',
+      email: 'a_machine_learning_admin@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.MACHINE_LEARNING_USER.username,
+    body: {
+      password: AUTHENTICATION.MACHINE_LEARNING_USER.password,
+      roles: ['machine_learning_user'],
+      full_name: 'a machine learning user',
+      email: 'a_machine_learning_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.MONITORING_USER.username,
+    body: {
+      password: AUTHENTICATION.MONITORING_USER.password,
+      roles: ['monitoring_user'],
+      full_name: 'a monitoring user',
+      email: 'a_monitoring_user@elastic.co',
     },
   });
 };

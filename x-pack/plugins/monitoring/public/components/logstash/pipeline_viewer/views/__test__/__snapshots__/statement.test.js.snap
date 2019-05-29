@@ -14,7 +14,6 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
     isCollapsed={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
       key="statementName"
     >
@@ -52,7 +51,6 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
     isCollapsed={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
       key="statementName"
     >
@@ -73,7 +71,6 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
       key="ifContent"
     >
@@ -142,7 +139,6 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
     isCollapsed={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
       key="statementName"
     >

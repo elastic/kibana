@@ -25,5 +25,6 @@ export const TabMetrics = ({ metrics }) => (
   <FieldList
     columns={columns}
     fields={metrics}
+    dataTestSubj="detailPanelMetricsTabTable"
   />
 );

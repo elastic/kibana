@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -31,6 +31,9 @@ import heatmapRaw from './heatmap_raw.png';
 import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
 import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
 import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
+import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -84,6 +87,14 @@ describe('CoordinateMapsVisualizationTest', function () {
         return EMS_TILES;
       } else if (url.startsWith('https://files.foobar')) {
         return EMS_FILES;
+      } else if (url.startsWith('https://raster-style.foobar')) {
+        if (url.includes('osm-bright-desaturated')) {
+          return EMS_STYLE_ROAD_MAP_DESATURATED;
+        } else if (url.includes('osm-bright')) {
+          return EMS_STYLE_ROAD_MAP_BRIGHT;
+        } else if (url.includes('dark-matter')) {
+          return EMS_STYLE_DARK_MAP;
+        }
       }
     });
   }));
@@ -142,7 +153,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
     it('should initialize OK', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -160,7 +171,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle to Heatmap OK', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -170,7 +181,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -187,7 +198,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle back&forth OK between mapTypes', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -196,7 +207,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -205,7 +216,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       vis.params.mapType = 'Scaled Circle Markers';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -222,7 +233,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle to different color schema ok', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -232,7 +243,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
       vis.params.colorSchema = 'Blues';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -249,7 +260,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle to different color schema and maptypes ok', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -260,7 +271,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
       vis.params.colorSchema = 'Greens';
       vis.params.mapType = 'Shaded Geohash Grid';
-      await coordinateMapVisualization.render(dummyESResponse, {
+      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
         params: true,
         aggs: false,

@@ -24,6 +24,9 @@
 // Management styles
 @import './management/index';
 
+// Doc Viewer
+@import './doc_viewer/index';
+
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';

@@ -17,13 +17,24 @@
  * under the License.
  */
 
-import buildProcessorFunction from '../build_processor_function';
-import processors from '../request_processors/series';
+import { buildProcessorFunction } from '../build_processor_function';
+import { processors } from '../request_processors/series';
 
-function buildRequestBody(req, panel, series, esQueryConfig, indexPattern) {
-  const processor = buildProcessorFunction(processors, req, panel, series, esQueryConfig, indexPattern);
+/**
+ * Builds series request body
+ *
+ * @param {...args}: [
+ *   req: {Object} - a request object,
+ *   panel: {Object} - a panel object,
+ *   series: {Object} - an series object,
+ *   esQueryConfig: {Object} - es query config object,
+ *   indexPatternObject: {Object} - an index pattern object,
+ *   capabilities: {Object} - a search capabilities object
+ * ]
+ * @returns {Object} doc - processed body
+ */
+export function buildRequestBody(...args) {
+  const processor = buildProcessorFunction(processors, ...args);
   const doc = processor({});
   return doc;
 }
-
-export default buildRequestBody;

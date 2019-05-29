@@ -14,6 +14,7 @@
 import _ from 'lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
+import { getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import { mlJobService } from '../../services/job_service';
 
@@ -46,33 +47,7 @@ export function buildConfig(record) {
 
   // Add the 'entity_fields' i.e. the partition, by, over fields which
   // define the metric series to be plotted.
-  config.entityFields = [];
-  if (_.has(record, 'partition_field_name')) {
-    config.entityFields.push({
-      fieldName: record.partition_field_name,
-      fieldValue: record.partition_field_value,
-      fieldType: 'partition'
-    });
-  }
-
-  if (_.has(record, 'over_field_name')) {
-    config.entityFields.push({
-      fieldName: record.over_field_name,
-      fieldValue: record.over_field_value,
-      fieldType: 'over'
-    });
-  }
-
-  // For jobs with by and over fields, don't add the 'by' field as this
-  // field will only be added to the top-level fields for record type results
-  // if it also an influencer over the bucket.
-  if (_.has(record, 'by_field_name') && !(_.has(record, 'over_field_name'))) {
-    config.entityFields.push({
-      fieldName: record.by_field_name,
-      fieldValue: record.by_field_value,
-      fieldType: 'by'
-    });
-  }
+  config.entityFields = getEntityFieldList(record);
 
   // Build the tooltip data for the chart info icon, showing further details on what is being plotted.
   let functionLabel = config.metricFunction;
