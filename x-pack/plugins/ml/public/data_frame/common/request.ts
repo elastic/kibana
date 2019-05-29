@@ -68,6 +68,14 @@ export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
   return search;
 }
 
+export function isSimpleQuery(arg: any): arg is SimpleQuery {
+  return arg.query_string !== undefined;
+}
+
+export function isDefaultQuery(query: PivotQuery): boolean {
+  return isSimpleQuery(query) && query.query_string.query === '*';
+}
+
 export function getDataFramePreviewRequest(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
@@ -77,13 +85,16 @@ export function getDataFramePreviewRequest(
   const request: DataFramePreviewRequest = {
     source: {
       index: indexPatternTitle,
-      query,
     },
     pivot: {
       group_by: {},
       aggregations: {},
     },
   };
+
+  if (!isDefaultQuery(query)) {
+    request.source.query = query;
+  }
 
   groupBy.forEach(g => {
     if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS) {

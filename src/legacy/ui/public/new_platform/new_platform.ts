@@ -21,11 +21,11 @@ import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
 const runtimeContext = {
   setup: {
     core: (null as unknown) as InternalCoreSetup,
-    plugins: {},
+    plugins: {} as Record<string, unknown>,
   },
   start: {
     core: (null as unknown) as InternalCoreStart,
-    plugins: {},
+    plugins: {} as Record<string, unknown>,
   },
 };
 
@@ -38,13 +38,16 @@ export function __reset__() {
   runtimeContext.start.core = (null as unknown) as InternalCoreStart;
 }
 
-export async function __newPlatformSetup__(core: InternalCoreSetup) {
+export async function __newPlatformSetup__(
+  core: InternalCoreSetup,
+  plugins: Record<string, unknown>
+) {
   if (runtimeContext.setup.core) {
     throw new Error('New platform core api was already set up');
   }
 
   runtimeContext.setup.core = core;
-
+  runtimeContext.setup.plugins = plugins;
   // Process any pending onSetup callbacks
   while (onSetupCallbacks.length) {
     const cb = onSetupCallbacks.shift()!;
@@ -52,12 +55,16 @@ export async function __newPlatformSetup__(core: InternalCoreSetup) {
   }
 }
 
-export async function __newPlatformStart__(core: InternalCoreStart) {
+export async function __newPlatformStart__(
+  core: InternalCoreStart,
+  plugins: Record<string, unknown>
+) {
   if (runtimeContext.start.core) {
     throw new Error('New platform core api was already started');
   }
 
   runtimeContext.start.core = core;
+  runtimeContext.start.plugins = plugins;
 
   // Process any pending onStart callbacks
   while (onStartCallbacks.length) {
