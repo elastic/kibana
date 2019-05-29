@@ -80,7 +80,6 @@
     "common.ui.aggResponse.fieldLabel": "字段",
     "common.ui.aggResponse.valueLabel": "值",
     "common.ui.aggTypes.aggregateWithLabel": "聚合对象",
-    "common.ui.aggTypes.aggregateWithTooltip": "选择将多个命中或多值字段组合成单个指标的策略",
     "common.ui.aggTypes.buckets.dateHistogramLabel": "{fieldName}/{intervalDescription}",
     "common.ui.aggTypes.buckets.dateHistogramTitle": "Date Histogram",
     "common.ui.aggTypes.buckets.dateRangeTitle": "日期范围",
