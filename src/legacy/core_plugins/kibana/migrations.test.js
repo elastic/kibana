@@ -891,8 +891,8 @@ Object {
 `);
     });
   });
-  describe('7.4.0', () => {
-    const migrate = doc => migrations.visualization['7.4.0'](doc);
+  describe('7.3.0 tsvb', () => {
+    const migrate = doc => migrations.visualization['7.3.0'](doc);
     const generateDoc = ({ params }) => ({
       attributes: {
         title: 'My Vis',
