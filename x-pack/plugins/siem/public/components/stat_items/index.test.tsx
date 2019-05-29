@@ -102,10 +102,10 @@ describe('Stat Items', () => {
         },
       ],
       barChart: [
-        { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
+        { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#DB1374' },
         {
           key: 'uniqueDestinationIps',
-          value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+          value: [{ x: 'uniqueDestinationIps', y: 2354 }],
           color: '#490092',
         },
       ],

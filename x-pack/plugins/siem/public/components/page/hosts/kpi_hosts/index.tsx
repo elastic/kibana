@@ -94,7 +94,7 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
   }
 `;
 
-export const KpiHostsComponent = React.memo<KpiHostsProps>(({ data, loading }) => {
+export const KpiHostsComponent = ({ data, loading }: KpiHostsProps) => {
   const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldTitleMapping, data);
   return loading ? (
     <FlexGroupSpinner justifyContent="center" alignItems="center">
@@ -109,4 +109,4 @@ export const KpiHostsComponent = React.memo<KpiHostsProps>(({ data, loading }) =
       })}
     </EuiFlexGroup>
   );
-});
+};

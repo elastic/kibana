@@ -118,10 +118,13 @@ const FlexGroup = styled(EuiFlexGroup)`
   min-height: 228px;
 `;
 
-export const KpiNetworkBaseComponent = React.memo<{
+export const KpiNetworkBaseComponent = ({
+  fieldsMapping,
+  data,
+}: {
   fieldsMapping: StatItemsProps[];
   data: KpiNetworkData;
-}>(({ fieldsMapping, data }) => {
+}) => {
   const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
 
   return (
@@ -131,7 +134,7 @@ export const KpiNetworkBaseComponent = React.memo<{
       })}
     </EuiFlexGroup>
   );
-});
+};
 
 const kipsPerRow = 2;
 

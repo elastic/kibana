@@ -105,33 +105,15 @@ export const useKpiMatrixStatus = (
   };
   useEffect(
     () => {
-      let temp: StatItemsProps;
       setStatItemsProps(
         mappings.map(stat => {
-          temp = {
+          return {
             ...stat,
             key: `kpi-summary-${stat.key}`,
+            fields: addValueToFields(stat.fields, data),
+            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
+            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
           };
-
-          if (stat.fields != null)
-            temp = {
-              ...temp,
-              fields: addValueToFields(stat.fields, data),
-            };
-
-          if (stat.enableAreaChart)
-            temp = {
-              ...temp,
-              areaChart: addValueToAreaChart(stat.fields, data),
-            };
-
-          if (stat.enableBarChart != null)
-            temp = {
-              ...temp,
-              barChart: addValueToBarChart(stat.fields, data),
-            };
-
-          return temp;
         })
       );
     },
