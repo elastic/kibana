@@ -110,9 +110,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   }
 
   public async create(input: SearchInput) {
-    return Promise.resolve(
-      new ErrorEmbeddable('Saved searches can only be created from a saved object', input)
-    );
+    return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
   }
 }
 

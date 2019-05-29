@@ -48,12 +48,12 @@ export class EditPanelAction extends Action {
     return <EuiIcon type="pencil" />;
   }
 
-  public isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
       embeddable && embeddable.getOutput().editable && embeddable.getOutput().editUrl
     );
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
-    return Promise.resolve(Boolean(canEditEmbeddable && inDashboardEditMode));
+    return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
   public execute() {

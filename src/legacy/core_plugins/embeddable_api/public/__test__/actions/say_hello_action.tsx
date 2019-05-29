@@ -64,7 +64,7 @@ export class SayHelloAction extends Action {
     context: ActionContext<Embeddable<EmbeddableInput, FullNameEmbeddableOutput>>
   ) {
     // Option 1: only compatible with Greeting Embeddables.
-    // return Promise.resolve(context.embeddable.type === CONTACT_CARD_EMBEDDABLE);
+    // return context.embeddable.type === CONTACT_CARD_EMBEDDABLE;
 
     // Option 2: require an embeddable with a specific input or output shape
     return hasFullNameOutput(context.embeddable);

@@ -53,16 +53,14 @@ export class RemovePanelAction extends Action {
     return <EuiIcon type="trash" />;
   }
 
-  public isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: ActionContext) {
     const isPanelExpanded =
       embeddable.parent &&
       hasExpandedPanelInput(embeddable.parent) &&
       embeddable.parent.getInput().expandedPanelId === embeddable.id;
 
-    return Promise.resolve(
-      Boolean(
-        embeddable.parent && embeddable.getInput().viewMode === ViewMode.EDIT && !isPanelExpanded
-      )
+    return Boolean(
+      embeddable.parent && embeddable.getInput().viewMode === ViewMode.EDIT && !isPanelExpanded
     );
   }
 

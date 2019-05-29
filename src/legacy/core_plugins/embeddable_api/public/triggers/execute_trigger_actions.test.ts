@@ -49,8 +49,8 @@ class TestAction extends Action {
     return 'test';
   }
 
-  isCompatible(context: ActionContext) {
-    return Promise.resolve(this.checkCompatibility(context));
+  async isCompatible(context: ActionContext) {
+    return this.checkCompatibility(context);
   }
 
   execute(context: ActionContext) {

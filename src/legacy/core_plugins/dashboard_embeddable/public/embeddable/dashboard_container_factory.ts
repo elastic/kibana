@@ -59,7 +59,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return Promise.resolve(new DashboardContainer(initialInput, embeddableFactories, parent));
+    return new DashboardContainer(initialInput, embeddableFactories, parent);
   }
 }
 

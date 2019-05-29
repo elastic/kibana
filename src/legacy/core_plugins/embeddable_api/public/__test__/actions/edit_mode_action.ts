@@ -33,8 +33,8 @@ export class EditModeAction extends Action {
     return `I should only show up in edit mode`;
   }
 
-  isCompatible(context: ActionContext) {
-    return Promise.resolve(context.embeddable.getInput().viewMode === ViewMode.EDIT);
+  async isCompatible(context: ActionContext) {
+    return context.embeddable.getInput().viewMode === ViewMode.EDIT;
   }
 
   execute() {

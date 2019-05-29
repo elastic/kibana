@@ -38,8 +38,8 @@ export class FilterableContainerFactory extends EmbeddableFactory<FilterableCont
     return true;
   }
 
-  public create(initialInput: FilterableContainerInput, parent?: Container) {
-    return Promise.resolve(new FilterableContainer(initialInput, embeddableFactories, parent));
+  public async create(initialInput: FilterableContainerInput, parent?: Container) {
+    return new FilterableContainer(initialInput, embeddableFactories, parent);
   }
 }
 

@@ -51,10 +51,8 @@ export class AddPanelAction extends Action {
     return <EuiIcon type="plusInCircleFilled" />;
   }
 
-  public isCompatible({ embeddable }: ActionContext) {
-    return Promise.resolve(
-      isContainer(embeddable) && embeddable.getInput().viewMode === ViewMode.EDIT
-    );
+  public async isCompatible({ embeddable }: ActionContext) {
+    return isContainer(embeddable) && embeddable.getInput().viewMode === ViewMode.EDIT;
   }
 
   public async execute({ embeddable }: ActionContext) {

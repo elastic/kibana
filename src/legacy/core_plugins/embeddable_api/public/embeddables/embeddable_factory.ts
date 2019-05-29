@@ -110,8 +110,8 @@ export abstract class EmbeddableFactory<
    * Explicit input is stored on the parent container for this embeddable. It overrides any inherited
    * input passed down from the parent container.
    */
-  public getExplicitInput(): Promise<Partial<TEmbeddableInput>> {
-    return Promise.resolve({});
+  public async getExplicitInput(): Promise<Partial<TEmbeddableInput>> {
+    return {};
   }
 
   /**

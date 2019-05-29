@@ -61,8 +61,10 @@ export abstract class Action<
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  public isCompatible(context: ActionContext<TEmbeddable, TTriggerContext>): Promise<boolean> {
-    return Promise.resolve(true);
+  public async isCompatible(
+    context: ActionContext<TEmbeddable, TTriggerContext>
+  ): Promise<boolean> {
+    return true;
   }
 
   /**

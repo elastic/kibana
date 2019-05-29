@@ -34,8 +34,8 @@ export class RestrictedAction extends Action {
     return `I am only sometimes compatible`;
   }
 
-  isCompatible(context: ActionContext) {
-    return Promise.resolve(this.isCompatibleFn(context));
+  async isCompatible(context: ActionContext) {
+    return this.isCompatibleFn(context);
   }
 
   execute() {}

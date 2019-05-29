@@ -78,8 +78,8 @@ export class ExpandPanelAction extends Action {
     return <EuiIcon type={isExpanded(embeddable) ? 'expand' : 'expand'} />;
   }
 
-  public isCompatible({ embeddable }: ActionContext) {
-    return Promise.resolve(Boolean(embeddable.parent && isDashboard(embeddable.parent)));
+  public async isCompatible({ embeddable }: ActionContext) {
+    return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
   public execute({ embeddable }: ActionContext) {

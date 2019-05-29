@@ -39,8 +39,8 @@ export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmb
     });
   }
 
-  public create(initialInput: FilterableEmbeddableInput, parent?: IContainer) {
-    return Promise.resolve(new FilterableEmbeddable(initialInput, parent));
+  public async create(initialInput: FilterableEmbeddableInput, parent?: IContainer) {
+    return new FilterableEmbeddable(initialInput, parent);
   }
 }
 

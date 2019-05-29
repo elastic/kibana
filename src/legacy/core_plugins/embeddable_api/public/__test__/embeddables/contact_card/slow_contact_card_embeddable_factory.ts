@@ -48,6 +48,6 @@ export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
     for (let i = 0; i < this.loadTickCount; i++) {
       await Promise.resolve();
     }
-    return Promise.resolve(new ContactCardEmbeddable(initialInput, parent));
+    return new ContactCardEmbeddable(initialInput, parent);
   }
 }

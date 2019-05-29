@@ -53,13 +53,13 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
     });
   }
 
-  public isCompatible(context: ActionContext) {
+  public async isCompatible(context: ActionContext) {
     let root: IEmbeddable | IContainer = context.embeddable;
     while (root.parent) {
       root = root.parent;
     }
 
-    return Promise.resolve(containerAcceptsFilterInput(root));
+    return containerAcceptsFilterInput(root);
   }
 
   public execute({

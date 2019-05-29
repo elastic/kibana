@@ -49,8 +49,8 @@ export class CustomizePanelTitleAction extends Action {
     return <EuiIcon type="pencil" />;
   }
 
-  public isCompatible({ embeddable }: ActionContext) {
-    return Promise.resolve(embeddable.getInput().viewMode === ViewMode.EDIT ? true : false);
+  public async isCompatible({ embeddable }: ActionContext) {
+    return embeddable.getInput().viewMode === ViewMode.EDIT ? true : false;
   }
 
   public async execute({ embeddable }: ActionContext) {

@@ -43,8 +43,8 @@ export class InspectPanelAction extends Action {
     return <EuiIcon type="inspect" />;
   }
 
-  public isCompatible({ embeddable }: ActionContext) {
-    return Promise.resolve(Inspector.isAvailable(embeddable.getInspectorAdapters()));
+  public async isCompatible({ embeddable }: ActionContext) {
+    return Inspector.isAvailable(embeddable.getInspectorAdapters());
   }
 
   public async execute({ embeddable }: ActionContext) {
