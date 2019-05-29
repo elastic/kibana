@@ -20,9 +20,12 @@ export function Detail({ match }: MatchPackage) {
   const { pkgkey } = match.params;
   const [info, setInfo] = useState(({} = {} as IntegrationInfo));
 
-  useEffect(() => {
-    getIntegrationInfoByKey(pkgkey).then(({ data }) => setInfo(data));
-  }, []);
+  useEffect(
+    () => {
+      getIntegrationInfoByKey(pkgkey).then(({ data }) => setInfo(data));
+    },
+    [pkgkey]
+  );
   const { description, name, version, icon } = info;
 
   return (

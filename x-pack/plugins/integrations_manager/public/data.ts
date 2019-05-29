@@ -5,14 +5,16 @@
  */
 
 import axios from 'axios';
+import chrome from 'ui/chrome';
 import { API } from '../common/constants';
 
 export const fetch = axios.create({
   withCredentials: true,
+  baseURL: chrome.getBasePath(),
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    'kbn-xsrf': 'professionally-crafted-string-of-text',
+    'kbn-xsrf': chrome.getXsrfToken(),
   },
   timeout: 30 * 1000,
 });
