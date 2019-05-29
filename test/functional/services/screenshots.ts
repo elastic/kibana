@@ -19,15 +19,21 @@
 
 import { resolve, dirname } from 'path';
 import { writeFile, readFileSync } from 'fs';
-import { fromNode as fcb, promisify } from 'bluebird';
+import Bluebird, { fromNode as fcb, promisify } from 'bluebird';
+// @ts-ignore
 import mkdirp from 'mkdirp';
 import del from 'del';
 import { comparePngs } from './lib/compare_pngs';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from './lib/web_element_wrapper';
 
-const mkdirAsync = promisify(mkdirp);
-const writeFileAsync = promisify(writeFile);
+type WriteFileAsync = (path: string | number | Buffer | URL, data: any) => Bluebird<void>;
+type MkDirAsync = (dirName: string) => Bluebird<void>;
 
-export async function ScreenshotsProvider({ getService }) {
+const mkdirAsync = promisify(mkdirp) as MkDirAsync;
+const writeFileAsync = promisify(writeFile) as WriteFileAsync;
+
+export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const browser = getService('browser');
@@ -38,14 +44,13 @@ export async function ScreenshotsProvider({ getService }) {
   await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
 
   class Screenshots {
-
     /**
      *
      * @param name {string} name of the file to use for comparison
      * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
      * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
      */
-    async compareAgainstBaseline(name, updateBaselines, el) {
+    async compareAgainstBaseline(name: string, updateBaselines: boolean, el: WebElementWrapper) {
       log.debug('compareAgainstBaseline');
       const sessionPath = resolve(SESSION_DIRECTORY, `${name}.png`);
       await this._take(sessionPath, el);
@@ -63,15 +68,15 @@ export async function ScreenshotsProvider({ getService }) {
       }
     }
 
-    async take(name, el) {
+    async take(name: string, el: WebElementWrapper) {
       return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`), el);
     }
 
-    async takeForFailure(name, el) {
+    async takeForFailure(name: string, el: WebElementWrapper) {
       await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
     }
 
-    async _take(path, el) {
+    async _take(path: string, el: WebElementWrapper) {
       try {
         log.info(`Taking screenshot "${path}"`);
         const screenshot = await (el ? el.takeScreenshot() : browser.takeScreenshot());
