@@ -218,7 +218,7 @@ export class SavedObjectsClient {
     attributes: T,
     options?: CreateOptions
   ) {
-    return this._repository.create(type, attributes, options);
+    return await this._repository.create(type, attributes, options);
   }
 
   /**
@@ -231,7 +231,7 @@ export class SavedObjectsClient {
     objects: Array<BulkCreateObject<T>>,
     options?: CreateOptions
   ) {
-    return this._repository.bulkCreate(objects, options);
+    return await this._repository.bulkCreate(objects, options);
   }
 
   /**
@@ -242,7 +242,7 @@ export class SavedObjectsClient {
    * @param options
    */
   async delete(type: string, id: string, options: BaseOptions = {}) {
-    return this._repository.delete(type, id, options);
+    return await this._repository.delete(type, id, options);
   }
 
   /**
@@ -253,7 +253,7 @@ export class SavedObjectsClient {
   async find<T extends SavedObjectAttributes = any>(
     options: FindOptions
   ): Promise<FindResponse<T>> {
-    return this._repository.find(options);
+    return await this._repository.find(options);
   }
 
   /**
@@ -271,7 +271,7 @@ export class SavedObjectsClient {
     objects: BulkGetObject[] = [],
     options: BaseOptions = {}
   ): Promise<BulkResponse<T>> {
-    return this._repository.bulkGet(objects, options);
+    return await this._repository.bulkGet(objects, options);
   }
 
   /**
@@ -286,7 +286,7 @@ export class SavedObjectsClient {
     id: string,
     options: BaseOptions = {}
   ): Promise<SavedObject<T>> {
-    return this._repository.get(type, id, options);
+    return await this._repository.get(type, id, options);
   }
 
   /**
@@ -302,6 +302,6 @@ export class SavedObjectsClient {
     attributes: Partial<T>,
     options: UpdateOptions = {}
   ): Promise<UpdateResponse<T>> {
-    return this._repository.update(type, id, attributes, options);
+    return await this._repository.update(type, id, attributes, options);
   }
 }
