@@ -40,13 +40,6 @@
     lockFileMaintenance: { enabled: false },
 
     /**
-     * Set the version spec to the exact version installed, ranges are the default
-     * and don't cause problems since we use yarn.lock, but pinning makes things
-     * less ambiguous
-     */
-    rangeStrategy: 'pin',
-
-    /**
      * Define groups of packages that should be updated/configured together
      */
     packageRules: [
