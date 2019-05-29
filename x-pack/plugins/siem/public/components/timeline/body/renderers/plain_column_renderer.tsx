@@ -8,7 +8,6 @@ import { isNumber } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -52,7 +51,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             name: `${columnName}: ${parseQueryValue(value)}`,
             queryMatch: {
               field: field.id,
-              value: escapeQueryValue(parseQueryValue(value)),
+              value: parseQueryValue(value),
               operator: IS_OPERATOR,
             },
             excluded: false,
