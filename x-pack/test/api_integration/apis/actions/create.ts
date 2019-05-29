@@ -10,8 +10,11 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('create', () => {
+    after(() => esArchiver.unload('empty_kibana'));
+
     it('should return 200 when creating an action', async () => {
       await supertest
         .post('/api/action')
