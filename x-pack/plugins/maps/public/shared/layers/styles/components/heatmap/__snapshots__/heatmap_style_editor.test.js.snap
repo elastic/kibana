@@ -5,7 +5,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
   describedByIds={Array []}
   fullWidth={false}
   hasEmptyLabelSpace={false}
-  label="heatmap color"
+  label="Color range"
   labelType="label"
 >
   <EuiSuperSelect
