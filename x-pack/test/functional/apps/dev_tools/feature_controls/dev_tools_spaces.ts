@@ -16,7 +16,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
 
-  describe('spaces', () => {
+  describe('spaces', function() {
+    // Geckodriver often crashes with https://github.com/mozilla/geckodriver/issues/1519
+    this.tags(['firefox']);
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
