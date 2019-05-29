@@ -23,7 +23,7 @@ export async function fetch(setup: Setup, serviceName: string) {
 
   const aggs = {
     threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
-    threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } } // TODO is there a max field?
+    threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } }
   };
 
   const params = {
