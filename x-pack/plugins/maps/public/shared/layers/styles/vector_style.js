@@ -16,7 +16,7 @@ import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
-import { getSymbolSvg, buildSrcUrl, styleSvg } from './symbols/symbols';
+import { loadImage } from './symbol_utils';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -499,23 +499,10 @@ export class VectorStyle extends AbstractStyle {
   async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId }) {
     const fillColor = this._descriptor.properties.fillColor;
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
-    const symbolSize = symbolId.includes('11') ? 11 : 15;
     const iconSize = this._descriptor.properties.iconSize;
 
     function getImageId(symbolId, color) {
       return `${symbolId}_${color}`;
-    }
-
-    async function getImageUrl(symbolId, color) {
-      let symbolSvg;
-      try {
-        symbolSvg = getSymbolSvg(symbolId);
-      } catch(error) {
-        return;
-      }
-
-      const styledSvg = await styleSvg(symbolSvg, color);
-      return buildSrcUrl(styledSvg);
     }
 
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
@@ -523,19 +510,9 @@ export class VectorStyle extends AbstractStyle {
     if (fillColor.type === VectorStyle.STYLE_TYPE.STATIC) {
       const color = fillColor.options.color;
       const imageId = getImageId(symbolId, color);
-      if (mbMap.hasImage(imageId)) {
-        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-      } else {
-        const img = new Image(symbolSize, symbolSize);
-        img.onload = () => {
-          mbMap.addImage(imageId, img);
-          mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-        };
-        img.onerror = (e) => {
-          console.log(e);
-        };
-        const imageUrl = await getImageUrl(symbolId, color);
-        img.src = imageUrl;
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
+      if (!mbMap.hasImage(imageId)) {
+        loadImage(imageId, symbolId, color, mbMap);
       }
     } else {
       // TODO handle dynamic color

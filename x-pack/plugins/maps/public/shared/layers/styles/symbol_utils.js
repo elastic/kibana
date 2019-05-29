@@ -6,7 +6,7 @@
 
 import { maki } from '@kbn/maki';
 import xml2js from 'xml2js';
-import { parseXmlString } from '../../../../../common/parse_xml_string';
+import { parseXmlString } from '../../../../common/parse_xml_string';
 
 export const SYMBOLS = {};
 maki.svgArray.forEach(svgString => {
@@ -41,4 +41,23 @@ export async function styleSvg(svgString, fill) {
   }
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
+}
+
+export async function loadImage(imageId, symbolId, color, mbMap) {
+  let symbolSvg;
+  try {
+    symbolSvg = getSymbolSvg(symbolId);
+  } catch(error) {
+    return;
+  }
+
+  const styledSvg = await styleSvg(symbolSvg, color);
+  const imageUrl = buildSrcUrl(styledSvg);
+
+  const symbolSize = symbolId.includes('11') ? 11 : 15;
+  const img = new Image(symbolSize, symbolSize);
+  img.onload = () => {
+    mbMap.addImage(imageId, img);
+  };
+  img.src = imageUrl;
 }

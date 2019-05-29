@@ -17,7 +17,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from '../../vector_constants';
-import { SYMBOLS, buildSrcUrl } from '../../symbols/symbols';
+import { SYMBOLS, buildSrcUrl } from '../../symbol_utils';
 
 const SYMBOLIZE_AS_OPTIONS = [
   {

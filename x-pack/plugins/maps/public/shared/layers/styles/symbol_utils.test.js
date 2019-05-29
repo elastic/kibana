@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSymbolSvg, styleSvg } from './symbols';
+import { getSymbolSvg, styleSvg } from './symbol_utils';
 
 describe('getSymbolSvg', () => {
   it('Should load symbol svg', () => {
