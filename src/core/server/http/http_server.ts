@@ -69,7 +69,6 @@ export interface HttpServerSetup {
     get: AuthStateStorage['get'];
     isAuthenticated: AuthStateStorage['isAuthenticated'];
   };
-  createNewServer?: (config: Partial<HttpConfig>) => Promise<HttpServerSetup>;
 }
 
 export class HttpServer {
@@ -173,8 +172,7 @@ export class HttpServer {
     }
 
     await this.server.start();
-    const serverPath = this.config ? this.config.rewriteBasePath || this.config.basePath : '';
-
+    const serverPath = this.config!.rewriteBasePath || this.config!.basePath || '';
     this.log.debug(`http server running at ${this.server.info.uri}${serverPath}`);
   }
 

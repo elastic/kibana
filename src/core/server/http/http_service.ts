@@ -29,9 +29,9 @@ import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
-export type HttpServiceSetup = HttpServerSetup & {
+export interface HttpServiceSetup extends HttpServerSetup {
   createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
-};
+}
 /** @public */
 export interface HttpServiceStart {
   /** Indicates if http server is listening on a port */
