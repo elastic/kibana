@@ -17,5 +17,9 @@ export interface CoreSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{`<p/>`        adminClient$: Observable&lt;ClusterClient&gt;;`<p/>`        dataClient$: Observable&lt;ClusterClient&gt;;`<p/>`    }</code> |  |
+<<<<<<< HEAD
 |  [http](./kibana-plugin-server.coresetup.http.md) | <code>{`<p/>`        registerAuth: HttpServiceSetup['registerAuth'];`<p/>`        registerOnRequest: HttpServiceSetup['registerOnRequest'];`<p/>`        getBasePathFor: HttpServiceSetup['getBasePathFor'];`<p/>`        setBasePathFor: HttpServiceSetup['setBasePathFor'];`<p/>`    }</code> |  |
+=======
+|  [http](./kibana-plugin-server.coresetup.http.md) | <code>{`<p/>`        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];`<p/>`        registerAuth: HttpServiceSetup['registerAuth'];`<p/>`        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];`<p/>`        getBasePathFor: HttpServiceSetup['getBasePathFor'];`<p/>`        setBasePathFor: HttpServiceSetup['setBasePathFor'];`<p/>`        createNewServer: HttpServiceSetup['createNewServer'];`<p/>`    }</code> |  |
+>>>>>>> 461a6c0f93... [feat] create additional http servers (#36804)
 

@@ -83,6 +83,7 @@ export interface CoreSetup {
     registerOnRequest: HttpServiceSetup['registerOnRequest'];
     getBasePathFor: HttpServiceSetup['getBasePathFor'];
     setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    createNewServer: HttpServiceSetup['createNewServer'];
   };
 }
 
