@@ -17,6 +17,7 @@
  * under the License.
  */
 
-import './directive';
+export { ApplyFiltersPopover } from './apply_filters_popover';
 
-export { FilterBar } from './filter_bar';
+// @ts-ignore
+export { setupDirective } from './directive';

@@ -17,6 +17,10 @@
  * under the License.
  */
 
-import './directive';
-
-export { ApplyFiltersPopover } from './apply_filters_popover';
+export function mapToObject(map: Map<string, unknown>) {
+  const result: Record<string, unknown> = Object.create(null);
+  for (const [key, value] of map) {
+    result[key] = value;
+  }
+  return result;
+}
