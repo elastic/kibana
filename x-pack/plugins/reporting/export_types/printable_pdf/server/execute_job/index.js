@@ -58,7 +58,8 @@ function executeJobFn(server) {
       }))
     );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
+    const boundCancelOn = cancellationToken.on.bind(cancellationToken);
+    const stop$ = Rx.fromEventPattern(boundCancelOn);
 
     return process$.pipe(takeUntil(stop$)).toPromise();
   });
