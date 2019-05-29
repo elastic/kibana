@@ -7,6 +7,7 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 import { useUrlParams } from '../../hooks';
+import { CLIENT_DEFAULTS } from '../../../common/constants';
 
 // TODO: when EUI exports types for this, this should be replaced
 interface SuperDateRangePickerRangeChangedEvent {
@@ -37,6 +38,7 @@ export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
     <EuiSuperDatePicker
       start={dateRangeStart}
       end={dateRangeEnd}
+      commonlyUsedRanges={CLIENT_DEFAULTS.COMMONLY_USED_DATE_RANGES}
       isPaused={autorefreshIsPaused}
       refreshInterval={autorefreshInterval}
       onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {

@@ -9,6 +9,12 @@ export const CLIENT_DEFAULTS = {
   AUTOREFRESH_INTERVAL: 60 * 1000,
   // polling defaults to "on"
   AUTOREFRESH_IS_PAUSED: false,
+  COMMONLY_USED_DATE_RANGES: [
+    { start: 'now/d', end: 'now', label: 'Today' },
+    { start: 'now/w', end: 'now', label: 'Week to date' },
+    { start: 'now/M', end: 'now', label: 'Month to date' },
+    { start: 'now/y', end: 'now', label: 'Year to date' },
+  ],
   DATE_RANGE_START: 'now-15m',
   DATE_RANGE_END: 'now',
   SEARCH: '',
