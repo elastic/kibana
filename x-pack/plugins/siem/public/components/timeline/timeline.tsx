@@ -104,6 +104,7 @@ export const Timeline = pure<Props>(
     const combinedQueries = combineQueries(
       dataProviders,
       indexPattern,
+      browserFields,
       kqlQueryExpression,
       kqlMode,
       start,
