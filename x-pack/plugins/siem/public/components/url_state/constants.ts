@@ -8,8 +8,6 @@ import { KeyUrlState, LocationKeysType, LocationMappedToModel } from './types';
 import { networkModel } from '../../store/network';
 import { hostsModel } from '../../store/hosts';
 
-export type timerange = string;
-
 export enum CONSTANTS {
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',

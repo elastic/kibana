@@ -37,8 +37,9 @@ const filterQuery: KueryFilterQuery = {
 
 const serializedFilterQuery: SerializedFilterQuery = {
   kuery: filterQuery,
-  serializedQuery:
-    '{"bool":{"should":[{"match_phrase":{"host.name":"siem-es"}}],"minimum_should_match":1}}',
+  serializedQuery: JSON.stringify({
+    bool: { should: [{ match_phrase: { 'host.name': 'siem-es' } }], minimum_should_match: 1 },
+  }),
 };
 
 const defaultLocation = {
