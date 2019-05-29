@@ -117,8 +117,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       dataClient$: deps.elasticsearch.dataClient$,
     },
     http: {
+      registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
-      registerOnRequest: deps.http.registerOnRequest,
+      registerOnPostAuth: deps.http.registerOnPostAuth,
       getBasePathFor: deps.http.getBasePathFor,
       setBasePathFor: deps.http.setBasePathFor,
       createNewServer: deps.http.createNewServer,
