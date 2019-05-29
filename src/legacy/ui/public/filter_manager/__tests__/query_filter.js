@@ -51,14 +51,10 @@ describe('Query Filter', function () {
 
       it('should have methods for modifying filters', function () {
         expect(queryFilter.addFilters).to.be.a('function');
-        expect(queryFilter.toggleFilter).to.be.a('function');
-        expect(queryFilter.toggleAll).to.be.a('function');
         expect(queryFilter.removeFilter).to.be.a('function');
         expect(queryFilter.removeAll).to.be.a('function');
         expect(queryFilter.invertFilter).to.be.a('function');
-        expect(queryFilter.invertAll).to.be.a('function');
         expect(queryFilter.pinFilter).to.be.a('function');
-        expect(queryFilter.pinAll).to.be.a('function');
       });
 
     });

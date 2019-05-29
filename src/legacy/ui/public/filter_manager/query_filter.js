@@ -20,18 +20,19 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { onlyDisabled } from './lib/only_disabled';
-import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';
-import { compareFilters } from './lib/compare_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
 import { getNewPlatform } from 'ui/new_platform';
 
-export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope, getAppState, globalState) {
+import { FilterManager } from './new_filter_manager';
+
+export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState, globalState) {
   const queryFilter = {};
+
+  let filterStateManager;
   const { uiSettings } = getNewPlatform().setup.core;
 
   const update$ = new Subject();
@@ -98,6 +99,8 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
         }
 
         filterState.filters = filterState.filters.concat(filters);
+
+        filterStateManager.addFilters(filters, addToGlobalState);
       });
   };
 
@@ -125,6 +128,8 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
     }
 
     state.filters.splice(index, 1);
+
+    filterStateManager.setFilters(appState.filters, globalState.filters);
   };
 
   /**
@@ -134,33 +139,9 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
     const appState = getAppState();
     appState.filters = [];
     globalState.filters = [];
+
+    filterStateManager.removeAll();
   };
-
-  /**
-   * Toggles the filter between enabled/disabled.
-   * @param {object} filter The filter to toggle
-   & @param {boolean} force Disabled true/false
-   * @returns {object} updated filter
-   */
-  queryFilter.toggleFilter = function (filter, force) {
-    // Toggle the disabled flag
-    const disabled = _.isUndefined(force) ? !filter.meta.disabled : !!force;
-    filter.meta.disabled = disabled;
-    return filter;
-  };
-
-  /**
-   * Disables all filters
-   * @params {boolean} force Disable/enable all filters
-   */
-  queryFilter.toggleAll = function (force) {
-    function doToggle(filter) {
-      queryFilter.toggleFilter(filter, force);
-    }
-
-    executeOnFilters(doToggle);
-  };
-
 
   /**
    * Inverts the negate value on the filter
@@ -168,19 +149,8 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
    * @returns {object} updated filter
    */
   queryFilter.invertFilter = function (filter) {
-    // Toggle the negate meta state
-    filter.meta.negate = !filter.meta.negate;
-    return filter;
+    return this.filterStateManager.invertFilter(filter);
   };
-
-  /**
-   * Inverts all filters
-   * @returns {object} Resulting updated filter list
-   */
-  queryFilter.invertAll = function () {
-    executeOnFilters(queryFilter.invertFilter);
-  };
-
 
   /**
    * Pins the filter to the global state
@@ -213,18 +183,6 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
     return filter;
   };
 
-  /**
-   * Pins all filters
-   * @params {boolean} force Pin/Unpin all filters
-   */
-  queryFilter.pinAll = function (force) {
-    function pin(filter) {
-      queryFilter.pinFilter(filter, force);
-    }
-
-    executeOnFilters(pin);
-  };
-
   queryFilter.setFilters = filters => {
     return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
       .then(mappedFilters => {
@@ -234,6 +192,8 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
         });
         globalState.filters = globalFilters;
         if (appState) appState.filters = appFilters;
+
+        filterStateManager.setFilters(appFilters, globalFilters);
       });
   };
 
@@ -279,138 +239,26 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, $rootScope,
     };
   }
 
-  // helper to run a function on all filters in all states
-  function executeOnFilters(fn) {
-    const appState = getAppState();
-    let globalFilters = [];
-    let appFilters = [];
-
-    if (globalState.filters) globalFilters = globalState.filters;
-    if (appState && appState.filters) appFilters = appState.filters;
-
-    globalFilters.concat(appFilters).forEach(fn);
-  }
-
-  function mergeStateFilters(gFilters, aFilters, compareOptions) {
-    // ensure we don't mutate the filters passed in
-    const globalFilters = gFilters ? _.cloneDeep(gFilters) : [];
-    const appFilters = aFilters ? _.cloneDeep(aFilters) : [];
-
-    // existing globalFilters should be mutated by appFilters
-    _.each(appFilters, function (filter, i) {
-      const match = _.find(globalFilters, function (globalFilter) {
-        return compareFilters(globalFilter, filter, compareOptions);
-      });
-
-      // no match, do nothing
-      if (!match) return;
-
-      // matching filter in globalState, update global and remove from appState
-      _.assign(match.meta, filter.meta);
-      appFilters.splice(i, 1);
-    });
-
-    // Reverse the order of globalFilters and appFilters, since uniqFilters
-    // will throw out duplicates from the back of the array, but we want
-    // newer filters to overwrite previously created filters.
-    globalFilters.reverse();
-    appFilters.reverse();
-
-    return [
-      // Reverse filters after uniq again, so they are still in the order, they
-      // were before updating them
-      uniqFilters(globalFilters).reverse(),
-      uniqFilters(appFilters).reverse()
-    ];
-  }
-
   /**
    * Initializes state watchers that use the event emitter
    * @returns {void}
    */
   function initWatchers() {
-    let removeAppStateWatchers;
-
-    $rootScope.$watch(getAppState, function () {
-      removeAppStateWatchers && removeAppStateWatchers();
-      removeAppStateWatchers = initAppStateWatchers();
-    });
-
-    function initAppStateWatchers() {
-      // multi watch on the app and global states
-      const stateWatchers = [{
-        fn: $rootScope.$watch,
-        deep: true,
-        get: queryFilter.getGlobalFilters
-      }, {
-        fn: $rootScope.$watch,
-        deep: true,
-        get: queryFilter.getAppFilters
-      }];
-
-      // when states change, use event emitter to trigger updates and fetches
-      return $rootScope.$watchMulti(stateWatchers, function (next, prev) {
-        // prevent execution on watcher instantiation
-        if (_.isEqual(next, prev)) return;
-
-        let doUpdate = false;
-        let doFetch = false;
-
-        // reconcile filter in global and app states
-        const filters = mergeStateFilters(next[0], next[1]);
-        const [globalFilters, appFilters] = filters;
-        const appState = getAppState();
-
-        // save the state, as it may have updated
-        const globalChanged = !_.isEqual(next[0], globalFilters);
-        const appChanged = !_.isEqual(next[1], appFilters);
-
-        // the filters were changed, apply to state (re-triggers this watcher)
-        if (globalChanged || appChanged) {
-          globalState.filters = globalFilters;
-          if (appState) appState.filters = appFilters;
-          return;
-        }
-
-        // check for actions, bail if we're done
-        getActions();
-        if (doUpdate) {
-          // save states and emit the required events
+    // This is a temporary solution to remove rootscope.
+    // Looking forward, new filters will be explicitly pushed into the filter manager.
+    const interval = setInterval(() => {
+      const appState = getAppState();
+      if (appState && appState.filters) {
+        clearInterval(interval);
+        filterStateManager = new FilterManager(appState.filters);
+        filterStateManager.getUpdates$().subscribe((shouldFetch) => {
           saveState();
           update$.next();
-
-          if (doFetch) {
+          if (shouldFetch) {
             fetch$.next();
           }
-        }
-
-        // iterate over each state type, checking for changes
-        function getActions() {
-          let newFilters = [];
-          let oldFilters = [];
-
-          stateWatchers.forEach(function (watcher, i) {
-            const nextVal = next[i];
-            const prevVal = prev[i];
-            newFilters = newFilters.concat(nextVal);
-            oldFilters = oldFilters.concat(prevVal);
-
-            // no update or fetch if there was no change
-            if (nextVal === prevVal) return;
-
-            if (nextVal) doUpdate = true;
-
-            // don't trigger fetch when only disabled filters
-            if (!onlyDisabled(nextVal, prevVal)) doFetch = true;
-          });
-
-          // make sure change wasn't only a state move
-          // checking length first is an optimization
-          if (doFetch && newFilters.length === oldFilters.length) {
-            if (onlyStateChanged(newFilters, oldFilters)) doFetch = false;
-          }
-        }
-      });
-    }
+        });
+      }
+    }, 100);
   }
 }
