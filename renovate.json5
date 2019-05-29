@@ -3,11 +3,11 @@
     'config:base'
   ],
 
-  /**
-   * Skip any package file whose path matches one of these. Can be string or glob pattern
-   */
   includePaths: [
     'package.json',
+    'x-pack/package.json',
+    'x-pack/plugins/*/package.json',
+    'packages/*/package.json'
   ],
 
   /**
