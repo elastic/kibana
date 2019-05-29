@@ -28,10 +28,12 @@ export interface LegacyPlatformParams {
 
 interface SetupDeps {
   core: InternalCoreSetup;
+  plugins: Record<string, unknown>;
 }
 
 interface StartDeps {
   core: InternalCoreStart;
+  plugins: Record<string, unknown>;
   targetDomElement: HTMLElement;
 }
 
@@ -52,7 +54,7 @@ export class LegacyPlatformService {
 
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public setup({ core }: SetupDeps) {
+  public setup({ core, plugins }: SetupDeps) {
     const {
       application,
       i18n,
@@ -65,7 +67,7 @@ export class LegacyPlatformService {
     } = core;
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__newPlatformSetup__(core);
+    require('ui/new_platform').__newPlatformSetup__(core, plugins);
     require('ui/metadata').__newPlatformSetup__(injectedMetadata.getLegacyMetadata());
     require('ui/i18n').__newPlatformSetup__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformSetup__(fatalErrors);
@@ -103,14 +105,14 @@ export class LegacyPlatformService {
     this.params.requireLegacyFiles();
   }
 
-  public start({ core, targetDomElement }: StartDeps) {
+  public start({ core, targetDomElement, plugins }: StartDeps) {
     if (!this.bootstrapModule) {
       throw new Error('Bootstrap module must be loaded before `start`');
     }
 
     this.targetDomElement = targetDomElement;
 
-    require('ui/new_platform').__newPlatformStart__(core);
+    require('ui/new_platform').__newPlatformStart__(core, plugins);
     require('ui/capabilities').__newPlatformStart__(core.application.capabilities);
 
     this.bootstrapModule.bootstrap(this.targetDomElement);
@@ -124,7 +126,7 @@ export class LegacyPlatformService {
     const angularRoot = angular.element(this.targetDomElement);
     const injector$ = angularRoot.injector();
 
-    // if we haven't gotten to the point of bootstraping
+    // if we haven't gotten to the point of bootstrapping
     // angular, injector$ won't be defined
     if (!injector$) {
       return;
