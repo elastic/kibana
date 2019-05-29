@@ -79,6 +79,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_tsvb_chart'));
+      loadTestFile(require.resolve('./_tsvb_time_series'));
       loadTestFile(require.resolve('./_tsvb_markdown'));
       loadTestFile(require.resolve('./_tsvb_table'));
       loadTestFile(require.resolve('./_vega_chart'));
