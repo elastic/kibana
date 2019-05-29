@@ -48,7 +48,7 @@ export const App = ({ licenseStatus }) => {
       <EuiCallOut
         title={(
           <FormattedMessage
-            id="xpack.watchern.app.licenseErrorTitle"
+            id="xpack.watcher.app.licenseErrorTitle"
             defaultMessage="License error"
           />
         )}
