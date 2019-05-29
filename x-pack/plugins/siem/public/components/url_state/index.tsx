@@ -105,6 +105,88 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     }
   );
 
+  private setInitialStateFromUrl = (urlKey: KeyUrlState, newUrlStateString: string) => {
+    if (urlKey === CONSTANTS.timerange) {
+      const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
+      const globalId: InputsModelId = 'global';
+      const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
+      const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
+      if (globalType) {
+        if (globalLinkTo.linkTo.length === 0) {
+          this.props.toggleTimelineLinkTo({ linkToId: 'global' });
+        }
+        if (globalType === 'absolute') {
+          const absoluteRange: AbsoluteTimeRange = get('global.timerange', timerangeStateData);
+          this.props.setAbsoluteTimerange({
+            ...absoluteRange,
+            id: globalId,
+          });
+        }
+        if (globalType === 'relative') {
+          const relativeRange: RelativeTimeRange = get('global.timerange', timerangeStateData);
+          this.props.setRelativeTimerange({
+            ...relativeRange,
+            id: globalId,
+          });
+        }
+      }
+      const timelineId: InputsModelId = 'timeline';
+      const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
+      const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
+      if (timelineType) {
+        if (timelineLinkTo.linkTo.length === 0) {
+          this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
+        }
+        if (timelineType === 'absolute') {
+          const absoluteRange: AbsoluteTimeRange = get('timeline.timerange', timerangeStateData);
+          this.props.setAbsoluteTimerange({
+            ...absoluteRange,
+            id: timelineId,
+          });
+        }
+        if (timelineType === 'relative') {
+          const relativeRange: RelativeTimeRange = get('timeline.timerange', timerangeStateData);
+          this.props.setRelativeTimerange({
+            ...relativeRange,
+            id: timelineId,
+          });
+        }
+      }
+    }
+    if (urlKey === CONSTANTS.kqlQuery) {
+      const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
+      if (isKqlForRoute(location.pathname, kqlQueryStateData)) {
+        const filterQuery = {
+          kuery: kqlQueryStateData.filterQuery,
+          serializedQuery: convertKueryToElasticSearchQuery(
+            kqlQueryStateData.filterQuery ? kqlQueryStateData.filterQuery.expression : '',
+            this.props.indexPattern
+          ),
+        };
+        if (
+          kqlQueryStateData.queryLocation === CONSTANTS.hostsPage ||
+          kqlQueryStateData.queryLocation === CONSTANTS.hostsDetails
+        ) {
+          const hostsType = LOCATION_MAPPED_TO_MODEL[kqlQueryStateData.queryLocation];
+          this.props.setHostsKql({
+            filterQuery,
+            hostsType,
+          });
+        }
+        if (
+          kqlQueryStateData.queryLocation === CONSTANTS.networkPage ||
+          kqlQueryStateData.queryLocation === CONSTANTS.networkDetails
+        ) {
+          const networkType = LOCATION_MAPPED_TO_MODEL[kqlQueryStateData.queryLocation];
+          this.props.setNetworkKql({
+            filterQuery,
+            networkType,
+          });
+        }
+      }
+    }
+  };
+
   private handleInitialize = (location: Location) => {
     URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
       const newUrlStateString = getParamFromQueryString(
@@ -112,100 +194,19 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
         urlKey
       );
       if (newUrlStateString) {
+        this.setInitialStateFromUrl(urlKey, newUrlStateString);
+      } else {
         if (urlKey === CONSTANTS.timerange) {
-          const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
-          const globalId: InputsModelId = 'global';
-          const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
-          const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
-          if (globalType) {
-            if (globalLinkTo.linkTo.length === 0) {
-              this.props.toggleTimelineLinkTo({ linkToId: 'global' });
-            }
-            if (globalType === 'absolute') {
-              const absoluteRange: AbsoluteTimeRange = get('global.timerange', timerangeStateData);
-              this.props.setAbsoluteTimerange({
-                ...absoluteRange,
-                id: globalId,
-              });
-            }
-            if (globalType === 'relative') {
-              const relativeRange: RelativeTimeRange = get('global.timerange', timerangeStateData);
-              this.props.setRelativeTimerange({
-                ...relativeRange,
-                id: globalId,
-              });
-            }
-          }
-          const timelineId: InputsModelId = 'timeline';
-          const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
-          const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
-          if (timelineType) {
-            if (timelineLinkTo.linkTo.length === 0) {
-              this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
-            }
-            if (timelineType === 'absolute') {
-              const absoluteRange: AbsoluteTimeRange = get(
-                'timeline.timerange',
-                timerangeStateData
-              );
-              this.props.setAbsoluteTimerange({
-                ...absoluteRange,
-                id: timelineId,
-              });
-            }
-            if (timelineType === 'relative') {
-              const relativeRange: RelativeTimeRange = get(
-                'timeline.timerange',
-                timerangeStateData
-              );
-              this.props.setRelativeTimerange({
-                ...relativeRange,
-                id: timelineId,
-              });
-            }
-          }
+          this.replaceStateInLocation(this.props.urlState[urlKey], urlKey);
         }
         if (urlKey === CONSTANTS.kqlQuery) {
-          const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
-          if (isKqlForRoute(location.pathname, kqlQueryStateData)) {
-            const filterQuery = {
-              kuery: kqlQueryStateData.filterQuery,
-              serializedQuery: convertKueryToElasticSearchQuery(
-                kqlQueryStateData.filterQuery ? kqlQueryStateData.filterQuery.expression : '',
-                this.props.indexPattern
-              ),
-            };
-            if (
-              kqlQueryStateData.queryLocation === CONSTANTS.hostsPage ||
-              kqlQueryStateData.queryLocation === CONSTANTS.hostsDetails
-            ) {
-              const hostsType = LOCATION_MAPPED_TO_MODEL[kqlQueryStateData.queryLocation];
-              this.props.setHostsKql({
-                filterQuery,
-                hostsType,
-              });
-            }
-            if (
-              kqlQueryStateData.queryLocation === CONSTANTS.networkPage ||
-              kqlQueryStateData.queryLocation === CONSTANTS.networkDetails
-            ) {
-              const networkType = LOCATION_MAPPED_TO_MODEL[kqlQueryStateData.queryLocation];
-              this.props.setNetworkKql({
-                filterQuery,
-                networkType,
-              });
-            }
+          const currentLocation: LocationTypes = getCurrentLocation(location.pathname);
+          if (currentLocation !== null) {
+            this.replaceStateInLocation(
+              this.props.urlState[CONSTANTS.kqlQuery][currentLocation],
+              urlKey
+            );
           }
-        }
-      } else if (urlKey === CONSTANTS.timerange) {
-        this.replaceStateInLocation(this.props.urlState[urlKey], urlKey);
-      } else if (urlKey === CONSTANTS.kqlQuery) {
-        const currentLocation: LocationTypes = getCurrentLocation(location.pathname);
-        if (currentLocation !== null) {
-          this.replaceStateInLocation(
-            this.props.urlState[CONSTANTS.kqlQuery][currentLocation],
-            urlKey
-          );
         }
       }
     });
