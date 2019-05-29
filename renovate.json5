@@ -16,11 +16,6 @@
   baseBranches: ['master'],
 
   /**
-   * Tell renovate to always use yarn
-   */
-  enabledManagers: ['yarn'],
-
-  /**
    * Labels added to PRs opened by renovate
    */
   labels: [
