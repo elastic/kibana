@@ -18,15 +18,23 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
-import { last } from 'lodash';
 
-import { htmlIdGenerator, EuiSpacer, EuiButton, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { parseRange, Range } from '../../utils/range';
 import { NumberRow, NumberRowModel } from './number_row';
+import {
+  parse,
+  EMPTY_STRING,
+  getRange,
+  validateOrder,
+  validateValue,
+  getNextModel,
+  getInitModelList,
+  getUpdatedModels,
+  hasInvalidValues,
+} from './utils';
 
-const EMPTY_STRING = '';
 interface NumberListProps {
   labelledbyId: string;
   numberArray: Array<number | undefined>;
@@ -34,13 +42,12 @@ interface NumberListProps {
   showValidation: boolean;
   unitName: string;
   validateAscendingOrder?: boolean;
+  onBlur?(): void;
+  onFocus?(): void;
   onChange(list: Array<number | undefined>): void;
   setTouched(): void;
   setValidity(isValid: boolean): void;
 }
-
-const defaultRange = parseRange('[0,Infinity)');
-const generateId = htmlIdGenerator();
 
 function NumberList({
   labelledbyId,
@@ -49,12 +56,14 @@ function NumberList({
   showValidation,
   unitName,
   validateAscendingOrder = true,
+  onBlur,
+  onFocus,
   onChange,
   setTouched,
   setValidity,
 }: NumberListProps) {
   const numberRange = getRange(range);
-  const [models, setModels] = useState(getInitList(numberArray));
+  const [models, setModels] = useState(getInitModelList(numberArray));
   const [ascendingError, setAscendingError] = useState(EMPTY_STRING);
 
   // responsible for discarding changes
@@ -62,7 +71,14 @@ function NumberList({
     () => {
       const updatedModels = getUpdatedModels(numberArray, models, numberRange);
       if (validateAscendingOrder) {
-        validateOrder(updatedModels, setAscendingError);
+        const isOrderValid = validateOrder(updatedModels);
+        setAscendingError(
+          isOrderValid
+            ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
+                defaultMessage: 'The values should be in ascending order.',
+              })
+            : EMPTY_STRING
+        );
       }
       setModels(updatedModels);
     },
@@ -75,6 +91,11 @@ function NumberList({
     },
     [models]
   );
+
+  // resposible for setting up an initial value ([0]) when there is no default value
+  useEffect(() => {
+    onChange(models.map(({ value }) => (value === EMPTY_STRING ? undefined : value)));
+  }, []);
 
   const onChangeValue = ({ id, value }: { id: string; value: string }) => {
     const parsedValue = parse(value);
@@ -93,14 +114,7 @@ function NumberList({
 
   // Add an item to the end of the list
   const onAdd = () => {
-    const newArray = [
-      ...models,
-      {
-        id: generateId(),
-        value: getNext(models, numberRange),
-        isInvalid: false,
-      },
-    ];
+    const newArray = [...models, getNextModel(models, numberRange)];
     onUpdate(newArray);
   };
 
@@ -109,11 +123,14 @@ function NumberList({
     onUpdate(newArray);
   };
 
-  const onBlur = (model: NumberRowModel) => {
+  const onBlurFn = (model: NumberRowModel) => {
     if (model.value === EMPTY_STRING) {
       model.isInvalid = true;
     }
     setTouched();
+    if (onBlur) {
+      onBlur();
+    }
   };
 
   const onUpdate = (modelList: NumberRowModel[]) => {
@@ -132,131 +149,30 @@ function NumberList({
             labelledbyId={labelledbyId}
             range={numberRange}
             onDelete={onDelete}
+            onFocus={onFocus}
             onChange={onChangeValue}
-            onBlur={() => onBlur(model)}
+            onBlur={() => onBlurFn(model)}
             autoFocus={models.length !== 1 && arrayIndex === models.length - 1}
           />
           {showValidation && model.isInvalid && model.errors && model.errors.length > 0 && (
             <EuiFormErrorText>{model.errors.join('\n')}</EuiFormErrorText>
           )}
-          <EuiSpacer size="s" />
+          {models.length - 1 !== arrayIndex && <EuiSpacer size="s" />}
         </Fragment>
       ))}
       {showValidation && ascendingError && <EuiFormErrorText>{ascendingError}</EuiFormErrorText>}
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiButton iconType="plusInCircle" fill={true} fullWidth={true} onClick={onAdd} size="s">
+        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
           <FormattedMessage
             id="common.ui.aggTypes.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"
             values={{ unitName }}
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </>
   );
-}
-
-function parse(value: string) {
-  const parsedValue = parseFloat(value);
-  return isNaN(parsedValue) ? EMPTY_STRING : parsedValue;
-}
-
-function getRange(range?: string) {
-  try {
-    return range ? parseRange(range) : defaultRange;
-  } catch (e) {
-    throw new TypeError('Unable to parse range: ' + e.message);
-  }
-}
-
-function getNext(list: NumberRowModel[], range: Range): number | '' {
-  const lastValue = last(list).value;
-  const next = Number(lastValue) ? Number(lastValue) + 1 : 1;
-
-  if (next < range.max) {
-    return next;
-  }
-
-  return range.max - 1;
-}
-
-function getInitList(list: Array<number | undefined>): NumberRowModel[] {
-  return list.length
-    ? list.map(num => ({
-        value: (num === undefined ? EMPTY_STRING : num) as NumberRowModel['value'],
-        id: generateId(),
-        isInvalid: false,
-      }))
-    : [{ value: EMPTY_STRING, id: generateId(), isInvalid: true }];
-}
-
-function hasInvalidValues(modelList: NumberRowModel[]): boolean {
-  return !!modelList.find(({ isInvalid }) => isInvalid);
-}
-
-function getUpdatedModels(
-  numberList: Array<number | undefined>,
-  modelList: NumberRowModel[],
-  numberRange: Range
-): NumberRowModel[] {
-  if (!numberList.length) {
-    return modelList;
-  }
-  return numberList.map((number, index) => {
-    const model = modelList[index] || { id: generateId() };
-    const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
-    const { isValid, errors } = validateValue(newValue, numberRange);
-    return {
-      ...model,
-      value: newValue,
-      isInvalid: !isValid,
-      errors,
-    };
-  });
-}
-
-function validateOrder(list: NumberRowModel[], setAscendingError: (message: string) => void) {
-  let isInvalidOrder = false;
-  list.forEach((model, index, array) => {
-    const previousModel = array[index - 1];
-    if (previousModel && model.value !== EMPTY_STRING) {
-      model.isInvalid = model.value <= previousModel.value;
-
-      if (model.isInvalid) {
-        isInvalidOrder = true;
-      }
-    }
-  });
-
-  setAscendingError(
-    isInvalidOrder
-      ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
-          defaultMessage: 'The values should be in ascending order.',
-        })
-      : EMPTY_STRING
-  );
-}
-
-function validateValue(value: number | '', numberRange: Range) {
-  const result = {
-    isValid: true,
-    errors: [] as string[],
-  };
-
-  if (value === EMPTY_STRING) {
-    result.isValid = false;
-  } else if (!numberRange.within(value)) {
-    result.isValid = false;
-    result.errors.push(
-      i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
-        defaultMessage: 'The value should be in the range: {range}.',
-        values: { range: `[${numberRange.min}, ${numberRange.max}]` },
-      })
-    );
-  }
-
-  return result;
 }
 
 export { NumberList };

@@ -24,7 +24,14 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         "name": "Name",
         "render": [Function],
         "sortable": true,
-        "width": "50%",
+        "width": "40%",
+      },
+      Object {
+        "field": "environments",
+        "name": "Environment",
+        "render": [Function],
+        "sortable": true,
+        "width": "20%",
       },
       Object {
         "field": "agentName",
@@ -75,7 +82,14 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         "name": "Name",
         "render": [Function],
         "sortable": true,
-        "width": "50%",
+        "width": "40%",
+      },
+      Object {
+        "field": "environments",
+        "name": "Environment",
+        "render": [Function],
+        "sortable": true,
+        "width": "20%",
       },
       Object {
         "field": "agentName",
@@ -118,6 +132,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       Object {
         "agentName": "nodejs",
         "avgResponseTime": null,
+        "environments": Array [
+          "test",
+        ],
         "errorsPerMinute": 46.06666666666667,
         "serviceName": "opbeans-node",
         "transactionsPerMinute": 0,
@@ -125,6 +142,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       Object {
         "agentName": "python",
         "avgResponseTime": 91535.42944785276,
+        "environments": Array [],
         "errorsPerMinute": 12.6,
         "serviceName": "opbeans-python",
         "transactionsPerMinute": 86.93333333333334,

@@ -8,11 +8,11 @@ import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { SimpleQuery } from '../../common';
+import { isDefaultQuery, PivotQuery } from '../../common';
 import { EsDoc, EsFieldName, getDefaultSelectableFields } from './common';
 
 const SEARCH_SIZE = 1000;
@@ -31,8 +31,8 @@ export interface UseSourceIndexDataReturnType {
 }
 
 export const useSourceIndexData = (
-  indexPattern: StaticIndexPattern,
-  query: SimpleQuery,
+  indexPattern: IndexPattern,
+  query: PivotQuery,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
 ): UseSourceIndexDataReturnType => {
@@ -48,7 +48,8 @@ export const useSourceIndexData = (
       const resp: SearchResponse<any> = await ml.esSearch({
         index: indexPattern.title,
         size: SEARCH_SIZE,
-        body: { query },
+        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
+        body: { query: isDefaultQuery(query) ? { match_all: {} } : query },
       });
 
       const docs = resp.hits.hits;
@@ -71,7 +72,7 @@ export const useSourceIndexData = (
     () => {
       getSourceIndexData();
     },
-    [indexPattern.title, query.query_string.query]
+    [indexPattern.title, JSON.stringify(query)]
   );
   return { errorMessage, status, tableItems };
 };

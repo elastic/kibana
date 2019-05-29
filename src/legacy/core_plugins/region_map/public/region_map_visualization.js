@@ -18,6 +18,7 @@
  */
 
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+import { i18n } from '@kbn/i18n';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
@@ -26,7 +27,7 @@ import { TileMapTooltipFormatter } from './tooltip_formatter';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, config, i18n) {
+export function RegionMapsVisualizationProvider(Private, config) {
 
   const tooltipFormatter = Private(TileMapTooltipFormatter);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -162,14 +163,14 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         const shouldShowWarning = this._params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
           toastNotifications.addWarning({
-            title: i18n('regionMap.visualization.unableToShowMismatchesWarningTitle', {
+            title: i18n.translate('regionMap.visualization.unableToShowMismatchesWarningTitle', {
               defaultMessage: 'Unable to show {mismatchesLength} {oneMismatch, plural, one {result} other {results}} on map',
               values: {
                 mismatchesLength: event.mismatches.length,
                 oneMismatch: event.mismatches.length > 1 ? 0 : 1,
               },
             }),
-            text: i18n('regionMap.visualization.unableToShowMismatchesWarningText', {
+            text: i18n.translate('regionMap.visualization.unableToShowMismatchesWarningText', {
               defaultMessage: 'Ensure that each of these term matches a shape on that shape\'s join field: {mismatches}',
               values: {
                 mismatches: event.mismatches ? event.mismatches.join(', ') : '',

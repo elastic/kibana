@@ -7,6 +7,7 @@
 
 // K5 imports
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
 import { notify } from 'ui/notify';
@@ -33,16 +34,16 @@ import { defaultQuery } from './templates/default_query';
 uiRoutes.when('/dev_tools/searchprofiler', {
   template: template,
   requireUICapability: 'dev_tools.show',
-  controller: ($scope, i18n) => {
-    $scope.registerLicenseLinkLabel = i18n('xpack.searchProfiler.registerLicenseLinkLabel',
+  controller: $scope => {
+    $scope.registerLicenseLinkLabel = i18n.translate('xpack.searchProfiler.registerLicenseLinkLabel',
       { defaultMessage: 'register a license' });
-    $scope.trialLicense = i18n('xpack.searchProfiler.trialLicenseTitle',
+    $scope.trialLicense = i18n.translate('xpack.searchProfiler.trialLicenseTitle',
       { defaultMessage: 'Trial' });
-    $scope.basicLicense = i18n('xpack.searchProfiler.basicLicenseTitle',
+    $scope.basicLicense = i18n.translate('xpack.searchProfiler.basicLicenseTitle',
       { defaultMessage: 'Basic' });
-    $scope.goldLicense = i18n('xpack.searchProfiler.goldLicenseTitle',
+    $scope.goldLicense = i18n.translate('xpack.searchProfiler.goldLicenseTitle',
       { defaultMessage: 'Gold' });
-    $scope.platinumLicense = i18n('xpack.searchProfiler.platinumLicenseTitle',
+    $scope.platinumLicense = i18n.translate('xpack.searchProfiler.platinumLicenseTitle',
       { defaultMessage: 'Platinum' });
   },
 });
@@ -59,7 +60,7 @@ uiModules
     return service;
   });
 
-function profileVizController($scope, $route, $interval, $http, HighlightService, Private) {
+function profileVizController($scope, $http, HighlightService, Private) {
   $scope.title = 'Search Profile';
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];

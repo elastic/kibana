@@ -7,9 +7,11 @@
 import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import {
+  GetUICapabilitiesFailureReason,
+  UICapabilitiesService,
+} from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
-import { assertDeeplyFalse } from '../../common/lib/assert_deeply_false';
 
 // eslint-disable-next-line import/no-default-export
 export default function catalogueTests({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -24,10 +26,10 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
             password: scenario.password,
           },
         });
-        expect(uiCapabilities.success).to.be(true);
-        expect(uiCapabilities.value).to.have.property('catalogue');
         switch (scenario.username) {
           case 'superuser': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
             // everything is enabled
             const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
@@ -37,6 +39,8 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           case 'read':
           case 'dual_privileges_all':
           case 'dual_privileges_read': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
             // everything except ml and monitoring is enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
@@ -47,6 +51,8 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           }
           case 'foo_all':
           case 'foo_read': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
             // only foo is enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
@@ -55,10 +61,11 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
-          // these users have no access to any ui capabilities
+          // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
-            assertDeeplyFalse(uiCapabilities.value!.catalogue);
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           default:
             throw new UnreachableError(scenario);

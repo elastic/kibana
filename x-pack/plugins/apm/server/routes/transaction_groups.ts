@@ -6,11 +6,11 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { CoreSetup } from 'src/core/server';
+import { InternalCoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getChartsData } from '../lib/transactions/charts';
-import { getDistribution } from '../lib/transactions/distribution';
+import { getTransactionCharts } from '../lib/transactions/charts';
+import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
 
 const defaultErrorHandler = (err: Error) => {
@@ -19,23 +19,23 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initTransactionGroupsApi(core: CoreSetup) {
+export function initTransactionGroupsApi(core: InternalCoreSetup) {
   const { server } = core.http;
 
   server.route({
     method: 'GET',
-    path:
-      '/api/apm/services/{serviceName}/transaction_groups/{transactionType}',
+    path: '/api/apm/services/{serviceName}/transaction_groups',
     options: {
       validate: {
         query: withDefaultValidators({
-          query: Joi.string()
+          transactionType: Joi.string()
         })
       },
       tags: ['access:apm']
     },
     handler: req => {
-      const { serviceName, transactionType } = req.params;
+      const { serviceName } = req.params;
+      const { transactionType } = req.query as { transactionType?: string };
       const setup = setupRequest(req);
 
       return getTopTransactions({
@@ -48,59 +48,25 @@ export function initTransactionGroupsApi(core: CoreSetup) {
 
   server.route({
     method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/{transactionType}/charts`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName, transactionType } = req.params;
-
-      return getChartsData({
-        serviceName,
-        transactionType,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
     path: `/api/apm/services/{serviceName}/transaction_groups/charts`,
     options: {
       validate: {
-        query: withDefaultValidators()
+        query: withDefaultValidators({
+          transactionType: Joi.string(),
+          transactionName: Joi.string()
+        })
       },
       tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
+      const { transactionType, transactionName } = req.query as {
+        transactionType?: string;
+        transactionName?: string;
+      };
 
-      return getChartsData({
-        serviceName,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/{transactionType}/{transactionName}/charts`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName, transactionType, transactionName } = req.params;
-
-      return getChartsData({
+      return getTransactionCharts({
         serviceName,
         transactionType,
         transactionName,
@@ -111,10 +77,12 @@ export function initTransactionGroupsApi(core: CoreSetup) {
 
   server.route({
     method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/{transactionType}/{transactionName}/distribution`,
+    path: `/api/apm/services/{serviceName}/transaction_groups/distribution`,
     options: {
       validate: {
         query: withDefaultValidators({
+          transactionType: Joi.string(),
+          transactionName: Joi.string(),
           transactionId: Joi.string().default(''),
           traceId: Joi.string().default('')
         })
@@ -123,19 +91,27 @@ export function initTransactionGroupsApi(core: CoreSetup) {
     },
     handler: req => {
       const setup = setupRequest(req);
-      const { serviceName, transactionType, transactionName } = req.params;
-      const { transactionId, traceId } = req.query as {
+      const { serviceName } = req.params;
+      const {
+        transactionType,
+        transactionName,
+        transactionId,
+        traceId
+      } = req.query as {
+        transactionType: string;
+        transactionName: string;
         transactionId: string;
         traceId: string;
       };
-      return getDistribution(
+
+      return getTransactionDistribution({
         serviceName,
-        transactionName,
         transactionType,
+        transactionName,
         transactionId,
         traceId,
         setup
-      ).catch(defaultErrorHandler);
+      }).catch(defaultErrorHandler);
     }
   });
 }
