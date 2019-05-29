@@ -1,0 +1,82 @@
+{
+  extends: [
+    'config:base'
+  ],
+
+  includePaths: [
+    'package.json',
+    'x-pack/package.json',
+    'x-pack/plugins/*/package.json',
+    'packages/*/package.json',
+    'test/plugin_functional/plugins/*/package.json',
+    'test/interpreter_functional/plugins/*/package.json',
+  ],
+
+  /**
+   * Only submit PRs to these branches, we will manually backport PRs for now
+   */
+  baseBranches: ['master'],
+
+  /**
+   * Labels added to PRs opened by renovate
+   */
+  labels: [
+    'release_note:skip',
+    ':Operations',
+    'chore',
+    'review'
+  ],
+
+  /**
+   * Enable creation of a "Master Issue" within the repository. This
+   * Master Issue is akin to a mini dashboard and contains a list of all
+   * PRs pending, open, closed (unmerged) or in error.
+   */
+  masterIssue: true,
+
+  npm: {
+    /**
+     * This deletes and re-creates the lock file, which we will only want
+     * to turn on once we've updated all our deps
+     */
+    lockFileMaintenance: { enabled: false },
+
+    /**
+     * Define groups of packages that should be updated/configured together
+     */
+    packageRules: [
+      {
+        packagePatterns: ['^.*$'],
+        enabled: false,
+      },
+      {
+        packagePatterns: ['^eslint'],
+        groupName: 'eslint related packages',
+        groupSlug: 'eslint',
+        enabled: true,
+      },
+      {
+        packagePatterns: ['^@babel', '.*babel.*'],
+        groupName: 'babel related packages',
+        groupSlug: 'babel',
+        enabled: true,
+      },
+      {
+        packagePatterns: ['^@kbn/.*'],
+        enabled: false,
+      }
+    ],
+  },
+
+  /**
+   * Limit the number of active PRs renovate will allow
+   */
+  prConcurrentLimit: 6,
+
+  /**
+   * Disable vulnerability alert handling, we handle that separately
+   */
+  vulnerabilityAlerts: {
+    enabled: false
+  },
+}
