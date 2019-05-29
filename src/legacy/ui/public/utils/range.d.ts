@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
+export function parseRange(input: string): Range;
 
-const wrapWithInlineComp = Component => props => (
-  <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
-    <Component {...props} wrappedWithInlineComp={true}/>
-  </div>);
-
-export { wrapWithInlineComp };
+export interface Range {
+  min: number;
+  max: number;
+  minInclusive: boolean;
+  maxInclusive: boolean;
+  within(n: number): boolean;
+}
