@@ -97,7 +97,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
         await this.httpsRedirectServer.start(config);
       }
 
-      this.httpServer.start(config);
+      await this.httpServer.start(config);
       await Promise.all([...this.secondaryServers.values()].map(server => server.start()));
     }
 
