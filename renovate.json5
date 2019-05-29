@@ -19,9 +19,10 @@
    * Labels added to PRs opened by renovate
    */
   labels: [
-    'renovate',
     'release_note:skip',
     ':Operations',
+    'chore',
+    'review'
   ],
 
   /**
