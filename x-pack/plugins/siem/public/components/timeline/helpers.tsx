@@ -13,10 +13,10 @@ import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/ke
 import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
 import { BrowserFields } from '../../containers/source';
 
-const converTimestampFieldToQuery = (field: string, value: string | number) =>
+const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
 
-const getBasicFields = memoizeOne(
+const getBaseFields = memoizeOne(
   (browserFields: BrowserFields): string[] => {
     const baseFields = get('base', browserFields);
     if (baseFields != null && baseFields.fields != null) {
@@ -28,8 +28,8 @@ const getBasicFields = memoizeOne(
 
 const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
   const splitFields = field.split('.');
-  const basicFields = getBasicFields(browserFields);
-  if (basicFields.includes(field)) {
+  const baseFields = getBaseFields(browserFields);
+  if (baseFields.includes(field)) {
     return ['base', 'fields', field];
   }
   return [splitFields[0], 'fields', field];
@@ -51,7 +51,7 @@ const buildQueryMatch = (
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR
       ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
-        ? converTimestampFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
+        ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
             isNumber(dataProvider.queryMatch.value)
               ? dataProvider.queryMatch.value
