@@ -342,6 +342,25 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                 },
               },
             },
+            "event": Object {
+              "fields": Object {
+                "event.end": Object {
+                  "aggregatable": true,
+                  "category": "event",
+                  "description": "event.end contains the date when the event ended or when the activity was last observed.",
+                  "example": null,
+                  "indexes": Array [
+                    "auditbeat-*",
+                    "filebeat-*",
+                    "packetbeat-*",
+                    "winlogbeat-*",
+                  ],
+                  "name": "event.end",
+                  "searchable": true,
+                  "type": "date",
+                },
+              },
+            },
             "source": Object {
               "fields": Object {
                 "source.ip": Object {
