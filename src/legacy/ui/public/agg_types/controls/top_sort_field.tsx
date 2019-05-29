@@ -17,11 +17,18 @@
  * under the License.
  */
 
-import { uiModules } from '../../modules';
-import { sortPrefixFirst } from '../../utils/sort_prefix_first';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { AggParamEditorProps } from '../../vis/editors/default';
+import { FieldParamType } from '../param_types';
+import { FieldParamEditor } from './field';
 
-uiModules
-  .get('kibana')
-  .filter('sortPrefixFirst', function () {
-    return sortPrefixFirst;
+function TopSortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
+  const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {
+    defaultMessage: 'Sort on',
   });
+
+  return <FieldParamEditor {...props} customLabel={customLabel} />;
+}
+
+export { TopSortFieldParamEditor };
