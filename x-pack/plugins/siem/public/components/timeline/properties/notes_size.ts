@@ -5,4 +5,4 @@
  */
 
 export const NOTES_PANEL_WIDTH = 1024;
-export const NOTES_PANEL_HEIGHT = 633;
+export const NOTES_PANEL_HEIGHT = 750;
