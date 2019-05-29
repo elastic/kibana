@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter, SearchParams } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -17,53 +17,6 @@ import { PromiseReturnType } from '../../../../../typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
-
-interface ResponseTimeBucket {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-  avg: {
-    value: number | null;
-  };
-  pct: {
-    values: {
-      '95.0': number | 'NaN';
-      '99.0': number | 'NaN';
-    };
-  };
-}
-
-interface TransactionResultBucket {
-  /**
-   * transaction result eg. 2xx
-   */
-  key: string;
-  doc_count: number;
-  timeseries: {
-    buckets: Array<{
-      key_as_string: string;
-      /**
-       * timestamp in ms
-       */
-      key: number;
-      doc_count: number;
-    }>;
-  };
-}
-
-interface Aggs {
-  response_times: {
-    buckets: ResponseTimeBucket[];
-  };
-  transaction_results: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: TransactionResultBucket[];
-  };
-  overall_avg_duration: {
-    value: number;
-  };
-}
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
@@ -96,8 +49,8 @@ export function timeseriesFetcher({
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
 
-  const params: SearchParams = {
-    index: config.get('apm_oss.transactionIndices'),
+  const params = {
+    index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: { bool: { filter } },
@@ -134,5 +87,5 @@ export function timeseriesFetcher({
     }
   };
 
-  return client.search<void, Aggs>(params);
+  return client.search<{}, typeof params>(params);
 }

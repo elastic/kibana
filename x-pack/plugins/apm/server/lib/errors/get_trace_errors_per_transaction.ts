@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
@@ -17,25 +16,14 @@ export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
-interface TraceErrorsAggBucket {
-  key: string;
-  doc_count: number;
-}
-
-interface TraceErrorsAggResponse {
-  transactions: {
-    buckets: TraceErrorsAggBucket[];
-  };
-}
-
 export async function getTraceErrorsPerTransaction(
   traceId: string,
   setup: Setup
 ): Promise<ErrorsPerTransaction> {
   const { start, end, client, config } = setup;
 
-  const params: SearchParams = {
-    index: [config.get('apm_oss.errorIndices')],
+  const params = {
+    index: config.get<string>('apm_oss.errorIndices'),
     body: {
       size: 0,
       query: {
@@ -57,7 +45,7 @@ export async function getTraceErrorsPerTransaction(
     }
   };
 
-  const resp = await client.search<never, TraceErrorsAggResponse>(params);
+  const resp = await client.search<never, typeof params>(params);
 
   return resp.aggregations.transactions.buckets.reduce(
     (acc, bucket) => ({

@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { BucketAgg } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
@@ -48,19 +46,11 @@ export async function getService(serviceName: string, setup: Setup) {
     }
   };
 
-  interface Aggs {
-    types: {
-      buckets: BucketAgg[];
-    };
-    agents: {
-      buckets: BucketAgg[];
-    };
-  }
-
-  const { aggregations } = await client.search<void, Aggs>(params);
+  const { aggregations } = await client.search<void, typeof params>(params);
   const buckets = idx(aggregations, _ => _.types.buckets) || [];
   const types = buckets.map(bucket => bucket.key);
-  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
+  const agentName = idx(aggregations, _ => _.agents.buckets[0].key) || '';
+
   return {
     serviceName,
     types,

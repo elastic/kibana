@@ -7,11 +7,11 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
-import { fetch, ThreadCountMetrics } from './fetcher';
-import { ChartBase } from '../../../types';
+import { fetch } from './fetcher';
+import { ChartBase, MetricSearchResponse } from '../../../types';
 import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
 
-const chartBase: ChartBase<ThreadCountMetrics> = {
+const chartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.threadCountChartTitle', {
     defaultMessage: 'Thread Count'
   }),
@@ -35,6 +35,8 @@ const chartBase: ChartBase<ThreadCountMetrics> = {
 };
 
 export async function getThreadCountChart(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<ThreadCountMetrics>(result, chartBase);
+  const result = (await fetch(setup, serviceName)) as MetricSearchResponse<
+    keyof typeof chartBase.series
+  >;
+  return transformDataToMetricsChart(result, chartBase as ChartBase);
 }

@@ -7,11 +7,11 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
-import { fetch, NonHeapMemoryMetrics } from './fetcher';
-import { ChartBase } from '../../../types';
+import { fetch } from './fetcher';
 import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
+import { MetricSearchResponse, ChartBase } from '../../../types';
 
-const chartBase: ChartBase<NonHeapMemoryMetrics> = {
+const chartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.nonHeapMemoryChartTitle', {
     defaultMessage: 'Non-Heap Memory'
   }),
@@ -41,6 +41,9 @@ const chartBase: ChartBase<NonHeapMemoryMetrics> = {
 };
 
 export async function getNonHeapMemoryChart(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<NonHeapMemoryMetrics>(result, chartBase);
+  const result = (await fetch(setup, serviceName)) as MetricSearchResponse<
+    keyof typeof chartBase.series
+  >;
+
+  return transformDataToMetricsChart(result, chartBase as ChartBase);
 }

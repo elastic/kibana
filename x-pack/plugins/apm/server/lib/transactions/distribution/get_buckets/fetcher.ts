@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -15,29 +14,9 @@ import {
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../typings/common';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
 
-interface Bucket {
-  key: number;
-  doc_count: number;
-  sample: SearchResponse<{
-    transaction: Pick<Transaction['transaction'], 'id' | 'sampled'>;
-    trace: {
-      id: string;
-    };
-  }>;
-}
-
-interface Aggs {
-  distribution: {
-    buckets: Bucket[];
-  };
-}
-
-export type ESResponse = PromiseReturnType<typeof bucketFetcher>;
 export function bucketFetcher(
   serviceName: string,
   transactionName: string,
@@ -95,5 +74,5 @@ export function bucketFetcher(
     }
   };
 
-  return client.search<void, Aggs>(params);
+  return client.search<void, typeof params>(params);
 }

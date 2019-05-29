@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_CULPRIT,
@@ -37,7 +36,10 @@ export async function getErrorGroups({
 }) {
   const { start, end, uiFiltersES, client, config } = setup;
 
-  const params: SearchParams = {
+  // sort buckets by last occurrence of error
+  const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
+
+  const params = {
     index: config.get<string>('apm_oss.errorIndices'),
     body: {
       size: 0,
@@ -56,7 +58,11 @@ export async function getErrorGroups({
           terms: {
             field: ERROR_GROUP_ID,
             size: 500,
-            order: { _count: sortDirection }
+            order: sortByLatestOccurrence
+              ? {
+                  max_timestamp: sortDirection
+                }
+              : { _count: sortDirection }
           },
           aggs: {
             sample: {
@@ -72,23 +78,21 @@ export async function getErrorGroups({
                 sort: [{ '@timestamp': 'desc' }],
                 size: 1
               }
-            }
+            },
+            ...(sortByLatestOccurrence
+              ? {
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp'
+                    }
+                  }
+                }
+              : {})
           }
         }
       }
     }
   };
-
-  // sort buckets by last occurrence of error
-  if (sortField === 'latestOccurrenceAt') {
-    params.body.aggs.error_groups.terms.order = {
-      max_timestamp: sortDirection
-    };
-
-    params.body.aggs.error_groups.aggs.max_timestamp = {
-      max: { field: '@timestamp' }
-    };
-  }
 
   interface SampleError {
     '@timestamp': APMError['@timestamp'];
@@ -105,31 +109,10 @@ export async function getErrorGroups({
     };
   }
 
-  interface Bucket {
-    key: string;
-    doc_count: number;
-    sample: {
-      hits: {
-        total: number;
-        max_score: number | null;
-        hits: Array<{
-          _source: SampleError;
-        }>;
-      };
-    };
-  }
+  const resp = await client.search<unknown, typeof params>(params);
 
-  interface Aggs {
-    error_groups: {
-      buckets: Bucket[];
-    };
-  }
-
-  const resp = await client.search<void, Aggs>(params);
-  const buckets = idx(resp, _ => _.aggregations.error_groups.buckets) || [];
-
-  const hits = buckets.map(bucket => {
-    const source = bucket.sample.hits.hits[0]._source;
+  const hits = resp.aggregations.error_groups.buckets.map(bucket => {
+    const source = bucket.sample.hits.hits[0]._source as SampleError;
     const message =
       idx(source, _ => _.error.log.message) ||
       idx(source, _ => _.error.exception[0].message);

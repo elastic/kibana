@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg, ESFilter } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
@@ -57,13 +57,7 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
     }
   };
 
-  interface Aggs extends BucketAgg {
-    environments: {
-      buckets: BucketAgg[];
-    };
-  }
-
-  const resp = await client.search<void, Aggs>(params);
+  const resp = await client.search<void, typeof params>(params);
   const aggs = resp.aggregations;
   const environmentsBuckets = idx(aggs, _ => _.environments.buckets) || [];
 

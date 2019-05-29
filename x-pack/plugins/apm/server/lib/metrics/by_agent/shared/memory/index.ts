@@ -6,11 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
-import { fetch, MemoryMetrics } from './fetcher';
-import { ChartBase } from '../../../types';
+import { fetch } from './fetcher';
+import { ChartBase, MetricSearchResponse } from '../../../types';
 import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
 
-const chartBase: ChartBase<MemoryMetrics> = {
+const chartBase = {
   title: i18n.translate(
     'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
     {
@@ -35,6 +35,9 @@ const chartBase: ChartBase<MemoryMetrics> = {
 };
 
 export async function getMemoryChartData(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<MemoryMetrics>(result, chartBase);
+  const result = (await fetch(setup, serviceName)) as MetricSearchResponse<
+    keyof typeof chartBase.series
+  >;
+
+  return transformDataToMetricsChart(result, chartBase as ChartBase);
 }

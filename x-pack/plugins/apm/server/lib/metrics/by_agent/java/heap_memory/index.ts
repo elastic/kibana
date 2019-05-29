@@ -7,13 +7,11 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
-import { fetch, HeapMemoryMetrics } from './fetcher';
-import { ChartBase } from '../../../types';
+import { fetch } from './fetcher';
 import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
+import { ChartBase, MetricSearchResponse } from '../../../types';
 
-// TODO: i18n for titles
-
-const chartBase: ChartBase<HeapMemoryMetrics> = {
+const chartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.heapMemoryChartTitle', {
     defaultMessage: 'Heap Memory'
   }),
@@ -49,6 +47,9 @@ const chartBase: ChartBase<HeapMemoryMetrics> = {
 };
 
 export async function getHeapMemoryChart(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<HeapMemoryMetrics>(result, chartBase);
+  const result = (await fetch(setup, serviceName)) as MetricSearchResponse<
+    keyof typeof chartBase.series
+  >;
+
+  return transformDataToMetricsChart(result, chartBase as ChartBase);
 }

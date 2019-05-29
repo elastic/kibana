@@ -7,11 +7,11 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Setup } from '../../../../helpers/setup_request';
-import { fetch, CPUMetrics } from './fetcher';
-import { ChartBase } from '../../../types';
+import { fetch } from './fetcher';
 import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
+import { MetricSearchResponse, ChartBase } from '../../../types';
 
-const chartBase: ChartBase<CPUMetrics> = {
+const chartBase = {
   title: i18n.translate('xpack.apm.serviceDetails.metrics.cpuUsageChartTitle', {
     defaultMessage: 'CPU usage'
   }),
@@ -47,6 +47,8 @@ const chartBase: ChartBase<CPUMetrics> = {
 };
 
 export async function getCPUChartData(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<CPUMetrics>(result, chartBase);
+  const result = (await fetch(setup, serviceName)) as MetricSearchResponse<
+    keyof typeof chartBase.series
+  >;
+  return transformDataToMetricsChart(result, chartBase as ChartBase);
 }
