@@ -174,6 +174,7 @@ export const schema = Joi.object()
         license: Joi.string().default('oss'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
+        serverEnvVars: Joi.object(),
         dataArchive: Joi.string(),
       })
       .default(),
