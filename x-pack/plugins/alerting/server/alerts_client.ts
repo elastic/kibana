@@ -6,7 +6,7 @@
 
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { SavedObjectReference } from './types';
-import { Alert } from './types';
+import { Alert, RawAlert } from './types';
 import { TaskManager } from '../../task_manager';
 import { AlertTypeRegistry } from './alert_type_registry';
 
@@ -57,28 +57,39 @@ export class AlertsClient {
   }
 
   public async create({ data, options }: CreateOptions) {
-    const references = this.extractReferences(data);
-    const createdAlert = await this.savedObjectsClient.create<any>('alert', data, {
+    const { alert: rawAlert, references } = this.getRawAlert(data);
+    const createdAlert = await this.savedObjectsClient.create<any>('alert', rawAlert, {
       ...options,
       references,
     });
-    const scheduledTask = await this.scheduleAlert(createdAlert.id, data);
+    let scheduledTask;
+    try {
+      scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert);
+    } catch (e) {
+      // Cleanup data, something went wrong scheduling the task
+      await this.savedObjectsClient.delete('alert', createdAlert.id);
+      throw e;
+    }
     await this.savedObjectsClient.update('alert', createdAlert.id, {
       scheduledTaskId: scheduledTask.id,
     });
     createdAlert.attributes.scheduledTaskId = scheduledTask.id;
-    return createdAlert;
+    return this.getAlertFromRaw(createdAlert.attributes, references);
   }
 
   public async get({ id }: { id: string }) {
-    return await this.savedObjectsClient.get('alert', id);
+    const result = await this.savedObjectsClient.get('alert', id);
+    return this.getAlertFromRaw(result.attributes, result.references);
   }
 
   public async find({ options = {} }: FindOptions) {
-    return await this.savedObjectsClient.find({
+    const results = await this.savedObjectsClient.find({
       ...options,
       type: 'alert',
     });
+    return results.saved_objects.map(result =>
+      this.getAlertFromRaw(result.attributes, result.references)
+    );
   }
 
   public async delete({ id }: { id: string }) {
@@ -93,20 +104,20 @@ export class AlertsClient {
     this.alertTypeRegistry.get(data.alertTypeId);
     // Re-create scheduled task if alertTypeId or interval changed
     const currentSavedObject = await this.savedObjectsClient.get('alert', id);
-    const references = this.extractReferences(data);
-    const updatedObject = await this.savedObjectsClient.update<any>('alert', id, data, {
+    const { alert: rawAlert, references } = this.getRawAlert(data);
+    const updatedObject = await this.savedObjectsClient.update<any>('alert', id, alert, {
       ...options,
       references,
     });
     if (this.shouldRescheduleTask(currentSavedObject.attributes, data)) {
       await this.taskManager.remove(currentSavedObject.attributes.scheduledTaskId);
-      const scheduledTask = await this.scheduleAlert(id, data);
+      const scheduledTask = await this.scheduleAlert(id, rawAlert);
       await this.savedObjectsClient.update<any>('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
       updatedObject.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return updatedObject;
+    return this.getAlertFromRaw(updatedObject.attributes, updatedObject.references);
   }
 
   private shouldRescheduleTask(previousAlert: Alert, updatedAlert: Alert) {
@@ -116,7 +127,7 @@ export class AlertsClient {
     );
   }
 
-  private async scheduleAlert(id: string, alert: Alert) {
+  private async scheduleAlert(id: string, alert: RawAlert) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alert.alertTypeId}`,
       params: {
@@ -127,15 +138,45 @@ export class AlertsClient {
     });
   }
 
-  private extractReferences(alert: Alert) {
+  private getAlertFromRaw(rawAlert: RawAlert, references: SavedObjectReference[]) {
+    const actions = rawAlert.actions.map((action, i) => {
+      const reference = references.find(ref => ref.name === action.actionRef);
+      if (!reference) {
+        throw new Error(`Reference ${action.actionRef} not found`);
+      }
+      return {
+        ...action,
+        actionRef: undefined,
+        id: reference.id,
+      };
+    });
+    return {
+      ...rawAlert,
+      actions,
+    };
+  }
+
+  private getRawAlert(alert: Alert): { references: SavedObjectReference[]; alert: RawAlert } {
     const references: SavedObjectReference[] = [];
-    for (let i = 0; i < alert.actions.length; i++) {
+    const rawActions = alert.actions.map((action, i) => {
+      const actionRef = `action_${i}`;
       references.push({
-        name: `action_${i}`,
+        name: actionRef,
         type: 'action',
-        id: alert.actions[i].id,
+        id: action.id,
       });
-    }
-    return references;
+      return {
+        ...action,
+        id: undefined,
+        actionRef,
+      };
+    });
+    return {
+      alert: {
+        ...alert,
+        actions: rawActions,
+      },
+      references,
+    };
   }
 }

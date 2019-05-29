@@ -39,10 +39,24 @@ export interface AlertAction {
   params: Record<string, any>;
 }
 
+export interface RawAlertAction {
+  group: string;
+  actionRef: string;
+  params: Record<string, any>;
+}
+
 export interface Alert {
   alertTypeId: string;
   interval: number;
   actions: AlertAction[];
+  alertTypeParams: Record<string, any>;
+  scheduledTaskId?: string;
+}
+
+export interface RawAlert {
+  alertTypeId: string;
+  interval: number;
+  actions: RawAlertAction[];
   alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
 }
