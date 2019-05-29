@@ -162,7 +162,10 @@ export const spaces = (kibana: Record<string, any>) =>
       initSpacesRequestInterceptors({
         config: initializerContext.legacyConfig,
         http: core.http,
-        legacyServer: server,
+        getHiddenUiAppById: server.getHiddenUiAppById,
+        onPostAuth: handler => {
+          server.ext('onPostAuth', handler);
+        },
         log,
         spacesService,
         xpackMain: plugins.xpackMain,

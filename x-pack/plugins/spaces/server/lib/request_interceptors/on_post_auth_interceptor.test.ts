@@ -224,9 +224,12 @@ describe('onPostAuthRequestInterceptor', () => {
 
       await root.start();
 
+      const legacyServer = kbnTestServer.getKbnServer(root).server;
+
       initSpacesOnPostAuthRequestInterceptor({
         config: (configFn() as unknown) as KibanaConfig,
-        legacyServer: kbnTestServer.getKbnServer(root).server,
+        onPostAuth: (handler: any) => legacyServer.ext('onPostAuth', handler),
+        getHiddenUiAppById: (app: string) => null,
         http: httpMock,
         log,
         xpackMain: plugins.xpack_main as XPackMainPlugin,

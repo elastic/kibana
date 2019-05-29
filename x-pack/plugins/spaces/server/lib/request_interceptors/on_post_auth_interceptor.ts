@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { HttpServiceSetup, Logger } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
@@ -15,7 +15,8 @@ import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_ser
 
 export interface OnPostAuthInterceptorDeps {
   config: KibanaConfig;
-  legacyServer: Server;
+  onPostAuth: (handler: any) => void;
+  getHiddenUiAppById: (appId: string) => unknown;
   http: HttpServiceSetup;
   xpackMain: XPackMainPlugin;
   spacesService: SpacesServiceSetup;
@@ -24,15 +25,16 @@ export interface OnPostAuthInterceptorDeps {
 
 export function initSpacesOnPostAuthRequestInterceptor({
   config,
-  legacyServer,
   xpackMain,
   spacesService,
   log,
   http,
+  onPostAuth,
+  getHiddenUiAppById,
 }: OnPostAuthInterceptorDeps) {
   const serverBasePath: string = config.get('server.basePath');
 
-  legacyServer.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
+  onPostAuth(async function spacesOnPostAuthHandler(request: any, h: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
@@ -61,7 +63,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         if (spaces.length > 0) {
           // render spaces selector instead of home page
-          const app = legacyServer.getHiddenUiAppById('space_selector');
+          const app = getHiddenUiAppById('space_selector');
           return (await h.renderApp(app, { spaces })).takeover();
         }
       } catch (error) {
