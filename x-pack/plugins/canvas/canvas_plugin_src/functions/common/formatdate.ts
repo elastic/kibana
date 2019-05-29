@@ -20,7 +20,7 @@ export function formatdate(): ContextFunction<'formatdate', number, Arguments, s
     type: 'string',
     help,
     context: {
-      types: ['number'],
+      types: ['number', 'string'],
     },
     args: {
       format: {
