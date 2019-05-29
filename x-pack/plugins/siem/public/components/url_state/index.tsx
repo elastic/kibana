@@ -105,7 +105,11 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     }
   );
 
-  private setInitialStateFromUrl = (urlKey: KeyUrlState, newUrlStateString: string) => {
+  private setInitialStateFromUrl = (
+    urlKey: KeyUrlState,
+    newUrlStateString: string,
+    location: Location
+  ) => {
     if (urlKey === CONSTANTS.timerange) {
       const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
       const globalId: InputsModelId = 'global';
@@ -194,7 +198,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
         urlKey
       );
       if (newUrlStateString) {
-        this.setInitialStateFromUrl(urlKey, newUrlStateString);
+        this.setInitialStateFromUrl(urlKey, newUrlStateString, location);
       } else {
         if (urlKey === CONSTANTS.timerange) {
           this.replaceStateInLocation(this.props.urlState[urlKey], urlKey);
