@@ -30,7 +30,7 @@ export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => (
 export const getMaybeDate = (value: string | number): moment.Moment => {
   if (isString(value) && value.trim() !== '') {
     const maybeDate = moment(new Date(value));
-    if (maybeDate.isValid()) {
+    if (maybeDate.isValid() || isNaN(+value)) {
       return maybeDate;
     } else {
       return moment(new Date(+value));

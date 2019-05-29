@@ -198,12 +198,12 @@ describe('formatted_date', () => {
       ).toBe('2019-05-28T23:06:10.612Z');
     });
 
-    test('returns a short date time string as a date string and not epoch', () => {
+    test('returns a short date time string as an epoch (sadly) so this is ambiguous', () => {
       expect(
-        getMaybeDate('2019-01-01')
+        getMaybeDate('20190101')
           .toDate()
           .toISOString()
-      ).toBe('2019-01-01T00:00:00.000Z');
+      ).toBe('1970-01-01T05:36:30.101Z');
     });
   });
 });
