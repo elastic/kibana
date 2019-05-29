@@ -109,7 +109,16 @@ export function adoptToHapiOnRequestFormat(fn: OnRequestHandler) {
           // We should update raw request as well since it can be proxied to the old platform
           let rawUrl;
           if (typeof newUrl === 'string') {
-            rawUrl = newUrl + (request.url.search || '');
+            if (request.url.query) {
+              rawUrl = modifyUrl(newUrl, parts => {
+                return {
+                  ...parts,
+                  query: request.url.query!,
+                };
+              });
+            } else {
+              rawUrl = newUrl;
+            }
           } else {
             rawUrl = newUrl.href;
           }
