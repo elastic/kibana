@@ -17,6 +17,32 @@
  * under the License.
  */
 
-export { IContainer, ContainerInput, ContainerOutput } from './i_container';
-export { Container, PanelState } from './container';
-export * from './embeddable_child_panel';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+  TimeRange,
+  Filters,
+  Query,
+} from '../../../../embeddable_api/public/index';
+import { SavedSearch } from '../types';
+
+export interface SearchInput extends EmbeddableInput {
+  timeRange: TimeRange;
+  query?: Query;
+  filters?: Filters;
+  hidePanelTitles?: boolean;
+  columns?: string[];
+  sort?: string[];
+}
+
+export interface SearchOutput extends EmbeddableOutput {
+  editUrl: string;
+  indexPatterns?: StaticIndexPattern[];
+  editable: boolean;
+}
+
+export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
+  getSavedSearch(): SavedSearch;
+}

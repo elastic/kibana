@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { PanelState, EmbeddableInput } from 'plugins/embeddable_api/index';
+import { PanelState, EmbeddableInput } from 'plugins/embeddable_api';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,

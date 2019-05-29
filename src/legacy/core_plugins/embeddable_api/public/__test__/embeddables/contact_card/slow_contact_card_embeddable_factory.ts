@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { EmbeddableFactory } from 'plugins/embeddable_api/index';
-import { Container } from 'plugins/embeddable_api/containers';
+import { EmbeddableFactory } from 'plugins/embeddable_api';
+import { Container } from 'plugins/embeddable_api';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';

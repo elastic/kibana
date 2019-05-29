@@ -26,8 +26,8 @@ jest.mock('ui/metadata', () => ({
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
-import { CONTACT_CARD_EMBEDDABLE } from 'plugins/embeddable_api/__test__';
-import { EmbeddableInput } from 'plugins/embeddable_api/index';
+import { CONTACT_CARD_EMBEDDABLE } from '../../../../embeddable_api/public/__test__';
+import { EmbeddableInput } from 'plugins/embeddable_api';
 
 interface TestInput extends EmbeddableInput {
   test: string;

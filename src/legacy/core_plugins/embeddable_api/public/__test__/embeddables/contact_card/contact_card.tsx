@@ -27,8 +27,8 @@ import {
 
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
-import { executeTriggerActions } from 'plugins/embeddable_api/triggers';
 import * as Rx from 'rxjs';
+import { executeTriggerActions } from '../../../triggers';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
 
 interface Props {

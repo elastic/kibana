@@ -27,12 +27,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  embeddableFactories,
-  ErrorEmbeddable,
-  Filter,
-  ViewMode,
-} from 'plugins/embeddable_api/index';
+import { embeddableFactories, ErrorEmbeddable, Filter, ViewMode } from 'plugins/embeddable_api';
 
 // @ts-ignore
 import { DocTitleProvider } from 'ui/doc_title';
@@ -52,9 +47,9 @@ import {
   DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
-} from 'plugins/dashboard_embeddable/index';
+} from 'plugins/dashboard_embeddable';
 
-import { isErrorEmbeddable } from 'plugins/embeddable_api/index';
+import { isErrorEmbeddable } from 'plugins/embeddable_api';
 import { IPrivate } from 'ui/private';
 import { AppState, IAppState } from 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
@@ -64,7 +59,7 @@ import { Query } from 'ui/visualize';
 import { QueryLanguageType } from 'ui/visualize/loader/types';
 import { KbnUrl } from 'ui/url/kbn_url';
 import { Subscription, Observable } from 'rxjs';
-import { openAddPanelFlyout } from 'plugins/embeddable_api/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout';
+import { openAddPanelFlyout } from 'plugins/embeddable_api';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 // @ts-ignore

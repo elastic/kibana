@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Embeddable, EmbeddableInput } from 'plugins/embeddable_api/index';
-import { EmbeddableOutput } from 'plugins/embeddable_api/embeddables';
+import { Embeddable, EmbeddableInput, EmbeddableOutput } from 'plugins/embeddable_api';
 
 export const EMPTY_EMBEDDABLE = 'EMPTY_EMBEDDABLE';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Container, embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api/index';
+import { Container, embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api';
 import { i18n } from '@kbn/i18n';
 import {
   FilterableContainer,

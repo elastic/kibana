@@ -23,7 +23,7 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import { DashboardContainer, DashboardContainerInput } from './dashboard_container';

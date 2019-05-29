@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { QueryLanguageType, ViewMode, EmbeddableInput } from 'plugins/embeddable_api/index';
+import { QueryLanguageType, ViewMode, EmbeddableInput } from 'plugins/embeddable_api';
 import { DashboardContainerInput, DashboardPanelState } from '../embeddable';
 
 export function getSampleDashboardInput(

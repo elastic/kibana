@@ -22,8 +22,8 @@ import {
   attachAction,
   CONTEXT_MENU_TRIGGER,
   triggerRegistry,
-} from 'plugins/embeddable_api/index';
-import { EditModeAction } from 'plugins/embeddable_api/__test__';
+} from 'plugins/embeddable_api';
+import { EditModeAction } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
 
 const editModeAction = new EditModeAction();
 actionRegistry.set(editModeAction.id, editModeAction);

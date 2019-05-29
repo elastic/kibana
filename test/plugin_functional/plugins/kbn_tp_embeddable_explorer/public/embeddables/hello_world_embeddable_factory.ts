@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HelloWorldEmbeddableFactory } from 'plugins/embeddable_api/__test__';
-import { embeddableFactories } from 'plugins/embeddable_api/index';
+import { embeddableFactories } from 'plugins/embeddable_api';
+import { HelloWorldEmbeddableFactory } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
 
 embeddableFactories.registerFactory(new HelloWorldEmbeddableFactory());

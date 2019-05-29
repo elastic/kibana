@@ -28,7 +28,7 @@ import {
   TimeRange,
   Trigger,
   Container,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { VisualizeLoader } from 'ui/visualize/loader';

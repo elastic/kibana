@@ -20,9 +20,9 @@ Actions are pluggable pieces of functionality exposed to the userthat take an em
 
 ## Triggers
 
-Triggers are the way actions are connected to a user action. We ship with two default triggers, `SHOW_CONTEXT_MENU` and `APPLY_FILTER`.
+Triggers are the way actions are connected to a user action. We ship with two default triggers, `CONTEXT_MENU_TRIGGER` and `APPLY_FILTER`.
 
-Actions attached to the `SHOW_CONTEXT_MENU` will be displayed in supported embeddables context menu to the user. Actions attached to the `APPLY_FILTER` trigger will show up when any embeddable emits this trigger.
+Actions attached to the `CONTEXT_MENU_TRIGGER` will be displayed in supported embeddables context menu to the user. Actions attached to the `APPLY_FILTER` trigger will show up when any embeddable emits this trigger.
 
 A developer can register new triggers that their embeddables, or external components, can emit (as long as they have an embeddable to pass along as context).
 

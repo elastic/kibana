@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IContainer } from 'plugins/embeddable_api/index';
 import React, { Component, RefObject } from 'react';
-
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import { Subscription } from 'rxjs';
-import { PanelState } from 'plugins/embeddable_api/containers/i_container';
-import { EmbeddableChildPanel } from 'plugins/embeddable_api/containers/embeddable_child_panel';
+
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { IContainer, PanelState, EmbeddableChildPanel } from 'plugins/embeddable_api';
 
 interface Props {
   container: IContainer;

@@ -29,7 +29,7 @@ import 'react-resizable/css/styles.css';
 import sizeMe from 'react-sizeme';
 import { toastNotifications } from 'ui/notify';
 import { Subscription } from 'rxjs';
-import { EmbeddableChildPanel } from 'plugins/embeddable_api/containers/embeddable_child_panel';
+import { EmbeddableChildPanel } from 'plugins/embeddable_api';
 import { DashboardConstants } from '../../../../kibana/public/dashboard/dashboard_constants';
 import { ViewMode } from '../../../../embeddable_api/public/index';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';

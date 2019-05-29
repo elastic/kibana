@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ViewMode } from 'plugins/embeddable_api/index';
+import { ViewMode } from 'plugins/embeddable_api';
 import { FilterUtils } from './filter_utils';
 import {
   DashboardAppStateDefaults,

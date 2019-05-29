@@ -18,4 +18,4 @@
  */
 
 export { EmbeddablePanel } from './embeddable_panel';
-export { ADD_PANEL_ACTION_ID, AddPanelAction } from './panel_header';
+export { ADD_PANEL_ACTION_ID, AddPanelAction, openAddPanelFlyout } from './panel_header';

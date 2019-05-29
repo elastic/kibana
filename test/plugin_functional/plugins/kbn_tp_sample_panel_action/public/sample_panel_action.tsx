@@ -27,7 +27,7 @@ import {
   triggerRegistry,
   attachAction,
   CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 
 class SamplePanelAction extends Action {
   public readonly type = 'samplePanelAction';

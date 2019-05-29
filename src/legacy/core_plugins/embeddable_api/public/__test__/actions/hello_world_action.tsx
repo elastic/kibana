@@ -20,10 +20,10 @@
 import React from 'react';
 
 import { getNewPlatform } from 'ui/new_platform';
-import { Action, actionRegistry, triggerRegistry } from 'plugins/embeddable_api/index';
+import { Action, actionRegistry, triggerRegistry } from 'plugins/embeddable_api';
 
 import { EuiFlyout } from '@elastic/eui';
-import { CONTEXT_MENU_TRIGGER } from 'plugins/embeddable_api/index';
+import { CONTEXT_MENU_TRIGGER } from 'plugins/embeddable_api';
 import { attachAction } from '../../triggers/attach_action';
 
 export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';

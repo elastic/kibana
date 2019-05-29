@@ -32,7 +32,7 @@ jest.mock('ui/capabilities', () => ({
   },
 }));
 
-import { EmbeddableFactoryRegistry, isErrorEmbeddable } from 'plugins/embeddable_api/index';
+import { EmbeddableFactoryRegistry, isErrorEmbeddable } from 'plugins/embeddable_api';
 import { ExpandPanelAction } from './expand_panel_action';
 import {
   ContactCardEmbeddable,
@@ -40,7 +40,7 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   ContactCardEmbeddableFactory,
-} from 'plugins/embeddable_api/__test__/index';
+} from '../../../embeddable_api/public/__test__/index';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../__test__';
 

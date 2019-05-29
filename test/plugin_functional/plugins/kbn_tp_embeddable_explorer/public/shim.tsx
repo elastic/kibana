@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { embeddableFactories, EmbeddableFactoryRegistry } from 'plugins/embeddable_api/index';
+import { embeddableFactories, EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
 
 import 'ui/autoload/all';
 import 'uiExports/embeddableActions';

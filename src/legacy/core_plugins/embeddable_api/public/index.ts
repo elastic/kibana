@@ -16,18 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
-
-export {
-  APPLY_FILTER_TRIGGER,
-  triggerRegistry,
-  executeTriggerActions,
-  CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from './triggers';
-
-export { Container, ContainerInput, ContainerOutput, PanelState, IContainer } from './containers';
-
 export {
   IEmbeddable,
   EmbeddableFactory,
@@ -53,4 +41,23 @@ export {
   Trigger,
 } from './types';
 
-export { AddPanelAction, EmbeddablePanel } from './panel';
+export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
+
+export {
+  APPLY_FILTER_TRIGGER,
+  triggerRegistry,
+  executeTriggerActions,
+  CONTEXT_MENU_TRIGGER,
+  attachAction,
+} from './triggers';
+
+export {
+  Container,
+  ContainerInput,
+  ContainerOutput,
+  PanelState,
+  IContainer,
+  EmbeddableChildPanel,
+} from './containers';
+
+export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';

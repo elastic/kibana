@@ -27,9 +27,9 @@ import {
   triggerRegistry,
   ActionContext,
   attachAction,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 import React from 'react';
-import { IncompatibleActionError } from 'plugins/embeddable_api/actions';
+import { IncompatibleActionError } from 'plugins/embeddable_api';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const EXPAND_PANEL_ACTION = 'togglePanel';

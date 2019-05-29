@@ -35,7 +35,7 @@ jest.mock(
   { virtual: true }
 );
 
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from 'plugins/dashboard_embeddable/index';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from 'plugins/dashboard_embeddable';
 import { parseVersion, convertPanelDataPre61, convertPanelDataPre63 } from './panel_utils';
 
 test('parseVersion', () => {

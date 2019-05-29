@@ -38,8 +38,8 @@ import {
   convertPanelStateToSavedDashboardPanel,
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel, Pre61SavedDashboardPanel } from '../types';
-import { DashboardPanelState } from 'plugins/dashboard_embeddable/index';
-import { EmbeddableInput } from 'plugins/embeddable_api/index';
+import { DashboardPanelState } from 'plugins/dashboard_embeddable';
+import { EmbeddableInput } from 'plugins/embeddable_api';
 
 interface CustomInput extends EmbeddableInput {
   something: string;

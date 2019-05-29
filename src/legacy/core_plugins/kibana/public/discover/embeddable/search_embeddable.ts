@@ -23,15 +23,10 @@ import { SearchSource } from 'ui/courier';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
   executeTriggerActions,
-  Filters,
-  Query,
-  TimeRange,
   Container,
   Filter,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
@@ -40,8 +35,8 @@ import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
-import { SEARCH_EMBEDDABLE_TYPE } from './search_embeddable_factory';
 import searchTemplate from './search_template.html';
+import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -80,22 +75,10 @@ interface SearchEmbeddableConfig {
   editable: boolean;
 }
 
-export interface SearchInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  query?: Query;
-  filters?: Filters;
-  hidePanelTitles?: boolean;
-  columns?: string[];
-  sort?: string[];
-}
+export const SEARCH_EMBEDDABLE_TYPE = 'search';
 
-export interface SearchOutput extends EmbeddableOutput {
-  editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
-  editable: boolean;
-}
-
-export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
+export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
+  implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
   private $compile: ng.ICompileService;
@@ -149,6 +132,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
 
   public getInspectorAdapters() {
     return this.inspectorAdaptors;
+  }
+
+  public getSavedSearch() {
+    return this.savedSearch;
   }
 
   /**

@@ -51,7 +51,7 @@ import {
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 

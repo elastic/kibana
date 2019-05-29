@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { IContainer, ContainerInput, ContainerOutput } from './i_container';
-export { Container, PanelState } from './container';
-export * from './embeddable_child_panel';
+export * from './types';
+export * from './search_embeddable_factory';
+export * from './search_embeddable';

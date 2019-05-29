@@ -17,18 +17,19 @@
  * under the License.
  */
 
+import React from 'react';
+
 import {
+  EmbeddablePanel,
   Container,
   embeddableFactories,
   EmbeddableFactoryRegistry,
-} from 'plugins/embeddable_api/index';
-import React from 'react';
+} from 'plugins/embeddable_api';
 import {
   HelloWorldContainer,
   CONTACT_CARD_EMBEDDABLE,
   HELLO_WORLD_EMBEDDABLE_TYPE,
-} from 'plugins/embeddable_api/__test__';
-import { EmbeddablePanel } from 'plugins/embeddable_api/panel';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
 
 interface Props {
   embeddableFactories: EmbeddableFactoryRegistry;

@@ -19,14 +19,14 @@
 
 import React from 'react';
 
-import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api/index';
+import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
-} from 'plugins/embeddable_api/__test__';
+} from '../../../../embeddable_api/public/__test__';
 import { DashboardContainer } from '../dashboard_container';
-import { getSampleDashboardInput } from 'plugins/dashboard_embeddable/__test__';
+import { getSampleDashboardInput } from '../../__test__';
 import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';

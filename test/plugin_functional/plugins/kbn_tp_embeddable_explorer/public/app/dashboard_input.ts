@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { DashboardContainerInput } from 'plugins/dashboard_embeddable/index';
-import { QueryLanguageType, ViewMode } from 'plugins/embeddable_api/types';
+import { DashboardContainerInput } from 'plugins/dashboard_embeddable';
+import { QueryLanguageType, ViewMode } from 'plugins/embeddable_api';
 
 export const dashboardInput: DashboardContainerInput = {
   panels: {

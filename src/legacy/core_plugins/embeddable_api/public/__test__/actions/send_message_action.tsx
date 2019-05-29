@@ -26,9 +26,9 @@ import {
   IncompatibleActionError,
   triggerRegistry,
   CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api/index';
-import { Embeddable, EmbeddableInput } from 'plugins/embeddable_api/embeddables';
-import { attachAction } from 'plugins/embeddable_api/triggers/attach_action';
+} from 'plugins/embeddable_api';
+import { attachAction } from '../../triggers/attach_action';
+import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
 

@@ -32,7 +32,7 @@ import {
   triggerRegistry,
   CONTEXT_MENU_TRIGGER,
   attachAction,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 import { DashboardContainer } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../__test__';
 import { mount } from 'enzyme';
@@ -40,7 +40,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EmbeddablePanel } from 'plugins/embeddable_api/panel';
+import { EmbeddablePanel } from 'plugins/embeddable_api';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   ContactCardEmbeddableOutput,
@@ -49,7 +49,7 @@ import {
   ContactCardEmbeddableInput,
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from 'plugins/embeddable_api/__test__';
+} from '../../../embeddable_api/public/__test__';
 
 test('DashboardContainer initializes embeddables', async done => {
   const embeddableFactories = new EmbeddableFactoryRegistry();

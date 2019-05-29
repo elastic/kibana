@@ -22,15 +22,15 @@ import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_help
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api/index';
+import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
 
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
-} from 'plugins/embeddable_api/__test__';
+} from '../../../../embeddable_api/public/__test__';
 import { DashboardContainer } from '../dashboard_container';
-import { getSampleDashboardInput } from 'plugins/dashboard_embeddable/__test__';
+import { getSampleDashboardInput } from '../../__test__';
 import { skip } from 'rxjs/operators';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });

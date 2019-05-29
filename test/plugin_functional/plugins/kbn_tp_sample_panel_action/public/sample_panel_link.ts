@@ -22,7 +22,7 @@ import {
   triggerRegistry,
   CONTEXT_MENU_TRIGGER,
   attachAction,
-} from 'plugins/embeddable_api/index';
+} from 'plugins/embeddable_api';
 
 class SamplePanelLink extends Action {
   public readonly type = 'samplePanelLink';

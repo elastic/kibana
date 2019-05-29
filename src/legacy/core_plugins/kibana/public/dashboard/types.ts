@@ -18,7 +18,7 @@
  */
 
 import { AppState } from 'ui/state_management/app_state';
-import { Query, Filter, ViewMode } from 'plugins/embeddable_api/index';
+import { Query, Filter, ViewMode } from 'plugins/embeddable_api';
 
 export interface GridData {
   w: number;

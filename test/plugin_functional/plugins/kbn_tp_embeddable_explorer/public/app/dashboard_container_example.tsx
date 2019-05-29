@@ -16,21 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EuiButton } from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerFactory,
-} from 'plugins/dashboard_embeddable/index';
+} from 'plugins/dashboard_embeddable';
+
 import {
   ErrorEmbeddable,
   ViewMode,
   EmbeddableFactoryRegistry,
   isErrorEmbeddable,
-} from 'plugins/embeddable_api/index';
-import React from 'react';
-import { EmbeddablePanel } from 'plugins/embeddable_api/panel';
-import { EuiLoadingChart } from '@elastic/eui';
+  EmbeddablePanel,
+} from 'plugins/embeddable_api';
+
 import { dashboardInput } from './dashboard_input';
 
 export interface Props {

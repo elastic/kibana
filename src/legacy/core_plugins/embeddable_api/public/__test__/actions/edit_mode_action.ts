@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ViewMode } from 'plugins/embeddable_api/types';
+import { ViewMode } from '../../types';
 import { Action, ActionContext } from '../../actions';
 
 export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION';

@@ -37,16 +37,13 @@ import {
   FilterableEmbeddable,
   FilterableEmbeddableFactory,
   ContactCardEmbeddable,
-} from '../../../__test__/index';
+  FilterableEmbeddableInput,
+  FILTERABLE_EMBEDDABLE,
+} from '../../../__test__';
 
 import { EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
-import {
-  FilterableEmbeddableInput,
-  FILTERABLE_EMBEDDABLE,
-} from 'plugins/embeddable_api/__test__/embeddables/filterable_embeddable';
-import { Filter } from 'plugins/embeddable_api/types';
-import { EmbeddableOutput } from 'plugins/embeddable_api/embeddables';
+import { Filter, EmbeddableOutput } from 'plugins/embeddable_api';
 
 const embeddableFactories = new EmbeddableFactoryRegistry();
 embeddableFactories.registerFactory(new FilterableEmbeddableFactory());

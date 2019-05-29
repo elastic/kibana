@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DashboardPanelState } from 'plugins/dashboard_embeddable/index';
+import { DashboardPanelState } from 'plugins/dashboard_embeddable';
 import chrome from 'ui/chrome';
 import { SavedDashboardPanel, Pre61SavedDashboardPanel } from '../types';
 import { parseVersion, convertPanelDataPre63, convertPanelDataPre61 } from '../panel/panel_utils';

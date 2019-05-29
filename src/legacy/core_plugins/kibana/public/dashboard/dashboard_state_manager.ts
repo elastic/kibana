@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
-import { Query, ViewMode } from 'plugins/embeddable_api/index';
+import { Query, ViewMode } from 'plugins/embeddable_api';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { Timefilter } from 'ui/timefilter';
 import { TimeRange } from 'ui/visualize';

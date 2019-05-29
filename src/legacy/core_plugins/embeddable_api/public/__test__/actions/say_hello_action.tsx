@@ -19,8 +19,7 @@
 import React from 'react';
 import { getNewPlatform } from 'ui/new_platform';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { attachAction } from 'plugins/embeddable_api/triggers/attach_action';
-import { triggerRegistry, CONTEXT_MENU_TRIGGER } from '../../triggers';
+import { triggerRegistry, CONTEXT_MENU_TRIGGER, attachAction } from '../../triggers';
 import { Action, ActionContext, actionRegistry, IncompatibleActionError } from '../../actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 

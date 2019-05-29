@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { Filter } from 'plugins/embeddable_api/index';
+import { Filter } from 'plugins/embeddable_api';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 /**

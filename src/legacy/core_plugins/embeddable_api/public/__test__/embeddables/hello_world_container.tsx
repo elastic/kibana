@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api/embeddables';
-import { Container } from 'plugins/embeddable_api/index';
+import {
+  Container,
+  EmbeddableFactoryRegistry,
+  ViewMode,
+  ContainerInput,
+} from 'plugins/embeddable_api';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ViewMode } from 'plugins/embeddable_api/types';
-import { ContainerInput } from 'plugins/embeddable_api/containers';
 import { I18nProvider } from '@kbn/i18n/react';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
 

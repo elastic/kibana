@@ -18,7 +18,7 @@
  */
 import { I18nContext } from 'ui/i18n';
 import { EuiTab } from '@elastic/eui';
-import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api/index';
+import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
 import React, { Component } from 'react';
 import { DashboardContainerExample } from './dashboard_container_example';
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';

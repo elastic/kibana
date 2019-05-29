@@ -20,20 +20,20 @@
 import '../doc_table';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+import { IPrivate } from 'ui/private';
+// @ts-ignore
+import { FilterManagerProvider } from 'ui/filter_manager';
+import { TimeRange } from 'ui/visualize';
 import {
   embeddableFactories,
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
-} from 'plugins/embeddable_api/index';
-import chrome from 'ui/chrome';
-import { IPrivate } from 'ui/private';
-// @ts-ignore
-import { FilterManagerProvider } from 'ui/filter_manager';
+} from '../../../../embeddable_api/public/index';
 import { SavedSearchLoader } from '../types';
-import { SearchEmbeddable, SearchInput, SearchOutput, FilterManager } from './search_embeddable';
-
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
+import { SearchEmbeddable, FilterManager, SEARCH_EMBEDDABLE_TYPE } from './search_embeddable';
+import { SearchInput, SearchOutput } from './types';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchInput,
@@ -70,7 +70,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 
   public async createFromSavedObject(
     savedObjectId: string,
-    input: Partial<SearchInput> & { id: string },
+    input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
     const $injector = await chrome.dangerouslyGetActiveInjector();

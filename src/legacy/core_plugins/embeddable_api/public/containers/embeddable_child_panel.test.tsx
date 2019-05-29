@@ -30,7 +30,7 @@ import {
   ContactCardEmbeddableOutput,
   HelloWorldContainer,
   CONTACT_CARD_EMBEDDABLE,
-} from 'plugins/embeddable_api/__test__';
+} from '../__test__';
 import { embeddableFactories } from '../embeddables/embeddable_factories_registry';
 import React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';

@@ -18,10 +18,10 @@
  */
 
 import React from 'react';
-import { embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api/index';
-import { Container } from 'plugins/embeddable_api/containers';
 import { i18n } from '@kbn/i18n';
 import { getNewPlatform } from 'ui/new_platform';
+import { embeddableFactories, EmbeddableFactory } from '../../../embeddables';
+import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
 

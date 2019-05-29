@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PanelState } from 'plugins/embeddable_api/index';
+import { PanelState } from 'plugins/embeddable_api';
 import React from 'react';
 // @ts-ignore
 import { ExitFullScreenButton } from 'ui/exit_full_screen';

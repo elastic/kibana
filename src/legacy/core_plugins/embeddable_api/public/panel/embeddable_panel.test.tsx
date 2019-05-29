@@ -30,24 +30,24 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   HelloWorldContainer,
-} from 'plugins/embeddable_api/__test__/embeddables';
+  EditModeAction,
+  ContactCardEmbeddableOutput,
+} from '../__test__';
 import {
   EmbeddableFactoryRegistry,
   isErrorEmbeddable,
   ViewMode,
   actionRegistry,
   triggerRegistry,
-} from 'plugins/embeddable_api/index';
-import { EditModeAction } from 'plugins/embeddable_api/__test__/actions';
+  EmbeddablePanel,
+} from 'plugins/embeddable_api';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EmbeddablePanel } from 'plugins/embeddable_api/panel';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { ContactCardEmbeddableOutput } from '../__test__/embeddables/contact_card';
 import { attachAction } from '../triggers/attach_action';
 
 const editModeAction = new EditModeAction();
