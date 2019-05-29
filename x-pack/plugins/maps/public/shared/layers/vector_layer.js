@@ -469,6 +469,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
+
     if (!pointLayer) {
       mbMap.addLayer({
         id: pointLayerId,
@@ -478,6 +479,7 @@ export class VectorLayer extends AbstractLayer {
       });
       mbMap.setFilter(pointLayerId, POINT_MB_FILTER);
     }
+
     this._style.setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
@@ -489,6 +491,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const symbolLayer = mbMap.getLayer(symbolLayerId);
+
     if (!symbolLayer) {
       mbMap.addLayer({
         id: symbolLayerId,
@@ -498,21 +501,11 @@ export class VectorLayer extends AbstractLayer {
       mbMap.setFilter(symbolLayerId, POINT_MB_FILTER);
     }
 
-    const imageId = 'test';
-    if (mbMap.hasImage(imageId)) {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-    } else {
-      const img = new Image(11, 11);
-      img.onload = () => {
-        //mbMap.setLayoutProperty(pointLayerId, 'icon-image', imageId);
-        mbMap.addImage(imageId, img);
-        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-      };
-      img.onerror = (e) => {
-        console.log(e);
-      };
-      img.src = '../api/maps/symbol/airfield-15/blue';
-    }
+    this._style.setMBSymbolPropertiesForPoints({
+      alpha: this.getAlpha(),
+      mbMap,
+      symbolLayerId: symbolLayerId,
+    });
   }
 
   _setMbLinePolygonProperties(mbMap) {
