@@ -163,6 +163,33 @@ function removeDateHistogramTimeZones(doc) {
   return doc;
 }
 
+// migrate gauge verticalSplit to alignment
+// https://github.com/elastic/kibana/issues/34636
+function migrateGaugeVerticalSplitToAlignment(doc)  {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+      if (visState && visState.type === 'gauge') {
+
+        visState.params.gauge.alignment = visState.params.gauge.verticalSplit ? 'vertical' : 'horizontal';
+        delete visState.params.gauge.verticalSplit;
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+  }
+  return doc;
+}
+
 export const migrations = {
   'index-pattern': {
     '6.5.0': (doc) => {
@@ -264,7 +291,8 @@ export const migrations = {
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
-    '7.2.0': doc => executeMigrations720(doc)
+    '7.2.0': doc => executeMigrations720(doc),
+    '7.3.0': migrateGaugeVerticalSplitToAlignment
   },
   dashboard: {
     '7.0.0': (doc) => {

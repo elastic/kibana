@@ -35,7 +35,7 @@ describe('onSetup', () => {
     const b = onSetup(bCallback);
     const coreSetup = { fake: true } as any;
 
-    __newPlatformSetup__(coreSetup);
+    __newPlatformSetup__(coreSetup, {});
 
     expect(await Promise.all([a, b])).toEqual([1, 2]);
     expect(aCallback).toHaveBeenCalledWith({ core: { fake: true }, plugins: {} });
@@ -46,7 +46,7 @@ describe('onSetup', () => {
     const callback = jest.fn(() => 3);
     const coreSetup = { fake: true } as any;
 
-    __newPlatformSetup__(coreSetup);
+    __newPlatformSetup__(coreSetup, {});
 
     expect(await onSetup(callback)).toEqual(3);
     expect(callback).toHaveBeenCalledWith({ core: { fake: true }, plugins: {} });
@@ -65,7 +65,7 @@ describe('onSetup', () => {
     const c = onSetup(cCallback);
     const coreSetup = { fake: true } as any;
 
-    __newPlatformSetup__(coreSetup);
+    __newPlatformSetup__(coreSetup, {});
 
     await expect(a).rejects.toThrowError('a error!');
     await expect(b).rejects.toThrowError('b error!');
@@ -79,7 +79,7 @@ describe('onSetup', () => {
     });
     const coreSetup = { fake: true } as any;
 
-    __newPlatformSetup__(coreSetup);
+    __newPlatformSetup__(coreSetup, {});
 
     await expect(onSetup(callback)).rejects.toThrowError('a error!');
   });
@@ -95,7 +95,7 @@ describe('onStart', () => {
     const b = onStart(bCallback);
     const coreStart = { fake: true } as any;
 
-    __newPlatformStart__(coreStart);
+    __newPlatformStart__(coreStart, {});
 
     expect(await Promise.all([a, b])).toEqual([1, 2]);
     expect(aCallback).toHaveBeenCalledWith({ core: { fake: true }, plugins: {} });
@@ -106,7 +106,7 @@ describe('onStart', () => {
     const callback = jest.fn(() => 3);
     const coreStart = { fake: true } as any;
 
-    __newPlatformStart__(coreStart);
+    __newPlatformStart__(coreStart, {});
 
     expect(await onStart(callback)).toEqual(3);
     expect(callback).toHaveBeenCalledWith({ core: { fake: true }, plugins: {} });
@@ -125,7 +125,7 @@ describe('onStart', () => {
     const c = onStart(cCallback);
     const coreStart = { fake: true } as any;
 
-    __newPlatformStart__(coreStart);
+    __newPlatformStart__(coreStart, {});
 
     await expect(a).rejects.toThrowError('a error!');
     await expect(b).rejects.toThrowError('b error!');
@@ -139,7 +139,7 @@ describe('onStart', () => {
     });
     const coreStart = { fake: true } as any;
 
-    __newPlatformStart__(coreStart);
+    __newPlatformStart__(coreStart, {});
 
     await expect(onStart(callback)).rejects.toThrowError('a error!');
   });
