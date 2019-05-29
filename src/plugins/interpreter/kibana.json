@@ -1,0 +1,8 @@
+{
+  "id": "interpreter",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["core", "interpreter"],
+  "server": false,
+  "ui": true
+}

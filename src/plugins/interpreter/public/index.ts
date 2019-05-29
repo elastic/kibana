@@ -17,6 +17,14 @@
  * under the License.
  */
 
-import { getNewPlatform } from '../../../../ui/public/new_platform';
+import { FunctionsRegistry } from './registries';
 
-export const functionsRegistry = getNewPlatform().setup.plugins.interpreter.functionsRegistry;
+export const plugin = () => ({
+  setup: () => {
+    const functionsRegistry = new FunctionsRegistry();
+    return {
+      functionsRegistry,
+    };
+  },
+  start: () => {},
+});

@@ -17,6 +17,11 @@
  * under the License.
  */
 
-import { getNewPlatform } from '../../../../ui/public/new_platform';
+import { Registry } from '@kbn/interpreter/common';
+const { Fn } = require('@kbn/interpreter/common'); // eslint-disable-line
 
-export const functionsRegistry = getNewPlatform().setup.plugins.interpreter.functionsRegistry;
+export class FunctionsRegistry extends Registry<any, any> {
+  wrapper(obj: any) {
+    return new Fn(obj);
+  }
+}

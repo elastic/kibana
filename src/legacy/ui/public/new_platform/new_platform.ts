@@ -74,7 +74,7 @@ export async function __newPlatformStart__(
 }
 
 export function getNewPlatform() {
-  if (runtimeContext.setup.core === null || runtimeContext.start.core === null) {
+  if (runtimeContext.setup.core === null /* || runtimeContext.start.core === null */) {
     throw new Error('runtimeContext is not initialized yet');
   }
 
