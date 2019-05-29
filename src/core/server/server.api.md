@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { ObjectType } from '@kbn/config-schema';
@@ -87,6 +88,7 @@ export interface CoreSetup {
         registerOnRequest: HttpServiceSetup['registerOnRequest'];
         getBasePathFor: HttpServiceSetup['getBasePathFor'];
         setBasePathFor: HttpServiceSetup['setBasePathFor'];
+        createNewServer: HttpServiceSetup['createNewServer'];
     };
 }
 
@@ -132,7 +134,12 @@ export type Headers = Record<string, string | string[] | undefined>;
 // Warning: (ae-forgotten-export) The symbol "HttpServerSetup" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type HttpServiceSetup = HttpServerSetup;
+export interface HttpServiceSetup extends HttpServerSetup {
+    // Warning: (ae-forgotten-export) The symbol "HttpConfig" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+}
 
 // @public (undocumented)
 export interface HttpServiceStart {

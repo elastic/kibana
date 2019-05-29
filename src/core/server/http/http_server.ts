@@ -55,6 +55,7 @@ export interface HttpServerSetup {
 
 export class HttpServer {
   private server?: Server;
+  private config?: HttpConfig;
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
   private basePathCache = new WeakMap<
@@ -102,6 +103,7 @@ export class HttpServer {
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
     this.server = createServer(serverOptions);
+    this.config = config;
 
     return {
       options: serverOptions,
@@ -120,13 +122,13 @@ export class HttpServer {
     };
   }
 
-  public async start(config: HttpConfig) {
+  public async start() {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
     this.log.debug('starting http server');
 
-    this.setupBasePathRewrite(this.server, config);
+    this.setupBasePathRewrite(this.server);
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
@@ -139,12 +141,8 @@ export class HttpServer {
     }
 
     await this.server.start();
-
-    this.log.debug(
-      `http server running at ${this.server.info.uri}${
-        config.rewriteBasePath ? config.basePath : ''
-      }`
-    );
+    const serverPath = this.config!.rewriteBasePath || this.config!.basePath || '';
+    this.log.debug(`http server running at ${this.server.info.uri}${serverPath}`);
   }
 
   public async stop() {
@@ -157,12 +155,12 @@ export class HttpServer {
     this.server = undefined;
   }
 
-  private setupBasePathRewrite(server: Server, config: HttpConfig) {
-    if (config.basePath === undefined || !config.rewriteBasePath) {
+  private setupBasePathRewrite(server: Server) {
+    if (this.config!.basePath === undefined || this.config!.rewriteBasePath) {
       return;
     }
 
-    const basePath = config.basePath;
+    const basePath = this.config!.basePath;
     server.ext('onRequest', (request, responseToolkit) => {
       const newURL = modifyUrl(request.url.href!, urlParts => {
         if (urlParts.pathname != null && urlParts.pathname.startsWith(basePath)) {
