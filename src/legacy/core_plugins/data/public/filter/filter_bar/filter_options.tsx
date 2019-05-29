@@ -58,7 +58,7 @@ class FilterOptionsUI extends Component<Props, State> {
       items: [
         {
           name: this.props.intl.formatMessage({
-            id: 'common.ui.searchBar.enableAllFiltersButtonLabel',
+            id: 'data.filter.options.enableAllFiltersButtonLabel',
             defaultMessage: 'Enable all',
           }),
           icon: 'eye',
@@ -70,7 +70,7 @@ class FilterOptionsUI extends Component<Props, State> {
         },
         {
           name: this.props.intl.formatMessage({
-            id: 'common.ui.searchBar.disableAllFiltersButtonLabel',
+            id: 'data.filter.options.disableAllFiltersButtonLabel',
             defaultMessage: 'Disable all',
           }),
           icon: 'eyeClosed',
@@ -82,7 +82,7 @@ class FilterOptionsUI extends Component<Props, State> {
         },
         {
           name: this.props.intl.formatMessage({
-            id: 'common.ui.searchBar.pinAllFiltersButtonLabel',
+            id: 'data.filter.options.pinAllFiltersButtonLabel',
             defaultMessage: 'Pin all',
           }),
           icon: 'pin',
@@ -94,7 +94,7 @@ class FilterOptionsUI extends Component<Props, State> {
         },
         {
           name: this.props.intl.formatMessage({
-            id: 'common.ui.searchBar.unpinAllFiltersButtonLabel',
+            id: 'data.filter.options.unpinAllFiltersButtonLabel',
             defaultMessage: 'Unpin all',
           }),
           icon: 'pin',
@@ -106,7 +106,7 @@ class FilterOptionsUI extends Component<Props, State> {
         },
         {
           name: this.props.intl.formatMessage({
-            id: 'common.ui.searchBar.invertNegatedFiltersButtonLabel',
+            id: 'data.filter.options.invertNegatedFiltersButtonLabel',
             defaultMessage: 'Invert inclusion',
           }),
           icon: 'invert',
@@ -118,7 +118,7 @@ class FilterOptionsUI extends Component<Props, State> {
         },
         {
           name: this.props.intl.formatMessage({
-            id: 'common.ui.searchBar.invertDisabledFiltersButtonLabel',
+            id: 'data.filter.options.invertDisabledFiltersButtonLabel',
             defaultMessage: 'Invert enabled/disabled',
           }),
           icon: 'eye',
@@ -130,7 +130,7 @@ class FilterOptionsUI extends Component<Props, State> {
         },
         {
           name: this.props.intl.formatMessage({
-            id: 'common.ui.searchBar.deleteAllFiltersButtonLabel',
+            id: 'data.filter.options.deleteAllFiltersButtonLabel',
             defaultMessage: 'Remove all',
           }),
           icon: 'trash',
@@ -155,11 +155,11 @@ class FilterOptionsUI extends Component<Props, State> {
             color="text"
             iconType="gear"
             aria-label={this.props.intl.formatMessage({
-              id: 'common.ui.searchBar.changeAllFiltersButtonLabel',
+              id: 'data.filter.options.changeAllFiltersButtonLabel',
               defaultMessage: 'Change all filters',
             })}
             title={this.props.intl.formatMessage({
-              id: 'common.ui.searchBar.changeAllFiltersButtonLabel',
+              id: 'data.filter.options.changeAllFiltersButtonLabel',
               defaultMessage: 'Change all filters',
             })}
             data-test-subj="showFilterActions"
@@ -171,7 +171,7 @@ class FilterOptionsUI extends Component<Props, State> {
       >
         <EuiPopoverTitle>
           <FormattedMessage
-            id="common.ui.searchBar.changeAllFiltersTitle"
+            id="data.filter.searchBar.changeAllFiltersTitle"
             defaultMessage="Change all filters"
           />
         </EuiPopoverTitle>
