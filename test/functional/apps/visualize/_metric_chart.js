@@ -120,22 +120,6 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it.skip('should show Standard Deviation', async function () {
-      const standardDeviationBytes = [
-        '-1,435.138', 'Lower Standard Deviation of bytes',
-        '12,889.766', 'Upper Standard Deviation of bytes'
-      ];
-      log.debug('Aggregation = Standard Deviation');
-      await PageObjects.visualize.selectAggregation('Standard Deviation', 'metrics');
-      log.debug('Field = bytes');
-      await PageObjects.visualize.selectField('bytes', 'metrics');
-      await PageObjects.visualize.clickGo();
-      await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
-        expect(standardDeviationBytes).to.eql(metricValue);
-      });
-    });
-
     it('should show Unique Count', async function () {
       const uniqueCountClientip = ['1,000', 'Unique count of clientip'];
       log.debug('Aggregation = Unique Count');
