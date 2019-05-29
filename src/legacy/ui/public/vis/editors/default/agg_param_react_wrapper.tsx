@@ -28,6 +28,7 @@ import { EditorConfig } from '../config/types';
 interface AggParamReactWrapperProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
+  config: any;
   editorConfig: EditorConfig;
   indexedFields: FieldParamType[];
   showValidation: boolean;
