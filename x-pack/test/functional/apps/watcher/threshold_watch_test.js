@@ -16,47 +16,29 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
-  describe('watcher_test', function () {
+  describe('threshold watch', function () {
     before('initialize tests', async () => {
       await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('settings');
       await testSubjects.click('watcher');
-      await PageObjects.watcher.clearAllWatches();
+      await PageObjects.watcher.deleteAllWatches();
     });
 
-    it('create and save a new watch', async () => {
-      await PageObjects.watcher.createWatch(watchID, watchName);
+    it('create and save a new threshold watch', async () => {
+      await PageObjects.watcher.createThresholdAlert(watchID, watchName);
       const watch = await PageObjects.watcher.getWatch(watchID);
       expect(watch.id).to.be(watchID);
       expect(watch.name).to.be(watchName);
     });
 
-    it('should prompt user to check to see if you can override a watch with a sameID', async () => {
-      await PageObjects.watcher.createWatch(watchID, updatedName);
-      const modal = await testSubjects.find('confirmModalBodyText');
-      const modalText =  await modal.getVisibleText();
-      expect(modalText).to.be(`Watch with ID "${watchID}" (name: "${watchName}") already exists. Do you want to overwrite it?`);
-      await testSubjects.click('confirmModalConfirmButton');
-      const watch = await PageObjects.watcher.getWatch(watchID);
-      expect(watch.id).to.be(watchID);
-      expect(watch.name).to.be(updatedName);
-    });
-
     //delete the watch
-    it('should delete the watch', async () => {
-      const watchList = indexBy(await PageObjects.watcher.getWatches(), 'id');
+    it('should delete the advanced watch', async () => {
+      const watchList = indexBy(await PageObjects.watcher.getAllWatches(), 'id');
       log.debug(watchList);
       expect(watchList.watchID.name).to.eql([updatedName]);
       await PageObjects.watcher.deleteWatch(watchID);
-      const modal = await testSubjects.find('confirmModalBodyText');
-      const modalText =  await modal.getVisibleText();
-      expect(modalText).to.be('This will permanently delete 1 Watch. Are you sure?');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const watchList1 = indexBy(await PageObjects.watcher.getWatches(), 'id');
-      log.debug(watchList1);
-      expect(watchList1).to.not.have.key(watchID);
     });
-
   });
 }

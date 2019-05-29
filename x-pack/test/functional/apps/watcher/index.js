@@ -8,7 +8,7 @@ export default function ({ loadTestFile }) {
   describe('watcher app', function () {
     this.tags('ciGroup1');
 
-    //loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./watcher_test'));
+    loadTestFile(require.resolve('./threshold_watch_test'));
+    loadTestFile(require.resolve('./advanced_watch_test'));
   });
 }
