@@ -122,6 +122,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       getBasePathFor: deps.http.getBasePathFor,
       setBasePathFor: deps.http.setBasePathFor,
+      createNewServer: deps.http.createNewServer,
     },
   };
 }
