@@ -5,6 +5,7 @@
   "kibana": {
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
     "detected": {
       "doesExist": true
     },
@@ -13,6 +14,7 @@
   "beats": {
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
     "detected": {
       "mightExist": true
     },
@@ -21,6 +23,7 @@
   "logstash": {
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
     "detected": {
       "mightExist": false
     },
@@ -29,6 +32,7 @@
   "apm": {
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
     "detected": {
       "mightExist": false
     },
@@ -37,6 +41,7 @@
   "elasticsearch": {
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
     "detected": {
       "doesExist": true
     },

@@ -276,6 +276,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     const productStatus = {
       totalUniqueInstanceCount: 0,
       totalUniqueFullyMigratedCount: 0,
+      totalUniquePartiallyMigratedCount: 0,
       detected: null,
       byUuid: {},
     };
