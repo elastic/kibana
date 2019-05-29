@@ -91,6 +91,7 @@ describe('IndexPattern Data Source', () => {
 
           // Private
           operationType: 'value',
+          sourceField: 'op',
         },
       },
     };
@@ -155,6 +156,46 @@ describe('IndexPattern Data Source', () => {
       const state = await indexPatternDatasource.initialize(persistedState);
 
       expect(indexPatternDatasource.getPersistableState(state)).toEqual(persistedState);
+    });
+  });
+
+  describe('#toExpression', () => {
+    it('should generate an empty expression when no columns are selected', async () => {
+      const state = await indexPatternDatasource.initialize();
+      expect(indexPatternDatasource.toExpression(state)).toEqual('');
+    });
+
+    it('should generate an expression for a values query', async () => {
+      const queryPersistedState: IndexPatternPersistedState = {
+        currentIndexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'My Op',
+            dataType: 'string',
+            isBucketed: false,
+
+            // Private
+            operationType: 'value',
+            sourceField: 'op',
+          },
+          col2: {
+            operationId: 'op2',
+            label: 'My Op 2',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'value',
+            sourceField: 'op2',
+          },
+        },
+      };
+      const state = await indexPatternDatasource.initialize(queryPersistedState);
+      expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(
+        `"esdocs index=\\"1\\" fields=\\"op, op2\\" sort=\\"op, DESC\\""`
+      );
     });
   });
 
@@ -262,6 +303,7 @@ describe('IndexPattern Data Source', () => {
               dataType: 'date',
               isBucketed: false,
               operationType: 'value',
+              sourceField: 'timestamp',
             },
           },
           columnOrder: ['col1', 'col2'],

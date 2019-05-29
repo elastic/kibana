@@ -24,6 +24,7 @@ interface IndexPatternColumn {
 
   // Private
   operationType: OperationType;
+  sourceField: string;
 }
 
 export interface IndexPattern {
@@ -98,6 +99,30 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   setState: (newState: IndexPatternPrivateState) => void;
 };
 
+function getOperations({ state, filterOperations }: IndexPatternDimensionPanelProps) {
+  const fields = state.indexPatterns[state.currentIndexPatternId].fields;
+  const columns: IndexPatternColumn[] = fields.map((field, index) => ({
+    operationId: `${index}`,
+    label: `Value of ${field.name}`,
+    dataType: field.type as DataType,
+    isBucketed: false,
+
+    operationType: 'value' as OperationType,
+    sourceField: field.name,
+  }));
+
+  const filteredColumns = columns.filter(col => {
+    const { operationId, label, dataType, isBucketed } = col;
+
+    return filterOperations({
+      id: operationId,
+      label,
+      dataType,
+      isBucketed,
+    });
+  });
+}
+
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
   const fields = props.state.indexPatterns[props.state.currentIndexPatternId].fields;
   const columns: IndexPatternColumn[] = fields.map((field, index) => ({
@@ -107,6 +132,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
     isBucketed: false,
 
     operationType: 'value' as OperationType,
+    sourceField: field.name,
   }));
 
   const filteredColumns = columns.filter(col => {
@@ -196,7 +222,16 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
     },
 
     toExpression(state: IndexPatternPrivateState) {
-      return `${JSON.stringify(state.columns)}`;
+      if (state.columnOrder.length === 0) {
+        return '';
+      }
+
+      const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
+      const expression = `esdocs index="${state.currentIndexPatternId}" fields="${fieldNames.join(
+        ', '
+      )}" sort="${fieldNames[0]}, DESC"`;
+
+      return expression;
     },
 
     renderDataPanel(

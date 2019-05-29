@@ -38,6 +38,14 @@ export const xyVisualization: Visualization<XyVisualizationState, XyVisualizatio
           }}
           render={props.datasource.renderDimensionPanel}
         />
+        <NativeRenderer
+          nativeProps={{
+            columnId: 'col2',
+            filterOperations: (op: Operation) => true,
+            suggestedOrder: 2,
+          }}
+          render={props.datasource.renderDimensionPanel}
+        />
       </div>,
       domElement
     );
