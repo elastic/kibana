@@ -257,8 +257,6 @@
     "common.ui.aggTypes.sizeLabel": "大小",
     "common.ui.aggTypes.sizeTooltip": "请求排名前 K 的命中。多个命中将通过“聚合对象”组合。",
     "common.ui.aggTypes.sortOnLabel": "排序依据",
-    "common.ui.aggTypes.sortOnPlaceholder": "选择字段",
-    "common.ui.aggTypes.sortOnTooltip": "排序依据",
     "common.ui.aggTypes.string.customLabel": "定制标签",
     "common.ui.aggTypes.timeInterval.createsTooLargeBucketsTooltip": "此时间间隔将创建过大而无法在选定时间范围内显示的存储桶，因此其已缩放至",
     "common.ui.aggTypes.timeInterval.createsTooManyBucketsTooltip": "此时间间隔将创建过多的存储桶，而无法在选定时间范围内全部显示，因此其已缩放至",
