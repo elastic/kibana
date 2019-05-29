@@ -5,20 +5,36 @@
  */
 
 import React from 'react';
+
 import {
-  // @ts-ignore
-  EuiSeriesChartUtils,
-} from '@elastic/eui';
-import styled from 'styled-components';
-import { EuiSeriesChart, EuiBarSeries, EuiXAxis, EuiYAxis } from '@elastic/eui/lib/experimental';
-import { BarChartData, WrappedByAutoSizer, ChartHolder } from './common';
+  Chart,
+  BarSeries,
+  Axis,
+  Position,
+  getSpecId,
+  ScaleType,
+  Settings,
+  mergeWithDefaultTheme,
+  PartialTheme,
+} from '@elastic/charts';
+import { getAxisId } from '@elastic/charts';
+import {
+  BarChartData,
+  WrappedByAutoSizer,
+  ChartHolder,
+  numberFormatter,
+  SeriesType,
+  getSeriesStyle,
+} from './common';
 import { AutoSizer } from '../auto_sizer';
 
-const { SCALE, ORIENTATION } = EuiSeriesChartUtils;
-const getYaxis = (value: string | number) => {
-  const label = value.toString();
-  const labelLength = 4;
-  return label.length > labelLength ? `${label.slice(0, labelLength)}.` : label;
+const getTheme = () => {
+  const theme: PartialTheme = {
+    scales: {
+      barsPadding: 0.5,
+    },
+  };
+  return mergeWithDefaultTheme(theme);
 };
 
 export const BarChartBaseComponent = React.memo<{
@@ -27,32 +43,41 @@ export const BarChartBaseComponent = React.memo<{
   height: number | null | undefined;
 }>(({ data, ...chartConfigs }) => {
   return chartConfigs.width && chartConfigs.height ? (
-    // @ts-ignore
-    <SeriesChart
-      yType={SCALE.ORDINAL}
-      orientation={ORIENTATION.HORIZONTAL}
-      showDefaultAxis={false}
-      data-test-subj="stat-bar-chart"
-      {...chartConfigs}
-    >
+    <Chart>
+      <Settings rotation={90} theme={getTheme()} />
       {data.map(series => {
+        const barSeriesKey = series.key;
+        const barSeriesSpecId = getSpecId(barSeriesKey);
+        const seriesType = SeriesType.BAR;
         return (
-          <EuiBarSeries
-            key={`stat-items-areachart-${series.key}`}
+          <BarSeries
+            id={barSeriesSpecId}
+            key={barSeriesKey}
             name={series.key}
-            // @ts-ignore
+            xScaleType={ScaleType.Ordinal}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            splitSeriesAccessors={['g']}
             data={series.value!}
-            color={series.color}
+            stackAccessors={['y']}
+            customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
           />
         );
       })}
-      {/*
-// @ts-ignore */}
-      <EuiXAxis />
-      {/*
-// @ts-ignore */}
-      <EuiYAxis tickFormat={getYaxis} />
-    </SeriesChart>
+
+      <Axis
+        id={getAxisId(`stat-items-barchart-${data[0].key}-x`)}
+        position={Position.Bottom}
+        tickSize={0}
+        tickFormat={numberFormatter}
+      />
+      <Axis
+        id={getAxisId(`stat-items-barchart-${data[0].key}-y`)}
+        position={Position.Left}
+        tickSize={0}
+      />
+    </Chart>
   ) : null;
 });
 
@@ -65,7 +90,7 @@ export const BarChartWithCustomPrompt = React.memo<{
     data.length &&
     data.some(
       ({ value }) =>
-        value != null && value.length > 0 && value.every(chart => chart.x != null && chart.x > 0)
+        value != null && value.length > 0 && value.every(chart => chart.y != null && chart.y > 0)
     ) ? (
     <BarChartBaseComponent height={height} width={width} data={data} />
   ) : (
@@ -84,12 +109,3 @@ export const BarChart = React.memo<{ barChart: BarChartData[] | null | undefined
     </AutoSizer>
   )
 );
-
-const SeriesChart = styled(EuiSeriesChart)`
-  svg
-    .rv-xy-plot__axis--horizontal
-    .rv-xy-plot__axis__ticks
-    .rv-xy-plot__axis__tick:not(:first-child):not(:last-child) {
-    display: none;
-  }
-`;

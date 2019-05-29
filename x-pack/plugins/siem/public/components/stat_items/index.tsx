@@ -86,8 +86,8 @@ export const useKpiMatrixStatus = (
     if (fields.length === 0) return [];
     return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
       const key: string = get('key', field);
-      const x: number | null = getOr(null, key, kpiHostData);
-      const y: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
+      const y: number | null = getOr(null, key, data);
+      const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
 
       return acc.concat([
         {
@@ -96,6 +96,7 @@ export const useKpiMatrixStatus = (
             {
               x,
               y,
+              g: key,
             },
           ],
         },
