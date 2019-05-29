@@ -29,7 +29,7 @@ import { AggConfigs } from 'ui/vis/agg_configs.js';
 import { IndexPatternsProvider } from 'ui/index_patterns';
 // @ts-ignore
 import { SearchSourceProvider } from 'ui/courier/search_source';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import chrome from 'ui/chrome';
 

@@ -28,7 +28,7 @@ import { Adapters } from 'ui/inspector';
 
 type getInitialContextFunction = () => KibanaContext;
 
-interface RunPipelineHandlers {
+export interface RunPipelineHandlers {
   getInitialContext: getInitialContextFunction;
   inspectorAdapters?: Adapters;
 }
