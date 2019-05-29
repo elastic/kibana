@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const unquoteString = str => {
+/**
+ * Removes single or double quotes if any exist around the given string
+ * @param str the string to unquote
+ * @returns the unquoted string
+ */
+export const unquoteString = (str: string): string => {
   if (/^"/.test(str)) {
     return str.replace(/^"(.+(?="$))"$/, '$1');
   }
