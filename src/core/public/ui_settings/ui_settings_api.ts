@@ -94,6 +94,13 @@ export class UiSettingsApi {
   }
 
   /**
+   * Report back if there are pending changes waiting to be sent.
+   */
+  public hasPendingChanges() {
+    return !!(this.pendingChanges && this.sendInProgress);
+  }
+
+  /**
    * If there are changes that need to be sent to the server and there is not already a
    * request in progress, this method will start a request sending those changes. Once
    * the request is complete `flushPendingChanges()` will be called again, and if the
@@ -137,13 +144,15 @@ export class UiSettingsApi {
     try {
       this.loadingCount$.next(this.loadingCount$.getValue() + 1);
 
-      return await this.http.fetch(path, {
+      const value = await this.http.fetch(path, {
         method,
         body: JSON.stringify(body),
         headers: {
           accept: 'application/json',
         },
       });
+
+      return value;
     } catch (err) {
       if (err.response && err.response.status >= 300) {
         throw new Error(`Request failed with status code: ${err.response.status}`);

@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { HttpFetchError } from 'target/types/public/http';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 
@@ -27,6 +28,8 @@ export interface HttpServiceBase {
   getBasePath(): string;
   prependBasePath(path: string): string;
   removeBasePath(path: string): string;
+  intercept(interceptor: HttpInterceptor): () => void;
+  removeAllInterceptors(): void;
   fetch: HttpHandler;
   delete: HttpHandler;
   get: HttpHandler;
@@ -80,4 +83,26 @@ export interface HttpFetchOptions extends HttpRequestInit {
 /** @public */
 export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
 /** @public */
-export type HttpBody = BodyInit | null;
+export type HttpBody = BodyInit | null | any;
+/** @public */
+export interface HttpResponse {
+  request: Request;
+  response?: Response;
+  body?: HttpBody;
+}
+/** @public */
+export interface HttpErrorResponse extends HttpResponse {
+  error: Error | HttpFetchError;
+}
+/** @public */
+export interface HttpErrorRequest {
+  request?: Request;
+  error: Error;
+}
+/** @public */
+export interface HttpInterceptor {
+  request?(request: Request): Promise<Request> | Request | void;
+  requestError?(httpErrorRequest: HttpErrorRequest): Promise<Request> | Request | void;
+  response?(httpResponse: HttpResponse): Promise<HttpResponse> | HttpResponse | void;
+  responseError?(httpErrorResponse: HttpErrorResponse): Promise<HttpResponse> | HttpResponse | void;
+}

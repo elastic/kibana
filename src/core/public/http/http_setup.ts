@@ -32,7 +32,7 @@ import { format } from 'url';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { modifyUrl } from '../utils';
-import { HttpBody, HttpFetchOptions, HttpServiceBase } from './types';
+import { HttpFetchOptions, HttpServiceBase, HttpInterceptor, HttpResponse } from './types';
 import { HttpFetchError } from './http_fetch_error';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
@@ -44,8 +44,19 @@ export const setup = (
 ): HttpServiceBase => {
   const loadingCount$ = new BehaviorSubject(0);
   const stop$ = new Subject();
+  const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
   const basePath = injectedMetadata.getBasePath() || '';
+
+  function intercept(interceptor: HttpInterceptor) {
+    interceptors.add(interceptor);
+
+    return () => interceptors.delete(interceptor);
+  }
+
+  function removeAllInterceptors() {
+    interceptors.clear();
+  }
 
   function prependBasePath(path: string): string {
     return modifyUrl(path, parts => {
@@ -55,7 +66,7 @@ export const setup = (
     });
   }
 
-  async function fetch(path: string, options?: HttpFetchOptions): Promise<HttpBody> {
+  function createRequest(path: string, options?: HttpFetchOptions) {
     const { query, prependBasePath: shouldPrependBasePath, ...fetchOptions } = merge(
       {
         method: 'GET',
@@ -82,11 +93,87 @@ export const setup = (
       delete fetchOptions.headers['Content-Type'];
     }
 
+    return new Request(url, fetchOptions);
+  }
+
+  // Request/response interceptors are called in opposite orders.
+  // Request hooks start from the newest interceptor and end with the oldest.
+  function interceptRequest(request: Request): Promise<Request> {
+    let next = request;
+
+    return [...interceptors].reduceRight(
+      (promise, interceptor) =>
+        promise.then(
+          async (current: Request) => {
+            if (!interceptor.request) {
+              return current;
+            }
+
+            next = (await interceptor.request(current)) || current;
+
+            return next;
+          },
+          async error => {
+            if (!interceptor.requestError) {
+              throw error;
+            }
+
+            const nextRequest = await interceptor.requestError({ error, request: next });
+
+            if (!nextRequest) {
+              throw error;
+            }
+
+            next = nextRequest;
+            return next;
+          }
+        ),
+      Promise.resolve(request)
+    );
+  }
+
+  // Response hooks start from the oldest interceptor and end with the newest.
+  async function interceptResponse(responsePromise: Promise<HttpResponse>) {
+    let current: HttpResponse;
+
+    const finalHttpResponse = await [...interceptors].reduce(
+      (promise, interceptor) =>
+        promise.then(
+          async httpResponse => {
+            if (!interceptor.response) {
+              return httpResponse;
+            }
+
+            current = (await interceptor.response(httpResponse)) || httpResponse;
+
+            return current;
+          },
+          async error => {
+            if (!interceptor.responseError) {
+              throw error;
+            }
+
+            const next = await interceptor.responseError({ ...current, error });
+
+            if (!next) {
+              throw error;
+            }
+
+            return next;
+          }
+        ),
+      responsePromise
+    );
+
+    return finalHttpResponse.body;
+  }
+
+  async function fetcher(request: Request): Promise<HttpResponse> {
     let response;
     let body = null;
 
     try {
-      response = await window.fetch(url, fetchOptions as RequestInit);
+      response = await window.fetch(request);
     } catch (err) {
       throw new HttpFetchError(err.message);
     }
@@ -115,7 +202,12 @@ export const setup = (
       throw new HttpFetchError(response.statusText, response, body);
     }
 
-    return body;
+    return { response, body, request };
+    // return body;
+  }
+
+  async function fetch(path: string, options: HttpFetchOptions = {}) {
+    return interceptResponse(interceptRequest(createRequest(path, options)).then(fetcher));
   }
 
   function shorthand(method: string) {
@@ -189,6 +281,8 @@ export const setup = (
     getBasePath,
     prependBasePath,
     removeBasePath,
+    intercept,
+    removeAllInterceptors,
     fetch,
     delete: shorthand('DELETE'),
     get: shorthand('GET'),
