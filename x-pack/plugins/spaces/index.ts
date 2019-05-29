@@ -10,8 +10,6 @@ import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { HttpServiceSetup } from 'src/core/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
-// @ts-ignore
-import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
