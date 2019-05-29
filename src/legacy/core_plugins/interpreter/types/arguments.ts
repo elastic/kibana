@@ -17,14 +17,7 @@
  * under the License.
  */
 
-import { UnwrapPromise } from './common';
-
-/**
- * This type can convert a type into a known Expression Argument string. For example,
- * `TypeToArgumentString<Datatable>` will resolve to `'datatable'`.  This allows
- * Expression Functions to continue to specify their type in a simple string format.
- */
-export type TypeToArgumentString<T> = KnownTypeToArgumentString<T> | UnmappedArgumentStrings;
+import { KnownTypeToString, TypeString, UnmappedTypeStrings } from './common';
 
 /**
  * This type represents all of the possible combinations of properties of an
@@ -38,6 +31,7 @@ export type ArgumentType<T> =
   | UnresolvedMultipleArgumentType<T>;
 
 /**
+<<<<<<< HEAD
  * Map the type of the generic to a string-based representation of the type.
  *
  * If the provided generic is its own type interface, we use the value of
@@ -68,12 +62,14 @@ type ArgumentString<T> = KnownTypeToArgumentString<UnwrapPromise<T>>;
 type UnmappedArgumentStrings = 'date' | 'filter';
 
 /**
+=======
+>>>>>>> 916916951a... Update ArgumentString-related types to simply be TypeString.
  * Map the type within the the generic array to a string-based
  * representation of the type.
  */
 // prettier-ignore
 type ArrayTypeToArgumentString<T> = 
-  T extends Array<infer ElementType> ? ArgumentString<ElementType> : 
+  T extends Array<infer ElementType> ? TypeString<ElementType> : 
   T extends null ? 'null' : 
   never;
 
@@ -83,7 +79,7 @@ type ArrayTypeToArgumentString<T> =
  */
 // prettier-ignore
 type UnresolvedTypeToArgumentString<T> = 
-  T extends (...args: any) => infer ElementType ? ArgumentString<ElementType> : 
+  T extends (...args: any) => infer ElementType ? TypeString<ElementType> : 
   T extends null ? 'null' : 
   never;
 
@@ -93,7 +89,7 @@ type UnresolvedTypeToArgumentString<T> =
  */
 // prettier-ignore
 type UnresolvedArrayTypeToArgumentString<T> = 
-  T extends Array<(...args: any) => infer ElementType> ? ArgumentString<ElementType> :
+  T extends Array<(...args: any) => infer ElementType> ? TypeString<ElementType> :
   T extends (...args: any) => infer ElementType ? ArrayTypeToArgumentString<ElementType> : 
   T extends null ? 'null' : 
   never;
@@ -137,7 +133,7 @@ interface BaseArgumentType<T> {
 type SingleArgumentType<T> = BaseArgumentType<T> & {
   multi?: false;
   resolve?: true;
-  types?: Array<KnownTypeToArgumentString<T> | UnmappedArgumentStrings>;
+  types?: Array<KnownTypeToString<T> | UnmappedTypeStrings>;
 };
 
 /**
@@ -149,7 +145,7 @@ type SingleArgumentType<T> = BaseArgumentType<T> & {
 type MultipleArgumentType<T> = BaseArgumentType<T> & {
   multi: true;
   resolve?: true;
-  types?: Array<ArrayTypeToArgumentString<T> | UnmappedArgumentStrings>;
+  types?: Array<ArrayTypeToArgumentString<T> | UnmappedTypeStrings>;
 };
 
 /**
@@ -162,7 +158,7 @@ type MultipleArgumentType<T> = BaseArgumentType<T> & {
 type UnresolvedSingleArgumentType<T> = BaseArgumentType<T> & {
   multi?: false;
   resolve: false;
-  types?: Array<UnresolvedTypeToArgumentString<T> | UnmappedArgumentStrings>;
+  types?: Array<UnresolvedTypeToArgumentString<T> | UnmappedTypeStrings>;
 };
 
 /**
@@ -175,5 +171,5 @@ type UnresolvedSingleArgumentType<T> = BaseArgumentType<T> & {
 type UnresolvedMultipleArgumentType<T> = BaseArgumentType<T> & {
   multi: true;
   resolve: false;
-  types?: Array<UnresolvedArrayTypeToArgumentString<T> | UnmappedArgumentStrings>;
+  types?: Array<UnresolvedArrayTypeToArgumentString<T> | UnmappedTypeStrings>;
 };

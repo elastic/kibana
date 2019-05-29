@@ -17,7 +17,13 @@
  * under the License.
  */
 
-export { ArgumentType, TypeToArgumentString } from './arguments';
-export { UnwrapPromise } from './common';
+export { ArgumentType } from './arguments';
+export {
+  TypeToString,
+  KnownTypeToString,
+  TypeString,
+  UnmappedTypeStrings,
+  UnwrapPromise,
+} from './common';
 export { ExpressionFunction } from './functions';
 export * from '../common/types';
