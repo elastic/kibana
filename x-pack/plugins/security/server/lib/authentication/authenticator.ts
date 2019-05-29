@@ -12,6 +12,8 @@ import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
   BasicAuthenticationProvider,
+  KerberosAuthenticationProvider,
+  RequestWithLoginAttempt,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
@@ -37,6 +39,7 @@ const providerMap = new Map<
   ) => BaseAuthenticationProvider
 >([
   ['basic', BasicAuthenticationProvider],
+  ['kerberos', KerberosAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
   ['oidc', OIDCAuthenticationProvider],
@@ -163,7 +166,7 @@ class Authenticator {
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: Legacy.Request) {
+  async authenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const isSystemApiRequest = this.server.plugins.kibana.systemApi.isSystemApiRequest(request);
@@ -227,7 +230,7 @@ class Authenticator {
    * Deauthenticates current request.
    * @param request Request instance.
    */
-  async deauthenticate(request: Legacy.Request) {
+  async deauthenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const sessionValue = await this.getSessionValue(request);
@@ -307,8 +310,10 @@ export async function initAuthenticator(server: Legacy.Server) {
     return loginAttempts.get(request);
   });
 
-  server.expose('authenticate', (request: Legacy.Request) => authenticator.authenticate(request));
-  server.expose('deauthenticate', (request: Legacy.Request) =>
+  server.expose('authenticate', (request: RequestWithLoginAttempt) =>
+    authenticator.authenticate(request)
+  );
+  server.expose('deauthenticate', (request: RequestWithLoginAttempt) =>
     authenticator.deauthenticate(request)
   );
   server.expose('registerAuthScopeGetter', (scopeExtender: ScopesGetter) =>
