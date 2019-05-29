@@ -332,6 +332,12 @@ export function MeterGaugeProvider() {
         this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constraints');
       }
 
+      //center the visualization
+      const transformX = width / 2;
+      const transformY = height / 2 > maxRadius ? height / 2 : maxRadius;
+
+      svg.attr('transform', `translate(${transformX}, ${transformY})`);
+
       return series;
     }
   }
