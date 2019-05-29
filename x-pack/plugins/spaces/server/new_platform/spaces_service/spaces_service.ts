@@ -30,11 +30,6 @@ export interface SpacesServiceSetup {
   isInDefaultSpace(request: RequestFacade): boolean;
 }
 
-interface CacheEntry {
-  spaceId: string;
-  isInDefaultSpace: boolean;
-}
-
 interface SpacesServiceDeps {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;

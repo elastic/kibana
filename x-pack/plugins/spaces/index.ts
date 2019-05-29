@@ -7,7 +7,6 @@
 import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { HttpServiceSetup } from 'src/core/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
@@ -126,7 +125,7 @@ export const spaces = (kibana: Record<string, any>) =>
       } as unknown) as SpacesInitializerContext;
 
       const spacesHttpService: SpacesHttpServiceSetup = {
-        ...(kbnServer.newPlatform.setup.core.http as HttpServiceSetup),
+        ...kbnServer.newPlatform.setup.core.http,
         route: server.route.bind(server),
       };
 
@@ -134,9 +133,9 @@ export const spaces = (kibana: Record<string, any>) =>
         http: spacesHttpService,
         elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
         savedObjects: server.savedObjects,
-        usage: (server as any).usage,
+        usage: server.usage,
         tutorial: {
-          addScopedTutorialContextFactory: (server as any).addScopedTutorialContextFactory,
+          addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
         },
         capabilities: {
           registerCapabilitiesModifier: server.registerCapabilitiesModifier,
