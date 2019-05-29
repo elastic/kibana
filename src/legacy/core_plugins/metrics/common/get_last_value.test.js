@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import getLastValue from './get_last_value';
+import { getLastValue } from './get_last_value';
 
 describe('getLastValue(data)', () => {
   test('should returns data if data is not array', () => {

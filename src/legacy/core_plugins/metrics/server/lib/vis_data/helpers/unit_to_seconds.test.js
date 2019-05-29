@@ -33,6 +33,12 @@ describe('unit_to_seconds', () => {
         unit: 'd',
       }));
 
+    test('should parse "0.5d" interval (positive)', () =>
+      expect(parseInterval('0.5d')).toEqual({
+        value: 0.5,
+        unit: 'd',
+      }));
+
     test('should parse "30M" interval (positive)', () =>
       expect(parseInterval('30M')).toEqual({
         value: 30,
@@ -63,6 +69,12 @@ describe('unit_to_seconds', () => {
       expect(convertIntervalToUnit('30m', 'h')).toEqual({
         value: 0.5,
         unit: 'h',
+      }));
+
+    test('should convert "0.5h" interval to "m" unit (positive)', () =>
+      expect(convertIntervalToUnit('0.5h', 'm')).toEqual({
+        value: 30,
+        unit: 'm',
       }));
 
     test('should convert "1h" interval to "m" unit (positive)', () =>

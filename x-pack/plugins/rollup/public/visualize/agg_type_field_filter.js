@@ -12,7 +12,7 @@ export function initAggTypeFieldFilter() {
    * and limit available fields for a given aggType based on that.
    */
   aggTypeFieldFilters.addFilter(
-    (field, fieldParamType, aggConfig) => {
+    (field, fieldParamType, aggConfig) => { // eslint-disable-line no-unused-vars
       const indexPattern = aggConfig.getIndexPattern();
       if(!indexPattern || indexPattern.type !== 'rollup') {
         return true;
