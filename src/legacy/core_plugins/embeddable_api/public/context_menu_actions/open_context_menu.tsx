@@ -144,7 +144,7 @@ export function openContextMenu(
     <I18nContext>
       <EuiPopover
         id="dashboardPanelContextMenu"
-        className="dshPanel_optionsMenuPopover"
+        className="embPanel_optionsMenuPopover"
         button={container}
         isOpen={true}
         closePopover={onClose}

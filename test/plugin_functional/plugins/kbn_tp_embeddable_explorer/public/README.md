@@ -13,3 +13,9 @@ and be sure to load the data
 node scripts/es_archiver.js load dashboard/current/data
 node scripts/es_archiver.js load dashboard/current/kibana
 ```
+
+alternatively you can run them via
+
+```
+yarn start --plugin-path test/plugin_functional/plugins/kbn_tp_embeddable_explorer
+```

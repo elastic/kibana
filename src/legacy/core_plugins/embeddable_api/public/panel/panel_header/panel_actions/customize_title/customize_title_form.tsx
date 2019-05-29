@@ -43,7 +43,7 @@ function CustomizeTitleFormUi({
   }
 
   return (
-    <div className="dshPanel__optionsMenuForm" data-test-subj="dashboardPanelTitleInputMenuItem">
+    <div className="embPanel__optionsMenuForm" data-test-subj="dashboardPanelTitleInputMenuItem">
       <EuiFormRow
         label={intl.formatMessage({
           id: 'kbn.dashboard.panel.optionsMenuForm.panelTitleFormRowLabel',

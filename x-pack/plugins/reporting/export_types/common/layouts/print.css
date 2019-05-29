@@ -107,7 +107,7 @@ visualize-app .visEditor__canvas {
 *  Dashboard tweaks
 */
 
-.dshPanel__header {
+.embPanel__header {
   /* hide the panel heading with the controls in it like expand */
   display: none !important;
 }
