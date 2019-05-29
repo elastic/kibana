@@ -375,6 +375,8 @@ describe('UrlStateContainer', () => {
   });
 
   describe('handleInitialize', () => {
+    // silly that this needs to be an array and not an object
+    // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
     const testCases = [
       [
         /* page */ CONSTANTS.networkPage,
