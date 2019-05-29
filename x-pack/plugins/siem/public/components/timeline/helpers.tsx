@@ -5,6 +5,7 @@
  */
 
 import { isEmpty, isNumber, get } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
@@ -15,16 +16,27 @@ import { BrowserFields } from '../../containers/source';
 const converTimestampFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
 
-const getBrowserFieldPath = (field: string) => {
-  const splitFields = field.split('.');
-  if (splitFields.length === 1) {
-    return `base.fields.${field}`;
+const getBasicFields = memoizeOne(
+  (browserFields: BrowserFields): string[] => {
+    const baseFields = get('base', browserFields);
+    if (baseFields != null && baseFields.fields != null) {
+      return Object.keys(baseFields.fields);
+    }
+    return [];
   }
-  return `${splitFields[0]}.fields.${field}`;
+);
+
+const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
+  const splitFields = field.split('.');
+  const basicFields = getBasicFields(browserFields);
+  if (basicFields.includes(field)) {
+    return ['base', 'fields', field];
+  }
+  return [splitFields[0], 'fields', field];
 };
 
 const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => {
-  const pathBrowserField = getBrowserFieldPath(field);
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
   const browserField = get(pathBrowserField, browserFields);
   if (browserField != null && browserField.type === 'date') {
     return true;

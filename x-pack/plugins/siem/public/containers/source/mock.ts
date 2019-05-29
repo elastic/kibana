@@ -593,6 +593,21 @@ export const mockBrowserFields: BrowserFields = {
       },
     },
   },
+  event: {
+    fields: {
+      'event.end': {
+        category: 'event',
+        description:
+          'event.end contains the date when the event ended or when the activity was last observed.',
+        example: null,
+        indexes: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        name: 'event.end',
+        searchable: true,
+        type: 'date',
+        aggregatable: true,
+      },
+    },
+  },
   source: {
     fields: {
       'source.ip': {

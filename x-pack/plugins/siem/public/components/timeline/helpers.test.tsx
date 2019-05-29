@@ -39,6 +39,22 @@ describe('Build KQL Query', () => {
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('( @timestamp: 1521848183232 )');
   });
 
+  test('Build KQL query with one data provider as date type (string input)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = 'event.end';
+    dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( event.end: 1521848183232 )');
+  });
+
+  test('Buld KQL query with one data provider as date type (numeric input)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = 'event.end';
+    dataProviders[0].queryMatch.value = 1521848183232;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( event.end: 1521848183232 )');
+  });
+
   test('Build KQL query with two data provider', () => {
     const dataProviders = mockDataProviders.slice(0, 2);
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
@@ -68,6 +84,24 @@ describe('Build KQL Query', () => {
     dataProviders[0].and[0].queryMatch.value = 1521848183232;
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('( name : Provider 1 and @timestamp: 1521848183232)');
+  });
+
+  test('Build KQL query with one data provider and one and as date type (string input)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(1, 2));
+    dataProviders[0].and[0].queryMatch.field = 'event.end';
+    dataProviders[0].and[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( name : Provider 1 and event.end: 1521848183232)');
+  });
+
+  test('Build KQL query with one data provider and one and as date type (numeric input)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(1, 2));
+    dataProviders[0].and[0].queryMatch.field = 'event.end';
+    dataProviders[0].and[0].queryMatch.value = 1521848183232;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('( name : Provider 1 and event.end: 1521848183232)');
   });
 
   test('Build KQL query with two data provider and multiple and', () => {
@@ -137,6 +171,42 @@ describe('Combined Queries', () => {
     )!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
+    );
+  });
+
+  test('Only Data Provider with a date type (string input)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = 'event.end';
+    dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
+    const { filterQuery } = combineQueries(
+      dataProviders,
+      mockIndexPattern,
+      mockBrowserFields,
+      '',
+      'search',
+      startDate,
+      endDate
+    )!;
+    expect(filterQuery).toEqual(
+      '{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
+    );
+  });
+
+  test('Only Data Provider with date type (numeric input)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = 'event.end';
+    dataProviders[0].queryMatch.value = 1521848183232;
+    const { filterQuery } = combineQueries(
+      dataProviders,
+      mockIndexPattern,
+      mockBrowserFields,
+      '',
+      'search',
+      startDate,
+      endDate
+    )!;
+    expect(filterQuery).toEqual(
+      '{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
   });
 
