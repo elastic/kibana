@@ -106,12 +106,10 @@ describe('ply', () => {
       });
 
       it('throws when row counts do not match across resulting datatables', () => {
-        expect(() =>
-          fn(testTable, {
-            by: ['name'],
-            expression: [doublePrice, rowCount],
-          })
-        ).to.throwException(new RegExp(errors.rowCountMismatch().message));
+        return fn(testTable, {
+          by: ['name'],
+          expression: [doublePrice, rowCount],
+        }).catch(e => expect(e).to.eql(errors.rowCountMismatch()));
       });
     });
   });
