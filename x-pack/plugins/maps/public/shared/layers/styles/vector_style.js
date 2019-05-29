@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getHexColorRangeStrings } from '../../utils/color_utils';
+import { getColorRampStops } from './color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
@@ -369,20 +369,13 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
-    // colorStops is an array of color stops
-    // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-    const colorStops = getHexColorRangeStrings(color, 8)
-      .reduce((accu, stopColor, idx, srcArr) => {
-        const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
-        return [ ...accu, stopNumber, stopColor ];
-      }, []);
-    const computedName = VectorStyle.getComputedFieldName(fieldName);
-
+    const colorStops = getColorRampStops(color);
+    const targetName = VectorStyle.getComputedFieldName(fieldName);
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['feature-state', computedName], -1], // extract value from feature state, default to -1 if no value provided
-      -1, 'rgba(0,0,0,0)',  // define stop with no data, color is irrelevant since opacity is set to zero
+      ['coalesce', ['feature-state', targetName], -1],
+      -1, 'rgba(0,0,0,0)',
       ...colorStops
     ];
   }

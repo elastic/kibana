@@ -165,5 +165,4 @@ Expression.propTypes = {
   error: PropTypes.string,
   isAutocompleteEnabled: PropTypes.bool,
   toggleAutocompleteEnabled: PropTypes.func,
-  runExpressionShortcut: PropTypes.string.isRequired,
 };
