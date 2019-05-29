@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import { adoptToHapiOnPostAuthFormat } from './on_post_auth';
 
-const requestMock = {} as any;
+const requestMock = { route: { settings: {} } } as any;
 const createResponseToolkit = (customization = {}): any => ({ ...customization });
 
 describe('adoptToHapiOnPostAuthFormat', () => {

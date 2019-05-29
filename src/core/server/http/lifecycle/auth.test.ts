@@ -23,7 +23,7 @@ import { adoptToHapiAuthFormat } from './auth';
 const SessionStorageMock = {
   asScoped: () => null as any,
 };
-const requestMock = {} as any;
+const requestMock = { route: { settings: {} } } as any;
 const createResponseToolkit = (customization = {}): any => ({ ...customization });
 
 describe('adoptToHapiAuthFormat', () => {

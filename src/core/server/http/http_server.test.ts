@@ -690,6 +690,7 @@ test('#setBasePathFor() cannot be set twice for one request', async () => {
           raw: {
             req: incomingMessage,
           },
+          route: { settings: {} },
         } as any,
         undefined
       );
@@ -739,7 +740,9 @@ test('Should support disabling auth for a route', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
-  router.get({ path: '/', validate: false, authRequired: false }, async (req, res) => res.ok({}));
+  router.get({ path: '/', validate: false, options: { authRequired: false } }, async (req, res) =>
+    res.ok({})
+  );
   registerRouter(router);
   const authenticate = jest.fn();
   await registerAuth(authenticate, cookieOptions);
@@ -774,7 +777,7 @@ describe('#auth.isAuthenticated()', () => {
     const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(config);
 
     const router = new Router('');
-    router.get({ path: '/', validate: false, authRequired: false }, async (req, res) =>
+    router.get({ path: '/', validate: false, options: { authRequired: false } }, async (req, res) =>
       res.ok({ isAuthenticated: auth.isAuthenticated(req) })
     );
     registerRouter(router);
@@ -791,7 +794,7 @@ describe('#auth.isAuthenticated()', () => {
     const { registerRouter, server: innerServer, auth } = await server.setup(config);
 
     const router = new Router('');
-    router.get({ path: '/', validate: false, authRequired: false }, async (req, res) =>
+    router.get({ path: '/', validate: false, options: { authRequired: false } }, async (req, res) =>
       res.ok({ isAuthenticated: auth.isAuthenticated(req) })
     );
     registerRouter(router);
@@ -840,7 +843,7 @@ describe('#auth.get()', () => {
     const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(config);
     await registerAuth(authenticate, cookieOptions);
     const router = new Router('');
-    router.get({ path: '/', validate: false, authRequired: false }, async (req, res) =>
+    router.get({ path: '/', validate: false, options: { authRequired: false } }, async (req, res) =>
       res.ok(auth.get(req))
     );
 

@@ -20,7 +20,12 @@
 import Boom from 'boom';
 import { adoptToHapiOnPreAuthFormat } from './on_pre_auth';
 
-const requestMock = {} as any;
+const createRequestMock = (customization: object = {}) =>
+  ({
+    route: { settings: {} },
+    raw: { req: {} },
+    ...customization,
+  } as any);
 const createResponseToolkit = (customization = {}): any => ({ ...customization });
 
 describe('adoptToHapiOnPreAuthFormat', () => {
@@ -28,7 +33,7 @@ describe('adoptToHapiOnPreAuthFormat', () => {
     const continueSymbol = {};
     const onPreAuth = adoptToHapiOnPreAuthFormat((req, t) => t.next());
     const result = await onPreAuth(
-      requestMock,
+      createRequestMock(),
       createResponseToolkit({
         ['continue']: continueSymbol,
       })
@@ -43,7 +48,7 @@ describe('adoptToHapiOnPreAuthFormat', () => {
     const takeoverSymbol = {};
     const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
     const result = await onPreAuth(
-      requestMock,
+      createRequestMock(),
       createResponseToolkit({
         redirect: redirectMock,
       })
@@ -60,16 +65,16 @@ describe('adoptToHapiOnPreAuthFormat', () => {
     );
     const continueSymbol = {};
     const setUrl = jest.fn();
-    const reqMock = { setUrl, raw: { req: {} } } as any;
+    const requestMock = createRequestMock({ setUrl });
     const result = await onPreAuth(
-      reqMock as any,
+      requestMock,
       createResponseToolkit({
         ['continue']: continueSymbol,
       })
     );
 
     expect(setUrl).toBeCalledWith(redirectUrl);
-    expect(reqMock.raw.req.url).toBe(redirectUrl);
+    expect(requestMock.raw.req.url).toBe(redirectUrl);
     expect(result).toBe(continueSymbol);
   });
 
@@ -77,7 +82,7 @@ describe('adoptToHapiOnPreAuthFormat', () => {
     const onPreAuth = adoptToHapiOnPreAuthFormat((req, t) => {
       return t.rejected(new Error('unexpected result'), { statusCode: 501 });
     });
-    const result = (await onPreAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onPreAuth(createRequestMock(), createResponseToolkit())) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('unexpected result');
@@ -88,7 +93,7 @@ describe('adoptToHapiOnPreAuthFormat', () => {
     const onPreAuth = adoptToHapiOnPreAuthFormat((req, t) => {
       throw new Error('unknown error');
     });
-    const result = (await onPreAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onPreAuth(createRequestMock(), createResponseToolkit())) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('unknown error');
@@ -97,7 +102,7 @@ describe('adoptToHapiOnPreAuthFormat', () => {
 
   it('Should return Boom.internal error if interceptor returns unexpected result', async () => {
     const onPreAuth = adoptToHapiOnPreAuthFormat((req, toolkit) => undefined as any);
-    const result = (await onPreAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onPreAuth(createRequestMock(), createResponseToolkit())) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toMatchInlineSnapshot(
