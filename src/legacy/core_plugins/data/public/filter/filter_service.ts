@@ -17,13 +17,32 @@
  * under the License.
  */
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from '../modules';
-import { FilterBar } from './filter_bar';
+import { once } from 'lodash';
+import { FilterBar, setupDirective as setupFilterBarDirective } from './filter_bar';
+import { ApplyFiltersPopover, setupDirective as setupApplyFiltersDirective } from './apply_filters';
 
-const app = uiModules.get('app/kibana', ['react']);
+/**
+ * FilterSearch Service
+ * @internal
+ */
+export class FilterService {
+  public setup() {
+    return {
+      ui: {
+        ApplyFiltersPopover,
+        FilterBar,
+      },
+      loadLegacyDirectives: once(() => {
+        setupFilterBarDirective();
+        setupApplyFiltersDirective();
+      }),
+    };
+  }
 
-app.directive('filterBar', reactDirective => {
-  return reactDirective(wrapInI18nContext(FilterBar));
-});
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type FilterSetup = ReturnType<FilterService['setup']>;

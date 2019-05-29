@@ -26,7 +26,6 @@ import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 
 import { capabilities } from 'ui/capabilities';
-import 'ui/apply_filters';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
@@ -55,8 +54,6 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { getNewPlatform } from 'ui/new_platform';
 
-import { data } from 'plugins/data';
-data.search.loadLegacyDirectives();
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
