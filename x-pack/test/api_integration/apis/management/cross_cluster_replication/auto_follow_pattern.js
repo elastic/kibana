@@ -19,6 +19,8 @@ export default function ({ getService }) {
     loadAutoFollowPatterns,
     getAutoFollowPattern,
     createAutoFollowPattern,
+    updateAutoFollowPattern,
+    deleteAutoFollowPattern,
     deleteAllAutoFollowPatterns
   } = registerAutoFollowPatternHelpers(supertest);
 
@@ -72,6 +74,32 @@ export default function ({ getService }) {
           const { body } = await getAutoFollowPattern(name).expect(200);
 
           expect(body).to.eql({ ...autoFollowPattern, name });
+        });
+      });
+
+      describe('update()', () => {
+        it('should update an auto-follow pattern', async () => {
+          const name = getRandomString();
+          const updatedLeaderIndexPattern = getRandomString();
+          const autoFollowPattern = getAutoFollowIndexPayload();
+
+          await createAutoFollowPattern(name, autoFollowPattern);
+          await updateAutoFollowPattern(name, { ...autoFollowPattern, leaderIndexPatterns: [updatedLeaderIndexPattern] });
+          const { body } = await getAutoFollowPattern(name);
+
+          expect(body.leaderIndexPatterns).to.eql([updatedLeaderIndexPattern]);
+        });
+      });
+
+      describe('delete()', () => {
+        it('should delete an auto-follow pattern', async () => {
+          const name = getRandomString();
+          const autoFollowPattern = getAutoFollowIndexPayload();
+
+          await createAutoFollowPattern(name, autoFollowPattern);
+          await deleteAutoFollowPattern(name);
+
+          await getAutoFollowPattern(name).expect(404);
         });
       });
     });

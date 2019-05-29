@@ -24,6 +24,13 @@ export const registerHelpers = (supertest) => {
       .send({ ...payload, id: name });
   };
 
+  const updateAutoFollowPattern = (id, payload) => (
+    supertest
+      .put(`${API_BASE_PATH}/auto_follow_patterns/${id}`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ...payload, id })
+  );
+
   const deleteAutoFollowPattern = (name) => {
     autoFollowPatternsCreated = autoFollowPatternsCreated.filter(c => c !== name);
 
@@ -43,6 +50,7 @@ export const registerHelpers = (supertest) => {
     loadAutoFollowPatterns,
     getAutoFollowPattern,
     createAutoFollowPattern,
+    updateAutoFollowPattern,
     deleteAutoFollowPattern,
     deleteAllAutoFollowPatterns
   };
