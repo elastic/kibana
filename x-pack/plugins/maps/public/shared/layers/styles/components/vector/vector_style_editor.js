@@ -9,8 +9,10 @@ import React, { Component, Fragment } from 'react';
 
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
+import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
+import { SYMBOLIZE_AS_CIRCLE } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
@@ -135,16 +137,36 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderPointProperties() {
+    let lineColor;
+    let lineWidth;
+    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE)  {
+      lineColor = (
+        <Fragment>
+          {this._renderLineColor()}
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+      lineWidth = (
+        <Fragment>
+          {this._renderLineWidth()}
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+    }
+
     return (
       <Fragment>
+        <VectorStyleSymbolEditor
+          styleOptions={this.props.styleProperties.symbol.options}
+          handlePropertyChange={this.props.handlePropertyChange}
+        />
+
         {this._renderFillColor()}
         <EuiSpacer size="m" />
 
-        {this._renderLineColor()}
-        <EuiSpacer size="m" />
+        {lineColor}
 
-        {this._renderLineWidth()}
-        <EuiSpacer size="m" />
+        {lineWidth}
 
         {this._renderSymbolSize()}
       </Fragment>

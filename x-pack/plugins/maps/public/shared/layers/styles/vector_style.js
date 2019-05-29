@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
-import { getDefaultStaticProperties } from './vector_style_defaults';
+import { getDefaultProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constants';
 import { VectorIcon } from './components/vector/legend/vector_icon';
@@ -37,12 +37,12 @@ export class VectorStyle extends AbstractStyle {
   static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
-      properties: { ...getDefaultStaticProperties(), ...properties }
+      properties: { ...getDefaultProperties(), ...properties }
     };
   }
 
   static createDefaultStyleProperties(mapColors) {
-    return getDefaultStaticProperties(mapColors);
+    return getDefaultProperties(mapColors);
   }
 
   static getDisplayName() {

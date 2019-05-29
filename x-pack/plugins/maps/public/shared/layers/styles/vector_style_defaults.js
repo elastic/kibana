@@ -5,12 +5,26 @@
  */
 
 import { VectorStyle } from './vector_style';
+import { SYMBOLIZE_AS_CIRCLE } from './vector_constants';
 import { COLOR_GRADIENTS } from './components/vector/color/color_ramp_select';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
+const DEFAULT_ICON = 'airfield 15';
 
 export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
+
+export function getDefaultProperties(mapColors = []) {
+  return {
+    ...getDefaultStaticProperties(mapColors),
+    symbol: {
+      options: {
+        symbolizeAs: SYMBOLIZE_AS_CIRCLE,
+        symbolId: DEFAULT_ICON,
+      }
+    },
+  };
+}
 
 export function getDefaultStaticProperties(mapColors = []) {
   // Colors must be state-aware to reduce unnecessary incrementation
@@ -42,7 +56,7 @@ export function getDefaultStaticProperties(mapColors = []) {
       options: {
         size: 10
       }
-    },
+    }
   };
 }
 
@@ -73,6 +87,6 @@ export function getDefaultDynamicProperties() {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE
       }
-    },
+    }
   };
 }
