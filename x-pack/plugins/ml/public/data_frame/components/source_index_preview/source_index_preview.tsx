@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent, useContext, useState } from 'react';
+import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
 
@@ -36,7 +37,9 @@ interface ExpandableTableProps extends EuiInMemoryTableProps {
 
 const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
 
+import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { Dictionary } from '../../../../common/types/common';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 import { isKibanaContext, KibanaContext, PivotQuery } from '../../common';
 
@@ -208,15 +211,23 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     const column = {
       field: `_source.${k}`,
       name: k,
-      render: undefined,
       sortable: true,
       truncateText: true,
     } as Dictionary<any>;
 
+    const field = indexPattern.fields.find(f => f.name === k);
+    const render = (d: string) => {
+      return field !== undefined && field.type === KBN_FIELD_TYPES.DATE
+        ? formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000)
+        : d;
+    };
+
+    column.render = render;
+
     if (CELL_CLICK_ENABLED && cellClick) {
       column.render = (d: string) => (
         <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
-          {d}
+          {render(d)}
         </EuiButtonEmpty>
       );
     }

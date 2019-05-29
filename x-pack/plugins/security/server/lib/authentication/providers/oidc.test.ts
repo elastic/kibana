@@ -6,6 +6,7 @@
 
 import sinon from 'sinon';
 import Boom from 'boom';
+import { LoginAttempt } from '../login_attempt';
 
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { requestFixture } from '../../__tests__/__fixtures__/request';
@@ -31,6 +32,23 @@ describe('OIDCAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, null);
 
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle requests with non-empty `loginAttempt`.', async () => {
+      const request = requestFixture();
+
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('user', 'password');
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      });
+
+      sinon.assert.notCalled(callWithRequest);
+      sinon.assert.notCalled(callWithInternalUser);
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
