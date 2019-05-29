@@ -132,7 +132,6 @@ class Authenticator {
   /**
    * Instantiates Authenticator and bootstrap configured providers.
    * @param server Server instance.
-   * @param authScope AuthScopeService instance.
    * @param session Session instance.
    */
   constructor(private readonly server: Legacy.Server, private readonly session: Session) {
@@ -208,7 +207,7 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
-        return AuthenticationResult.succeeded(authenticationResult.user as any);
+        return AuthenticationResult.succeeded(authenticationResult.user!);
       } else if (authenticationResult.redirected()) {
         return authenticationResult;
       }

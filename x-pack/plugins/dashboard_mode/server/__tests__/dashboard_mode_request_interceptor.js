@@ -62,7 +62,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
     });
   });
 
-  describe('request does not have `xpack:dashboardMode` scope', () => {
+  describe('request is not for dashboad-only user', () => {
     describe('app route', () => {
       it('lets the route render as normal', async () => {
         const { server } = setup();
@@ -102,7 +102,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
     });
   });
 
-  describe('request has correct auth scope scope', () => {
+  describe('request for dashboard-only user', () => {
     describe('non-kibana app route', () => {
       it('responds with 404', async () => {
         const { server } = setup();
