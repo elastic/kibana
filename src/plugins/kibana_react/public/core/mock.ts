@@ -18,10 +18,10 @@
  */
 
 import { Core } from './types';
-import { createInMemoryUiSettingsService } from './memory/ui_settings';
+import { uiSettingsServiceMock } from '../../../../core/public/mocks';
 
-export const createInMemoryCore = (): Core => {
-  const uiSettings = createInMemoryUiSettingsService();
+export const createMock = (): Core => {
+  const uiSettings = uiSettingsServiceMock.createSetupContract();
 
   const core: Partial<Core> = {
     uiSettings,

@@ -23,13 +23,32 @@ import { act, Simulate } from 'react-dom/test-utils';
 import { useUiSetting } from './use_ui_setting';
 import { createContext } from '../core';
 import { Core } from '../core/types';
-import { createInMemoryCore } from '../core/memory';
+import { createMock } from '../core/mock';
+import { Subject } from 'rxjs';
+import { useObservable } from '../util/use_observable';
+
+jest.mock('../util/use_observable');
+const useObservableSpy = (useObservable as any) as jest.SpyInstance;
+useObservableSpy.mockImplementation((observable, def) => def);
+
+const mock = (): [Core, Subject<any>] => {
+  const core = createMock() as Core;
+  const get = (core.uiSettings!.get as any) as jest.SpyInstance;
+  const get$ = (core.uiSettings!.get$ as any) as jest.SpyInstance;
+  const subject = new Subject();
+
+  get.mockImplementation(() => 'bar');
+  get$.mockImplementation(() => subject);
+
+  return [core, subject];
+};
 
 let container: HTMLDivElement | null;
 
 beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
+  useObservableSpy.mockClear();
 });
 
 afterEach(() => {
@@ -51,9 +70,8 @@ const TestConsumer: React.FC<{
   );
 };
 
-test('synchronously returns the latest value', async () => {
-  const core = createInMemoryCore() as Core;
-  await core.uiSettings!.set('foo', 'bar');
+test('synchronously renders setting value', async () => {
+  const [core] = mock();
   const { Provider } = createContext(core);
 
   ReactDOM.render(
@@ -65,10 +83,12 @@ test('synchronously returns the latest value', async () => {
 
   const strong = container!.querySelector('strong');
   expect(strong!.textContent).toBe('bar');
+  expect(core.uiSettings!.get).toHaveBeenCalledTimes(1);
+  expect((core.uiSettings!.get as any).mock.calls[0][0]).toBe('foo');
 });
 
-test('returns default value on non-existing key', async () => {
-  const core = createInMemoryCore() as Core;
+test('calls Core with correct arguments', async () => {
+  const core = createMock();
   const { Provider } = createContext(core);
 
   ReactDOM.render(
@@ -78,14 +98,14 @@ test('returns default value on non-existing key', async () => {
     container
   );
 
-  const strong = container!.querySelector('strong');
-  expect(strong!.textContent).toBe('DEFAULT');
+  expect(core.uiSettings!.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
 });
 
-test('re-renders with latest setting value as it changes', async () => {
-  const core = createInMemoryCore() as Core;
-  await core.uiSettings!.set('theme:darkMode', 'yes');
+test('subscribes to observable using useObservable', async () => {
+  const [core, subject] = mock();
   const { Provider } = createContext(core);
+
+  expect(useObservableSpy).toHaveBeenCalledTimes(0);
 
   ReactDOM.render(
     <Provider>
@@ -94,26 +114,12 @@ test('re-renders with latest setting value as it changes', async () => {
     container
   );
 
-  const strong = container!.querySelector('strong');
-  expect(strong!.textContent).toBe('yes');
-
-  let promise;
-  act(() => {
-    promise = core.uiSettings!.set('theme:darkMode', 'no');
-  });
-  await promise;
-  expect(strong!.textContent).toBe('no');
-
-  act(() => {
-    promise = core.uiSettings!.set('theme:darkMode', 'semidark');
-  });
-  await promise;
-  expect(strong!.textContent).toBe('semidark');
+  expect(useObservableSpy).toHaveBeenCalledTimes(1);
+  expect(useObservableSpy.mock.calls[0][0]).toBe(subject);
 });
 
 test('can set new hook value', async () => {
-  const core = createInMemoryCore() as Core;
-  await core.uiSettings!.set('a', 'b');
+  const [core] = mock();
   const { Provider } = createContext(core);
 
   ReactDOM.render(
@@ -123,12 +129,12 @@ test('can set new hook value', async () => {
     container
   );
 
-  const strong = container!.querySelector('strong');
-  expect(strong!.textContent).toBe('b');
+  expect(core.uiSettings!.set).toHaveBeenCalledTimes(0);
 
   act(() => {
     Simulate.click(container!.querySelector('button')!, {});
   });
 
-  expect(strong!.textContent).toBe('c');
+  expect(core.uiSettings!.set).toHaveBeenCalledTimes(1);
+  expect(core.uiSettings!.set).toHaveBeenCalledWith('a', 'c');
 });
