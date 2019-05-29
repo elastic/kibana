@@ -4,135 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeService } from '../action_type_service';
+import { TaskManager } from '../../../task_manager';
 import { createFireFunction } from '../create_fire_function';
 
-const mockEncryptedSavedObjects = {
-  isEncryptionError: jest.fn(),
-  registerType: jest.fn(),
-  getDecryptedAsInternalUser: jest.fn(),
+const mockTaskManager = {
+  schedule: jest.fn() as TaskManager['schedule'],
+} as TaskManager;
+
+const savedObjectsClient = {
+  errors: {} as any,
+  bulkCreate: jest.fn(),
+  bulkGet: jest.fn(),
+  create: jest.fn(),
+  delete: jest.fn(),
+  find: jest.fn(),
+  get: jest.fn(),
+  update: jest.fn(),
 };
 
+beforeEach(() => jest.resetAllMocks());
+
 describe('fire()', () => {
-  test('fires an action with all given parameters', async () => {
-    const actionTypeService = new ActionTypeService();
+  test('schedules the action with all given parameters', async () => {
     const fireFn = createFireFunction({
-      actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
+      taskManager: mockTaskManager,
+      savedObjectsClient,
     });
-    const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
-    actionTypeService.register({
-      id: 'mock',
-      name: 'Mock',
-      executor: mockActionType,
-    });
-    mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: 'mock-action',
+    savedObjectsClient.get.mockResolvedValueOnce({
       attributes: {
-        actionTypeId: 'mock',
-        actionTypeConfigSecrets: {
-          foo: true,
-        },
+        actionTypeId: 'mock-action',
       },
     });
-    const result = await fireFn({
-      id: 'mock-action',
+    await fireFn({
+      id: '123',
       params: { baz: false },
+      namespace: 'abc',
     });
-    expect(result).toEqual({ success: true });
-    expect(mockActionType).toMatchInlineSnapshot(`
+    expect(mockTaskManager.schedule).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
-        "actionTypeConfig": Object {
-          "foo": true,
-        },
         "params": Object {
-          "baz": false,
+          "actionTypeParams": Object {
+            "baz": false,
+          },
+          "id": "123",
+          "namespace": "abc",
         },
+        "scope": Array [
+          "alerting",
+        ],
+        "state": Object {},
+        "taskType": "actions:mock-action",
       },
     ],
   ],
   "results": Array [
     Object {
       "type": "return",
-      "value": Promise {},
+      "value": undefined,
     },
   ],
 }
 `);
-    expect(mockEncryptedSavedObjects.getDecryptedAsInternalUser.mock.calls).toEqual([
-      ['action', 'mock-action', { namespace: undefined }],
-    ]);
-  });
-
-  test(`throws an error when the action type isn't registered`, async () => {
-    const actionTypeService = new ActionTypeService();
-    const fireFn = createFireFunction({
-      actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
-    });
-    mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: 'mock-action',
-      attributes: {
-        actionTypeId: 'non-registered-action-type',
-        actionTypeConfigSecrets: {
-          foo: true,
-        },
-      },
-    });
-    await expect(
-      fireFn({ id: 'mock-action', params: { baz: false } })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"non-registered-action-type\\" is not registered."`
-    );
-  });
-
-  test('merges encrypted and unencrypted attributes', async () => {
-    const actionTypeService = new ActionTypeService();
-    const fireFn = createFireFunction({
-      actionTypeService,
-      encryptedSavedObjectsPlugin: mockEncryptedSavedObjects,
-    });
-    const mockActionType = jest.fn().mockResolvedValueOnce({ success: true });
-    actionTypeService.register({
-      id: 'mock',
-      name: 'Mock',
-      unencryptedAttributes: ['a', 'c'],
-      executor: mockActionType,
-    });
-    mockEncryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: 'mock-action',
-      attributes: {
-        actionTypeId: 'mock',
-        actionTypeConfig: {
-          a: true,
-          c: true,
-        },
-        actionTypeConfigSecrets: {
-          b: true,
-        },
-      },
-    });
-    const result = await fireFn({
-      id: 'mock-action',
-      params: { baz: false },
-    });
-    expect(result).toEqual({ success: true });
-    expect(mockActionType).toMatchInlineSnapshot(`
+    expect(savedObjectsClient.get).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
+      "action",
+      "123",
       Object {
-        "actionTypeConfig": Object {
-          "a": true,
-          "b": true,
-          "c": true,
-        },
-        "params": Object {
-          "baz": false,
-        },
+        "namespace": "abc",
       },
     ],
   ],

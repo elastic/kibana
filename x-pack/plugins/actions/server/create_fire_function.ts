@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeService } from './action_type_service';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { TaskManager } from '../../task_manager';
 
 interface CreateFireFunctionOptions {
-  actionTypeService: ActionTypeService;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  taskManager: TaskManager;
+  savedObjectsClient: SavedObjectsClient;
 }
 
 interface FireOptions {
@@ -18,22 +18,18 @@ interface FireOptions {
   namespace?: string;
 }
 
-export function createFireFunction({
-  actionTypeService,
-  encryptedSavedObjectsPlugin,
-}: CreateFireFunctionOptions) {
+export function createFireFunction({ taskManager, savedObjectsClient }: CreateFireFunctionOptions) {
   return async function fire({ id, params, namespace }: FireOptions) {
-    const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', id, {
-      namespace,
-    });
-    const mergedActionTypeConfig = {
-      ...action.attributes.actionTypeConfig,
-      ...action.attributes.actionTypeConfigSecrets,
-    };
-    return await actionTypeService.execute({
-      id: action.attributes.actionTypeId,
-      actionTypeConfig: mergedActionTypeConfig,
-      params,
+    const actionSavedObject = await savedObjectsClient.get('action', id, { namespace });
+    taskManager.schedule({
+      taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
+      params: {
+        id,
+        namespace,
+        actionTypeParams: params,
+      },
+      state: {},
+      scope: ['alerting'],
     });
   };
 }

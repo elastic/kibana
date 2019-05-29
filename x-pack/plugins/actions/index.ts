@@ -14,7 +14,7 @@ export function actions(kibana: any) {
   return new kibana.Plugin({
     id: 'actions',
     configPrefix: 'xpack.actions',
-    require: ['kibana', 'elasticsearch', 'encrypted_saved_objects'],
+    require: ['kibana', 'elasticsearch', 'task_manager', 'encrypted_saved_objects'],
     config(Joi: Root) {
       return Joi.object()
         .keys({

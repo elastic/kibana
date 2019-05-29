@@ -17,5 +17,21 @@ export interface SavedObjectReference {
 export interface ActionsPlugin {
   registerType: ActionTypeService['register'];
   listTypes: ActionTypeService['list'];
-  fire: ({ id, params }: { id: string; params: Record<string, any> }) => Promise<any>;
+  fire: ({ id, params }: { id: string; params: Record<string, any> }) => Promise<void>;
+}
+
+export interface ActionTypeExecutorOptions {
+  actionTypeConfig: Record<string, any>;
+  params: Record<string, any>;
+}
+
+export interface ActionType {
+  id: string;
+  name: string;
+  unencryptedAttributes?: string[];
+  validate?: {
+    params?: Record<string, any>;
+    actionTypeConfig?: Record<string, any>;
+  };
+  executor({ actionTypeConfig, params }: ActionTypeExecutorOptions): Promise<any>;
 }

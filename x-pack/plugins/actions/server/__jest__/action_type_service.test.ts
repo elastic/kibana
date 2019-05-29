@@ -4,24 +4,92 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+jest.mock('../get_create_task_runner_function', () => ({
+  getCreateTaskRunnerFunction: jest.fn(),
+}));
+
+import { TaskManager } from '../../../task_manager';
+import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import { ActionTypeService } from '../action_type_service';
+
+const mockTaskManager = {
+  registerTaskDefinitions: jest.fn() as TaskManager['registerTaskDefinitions'],
+} as TaskManager;
+
+const mockEncryptedSavedObjectsPlugin = {
+  getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
+} as EncryptedSavedObjectsPlugin;
+
+const actionTypeServiceParams = {
+  taskManager: mockTaskManager,
+  encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
+};
+
+beforeEach(() => jest.resetAllMocks());
 
 describe('register()', () => {
   test('able to register action types', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getCreateTaskRunnerFunction } = require('../get_create_task_runner_function');
+    getCreateTaskRunnerFunction.mockReturnValueOnce(jest.fn());
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
     expect(actionTypeService.has('my-action-type')).toEqual(true);
+    expect(mockTaskManager.registerTaskDefinitions).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "actions:my-action-type": Object {
+          "createTaskRunner": [MockFunction],
+          "title": "My action type",
+          "type": "actions:my-action-type",
+        },
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`);
+    expect(getCreateTaskRunnerFunction).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "actionType": Object {
+          "executor": [MockFunction],
+          "id": "my-action-type",
+          "name": "My action type",
+        },
+        "encryptedSavedObjectsPlugin": Object {
+          "getDecryptedAsInternalUser": [MockFunction],
+        },
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": [MockFunction],
+    },
+  ],
+}
+`);
   });
 
   test('throws error if action type already registered', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -41,7 +109,7 @@ describe('register()', () => {
 
 describe('get()', () => {
   test('returns action type', () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -58,7 +126,7 @@ Object {
   });
 
   test(`throws an error when action type doesn't exist`, () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     expect(() => actionTypeService.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"my-action-type\\" is not registered."`
     );
@@ -67,7 +135,7 @@ Object {
 
 describe('getUnencryptedAttributes()', () => {
   test('returns empty array when unencryptedAttributes is undefined', () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -78,7 +146,7 @@ describe('getUnencryptedAttributes()', () => {
   });
 
   test('returns values inside unencryptedAttributes array when it exists', () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -92,7 +160,7 @@ describe('getUnencryptedAttributes()', () => {
 
 describe('list()', () => {
   test('returns list of action types', () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -108,224 +176,20 @@ describe('list()', () => {
   });
 });
 
-describe('validateParams()', () => {
-  test('should pass when validation not defined', () => {
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      async executor() {},
-    });
-    actionTypeService.validateParams('my-action-type', {});
-  });
-
-  test('should validate and pass when params is valid', () => {
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
-      },
-      async executor() {},
-    });
-    actionTypeService.validateParams('my-action-type', { param1: 'value' });
-  });
-
-  test('should validate and throw error when params is invalid', () => {
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
-      },
-      async executor() {},
-    });
-    expect(() =>
-      actionTypeService.validateParams('my-action-type', {})
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
-    );
-  });
-});
-
-describe('validateActionTypeConfig()', () => {
-  test('should pass when validation not defined', () => {
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      async executor() {},
-    });
-    actionTypeService.validateActionTypeConfig('my-action-type', {});
-  });
-
-  test('should validate and pass when actionTypeConfig is valid', () => {
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      validate: {
-        actionTypeConfig: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
-      },
-      async executor() {},
-    });
-    actionTypeService.validateActionTypeConfig('my-action-type', { param1: 'value' });
-  });
-
-  test('should validate and throw error when actionTypeConfig is invalid', () => {
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      validate: {
-        actionTypeConfig: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
-      },
-      async executor() {},
-    });
-    expect(() =>
-      actionTypeService.validateActionTypeConfig('my-action-type', {})
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
-    );
-  });
-});
-
 describe('has()', () => {
   test('returns false for unregistered action types', () => {
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     expect(actionTypeService.has('my-action-type')).toEqual(false);
   });
 
   test('returns true after registering an action type', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService();
+    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
     actionTypeService.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
     expect(actionTypeService.has('my-action-type'));
-  });
-});
-
-describe('execute()', () => {
-  test('calls the executor with proper params', async () => {
-    const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      executor,
-    });
-    await actionTypeService.execute({
-      id: 'my-action-type',
-      actionTypeConfig: { foo: true },
-      params: { bar: false },
-    });
-    expect(executor).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "actionTypeConfig": Object {
-          "foo": true,
-        },
-        "params": Object {
-          "bar": false,
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
-  });
-
-  test('validates params', async () => {
-    const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      executor,
-      validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
-      },
-    });
-    await expect(
-      actionTypeService.execute({
-        id: 'my-action-type',
-        actionTypeConfig: {},
-        params: {},
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
-    );
-  });
-
-  test('validates actionTypeConfig', async () => {
-    const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeService = new ActionTypeService();
-    actionTypeService.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      executor,
-      validate: {
-        actionTypeConfig: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
-      },
-    });
-    await expect(
-      actionTypeService.execute({
-        id: 'my-action-type',
-        actionTypeConfig: {},
-        params: {},
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
-    );
-  });
-
-  test('throws error if action type not registered', async () => {
-    const actionTypeService = new ActionTypeService();
-    await expect(
-      actionTypeService.execute({
-        id: 'my-action-type',
-        actionTypeConfig: { foo: true },
-        params: { bar: false },
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"my-action-type\\" is not registered."`
-    );
   });
 });

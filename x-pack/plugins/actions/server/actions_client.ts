@@ -7,6 +7,7 @@
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ActionTypeService } from './action_type_service';
 import { SavedObjectReference } from './types';
+import { throwIfActionTypeConfigInvalid } from './throw_if_action_type_config_invalid';
 
 interface Action {
   description: string;
@@ -63,7 +64,8 @@ export class ActionsClient {
    */
   public async create({ data, options }: CreateOptions) {
     const { actionTypeId } = data;
-    this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
+    const actionType = this.actionTypeService.get(actionTypeId);
+    throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
     const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
     return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
   }
@@ -98,9 +100,9 @@ export class ActionsClient {
   public async update({ id, data, options = {} }: UpdateOptions) {
     const { actionTypeId } = data;
     // Throws an error if action type is invalid
-    this.actionTypeService.get(actionTypeId);
+    const actionType = this.actionTypeService.get(actionTypeId);
     if (data.actionTypeConfig) {
-      this.actionTypeService.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
+      throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
       data = this.moveEncryptedAttributesToSecrets(data);
     }
     return await this.savedObjectsClient.update<any>('action', id, data, options);

@@ -6,31 +6,25 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
+import { ActionType } from './types';
+import { TaskManager } from '../../task_manager';
+import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
+import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
-interface ExecutorOptions {
-  actionTypeConfig: Record<string, any>;
-  params: Record<string, any>;
-}
-
-interface ActionType {
-  id: string;
-  name: string;
-  unencryptedAttributes?: string[];
-  validate?: {
-    params?: Record<string, any>;
-    actionTypeConfig?: Record<string, any>;
-  };
-  executor({ actionTypeConfig, params }: ExecutorOptions): Promise<any>;
-}
-
-interface ExecuteOptions {
-  id: string;
-  actionTypeConfig: Record<string, any>;
-  params: Record<string, any>;
+interface ConstructorOptions {
+  taskManager: TaskManager;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 }
 
 export class ActionTypeService {
+  private taskManager: TaskManager;
   private actionTypes: Record<string, ActionType> = {};
+  private encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+
+  constructor({ taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
+    this.taskManager = taskManager;
+    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
+  }
 
   /**
    * Returns if the action type service has the given action type registered
@@ -54,6 +48,16 @@ export class ActionTypeService {
       );
     }
     this.actionTypes[actionType.id] = actionType;
+    this.taskManager.registerTaskDefinitions({
+      [`actions:${actionType.id}`]: {
+        title: actionType.name,
+        type: `actions:${actionType.id}`,
+        createTaskRunner: getCreateTaskRunnerFunction({
+          actionType,
+          encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
+        }),
+      },
+    });
   }
 
   /**
@@ -89,43 +93,5 @@ export class ActionTypeService {
       id: actionTypeId,
       name: actionType.name,
     }));
-  }
-
-  /**
-   * Throws an error if params are invalid for given action type
-   */
-  public validateParams(id: string, params: Record<string, any>) {
-    const actionType = this.get(id);
-    const validator = actionType.validate && actionType.validate.params;
-    if (validator) {
-      const { error } = validator.validate(params);
-      if (error) {
-        throw error;
-      }
-    }
-  }
-
-  /**
-   * Throws an error if actionTypeConfig is invalid for given action type
-   */
-  public validateActionTypeConfig(id: string, actionTypeConfig: Record<string, any>) {
-    const actionType = this.get(id);
-    const validator = actionType.validate && actionType.validate.actionTypeConfig;
-    if (validator) {
-      const { error } = validator.validate(actionTypeConfig);
-      if (error) {
-        throw error;
-      }
-    }
-  }
-
-  /**
-   * Executes an action type based on given parameters
-   */
-  public async execute({ id, actionTypeConfig, params }: ExecuteOptions) {
-    const actionType = this.get(id);
-    this.validateActionTypeConfig(id, actionTypeConfig);
-    this.validateParams(id, params);
-    return await actionType.executor({ actionTypeConfig, params });
   }
 }

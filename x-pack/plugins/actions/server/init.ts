@@ -26,13 +26,22 @@ export function init(server: Legacy.Server) {
     return;
   }
 
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const savedObjectsClientWithInternalUser = server.savedObjects.getSavedObjectsRepository(
+    callWithInternalUser
+  );
+
   // Encrypted attributes
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
     attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
   });
 
-  const actionTypeService = new ActionTypeService();
+  const { taskManager } = server;
+  const actionTypeService = new ActionTypeService({
+    taskManager: taskManager!,
+    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+  });
 
   // Routes
   createRoute(server);
@@ -43,8 +52,8 @@ export function init(server: Legacy.Server) {
   listActionTypesRoute(server);
 
   const fireFn = createFireFunction({
-    actionTypeService,
-    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+    taskManager: taskManager!,
+    savedObjectsClient: savedObjectsClientWithInternalUser,
   });
 
   // Expose service to server
