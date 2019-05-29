@@ -65,7 +65,7 @@ type ArgumentString<T> = KnownTypeToArgumentString<UnwrapPromise<T>>;
  *
  * `date` is typed as a number or string, and represents a date
  */
-type UnmappedArgumentStrings = 'date';
+type UnmappedArgumentStrings = 'date' | 'filter';
 
 /**
  * Map the type within the the generic array to a string-based

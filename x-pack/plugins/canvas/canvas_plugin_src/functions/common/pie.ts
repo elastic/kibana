@@ -12,15 +12,8 @@ import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palett
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../strings';
-import {
-  ContextFunction,
-  Legend,
-  Palette,
-  PointSeries,
-  Render,
-  SeriesStyle,
-  Style,
-} from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import { Legend, Palette, PointSeries, Render, SeriesStyle, Style } from '../types';
 
 interface PieSeriesOptions {
   show: boolean;
@@ -77,7 +70,7 @@ interface Arguments {
   tilt: number;
 }
 
-export function pie(): ContextFunction<'pie', PointSeries, Arguments, Render<Pie>> {
+export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<Pie>> {
   const { help, args: argHelp } = getFunctionHelp().pie;
 
   return {

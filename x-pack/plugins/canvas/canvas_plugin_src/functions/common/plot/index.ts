@@ -16,16 +16,8 @@ import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
 import { getFunctionHelp } from '../../../strings';
-import {
-  AxisConfig,
-  ContextFunction,
-  PointSeries,
-  Render,
-  SeriesStyle,
-  Style,
-  Palette,
-  Legend,
-} from '../../types';
+import { ExpressionFunction } from '../../../../../../../src/legacy/core_plugins/interpreter/types';
+import { AxisConfig, PointSeries, Render, SeriesStyle, Style, Palette, Legend } from '../../types';
 
 interface Arguments {
   seriesStyle: SeriesStyle[] | null;
@@ -37,7 +29,7 @@ interface Arguments {
   yaxis: AxisConfig | boolean;
 }
 
-export function plot(): ContextFunction<'plot', PointSeries, Arguments, Render<any>> {
+export function plot(): ExpressionFunction<'plot', PointSeries, Arguments, Render<any>> {
   const { help, args: argHelp } = getFunctionHelp().plot;
 
   return {

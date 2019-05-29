@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Filter, ContextFunction } from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import { Filter } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -12,7 +13,7 @@ interface Arguments {
   filterGroup: string | null;
 }
 
-export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter> {
+export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filter> {
   const { help, args: argHelp } = getFunctionHelp().exactly;
 
   return {
@@ -47,7 +48,7 @@ export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter>
         value,
         column,
         and: [],
-      };
+      } as Filter;
 
       return { ...context, and: [...context.and, filter] };
     },

@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
-import { NullContextFunction } from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -21,7 +21,7 @@ interface Return {
   gradient: boolean;
 }
 
-export function palette(): NullContextFunction<'palette', Arguments, Return> {
+export function palette(): ExpressionFunction<'palette', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().palette;
 
   return {

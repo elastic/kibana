@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './arguments';
 export * from './common';
 export * from './functions';
 export * from './style';

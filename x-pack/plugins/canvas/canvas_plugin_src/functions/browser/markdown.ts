@@ -6,7 +6,8 @@
 
 // @ts-ignore untyped local
 import { Handlebars } from '../../../common/lib/handlebars';
-import { ContextFunction, Datatable, Render, Style } from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import { Datatable, Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 type Context = Datatable | null;
@@ -21,7 +22,7 @@ interface Return {
   font: Style;
 }
 
-export function markdown(): ContextFunction<'markdown', Context, Arguments, Render<Return>> {
+export function markdown(): ExpressionFunction<'markdown', Context, Arguments, Render<Return>> {
   const { help, args: argHelp } = getFunctionHelp().markdown;
 
   return {

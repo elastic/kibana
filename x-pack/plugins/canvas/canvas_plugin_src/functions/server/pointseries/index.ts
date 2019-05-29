@@ -19,8 +19,8 @@ import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp } from '../../../strings';
+import { ExpressionFunction } from '../../../../../../../src/legacy/core_plugins/interpreter/types';
 import {
-  ContextFunction,
   Datatable,
   DatatableRow,
   PointSeries,
@@ -39,7 +39,12 @@ function keysOf<T, K extends keyof T>(obj: T): K[] {
 
 type Arguments = { [key in PointSeriesColumnName]: string | null };
 
-export function pointseries(): ContextFunction<'pointseries', Datatable, Arguments, PointSeries> {
+export function pointseries(): ExpressionFunction<
+  'pointseries',
+  Datatable,
+  Arguments,
+  PointSeries
+> {
   const { help, args: argHelp } = getFunctionHelp().pointseries;
 
   return {

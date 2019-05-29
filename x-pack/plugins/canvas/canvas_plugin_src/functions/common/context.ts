@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Function } from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { getFunctionHelp } from '../../strings';
 
-export function context(): Function<'context', {}, any> {
+export function context(): ExpressionFunction<'context', void, {}, any> {
   const { help } = getFunctionHelp().context;
 
   return {

@@ -5,7 +5,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ContextFunction, Filter } from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import { Filter } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -15,7 +16,7 @@ interface Arguments {
   filterGroup: string | null;
 }
 
-export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, Filter> {
+export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments, Filter> {
   const { help, args: argHelp } = getFunctionHelp().timefilter;
 
   return {
@@ -58,7 +59,7 @@ export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, F
         type: 'time',
         column,
         and: [],
-      };
+      } as Filter;
 
       function parseAndValidate(str: string): string {
         const moment = dateMath.parse(str);

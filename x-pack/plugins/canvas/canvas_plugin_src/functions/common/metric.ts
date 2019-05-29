@@ -5,7 +5,8 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunction, Render, Style } from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import { Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 type Context = string | null;
@@ -16,7 +17,7 @@ interface Arguments {
   labelFont: Style;
 }
 
-export function metric(): ContextFunction<'metric', Context, Arguments, Render<Arguments>> {
+export function metric(): ExpressionFunction<'metric', Context, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().metric;
 
   return {

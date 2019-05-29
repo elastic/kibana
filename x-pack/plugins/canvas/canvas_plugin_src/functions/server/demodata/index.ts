@@ -9,14 +9,15 @@ import { sortBy } from 'lodash';
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 // @ts-ignore
 import { getDemoRows } from './get_demo_rows';
-import { ContextFunction, Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
+import { ExpressionFunction } from '../../../../../../../src/legacy/core_plugins/interpreter/types';
+import { Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 import { getFunctionHelp } from '../../../strings';
 
 interface Arguments {
   type: string | null;
 }
 
-export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datatable> {
+export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().demodata;
 
   return {

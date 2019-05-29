@@ -8,7 +8,8 @@
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { ContextFunction, Render } from '../types';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import { Render } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 export enum Origin {
@@ -24,7 +25,7 @@ interface Arguments {
   origin: Origin;
 }
 
-export function revealImage(): ContextFunction<
+export function revealImage(): ExpressionFunction<
   'revealImage',
   number,
   Arguments,
