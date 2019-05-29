@@ -76,7 +76,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
 // The only way a visualization has to restrict the query building
 export interface DatasourceDimensionPanelProps {
   // If no columnId is passed, it will render as empty
-  columnId?: string;
+  columnId: string;
 
   // Visualizations can restrict operations based on their own rules
   filterOperations: (operation: Operation) => boolean;

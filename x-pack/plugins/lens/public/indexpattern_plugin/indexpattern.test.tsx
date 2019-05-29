@@ -199,11 +199,73 @@ describe('IndexPattern Data Source', () => {
           <IndexPatternDimensionPanel
             state={state}
             setState={() => {}}
+            columnId={'col2'}
             filterOperations={(operation: Operation) => true}
           />
         );
 
         expect(wrapper).toMatchSnapshot();
+      });
+
+      it('should call the filterOperations function', () => {
+        const filterOperations = jest.fn().mockReturnValue(true);
+
+        shallow(
+          <IndexPatternDimensionPanel
+            state={state}
+            setState={() => {}}
+            columnId={'col2'}
+            filterOperations={filterOperations}
+          />
+        );
+
+        expect(filterOperations).toBeCalledTimes(3);
+      });
+
+      it('should filter out all selections if the filter returns false', () => {
+        const wrapper = shallow(
+          <IndexPatternDimensionPanel
+            state={state}
+            setState={() => {}}
+            columnId={'col2'}
+            filterOperations={() => false}
+          />
+        );
+
+        expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
+      });
+
+      it('should update the datasource state on selection', () => {
+        const setState = jest.fn();
+
+        const wrapper = shallow(
+          <IndexPatternDimensionPanel
+            state={state}
+            setState={setState}
+            columnId={'col2'}
+            filterOperations={() => true}
+          />
+        );
+
+        const comboBox = wrapper.find(EuiComboBox)!;
+        const firstOption = comboBox.prop('options')![0];
+
+        comboBox.prop('onChange')!([firstOption]);
+
+        expect(setState).toHaveBeenCalledWith({
+          ...state,
+          columns: {
+            ...state.columns,
+            col2: {
+              operationId: firstOption.value,
+              label: 'Value of timestamp',
+              dataType: 'date',
+              isBucketed: false,
+              operationType: 'value',
+            },
+          },
+          columnOrder: ['col1', 'col2'],
+        });
       });
     });
   });

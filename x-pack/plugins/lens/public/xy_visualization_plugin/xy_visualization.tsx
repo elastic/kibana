@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Visualization } from '../types';
+import { Visualization, Operation } from '../types';
+import { NativeRenderer } from '../native_renderer';
 
 export interface XyVisualizationState {
   roles: string[];
@@ -26,7 +27,20 @@ export const xyVisualization: Visualization<XyVisualizationState, XyVisualizatio
   },
 
   renderConfigPanel: (domElement, props) => {
-    render(<div>XY Visualization</div>, domElement);
+    render(
+      <div>
+        XY Visualization
+        <NativeRenderer
+          nativeProps={{
+            columnId: 'col1',
+            filterOperations: (op: Operation) => true,
+            suggestedOrder: 1,
+          }}
+          render={props.datasource.renderDimensionPanel}
+        />
+      </div>,
+      domElement
+    );
   },
 
   getSuggestions: options => [],
