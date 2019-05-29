@@ -1,6 +1,6 @@
 {
   "value": {
-    "id": "action:85c2d74a-a306-4d53-9c91-06773fbca869",
+    "id": "action:8978428d-6890-43f7-b4a6-e7a4064c33f7",
     "index": ".kibana",
     "source": {
       "action": {
@@ -9,7 +9,7 @@
         "actionTypeConfig": {
           "unencrypted" : "unencrypted text"
         },
-        "actionTypeConfigSecrets": "xXUrhUtZaWM8pqeofM3sMgbiWF5pJojt2r/tCpDu6uIcGycuYz5Ura9KWz44/PFqRvpWAPb2BXOUWdhL/f6SCuaq8MV+sZgM9ukE3VDOWTgXPB9mL0kE5H8lGnptQqTr2GZJWccTiidNNxqRC3/NHOzgwVag197Xbt503pG4Pg=="
+        "actionTypeConfigSecrets": "2EwBKlUB5B2WzdFrW7IkaAf6UqciGwMPugR/Homp9nSxsfHsd01wmqe2r6iKsqwhewUkiYZQ4DRpLf/tR78eWXIGjOV9PAOq6UzMO4cHSBmTdtvQ1smP3UegFKFSvTOnXkQ1yYvih5eURFVgXJrGpXNz2XB3yLoKo4uulhPxjg=="
       },
       "type": "action",
       "migrationVersion": {}

@@ -19,7 +19,7 @@ export default function deleteActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 200 when deleting an action', async () => {
       await supertest
-        .delete('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .delete('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
         .set('kbn-xsrf', 'foo')
         .expect(200)
         .then((resp: any) => {

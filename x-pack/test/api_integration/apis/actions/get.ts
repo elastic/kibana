@@ -18,11 +18,11 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
 
     it('should return 200 when finding a record and not return encrypted attributes', async () => {
       await supertest
-        .get('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .get('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+            id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
             type: 'action',
             references: [],
             version: resp.body.version,

@@ -27,7 +27,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+                id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],
@@ -51,7 +51,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+                id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],
