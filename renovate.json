@@ -1,5 +1,25 @@
 {
-  "extends": [
-    "config:base"
-  ]
+  "baseBranches": ["master"],
+  "enabledManagers": ["yarn"],
+  "labels": [
+    "renovate",
+    "release_note:skip",
+    ":Operations"
+  ],
+  "lockFileMaintenance": { "enabled": false },
+  "masterIssue": true,
+  "enabled": false,
+  "packageRules": [
+    {
+      "packagePatterns": ["^eslint"],
+      "groupName": "eslint related packages",
+      "groupSlug": "eslint",
+      "enabled": true
+    }
+  ],
+  "prConcurrentLimit": 6,
+  "rangeStrategy": "pin",
+  "vulnerabilityAlerts": {
+    "enabled": false
+  }
 }
