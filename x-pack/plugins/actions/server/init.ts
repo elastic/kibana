@@ -32,7 +32,7 @@ export function init(server: Legacy.Server) {
     attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
   });
 
-  const actionTypeService = new ActionTypeRegistry({
+  const actionTypeRegistry = new ActionTypeRegistry({
     services: {
       log: server.log,
     },
