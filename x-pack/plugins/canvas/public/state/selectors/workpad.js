@@ -160,7 +160,7 @@ function extractFilterGroups(ast) {
       return groups.concat(
         buildGroupValues(args, argValue => {
           // this only handles simple values
-          if (typeof argValue !== 'object') {
+          if (argValue !== null && typeof argValue !== 'object') {
             return argValue;
           }
         })
@@ -170,7 +170,7 @@ function extractFilterGroups(ast) {
       return groups.concat(
         buildGroupValues(args, argValue => {
           // recursively collect filter groups
-          if (typeof argValue === 'object' && argValue.type === 'expression') {
+          if (argValue !== null && typeof argValue === 'object' && argValue.type === 'expression') {
             return extractFilterGroups(argValue);
           }
         })
