@@ -58,7 +58,7 @@
         groupName: 'eslint related packages',
         groupSlug: 'eslint',
         enabled: true,
-      }
+      },
       {
         packagePatterns: ['^@babel', '.*babel.*'],
         groupName: 'eslint related packages',
