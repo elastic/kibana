@@ -18,7 +18,23 @@
  */
 
 import { ObjectType, Schema } from '@kbn/config-schema';
-export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+
+export interface RouteConfigOptions {
+  /**
+   * A flag shows that authentication for a route:
+   * enabled  when true
+   * disabled when false
+   *
+   * Enabled by default.
+   */
+  authRequired?: boolean;
+
+  /**
+   * Additional meta-data information to attach fot the route.
+   */
+  tags?: string[];
+}
 
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
   /**
@@ -36,14 +52,7 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
    */
   validate: RouteValidateFactory<P, Q, B> | false;
 
-  /**
-   * A flag shows that authentication for a route:
-   * enabled  when true
-   * disabled when false
-   *
-   * Enabled by default.
-   */
-  authRequired?: boolean;
+  options?: RouteConfigOptions;
 }
 
 export type RouteValidateFactory<

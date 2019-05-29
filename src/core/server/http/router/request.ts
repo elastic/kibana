@@ -22,10 +22,26 @@ import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
 import { filterHeaders, Headers } from './headers';
-import { RouteSchemas } from './route';
+import { RouteSchemas, RouteConfigOptions } from './route';
+
+interface KibanaRequestRoute {
+  path: string;
+  method: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options';
+  options: RouteConfigOptions;
+}
 
 /** @public */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+  public static getRoute(request: Request): KibanaRequestRoute {
+    return {
+      path: request.path,
+      method: request.method,
+      options: {
+        authRequired: request.route.settings.auth === false ? false : true,
+        tags: request.route.settings.tags || [],
+      },
+    };
+  }
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
@@ -35,7 +51,14 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     routeSchemas: RouteSchemas<P, Q, B> | undefined
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
-    return new KibanaRequest(req, requestParts.params, requestParts.query, requestParts.body);
+    const route = KibanaRequest.getRoute(req);
+    return new KibanaRequest(
+      req,
+      requestParts.params,
+      requestParts.query,
+      requestParts.body,
+      route
+    );
   }
 
   /**
@@ -70,17 +93,16 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   }
 
   public readonly headers: Headers;
-  public readonly path: string;
   public readonly url: Url;
 
   constructor(
     private readonly request: Request,
     readonly params: Params,
     readonly query: Query,
-    readonly body: Body
+    readonly body: Body,
+    readonly route: KibanaRequestRoute
   ) {
     this.headers = request.headers;
-    this.path = request.path;
     this.url = request.url;
   }
 
