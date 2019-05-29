@@ -17,11 +17,22 @@
  * under the License.
  */
 
-import { uiModules } from '../../modules';
-import { sortPrefixFirst } from '../../utils/sort_prefix_first';
+import React from 'react';
 
-uiModules
-  .get('kibana')
-  .filter('sortPrefixFirst', function () {
-    return sortPrefixFirst;
+import { EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
+
+function AutoPrecisionParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
+  const label = i18n.translate('common.ui.aggTypes.changePrecisionLabel', {
+    defaultMessage: 'Change precision on map zoom',
   });
+
+  return (
+    <EuiFormRow className="visEditorSidebar__aggParamFormRow">
+      <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
+    </EuiFormRow>
+  );
+}
+
+export { AutoPrecisionParamEditor };

@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import { AggParam } from '../../../agg_types';
-import { AggConfig } from '../../agg_config';
-import { FieldParamType } from '../../../agg_types/param_types';
-import { EditorConfig } from '../config/types';
+import React from 'react';
 
-// NOTE: we cannot export the interface with export { InterfaceName }
-// as there is currently a bug on babel typescript transform plugin for it
-// https://github.com/babel/babel/issues/7641
-//
-export interface AggParamEditorProps<T> {
-  agg: AggConfig;
-  aggParam: AggParam;
-  config: any;
-  editorConfig: EditorConfig;
-  indexedFields?: FieldParamType[];
-  showValidation: boolean;
-  value: T;
-  setValidity(isValid: boolean): void;
-  setValue(value?: T): void;
-  setTouched(): void;
+import { EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
+
+function UseGeocentroidParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
+  const label = i18n.translate('common.ui.aggTypes.placeMarkersOffGridLabel', {
+    defaultMessage: 'Place markers off grid (use geocentroid)',
+  });
+
+  return (
+    <EuiFormRow className="visEditorSidebar__aggParamFormRow">
+      <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
+    </EuiFormRow>
+  );
 }
+
+export { UseGeocentroidParamEditor };
