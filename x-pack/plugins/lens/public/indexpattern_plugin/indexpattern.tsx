@@ -24,6 +24,7 @@ interface IndexPatternColumn {
 
   // Private
   operationType: OperationType;
+  sourceField: string;
 }
 
 export interface IndexPattern {
@@ -107,6 +108,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
     isBucketed: false,
 
     operationType: 'value' as OperationType,
+    sourceField: field.name,
   }));
 
   const filteredColumns = columns.filter(col => {
@@ -196,7 +198,16 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
     },
 
     toExpression(state: IndexPatternPrivateState) {
-      return `${JSON.stringify(state.columns)}`;
+      if (state.columnOrder.length === 0) {
+        return '';
+      }
+
+      const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
+      const expression = `esdocs index="${state.currentIndexPatternId}" fields="${fieldNames.join(
+        ', '
+      )}" sort="${fieldNames[0]}, DESC"`;
+
+      return expression;
     },
 
     renderDataPanel(
