@@ -203,7 +203,6 @@ export const setup = (
     }
 
     return { response, body, request };
-    // return body;
   }
 
   async function fetch(path: string, options: HttpFetchOptions = {}) {

@@ -18,9 +18,9 @@
  */
 
 import { Observable } from 'rxjs';
-import { HttpFetchError } from 'target/types/public/http';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
+import { HttpFetchError } from './http_fetch_error';
 
 /** @public */
 export interface HttpServiceBase {

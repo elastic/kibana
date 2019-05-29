@@ -192,6 +192,10 @@ export interface HttpServiceBase {
     getLoadingCount$(): Observable<number>;
     // (undocumented)
     head: HttpHandler;
+    // Warning: (ae-forgotten-export) The symbol "HttpInterceptor" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    intercept(interceptor: HttpInterceptor): () => void;
     // (undocumented)
     options: HttpHandler;
     // (undocumented)
@@ -202,6 +206,8 @@ export interface HttpServiceBase {
     prependBasePath(path: string): string;
     // (undocumented)
     put: HttpHandler;
+    // (undocumented)
+    removeAllInterceptors(): void;
     // (undocumented)
     removeBasePath(path: string): string;
     // (undocumented)
