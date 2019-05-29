@@ -256,8 +256,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
         "key": "uniqueSourceIps",
         "value": Array [
           Object {
-            "x": 1714,
-            "y": "uniqueSourceIps",
+            "x": "uniqueSourceIps",
+            "y": "1714",
           },
         ],
       },
@@ -266,8 +266,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
         "key": "uniqueDestinationIps",
         "value": Array [
           Object {
-            "x": 2354,
-            "y": "uniqueDestinationIps",
+            "x": "uniqueDestinationIps",
+            "y": 2354,
           },
         ],
       },
@@ -531,8 +531,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                               "key": "uniqueSourceIps",
                               "value": Array [
                                 Object {
-                                  "x": 1714,
-                                  "y": "uniqueSourceIps",
+                                  "x": "uniqueSourceIps",
+                                  "y": "1714",
                                 },
                               ],
                             },
@@ -541,8 +541,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                               "key": "uniqueDestinationIps",
                               "value": Array [
                                 Object {
-                                  "x": 2354,
-                                  "y": "uniqueDestinationIps",
+                                  "x": "uniqueDestinationIps",
+                                  "y": 2354,
                                 },
                               ],
                             },
@@ -567,8 +567,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                       "key": "uniqueSourceIps",
                                       "value": Array [
                                         Object {
-                                          "x": 1714,
-                                          "y": "uniqueSourceIps",
+                                          "x": "uniqueSourceIps",
+                                          "y": "1714",
                                         },
                                       ],
                                     },
@@ -577,67 +577,40 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                       "key": "uniqueDestinationIps",
                                       "value": Array [
                                         Object {
-                                          "x": 2354,
-                                          "y": "uniqueDestinationIps",
+                                          "x": "uniqueDestinationIps",
+                                          "y": 2354,
                                         },
                                       ],
                                     },
                                   ]
                                 }
                               >
-                                <ChartHolder>
-                                  <Styled(EuiFlexGroup)
-                                    alignItems="center"
-                                    justifyContent="center"
-                                  >
-                                    <EuiFlexGroup
-                                      alignItems="center"
-                                      className="sc-bdVaJa dGIfxd"
-                                      justifyContent="center"
-                                    >
-                                      <div
-                                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bdVaJa dGIfxd"
-                                      >
-                                        <EuiFlexItem
-                                          grow={false}
-                                        >
-                                          <div
-                                            className="euiFlexItem euiFlexItem--flexGrowZero"
-                                          >
-                                            <EuiText
-                                              color="subdued"
-                                              size="s"
-                                              textAlign="center"
-                                            >
-                                              <div
-                                                className="euiText euiText--small"
-                                              >
-                                                <EuiTextAlign
-                                                  textAlign="center"
-                                                >
-                                                  <div
-                                                    className="euiTextAlign euiTextAlign--center"
-                                                  >
-                                                    <EuiTextColor
-                                                      color="subdued"
-                                                      component="div"
-                                                    >
-                                                      <div
-                                                        className="euiTextColor euiTextColor--subdued"
-                                                      >
-                                                        Chart Data Not Available
-                                                      </div>
-                                                    </EuiTextColor>
-                                                  </div>
-                                                </EuiTextAlign>
-                                              </div>
-                                            </EuiText>
-                                          </div>
-                                        </EuiFlexItem>
-                                      </div>
-                                    </EuiFlexGroup>
-                                  </Styled(EuiFlexGroup)>
-                                </ChartHolder>
+                                <Component
+                                  data={
+                                    Array [
+                                      Object {
+                                        "color": "#DB1374",
+                                        "key": "uniqueSourceIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": "uniqueSourceIps",
+                                            "y": "1714",
+                                          },
+                                        ],
+                                      },
+                                      Object {
+                                        "color": "#490092",
+                                        "key": "uniqueDestinationIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": "uniqueDestinationIps",
+                                            "y": 2354,
+                                          },
+                                        ],
+                                      },
+                                    ]
+                                  }
+                                />
                               </Component>
                             </div>
                           </styled.div>
