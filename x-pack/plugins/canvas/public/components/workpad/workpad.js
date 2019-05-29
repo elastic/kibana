@@ -25,7 +25,7 @@ export class Workpad extends React.PureComponent {
     isFullscreen: PropTypes.bool.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    workpadCss: PropTypes.string.required,
+    workpadCss: PropTypes.string.isRequired,
     undoHistory: PropTypes.func.isRequired,
     redoHistory: PropTypes.func.isRequired,
     nextPage: PropTypes.func.isRequired,
