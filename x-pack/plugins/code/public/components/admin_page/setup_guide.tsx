@@ -48,7 +48,7 @@ const steps = [
         <p />
         <h5>PRE-INSTALLED LANGUAGE SERVERS:</h5>
         <p />
-        Typescript
+        TypeScript
         <p />
         <h5>AVAILABLE LANGUAGE SERVERS:</h5>
         <p />
