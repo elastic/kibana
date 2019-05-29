@@ -7,7 +7,9 @@
     'package.json',
     'x-pack/package.json',
     'x-pack/plugins/*/package.json',
-    'packages/*/package.json'
+    'packages/*/package.json',
+    'test/plugin_functional/plugins/*/package.json',
+    'test/interpreter_functional/plugins/*/package.json',
   ],
 
   /**
