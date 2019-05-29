@@ -30,7 +30,7 @@ describe('NewNote', () => {
         .find('button[role="tab"]')
         .first()
         .text()
-    ).toEqual(i18n.NOTE(1));
+    ).toEqual(i18n.NOTE);
   });
 
   test('it renders a tab labeled "Preview (Markdown)"', () => {

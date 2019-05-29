@@ -17,10 +17,10 @@
  * under the License.
  */
 import { buildEsQuery } from '@kbn/es-query';
-import getTimerange from '../../helpers/get_timerange';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import { getTimerange } from '../../helpers/get_timerange';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 
-export default function query(req, panel, esQueryConfig, indexPatternObject) {
+export function query(req, panel, esQueryConfig, indexPatternObject) {
   return next => doc => {
     const { timeField } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { from, to } = getTimerange(req);

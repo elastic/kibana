@@ -21,7 +21,7 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import sinon from 'sinon';
-import YesNo from './yes_no';
+import { YesNo } from './yes_no';
 
 describe('YesNo', () => {
   it('call onChange={handleChange} on yes', () => {
