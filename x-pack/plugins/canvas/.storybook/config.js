@@ -45,9 +45,13 @@ function loadStories() {
   );
   css.keys().forEach(filename => css(filename));
 
-  // Find all files ending in *.examples.ts
-  const req = require.context('./..', true, /.examples.tsx$/);
-  req.keys().forEach(filename => req(filename));
+  // Find all files ending in *.examples.ts in x-pack
+  const xpack = require.context('./../../../../x-pack/plugins', true, /.examples.tsx$/);
+  xpack.keys().forEach(filename => xpack(filename));
+  
+  // Find all files ending in *.examples.ts in src
+  const src = require.context('./../../../../src', true, /.examples.tsx$/);
+  src.keys().forEach(filename => src(filename));
 }
 
 // Set up the Storybook environment with custom settings.

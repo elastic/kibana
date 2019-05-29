@@ -70,7 +70,8 @@
     "build:types": "tsc --p tsconfig.types.json",
     "core:acceptApiChanges": "node scripts/check_core_api_changes.js --accept",
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
-    "spec_to_console": "node scripts/spec_to_console"
+    "spec_to_console": "node scripts/spec_to_console",
+    "storybook": "node x-pack/plugins/canvas/scripts/storybook"
   },
   "repository": {
     "type": "git",
