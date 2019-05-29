@@ -18,7 +18,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('spaces', function() {
     // Geckodriver often crashes with https://github.com/mozilla/geckodriver/issues/1519
-    this.tags(['firefox']);
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
