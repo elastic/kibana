@@ -25,45 +25,53 @@
   ],
 
   /**
-   * This deletes and re-creates the lock file, which we will only want
-   * to turn on once we've updated all our deps
-   */
-  lockFileMaintenance: { enabled: false },
-
-  /**
    * Enable creation of a "Master Issue" within the repository. This
    * Master Issue is akin to a mini dashboard and contains a list of all
    * PRs pending, open, closed (unmerged) or in error.
    */
   masterIssue: true,
 
-  /**
-   * Define groups of packages that should be updated/configured together
-   */
-  packageRules: [
-    {
-      packagePatterns: ['^.*$'],
-      enabled: false,
-    },
-    {
-      packagePatterns: ['^eslint'],
-      groupName: 'eslint related packages',
-      groupSlug: 'eslint',
-      enabled: true,
-    }
-  ],
+  npm: {
+    /**
+     * This deletes and re-creates the lock file, which we will only want
+     * to turn on once we've updated all our deps
+     */
+    lockFileMaintenance: { enabled: false },
+
+    /**
+     * Set the version spec to the exact version installed, ranges are the default
+     * and don't cause problems since we use yarn.lock, but pinning makes things
+     * less ambiguous
+     */
+    rangeStrategy: 'pin',
+
+    /**
+     * Define groups of packages that should be updated/configured together
+     */
+    packageRules: [
+      {
+        packagePatterns: ['^.*$'],
+        enabled: false,
+      },
+      {
+        packagePatterns: ['^eslint'],
+        groupName: 'eslint related packages',
+        groupSlug: 'eslint',
+        enabled: true,
+      }
+      {
+        packagePatterns: ['^@babel', '.*babel.*'],
+        groupName: 'eslint related packages',
+        groupSlug: 'eslint',
+        enabled: true,
+      }
+    ],
+  },
 
   /**
    * Limit the number of active PRs renovate will allow
    */
   prConcurrentLimit: 6,
-
-  /**
-   * Set the version spec to the exact version installed, ranges are the default
-   * and don't cause problems since we use yarn.lock, but pinning makes things
-   * less ambiguous
-   */
-  rangeStrategy: 'pin',
 
   /**
    * Disable vulnerability alert handling, we handle that separately
