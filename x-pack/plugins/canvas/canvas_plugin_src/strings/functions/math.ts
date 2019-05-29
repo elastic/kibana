@@ -32,3 +32,35 @@ export const help: FunctionHelp<FunctionFactory<typeof math>> = {
     }),
   },
 };
+
+export const errors = {
+  emptyExpression: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.math.emptyExpressionErrorMessage', {
+        defaultMessage: 'Empty expression',
+      })
+    ),
+  tooManyResults: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.math.tooManyResultsErrorMessage', {
+        defaultMessage:
+          'Expressions must return a single number. Try wrapping your expression in {mean} or {sum}',
+        values: {
+          mean: 'mean()',
+          sum: 'sum()',
+        },
+      })
+    ),
+  executionFailed: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.math.executionFailedErrorMessage', {
+        defaultMessage: 'Failed to execute math expression. Check your column names',
+      })
+    ),
+  emptyDatatable: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.math.emptyDatatableErrorMessage', {
+        defaultMessage: 'Empty datatable',
+      })
+    ),
+};

@@ -9,7 +9,7 @@ import { evaluate } from 'tinymath';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 import { ContextFunction, Datatable, isDatatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   expression: string;
@@ -19,6 +19,7 @@ type Context = number | Datatable;
 
 export function math(): ContextFunction<'math', Context, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().math;
+  const errors = getFunctionErrors().math;
 
   return {
     name: 'math',
@@ -38,7 +39,7 @@ export function math(): ContextFunction<'math', Context, Arguments, number> {
       const { expression } = args;
 
       if (!expression || expression.trim() === '') {
-        throw new Error('Empty expression');
+        throw errors.emptyExpression();
       }
 
       const mathContext = isDatatable(context)
@@ -51,17 +52,15 @@ export function math(): ContextFunction<'math', Context, Arguments, number> {
           if (result.length === 1) {
             return result[0];
           }
-          throw new Error(
-            'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
-          );
+          throw errors.tooManyResults();
         }
         if (isNaN(result)) {
-          throw new Error('Failed to execute math expression. Check your column names');
+          throw errors.executionFailed();
         }
         return result;
       } catch (e) {
         if (isDatatable(context) && context.rows.length === 0) {
-          throw new Error('Empty datatable');
+          throw errors.emptyDatatable();
         } else {
           throw e;
         }

@@ -8,6 +8,9 @@ import expect from '@kbn/expect';
 import { containerStyle } from '../containerStyle';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticLogo } from '../../../lib/elastic_logo';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().containerStyle;
 
 describe('containerStyle', () => {
   const fn = functionWrapper(containerStyle);
@@ -76,9 +79,7 @@ describe('containerStyle', () => {
       it('throws when provided an invalid dataurl/url', () => {
         expect(fn)
           .withArgs(null, { backgroundImage: 'foo' })
-          .to.throwException(e => {
-            expect(e.message).to.be('Invalid backgroundImage. Please provide an asset or a URL.');
-          });
+          .to.throwException(new RegExp(errors.invalidBackgroundImage('foo').message));
       });
     });
 

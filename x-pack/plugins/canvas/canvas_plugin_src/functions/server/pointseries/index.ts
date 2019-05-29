@@ -18,7 +18,7 @@ import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
-import { getFunctionHelp } from '../../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../strings';
 import {
   ContextFunction,
   Datatable,
@@ -74,6 +74,7 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
       // The way the function below is written you can add as many arbitrary named args as you want.
     },
     fn: (context, args) => {
+      const errors = getFunctionErrors().pointseries;
       // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
       const columnNames = context.columns.map(col => col.name);
       const mathScope = pivotObjectArray(context.rows, columnNames);
@@ -186,7 +187,7 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
           try {
             const ev = evaluate(args[measure], subScope);
             if (Array.isArray(ev)) {
-              throw new Error('Expressions must be wrapped in a function such as sum()');
+              throw errors.unwrappedExpression();
             }
 
             return ev;

@@ -6,7 +6,7 @@
 
 import dateMath from '@elastic/datemath';
 import { ContextFunction, Filter } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -16,6 +16,7 @@ interface Arguments {
 
 export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, Filter> {
   const { help, args: argHelp } = getFunctionHelp().timefilter;
+  const errors = getFunctionErrors().timefilter;
 
   return {
     name: 'timefilter',
@@ -59,7 +60,7 @@ export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, F
         const moment = dateMath.parse(str);
 
         if (!moment || !moment.isValid()) {
-          throw new Error(`Invalid date/time string: '${str}'`);
+          throw errors.invalidString(str);
         }
 
         return moment.toISOString();

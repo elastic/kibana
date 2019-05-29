@@ -7,7 +7,7 @@
 // @ts-ignore no @typed def
 import inlineStyle from 'inline-style';
 import { openSans } from '../../../common/lib/fonts';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 import {
   CSSStyle,
   FontFamily,
@@ -31,6 +31,7 @@ interface Arguments {
 
 export function font(): NullContextFunction<'font', Arguments, Style> {
   const { help, args: argHelp } = getFunctionHelp().font;
+  const errors = getFunctionErrors().font;
 
   return {
     name: 'font',
@@ -87,10 +88,10 @@ export function font(): NullContextFunction<'font', Arguments, Style> {
     },
     fn: (_context, args) => {
       if (!Object.values(FontWeight).includes(args.weight)) {
-        throw new Error(`Invalid font weight: '${args.weight}'`);
+        throw errors.invalidFontWeight(args.weight);
       }
       if (!TEXT_ALIGNMENTS.includes(args.align)) {
-        throw new Error(`Invalid text alignment: '${args.align}'`);
+        throw errors.invalidTextAlignment(args.align);
       }
 
       // the line height shouldn't ever be lower than the size, and apply as a

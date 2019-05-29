@@ -7,6 +7,9 @@
 import expect from '@kbn/expect';
 import { csv } from '../csv';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
   const fn = functionWrapper(csv);
@@ -110,8 +113,6 @@ one|1
 two.2
 fourty two,42`,
       })
-      .to.throwException(e => {
-        expect(e.message).to.be('Error parsing input CSV.');
-      });
+      .to.throwException(new RegExp(errors.invalidInputCSV().message));
   });
 });

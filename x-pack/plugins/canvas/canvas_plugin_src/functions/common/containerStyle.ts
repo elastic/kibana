@@ -5,7 +5,7 @@
  */
 
 import { NullContextFunction, ContainerStyle } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
@@ -15,6 +15,7 @@ interface Return extends ContainerStyle {
 
 export function containerStyle(): NullContextFunction<'containerStyle', ContainerStyle, Return> {
   const { help, args: argHelp } = getFunctionHelp().containerStyle;
+  const errors = getFunctionErrors().containerStyle;
 
   return {
     name: 'containerStyle',
@@ -76,7 +77,7 @@ export function containerStyle(): NullContextFunction<'containerStyle', Containe
 
       if (backgroundImage) {
         if (!isValidUrl(backgroundImage)) {
-          throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
+          throw errors.invalidBackgroundImage();
         }
 
         style.backgroundImage = `url(${backgroundImage})`;

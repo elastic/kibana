@@ -31,3 +31,17 @@ export const help: FunctionHelp<FunctionFactory<typeof image>> = {
     }),
   },
 };
+
+export const errors = {
+  invalidImageMode: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.image.invalidImageModeErrorMessage', {
+        defaultMessage: '"mode" must be "{contain}", "{cover}", or "{stretch}"',
+        values: {
+          contain: ImageMode.CONTAIN,
+          cover: ImageMode.COVER,
+          stretch: ImageMode.STRETCH,
+        },
+      })
+    ),
+};

@@ -35,3 +35,21 @@ export const help: FunctionHelp<FunctionFactory<typeof ply>> = {
     }),
   },
 };
+
+export const errors = {
+  columnNotFound: (by: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.ply.columnNotFoundErrorMessage', {
+        defaultMessage: "Column not found: '{by}'",
+        values: {
+          by,
+        },
+      })
+    ),
+  rowCountMismatch: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.ply.rowCountMismatchErrorMessage', {
+        defaultMessage: 'All expressions must return the same number of rows',
+      })
+    ),
+};

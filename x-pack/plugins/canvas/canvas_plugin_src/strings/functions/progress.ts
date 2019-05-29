@@ -53,3 +53,27 @@ export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
     }),
   },
 };
+
+export const errors = {
+  invalidMaxValue: (max: number) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.progress.invalidMaxValueErrorMessage', {
+        defaultMessage: "Invalid {arg} value: '{max, number}'. '{arg}' must be greater than 0",
+        values: {
+          arg: 'max',
+          max,
+        },
+      })
+    ),
+  invalidValue: (value: number, max: number = 1) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.progress.invalidValueErrorMessage', {
+        defaultMessage:
+          "Invalid value: '{value, number}'. Value must be between 0 and {max, number}",
+        values: {
+          value,
+          max,
+        },
+      })
+    ),
+};

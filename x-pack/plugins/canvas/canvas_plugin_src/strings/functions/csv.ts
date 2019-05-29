@@ -31,3 +31,12 @@ export const help: FunctionHelp<FunctionFactory<typeof csv>> = {
     }),
   },
 };
+
+export const errors = {
+  invalidInputCSV: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.csv.invalidInputCSVErrorMessage', {
+        defaultMessage: 'Error parsing input CSV.',
+      })
+    ),
+};

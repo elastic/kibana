@@ -28,3 +28,24 @@ export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
     }),
   },
 };
+
+export const errors = {
+  columnNotFound: (column: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.alterColumn.columnNotFoundErrorMessage', {
+        defaultMessage: "Column not found: '{column}'",
+        values: {
+          column,
+        },
+      })
+    ),
+  cannotConvertType: (type: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.alterColumn.cannotConvertTypeErrorMessage', {
+        defaultMessage: "Cannot convert to '{type}'",
+        values: {
+          type,
+        },
+      })
+    ),
+};

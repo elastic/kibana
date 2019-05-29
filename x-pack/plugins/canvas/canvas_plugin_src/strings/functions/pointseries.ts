@@ -42,3 +42,15 @@ export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
     }),
   },
 };
+
+export const errors = {
+  unwrappedExpression: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.pointseries.unwrappedExpressionErrorMessage', {
+        defaultMessage: 'Expressions must be wrapped in a function such as {fn}',
+        values: {
+          fn: 'sum()',
+        },
+      })
+    ),
+};

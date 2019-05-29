@@ -75,3 +75,12 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     }),
   },
 };
+
+export const errors = {
+  invalidBackgroundImage: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.containerStyle.invalidBackgroundImageErrorMessage', {
+        defaultMessage: 'Invalid backgroundImage. Please provide an asset or a URL.',
+      })
+    ),
+};
