@@ -56,7 +56,7 @@ export class WorkpadApp extends React.PureComponent {
 
             {isWriteable && (
               <div className="canvasLayout__sidebar hide-for-sharing">
-                <Sidebar />
+                <Sidebar commit={this.interactivePageLayout || (() => {})} />
               </div>
             )}
           </div>

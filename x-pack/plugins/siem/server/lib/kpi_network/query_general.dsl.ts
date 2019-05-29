@@ -44,10 +44,9 @@ const getGeneralQueryFilter = () => [
 export const buildGeneralQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    packetbeatAlias,
   },
 }: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
@@ -65,7 +64,7 @@ export const buildGeneralQuery = ({
 
   const dslQuery = [
     {
-      index: [logAlias, packetbeatAlias],
+      index: defaultIndex,
       allowNoIndices: true,
       ignoreUnavailable: true,
     },

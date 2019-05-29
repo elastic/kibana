@@ -19,7 +19,7 @@
 
 export { ConfigService } from './config_service';
 export { RawConfigService } from './raw_config_service';
-export { Config, ConfigPath, isConfigPath } from './config';
+export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs } from './env';
 

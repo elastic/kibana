@@ -10,9 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import chrome from 'ui/chrome';
 
-import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -24,13 +22,13 @@ import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { IndexType, LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
+import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-
-const basePath = chrome.getBasePath();
+import { UrlStateContainer } from '../../components/url_state';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -39,21 +37,20 @@ interface NetworkComponentReduxProps {
   filterQuery: string;
 }
 
-const indexTypes = [IndexType.FILEBEAT, IndexType.PACKETBEAT];
-
 type NetworkComponentProps = NetworkComponentReduxProps;
 const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={indexTypes}>
-    {({ filebeatIndicesExist, indexPattern }) =>
-      indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
+  <WithSource sourceId="default">
+    {({ indicesExist, indexPattern }) =>
+      indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
         <StickyContainer>
           <FiltersGlobal>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+            <UrlStateContainer indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <HeaderPage
             subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-            title={i18n.NETWORK}
+            title={i18n.PAGE_TITLE}
           />
 
           <GlobalTime>
@@ -131,12 +128,11 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
           </GlobalTime>
         </StickyContainer>
       ) : (
-        <EmptyPage
-          title={i18n.NO_FILEBEAT_INDICES}
-          message={i18n.LETS_ADD_SOME}
-          actionLabel={i18n.SETUP_INSTRUCTIONS}
-          actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-        />
+        <>
+          <HeaderPage title={i18n.PAGE_TITLE} />
+
+          <NetworkEmptyPage />
+        </>
       )
     }
   </WithSource>

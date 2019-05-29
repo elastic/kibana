@@ -7,9 +7,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { ToolTipShortcut } from '../../tool_tip_shortcut';
 
 export const RefreshControl = ({ doRefresh, inFlight }) => (
-  <EuiToolTip position="bottom" content="Refresh data">
+  <EuiToolTip
+    position="bottom"
+    content={
+      <span>
+        Refresh data
+        <ToolTipShortcut namespace="EDITOR" action="REFRESH" />
+      </span>
+    }
+  >
     <EuiButtonIcon
       disabled={inFlight}
       iconType="refresh"

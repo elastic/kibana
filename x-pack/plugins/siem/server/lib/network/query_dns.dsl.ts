@@ -74,10 +74,9 @@ export const buildDnsQuery = ({
   networkDnsSortField,
   timerange: { from, to },
   pagination: { limit },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    packetbeatAlias,
   },
 }: NetworkDnsRequestOptions) => {
   const filter = [
@@ -94,7 +93,7 @@ export const buildDnsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: packetbeatAlias,
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

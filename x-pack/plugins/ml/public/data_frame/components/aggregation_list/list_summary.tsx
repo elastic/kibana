@@ -20,7 +20,9 @@ export const AggListSummary: React.SFC<AggListSummaryProps> = ({ list }) => {
     <EuiForm>
       {aggNames.map((aggName: AggName) => (
         <Fragment key={aggName}>
-          <EuiPanel paddingSize="s">{aggName}</EuiPanel>
+          <EuiPanel paddingSize="s">
+            <div className="eui-textTruncate">{aggName}</div>
+          </EuiPanel>
           {aggNames.length > 0 && <EuiSpacer size="s" />}
         </Fragment>
       ))}

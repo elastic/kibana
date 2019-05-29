@@ -79,16 +79,16 @@ export default function ({ getPageObjects, getService }) {
 
       //circle layer for points
       // eslint-disable-next-line max-len
-      expect(layersForVectorSource[0]).to.eql({ 'id': 'n1t6f_circle', 'type': 'circle', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']], 'paint': { 'circle-color': ['interpolate', ['linear'], ['coalesce', ['get', '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'], -1], -1, 'rgba(0,0,0,0)', 0, '#f7faff', 0.125, '#ddeaf7', 0.25, '#c5daee', 0.375, '#9dc9e0', 0.5, '#6aadd5', 0.625, '#4191c5', 0.75, '#2070b4', 0.875, '#072f6b'], 'circle-opacity': 0.75, 'circle-stroke-color': '#FFFFFF', 'circle-stroke-opacity': 0.75, 'circle-stroke-width': 1, 'circle-radius': 10 } });
+      expect(layersForVectorSource[0]).to.eql({ 'id': 'n1t6f_circle', 'type': 'circle', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],  'layout': { 'visibility': 'visible' }, 'paint': { 'circle-color': ['interpolate', ['linear'], ['coalesce', ['feature-state', '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'], -1], -1, 'rgba(0,0,0,0)', 0, '#f7faff', 0.125, '#ddeaf7', 0.25, '#c5daee', 0.375, '#9dc9e0', 0.5, '#6aadd5', 0.625, '#4191c5', 0.75, '#2070b4', 0.875, '#072f6b'], 'circle-opacity': 0.75, 'circle-stroke-color': '#FFFFFF', 'circle-stroke-opacity': 0.75, 'circle-stroke-width': 1, 'circle-radius': 10 } });
 
       //fill layer
       // eslint-disable-next-line max-len
-      expect(layersForVectorSource[1]).to.eql({ 'id': 'n1t6f_fill', 'type': 'fill', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']], 'paint': { 'fill-color': ['interpolate', ['linear'], ['coalesce', ['get', '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'], -1], -1, 'rgba(0,0,0,0)', 0, '#f7faff', 0.125, '#ddeaf7', 0.25, '#c5daee', 0.375, '#9dc9e0', 0.5, '#6aadd5', 0.625, '#4191c5', 0.75, '#2070b4', 0.875, '#072f6b'], 'fill-opacity': 0.75 } }
+      expect(layersForVectorSource[1]).to.eql({ 'id': 'n1t6f_fill', 'type': 'fill', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']], 'layout': { 'visibility': 'visible' }, 'paint': { 'fill-color': ['interpolate', ['linear'], ['coalesce', ['feature-state', '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'], -1], -1, 'rgba(0,0,0,0)', 0, '#f7faff', 0.125, '#ddeaf7', 0.25, '#c5daee', 0.375, '#9dc9e0', 0.5, '#6aadd5', 0.625, '#4191c5', 0.75, '#2070b4', 0.875, '#072f6b'], 'fill-opacity': 0.75 } }
       );
 
       //line layer for borders
       // eslint-disable-next-line max-len
-      expect(layersForVectorSource[2]).to.eql({ 'id': 'n1t6f_line', 'type': 'line', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon'], ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'MultiLineString']], 'paint': { 'line-color': '#FFFFFF', 'line-opacity': 0.75, 'line-width': 1 } });
+      expect(layersForVectorSource[2]).to.eql({ 'id': 'n1t6f_line', 'type': 'line', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon'], ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'MultiLineString']], 'layout': { 'visibility': 'visible' }, 'paint': { 'line-color': '#FFFFFF', 'line-opacity': 0.75, 'line-width': 1 } });
 
     });
 

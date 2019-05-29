@@ -10,31 +10,45 @@ import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { dragAndDropModel, dragAndDropSelectors, State } from '../../store';
+import { BrowserFields } from '../../containers/source';
+import { dragAndDropModel, dragAndDropSelectors } from '../../store';
+import { IdToDataProvider } from '../../store/drag_and_drop/model';
+import { State } from '../../store/reducer';
 
 import {
+  addFieldToTimelineColumns,
   addProviderToTimeline,
+  fieldWasDroppedOnTimelineColumns,
   providerWasDroppedOnTimeline,
   providerWasDroppedOnTimelineButton,
 } from './helpers';
 
 interface Props {
+  browserFields: BrowserFields;
   children: React.ReactNode;
   dataProviders?: dragAndDropModel.IdToDataProvider;
   dispatch: Dispatch;
 }
 
 interface OnDragEndHandlerParams {
-  result: DropResult;
-  dataProviders: dragAndDropModel.IdToDataProvider;
+  browserFields: BrowserFields;
+  dataProviders: IdToDataProvider;
   dispatch: Dispatch;
+  result: DropResult;
 }
 
-const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerParams) => {
+const onDragEndHandler = ({
+  browserFields,
+  dataProviders,
+  dispatch,
+  result,
+}: OnDragEndHandlerParams) => {
   if (providerWasDroppedOnTimeline(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
   } else if (providerWasDroppedOnTimelineButton(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
+  } else if (fieldWasDroppedOnTimelineColumns(result)) {
+    addFieldToTimelineColumns({ browserFields, dispatch, result });
   }
 };
 
@@ -60,12 +74,13 @@ export class DragDropContextWrapperComponent extends React.Component<Props> {
   private onDragEnd: (result: DropResult, provided: ResponderProvided) => void = (
     result: DropResult
   ) => {
-    const { dataProviders, dispatch } = this.props;
+    const { browserFields, dataProviders, dispatch } = this.props;
 
     enableScrolling();
 
     if (dataProviders != null) {
       onDragEndHandler({
+        browserFields,
         result,
         dataProviders,
         dispatch,

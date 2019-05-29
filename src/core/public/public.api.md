@@ -37,16 +37,6 @@ export interface ApplicationStart {
 }
 
 // @public
-export interface BasePathSetup {
-    addToPath(path: string): string;
-    get(): string;
-    removeFromPath(path: string): string;
-}
-
-// @public
-export type BasePathStart = BasePathSetup;
-
-// @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
     catalogue: Record<string, boolean>;
@@ -119,10 +109,6 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    application: ApplicationSetup;
-    // (undocumented)
-    basePath: BasePathSetup;
-    // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
@@ -130,8 +116,6 @@ export interface CoreSetup {
     http: HttpSetup;
     // (undocumented)
     i18n: I18nSetup;
-    // (undocumented)
-    injectedMetadata: InjectedMetadataSetup;
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -141,17 +125,13 @@ export interface CoreSetup {
 // @public
 export interface CoreStart {
     // (undocumented)
-    application: ApplicationStart;
-    // (undocumented)
-    basePath: BasePathStart;
+    application: Pick<ApplicationStart, 'capabilities'>;
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
-    // (undocumented)
-    injectedMetadata: InjectedMetadataStart;
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)
@@ -186,13 +166,45 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HttpService" needs to be exported by the entry point index.d.ts
-// 
 // @public (undocumented)
-export type HttpSetup = ReturnType<HttpService['setup']>;
+export interface HttpServiceBase {
+    // (undocumented)
+    addLoadingCount(count$: Observable<number>): void;
+    // (undocumented)
+    delete: HttpHandler;
+    // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    fetch: HttpHandler;
+    // (undocumented)
+    get: HttpHandler;
+    // (undocumented)
+    getBasePath(): string;
+    // (undocumented)
+    getLoadingCount$(): Observable<number>;
+    // (undocumented)
+    head: HttpHandler;
+    // (undocumented)
+    options: HttpHandler;
+    // (undocumented)
+    patch: HttpHandler;
+    // (undocumented)
+    post: HttpHandler;
+    // (undocumented)
+    prependBasePath(path: string): string;
+    // (undocumented)
+    put: HttpHandler;
+    // (undocumented)
+    removeBasePath(path: string): string;
+    // (undocumented)
+    stop(): void;
+}
 
 // @public (undocumented)
-export type HttpStart = ReturnType<HttpService['start']>;
+export type HttpSetup = HttpServiceBase;
+
+// @public (undocumented)
+export type HttpStart = HttpServiceBase;
 
 // @public
 export interface I18nSetup {
@@ -205,86 +217,24 @@ export interface I18nSetup {
 export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
-export interface InjectedMetadataParams {
+export interface InternalCoreSetup extends CoreSetup {
     // (undocumented)
-    injectedMetadata: {
-        version: string;
-        buildNumber: number;
-        basePath: string;
-        csp: {
-            warnLegacyBrowsers: boolean;
-        };
-        vars: {
-            [key: string]: unknown;
-        };
-        uiPlugins: Array<{
-            id: PluginName;
-            plugin: DiscoveredPlugin;
-        }>;
-        legacyMetadata: {
-            app: unknown;
-            translations: unknown;
-            bundleId: string;
-            nav: LegacyNavLink[];
-            version: string;
-            branch: string;
-            buildNum: number;
-            buildSha: string;
-            basePath: string;
-            serverName: string;
-            devMode: boolean;
-            uiSettings: {
-                defaults: UiSettingsState;
-                user?: UiSettingsState;
-            };
-        };
-    };
+    application: ApplicationSetup;
+    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    injectedMetadata: InjectedMetadataSetup;
 }
 
-// @public
-export interface InjectedMetadataSetup {
+// @internal (undocumented)
+export interface InternalCoreStart extends CoreStart {
     // (undocumented)
-    getBasePath: () => string;
+    application: ApplicationStart;
+    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    getCspConfig: () => {
-        warnLegacyBrowsers: boolean;
-    };
-    // (undocumented)
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    // (undocumented)
-    getInjectedVars: () => {
-        [key: string]: unknown;
-    };
-    // (undocumented)
-    getKibanaBuildNumber: () => number;
-    // (undocumented)
-    getKibanaVersion: () => string;
-    // (undocumented)
-    getLegacyMetadata: () => {
-        app: unknown;
-        translations: unknown;
-        bundleId: string;
-        nav: LegacyNavLink[];
-        version: string;
-        branch: string;
-        buildNum: number;
-        buildSha: string;
-        basePath: string;
-        serverName: string;
-        devMode: boolean;
-        uiSettings: {
-            defaults: UiSettingsState;
-            user?: UiSettingsState | undefined;
-        };
-    };
-    getPlugins: () => Array<{
-        id: string;
-        plugin: DiscoveredPlugin;
-    }>;
+    injectedMetadata: InjectedMetadataStart;
 }
-
-// @public (undocumented)
-export type InjectedMetadataStart = InjectedMetadataSetup;
 
 // @public (undocumented)
 export interface LegacyNavLink {
@@ -338,9 +288,9 @@ export interface OverlayStart {
 // @public
 export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
     // (undocumented)
-    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
     // (undocumented)
-    start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
@@ -350,42 +300,6 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 
 // @public
 export interface PluginInitializerContext {
-}
-
-// @public
-export interface PluginSetupContext {
-    // (undocumented)
-    basePath: BasePathSetup;
-    // (undocumented)
-    chrome: ChromeSetup;
-    // (undocumented)
-    fatalErrors: FatalErrorsSetup;
-    // (undocumented)
-    http: HttpSetup;
-    // (undocumented)
-    i18n: I18nSetup;
-    // (undocumented)
-    notifications: NotificationsSetup;
-    // (undocumented)
-    uiSettings: UiSettingsSetup;
-}
-
-// @public
-export interface PluginStartContext {
-    // (undocumented)
-    application: Pick<ApplicationStart, 'capabilities'>;
-    // (undocumented)
-    basePath: BasePathStart;
-    // (undocumented)
-    chrome: ChromeStart;
-    // (undocumented)
-    http: HttpStart;
-    // (undocumented)
-    i18n: I18nStart;
-    // (undocumented)
-    notifications: NotificationsStart;
-    // (undocumented)
-    overlays: OverlayStart;
 }
 
 export { Toast }
@@ -449,12 +363,5 @@ export interface UiSettingsState {
     [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
 }
 
-
-// Warnings were encountered during analysis:
-// 
-// src/core/public/injected_metadata/injected_metadata_service.ts:48:7 - (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
-// src/core/public/injected_metadata/injected_metadata_service.ts:49:7 - (ae-forgotten-export) The symbol "DiscoveredPlugin" needs to be exported by the entry point index.d.ts
-
-// (No @packageDocumentation comment for this package)
 
 ```

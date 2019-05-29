@@ -15,8 +15,9 @@ import { ColumnHeader } from '../column_header';
 import * as i18n from '../translations';
 
 const IconType = styled(EuiIcon)`
+  margin-right: 3px;
   position: relative;
-  top: -1px;
+  top: -2px;
 `;
 
 const P = styled.p`
@@ -33,10 +34,12 @@ const ToolTipTableValue = styled.span`
 
 export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) => (
   <>
-    <P>
-      <ToolTipTableMetadata data-test-subj="category">{i18n.CATEGORY}:</ToolTipTableMetadata>
-      <ToolTipTableValue data-test-subj="category-value">{header.category}</ToolTipTableValue>
-    </P>
+    {!isEmpty(header.category) ? (
+      <P>
+        <ToolTipTableMetadata data-test-subj="category">{i18n.CATEGORY}:</ToolTipTableMetadata>
+        <ToolTipTableValue data-test-subj="category-value">{header.category}</ToolTipTableValue>
+      </P>
+    ) : null}
     <P>
       <ToolTipTableMetadata data-test-subj="field">{i18n.FIELD}:</ToolTipTableMetadata>
       <ToolTipTableValue data-test-subj="field-value">{header.id}</ToolTipTableValue>

@@ -149,7 +149,6 @@ jest.mock('ui/chrome/services/global_nav_state', () => {
   };
 });
 
-import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -162,7 +161,6 @@ import { LegacyPlatformService } from './legacy_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 
 const applicationSetup = applicationServiceMock.createSetupContract();
-const basePathSetup = basePathServiceMock.createSetupContract();
 const chromeSetup = chromeServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
 const httpSetup = httpServiceMock.createSetupContract();
@@ -185,17 +183,16 @@ const defaultSetupDeps = {
     injectedMetadata: injectedMetadataSetup,
     notifications: notificationsSetup,
     http: httpSetup,
-    basePath: basePathSetup,
     uiSettings: uiSettingsSetup,
     chrome: chromeSetup,
   },
+  plugins: {},
 };
 
 const applicationStart = applicationServiceMock.createStartContract();
-const basePathStart = basePathServiceMock.createStartContract();
+const httpStart = httpServiceMock.createStartContract();
 const chromeStart = chromeServiceMock.createStartContract();
 const i18nStart = i18nServiceMock.createStartContract();
-const httpStart = httpServiceMock.createStartContract();
 const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
 const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
@@ -203,15 +200,15 @@ const overlayStart = overlayServiceMock.createStartContract();
 const defaultStartDeps = {
   core: {
     application: applicationStart,
-    basePath: basePathStart,
+    http: httpStart,
     chrome: chromeStart,
     i18n: i18nStart,
-    http: httpStart,
     injectedMetadata: injectedMetadataStart,
     notifications: notificationsStart,
     overlays: overlayStart,
   },
   targetDomElement: document.createElement('div'),
+  plugins: {},
 };
 
 afterEach(() => {
@@ -288,7 +285,7 @@ describe('#setup()', () => {
       legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockBasePathInit).toHaveBeenCalledTimes(1);
-      expect(mockBasePathInit).toHaveBeenCalledWith(basePathSetup);
+      expect(mockBasePathInit).toHaveBeenCalledWith(httpSetup);
     });
 
     it('passes basePath service to ui/chrome/api/ui_settings', () => {
