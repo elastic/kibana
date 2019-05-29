@@ -200,7 +200,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       // wait until the count of dashboard panels equals the count of toggle menu icons
       await retry.waitFor('in edit mode', async () => {
         const [panels, menuIcons] = await Promise.all([
-          testSubjects.findAll('dashboardPanel'),
+          testSubjects.findAll('embeddablePanel'),
           testSubjects.findAll('embeddablePanelToggleMenuIcon'),
         ]);
         return panels.length === menuIcons.length;
@@ -484,7 +484,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelCount() {
       log.debug('getPanelCount');
-      const panels = await testSubjects.findAll('dashboardPanel');
+      const panels = await testSubjects.findAll('embeddablePanel');
       return panels.length;
     }
 
@@ -509,7 +509,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getDashboardPanels() {
-      return await testSubjects.findAll('dashboardPanel');
+      return await testSubjects.findAll('embeddablePanel');
     }
 
     async addVisualizations(visualizations) {

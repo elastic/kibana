@@ -256,6 +256,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           style={{ zIndex: focusedPanelIndex === panel.embeddableId ? 2 : 'auto' }}
           className={classes}
           key={panel.embeddableId}
+          data-test-subj="dashboardPanel"
           ref={reactGridItem => {
             this.gridItems[panel.embeddableId] = reactGridItem;
           }}

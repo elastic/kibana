@@ -44,6 +44,11 @@ interface State {
   loading: boolean;
 }
 
+/**
+ * This component can be used by embeddable containers using react to easily render children. It waits
+ * for the child to be initialized, showing a loading indicator until that is complete.
+ */
+
 class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps, State> {
   [panel: string]: any;
   public mounted: boolean;
@@ -63,19 +68,17 @@ class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps
     this.mounted = true;
     const { container } = this.props;
     this.subscription = container.getOutput$().subscribe(() => {
-      if (container.getOutput().embeddableLoaded[this.props.embeddableId]) {
-        this.embeddable = container.getChild(this.props.embeddableId);
-        this.setState({ loading: false });
+      if (this.mounted) {
+        if (container.getOutput().embeddableLoaded[this.props.embeddableId]) {
+          this.embeddable = container.getChild(this.props.embeddableId);
+          this.setState({ loading: false });
+        }
       }
     });
   }
 
   public componentWillUnmount() {
     this.mounted = false;
-    const { container } = this.props;
-    if (this.embeddable && container.getChild(this.embeddable.id)) {
-      container.removeEmbeddable(this.embeddable.id);
-    }
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -87,12 +90,7 @@ class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps
     });
 
     return (
-      <div
-        id="embeddedPanel"
-        data-test-subj="dashboardPanel"
-        className={classes}
-        ref={panelElement => (this.panelElement = panelElement)}
-      >
+      <div id="embeddedPanel" className={classes}>
         {this.state.loading || !this.embeddable ? (
           <EuiLoadingChart size="l" mono />
         ) : (
