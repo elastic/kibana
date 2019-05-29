@@ -12,13 +12,7 @@ import * as React from 'react';
 import { AppTestingFrameworkAdapter } from '../../lib/adapters/framework/testing_framework_adapter';
 import { mockFrameworks, TestProviders } from '../../mock';
 
-import {
-  KibanaConfigContext,
-  PreferenceFormattedDate,
-  FormattedDate,
-  isEpochString,
-  getMaybeDate,
-} from '.';
+import { KibanaConfigContext, PreferenceFormattedDate, FormattedDate, getMaybeDate } from '.';
 import { getEmptyValue } from '../empty_value';
 
 describe('formatted_date', () => {
@@ -152,30 +146,12 @@ describe('formatted_date', () => {
         const wrapper = mount(
           <TestProviders>
             <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-              <FormattedDate fieldName="@timestamp" value={'Evan Braden Rebecca'} />
+              <FormattedDate fieldName="@timestamp" value={'Rebecca Evan Braden'} />
             </KibanaConfigContext.Provider>
           </TestProviders>
         );
-        expect(wrapper.text()).toEqual('Evan Braden Rebecca');
+        expect(wrapper.text()).toEqual('Rebecca Evan Braden');
       });
-    });
-  });
-
-  describe('isEpochString', () => {
-    test('returns empty string as not epoch', () => {
-      expect(isEpochString('')).toBe(false);
-    });
-
-    test('returns string with empty spaces as not epoch', () => {
-      expect(isEpochString('  ')).toBe(false);
-    });
-
-    test('returns string as not epoch', () => {
-      expect(isEpochString('2019-05-28T23:05:28.405Z')).toBe(false);
-    });
-
-    test('returns plain string number as epoch', () => {
-      expect(isEpochString('1559079339000')).toBe(true);
     });
   });
 
@@ -220,6 +196,14 @@ describe('formatted_date', () => {
           .toDate()
           .toISOString()
       ).toBe('2019-05-28T23:06:10.612Z');
+    });
+
+    test('returns a short date time string as a date string and not epoch', () => {
+      expect(
+        getMaybeDate('2019-01-01')
+          .toDate()
+          .toISOString()
+      ).toBe('2019-01-01T00:00:00.000Z');
     });
   });
 });

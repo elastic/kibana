@@ -27,11 +27,18 @@ export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => (
   </KibanaConfigContext.Consumer>
 ));
 
-export const isEpochString = (possibleEpoch: string): boolean =>
-  possibleEpoch.trim() !== '' && !isNaN(+possibleEpoch);
-
-export const getMaybeDate = (value: string | number): moment.Moment =>
-  isString(value) && isEpochString(value) ? moment(new Date(+value)) : moment(new Date(value));
+export const getMaybeDate = (value: string | number): moment.Moment => {
+  if (isString(value) && value.trim() !== '') {
+    const maybeDate = moment(new Date(value));
+    if (maybeDate.isValid()) {
+      return maybeDate;
+    } else {
+      return moment(new Date(+value));
+    }
+  } else {
+    return moment(new Date(value));
+  }
+};
 
 /**
  * Renders the specified date value in a format determined by the user's preferences,
