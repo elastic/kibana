@@ -36,9 +36,11 @@ export type SavedObjectsClientFactory<Request = any> = (
  * Provider for the Scoped Saved Object Client.
  */
 export class ScopedSavedObjectsClientProvider<Request = any> {
-  _wrapperFactories = new PriorityCollection<SavedObjectsClientWrapperFactory<Request>>();
+  private readonly _wrapperFactories = new PriorityCollection<
+    SavedObjectsClientWrapperFactory<Request>
+  >();
   private _clientFactory: SavedObjectsClientFactory<Request>;
-  private _originalClientFactory: SavedObjectsClientFactory<Request>;
+  private readonly _originalClientFactory: SavedObjectsClientFactory<Request>;
 
   constructor({
     defaultClientFactory,

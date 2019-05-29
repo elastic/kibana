@@ -25,9 +25,14 @@ interface DecoratedError extends Boom {
   [code]?: string;
 }
 
-function decorate(error: any, errorCode: string, statusCode: number, message?: string) {
+function decorate(
+  error: Error | DecoratedError,
+  errorCode: string,
+  statusCode: number,
+  message?: string
+): DecoratedError {
   if (isSavedObjectsClientError(error)) {
-    return error as DecoratedError;
+    return error;
   }
 
   const boom = Boom.boomify(error, {
@@ -41,8 +46,8 @@ function decorate(error: any, errorCode: string, statusCode: number, message?: s
   return boom;
 }
 
-export function isSavedObjectsClientError(error: any) {
-  return error && !!error[code];
+export function isSavedObjectsClientError(error: any): error is DecoratedError {
+  return Boolean(error && error[code]);
 }
 
 // 400 - badRequest

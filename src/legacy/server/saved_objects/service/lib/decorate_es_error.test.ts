@@ -79,6 +79,7 @@ describe('savedObjectsClient/decorateEsError', () => {
   });
 
   it('makes es.Forbidden a SavedObjectsClient/Forbidden error', () => {
+    // Ignore missing type until https://github.com/DefinitelyTyped/DefinitelyTyped/pull/35809 is published
     // @ts-ignore
     const error = new esErrors.Forbidden();
     expect(isForbiddenError(error)).toBe(false);
