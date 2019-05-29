@@ -463,16 +463,11 @@ describe('UrlStateContainer', () => {
           mockProps = getMockPropsObj({ page, examplePath, namespaceLower, type })
             .relativeTimeSearch.undefinedQuery;
           shallow(<UrlStateContainerLifecycle {...mockProps} />);
-          // @ts-ignore property mock does not exists
-          // console.log(`set${namespaceUpper}Kql`);
-          // console.log('HEYHEY', defaultProps[`set${namespaceUpper}Kql`]);
-          // console.log('HEYHEY', mockProps[`set${namespaceUpper}Kql`]);
           const functionName =
             namespaceUpper === 'Network' ? defaultProps.setNetworkKql : defaultProps.setHostsKql;
           // @ts-ignore property mock does not exists
           expect(functionName.mock.calls[0][0]).toEqual({
             filterQuery: serializedFilterQuery,
-            // @ts-ignore
             [`${namespaceLower}Type`]: type,
           });
         });
