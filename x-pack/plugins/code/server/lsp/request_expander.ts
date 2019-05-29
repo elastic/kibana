@@ -191,8 +191,8 @@ export class RequestExpander implements ILanguageServerHandler {
 
         if (timeout > 0 && ws.initPromise) {
           try {
-            const elasped = Date.now() - startTime;
-            await promiseTimeout(timeout - elasped, ws.initPromise);
+            const elapsed = Date.now() - startTime;
+            await promiseTimeout(timeout - elapsed, ws.initPromise);
           } catch (e) {
             if (e.isTimeout) {
               throw InitializingError;
