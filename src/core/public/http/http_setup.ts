@@ -205,7 +205,7 @@ export const setup = (
     return { response, body, request };
   }
 
-  async function fetch(path: string, options: HttpFetchOptions = {}) {
+  function fetch(path: string, options: HttpFetchOptions = {}) {
     return interceptResponse(interceptRequest(createRequest(path, options)).then(fetcher));
   }
 
