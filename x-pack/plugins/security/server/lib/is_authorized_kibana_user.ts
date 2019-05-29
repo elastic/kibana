@@ -41,11 +41,17 @@ export const isAuthorizedKibanaUser = async (
 };
 
 function getUserRoles(request: Legacy.Request, user?: AuthenticatedUser) {
-  if (user) {
+  if (user && user.roles) {
     return user.roles;
   }
-  if (request.auth && request.auth.credentials) {
-    return (request.auth.credentials as AuthenticatedUser).roles;
+
+  const authUser: AuthenticatedUser | null =
+    request.auth && request.auth.credentials
+      ? (request.auth.credentials as AuthenticatedUser)
+      : null;
+
+  if (authUser && authUser.roles) {
+    return authUser.roles;
   }
   return [];
 }
