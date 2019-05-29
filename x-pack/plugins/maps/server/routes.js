@@ -9,8 +9,6 @@ import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, EMS_META_PATH, GIS_API_PATH } fr
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 import { getEMSResources } from '../common/ems_util';
-import { loadMakiSvg } from './symbols/load_maki_svg';
-import { getStyledSvg } from './symbols/get_styled_svg';
 
 import Boom from 'boom';
 
@@ -158,22 +156,4 @@ export function initRoutes(server, licenseUid) {
       }
     }
   });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/symbol/{symbolName}/{fillColor}`,
-    handler: async (request, h) => {
-      let svgString;
-      try {
-        svgString = loadMakiSvg(request.params.symbolName);
-      } catch(error) {
-        server.log('warning', error.message);
-        return h.response().code(404);
-      }
-
-      const styledSvgString = await getStyledSvg(svgString, request.params.fillColor);
-      return h.response(styledSvgString).header('Content-type', 'image/svg+xml');
-    }
-  });
-
 }

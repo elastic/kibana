@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { maki } from './maki';
+import { maki } from '@kbn/maki';
+import xml2js from 'xml2js';
+import { parseXmlString } from '../../../../../common/parse_xml_string';
 
 export const SYMBOLS = {};
 maki.svgArray.forEach(svgString => {
@@ -30,4 +32,13 @@ export function buildSrcUrl(svgString) {
   const domUrl = window.URL || window.webkitURL || window;
   const svg = new Blob([svgString], { type: 'image/svg+xml' });
   return domUrl.createObjectURL(svg);
+}
+
+export async function styleSvg(svgString, fill) {
+  const svgXml = await parseXmlString(svgString);
+  if (fill) {
+    svgXml.svg.$.style = `fill: ${fill};`;
+  }
+  const builder = new xml2js.Builder();
+  return builder.buildObject(svgXml);
 }

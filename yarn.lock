@@ -2062,11 +2062,6 @@
   resolved "https://registry.yarnpkg.com/@mapbox/jsonlint-lines-primitives/-/jsonlint-lines-primitives-2.0.2.tgz#ce56e539f83552b58d10d672ea4d6fc9adc7b234"
   integrity sha1-zlblOfg1UrWNENZy6k1vya3HsjQ=
 
-"@mapbox/maki@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@mapbox/maki/-/maki-6.1.0.tgz#87d21bfdfc4a48be5ea3530c062a1a74bcbf8019"
-  integrity sha512-35uJaQh2zyKvowNrPFo3jv+aQXX6KjlFDwi9hfusMapE7DQUhWxY+6r65RxdbtTv2xmyZ1VMTZ/uN8Vpy0hsxQ==
-
 "@mapbox/mapbox-gl-draw@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-draw/-/mapbox-gl-draw-1.1.1.tgz#b88a7919c8de04eb7946885e747e22049c3a3138"

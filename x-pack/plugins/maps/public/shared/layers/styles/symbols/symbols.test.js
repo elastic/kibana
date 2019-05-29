@@ -4,11 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSymbolSvg } from './symbols';
+import { getSymbolSvg, styleSvg } from './symbols';
 
 describe('getSymbolSvg', () => {
   it('Should load symbol svg', () => {
     const svgString = getSymbolSvg('aerialway 11');
     expect(svgString.length).toBe(643);
+  });
+});
+
+describe('styleSvg', () => {
+  it('Should not add style property when fill not provided', async () => {
+    const unstyledSvgString = '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
+    const styledSvg = await styleSvg(unstyledSvgString);
+    expect(styledSvg.split('\n')[1]).toBe('<svg version=\"1.1\" width=\"11px\" height=\"11px\" viewBox=\"0 0 11 11\">');
+  });
+
+  it('Should add style property to svg element', async () => {
+    const unstyledSvgString = '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
+    const styledSvg = await styleSvg(unstyledSvgString, 'red');
+    // eslint-disable-next-line max-len
+    expect(styledSvg.split('\n')[1]).toBe('<svg version=\"1.1\" width=\"11px\" height=\"11px\" viewBox=\"0 0 11 11\" style=\"fill: red;\">');
   });
 });

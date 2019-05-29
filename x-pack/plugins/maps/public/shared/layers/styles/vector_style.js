@@ -15,6 +15,7 @@ import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constan
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
+import { SYMBOLIZE_AS_CIRCLE } from './vector_constants';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -492,5 +493,9 @@ export class VectorStyle extends AbstractStyle {
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
     }
+  }
+
+  arePointsSymbolizedAsCircles() {
+    return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
   }
 }

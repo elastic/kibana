@@ -35,6 +35,12 @@ const ALL_SHAPE_MB_FILTER = [
   ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
 ];
 
+const POINT_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
+];
+
 
 let idCounter = 0;
 function generateNumericalId() {
@@ -435,46 +441,78 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _setMbPointsProperties(mbMap) {
+    const pointLayerId = this._getMbPointLayerId();
+    const symbolLayerId = this._getMbSymbolLayerId();
+    const pointLayer = mbMap.getLayer(pointLayerId);
+    const symbolLayer = mbMap.getLayer(symbolLayerId);
+
+    let layerId;
+    if (this._style.arePointsSymbolizedAsCircles()) {
+      layerId = pointLayerId;
+      if (symbolLayer) {
+        mbMap.removeLayer(symbolLayerId);
+      }
+      this._setMbCircleProperties(mbMap);
+    } else {
+      layerId = symbolLayerId;
+      if (pointLayer) {
+        mbMap.removeLayer(pointLayerId);
+      }
+      this._setMbSymbolProperties(mbMap);
+    }
+
+    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+  }
+
+  _setMbCircleProperties(mbMap) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
     if (!pointLayer) {
       mbMap.addLayer({
         id: pointLayerId,
-        type: 'symbol',
+        type: 'circle',
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
+      mbMap.setFilter(pointLayerId, POINT_MB_FILTER);
     }
-    /*this._style.setMBPaintPropertiesForPoints({
+    this._style.setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
       pointLayerId: pointLayerId,
-    });*/
+    });
+  }
 
-    /*const DOMURL = window.URL || window.webkitURL || window;
-    const svg = new Blob([renderedElement.innerHTML], {type: 'image/svg+xml'});
-    const symbolUrl = DOMURL.createObjectURL(svg);*/
+  _setMbSymbolProperties(mbMap) {
+    const sourceId = this.getId();
+    const symbolLayerId = this._getMbSymbolLayerId();
+    const symbolLayer = mbMap.getLayer(symbolLayerId);
+    if (!symbolLayer) {
+      mbMap.addLayer({
+        id: symbolLayerId,
+        type: 'symbol',
+        source: sourceId,
+      });
+      mbMap.setFilter(symbolLayerId, POINT_MB_FILTER);
+    }
 
     const imageId = 'test';
     if (mbMap.hasImage(imageId)) {
-      mbMap.setLayoutProperty(pointLayerId, 'icon-image', imageId);
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
     } else {
       const img = new Image(11, 11);
       img.onload = () => {
         //mbMap.setLayoutProperty(pointLayerId, 'icon-image', imageId);
         mbMap.addImage(imageId, img);
-        mbMap.setLayoutProperty(pointLayerId, 'icon-image', imageId);
+        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
       };
       img.onerror = (e) => {
         console.log(e);
       };
       img.src = '../api/maps/symbol/airfield-15/blue';
     }
-
-    mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   _setMbLinePolygonProperties(mbMap) {
@@ -536,6 +574,10 @@ export class VectorLayer extends AbstractLayer {
     return this.getId() +  '_circle';
   }
 
+  _getMbSymbolLayerId() {
+    return this.getId() +  '_symbol';
+  }
+
   _getMbLineLayerId() {
     return this.getId() + '_line';
   }
@@ -545,9 +587,8 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getMbLayerIds() {
-    return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
+    return [this._getMbPointLayerId(), this._getMbSymbolLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
   }
-
 
   _addJoinsToSourceTooltips(tooltipsFromSource) {
     for (let i = 0; i < tooltipsFromSource.length; i++) {
@@ -563,7 +604,6 @@ export class VectorLayer extends AbstractLayer {
       }
     }
   }
-
 
   async getPropertiesForTooltip(properties) {
 
