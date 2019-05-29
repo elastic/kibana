@@ -147,16 +147,15 @@ file.
 +
 --
 // tag::disable-system-module[]
-Run the following command:
+By default, the {metricbeat-ref}/metricbeat-module-system.html[system module] is
+enabled. The information it collects, however, is not shown on the *Monitoring*
+page in {kib}. Unless you want to use that information for other purposes, run
+the following command:
 
 ["source","sh",subs="attributes,callouts"]
 ----------------------------------------------------------------------
 metricbeat modules disable system
 ----------------------------------------------------------------------
-
-For more information, see 
-{metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and
-{metricbeat-ref}/metricbeat-module-system.html[System module].
 // end::disable-system-module[] 
 --
 
