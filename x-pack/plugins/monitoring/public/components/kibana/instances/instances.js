@@ -145,7 +145,9 @@ export class KibanaInstances extends PureComponent {
               sorting={this.sorting}
               pagination={this.pagination}
               setupMode={setupMode}
-              productUuidField="kibana.uuid"
+              uuidField="kibana.uuid"
+              nameField="name"
+              ipField="transport_address"
               search={{
                 box: {
                   incremental: true,

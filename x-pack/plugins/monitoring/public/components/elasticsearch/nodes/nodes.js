@@ -253,7 +253,9 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}
-            productUuidField="resolver"
+            uuidField="resolver"
+            nameField="name"
+            ipField="transport_address"
             search={{
               box: {
                 incremental: true,

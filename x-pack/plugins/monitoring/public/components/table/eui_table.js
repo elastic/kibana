@@ -21,7 +21,9 @@ export class EuiMonitoringTable extends React.PureComponent {
       search = {},
       columns: _columns,
       setupMode,
-      productUuidField,
+      uuidField,
+      nameField,
+      ipField,
       ...props
     } = this.props;
 
@@ -47,8 +49,8 @@ export class EuiMonitoringTable extends React.PureComponent {
     if (setupMode && setupMode.enabled) {
       columns.push({
         name: 'Migration Status',
-        field: productUuidField,
-        render: (uuid) => {
+        field: uuidField,
+        render: (uuid, product) => {
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[uuid] || {};
 
@@ -63,8 +65,13 @@ export class EuiMonitoringTable extends React.PureComponent {
           }
 
           if (status.isInternalCollector || status.isPartiallyMigrated) {
+            const instance = {
+              uuid: product[uuidField],
+              name: product[nameField],
+              ip: product[ipField]
+            };
             return (
-              <EuiButton color="danger" onClick={() => setupMode.openFlyout(uuid)}>
+              <EuiButton color="danger" onClick={() => setupMode.openFlyout(instance)}>
                 {i18n.translate('xpack.monitoring.euiTable.migrateButtonLabel', {
                   defaultMessage: 'Migrate'
                 })}

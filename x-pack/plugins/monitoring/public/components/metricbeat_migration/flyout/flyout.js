@@ -20,23 +20,27 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiLink,
-  EuiText
+  EuiText,
+  EuiCallOut
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 import { Storage } from '../../../../../../../src/legacy/ui/public/storage/storage';
 import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   INSTRUCTION_STEP_SET_MONITORING_URL,
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
 import { KIBANA_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
+import { Monospace } from '../instruction_steps/components/monospace';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
 const AUTO_CHECK_INTERVAL_IN_MS = 5000;
+const DEFAULT_ES_MONITORING_URL = 'http://localhost:9200';
 
 export class Flyout extends Component {
   constructor(props) {
@@ -111,7 +115,7 @@ export class Flyout extends Component {
   }
 
   renderActiveStep() {
-    const { product, productName, onClose, meta } = this.props;
+    const { product, productName, onClose, meta, instance } = this.props;
     const {
       activeStep,
       esMonitoringUrl,
@@ -135,7 +139,7 @@ export class Flyout extends Component {
             >
               <EuiFieldText
                 value={esMonitoringUrl}
-                placeholder="http://localhost:9200"
+                placeholder={DEFAULT_ES_MONITORING_URL}
                 onChange={e => this.setEsMonitoringUrl(e.target.value)}
               />
             </EuiFormRow>
@@ -154,7 +158,27 @@ export class Flyout extends Component {
 
         return (
           <Fragment>
-            <EuiSpacer size="m"/>
+            <EuiCallOut
+              size="s"
+              title={<FormattedMessage
+                id="xpack.monitoring.metricbeatMigration.flyout.migrationDescriptionLabel"
+                defaultMessage="Migrating {instance}"
+                values={{
+                  instance: (
+                    <FormattedMessage
+                      id="xpack.monitoring.metricbeatMigration.flyout.migrationDescriptionInstanceLabel"
+                      defaultMessage="{instanceName} located at {instanceIp}"
+                      values={{
+                        instanceName: (<Monospace>{instance.name}</Monospace>),
+                        instanceIp: (<Monospace>{instance.ip}</Monospace>)
+                      }}
+                    />
+                  )
+                }}
+              />}
+              iconType="pin"
+            />
+            <EuiSpacer size="l"/>
             <EuiSteps steps={instructionSteps}/>
           </Fragment>
         );

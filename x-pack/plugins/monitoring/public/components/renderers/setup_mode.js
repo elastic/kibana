@@ -12,7 +12,7 @@ export class SetupModeRenderer extends React.Component {
   state = {
     renderState: false,
     isFlyoutOpen: false,
-    instanceUuid: null,
+    instance: null,
   }
 
   componentWillMount() {
@@ -23,12 +23,12 @@ export class SetupModeRenderer extends React.Component {
 
   getFlyout(data, meta) {
     const { productName } = this.props;
-    const { isFlyoutOpen, instanceUuid } = this.state;
+    const { isFlyoutOpen, instance } = this.state;
     if (!data || !isFlyoutOpen) {
       return null;
     }
 
-    let product = data.byUuid[instanceUuid];
+    let product = data.byUuid[instance.uuid];
     const isFullyOrPartiallyMigrated = data.totalUniquePartiallyMigratedCount === data.totalUniqueInstanceCount
       || data.totalUniqueFullyMigratedCount === data.totalUniqueInstanceCount;
     if (!product && productName === ELASTICSEARCH_CUSTOM_ID && isFullyOrPartiallyMigrated) {
@@ -41,6 +41,7 @@ export class SetupModeRenderer extends React.Component {
         productName={productName}
         product={product}
         meta={meta}
+        instance={instance}
         updateProduct={updateSetupModeData}
       />
     );
@@ -58,7 +59,7 @@ export class SetupModeRenderer extends React.Component {
         enabled: setupModeState.enabled,
         productName,
         updateSetupModeData,
-        openFlyout: (instanceUuid) => this.setState({ isFlyoutOpen: true, instanceUuid }),
+        openFlyout: (instance) => this.setState({ isFlyoutOpen: true, instance }),
         closeFlyout: () => this.setState({ isFlyoutOpen: false }),
       },
       flyoutComponent: this.getFlyout(data, meta),
