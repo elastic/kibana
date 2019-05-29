@@ -339,7 +339,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const isDataExists = await testSubjects.exists('tableView');
       log.debug(`data is already rendered: ${isDataExists}`);
       if (!isDataExists) {
-        await testSubjects.existOrFail('noTSVBDataMessage');
+        await this.checkPreviewIsDisabled();
       }
     }
 
@@ -368,6 +368,42 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const label = labels[aggNth];
       const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
       await comboBox.setElement(fieldEl, field);
+    }
+
+    public async clickColorPicker(): Promise<void> {
+      await testSubjects.click('tvbColorPicker');
+    }
+
+    public async checkColorPickerPopUpIsPresent(): Promise<void> {
+      log.debug(`Check color picker popup is present`);
+      await testSubjects.existOrFail('tvbColorPickerPopUp', { timeout: 5000 });
+    }
+
+    public async changePanelPreview(nth: number = 0): Promise<void> {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const changePreviewBtnArray = await testSubjects.findAll('AddActivatePanelBtn');
+      await changePreviewBtnArray[nth].click();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    public async checkPreviewIsDisabled(): Promise<void> {
+      log.debug(`Check no data message is present`);
+      await testSubjects.existOrFail('noTSVBDataMessage', { timeout: 5000 });
+    }
+
+    public async cloneSeries(nth: number = 0): Promise<void> {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const cloneBtnArray = await testSubjects.findAll('AddCloneBtn');
+      await cloneBtnArray[nth].click();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    public async getLegentItems(): Promise<WebElementWrapper[]> {
+      return await testSubjects.findAll('tsvbLegendItem');
+    }
+
+    public async getSeries(): Promise<WebElementWrapper[]> {
+      return await find.allByCssSelector('.tvbSeriesEditor');
     }
   }
 

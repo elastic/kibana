@@ -2001,7 +2001,6 @@
     "kbnVislibVisTypes.controls.gaugeOptions.styleTitle": "样式",
     "kbnVislibVisTypes.controls.gaugeOptions.subTextLabel": "子文本",
     "kbnVislibVisTypes.controls.gaugeOptions.toTitle": "到",
-    "kbnVislibVisTypes.controls.gaugeOptions.verticalSplitLabel": "垂直拆分",
     "kbnVislibVisTypes.controls.heatmapOptions.addRangeButtonLabel": "添加范围",
     "kbnVislibVisTypes.controls.heatmapOptions.colorLabel": "颜色",
     "kbnVislibVisTypes.controls.heatmapOptions.colorScaleLabel": "颜色比例",
