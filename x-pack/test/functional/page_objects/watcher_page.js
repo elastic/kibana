@@ -9,7 +9,7 @@ import { map as mapAsync } from 'bluebird';
 export function WatcherPageProvider({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
   const find = getService('find');
-  const log = getService('log');
+  //const log = getService('log');
   const testSubjects = getService('testSubjects');
 
   class WatcherPage {
@@ -28,6 +28,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
       const thresholdName = await testSubjects.find('thresholdWatchName');
       await thresholdName.setValue(name);
       await testSubjects.setValue(index);
+      console.log(timeField, timeUnit);
       // await find.allByCssSelector()
     }
 
