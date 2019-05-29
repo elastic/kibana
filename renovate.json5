@@ -37,23 +37,21 @@
    */
   masterIssue: true,
 
-  // /**
-  //  * Disable package updates globally, overridden by the packageRules below
-  //  * so that we can slowly enable updates
-  //  */
-  // enabled: false,
-
-  // /**
-  //  * Define groups of packages that should be updated/configured together
-  //  */
-  // packageRules: [
-  //   {
-  //     packagePatterns: ['^eslint'],
-  //     groupName: 'eslint related packages',
-  //     groupSlug: 'eslint',
-  //     enabled: true,
-  //   }
-  // ],
+  /**
+   * Define groups of packages that should be updated/configured together
+   */
+  packageRules: [
+    {
+      packagePatterns: ['^.*$'],
+      enabled: false,
+    },
+    {
+      packagePatterns: ['^eslint'],
+      groupName: 'eslint related packages',
+      groupSlug: 'eslint',
+      enabled: true,
+    }
+  ],
 
   /**
    * Limit the number of active PRs renovate will allow
