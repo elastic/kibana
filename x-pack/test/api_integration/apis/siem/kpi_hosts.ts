@@ -26,7 +26,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T16:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 1,
             },
@@ -35,7 +35,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T19:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 0,
             },
@@ -44,7 +44,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T22:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 1,
             },
@@ -53,7 +53,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-10T01:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 1,
             },
@@ -69,7 +69,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T16:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 52,
             },
@@ -78,7 +78,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T19:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 0,
             },
@@ -87,7 +87,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T22:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 31,
             },
@@ -96,7 +96,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-10T01:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 88,
             },
@@ -108,7 +108,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T16:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 61,
             },
@@ -117,7 +117,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T19:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 0,
             },
@@ -126,7 +126,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T22:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 45,
             },
@@ -135,7 +135,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-10T01:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 114,
             },
@@ -178,7 +178,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T16:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 1,
             },
@@ -187,7 +187,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T19:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 0,
             },
@@ -196,7 +196,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T22:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 1,
             },
@@ -205,7 +205,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-10T01:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 1,
             },
@@ -221,7 +221,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T16:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 52,
             },
@@ -230,7 +230,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T19:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 0,
             },
@@ -239,7 +239,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T22:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 31,
             },
@@ -248,7 +248,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-10T01:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 88,
             },
@@ -260,7 +260,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T16:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 61,
             },
@@ -269,7 +269,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T19:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 0,
             },
@@ -278,7 +278,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-09T22:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 45,
             },
@@ -287,7 +287,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           {
             x: '2019-02-10T01:00:00.000Z',
             y: {
-              __typename: 'Count',
+              __typename: 'KpiHostCount',
               doc_count: null,
               value: 114,
             },

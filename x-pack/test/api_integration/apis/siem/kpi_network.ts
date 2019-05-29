@@ -20,11 +20,114 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
+        __typename: 'KpiNetworkData',
         networkEvents: 6157,
+        networkEventsHistogram: [
+          {
+            key_as_string: '2019-02-09T16:00:00.000Z',
+            doc_count: 1574,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T19:00:00.000Z',
+            doc_count: 0,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T22:00:00.000Z',
+            doc_count: 1302,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-10T01:00:00.000Z',
+            doc_count: 3281,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+        ],
         uniqueFlowId: 712,
         activeAgents: 1,
         uniqueSourcePrivateIps: 8,
+        uniqueSourcePrivateIpsHistogram: [
+          {
+            key_as_string: '2019-02-09T16:00:00.000Z',
+            doc_count: 1221,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T19:00:00.000Z',
+            doc_count: 0,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 0,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T22:00:00.000Z',
+            doc_count: 908,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-10T01:00:00.000Z',
+            doc_count: 2435,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 7,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+        ],
         uniqueDestinationPrivateIps: 9,
+        uniqueDestinationPrivateIpsHistogram: [
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            doc_count: 1047,
+            key_as_string: '2019-02-09T16:00:00.000Z',
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 0,
+            },
+            doc_count: 0,
+            key_as_string: '2019-02-09T19:00:00.000Z',
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            doc_count: 771,
+            key_as_string: '2019-02-09T22:00:00.000Z',
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            doc_count: 2072,
+            key_as_string: '2019-02-10T01:00:00.000Z',
+          },
+        ],
         dnsQueries: 169,
         tlsHandshakes: 62,
       };
@@ -57,11 +160,114 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
+        __typename: 'KpiNetworkData',
         networkEvents: 6157,
+        networkEventsHistogram: [
+          {
+            key_as_string: '2019-02-09T16:00:00.000Z',
+            doc_count: 1574,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T19:00:00.000Z',
+            doc_count: 0,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T22:00:00.000Z',
+            doc_count: 1302,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-10T01:00:00.000Z',
+            doc_count: 3281,
+            count: null,
+            __typename: 'KpiNetworkHistogramData',
+          },
+        ],
         uniqueFlowId: 712,
         activeAgents: 1,
         uniqueSourcePrivateIps: 8,
+        uniqueSourcePrivateIpsHistogram: [
+          {
+            key_as_string: '2019-02-09T16:00:00.000Z',
+            doc_count: 1221,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T19:00:00.000Z',
+            doc_count: 0,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 0,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-09T22:00:00.000Z',
+            doc_count: 908,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+          {
+            key_as_string: '2019-02-10T01:00:00.000Z',
+            doc_count: 2435,
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 7,
+            },
+            __typename: 'KpiNetworkHistogramData',
+          },
+        ],
         uniqueDestinationPrivateIps: 9,
+        uniqueDestinationPrivateIpsHistogram: [
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            doc_count: 1047,
+            key_as_string: '2019-02-09T16:00:00.000Z',
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 0,
+            },
+            doc_count: 0,
+            key_as_string: '2019-02-09T19:00:00.000Z',
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            doc_count: 771,
+            key_as_string: '2019-02-09T22:00:00.000Z',
+          },
+          {
+            __typename: 'KpiNetworkHistogramData',
+            count: {
+              __typename: 'KpiNetworkCount',
+              value: 8,
+            },
+            doc_count: 2072,
+            key_as_string: '2019-02-10T01:00:00.000Z',
+          },
+        ],
         dnsQueries: 169,
         tlsHandshakes: 62,
       };
