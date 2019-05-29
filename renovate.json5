@@ -65,6 +65,10 @@
         groupName: 'babel related packages',
         groupSlug: 'babel',
         enabled: true,
+      },
+      {
+        packagePatterns: ['^@kbn/.*'],
+        enabled: false,
       }
     ],
   },
