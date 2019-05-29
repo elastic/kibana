@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -92,7 +91,7 @@ function OrderAggParamEditor({
   const options = responseValueAggs
     ? responseValueAggs.map(respAgg => ({
         text: i18n.translate('common.ui.aggTypes.orderAgg.metricLabel', {
-          defaultMessage: 'metric: {metric}',
+          defaultMessage: 'Metric: {metric}',
           values: {
             metric: safeMakeLabel(respAgg),
           },

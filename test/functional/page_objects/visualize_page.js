@@ -1222,14 +1222,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return errorMessage;
     }
 
-    async selectOrderBytMetric(agg, metric) {
+    async selectOrderByMetric(agg, metric) {
       const sortSelect = await testSubjects.find(`visEditorOrderBy${agg}`);
       const sortMetric = await sortSelect.findByCssSelector(`option[value="${metric}"]`);
       await sortMetric.click();
     }
 
     async selectCustomSortMetric(agg, metric, field) {
-      await this.selectOrderBytMetric(agg, 'custom');
+      await this.selectOrderByMetric(agg, 'custom');
       await this.selectAggregation(metric, 'groupName');
       await this.selectField(field, 'groupName');
     }
