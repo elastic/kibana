@@ -189,6 +189,7 @@ const defaultSetupDeps = {
     uiSettings: uiSettingsSetup,
     chrome: chromeSetup,
   },
+  plugins: {},
 };
 
 const applicationStart = applicationServiceMock.createStartContract();
@@ -212,6 +213,7 @@ const defaultStartDeps = {
     overlays: overlayStart,
   },
   targetDomElement: document.createElement('div'),
+  plugins: {},
 };
 
 afterEach(() => {

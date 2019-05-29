@@ -32,6 +32,7 @@ import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
+import { mapToObject } from '../utils/';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -147,8 +148,8 @@ export class CoreSystem {
       };
 
       // Services that do not expose contracts at setup
-      await this.plugins.setup(core);
-      await this.legacyPlatform.setup({ core });
+      const plugins = await this.plugins.setup(core);
+      await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -199,8 +200,12 @@ export class CoreSystem {
         overlays,
       };
 
-      await this.plugins.start(core);
-      await this.legacyPlatform.start({ core, targetDomElement: legacyPlatformTargetDomElement });
+      const plugins = await this.plugins.start(core);
+      await this.legacyPlatform.start({
+        core,
+        plugins: mapToObject(plugins.contracts),
+        targetDomElement: legacyPlatformTargetDomElement,
+      });
     } catch (error) {
       if (this.fatalErrorsSetup) {
         this.fatalErrorsSetup.add(error);

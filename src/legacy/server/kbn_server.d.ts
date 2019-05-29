@@ -21,12 +21,10 @@ import { ResponseObject, Server } from 'hapi';
 
 import {
   ElasticsearchServiceSetup,
-  HttpServiceSetup,
-  HttpServiceStart,
   ConfigService,
   LoggerFactory,
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalCoreSetup,
+  InternalCoreStart,
 } from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
@@ -96,17 +94,12 @@ export default class KbnServer {
       logger: LoggerFactory;
     };
     setup: {
-      core: {
-        elasticsearch: ElasticsearchServiceSetup;
-        http: HttpServiceSetup;
-      };
-      plugins: PluginsServiceSetup;
+      core: InternalCoreSetup;
+      plugins: Record<string, unknown>;
     };
     start: {
-      core: {
-        http: HttpServiceStart;
-      };
-      plugins: PluginsServiceStart;
+      core: InternalCoreStart;
+      plugins: Record<string, unknown>;
     };
     stop: null;
     params: {
