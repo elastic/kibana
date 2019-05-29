@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import { Note } from '../../lib/note';
 
 import * as i18n from './translations';
+import { CountBadge } from '../page';
 
 /** Performs IO to update (or add a new) note */
 export type UpdateNote = (note: Note) => void;
@@ -46,6 +47,8 @@ export const search = {
 };
 
 const TitleText = styled.h3`
+  margin: 0 5px;
+  cursor: default;
   user-select: none;
 `;
 
@@ -53,9 +56,21 @@ const TitleText = styled.h3`
 export const NotesCount = pure<{
   noteIds: string[];
 }>(({ noteIds }) => (
-  <EuiTitle size="s">
-    <TitleText>{i18n.NOTE(noteIds.length)}</TitleText>
-  </EuiTitle>
+  <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexItem grow={false}>
+      <EuiIcon color="text" size="l" type="editorComment" />
+    </EuiFlexItem>
+
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="s">
+        <TitleText>{i18n.NOTES}</TitleText>
+      </EuiTitle>
+    </EuiFlexItem>
+
+    <EuiFlexItem grow={false}>
+      <CountBadge color="hollow">{noteIds.length}</CountBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 ));
 
 /** Creates a new instance of a `note` */
@@ -70,7 +85,9 @@ export const createNote = ({
   id: getNewNoteId(),
   lastEdit: null,
   note: newNote.trim(),
+  saveObjectId: null,
   user: 'elastic', // TODO: get the logged-in Kibana user
+  version: null,
 });
 
 interface UpdateAndAssociateNodeParams {

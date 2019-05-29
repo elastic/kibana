@@ -104,6 +104,7 @@ export interface Columns<T> {
   truncateText?: boolean;
   hideForMobile?: boolean;
   render?: (item: T) => void;
+  width?: string;
 }
 
 export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureComponent<
@@ -267,7 +268,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
                         isLoading={loading}
                         onClick={this.props.loadMore}
                       >
-                        {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
+                        {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -281,25 +282,21 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   }
 
   private onButtonClick = () => {
-    this.setState({
-      ...this.state,
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState(prevState => ({
+      ...prevState,
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   };
 
   private closePopover = () => {
-    this.setState({
-      ...this.state,
+    this.setState(prevState => ({
+      ...prevState,
       isPopoverOpen: false,
-    });
+    }));
   };
 }
 
 export const BasicTableContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  height: auto;
   position: relative;
 `;
 

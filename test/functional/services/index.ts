@@ -19,7 +19,6 @@
 
 import { AppsMenuProvider } from './apps_menu';
 import { BrowserProvider } from './browser';
-// @ts-ignore not TS yet
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
@@ -48,7 +47,6 @@ import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 // @ts-ignore not TS yet
 import { RenderableProvider } from './renderable';
-// @ts-ignore not TS yet
 import { ScreenshotsProvider } from './screenshots';
 // @ts-ignore not TS yet
 import { SnapshotsProvider } from './snapshots';

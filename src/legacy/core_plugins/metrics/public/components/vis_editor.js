@@ -22,17 +22,17 @@ import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
-import VisEditorVisualization from './vis_editor_visualization';
-import Visualization from './visualization';
-import VisPicker from './vis_picker';
-import PanelConfig from './panel_config';
-import brushHandler from '../lib/create_brush_handler';
+import { VisEditorVisualization } from './vis_editor_visualization';
+import { Visualization } from './visualization';
+import { VisPicker } from './vis_picker';
+import { PanelConfig } from './panel_config';
+import { brushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 
-class VisEditor extends Component {
+export class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
@@ -62,6 +62,7 @@ class VisEditor extends Component {
   };
 
   updateVisState = debounce(() => {
+    this.props.vis.params = this.state.model;
     this.props.vis.updateState();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
@@ -76,8 +77,6 @@ class VisEditor extends Component {
     };
     let dirty = true;
 
-    this.props.vis.params = nextModel;
-
     if (this.state.autoApply || hasTypeChanged) {
       this.updateVisState();
 
@@ -85,8 +84,7 @@ class VisEditor extends Component {
     }
 
     if (this.props.isEditorMode) {
-      const { params } = this.props.vis;
-      const extractedIndexPatterns = extractIndexPatterns(params);
+      const extractedIndexPatterns = extractIndexPatterns(nextModel);
 
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
         fetchFields(extractedIndexPatterns)
@@ -200,5 +198,3 @@ VisEditor.propTypes = {
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
 };
-
-export default VisEditor;

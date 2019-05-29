@@ -17,12 +17,12 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import {
   FileTree,
   FileTreeItemType,
+  SearchOptions,
   SearchScope,
   WorkerReservedProgress,
-  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, SearchOptions } from '../../actions';
+import { changeSearchScope, FetchFileResponse } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
 import {
@@ -52,9 +52,9 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
-  fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
-  currentRepository?: Repository;
+  fileTreeLoading: boolean;
+  query: string;
 }
 const LANG_MD = 'markdown';
 
@@ -224,12 +224,12 @@ class CodeContent extends React.PureComponent<Props> {
     return (
       <div className="codeContainer__main">
         <TopBar
-          defaultSearchScope={this.props.currentRepository}
           routeParams={this.props.match.params}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          query={this.props.query}
         />
         {this.renderContent()}
       </div>
@@ -272,7 +272,7 @@ class CodeContent extends React.PureComponent<Props> {
       return this.renderProgress();
     }
 
-    const { file, match, tree, fileTreeLoadingPaths } = this.props;
+    const { file, match, tree, fileTreeLoading } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
@@ -280,7 +280,7 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <div className="codeContainer__directoryView">
-            <Directory node={node} loading={fileTreeLoadingPaths.includes(path)} />
+            <Directory node={node} loading={fileTreeLoading} />
             <CommitHistory
               repoUri={repoUri}
               header={
@@ -388,14 +388,14 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
   file: state.file.file,
   tree: state.file.tree,
-  fileTreeLoadingPaths: state.file.fileTreeLoadingPaths,
+  fileTreeLoading: state.file.fileTreeLoading,
   currentTree: currentTreeSelector(state),
   branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
-  currentRepository: state.repository.currentRepository,
+  query: state.search.query,
 });
 
 const mapDispatchToProps = {

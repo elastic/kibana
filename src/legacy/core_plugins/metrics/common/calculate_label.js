@@ -18,7 +18,7 @@
  */
 
 import { includes, startsWith } from 'lodash';
-import lookup from './agg_lookup';
+import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
 
 const paths = [
@@ -35,7 +35,8 @@ const paths = [
   'serial_diff',
   'positive_only',
 ];
-export default function calculateLabel(metric, metrics) {
+
+export function calculateLabel(metric, metrics) {
   if (!metric) return i18n.translate('tsvb.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
   if (metric.alias) return metric.alias;
 

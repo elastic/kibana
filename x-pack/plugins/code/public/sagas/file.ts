@@ -10,6 +10,7 @@ import { kfetch } from 'ui/kfetch';
 import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
+import { FileTree } from '../../model';
 import {
   fetchDirectory,
   fetchDirectoryFailed,
@@ -38,34 +39,51 @@ import {
   gotoRepo,
   Match,
   setNotFound,
+  fetchRootRepoTree,
+  fetchRootRepoTreeSuccess,
+  fetchRootRepoTreeFailed,
 } from '../actions';
 import { RootState } from '../reducers';
-import { treeCommitsSelector } from '../selectors';
+import { treeCommitsSelector, createTreeSelector } from '../selectors';
 import { repoRoutePattern } from './patterns';
-import { FileTree } from '../../model';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
-    const tree = yield call(requestRepoTree, action.payload!);
-    (tree.children || []).sort((a: FileTree, b: FileTree) => {
-      const typeDiff = a.type - b.type;
-      if (typeDiff === 0) {
-        return a.name > b.name ? 1 : -1;
+    const { uri, revision, path, parents, isDir } = action.payload!;
+    if (path && isDir) {
+      const tree = yield select(createTreeSelector(path));
+      if (tree) {
+        const { children } = tree;
+        // do not request file tree if this tree exists and its children are not empty
+        if (!children || children.length === 0) {
+          yield call(fetchPath, { uri, revision, path, parents, isDir });
+        }
       } else {
-        return -typeDiff;
+        yield call(fetchPath, { uri, revision, path, parents, isDir });
       }
-    });
-    tree.repoUri = action.payload!.uri;
-    yield put(
-      fetchRepoTreeSuccess({
-        tree,
-        path: action.payload!.path,
-        withParents: action.payload!.parents,
-      })
-    );
+    } else {
+      yield call(fetchPath, action.payload!);
+    }
   } catch (err) {
-    yield put(fetchRepoTreeFailed({ ...err, path: action.payload!.path }));
+    yield put(fetchRepoTreeFailed(err));
   }
+}
+
+function* fetchPath(payload: FetchRepoTreePayload) {
+  const update: FileTree = yield call(requestRepoTree, payload);
+  (update.children || []).sort((a, b) => {
+    const typeDiff = a.type - b.type;
+    if (typeDiff === 0) {
+      return a.name > b.name ? 1 : -1;
+    } else {
+      return -typeDiff;
+    }
+  });
+  update.repoUri = payload.uri;
+  yield put(
+    fetchRepoTreeSuccess({ tree: update, path: payload.path, withParents: payload.parents })
+  );
+  return update;
 }
 
 interface FileTreeQuery {
@@ -79,7 +97,7 @@ function requestRepoTree({
   uri,
   revision,
   path,
-  limit = 50,
+  limit = 1000,
   parents = false,
 }: FetchRepoTreePayload) {
   const query: FileTreeQuery = { limit, flatten: true };
@@ -94,6 +112,20 @@ function requestRepoTree({
 
 export function* watchFetchRepoTree() {
   yield takeEvery(String(fetchRepoTree), handleFetchRepoTree);
+}
+
+function* handleFetchRootRepoTree(action: Action<FetchRepoPayloadWithRevision>) {
+  try {
+    const { uri, revision } = action.payload!;
+    const tree = yield call(requestRepoTree, { uri, revision, path: '', isDir: true });
+    yield put(fetchRootRepoTreeSuccess(tree));
+  } catch (err) {
+    yield put(fetchRootRepoTreeFailed(err));
+  }
+}
+
+export function* watchFetchRootRepoTree() {
+  yield takeEvery(String(fetchRootRepoTree), handleFetchRootRepoTree);
 }
 
 function* handleFetchBranches(action: Action<FetchRepoPayload>) {

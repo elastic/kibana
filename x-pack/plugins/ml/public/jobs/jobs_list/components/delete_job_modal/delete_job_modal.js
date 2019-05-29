@@ -150,15 +150,17 @@ export const DeleteJobModal = injectI18n(class extends Component {
                     }}
                   />
                 </p>
-                {(this.state.jobs.length > 1) &&
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-                      defaultMessage="Deleting multiple jobs can be time consuming.
-                      They will be deleted in the background and may not disappear from the jobs list instantly"
-                    />
-                  </p>
-                }
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
+                    defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
+                    {jobsCount, plural, one {It} other {They}} will be deleted in the background
+                    and may not disappear from the jobs list instantly"
+                    values={{
+                      jobsCount: this.state.jobs.length
+                    }}
+                  />
+                </p>
               </React.Fragment>
             }
 

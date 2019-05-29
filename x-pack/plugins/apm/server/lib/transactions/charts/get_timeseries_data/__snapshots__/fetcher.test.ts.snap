@@ -83,6 +83,11 @@ Array [
               },
               Object {
                 "term": Object {
+                  "service.environment": "test",
+                },
+              },
+              Object {
+                "term": Object {
                   "transaction.type": "myTransactionType",
                 },
               },

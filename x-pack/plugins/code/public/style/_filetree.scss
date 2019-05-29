@@ -13,7 +13,6 @@
 .codeFileTree__node {
   display: flex;
   flex-direction: row;
-  position: relative;
 }
 
 .codeFileTree__item {
@@ -21,7 +20,7 @@
 }
 
 .codeFileTree__file {
-  margin-left: calc(28rem/16);
+  margin-left: calc(28rem / 16);
 }
 
 .codeFileTree__directory {
@@ -45,7 +44,7 @@
   }
 }
 
-@include euiBreakpoint('xs','s') {
+@include euiBreakpoint('xs', 's') {
   .codeFileTree__container {
     margin-left: -$euiSizeXL;
     margin-top: -$euiSizeL;

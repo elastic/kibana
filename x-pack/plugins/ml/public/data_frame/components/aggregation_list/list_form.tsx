@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { AggName, PivotAggsConfig, PivotAggsConfigDict } from '../../common';
 
@@ -28,17 +28,13 @@ export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, onChang
         return (
           <Fragment key={aggName}>
             <EuiPanel paddingSize="s">
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <AggLabelForm
-                    deleteHandler={deleteHandler}
-                    item={list[aggName]}
-                    onChange={item => onChange(aggName, item)}
-                    otherAggNames={otherAggNames}
-                    options={options}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <AggLabelForm
+                deleteHandler={deleteHandler}
+                item={list[aggName]}
+                onChange={item => onChange(aggName, item)}
+                otherAggNames={otherAggNames}
+                options={options}
+              />
             </EuiPanel>
             {listKeys.length > 0 && <EuiSpacer size="s" />}
           </Fragment>

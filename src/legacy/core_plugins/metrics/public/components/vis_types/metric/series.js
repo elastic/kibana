@@ -19,13 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import ColorPicker from '../../color_picker';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { ColorPicker } from '../../color_picker';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import Split from '../../split';
+import { Split } from '../../split';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import createTextHandler from '../../lib/create_text_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 
@@ -204,5 +204,4 @@ MetricSeriesUi.propTypes = {
   dragHandleProps: PropTypes.object,
 };
 
-const MetricSeries = injectI18n(MetricSeriesUi);
-export default MetricSeries;
+export const MetricSeries = injectI18n(MetricSeriesUi);

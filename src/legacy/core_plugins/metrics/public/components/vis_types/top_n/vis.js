@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import tickFormatter from '../../lib/tick_formatter';
-import TopN from '../../../visualizations/components/top_n';
-import getLastValue from '../../../../common/get_last_value';
+import { tickFormatter } from '../../lib/tick_formatter';
+import { TopN } from '../../../visualizations/components/top_n';
+import { getLastValue } from '../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../../common/set_is_reversed';
-import replaceVars from '../../lib/replace_vars';
+import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { sortBy, first, get, gt, gte, lt, lte } from 'lodash';
@@ -47,7 +47,7 @@ function sortSeries(visData, model) {
   }, []);
 }
 
-function TopNVisualization(props) {
+export function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 
   const series = sortSeries(visData, model)
@@ -107,5 +107,3 @@ TopNVisualization.propTypes = {
   visData: PropTypes.object,
   getConfig: PropTypes.func
 };
-
-export default TopNVisualization;
