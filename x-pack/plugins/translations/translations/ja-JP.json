@@ -80,7 +80,6 @@
     "common.ui.aggResponse.fieldLabel": "フィールド",
     "common.ui.aggResponse.valueLabel": "値",
     "common.ui.aggTypes.aggregateWithLabel": "集約基準",
-    "common.ui.aggTypes.aggregateWithTooltip": "複数ヒットまたは複数値のフィールドを 1 つのメトリックにまとめる方法を選択してください",
     "common.ui.aggTypes.buckets.dateHistogramLabel": "{intervalDescription} ごとに {fieldName}",
     "common.ui.aggTypes.buckets.dateHistogramTitle": "Date Histogram",
     "common.ui.aggTypes.buckets.dateRangeTitle": "日付範囲",
