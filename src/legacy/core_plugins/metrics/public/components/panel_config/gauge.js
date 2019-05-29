@@ -53,9 +53,7 @@ const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLa
 class GaugePanelConfigUi extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selectedTab: 'data',
-    };
+    this.state = { selectedTab: 'data' };
   }
 
   componentWillMount() {

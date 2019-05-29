@@ -239,7 +239,6 @@ describe('QueryBarInput', () => {
         intl={null as any}
       />
     );
-    // TODO: update test to ensure it passes properly. This test should fail when we add additional quotes around the index pattern name
     expect(mockFetchIndexPatterns).toHaveBeenCalledWith(['logstash-*']);
   });
 });

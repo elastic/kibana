@@ -111,7 +111,9 @@ export class QueryBarInputUI extends Component<Props, State> {
     const objectPatterns = this.props.indexPatterns.filter(
       indexPattern => typeof indexPattern !== 'string'
     ) as IndexPattern[];
+
     const objectPatternsFromStrings = await fetchIndexPatterns(stringPatterns);
+
     this.setState({
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
     });
@@ -384,6 +386,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
+
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 

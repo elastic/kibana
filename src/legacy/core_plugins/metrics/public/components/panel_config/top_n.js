@@ -53,9 +53,7 @@ export class TopNPanelConfig extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      selectedTab: 'data',
-    };
+    this.state = { selectedTab: 'data' };
   }
 
   componentWillMount() {

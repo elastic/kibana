@@ -54,9 +54,7 @@ const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLa
 class MarkdownPanelConfigUi extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selectedTab: 'markdown'
-    };
+    this.state = { selectedTab: 'markdown' };
     this.handleCSSChange = this.handleCSSChange.bind(this);
   }
 
@@ -91,24 +89,15 @@ class MarkdownPanelConfigUi extends Component {
 
     const alignOptions = [
       {
-        label: intl.formatMessage({
-          id: 'tsvb.markdown.alignOptions.topLabel',
-          defaultMessage: 'Top',
-        }),
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.topLabel', defaultMessage: 'Top' }),
         value: 'top',
       },
       {
-        label: intl.formatMessage({
-          id: 'tsvb.markdown.alignOptions.middleLabel',
-          defaultMessage: 'Middle',
-        }),
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.middleLabel', defaultMessage: 'Middle' }),
         value: 'middle',
       },
       {
-        label: intl.formatMessage({
-          id: 'tsvb.markdown.alignOptions.bottomLabel',
-          defaultMessage: 'Bottom',
-        }),
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.bottomLabel', defaultMessage: 'Bottom' }),
         value: 'bottom',
       },
     ];
@@ -117,7 +106,7 @@ class MarkdownPanelConfigUi extends Component {
     });
     let view;
     if (selectedTab === 'markdown') {
-      view = <MarkdownEditor {...this.props} />;
+      view = (<MarkdownEditor {...this.props}/>);
     } else if (selectedTab === 'data') {
       view = (
         <SeriesEditor
@@ -135,7 +124,10 @@ class MarkdownPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="tsvb.markdown.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="tsvb.markdown.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -152,12 +144,10 @@ class MarkdownPanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.markdown.optionsTab.panelFilterLabel"
-                      defaultMessage="Panel filter"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.markdown.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
                   fullWidth
                 >
                   <QueryBarInput
@@ -195,7 +185,10 @@ class MarkdownPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="tsvb.markdown.optionsTab.styleLabel" defaultMessage="Style" />
+                <FormattedMessage
+                  id="tsvb.markdown.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -307,7 +300,10 @@ class MarkdownPanelConfigUi extends Component {
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
-            <FormattedMessage id="tsvb.markdown.dataTab.dataButtonLabel" defaultMessage="Data" />
+            <FormattedMessage
+              id="tsvb.markdown.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}

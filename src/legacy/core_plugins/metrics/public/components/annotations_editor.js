@@ -71,7 +71,7 @@ export class AnnotationsEditor extends Component {
   }
 
   handleChange(item, name) {
-    return e => {
+    return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
@@ -80,16 +80,19 @@ export class AnnotationsEditor extends Component {
   }
   handleQueryChange = (model, filter) => {
     const part = { query_string: filter };
-    collectionActions.handleChange(this.props, _.assign({}, model, part));
+    collectionActions.handleChange(this.props, {
+      ...model,
+      ...part
+    });
   };
   renderRow(row) {
     const defaults = {
-      fields: '', template: '',
+      fields: '',
+      template: '',
       index_pattern: '*',
       query_string: { query: '', language: uiSettingsQueryLanguage }
     };
     const model = { ...defaults, ...row };
-    const indexPatternForQuery = (model.index_pattern && model.index_pattern !== '*') ? model.index_pattern : model.default_index_pattern;
     const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
@@ -119,12 +122,10 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('indexPattern')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.annotationsEditor.indexPatternLabel"
-                      defaultMessage="Index pattern (required)"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.indexPatternLabel"
+                    defaultMessage="Index pattern (required)"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -137,12 +138,10 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('timeField')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.annotationsEditor.timeFieldLabel"
-                      defaultMessage="Time field (required)"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.timeFieldLabel"
+                    defaultMessage="Time field (required)"
+                  />)}
                   fullWidth
                 >
                   <FieldSelect
@@ -163,12 +162,10 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('queryString')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.annotationsEditor.queryStringLabel"
-                      defaultMessage="Query string"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.queryStringLabel"
+                    defaultMessage="Query string"
+                  />)}
                   fullWidth
                 >
                   <QueryBarInput
@@ -179,7 +176,7 @@ export class AnnotationsEditor extends Component {
                     screenTitle={'AnnotationsEditor'}
                     onChange={query => this.handleQueryChange(model, query)}
                     appName={'VisEditor'}
-                    indexPatterns={[indexPatternForQuery]}
+                    indexPatterns={[model.index_pattern]}
                     store={localStorage || {}}
                     showDatePicker={false}
                   />
@@ -221,12 +218,10 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('icon')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.annotationsEditor.iconLabel"
-                      defaultMessage="Icon (required)"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.iconLabel"
+                    defaultMessage="Icon (required)"
+                  />)}
                 >
                   <IconSelect value={model.icon} onChange={this.handleChange(model, 'icon')} />
                 </EuiFormRow>
@@ -234,12 +229,10 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('fields')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.annotationsEditor.fieldsLabel"
-                      defaultMessage="Fields (required - comma separated paths)"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.fieldsLabel"
+                    defaultMessage="Fields (required - comma separated paths)"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -252,12 +245,10 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('rowTemplate')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.annotationsEditor.rowTemplateLabel"
-                      defaultMessage="Row template (required)"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.rowTemplateLabel"
+                    defaultMessage="Row template (required)"
+                  />)}
                   helpText={
                     <span>
                       <FormattedMessage
@@ -327,7 +318,7 @@ export class AnnotationsEditor extends Component {
           </EuiTitle>
           <EuiSpacer size="m" />
 
-          {annotations}
+          { annotations }
         </div>
       );
     }
