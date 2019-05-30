@@ -12,7 +12,7 @@
   "dependencies": {
     "argv-split": "^2.0.1",
     "commander": "^2.9.0",
-    "del": "^2.2.2",
+    "del": "^4.0.0",
     "execa": "^1.0.0",
     "gulp-rename": "1.2.2",
     "globby": "^8.0.1",
