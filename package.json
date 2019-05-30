@@ -80,7 +80,7 @@
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
     "**/typescript": "^3.3.3333",
-    "**/@elastic/eui/**/core-js": "2.5.3"
+    "**/@elastic/eui/**/core-js": "2.6.9"
   },
   "workspaces": {
     "packages": [
@@ -142,7 +142,7 @@
     "color": "1.0.3",
     "commander": "2.8.1",
     "compare-versions": "3.1.0",
-    "core-js": "2.5.3",
+    "core-js": "2.6.9",
     "css-loader": "1.0.0",
     "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.6",
