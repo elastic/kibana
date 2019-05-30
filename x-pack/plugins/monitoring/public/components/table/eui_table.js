@@ -66,9 +66,9 @@ export class EuiMonitoringTable extends React.PureComponent {
 
           if (status.isInternalCollector || status.isPartiallyMigrated) {
             const instance = {
-              uuid: product[uuidField],
-              name: product[nameField],
-              ip: product[ipField]
+              uuid: get(product, uuidField),
+              name: get(product, nameField),
+              ip: get(product, ipField)
             };
             return (
               <EuiButton color="danger" onClick={() => setupMode.openFlyout(instance)}>

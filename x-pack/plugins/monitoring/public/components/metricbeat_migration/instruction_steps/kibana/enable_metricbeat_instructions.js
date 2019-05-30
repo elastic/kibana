@@ -27,6 +27,39 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
   checkForMigrationStatus,
   autoCheckIntervalInMs
 }) {
+  const securitySetup = (
+    <Fragment>
+      <EuiSpacer size="m"/>
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        title={(
+          <EuiText>
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.metricbeatSecuritySetup"
+              defaultMessage="If security features are enabled, there may be more setup required.{link}"
+              values={{
+                link: (
+                  <Fragment>
+                    {` `}
+                    <EuiLink
+                      href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`}
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.metricbeatMigration.kibanaInstructions.metricbeatSecuritySetupLinkText"
+                        defaultMessage="View more information."
+                      />
+                    </EuiLink>
+                  </Fragment>
+                )
+              }}
+            />
+          </EuiText>
+        )}
+      />
+    </Fragment>
+  );
   const installMetricbeatStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatTitle', {
       defaultMessage: 'Install Metricbeat on the same server as Kibana'
@@ -58,7 +91,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
 
   const enableMetricbeatModuleStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.enableMetricbeatModuleTitle', {
-      defaultMessage: 'Enable and configure the Kibana module in Metricbeat'
+      defaultMessage: 'Enable and configure the Kibana x-pack module in Metricbeat'
     }),
     children: (
       <Fragment>
@@ -85,6 +118,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
             />
           </p>
         </EuiText>
+        {securitySetup}
       </Fragment>
     )
   };
@@ -120,6 +154,7 @@ output.elasticsearch:
   #password: "changeme"
 `}
         </EuiCodeBlock>
+        {securitySetup}
       </Fragment>
 
     )

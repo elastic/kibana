@@ -147,7 +147,7 @@ export class KibanaInstances extends PureComponent {
               setupMode={setupMode}
               uuidField="kibana.uuid"
               nameField="name"
-              ipField="transport_address"
+              ipField="kibana.transport_address"
               search={{
                 box: {
                   incremental: true,

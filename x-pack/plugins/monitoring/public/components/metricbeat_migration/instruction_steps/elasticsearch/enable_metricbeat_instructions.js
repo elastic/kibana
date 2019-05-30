@@ -27,6 +27,40 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
   checkForMigrationStatus,
   autoCheckIntervalInMs
 }) {
+  const securitySetup = (
+    <Fragment>
+      <EuiSpacer size="m"/>
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        title={(
+          <EuiText>
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetup"
+              defaultMessage="If security features are enabled, there may be more setup required.{link}"
+              values={{
+                link: (
+                  <Fragment>
+                    {` `}
+                    <EuiLink
+                      href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`}
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetupLinkText"
+                        defaultMessage="View more information."
+                      />
+                    </EuiLink>
+                  </Fragment>
+                )
+              }}
+            />
+          </EuiText>
+        )}
+      />
+    </Fragment>
+  );
+
   const installMetricbeatStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatTitle', {
       defaultMessage: 'Install Metricbeat on the same server as Elasticsearch'
@@ -59,7 +93,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
 
   const enableMetricbeatModuleStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleTitle', {
-      defaultMessage: 'Enable and configure the Elasticsearch module in Metricbeat'
+      defaultMessage: 'Enable and configure the Elasticsearch x-pack module in Metricbeat'
     }),
     children: (
       <Fragment>
@@ -88,6 +122,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
             />
           </p>
         </EuiText>
+        {securitySetup}
       </Fragment>
     )
   };
@@ -123,6 +158,7 @@ output.elasticsearch:
   #password: "changeme"
 `}
         </EuiCodeBlock>
+        {securitySetup}
       </Fragment>
 
     )
