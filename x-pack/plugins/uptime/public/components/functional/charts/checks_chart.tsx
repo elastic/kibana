@@ -84,11 +84,19 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+            title={i18n.translate('xpack.uptime.monitorChart.checksChart.bottomAxis.title', {
+              defaultMessage: 'Timestamp',
+              description: 'The heading of the x-axis of a chart of timeseries data.',
+            })}
           />
           <Axis
             id={getAxisId('left')}
             position={Position.Left}
             tickFormat={d => Number(d).toFixed(0)}
+            title={i18n.translate('xpack.uptime.monitorChart.checksChart.leftAxis.title', {
+              defaultMessage: 'Number of checks',
+              description: 'The heading of the y-axis of a chart of timeseries data',
+            })}
           />
           <AreaSeries
             customSeriesColors={getColorsMap(successColor, upSeriesSpecId)}

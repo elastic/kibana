@@ -90,7 +90,7 @@ export const DurationChart = ({
             showOverlappingTicks={true}
             tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
-              defaultMessage: 'timestamp',
+              defaultMessage: 'Timestamp',
             })}
           />
           <Axis

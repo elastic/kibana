@@ -15,7 +15,7 @@ exports[`SnapshotHistogram component renders the component without errors 1`] = 
       id="Snapshot Y Axis"
       position="left"
       showOverlappingTicks={true}
-      title="Monitor status"
+      title="Monitors"
     />
     <inject-BarSeriesSpecComponent-with-chartStore
       customSeriesColors={

@@ -72,7 +72,7 @@ export const SnapshotHistogram = ({
           )}
           position={Position.Left}
           showOverlappingTicks={true}
-          title="Monitor status"
+          title="Monitors"
         />
         <BarSeries
           customSeriesColors={getColorsMap(successColor, upSpecId)}
