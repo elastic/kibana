@@ -102,7 +102,7 @@
         groupSlug: 'd3',
       },
       {
-        packagePatterns: ['\\breact\\b', '\\bredux\\b'],
+        packagePatterns: ['\\breact\\b', '\\bredux\\b', '\\benzyme\\b'],
         packageNames: [
           'ngreact',
           'recompose',
@@ -129,6 +129,25 @@
         groupName: 'language server related packages',
         groupSlug: 'language server',
       },
+      {
+        packageNames: [
+          'hapi',
+          '@types/hapi'
+          'joi',
+          '@types/joi',
+          'boom',
+          '@types/boom',
+          'hoek',
+          '@types/hoek',
+          'h2o2',
+          '@elastic/good',
+          'good-squeeze',
+          'inert'
+        ],
+        packagePatterns: ['\\bhapi\\b'],
+        groupName: 'hapi related packages',
+        groupSlug: 'hapi',
+      },
 
       // internal/local packages
       {
@@ -153,5 +172,10 @@
   /**
    * Disable automatic rebase on each change to base branch
    */
-  rebaseStalePrs: false
+  rebaseStalePrs: false,
+
+  /**
+   * Disable semantic commit formating
+   */
+  semanticCommits: false,
 }
