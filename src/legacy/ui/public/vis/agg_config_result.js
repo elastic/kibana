@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 
 // eslint-disable-next-line import/no-default-export
 export default function AggConfigResult(aggConfig, parent, value, key, filters) {

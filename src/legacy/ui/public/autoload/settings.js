@@ -25,7 +25,7 @@
  */
 
 import moment from 'moment-timezone';
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 
 function setDefaultTimezone(tz) {
   moment.tz.setDefault(tz);

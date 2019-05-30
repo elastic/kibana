@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { MarkdownSimple } from 'ui/markdown';
-import { uiModules } from '../modules';
-import { metadata } from '../metadata';
+import { uiModules } from 'ui/modules';
+import { metadata } from 'ui/metadata';
 import { fatalError } from './fatal_error';
 import { banners } from './banners';
 import { Notifier } from './notifier';

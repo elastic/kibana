@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();

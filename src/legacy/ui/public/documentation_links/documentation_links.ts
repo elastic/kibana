@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { metadata } from '../metadata';
+import { metadata } from 'ui/metadata';
 
 /*
   WARNING: The links in this file are validated during the docs build. This is accomplished with some regex magic that

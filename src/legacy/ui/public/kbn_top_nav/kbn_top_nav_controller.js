@@ -19,7 +19,7 @@
 
 import { capitalize, isArray, isFunction, get } from 'lodash';
 
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 
 export function KbnTopNavControllerProvider($compile) {

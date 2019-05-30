@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 import { parseInterval } from '../utils/parse_interval';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {

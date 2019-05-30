@@ -20,17 +20,17 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-import { metadata } from '../metadata';
-import '../state_management/global_state';
-import '../config';
-import '../notify';
-import '../private';
-import '../promises';
-import '../storage';
-import '../watch_multi';
+import { metadata } from 'ui/metadata';
+import 'ui/state_management/global_state';
+import 'ui/config';
+import 'ui/notify';
+import 'ui/private';
+import 'ui/promises';
+import 'ui/storage';
+import 'ui/watch_multi';
 import './services';
-import '../react_components';
-import '../i18n';
+import 'ui/react_components';
+import 'ui/i18n';
 
 import { initAngularApi } from './api/angular';
 import appsApi from './api/apps';

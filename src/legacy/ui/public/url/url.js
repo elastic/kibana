@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiModules } from '../modules';
-import { AppStateProvider } from '../state_management/app_state';
+import { uiModules } from 'ui/modules';
+import { AppStateProvider } from 'ui/state_management/app_state';
 
 uiModules.get('kibana/url')
   .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });

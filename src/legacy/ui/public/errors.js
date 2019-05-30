@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import { createLegacyClass } from './utils/legacy_class';
+import { createLegacyClass } from 'ui/utils/legacy_class';
 
 const canStack = (function () {
   const err = new Error();

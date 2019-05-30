@@ -18,7 +18,7 @@
  */
 
 // chrome expects to be loaded first, let it get its way
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 
 import { parse as parseUrl } from 'url';
 import sinon from 'sinon';

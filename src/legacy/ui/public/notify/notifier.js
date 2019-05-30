@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { metadata } from '../metadata';
+import { metadata } from 'ui/metadata';
 import { formatMsg, formatStack } from './lib';
 import '../render_directive';
 import { i18n } from '@kbn/i18n';

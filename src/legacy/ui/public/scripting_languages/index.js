@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 import { toastNotifications } from '../notify';
 import { i18n } from '@kbn/i18n';
 
