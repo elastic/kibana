@@ -1,5 +1,61 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getFilteredQueryAndStatusFilter handles nested query strings 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "bool": Object {
+            "should": Array [
+              Array [
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "match": Object {
+                          "monitor.name": Object {
+                            "operator": "and",
+                            "query": "test-page",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "match": Object {
+                          "monitor.name": Object {
+                            "operator": "and",
+                            "query": "prod-site",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            ],
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": "up",
+}
+`;
+
 exports[`getFilteredQueryAndStatusFilter handles simple_query_string 1`] = `
 Object {
   "query": Object {

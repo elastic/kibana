@@ -45,4 +45,65 @@ describe('getFilteredQueryAndStatusFilter', () => {
     const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     expect(result).toMatchSnapshot();
   });
+
+  it('handles nested query strings', () => {
+    filters = `{
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "monitor.status": {
+                      "query": "up",
+                      "operator": "and"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                [
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "test-page",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "prod-site",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
 });
