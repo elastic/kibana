@@ -34,8 +34,10 @@ uiModules
     ['onChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
+    ['responseValueAggs', { watchDepth: 'reference' }],
     'showValidation',
     'value',
+    'visName'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -64,9 +66,11 @@ uiModules
             indexed-fields="indexedFields"
             show-validation="showValidation"
             value="paramValue"
+            vis-name="vis.type.name"
             on-change="onChange"
             set-touched="setTouched"
             set-validity="setValidity"
+            response-value-aggs="responseValueAggs"
           ></vis-agg-param-react-wrapper>`;
         }
 
