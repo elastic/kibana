@@ -165,6 +165,17 @@ describe('#callAsInternalUser', () => {
     ).rejects.toStrictEqual(mockAuthenticationError);
   });
 
+  test('sets the onabort property of a signal if provided', () => {
+    const controller = new AbortController();
+
+    clusterClient.callAsInternalUser('ping', undefined, {
+      wrap401Errors: false,
+      signal: controller.signal,
+    });
+
+    expect(typeof controller.signal.onabort).toBe('function');
+  });
+
   test('does not override WWW-Authenticate if returned by Elasticsearch', async () => {
     const mockAuthenticationError = new (errors.AuthenticationException as any)(
       'Authentication Exception',
