@@ -178,7 +178,7 @@ describe('IndexPattern Data Source', () => {
 
             // Private
             operationType: 'value',
-            sourceField: 'op',
+            sourceField: 'source',
           },
           col2: {
             operationId: 'op2',
@@ -188,13 +188,46 @@ describe('IndexPattern Data Source', () => {
 
             // Private
             operationType: 'value',
-            sourceField: 'op2',
+            sourceField: 'bytes',
           },
         },
       };
       const state = await indexPatternDatasource.initialize(queryPersistedState);
       expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(
-        `"esdocs index=\\"1\\" fields=\\"op, op2\\" sort=\\"op, DESC\\""`
+        `"esdocs index=\\"1\\" fields=\\"source, bytes\\" sort=\\"source, DESC\\""`
+      );
+    });
+
+    it('should generate an expression for an aggregated query', async () => {
+      const queryPersistedState: IndexPatternPersistedState = {
+        currentIndexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Count of Documents',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+            sourceField: 'document',
+          },
+          col2: {
+            operationId: 'op2',
+            label: 'Date',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'timestamp',
+          },
+        },
+      };
+      const state = await indexPatternDatasource.initialize(queryPersistedState);
+      expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(
+        `"esaggs index=\\"1\\" aggs=\\"{\\"timestamp\\":{\\"date_histogram\\":{\\"field\\":\\"timestamp\\",\\"aggs\\":{\\"document\\":{\\"count\\":{\\"field\\":\\"document\\"}}}}}}\\""`
       );
     });
   });
@@ -260,7 +293,7 @@ describe('IndexPattern Data Source', () => {
           />
         );
 
-        expect(filterOperations).toBeCalledTimes(3);
+        expect(filterOperations).toBeCalled();
       });
 
       it('should filter out all selections if the filter returns false', () => {
@@ -299,7 +332,7 @@ describe('IndexPattern Data Source', () => {
             ...state.columns,
             col2: {
               operationId: firstOption.value,
-              label: 'Value of timestamp',
+              label: 'value of timestamp',
               dataType: 'date',
               isBucketed: false,
               operationType: 'value',
