@@ -21,10 +21,11 @@ export interface HeaderPageProps {
   children?: React.ReactNode;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
+  'data-test-subj'?: string;
 }
 
-export const HeaderPage = pure<HeaderPageProps>(({ children, subtitle, title }) => (
-  <Header>
+export const HeaderPage = pure<HeaderPageProps>(({ children, subtitle, title, ...rest }) => (
+  <Header {...rest}>
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiTitle size="l">
