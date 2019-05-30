@@ -18,7 +18,6 @@ export * from './get_legend_config';
 export * from './handlebars';
 export * from './hex_to_rgb';
 export * from './httpurl';
-export * from './latest_change';
 export * from './missing_asset';
 export * from './palettes';
 export * from './pivot_object_array';
