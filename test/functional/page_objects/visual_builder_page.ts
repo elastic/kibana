@@ -219,6 +219,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
+     * changed data formatter for template in an `options` label tab
+     *
+     * @param formatter
+     * @default 'Number'
+     */
+    public async changeDataFormatter(
+      formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
+    ) {
+      const formatterEl = (await find.allByCssSelector('.euiComboBox'))[0];
+      await comboBox.setElement(formatterEl, formatter);
+    }
+
+    /**
      * write template for aggregation row in the `option` tab
      *
      * @param template always should contain `{{value}}`
