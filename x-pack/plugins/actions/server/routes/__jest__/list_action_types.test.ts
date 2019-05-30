@@ -20,12 +20,12 @@ it('calls the list function', async () => {
     url: '/api/action/types',
   };
 
-  actionTypeRegistry.listTypes.mockResolvedValueOnce({ success: true });
+  actionTypeRegistry.list.mockResolvedValueOnce({ success: true });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(actionTypeRegistry.listTypes).toMatchInlineSnapshot(`
+  expect(actionTypeRegistry.list).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [],
