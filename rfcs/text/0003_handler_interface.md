@@ -33,6 +33,43 @@ http.router.route({
 
 The informal concept of handlers already exists today in HTTP routing, task
 management, and the designs of application mounting and alert execution.
+Examples:
+
+```tsx
+// Task manager tasks
+taskManager.registerTaskDefinitions({
+  myTask: {
+    title: 'The task',
+    timeout: '5m',
+    createTaskRunner(context) {
+      return {
+        async run() {
+          const docs = await context.elasticsearch.search();
+          doSomethingWithDocs(docs);
+        }
+      }
+    }
+  }
+})
+
+// Application mount handlers
+application.registerApp({
+  id: 'myApp',
+  mount(context, domElement) {
+    ReactDOM.render(<MyApp overlaysService={context.overlays} />, domElement);
+    return () => ReactDOM.unmountComponentAtNode(domElement);
+  }
+});
+
+// Alerting
+alerting.registerType({
+  id: 'myAlert',
+  async execute(context, params, state) {
+    const indexPatterns = await context.savedObjects.find('indexPattern');
+    // use index pattern to search
+  }
+})
+```
 
 Without a formal definition, each handler interface varies slightly and
 different solutions are developed per handler for managing complexity and
