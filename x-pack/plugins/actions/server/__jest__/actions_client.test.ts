@@ -10,13 +10,6 @@ import { ActionsClient } from '../actions_client';
 import { taskManagerMock } from './task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 
-const services = {
-  log: jest.fn(),
-};
-const actionTypeRegistryParams = {
-  services,
-};
-
 const savedObjectsClient = {
   errors: {} as any,
   bulkCreate: jest.fn(),
