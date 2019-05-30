@@ -26,7 +26,7 @@
 
 import { Matrix3d, TransformMatrix3d, Vector3d } from '.';
 
-const NANMATRIX: TransformMatrix3d = [
+export const NANMATRIX: TransformMatrix3d = [
   NaN,
   NaN,
   NaN,
