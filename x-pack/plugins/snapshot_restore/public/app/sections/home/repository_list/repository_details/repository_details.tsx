@@ -182,7 +182,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"
-                  defaultMessage="This is a managed repository. Proceed with caution!"
+                  defaultMessage="This is a managed repository used by other systems. Any changes you make might affect how these systems operate."
                 />
               }
             />
@@ -347,6 +347,16 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
                           deleteRepositoryPrompt([repositoryName], onRepositoryDeleted)
                         }
                         isDisabled={repositoryDetails.isManagedRepository}
+                        title={
+                          repositoryDetails.isManagedRepository
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.repositoryDetails.removeManagedRepositoryButtonTitle',
+                                {
+                                  defaultMessage: 'You cannot delete a managed repository.',
+                                }
+                              )
+                            : null
+                        }
                       >
                         <FormattedMessage
                           id="xpack.snapshotRestore.repositoryDetails.removeButtonLabel"

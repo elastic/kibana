@@ -175,6 +175,16 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
   const selection = {
     onSelectionChange: (newSelectedItems: Repository[]) => setSelectedItems(newSelectedItems),
     selectable: ({ name }: Repository) => Boolean(name !== managedRepository),
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.snapshotRestore.repositoryList.table.unselectableManagedRepositoryTooltip',
+          {
+            defaultMessage: 'You cannot delete a managed repository.',
+          }
+        );
+      }
+    },
   };
 
   const search = {

@@ -157,7 +157,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
-                  defaultMessage="This is a managed repository. Changing these settings may have adverse effects. Proceed with caution!"
+                  defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
                 />
               }
             />
@@ -166,6 +166,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         ) : null}
         <RepositoryForm
           repository={repository}
+          isManagedRepository={isManagedRepository}
           isEditing={true}
           isSaving={isSaving}
           saveError={renderSaveError()}
