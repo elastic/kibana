@@ -71,11 +71,11 @@ import {
     // typings:expect-error
     vec3d = 3; // not even an array
     // typings:expect-error
-    vec3d = [] as vector2d; // no elements
+    vec3d = [] as vector3d; // no elements
     // typings:expect-error
-    vec3d = [0, 0, 0] as vector2d; // too few elements
+    vec3d = [0, 0, 0] as vector3d; // too few elements
     // typings:expect-error
-    vec3d = [0, 0, 0, 0, 0] as vector2d; // too many elements
+    vec3d = [0, 0, 0, 0, 0] as vector3d; // too many elements
 
     return; // arrayCreationTests
   })(UNIT2D, UNIT3D);
