@@ -106,7 +106,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show the correct count in the legend with duration formatter', async () => {
-        const expectedLegendValue = '156,00';
+        const expectedLegendValue = '156.00';
 
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Duration');
