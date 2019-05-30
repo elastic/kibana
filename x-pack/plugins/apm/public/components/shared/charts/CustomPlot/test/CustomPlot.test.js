@@ -13,10 +13,8 @@ import { InnerCustomPlot } from '../index';
 import responseWithData from './responseWithData.json';
 import VoronoiPlot from '../VoronoiPlot';
 import InteractivePlot from '../InteractivePlot';
-import {
-  getResponseTimeSeries,
-  getEmptySerie
-} from '../../../../../selectors/chartSelectors';
+import { getResponseTimeSeries } from '../../../../../selectors/chartSelectors';
+import { getEmptySerie } from '../getEmptySeries';
 
 function getXValueByIndex(index) {
   return responseWithData.responseTimes.avg[index].x;
