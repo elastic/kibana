@@ -156,7 +156,7 @@ export class HttpServer {
   }
 
   private setupBasePathRewrite(server: Server) {
-    if (this.config!.basePath === undefined || this.config!.rewriteBasePath) {
+    if (this.config!.basePath === undefined || !this.config!.rewriteBasePath) {
       return;
     }
 
@@ -169,7 +169,6 @@ export class HttpServer {
           return {};
         }
       });
-
       if (!newURL) {
         return responseToolkit
           .response('Not Found')

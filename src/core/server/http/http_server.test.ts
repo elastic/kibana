@@ -490,15 +490,21 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
 
 describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   let innerServerListener: Server;
+  let configWithBasePath: HttpConfig;
 
   beforeEach(async () => {
+    configWithBasePath = {
+      ...config,
+      basePath: '/bar',
+      rewriteBasePath: true,
+    } as HttpConfig;
     const router = new Router('/');
     router.get({ path: '/', validate: false }, async (req, res) => res.ok({ key: 'value:/' }));
     router.get({ path: '/foo', validate: false }, async (req, res) =>
       res.ok({ key: 'value:/foo' })
     );
 
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
     registerRouter(router);
 
     await server.start();
