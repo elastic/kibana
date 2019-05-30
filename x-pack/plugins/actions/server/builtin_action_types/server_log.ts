@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 
-import { ActionType, ExecutorOptions } from '../action_type_service';
+import { ActionType, ExecutorOptions } from '../action_type_registry';
 
 const DEFAULT_TAGS = ['info', 'alerting'];
 

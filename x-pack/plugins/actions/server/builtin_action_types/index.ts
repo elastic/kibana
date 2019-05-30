@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeService } from '../action_type_service';
+import { ActionTypeRegistry } from '../action_type_registry';
 
-import { actionType as serverLogActionType } from '././server_log';
+import { actionType as serverLogActionType } from './server_log';
 
-export function registerBuiltInActionTypes(actionTypeService: ActionTypeService) {
-  actionTypeService.register(serverLogActionType);
+export function registerBuiltInActionTypes(actionTypeRegistry: ActionTypeRegistry) {
+  actionTypeRegistry.register(serverLogActionType);
 }

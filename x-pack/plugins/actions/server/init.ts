@@ -40,7 +40,7 @@ export function init(server: Legacy.Server) {
     },
   });
 
-  registerBuiltInActionTypes(actionTypeService);
+  registerBuiltInActionTypes(actionTypeRegistry);
 
   // Routes
   createRoute(server);
