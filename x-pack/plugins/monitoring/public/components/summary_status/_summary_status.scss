@@ -1,6 +1,6 @@
 .monSummaryStatusNoWrap {
-  margin-left: 12px;
-  margin-right: 12px;
+  margin-left: $euiSizeM;
+  margin-right: $euiSizeM;
   .euiTitle {
     overflow-x: hidden;
     white-space: nowrap;
@@ -8,6 +8,6 @@
   }
 
   .euiFlexItem {
-    margin: 8px;
+    margin: $euiSizeS;
   }
 }
