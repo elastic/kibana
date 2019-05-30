@@ -2,17 +2,10 @@
 
 exports[`FeatureTooltip should not show close button and not show filter button 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
-  >
-    <EuiFlexItem>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <EuiDescriptionList
+    listItems={Array []}
+    type="column"
+  />
 </Fragment>
 `;
 
@@ -22,99 +15,76 @@ exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
     direction="column"
     gutterSize="none"
   >
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
+    <EuiFlexItem
+      grow={true}
     >
-      <EuiFlexItem
-        grow={true}
-      >
-        <EuiFlexGroup
-          alignItems="flexEnd"
-          direction="row"
-          justifyContent="flexEnd"
-        >
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Close tooltip"
-              color="primary"
-              iconSize="m"
-              iconType="cross"
-              onClick={[Function]}
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexItem>
       <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
+        alignItems="flexEnd"
+        direction="row"
+        justifyContent="flexEnd"
       >
-        <EuiFlexGroup
-          key="0"
+        <EuiFlexItem
+          grow={false}
         >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": "bar",
-                }
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Filter on property"
-              className="mapFeatureTooltipFilterButton"
-              color="primary"
-              iconSize="m"
-              iconType="plusInCircle"
-              onClick={[Function]}
-              title="Filter on property"
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup
-          key="1"
-        >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": "bar",
-                }
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiButtonIcon
+            aria-label="Close tooltip"
+            color="primary"
+            iconSize="m"
+            iconType="cross"
+            onClick={[Function]}
+            type="button"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiDescriptionList
+    listItems={
+      Array [
+        Object {
+          "description": <div>
+            <div
+              className="tooltipLineDescription"
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "bar",
+                }
+              }
+            />
+            <div
+              className="tooltipLineDescription"
+            >
+              <EuiButtonIcon
+                aria-label="Filter on property"
+                className="mapFeatureTooltipFilterButton"
+                color="primary"
+                iconSize="m"
+                iconType="plusInCircle"
+                onClick={[Function]}
+                title="Filter on property"
+                type="button"
+              />
+            </div>
+          </div>,
+          "title": "foo",
+        },
+        Object {
+          "description": <div>
+            <div
+              className="tooltipLineDescription"
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "bar",
+                }
+              }
+            />
+          </div>,
+          "title": "foo",
+        },
+      ]
+    }
+    type="column"
+  />
 </Fragment>
 `;
 
@@ -124,40 +94,33 @@ exports[`FeatureTooltip should show close button, but not filter button 1`] = `
     direction="column"
     gutterSize="none"
   >
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
+    <EuiFlexItem
+      grow={true}
     >
-      <EuiFlexItem
-        grow={true}
-      >
-        <EuiFlexGroup
-          alignItems="flexEnd"
-          direction="row"
-          justifyContent="flexEnd"
-        >
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Close tooltip"
-              color="primary"
-              iconSize="m"
-              iconType="cross"
-              onClick={[Function]}
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexItem>
       <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-      />
+        alignItems="flexEnd"
+        direction="row"
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonIcon
+            aria-label="Close tooltip"
+            color="primary"
+            iconSize="m"
+            iconType="cross"
+            onClick={[Function]}
+            type="button"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiDescriptionList
+    listItems={Array []}
+    type="column"
+  />
 </Fragment>
 `;
 
@@ -176,75 +139,52 @@ exports[`FeatureTooltip should show error message if unable to load tooltip cont
 
 exports[`FeatureTooltip should show only filter button for filterable properties 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
-  >
-    <EuiFlexItem>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-      >
-        <EuiFlexGroup
-          key="0"
-        >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
+  <EuiDescriptionList
+    listItems={
+      Array [
+        Object {
+          "description": <div>
+            <div
+              className="tooltipLineDescription"
               dangerouslySetInnerHTML={
                 Object {
                   "__html": "bar",
                 }
               }
             />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Filter on property"
-              className="mapFeatureTooltipFilterButton"
-              color="primary"
-              iconSize="m"
-              iconType="plusInCircle"
-              onClick={[Function]}
-              title="Filter on property"
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup
-          key="1"
-        >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
+            <div
+              className="tooltipLineDescription"
+            >
+              <EuiButtonIcon
+                aria-label="Filter on property"
+                className="mapFeatureTooltipFilterButton"
+                color="primary"
+                iconSize="m"
+                iconType="plusInCircle"
+                onClick={[Function]}
+                title="Filter on property"
+                type="button"
+              />
+            </div>
+          </div>,
+          "title": "foo",
+        },
+        Object {
+          "description": <div>
+            <div
+              className="tooltipLineDescription"
               dangerouslySetInnerHTML={
                 Object {
                   "__html": "bar",
                 }
               }
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+          </div>,
+          "title": "foo",
+        },
+      ]
+    }
+    type="column"
+  />
 </Fragment>
 `;

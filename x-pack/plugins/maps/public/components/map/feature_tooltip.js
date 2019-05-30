@@ -103,7 +103,7 @@ export class FeatureTooltip extends React.Component {
           aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
             defaultMessage: 'Filter on property'
           })}
-          className="mapFeatureTooltipFilterButton"
+          className="mapFeatureTooltip__filterButton"
         />
       </div>
     );
@@ -120,7 +120,7 @@ export class FeatureTooltip extends React.Component {
       const htmlValue = (
         <div>
           <div
-            className="tooltipLineDescription"
+            className="mapFeatureTooltip__lineDescription"
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
               __html: tooltipProperty.getHtmlDisplayValue()
