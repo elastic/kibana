@@ -13,7 +13,6 @@ import { requestFixture } from '../__tests__/__fixtures__/request';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
-import { AuthScopeService } from '../auth_scope_service';
 import { LoginAttempt } from './login_attempt';
 import { initAuthenticator } from './authenticator';
 import * as ClientShield from '../../../../../server/lib/get_client_shield';
@@ -46,7 +45,6 @@ describe('Authenticator', () => {
       .stub(Session, 'create')
       .withArgs(server as any)
       .resolves(session as any);
-    sandbox.stub(AuthScopeService.prototype, 'getForRequestAndUser').resolves([]);
 
     sandbox.useFakeTimers();
   });
@@ -109,7 +107,7 @@ describe('Authenticator', () => {
 
       const authenticationResult = await authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(authenticationResult.user).toEqual(user);
     });
 
     it('creates session whenever authentication provider returns state for system API requests', async () => {
@@ -126,7 +124,7 @@ describe('Authenticator', () => {
 
       const systemAPIAuthenticationResult = await authenticate(request);
       expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(systemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(systemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -148,7 +146,7 @@ describe('Authenticator', () => {
 
       const notSystemAPIAuthenticationResult = await authenticate(request);
       expect(notSystemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(notSystemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(notSystemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -185,12 +183,12 @@ describe('Authenticator', () => {
 
       const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
       expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(systemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(systemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.notCalled(session.set);
 
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
       expect(notSystemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(notSystemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(notSystemAPIAuthenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, notSystemAPIRequest, {
         state: { authorization: 'Basic yyy' },
@@ -253,7 +251,7 @@ describe('Authenticator', () => {
 
       const authenticationResult = await authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(authenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -280,7 +278,7 @@ describe('Authenticator', () => {
 
       const authenticationResult = await authenticate(request);
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
+      expect(authenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
@@ -466,20 +464,6 @@ describe('Authenticator', () => {
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
       expect(notSystemAPIAuthenticationResult.notHandled()).toBe(true);
       sinon.assert.calledTwice(session.clear);
-    });
-
-    it('complements user with `scope` property.', async () => {
-      const user = { username: 'user' };
-      const request = requestFixture({ headers: { authorization: 'Basic ***' } });
-
-      cluster.callWithRequest.withArgs(request).resolves(user);
-      (AuthScopeService.prototype.getForRequestAndUser as sinon.SinonStub)
-        .withArgs(request, user)
-        .resolves(['foo', 'bar']);
-
-      const authenticationResult = await authenticate(request);
-      expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual({ ...user, scope: ['foo', 'bar'] });
     });
   });
 

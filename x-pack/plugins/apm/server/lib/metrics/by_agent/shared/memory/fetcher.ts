@@ -59,5 +59,5 @@ export async function fetch(setup: Setup, serviceName: string) {
     }
   };
 
-  return client<void, MetricsAggs<MemoryMetrics>>('search', params);
+  return client.search<void, MetricsAggs<MemoryMetrics>>(params);
 }

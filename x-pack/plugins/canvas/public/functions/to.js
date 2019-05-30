@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registries } from 'plugins/interpreter/registries';
 import { castProvider } from '@kbn/interpreter/common';
+import { registries } from 'plugins/interpreter/registries';
 
 export const to = () => ({
   name: 'to',
