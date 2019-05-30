@@ -35,10 +35,19 @@
   masterIssue: true,
 
   /**
+   * Whether updates should require manual approval from within the
+   * Master Issue before creation.
+   *
+   * We can turn this off once we've gotten through the backlog of
+   * outdated packages.
+   */
+  masterIssueApproval: true,
+
+  /**
    * Policy for how to modify/update existing ranges
    * pin = convert ranges to exact versions, e.g. ^1.0.0 -> 1.1.0
    */
-  rangeStrategy: 'pin',
+  rangeStrategy: 'replace',
 
   npm: {
     /**
@@ -52,51 +61,42 @@
      */
     packageRules: [
       {
-        packagePatterns: ['^.*$'],
-        enabled: false,
-      },
-      {
-        packagePatterns: ['^eslint'],
+        packagePatterns: ['\\beslint\\b'],
         groupName: 'eslint related packages',
         groupSlug: 'eslint',
-        enabled: true,
       },
       {
-        packagePatterns: ['^@babel', '\\bbabel\\b'],
+        packagePatterns: ['\\bbabel\\b'],
         groupName: 'babel related packages',
         groupSlug: 'babel',
-        enabled: true,
       },
       {
         packagePatterns: ['\\bjest\\b'],
         groupName: 'jest related packages',
         groupSlug: 'jest',
-        enabled: true,
       },
       {
         packagePatterns: ['\\bmocha\\b'],
         groupName: 'mocha related packages',
         groupSlug: 'mocha',
-        enabled: true,
       },
       {
         packagePatterns: ['\\bkarma\\b'],
         groupName: 'karma related packages',
         groupSlug: 'karma',
-        enabled: true,
       },
       {
         packagePatterns: ['\\bgulp\\b'],
         groupName: 'gulp related packages',
         groupSlug: 'gulp',
-        enabled: true,
       },
       {
         packagePatterns: ['\\bgrunt\\b'],
         groupName: 'grunt related packages',
         groupSlug: 'grunt',
-        enabled: true,
       },
+
+      // internal/local packages
       {
         packagePatterns: ['^@kbn/.*'],
         enabled: false,
