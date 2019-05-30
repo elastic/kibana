@@ -34,6 +34,12 @@
    */
   masterIssue: true,
 
+  /**
+   * Policy for how to modify/update existing ranges
+   * pin = convert ranges to exact versions, e.g. ^1.0.0 -> 1.1.0
+   */
+  rangeStrategy: 'pin',
+
   npm: {
     /**
      * This deletes and re-creates the lock file, which we will only want
