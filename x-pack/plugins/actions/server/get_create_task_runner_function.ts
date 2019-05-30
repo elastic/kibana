@@ -35,7 +35,7 @@ export function getCreateTaskRunnerFunction({
           ...action.attributes.actionTypeConfigSecrets,
         };
         throwIfActionTypeConfigInvalid(actionType, mergedActionTypeConfig);
-        throwIfActionTypeParamsInvalid(actionType, throwIfActionTypeParamsInvalid);
+        throwIfActionTypeParamsInvalid(actionType, actionTypeParams);
         await actionType.executor({
           actionTypeConfig: mergedActionTypeConfig,
           params: actionTypeParams,

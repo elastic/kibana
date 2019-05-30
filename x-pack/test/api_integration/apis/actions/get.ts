@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -18,11 +19,11 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
 
     it('should return 200 when finding a record and not return encrypted attributes', async () => {
       await supertest
-        .get('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+            id: ES_ARCHIVER_ACTION_ID,
             type: 'action',
             references: [],
             version: resp.body.version,

@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskManager } from '../../../task_manager';
+import { taskManagerMock } from './task_manager.mock';
 import { createFireFunction } from '../create_fire_function';
 
-const mockTaskManager = {
-  schedule: jest.fn() as TaskManager['schedule'],
-} as TaskManager;
+const mockTaskManager = taskManagerMock.create();
 
 const savedObjectsClient = {
   errors: {} as any,

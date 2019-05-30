@@ -15,6 +15,13 @@ export function actions(kibana: any) {
     id: 'actions',
     configPrefix: 'xpack.actions',
     require: ['kibana', 'elasticsearch', 'task_manager', 'encrypted_saved_objects'],
+    isEnabled(config: any) {
+      return (
+        config.get('xpack.encrypted_saved_objects.enabled') === true &&
+        config.get('xpack.actions.enabled') === true &&
+        config.get('xpack.task_manager.enabled') === true
+      );
+    },
     config(Joi: Root) {
       return Joi.object()
         .keys({

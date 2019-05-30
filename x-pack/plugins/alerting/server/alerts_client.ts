@@ -9,6 +9,7 @@ import { SavedObjectReference } from './types';
 import { Alert, RawAlert } from './types';
 import { TaskManager } from '../../task_manager';
 import { AlertTypeRegistry } from './alert_type_registry';
+import { TASK_MANAGER_SCOPE } from '../common/constants';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
@@ -134,7 +135,7 @@ export class AlertsClient {
         alertId: id,
       },
       state: {},
-      scope: ['alerting'],
+      scope: [TASK_MANAGER_SCOPE],
     });
   }
 

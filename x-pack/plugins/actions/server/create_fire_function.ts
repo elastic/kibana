@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { TASK_MANAGER_SCOPE } from '../common/constants';
 import { TaskManager } from '../../task_manager';
 
 interface CreateFireFunctionOptions {
@@ -29,7 +30,7 @@ export function createFireFunction({ taskManager, savedObjectsClient }: CreateFi
         actionTypeParams: params,
       },
       state: {},
-      scope: ['alerting'],
+      scope: [TASK_MANAGER_SCOPE],
     });
   };
 }

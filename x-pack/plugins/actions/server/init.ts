@@ -19,13 +19,6 @@ import {
 } from './routes';
 
 export function init(server: Legacy.Server) {
-  const actionsEnabled = server.config().get('xpack.actions.enabled');
-
-  if (!actionsEnabled) {
-    server.log(['info', 'actions'], 'Actions app disabled by configuration');
-    return;
-  }
-
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsClientWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser

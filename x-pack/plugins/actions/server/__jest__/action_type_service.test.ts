@@ -8,13 +8,11 @@ jest.mock('../get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn(),
 }));
 
-import { TaskManager } from '../../../task_manager';
+import { taskManagerMock } from './task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import { ActionTypeService } from '../action_type_service';
 
-const mockTaskManager = {
-  registerTaskDefinitions: jest.fn() as TaskManager['registerTaskDefinitions'],
-} as TaskManager;
+const mockTaskManager = taskManagerMock.create();
 
 const mockEncryptedSavedObjectsPlugin = {
   getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],

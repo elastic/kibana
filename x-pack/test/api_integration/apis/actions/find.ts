@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,7 +28,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+                id: ES_ARCHIVER_ACTION_ID,
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],
@@ -51,7 +52,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+                id: ES_ARCHIVER_ACTION_ID,
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],

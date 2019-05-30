@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -38,7 +39,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           actions: [
             {
               group: 'default',
-              id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+              id: ES_ARCHIVER_ACTION_ID,
               params: {
                 message:
                   'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
@@ -63,7 +64,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
               actions: [
                 {
                   group: 'default',
-                  id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+                  id: ES_ARCHIVER_ACTION_ID,
                   params: {
                     message:
                       'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',

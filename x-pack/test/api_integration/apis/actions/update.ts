@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -18,7 +19,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 200 when updating a document', async () => {
       await supertest
-        .put('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
@@ -30,7 +31,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+            id: ES_ARCHIVER_ACTION_ID,
             type: 'action',
             references: [],
             version: resp.body.version,
@@ -46,7 +47,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should support partial updates', async () => {
       await supertest
-        .put('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
@@ -56,11 +57,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         })
         .expect(200);
       await supertest
-        .get('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+            id: ES_ARCHIVER_ACTION_ID,
             type: 'action',
             references: [],
             version: resp.body.version,
@@ -78,7 +79,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should not be able to pass null to actionTypeConfig', async () => {
       await supertest
-        .put('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
@@ -104,7 +105,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should not return encrypted attributes', async () => {
       await supertest
-        .put('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
@@ -119,7 +120,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '85c2d74a-a306-4d53-9c91-06773fbca869',
+            id: ES_ARCHIVER_ACTION_ID,
             type: 'action',
             references: [],
             version: resp.body.version,
@@ -158,7 +159,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 400 when payload is empty and invalid', async () => {
       await supertest
-        .put('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({})
         .expect(400)
@@ -174,7 +175,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 400 when payload attributes are empty and invalid', async () => {
       await supertest
-        .put('/api/action/85c2d74a-a306-4d53-9c91-06773fbca869')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {},

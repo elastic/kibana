@@ -18,13 +18,6 @@ import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClient } from './alerts_client';
 
 export function init(server: Legacy.Server) {
-  const alertingEnabled = server.config().get('xpack.alerting.enabled');
-
-  if (!alertingEnabled) {
-    server.log(['info', 'alerting'], 'Alerting app disabled by configuration');
-    return;
-  }
-
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsClientWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser

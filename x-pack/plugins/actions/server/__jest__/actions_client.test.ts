@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import { ActionTypeService } from '../action_type_service';
 import { ActionsClient } from '../actions_client';
-import { TaskManager } from '../../../task_manager';
+import { taskManagerMock } from './task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 
 const savedObjectsClient = {
@@ -21,9 +21,7 @@ const savedObjectsClient = {
   update: jest.fn(),
 };
 
-const mockTaskManager = {
-  registerTaskDefinitions: jest.fn() as TaskManager['registerTaskDefinitions'],
-} as TaskManager;
+const mockTaskManager = taskManagerMock.create();
 
 const mockEncryptedSavedObjectsPlugin = {
   getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
