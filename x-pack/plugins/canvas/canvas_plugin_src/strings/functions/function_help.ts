@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { AvailableFunctions } from '../../functions/types';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { UnionToIntersection } from '../../functions/types';
 
 import { help as all } from './all';

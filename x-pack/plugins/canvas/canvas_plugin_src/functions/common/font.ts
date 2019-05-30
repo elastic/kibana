@@ -6,9 +6,9 @@
 
 // @ts-ignore no @typed def
 import inlineStyle from 'inline-style';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
 import { getFunctionHelp } from '../../strings';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { CSSStyle, FontFamily, FontWeight, Style, TextAlignment, TEXT_ALIGNMENTS } from '../types';
 
 interface Arguments {

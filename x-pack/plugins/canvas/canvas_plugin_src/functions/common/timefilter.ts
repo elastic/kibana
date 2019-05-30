@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Filter } from '../types';
 import { getFunctionHelp } from '../../strings';
 

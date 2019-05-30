@@ -7,12 +7,12 @@
 import { get, map, groupBy } from 'lodash';
 // @ts-ignore lodash.keyby imports invalid member from @types/lodash
 import keyBy from 'lodash.keyby';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../strings';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { Legend, Palette, PointSeries, Render, SeriesStyle, Style } from '../types';
 
 interface PieSeriesOptions {

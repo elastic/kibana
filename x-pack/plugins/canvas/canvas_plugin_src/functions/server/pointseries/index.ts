@@ -10,6 +10,7 @@ import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, values } from 'lodash';
 import moment from 'moment';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 // @ts-ignore Untyped local
@@ -19,7 +20,6 @@ import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp } from '../../../strings';
-import { ExpressionFunction } from '../../../../../../../src/legacy/core_plugins/interpreter/types';
 import {
   Datatable,
   DatatableRow,

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { functions as commonFunctions } from '../../functions/common';
 import { functions as browserFunctions } from '../../functions/browser';
 import { functions as serverFunctions } from '../../functions/server';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 
 // A reducing type for Function Factories to a base `Function`.
 // This is useful for collecting all of the Functions and the concepts they share as

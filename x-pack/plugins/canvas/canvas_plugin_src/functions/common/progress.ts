@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
