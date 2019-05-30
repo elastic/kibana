@@ -15,7 +15,7 @@ export class CancellationToken {
     this._callbacks = [];
   }
 
-  on(callback: Function) {
+  public on = (callback: Function) => {
     if (!isFunction(callback)) {
       throw new Error('Expected callback to be a function');
     }
@@ -26,10 +26,10 @@ export class CancellationToken {
     }
 
     this._callbacks.push(callback);
-  }
+  };
 
-  cancel() {
+  public cancel = () => {
     this.isCancelled = true;
     this._callbacks.forEach(callback => callback());
-  }
+  };
 }
