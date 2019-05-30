@@ -24,7 +24,7 @@
  *
  */
 
-import { TransformMatrix3d, Vector3d } from '.';
+import { Matrix3d, TransformMatrix3d, Vector3d } from '.';
 
 const NANMATRIX: TransformMatrix3d = [
   NaN,
@@ -151,6 +151,7 @@ export const normalize = ([A, B, C, D]: Vector3d): Vector3d =>
  *         b    f    j    n
  *         c    g    k    o
  *         d    h    l    p
+ *
  */
 export const invert = ([
   a,
@@ -170,7 +171,7 @@ export const invert = ([
   o,
   p,
 ]: TransformMatrix3d): TransformMatrix3d => {
-  const inv: TransformMatrix3d = [
+  const inv: Matrix3d = [
     f * k * p - f * l * o - j * g * p + j * h * o + n * g * l - n * h * k,
     -b * k * p + b * l * o + j * c * p - j * d * o - n * c * l + n * d * k,
     b * g * p - b * h * o - f * c * p + f * d * o + n * c * h - n * d * g,

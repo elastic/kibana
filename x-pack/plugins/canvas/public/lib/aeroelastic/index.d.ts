@@ -10,11 +10,13 @@
 type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
 type f = f64; // shorthand
 
-export type Vector2d = [f, f, f] & ReadonlyArray<f>;
-export type Vector3d = [f, f, f, f] & ReadonlyArray<f>;
+export type Vector2d = Readonly<[f, f, f]>;
+export type Vector3d = Readonly<[f, f, f, f]>;
 
-export type TransformMatrix2d = [f, f, f, f, f, f, f, f, f] & ReadonlyArray<f>;
-export type TransformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f] & ReadonlyArray<f>;
+export type Matrix2d = [f, f, f, f, f, f, f, f, f];
+export type TransformMatrix2d = Readonly<Matrix2d>;
+export type Matrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f];
+export type TransformMatrix3d = Readonly<Matrix3d>;
 
 // plain, JSON-bijective value
 export type Json = JsonPrimitive | JsonArray | JsonMap;
