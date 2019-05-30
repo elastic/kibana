@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export { HttpService } from './http_service';
-export { HttpFetchError } from './http_fetch_error';
-export { HttpInterceptHaltError } from './http_intercept_halt_error';
-export { HttpInterceptController } from './http_intercept_controller';
-export * from './types';
+export class HttpInterceptHaltError extends Error {
+  constructor() {
+    super('HTTP Intercept Halt');
+
+    // captureStackTrace is only available in the V8 engine, so any browser using
+    // a different JS engine won't have access to this method.
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, HttpInterceptHaltError);
+    }
+  }
+}

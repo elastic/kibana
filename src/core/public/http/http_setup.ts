@@ -33,7 +33,9 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { modifyUrl } from '../utils';
 import { HttpFetchOptions, HttpServiceBase, HttpInterceptor, HttpResponse } from './types';
+import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
+import { HttpInterceptHaltError } from './http_intercept_halt_error';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
@@ -98,27 +100,41 @@ export const setup = (
 
   // Request/response interceptors are called in opposite orders.
   // Request hooks start from the newest interceptor and end with the oldest.
-  function interceptRequest(request: Request): Promise<Request> {
+  function interceptRequest(
+    request: Request,
+    controller: HttpInterceptController
+  ): Promise<Request> {
     let next = request;
 
     return [...interceptors].reduceRight(
       (promise, interceptor) =>
         promise.then(
           async (current: Request) => {
+            if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
             if (!interceptor.request) {
               return current;
             }
 
-            next = (await interceptor.request(current)) || current;
+            next = (await interceptor.request(current, controller)) || current;
 
             return next;
           },
           async error => {
+            if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
             if (!interceptor.requestError) {
               throw error;
             }
 
-            const nextRequest = await interceptor.requestError({ error, request: next });
+            const nextRequest = await interceptor.requestError(
+              { error, request: next },
+              controller
+            );
 
             if (!nextRequest) {
               throw error;
@@ -133,27 +149,38 @@ export const setup = (
   }
 
   // Response hooks start from the oldest interceptor and end with the newest.
-  async function interceptResponse(responsePromise: Promise<HttpResponse>) {
+  async function interceptResponse(
+    responsePromise: Promise<HttpResponse>,
+    controller: HttpInterceptController
+  ) {
     let current: HttpResponse;
 
     const finalHttpResponse = await [...interceptors].reduce(
       (promise, interceptor) =>
         promise.then(
           async httpResponse => {
+            if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
             if (!interceptor.response) {
               return httpResponse;
             }
 
-            current = (await interceptor.response(httpResponse)) || httpResponse;
+            current = (await interceptor.response(httpResponse, controller)) || httpResponse;
 
             return current;
           },
           async error => {
+            if (controller.halted) {
+              throw new HttpInterceptHaltError();
+            }
+
             if (!interceptor.responseError) {
               throw error;
             }
 
-            const next = await interceptor.responseError({ ...current, error });
+            const next = await interceptor.responseError({ ...current, error }, controller);
 
             if (!next) {
               throw error;
@@ -206,7 +233,13 @@ export const setup = (
   }
 
   function fetch(path: string, options: HttpFetchOptions = {}) {
-    return interceptResponse(interceptRequest(createRequest(path, options)).then(fetcher));
+    const controller = new HttpInterceptController();
+    const initialRequest = createRequest(path, options);
+
+    return interceptResponse(
+      interceptRequest(initialRequest, controller).then(fetcher),
+      controller
+    );
   }
 
   function shorthand(method: string) {

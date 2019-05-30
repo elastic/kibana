@@ -400,6 +400,74 @@ describe('interception', () => {
     ]);
   });
 
+  it('should skip remaining interceptors when controller halts during request', async () => {
+    const order: string[] = [];
+
+    http.intercept({
+      request() {
+        order.push('Request 1');
+      },
+      response() {
+        order.push('Response 1');
+      },
+    });
+    http.intercept({
+      request(request, controller) {
+        controller.halt();
+        order.push('Request 2');
+      },
+      response() {
+        order.push('Response 2');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 3');
+      },
+      response() {
+        order.push('Response 3');
+      },
+    });
+
+    await expect(http.fetch('/my/wat')).rejects.toThrow(/HTTP Intercept Halt/);
+    expect(fetchMock.called()).toBe(false);
+    expect(order).toEqual(['Request 3', 'Request 2']);
+  });
+
+  it('should skip remaining interceptors when controller halts during response', async () => {
+    const order: string[] = [];
+
+    http.intercept({
+      request() {
+        order.push('Request 1');
+      },
+      response(response, controller) {
+        controller.halt();
+        order.push('Response 1');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 2');
+      },
+      response() {
+        order.push('Response 2');
+      },
+    });
+    http.intercept({
+      request() {
+        order.push('Request 3');
+      },
+      response() {
+        order.push('Response 3');
+      },
+    });
+
+    await expect(http.fetch('/my/wat')).rejects.toThrow(/HTTP Intercept Halt/);
+    expect(fetchMock.called()).toBe(true);
+    expect(order).toEqual(['Request 3', 'Request 2', 'Request 1', 'Response 1']);
+  });
+
   it('should not fetch if exception occurs during request interception', async () => {
     const order: string[] = [];
 

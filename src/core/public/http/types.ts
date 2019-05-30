@@ -20,6 +20,7 @@
 import { Observable } from 'rxjs';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
+import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
 
 /** @public */
@@ -101,8 +102,20 @@ export interface HttpErrorRequest {
 }
 /** @public */
 export interface HttpInterceptor {
-  request?(request: Request): Promise<Request> | Request | void;
-  requestError?(httpErrorRequest: HttpErrorRequest): Promise<Request> | Request | void;
-  response?(httpResponse: HttpResponse): Promise<HttpResponse> | HttpResponse | void;
-  responseError?(httpErrorResponse: HttpErrorResponse): Promise<HttpResponse> | HttpResponse | void;
+  request?(
+    request: Request,
+    controller: HttpInterceptController
+  ): Promise<Request> | Request | void;
+  requestError?(
+    httpErrorRequest: HttpErrorRequest,
+    controller: HttpInterceptController
+  ): Promise<Request> | Request | void;
+  response?(
+    httpResponse: HttpResponse,
+    controller: HttpInterceptController
+  ): Promise<HttpResponse> | HttpResponse | void;
+  responseError?(
+    httpErrorResponse: HttpErrorResponse,
+    controller: HttpInterceptController
+  ): Promise<HttpResponse> | HttpResponse | void;
 }
