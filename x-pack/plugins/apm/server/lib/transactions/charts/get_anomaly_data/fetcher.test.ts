@@ -18,7 +18,11 @@ describe('anomalyAggsFetcher', () => {
         transactionType: 'myTransactionType',
         intervalString: 'myInterval',
         mlBucketSize: 10,
-        setup: { client: clientSpy, start: 100000, end: 200000 } as any
+        setup: {
+          client: { search: clientSpy },
+          start: 100000,
+          end: 200000
+        } as any
       });
     });
 
@@ -34,20 +38,22 @@ describe('anomalyAggsFetcher', () => {
   it('should swallow HTTP errors', () => {
     const httpError = new Error('anomaly lookup failed') as any;
     httpError.statusCode = 418;
-    const failClient = jest.fn(() => Promise.reject(httpError));
+    const failedRequestSpy = jest.fn(() => Promise.reject(httpError));
 
     return expect(
-      anomalySeriesFetcher({ setup: { client: failClient } } as any)
+      anomalySeriesFetcher({
+        setup: { client: { search: failedRequestSpy } }
+      } as any)
     ).resolves.toEqual(undefined);
   });
 
   it('should throw other errors', () => {
     const otherError = new Error('anomaly lookup ASPLODED') as any;
-    const failClient = jest.fn(() => Promise.reject(otherError));
+    const failedRequestSpy = jest.fn(() => Promise.reject(otherError));
 
     return expect(
       anomalySeriesFetcher({
-        setup: { client: failClient }
+        setup: { client: { search: failedRequestSpy } }
       } as any)
     ).rejects.toThrow(otherError);
   });
