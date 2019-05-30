@@ -5,7 +5,7 @@
  */
 
 import { ID, API } from '../common/constants';
-import { fetchInfo, fetchList, fetchZip } from './registry';
+import { fetchInfo, fetchList, getZipInfo } from './registry';
 
 // Manager public API paths (currently essentially a proxy to registry service)
 export const routes = [
@@ -33,8 +33,8 @@ export const routes = [
     },
     handler: async (req: { params: { pkgkey: string } }) => {
       const { pkgkey } = req.params;
-      const data = await fetchZip(pkgkey);
-      return { meta: { pkgkey, size: `${data.length / 1024}kB` } };
+      const directory = await getZipInfo(pkgkey);
+      return { meta: { pkgkey, directory } };
     },
   },
 ];
