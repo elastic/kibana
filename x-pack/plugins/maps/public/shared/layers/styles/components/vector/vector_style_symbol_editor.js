@@ -87,7 +87,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange }) 
 
     const renderOption = ({ value, label }) => {
       return (
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false} style={{ width: '15px' }}>
             <img src={buildSrcUrl(SYMBOLS[value])} alt={label} />
           </EuiFlexItem>

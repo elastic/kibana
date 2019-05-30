@@ -16,7 +16,6 @@ import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
-import { loadImage } from './symbol_utils';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -491,30 +490,16 @@ export class VectorStyle extends AbstractStyle {
   }
 
   async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId }) {
-    const fillColor = this._descriptor.properties.fillColor;
-    const symbolId = this._descriptor.properties.symbol.options.symbolId;
-    const iconSize = this._descriptor.properties.iconSize;
-
-    function getImageId(symbolId, color) {
-      return `${symbolId}_${color}`;
-    }
-
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
 
-    if (fillColor.type === VectorStyle.STYLE_TYPE.STATIC) {
-      const color = fillColor.options.color;
-      const imageId = getImageId(symbolId, color);
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-      if (mbMap.hasImage(imageId)) {
-        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-      } else {
-        await loadImage(imageId, symbolId, color, mbMap);
-        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-      }
-    } else {
-      // TODO handle dynamic color
-    }
+    const symbolId = this._descriptor.properties.symbol.options.symbolId;
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId.split(' ').join('-'));
 
+    const color = this._getMBColor(this._descriptor.properties.fillColor);
+    // icon-color is only supported on SDF icons.
+    mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
+
+    const iconSize = this._descriptor.properties.iconSize;
     if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / DEFAULT_ICON_SIZE);
     } else {
