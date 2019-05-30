@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
-
 /* eslint-env jest */
 
-const chrome = {
-  getBasePath: jest.fn(),
-  getUiSettingsClient: () => ({
-    ...uiSettingsServiceMock.createSetupContract(),
-    getUpdate$: () => ({
-      subscribe: jest.fn(),
-    }),
-  }),
+const interpreter = {
+  getInterpreter: jest.fn().mockReturnValue(Promise.resolve({ interpreter: jest.fn() })),
+  interpretAst: jest.fn(),
 };
 
 // eslint-disable-next-line import/no-default-export
-export default chrome;
+export default interpreter;
