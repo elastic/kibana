@@ -52,9 +52,10 @@ function getYTickFormatter(chart: GenericMetricsChart) {
   switch (chart.yUnit) {
     case 'bytes': {
       const max = Math.max(
-        ...chart.series.flatMap(series =>
-          series.data.map(coord => coord.y || 0)
-        )
+        // TODO: Use flatMap
+        ...chart.series
+          .map(series => series.data.map(coord => coord.y || 0))
+          .reduce((prev, current) => prev.concat(current))
       );
       return getFixedByteFormatter(max);
     }
