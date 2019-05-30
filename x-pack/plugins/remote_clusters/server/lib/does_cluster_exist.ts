@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export async function doesClusterExist(callWithRequest, clusterName) {
+export async function doesClusterExist(callWithRequest: any, clusterName: string): Promise<any> {
   try {
     const clusterInfoByName = await callWithRequest('cluster.remoteInfo');
-    return !!(clusterInfoByName && clusterInfoByName[clusterName]);
-  } catch(err) {
+    return Boolean(clusterInfoByName && clusterInfoByName[clusterName]);
+  } catch (err) {
     throw new Error('Unable to check if cluster already exists.');
   }
 }

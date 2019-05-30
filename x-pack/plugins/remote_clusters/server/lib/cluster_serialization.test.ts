@@ -9,27 +9,26 @@ import { deserializeCluster, serializeCluster } from './cluster_serialization';
 describe('cluster_serialization', () => {
   describe('deserializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
-      expect(() => deserializeCluster()).toThrowError();
-      expect(() => deserializeCluster('foo')).toThrowError();
       expect(() => deserializeCluster('foo', 'bar')).toThrowError();
-      expect(() => deserializeCluster(null, {})).toThrowError();
     });
 
     it('should deserialize a complete cluster object', () => {
-      expect(deserializeCluster('test_cluster', {
-        seeds: [ 'localhost:9300' ],
-        connected: true,
-        num_nodes_connected: 1,
-        max_connections_per_cluster: 3,
-        initial_connect_timeout: '30s',
-        skip_unavailable: false,
-        transport: {
-          ping_schedule: '-1',
-          compress: false,
-        }
-      })).toEqual({
+      expect(
+        deserializeCluster('test_cluster', {
+          seeds: ['localhost:9300'],
+          connected: true,
+          num_nodes_connected: 1,
+          max_connections_per_cluster: 3,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+          transport: {
+            ping_schedule: '-1',
+            compress: false,
+          },
+        })
+      ).toEqual({
         name: 'test_cluster',
-        seeds: [ 'localhost:9300' ],
+        seeds: ['localhost:9300'],
         isConnected: true,
         connectedNodesCount: 1,
         maxConnectionsPerCluster: 3,
@@ -41,16 +40,18 @@ describe('cluster_serialization', () => {
     });
 
     it('should deserialize a cluster object without transport information', () => {
-      expect(deserializeCluster('test_cluster', {
-        seeds: [ 'localhost:9300' ],
-        connected: true,
-        num_nodes_connected: 1,
-        max_connections_per_cluster: 3,
-        initial_connect_timeout: '30s',
-        skip_unavailable: false
-      })).toEqual({
+      expect(
+        deserializeCluster('test_cluster', {
+          seeds: ['localhost:9300'],
+          connected: true,
+          num_nodes_connected: 1,
+          max_connections_per_cluster: 3,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+        })
+      ).toEqual({
         name: 'test_cluster',
-        seeds: [ 'localhost:9300' ],
+        seeds: ['localhost:9300'],
         isConnected: true,
         connectedNodesCount: 1,
         maxConnectionsPerCluster: 3,
@@ -60,17 +61,19 @@ describe('cluster_serialization', () => {
     });
 
     it('should deserialize a cluster object with arbitrary missing properties', () => {
-      expect(deserializeCluster('test_cluster', {
-        seeds: [ 'localhost:9300' ],
-        connected: true,
-        num_nodes_connected: 1,
-        initial_connect_timeout: '30s',
-        transport: {
-          compress: false,
-        }
-      })).toEqual({
+      expect(
+        deserializeCluster('test_cluster', {
+          seeds: ['localhost:9300'],
+          connected: true,
+          num_nodes_connected: 1,
+          initial_connect_timeout: '30s',
+          transport: {
+            compress: false,
+          },
+        })
+      ).toEqual({
         name: 'test_cluster',
-        seeds: [ 'localhost:9300' ],
+        seeds: ['localhost:9300'],
         isConnected: true,
         connectedNodesCount: 1,
         initialConnectTimeout: '30s',
@@ -81,27 +84,28 @@ describe('cluster_serialization', () => {
 
   describe('serializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
-      expect(() => serializeCluster()).toThrowError();
       expect(() => serializeCluster('foo')).toThrowError();
     });
 
     it('should serialize a complete cluster object to only dynamic properties', () => {
-      expect(serializeCluster({
-        name: 'test_cluster',
-        seeds: [ 'localhost:9300' ],
-        isConnected: true,
-        connectedNodesCount: 1,
-        maxConnectionsPerCluster: 3,
-        initialConnectTimeout: '30s',
-        skipUnavailable: false,
-        transportPingSchedule: '-1',
-        transportCompress: false,
-      })).toEqual({
+      expect(
+        serializeCluster({
+          name: 'test_cluster',
+          seeds: ['localhost:9300'],
+          isConnected: true,
+          connectedNodesCount: 1,
+          maxConnectionsPerCluster: 3,
+          initialConnectTimeout: '30s',
+          skipUnavailable: false,
+          transportPingSchedule: '-1',
+          transportCompress: false,
+        })
+      ).toEqual({
         persistent: {
           cluster: {
             remote: {
               test_cluster: {
-                seeds: [ 'localhost:9300' ],
+                seeds: ['localhost:9300'],
                 skip_unavailable: false,
               },
             },
@@ -111,15 +115,17 @@ describe('cluster_serialization', () => {
     });
 
     it('should serialize a cluster object with missing properties', () => {
-      expect(serializeCluster({
-        name: 'test_cluster',
-        seeds: [ 'localhost:9300' ],
-      })).toEqual({
+      expect(
+        serializeCluster({
+          name: 'test_cluster',
+          seeds: ['localhost:9300'],
+        })
+      ).toEqual({
         persistent: {
           cluster: {
             remote: {
               test_cluster: {
-                seeds: [ 'localhost:9300' ],
+                seeds: ['localhost:9300'],
                 skip_unavailable: null,
               },
             },

@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function deserializeCluster(name, esClusterObject) {
-  if (
-    !name
-    || !esClusterObject || typeof esClusterObject !== 'object'
-  ) {
+export function deserializeCluster(name: string, esClusterObject: any): any {
+  if (!name || !esClusterObject || typeof esClusterObject !== 'object') {
     throw new Error('Unable to deserialize cluster');
   }
 
@@ -22,7 +19,7 @@ export function deserializeCluster(name, esClusterObject) {
     transport,
   } = esClusterObject;
 
-  let deserializedClusterObject = {
+  let deserializedClusterObject: any = {
     name,
     seeds,
     isConnected,
@@ -33,10 +30,7 @@ export function deserializeCluster(name, esClusterObject) {
   };
 
   if (transport) {
-    const {
-      ping_schedule: transportPingSchedule,
-      compress: transportCompress,
-    } = transport;
+    const { ping_schedule: transportPingSchedule, compress: transportCompress } = transport;
 
     deserializedClusterObject = {
       ...deserializedClusterObject,
@@ -55,16 +49,12 @@ export function deserializeCluster(name, esClusterObject) {
   return deserializedClusterObject;
 }
 
-export function serializeCluster(deserializedClusterObject) {
+export function serializeCluster(deserializedClusterObject: any): any {
   if (!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
   }
 
-  const {
-    name,
-    seeds,
-    skipUnavailable,
-  } = deserializedClusterObject;
+  const { name, seeds, skipUnavailable } = deserializedClusterObject;
 
   return {
     persistent: {

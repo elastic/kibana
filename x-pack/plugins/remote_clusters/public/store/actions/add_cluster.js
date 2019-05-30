@@ -27,10 +27,8 @@ export const addCluster = (cluster) => async (dispatch) => {
     type: ADD_CLUSTER_START,
   });
 
-  let newCluster;
-
   try {
-    [ newCluster ] = await Promise.all([
+    await Promise.all([
       sendAddClusterRequest(cluster),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
       new Promise(resolve => setTimeout(resolve, 500)),
@@ -80,7 +78,6 @@ export const addCluster = (cluster) => async (dispatch) => {
 
   dispatch({
     type: ADD_CLUSTER_SUCCESS,
-    payload: { cluster: newCluster.data },
   });
 
   const { history, route: { location: { search } }  } = getRouter();
