@@ -18,7 +18,7 @@
  */
 
 /* global jest */
-export function getEmbeddableFactoryMock(config) {
+export function getEmbeddableFactoryMock(config?: any) {
   const embeddableFactoryMockDefaults = {
     create: jest.fn(() => Promise.resolve({})),
   };

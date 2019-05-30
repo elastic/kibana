@@ -34,14 +34,15 @@ import {
   EmbeddableReduxState,
   EmbeddablesMap,
   PanelId,
-  PanelState,
-  PanelStateMap,
 } from './types';
+import { SavedDashboardPanel } from '../types';
 
-export const getPanels = (dashboard: DashboardState): Readonly<PanelStateMap> => dashboard.panels;
+export const getPanels = (
+  dashboard: DashboardState
+): Readonly<{ [key: string]: SavedDashboardPanel }> => dashboard.panels;
 
-export const getPanel = (dashboard: DashboardState, panelId: PanelId): PanelState =>
-  getPanels(dashboard)[panelId] as PanelState;
+export const getPanel = (dashboard: DashboardState, panelId: PanelId): SavedDashboardPanel =>
+  getPanels(dashboard)[panelId] as SavedDashboardPanel;
 
 export const getPanelType = (dashboard: DashboardState, panelId: PanelId): string =>
   getPanel(dashboard, panelId).type;
@@ -150,5 +151,7 @@ export const getContainerState = (dashboard: DashboardState, panelId: PanelId): 
 /**
  * @return an array of filters any embeddables wish dashboard to apply
  */
-export const getStagedFilters = (dashboard: DashboardState): Filters =>
+export const getStagedFilters = (
+  dashboard: DashboardState
+): Array<{ field: string; value: string; operator: string; index: string }> =>
   _.compact(_.map(dashboard.embeddables, 'stagedFilter'));

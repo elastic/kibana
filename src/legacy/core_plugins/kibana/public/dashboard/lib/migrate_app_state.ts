@@ -17,22 +17,20 @@
  * under the License.
  */
 
+import { SavedDashboardPanel, DashboardAppState } from '../types';
+
 /**
- * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
- * This could be improved if we extract the appState and state classes externally of their angular providers.
- * @return {AppStateMock}
+ * Creates a new instance of AppState based of the saved dashboard.
+ *
+ * @param appState {AppState} AppState class to instantiate
  */
-export function getAppStateMock() {
-  class AppStateMock {
-    constructor(defaults) {
-      Object.assign(this, defaults);
-    }
-
-    on() {}
-    off() {}
-    toJSON() { return ''; }
-    save() {}
+export function migrateAppState(appState: DashboardAppState) {
+  // For BWC in pre 6.1 versions where uiState was stored at the dashboard level, not at the panel level.
+  if (appState.uiState) {
+    appState.panels.forEach((panel: SavedDashboardPanel) => {
+      panel.embeddableConfig = appState.uiState[`P-${panel.panelIndex}`];
+    });
+    delete appState.uiState;
+    appState.save();
   }
-
-  return AppStateMock;
 }

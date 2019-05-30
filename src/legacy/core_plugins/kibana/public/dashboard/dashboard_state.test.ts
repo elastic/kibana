@@ -22,29 +22,38 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { embeddableIsInitialized, setPanels } from './actions';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { store } from '../store';
+import { IAppState } from 'ui/state_management/app_state';
+import { DashboardAppState } from './types';
+import { TimeRange } from 'ui/embeddable';
+import { IndexPattern } from 'ui/index_patterns';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
 
-
-describe('DashboardState', function () {
-  let dashboardState;
+describe('DashboardState', function() {
+  let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
-  const mockTimefilter = {
-    time: {},
-    setTime: function (time) { this.time = time; },
+  const mockTimefilter: {
+    time: TimeRange;
+    setTime: (time: TimeRange) => void;
+  } = {
+    time: { to: 'now', from: 'now-15m' },
+    setTime(time) {
+      this.time = time;
+    },
   };
-  const mockIndexPattern = { id: 'index1' };
+  const mockIndexPattern: IndexPattern = { id: 'index1', fields: [], title: 'hi' };
 
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
-      AppState: getAppStateMock(),
+      AppStateClass: getAppStateMock() as IAppState<DashboardAppState>,
       hideWriteControls: false,
+      addFilter: () => {},
     });
   }
 
-  describe('syncTimefilterWithDashboard', function () {
-    test('syncs quick time', function () {
+  describe('syncTimefilterWithDashboard', function() {
+    test('syncs quick time', function() {
       savedDashboard.timeRestore = true;
       savedDashboard.timeFrom = 'now/w';
       savedDashboard.timeTo = 'now/w';
@@ -59,7 +68,7 @@ describe('DashboardState', function () {
       expect(mockTimefilter.time.from).toBe('now/w');
     });
 
-    test('syncs relative time', function () {
+    test('syncs relative time', function() {
       savedDashboard.timeRestore = true;
       savedDashboard.timeFrom = 'now-13d';
       savedDashboard.timeTo = 'now';
@@ -74,7 +83,7 @@ describe('DashboardState', function () {
       expect(mockTimefilter.time.from).toBe('now-13d');
     });
 
-    test('syncs absolute time', function () {
+    test('syncs absolute time', function() {
       savedDashboard.timeRestore = true;
       savedDashboard.timeFrom = '2015-09-19 06:31:44.000';
       savedDashboard.timeTo = '2015-09-29 06:31:44.000';
@@ -90,7 +99,7 @@ describe('DashboardState', function () {
     });
   });
 
-  describe('isDirty', function () {
+  describe('isDirty', function() {
     beforeAll(() => {
       initDashboardState();
     });
@@ -108,15 +117,32 @@ describe('DashboardState', function () {
     });
   });
 
-  describe('panelIndexPatternMapping', function () {
+  describe('panelIndexPatternMapping', function() {
     beforeAll(() => {
       initDashboardState();
     });
 
-    function simulateNewEmbeddableWithIndexPatterns({ panelId, indexPatterns }) {
-      store.dispatch(setPanels({ [panelId]: { panelIndex: panelId } }));
+    function simulateNewEmbeddableWithIndexPatterns({
+      panelId,
+      indexPatterns,
+    }: {
+      panelId: string;
+      indexPatterns?: IndexPattern[];
+    }) {
+      store.dispatch(
+        setPanels({
+          [panelId]: {
+            id: '123',
+            panelIndex: panelId,
+            version: '1',
+            type: 'hi',
+            embeddableConfig: {},
+            gridData: { x: 1, y: 1, h: 1, w: 1, i: '1' },
+          },
+        })
+      );
       const metadata = { title: 'my embeddable title', editUrl: 'editme', indexPatterns };
-      store.dispatch(embeddableIsInitialized({ metadata, panelId: panelId }));
+      store.dispatch(embeddableIsInitialized({ metadata, panelId }));
     }
 
     test('initially has no index patterns', () => {
@@ -124,13 +150,19 @@ describe('DashboardState', function () {
     });
 
     test('registers index pattern when an embeddable is initialized with one', async () => {
-      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo1', indexPatterns: [mockIndexPattern] });
+      simulateNewEmbeddableWithIndexPatterns({
+        panelId: 'foo1',
+        indexPatterns: [mockIndexPattern],
+      });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });
 
     test('registers unique index patterns', async () => {
-      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo2', indexPatterns: [mockIndexPattern] });
+      simulateNewEmbeddableWithIndexPatterns({
+        panelId: 'foo2',
+        indexPatterns: [mockIndexPattern],
+      });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });

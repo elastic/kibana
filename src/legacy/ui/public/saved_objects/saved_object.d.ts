@@ -17,15 +17,13 @@
  * under the License.
  */
 
+export interface SaveOptions {
+  confirmOverwrite: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
+}
 
-export function getSavedDashboardMock(config) {
-  const defaults = {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: {
-      getOwnField: (param) => param
-    }
-  };
-  return Object.assign(defaults, config);
+export interface SavedObject {
+  save: (saveOptions: SaveOptions) => Promise<string>;
+  copyOnSave: boolean;
 }

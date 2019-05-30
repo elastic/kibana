@@ -47,9 +47,9 @@ import {
   getPanelType,
   getViewMode,
   PanelId,
-  PanelState,
 } from '../selectors';
 import { DashboardPanel } from './dashboard_panel';
+import { SavedDashboardPanel } from '../types';
 
 export interface DashboardPanelContainerOwnProps {
   panelId: PanelId;
@@ -61,7 +61,7 @@ interface DashboardPanelContainerStateProps {
   viewOnlyMode: boolean;
   containerState: ContainerState;
   initialized: boolean;
-  panel: PanelState;
+  panel: SavedDashboardPanel;
   lastReloadRequestTime?: number;
 }
 

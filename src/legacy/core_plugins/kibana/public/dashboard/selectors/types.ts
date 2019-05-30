@@ -19,7 +19,7 @@
 
 import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { GridData } from '../types';
+import { SavedDashboardPanel } from '../types';
 
 export type DashboardViewMode = DashboardViewMode;
 export interface ViewState {
@@ -38,16 +38,6 @@ export interface ViewState {
 export type PanelId = string;
 export type SavedObjectId = string;
 
-export interface PanelState {
-  readonly id: SavedObjectId;
-  readonly version: string;
-  readonly type: string;
-  panelIndex: PanelId;
-  readonly embeddableConfig: any;
-  readonly gridData: GridData;
-  readonly title?: string;
-}
-
 export interface EmbeddableReduxState {
   readonly metadata?: EmbeddableMetadata;
   readonly error?: string | object;
@@ -57,23 +47,6 @@ export interface EmbeddableReduxState {
    * Timestamp of the last time this embeddable was requested to reload.
    */
   readonly lastReloadRequestTime: number;
-}
-
-export interface Pre61PanelState {
-  size_x: number;
-  size_y: number;
-  row: number;
-  col: number;
-  panelIndex: any; // earlier versions allowed this to be number or string
-  id: string;
-  type: string;
-  // Embeddableconfig didn't actually exist on older panel states but `migrate_app_state.js` handles
-  // stuffing it on.
-  embeddableConfig: any;
-}
-
-export interface PanelStateMap {
-  [panelId: string]: PanelState | Pre61PanelState;
 }
 
 export interface EmbeddablesMap {
@@ -87,7 +60,7 @@ export interface DashboardMetadata {
 
 export interface DashboardState {
   readonly view: ViewState;
-  readonly panels: PanelStateMap;
+  readonly panels: { [key: string]: SavedDashboardPanel };
   readonly embeddables: EmbeddablesMap;
   readonly metadata: DashboardMetadata;
 }

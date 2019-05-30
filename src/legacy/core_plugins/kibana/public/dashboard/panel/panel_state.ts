@@ -23,29 +23,14 @@ import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
 } from '../dashboard_constants';
-import { PanelState } from '../selectors';
-
-/**
- * Represents a panel on a grid. Keeps track of position in the grid and what visualization it
- * contains.
- *
- * @typedef {Object} PanelState
- * @property {number} id - Id of the visualization contained in the panel.
- * @property {string} version - Version of Kibana this panel was created in.
- * @property {string} type - Type of the visualization in the panel.
- * @property {number} panelIndex - Unique id to represent this panel in the grid. Note that this is
- * NOT the index in the panels array. While it may initially represent that, it is not
- * updated with changes in a dashboard, and is simply used as a unique identifier.  The name
- * remains as panelIndex for backward compatibility reasons - changing it can break reporting.
- * @property {Object} gridData
- * @property {number} gridData.w - Width of the panel.
- * @property {number} gridData.h - Height of the panel.
- * @property {number} gridData.x - Column position of the panel.
- * @property {number} gridData.y - Row position of the panel.
- */
+import { SavedDashboardPanel } from '../types';
 
 // Look for the smallest y and x value where the default panel will fit.
-function findTopLeftMostOpenSpace(width: number, height: number, currentPanels: PanelState[]) {
+function findTopLeftMostOpenSpace(
+  width: number,
+  height: number,
+  currentPanels: SavedDashboardPanel[]
+) {
   let maxY = -1;
 
   currentPanels.forEach(panel => {
@@ -65,6 +50,14 @@ function findTopLeftMostOpenSpace(width: number, height: number, currentPanels: 
   currentPanels.forEach(panel => {
     for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
       for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
+        const row = grid[y];
+        if (row === undefined) {
+          throw new Error(
+            `Attempted to access a row that doesn't exist at ${y} for panel ${JSON.stringify(
+              panel
+            )}`
+          );
+        }
         grid[y][x] = 1;
       }
     }
@@ -96,22 +89,17 @@ function findTopLeftMostOpenSpace(width: number, height: number, currentPanels: 
       }
     }
   }
-  return { x: 0, y: Infinity };
+  return { x: 0, y: maxY };
 }
 
 /**
  * Creates and initializes a basic panel state.
- * @param {number} id
- * @param {string} type
- * @param {number} panelIndex
- * @param {Array} currentPanels
- * @return {PanelState}
  */
 export function createPanelState(
   id: string,
   type: string,
   panelIndex: string,
-  currentPanels: PanelState[]
+  currentPanels: SavedDashboardPanel[]
 ) {
   const { x, y } = findTopLeftMostOpenSpace(
     DEFAULT_PANEL_WIDTH,

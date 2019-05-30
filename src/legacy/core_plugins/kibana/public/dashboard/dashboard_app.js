@@ -110,7 +110,7 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardStateManager = new DashboardStateManager({
         savedDashboard: dash,
-        AppState,
+        AppStateClass: AppState,
         hideWriteControls: dashboardConfig.getHideWriteControls(),
         addFilter: ({ field, value, operator, index }) => {
           filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);

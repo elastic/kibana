@@ -46,7 +46,9 @@ export const getEmbeddableStagedFilter = (state: CoreKibanaState, panelId: Panel
 export const getEmbeddableMetadata = (state: CoreKibanaState, panelId: PanelId) =>
   DashboardSelectors.getEmbeddableMetadata(getDashboard(state), panelId);
 
-export const getStagedFilters = (state: CoreKibanaState): Filters =>
+export const getStagedFilters = (
+  state: CoreKibanaState
+): Array<{ field: string; value: string; operator: string; index: string }> =>
   DashboardSelectors.getStagedFilters(getDashboard(state));
 export const getViewMode = (state: CoreKibanaState): DashboardViewMode =>
   DashboardSelectors.getViewMode(getDashboard(state));

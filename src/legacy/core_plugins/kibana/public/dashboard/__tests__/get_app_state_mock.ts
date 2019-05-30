@@ -17,16 +17,32 @@
  * under the License.
  */
 
-export { EmbeddableFactory, OnEmbeddableStateChanged } from './embeddable_factory';
-export * from './embeddable';
-export * from './context_menu_actions';
-export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';
-export {
-  ContainerState,
-  EmbeddableState,
-  Query,
-  Filters,
-  Filter,
-  TimeRange,
-  RefreshConfig,
-} from './types';
+import { IAppState } from 'ui/state_management/app_state';
+
+/**
+ * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
+ * This could be improved if we extract the appState and state classes externally of their angular providers.
+ * @return {AppStateMock}
+ */
+export function getAppStateMock(): IAppState {
+  class AppStateMock {
+    constructor(defaults: any) {
+      Object.assign(this, defaults);
+    }
+
+    on() {}
+    off() {}
+    toJSON() {
+      return '';
+    }
+    save() {}
+    translateHashToRison(stateHashOrRison: string | string[]) {
+      return stateHashOrRison;
+    }
+    getQueryParamName() {
+      return '';
+    }
+  }
+
+  return AppStateMock;
+}

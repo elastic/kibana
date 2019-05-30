@@ -20,10 +20,16 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { IAppState } from 'ui/state_management/app_state';
+import { TimeRange, Filter, Query } from 'ui/embeddable';
+import { Timefilter } from 'ui/timefilter';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
+
 import {
   updateViewMode,
   setPanels,
@@ -41,7 +47,6 @@ import {
   closeContextMenu,
   requestReload,
 } from './actions';
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
 import { getAppStateDefaults, migrateAppState } from './lib';
 import {
@@ -59,6 +64,17 @@ import {
   getQuery,
   getFilters,
 } from '../selectors';
+import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
+import { DashboardAppState, SavedDashboardPanel } from './types';
+
+export type AddFilterFuntion = (
+  {
+    field,
+    value,
+    operator,
+    index,
+  }: { field: string; value: string; operator: string; index: string }
+) => void;
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -67,21 +83,43 @@ import {
  * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
+  public savedDashboard: SavedObjectDashboard;
+  public appState: DashboardAppState;
+  public lastSavedDashboardFilters: any;
+  private stateDefaults: any;
+  private hideWriteControls: boolean;
+  public isDirty: boolean;
+  private changeListeners: any[];
+  private stateMonitor: any;
+  private panelIndexPatternMapping: { [key: string]: StaticIndexPattern[] } = {};
+  private addFilter: AddFilterFuntion;
+  private unsubscribe: () => void;
+
   /**
    *
-   * @param {SavedDashboard} savedDashboard
-   * @param {AppState} AppState The AppState class to use when instantiating a new AppState instance.
-   * @param {boolean} hideWriteControls true if write controls should be hidden.
-   * @param {function} addFilter a function that can be used to add a filter bar filter
+   * @param savedDashboard
+   * @param AppState The AppState class to use when instantiating a new AppState instance.
+   * @param hideWriteControls true if write controls should be hidden.
+   * @param addFilter a function that can be used to add a filter bar filter
    */
-  constructor({ savedDashboard, AppState, hideWriteControls, addFilter }) {
+  constructor({
+    savedDashboard,
+    AppStateClass,
+    hideWriteControls,
+    addFilter,
+  }: {
+    savedDashboard: SavedObjectDashboard;
+    AppStateClass: IAppState<DashboardAppState>;
+    hideWriteControls: boolean;
+    addFilter: AddFilterFuntion;
+  }) {
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
     this.addFilter = addFilter;
 
     this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
 
-    this.appState = new AppState(this.stateDefaults);
+    this.appState = new AppStateClass(this.stateDefaults);
 
     // Initializing appState does two things - first it translates the defaults into AppState, second it updates
     // appState based on the URL (the url trumps the defaults). This means if we update the state format at all and
@@ -108,22 +146,22 @@ export class DashboardStateManager {
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
-    this._pushAppStateChangesToStore();
+    this.pushAppStateChangesToStore();
 
     this.changeListeners = [];
 
-    this.unsubscribe = store.subscribe(() => this._handleStoreChanges());
-    this.stateMonitor.onChange(status => {
+    this.unsubscribe = store.subscribe(() => this.handleStoreChanges());
+    this.stateMonitor.onChange((status: { dirty: boolean }) => {
       this.changeListeners.forEach(listener => listener(status));
-      this._pushAppStateChangesToStore();
+      this.pushAppStateChangesToStore();
     });
   }
 
-  registerChangeListener(callback) {
+  public registerChangeListener(callback: (status: { dirty: boolean }) => void) {
     this.changeListeners.push(callback);
   }
 
-  _areStoreAndAppStatePanelsEqual() {
+  private areStoreAndAppStatePanelsEqual() {
     const state = store.getState();
     const storePanels = getPanels(store.getState());
     const appStatePanels = this.getPanels();
@@ -132,47 +170,54 @@ export class DashboardStateManager {
       return false;
     }
 
-    return appStatePanels.every((appStatePanel) => {
+    return appStatePanels.every(appStatePanel => {
       const storePanel = getPanel(state, appStatePanel.panelIndex);
       return _.isEqual(appStatePanel, storePanel);
     });
   }
 
   /**
-   * Time is part of global state so we need to deal with it outside of _pushAppStateChangesToStore.
+   * Time is part of global state so we need to deal with it outside of pushAppStateChangesToStore.
    * @param {String|Object} newTimeFilter.to -- either a string representing an absolute time in utc format,
    * or a relative time (now-15m), or a moment object
    * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
    * moment object
    */
-  handleTimeChange(newTimeFilter) {
-    store.dispatch(updateTimeRange({
-      from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
-      to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
-    }));
+  public handleTimeChange(newTimeFilter: Timefilter) {
+    store.dispatch(
+      updateTimeRange({
+        from: FilterUtils.convertTimeToUTCString(newTimeFilter.from).toString(),
+        to: FilterUtils.convertTimeToUTCString(newTimeFilter.to).toString(),
+      })
+    );
   }
 
-  handleRefreshConfigChange({ pause, value }) {
-    store.dispatch(updateRefreshConfig({
-      isPaused: pause,
-      interval: value,
-    }));
+  public handleRefreshConfigChange({ pause, value }: { pause: boolean; value: number }) {
+    store.dispatch(
+      updateRefreshConfig({
+        isPaused: pause,
+        interval: value,
+      })
+    );
   }
 
   /**
    * Changes made to app state outside of direct calls to this class will need to be propagated to the store.
    * @private
    */
-  _pushAppStateChangesToStore() {
+  private pushAppStateChangesToStore() {
     // We need these checks, or you can get into a loop where a change is triggered by the store, which updates
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
-    if (!this._areStoreAndAppStatePanelsEqual()) {
+    if (!this.areStoreAndAppStatePanelsEqual()) {
       // Translate appState panels data into the data expected by redux, copying the panel objects as we do so
       // because the panels inside appState can be mutated, while redux state should never be mutated directly.
-      const panelsMap = this.getPanels().reduce((acc, panel) => {
-        acc[panel.panelIndex] = _.cloneDeep(panel);
-        return acc;
-      }, {});
+      const panelsMap = this.getPanels().reduce(
+        (acc: { [key: string]: SavedDashboardPanel }, panel) => {
+          acc[panel.panelIndex] = _.cloneDeep(panel);
+          return acc;
+        },
+        {}
+      );
       store.dispatch(setPanels(panelsMap));
     }
 
@@ -220,10 +265,12 @@ export class DashboardStateManager {
   _pushFiltersToStore() {
     const state = store.getState();
     const dashboardFilters = this.getDashboardFilterBars();
-    if (!_.isEqual(
-      FilterUtils.cleanFiltersForComparison(dashboardFilters),
-      FilterUtils.cleanFiltersForComparison(getFilters(state))
-    )) {
+    if (
+      !_.isEqual(
+        FilterUtils.cleanFiltersForComparison(dashboardFilters),
+        FilterUtils.cleanFiltersForComparison(getFilters(state))
+      )
+    ) {
       store.dispatch(updateFilters(dashboardFilters));
     }
   }
@@ -232,24 +279,28 @@ export class DashboardStateManager {
     store.dispatch(requestReload());
   }
 
-  _handleStoreChanges() {
+  private handleStoreChanges() {
     let dirty = false;
-    if (!this._areStoreAndAppStatePanelsEqual()) {
-      const panels = getPanels(store.getState());
+    if (!this.areStoreAndAppStatePanelsEqual()) {
+      const panels: { [key: string]: SavedDashboardPanel } = getPanels(store.getState());
       this.appState.panels = [];
       this.panelIndexPatternMapping = {};
-      Object.values(panels).map(panel => {
+      Object.values(panels).map((panel: SavedDashboardPanel) => {
         this.appState.panels.push(_.cloneDeep(panel));
       });
       dirty = true;
     }
 
     _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
-      if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
+      if (
+        panelId &&
+        embeddable.initialized &&
+        !this.panelIndexPatternMapping.hasOwnProperty(panelId)
+      ) {
         const embeddableMetadata = getEmbeddableMetadata(store.getState(), panelId);
-        if (embeddableMetadata.indexPatterns) {
+        if (embeddableMetadata && embeddableMetadata.indexPatterns) {
           this.panelIndexPatternMapping[panelId] = _.compact(embeddableMetadata.indexPatterns);
-          this.dirty = true;
+          dirty = true;
         }
       }
     });
@@ -272,16 +323,16 @@ export class DashboardStateManager {
     this.saveState();
   }
 
-  getFullScreenMode() {
+  public getFullScreenMode() {
     return this.appState.fullScreenMode;
   }
 
-  setFullScreenMode(fullScreenMode) {
+  public setFullScreenMode(fullScreenMode: boolean) {
     this.appState.fullScreenMode = fullScreenMode;
     this.saveState();
   }
 
-  getPanelIndexPatterns() {
+  public getPanelIndexPatterns() {
     const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
     return _.uniq(indexPatterns, 'id');
   }
@@ -289,7 +340,7 @@ export class DashboardStateManager {
   /**
    * Resets the state back to the last saved version of the dashboard.
    */
-  resetState() {
+  public resetState() {
     // In order to show the correct warning, we have to store the unsaved
     // title on the dashboard object. We should fix this at some point, but this is how all the other object
     // save panels work at the moment.
@@ -317,66 +368,68 @@ export class DashboardStateManager {
    * Returns an object which contains the current filter state of this.savedDashboard.
    * @returns {{timeTo: String, timeFrom: String, filterBars: Array, query: Object}}
    */
-  getFilterState() {
+  public getFilterState() {
     return {
       timeTo: this.savedDashboard.timeTo,
       timeFrom: this.savedDashboard.timeFrom,
       filterBars: this.getDashboardFilterBars(),
-      query: this.getDashboardQuery()
+      query: this.getDashboardQuery(),
     };
   }
 
-  getTitle() {
+  public getTitle() {
     return this.appState.title;
   }
 
-  getDescription() {
+  public getDescription() {
     return this.appState.description;
   }
 
-  setDescription(description) {
+  public setDescription(description: string) {
     this.appState.description = description;
     this.saveState();
   }
 
-  setTitle(title) {
+  public setTitle(title: string) {
     this.appState.title = title;
     this.savedDashboard.title = title;
     this.saveState();
   }
 
-  getAppState() {
+  public getAppState() {
     return this.appState;
   }
 
-  getQuery() {
+  public getQuery() {
     return this.appState.query;
   }
 
-  getUseMargins() {
+  public getUseMargins() {
     // Existing dashboards that don't define this should default to false.
-    return this.appState.options.useMargins === undefined ? false : this.appState.options.useMargins;
+    return this.appState.options.useMargins === undefined
+      ? false
+      : this.appState.options.useMargins;
   }
 
-  setUseMargins(useMargins) {
+  public setUseMargins(useMargins: boolean) {
     this.appState.options.useMargins = useMargins;
     this.saveState();
   }
 
-  getHidePanelTitles() {
+  public getHidePanelTitles() {
     return this.appState.options.hidePanelTitles;
   }
 
-  setHidePanelTitles(hidePanelTitles) {
+  public setHidePanelTitles(hidePanelTitles: boolean) {
     this.appState.options.hidePanelTitles = hidePanelTitles;
     this.saveState();
   }
 
-  getTimeRestore() {
+  public getTimeRestore() {
     return this.appState.timeRestore;
   }
 
-  setTimeRestore(timeRestore) {
+  public setTimeRestore(timeRestore: boolean) {
     this.appState.timeRestore = timeRestore;
     this.saveState();
   }
@@ -384,23 +437,23 @@ export class DashboardStateManager {
   /**
    * @returns {boolean}
    */
-  getIsTimeSavedWithDashboard() {
+  public getIsTimeSavedWithDashboard() {
     return this.savedDashboard.timeRestore;
   }
 
-  getDashboardFilterBars() {
+  public getDashboardFilterBars() {
     return FilterUtils.getFilterBarsForDashboard(this.savedDashboard);
   }
 
-  getDashboardQuery() {
+  public getDashboardQuery() {
     return FilterUtils.getQueryFilterForDashboard(this.savedDashboard);
   }
 
-  getLastSavedFilterBars() {
+  public getLastSavedFilterBars() {
     return this.lastSavedDashboardFilters.filterBars;
   }
 
-  getLastSavedQuery() {
+  public getLastSavedQuery() {
     return this.lastSavedDashboardFilters.query;
   }
 
@@ -408,15 +461,12 @@ export class DashboardStateManager {
    * @returns {boolean} True if the query changed since the last time the dashboard was saved, or if it's a
    * new dashboard, if the query differs from the default.
    */
-  getQueryChanged() {
+  public getQueryChanged() {
     const currentQuery = this.appState.query;
     const lastSavedQuery = this.getLastSavedQuery();
 
-    const isLegacyStringQuery = (
-      _.isString(lastSavedQuery)
-      && _.isPlainObject(currentQuery)
-      && _.has(currentQuery, 'query')
-    );
+    const isLegacyStringQuery =
+      _.isString(lastSavedQuery) && _.isPlainObject(currentQuery) && _.has(currentQuery, 'query');
     if (isLegacyStringQuery) {
       return lastSavedQuery !== currentQuery.query;
     }
@@ -428,7 +478,7 @@ export class DashboardStateManager {
    * @returns {boolean} True if the filter bar state has changed since the last time the dashboard was saved,
    * or if it's a new dashboard, if the query differs from the default.
    */
-  getFilterBarChanged() {
+  public getFilterBarChanged() {
     return !_.isEqual(
       FilterUtils.cleanFiltersForComparison(this.appState.filters),
       FilterUtils.cleanFiltersForComparison(this.getLastSavedFilterBars())
@@ -439,9 +489,12 @@ export class DashboardStateManager {
    * @param timeFilter
    * @returns {boolean} True if the time state has changed since the time saved with the dashboard.
    */
-  getTimeChanged(timeFilter) {
+  public getTimeChanged(timeFilter: Timefilter) {
     return (
-      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.getTime().from) ||
+      !FilterUtils.areTimesEqual(
+        this.lastSavedDashboardFilters.timeFrom,
+        timeFilter.getTime().from
+      ) ||
       !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.getTime().to)
     );
   }
@@ -450,21 +503,21 @@ export class DashboardStateManager {
    *
    * @returns {DashboardViewMode}
    */
-  getViewMode() {
+  public getViewMode() {
     return this.hideWriteControls ? DashboardViewMode.VIEW : this.appState.viewMode;
   }
 
   /**
    * @returns {boolean}
    */
-  getIsViewMode() {
+  public getIsViewMode() {
     return this.getViewMode() === DashboardViewMode.VIEW;
   }
 
   /**
    * @returns {boolean}
    */
-  getIsEditMode() {
+  public getIsEditMode() {
     return this.getViewMode() === DashboardViewMode.EDIT;
   }
 
@@ -472,22 +525,24 @@ export class DashboardStateManager {
    *
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
-  getIsDirty(timeFilter) {
+  public getIsDirty(timeFilter?: TimeRange) {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
     return this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged);
   }
 
-  getPanels() {
+  public getPanels(): SavedDashboardPanel[] {
     return this.appState.panels;
   }
 
-  updatePanel(panelIndex, panelAttributes) {
-    const panel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
-    Object.assign(panel, panelAttributes);
+  public updatePanel(panelIndex: string, panelAttributes: any) {
+    const foundPanel = this.getPanels().find(
+      (panel: SavedDashboardPanel) => panel.panelIndex === panelIndex
+    );
+    Object.assign(foundPanel, panelAttributes);
     this.saveState();
-    return panel;
+    return foundPanel;
   }
 
   /**
@@ -495,15 +550,15 @@ export class DashboardStateManager {
    * @param {number} id
    * @param {string} type
    */
-  addNewPanel = (id, type) => {
+  public addNewPanel = (id: string, type: string) => {
     const maxPanelIndex = PanelUtils.getMaxPanelIndex(this.getPanels());
-    const newPanel = createPanelState(id, type, maxPanelIndex, this.getPanels());
+    const newPanel = createPanelState(id, type, maxPanelIndex.toString(), this.getPanels());
     this.getPanels().push(newPanel);
     this.saveState();
-  }
+  };
 
-  removePanel(panelIndex) {
-    _.remove(this.getPanels(), (panel) => {
+  public removePanel(panelIndex: string) {
+    _.remove(this.getPanels(), panel => {
       if (panel.panelIndex === panelIndex) {
         delete this.panelIndexPatternMapping[panelIndex];
         return true;
@@ -518,7 +573,7 @@ export class DashboardStateManager {
    * @param timeFilter
    * @returns {Array.<string>} An array of user friendly strings indicating the filter types that have changed.
    */
-  getChangedFilterTypes(timeFilter) {
+  public getChangedFilterTypes(timeFilter: Timefilter) {
     const changedFilters = [];
     if (this.getFilterBarChanged()) {
       changedFilters.push('filter');
@@ -533,25 +588,24 @@ export class DashboardStateManager {
   }
 
   /**
-   * @return {boolean} True if filters (query, filter bar filters, and time picker if time is stored
+   * @return True if filters (query, filter bar filters, and time picker if time is stored
    * with the dashboard) have changed since the last saved state (or if the dashboard hasn't been saved,
    * the default state).
    */
-  getFiltersChanged(timeFilter) {
+  public getFiltersChanged(timeFilter: Timefilter) {
     return this.getChangedFilterTypes(timeFilter).length > 0;
   }
 
   /**
    * Updates timeFilter to match the time saved with the dashboard.
-   * @param {Object} timeFilter
-   * @param {func} timeFilter.setTime
-   * @param {func} timeFilter.setRefreshInterval
    */
-  syncTimefilterWithDashboard(timeFilter) {
+  public syncTimefilterWithDashboard(timeFilter: Timefilter) {
     if (!this.getIsTimeSavedWithDashboard()) {
-      throw new Error(i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
-        defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
-      }));
+      throw new Error(
+        i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
+          defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
+        })
+      );
     }
 
     timeFilter.setTime({
@@ -567,7 +621,7 @@ export class DashboardStateManager {
   /**
    * Saves the current application state to the URL.
    */
-  saveState() {
+  public saveState() {
     this.appState.save();
   }
 
@@ -575,7 +629,7 @@ export class DashboardStateManager {
    * Applies the current filter state to the dashboard.
    * @param filter {Array.<Object>} An array of filter bar filters.
    */
-  applyFilters(query, filters) {
+  public applyFilters(query: Query, filters: Filter[]) {
     this.appState.query = query;
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
@@ -587,7 +641,7 @@ export class DashboardStateManager {
   /**
    * Creates a state monitor and saves it to this.stateMonitor. Used to track unsaved changes made to appState.
    */
-  createStateMonitor() {
+  public createStateMonitor() {
     this.stateMonitor = stateMonitorFactory.create(this.appState, this.stateDefaults);
 
     this.stateMonitor.ignoreProps('viewMode');
@@ -596,7 +650,7 @@ export class DashboardStateManager {
     // Query needs to be compared manually because saved legacy queries get migrated in app state automatically
     this.stateMonitor.ignoreProps('query');
 
-    this.stateMonitor.onChange(status => {
+    this.stateMonitor.onChange((status: { dirty: boolean }) => {
       this.isDirty = status.dirty;
     });
   }
@@ -604,7 +658,7 @@ export class DashboardStateManager {
   /**
    * @param newMode {DashboardViewMode}
    */
-  switchViewMode(newMode) {
+  public switchViewMode(newMode: DashboardViewMode) {
     this.appState.viewMode = newMode;
     this.saveState();
   }
@@ -612,7 +666,7 @@ export class DashboardStateManager {
   /**
    * Destroys and cleans up this object when it's no longer used.
    */
-  destroy() {
+  public destroy() {
     if (this.stateMonitor) {
       this.stateMonitor.destroy();
     }
