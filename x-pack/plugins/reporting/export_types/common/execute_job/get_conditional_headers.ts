@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ConditionalHeaders, ConfigObject, KbnServer, ReportingJob } from '../../../types';
+import { ConditionalHeaders, ConfigObject, JobDocPayload, KbnServer } from '../../../types';
 
 export const getConditionalHeaders = ({
   job,
   filteredHeaders,
   server,
 }: {
-  job: ReportingJob;
+  job: JobDocPayload;
   filteredHeaders: Record<string, string>;
   server: KbnServer;
 }) => {

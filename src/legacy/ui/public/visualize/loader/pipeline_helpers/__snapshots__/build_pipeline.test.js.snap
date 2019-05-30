@@ -26,6 +26,8 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function without splits or buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0,1],\\"buckets\\":[]}}' "`;
 
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function with boolean param showLabel 1`] = `"tagcloud metric={visdimension 0} showLabel=false "`;
+
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function with buckets 1`] = `"tagcloud metric={visdimension 0}  bucket={visdimension 1 } "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function without buckets 1`] = `"tagcloud metric={visdimension 0} "`;

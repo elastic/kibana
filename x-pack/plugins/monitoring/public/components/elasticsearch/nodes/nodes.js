@@ -23,7 +23,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
+import _ from 'lodash';
 
+const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = showCgroupMetricsElasticsearch => {
   const cols = [];
 
@@ -91,7 +93,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
     cols.push({
       name: cpuUsageColumnTitle,
       field: 'node_cgroup_quota',
-      sortable: true,
+      sortable: getSortHandler('node_cgroup_quota'),
       render: (value, node) => (
         <MetricCell
           isOnline={node.isOnline}
@@ -107,7 +109,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
         defaultMessage: 'CPU Throttling',
       }),
       field: 'node_cgroup_throttled',
-      sortable: true,
+      sortable: getSortHandler('node_cgroup_throttled'),
       render: (value, node) => (
         <MetricCell
           isOnline={node.isOnline}
@@ -121,7 +123,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
     cols.push({
       name: cpuUsageColumnTitle,
       field: 'node_cpu_utilization',
-      sortable: true,
+      sortable: getSortHandler('node_cpu_utilization'),
       render: (value, node) => (
         <MetricCell
           isOnline={node.isOnline}
@@ -137,7 +139,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
         defaultMessage: 'Load Average',
       }),
       field: 'node_load_average',
-      sortable: true,
+      sortable: getSortHandler('node_load_average'),
       render: (value, node) => (
         <MetricCell
           isOnline={node.isOnline}
@@ -157,7 +159,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
       }
     }),
     field: 'node_jvm_mem_percent',
-    sortable: true,
+    sortable: getSortHandler('node_jvm_mem_percent'),
     render: (value, node) => (
       <MetricCell
         isOnline={node.isOnline}
@@ -173,7 +175,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
       defaultMessage: 'Disk Free Space',
     }),
     field: 'node_free_space',
-    sortable: true,
+    sortable: getSortHandler('node_free_space'),
     width: '300px',
     render: (value, node) => (
       <MetricCell

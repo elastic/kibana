@@ -11,9 +11,32 @@ import { DefinePivotExposedState } from '../components/define_pivot/define_pivot
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
-import { getDataFramePreviewRequest, getDataFrameRequest, getPivotQuery } from './request';
+import {
+  getDataFramePreviewRequest,
+  getDataFrameRequest,
+  getPivotQuery,
+  isDefaultQuery,
+  isSimpleQuery,
+  PivotQuery,
+} from './request';
+
+const defaultQuery: PivotQuery = { query_string: { query: '*' } };
+const matchAllQuery: PivotQuery = { match_all: {} };
+const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
 describe('Data Frame: Common', () => {
+  test('isSimpleQuery()', () => {
+    expect(isSimpleQuery(defaultQuery)).toBe(true);
+    expect(isSimpleQuery(matchAllQuery)).toBe(false);
+    expect(isSimpleQuery(simpleQuery)).toBe(true);
+  });
+
+  test('isDefaultQuery()', () => {
+    expect(isDefaultQuery(defaultQuery)).toBe(true);
+    expect(isDefaultQuery(matchAllQuery)).toBe(false);
+    expect(isDefaultQuery(simpleQuery)).toBe(false);
+  });
+
   test('getPivotQuery()', () => {
     const query = getPivotQuery('the-query');
 
