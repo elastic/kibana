@@ -78,7 +78,7 @@ class DataPlugin {
  */
 export const data = new DataPlugin().setup();
 
-/** @public */
+/** @public types */
 export interface DataSetup {
   expressions: ExpressionsSetup;
   indexPatterns: IndexPatternsSetup;
@@ -93,7 +93,14 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
 
-/** @public */
+/** @public static code */
 export { dateHistogramInterval } from '../common/date_histogram_interval';
-/** @public */
-export * from '../common/parse_es_interval';
+
+/** @public static code */
+export {
+  isValidEsInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  parseEsInterval,
+  ParsedInterval,
+} from '../common/parse_es_interval';
