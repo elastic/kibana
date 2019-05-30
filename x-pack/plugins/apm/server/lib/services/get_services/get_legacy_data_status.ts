@@ -8,16 +8,15 @@ import {
   OBSERVER_VERSION_MAJOR,
   PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
-import { APMSearchParams, Setup } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup) {
   const { client, config } = setup;
 
-  const params: APMSearchParams = {
-    includeLegacyData: true,
+  const params = {
     terminateAfter: 1,
-    index: [config.get('apm_oss.transactionIndices')],
+    index: [config.get<string>('apm_oss.transactionIndices')],
     body: {
       size: 0,
       query: {
@@ -31,7 +30,7 @@ export async function getLegacyDataStatus(setup: Setup) {
     }
   };
 
-  const resp = await client('search', params);
+  const resp = await client.search(params, { includeLegacyData: true });
   const hasLegacyData = resp.hits.total > 0;
   return hasLegacyData;
 }
