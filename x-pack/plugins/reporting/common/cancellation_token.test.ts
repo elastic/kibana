@@ -25,6 +25,28 @@ describe('Cancellation Token', () => {
     expect(onCancelled).toBeCalled();
   });
 
+  it('binds the `on` method properly so that it can be passed around', () => {
+    const cancellationToken = new CancellationToken();
+    const onCancelled = jest.fn();
+    const unboundOn = cancellationToken.on;
+
+    cancellationToken.cancel();
+    unboundOn(onCancelled);
+
+    expect(onCancelled).toBeCalled();
+  });
+
+  it('binds the `cancel` method properly so that it can be passed around', () => {
+    const cancellationToken = new CancellationToken();
+    const onCancelled = jest.fn();
+    const unboundCancel = cancellationToken.cancel;
+
+    unboundCancel();
+    cancellationToken.on(onCancelled);
+
+    expect(onCancelled).toBeCalled();
+  });
+
   it('throws an error when the callback is not a function', () => {
     const cancellationToken = new CancellationToken();
 
