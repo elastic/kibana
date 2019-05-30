@@ -13715,18 +13715,17 @@ grunt-peg@^2.0.1:
   dependencies:
     pegjs "~0.9.0"
 
-grunt-run@0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/grunt-run/-/grunt-run-0.7.0.tgz#1a6ec07e46d5de64eeb49ac60324055c29020b82"
-  integrity sha1-Gm7AfkbV3mTutJrGAyQFXCkCC4I=
+grunt-run@0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/grunt-run/-/grunt-run-0.8.1.tgz#502f988947a59f9ad567e2dcb5eeedec712980ec"
+  integrity sha512-+wvoOJevugcjMLldbVCyspRHHntwVIJiTGjx0HFq+UwXhVPe7AaAiUdY4135CS68pAoRLhd7pAILpL2ITe1tmA==
   dependencies:
-    lodash "^3.10.0"
     strip-ansi "^3.0.0"
 
-grunt@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/grunt/-/grunt-1.0.3.tgz#b3c99260c51d1b42835766e796527b60f7bba374"
-  integrity sha512-/JzmZNPfKorlCrrmxWqQO4JVodO+DVd5XX4DkocL/1WlLlKVLE9+SdEIempOAxDhWPysLle6afvn/hg7Ck2k9g==
+grunt@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/grunt/-/grunt-1.0.4.tgz#c799883945a53a3d07622e0737c8f70bfe19eb38"
+  integrity sha512-PYsMOrOC+MsdGEkFVwMaMyc6Ob7pKmq+deg1Sjr+vvMWp35sztfwKE7qoN51V+UEtHsyNuMcGdgMLFkBHvMxHQ==
   dependencies:
     coffeescript "~1.10.0"
     dateformat "~1.0.12"
@@ -13739,7 +13738,7 @@ grunt@1.0.3:
     grunt-legacy-log "~2.0.0"
     grunt-legacy-util "~1.1.1"
     iconv-lite "~0.4.13"
-    js-yaml "~3.5.2"
+    js-yaml "~3.13.0"
     minimatch "~3.0.2"
     mkdirp "~0.5.1"
     nopt "~3.0.6"
@@ -16544,6 +16543,14 @@ js-yaml@^3.13.0:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
+js-yaml@~3.13.0:
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.13.1.tgz#aff151b30bfdfa8e49e05da22e7415e9dfa37847"
+  integrity sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw==
+  dependencies:
+    argparse "^1.0.7"
+    esprima "^4.0.0"
+
 js-yaml@~3.4.3:
   version "3.4.6"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.4.6.tgz#6be1b23f6249f53d293370fd4d1aaa63ce1b4eb0"
@@ -16552,14 +16559,6 @@ js-yaml@~3.4.3:
     argparse "^1.0.2"
     esprima "^2.6.0"
     inherit "^2.2.2"
-
-js-yaml@~3.5.2:
-  version "3.5.5"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.5.5.tgz#0377c38017cabc7322b0d1fbcd25a491641f2fbe"
-  integrity sha1-A3fDgBfKvHMisNH7zSWkkWQfL74=
-  dependencies:
-    argparse "^1.0.2"
-    esprima "^2.6.0"
 
 js-yaml@~3.7.0:
   version "3.7.0"
@@ -17870,7 +17869,7 @@ lodash@>4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.11.1, lodash@^4.13.1, lo
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
 
-lodash@^3.10.0, lodash@^3.10.1, lodash@^3.3.1, lodash@~3.10.1:
+lodash@^3.10.1, lodash@^3.3.1, lodash@~3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
