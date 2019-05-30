@@ -43,6 +43,21 @@ export async function styleSvg(svgString, fill) {
   return builder.buildObject(svgXml);
 }
 
+function addImageToMap(imageUrl, imageId, symbolId, mbMap) {
+  return new Promise((resolve, reject) => {
+    const symbolSize = symbolId.includes('11') ? 11 : 15;
+    const img = new Image(symbolSize, symbolSize);
+    img.onload = () => {
+      mbMap.addImage(imageId, img);
+      resolve();
+    };
+    img.onerror = (err) => {
+      reject(err);
+    };
+    img.src = imageUrl;
+  });
+}
+
 export async function loadImage(imageId, symbolId, color, mbMap) {
   let symbolSvg;
   try {
@@ -54,10 +69,5 @@ export async function loadImage(imageId, symbolId, color, mbMap) {
   const styledSvg = await styleSvg(symbolSvg, color);
   const imageUrl = buildSrcUrl(styledSvg);
 
-  const symbolSize = symbolId.includes('11') ? 11 : 15;
-  const img = new Image(symbolSize, symbolSize);
-  img.onload = () => {
-    mbMap.addImage(imageId, img);
-  };
-  img.src = imageUrl;
+  await addImageToMap(imageUrl, imageId, symbolId, mbMap);
 }

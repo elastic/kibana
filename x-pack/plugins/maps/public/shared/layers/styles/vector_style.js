@@ -505,8 +505,11 @@ export class VectorStyle extends AbstractStyle {
       const color = fillColor.options.color;
       const imageId = getImageId(symbolId, color);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
-      if (!mbMap.hasImage(imageId)) {
-        loadImage(imageId, symbolId, color, mbMap);
+      if (mbMap.hasImage(imageId)) {
+        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
+      } else {
+        await loadImage(imageId, symbolId, color, mbMap);
+        mbMap.setLayoutProperty(symbolLayerId, 'icon-image', imageId);
       }
     } else {
       // TODO handle dynamic color
