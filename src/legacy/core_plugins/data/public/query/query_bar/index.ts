@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { QueryBar } from './components';
+export { QueryBar, QueryBarInput } from './components';
 export { fromUser } from './lib/from_user';
 export { toUser } from './lib/to_user';
 

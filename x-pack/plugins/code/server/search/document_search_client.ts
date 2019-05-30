@@ -239,6 +239,8 @@ export class DocumentSearchClient extends AbstractSearchClient {
       ? DocumentSearchIndexWithScope(req.repoScope)
       : `${DocumentIndexNamePrefix}*`;
 
+    const queryStr = req.query.toLowerCase();
+
     const rawRes = await this.client.search({
       index,
       body: {
@@ -250,7 +252,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
               {
                 prefix: {
                   'path.hierarchy': {
-                    value: req.query,
+                    value: queryStr,
                     boost: 1.0,
                   },
                 },
@@ -258,7 +260,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
               {
                 term: {
                   'path.hierarchy': {
-                    value: req.query,
+                    value: queryStr,
                     boost: 10.0,
                   },
                 },
