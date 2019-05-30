@@ -202,7 +202,7 @@ function* handleMainRouteChange(action: Action<Match>) {
         .split('/')
         .slice(0, -1)
         .join('/');
-  yield put(openTreePath(openPath));
+  yield put(openTreePath(openPath || ''));
   yield put(
     fetchRepoTree({
       uri: repoUri,
