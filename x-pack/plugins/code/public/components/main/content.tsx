@@ -52,6 +52,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
+  notFoundDirs: string[];
   searchOptions: SearchOptions;
   fileTreeLoading: boolean;
   query: string;
@@ -265,15 +266,15 @@ class CodeContent extends React.PureComponent<Props> {
   }
 
   public renderContent() {
-    if (this.props.isNotFound) {
+    const { file, match, tree, fileTreeLoading, isNotFound, notFoundDirs } = this.props;
+    const { path, pathType, resource, org, repo, revision } = match.params;
+    if (isNotFound || notFoundDirs.includes(path || '')) {
       return <NotFound />;
     }
     if (this.shouldRenderProgress()) {
       return this.renderProgress();
     }
 
-    const { file, match, tree, fileTreeLoading } = this.props;
-    const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
       case PathTypes.tree:
@@ -386,6 +387,7 @@ class CodeContent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
+  notFoundDirs: state.file.notFoundDirs,
   file: state.file.file,
   tree: state.file.tree,
   fileTreeLoading: state.file.fileTreeLoading,
