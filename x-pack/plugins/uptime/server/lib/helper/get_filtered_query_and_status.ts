@@ -39,10 +39,10 @@ export const getFilteredQueryAndStatusFilter = (
 ) => {
   let statusFilter: string | undefined;
   let filterObject: any;
-  let nonStatusFiters;
+  let nonStatusFilters;
   if (filters) {
     filterObject = JSON.parse(filters);
-    nonStatusFiters = getFilteredQuery(dateRangeStart, dateRangeEnd, {
+    nonStatusFilters = getFilteredQuery(dateRangeStart, dateRangeEnd, {
       bool: {
         must: filterObject.bool.must.filter(
           (filter: any) =>
@@ -52,11 +52,11 @@ export const getFilteredQueryAndStatusFilter = (
     });
     statusFilter = getMonitorsListFilteredQuery(filterObject);
   } else {
-    nonStatusFiters = getFilteredQuery(dateRangeStart, dateRangeEnd);
+    nonStatusFilters = getFilteredQuery(dateRangeStart, dateRangeEnd);
   }
 
   return {
-    query: nonStatusFiters,
+    query: nonStatusFilters,
     statusFilter,
   };
 };
