@@ -31,39 +31,6 @@ export type ArgumentType<T> =
   | UnresolvedMultipleArgumentType<T>;
 
 /**
-<<<<<<< HEAD
- * Map the type of the generic to a string-based representation of the type.
- *
- * If the provided generic is its own type interface, we use the value of
- * the `type` key as the string literal type for the argument.
- */
-// prettier-ignore
-type KnownTypeToArgumentString<T> = 
-  T extends string ? 'string' : 
-  T extends boolean ? 'boolean' : 
-  T extends number ? 'number' :
-  T extends null ? 'null' :
-  T extends { type: string } ? T['type'] :
-  never;
-
-/**
- * If the argument type extends a Promise, we still need to return the string
- * representation:
- *
- * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
- */
-type ArgumentString<T> = KnownTypeToArgumentString<UnwrapPromise<T>>;
-
-/**
- * Types used in Expression Arguments that don't map to a primitive cleanly:
- *
- * `date` is typed as a number or string, and represents a date
- */
-type UnmappedArgumentStrings = 'date' | 'filter';
-
-/**
-=======
->>>>>>> 916916951a... Update ArgumentString-related types to simply be TypeString.
  * Map the type within the the generic array to a string-based
  * representation of the type.
  */
