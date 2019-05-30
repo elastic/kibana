@@ -72,5 +72,5 @@ export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
     }
   };
 
-  return client<void, Aggs>('search', params);
+  return client.search<void, Aggs>(params);
 }

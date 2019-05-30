@@ -17,29 +17,23 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './_bucket_agg_type';
 import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
+import { wrapWithInlineComp } from './_inline_comp_wrapper';
+import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
+import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { aggFilter } from './_terms_helper';
 import orderAggTemplate from '../controls/order_agg.html';
 import { OrderParamEditor } from '../controls/order';
+import { OrderAggParamEditor } from '../controls/order_agg';
 import { SizeParamEditor } from '../controls/size';
-import { wrapWithInlineComp } from './_inline_comp_wrapper';
-import { i18n } from '@kbn/i18n';
-
-import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
-import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { MissingBucketParamEditor } from '../controls/missing_bucket';
 import { OtherBucketParamEditor } from '../controls/other_bucket';
-import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-
-const aggFilter = [
-  '!top_hits', '!percentiles', '!median', '!std_dev',
-  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
-  '!avg_bucket', '!max_bucket', '!min_bucket', '!sum_bucket'
-];
 
 const orderAggSchema = (new Schemas([
   {
@@ -121,6 +115,11 @@ export const termsBucketAgg = new BucketAggType({
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
     },
     {
+      name: 'orderBy',
+      editorComponent: OrderAggParamEditor,
+      write: () => {} // prevent default write, it's handled by orderAgg
+    },
+    {
       name: 'orderAgg',
       type: AggConfig,
       default: null,
@@ -139,32 +138,8 @@ export const termsBucketAgg = new BucketAggType({
         return orderAgg;
       },
       controller: function ($scope) {
-        $scope.safeMakeLabel = function (agg) {
-          try {
-            return agg.makeLabel();
-          } catch (e) {
-            return i18n.translate('common.ui.aggTypes.buckets.terms.aggNotValidLabel', {
-              defaultMessage: '- agg not valid -',
-            });
-          }
-        };
-
-        const INIT = {}; // flag to know when prevOrderBy has changed
-        let prevOrderBy = INIT;
-
         $scope.$watch('responseValueAggs', updateOrderAgg);
         $scope.$watch('agg.params.orderBy', updateOrderAgg);
-
-        // Returns true if the agg is not compatible with the terms bucket
-        $scope.rejectAgg = function rejectAgg(agg) {
-          return aggFilter.includes(`!${agg.type.name}`);
-        };
-
-        $scope.$watch('agg.params.field.type', (type) => {
-          if (type !== 'string') {
-            $scope.agg.params.missingBucket = false;
-          }
-        });
 
         function updateOrderAgg() {
           // abort until we get the responseValueAggs
@@ -174,27 +149,9 @@ export const termsBucketAgg = new BucketAggType({
           const orderBy = params.orderBy;
           const paramDef = agg.type.params.byName.orderAgg;
 
-          // setup the initial value of orderBy
-          if (!orderBy && prevOrderBy === INIT) {
-            let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
-            if (!respAgg) {
-              respAgg = { id: '_key' };
-            }
-            params.orderBy = respAgg.id;
-            return;
-          }
-
-          // track the previous value
-          prevOrderBy = orderBy;
-
           // we aren't creating a custom aggConfig
           if (!orderBy || orderBy !== 'custom') {
             params.orderAgg = null;
-            // ensure that orderBy is set to a valid agg
-            const respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).find({ id: orderBy });
-            if (!respAgg) {
-              params.orderBy = '_key';
-            }
             return;
           }
 
@@ -256,7 +213,7 @@ export const termsBucketAgg = new BucketAggType({
           value: 'asc'
         }
       ],
-      write: _.noop // prevent default write, it's handled by orderAgg
+      write: () => {} // prevent default write, it's handled by orderAgg
     },
     {
       name: 'size',
@@ -264,14 +221,10 @@ export const termsBucketAgg = new BucketAggType({
       default: 5
     },
     {
-      name: 'orderBy',
-      write: _.noop // prevent default write, it's handled by orderAgg
-    },
-    {
       name: 'otherBucket',
       default: false,
       editorComponent: OtherBucketParamEditor,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'otherBucketLabel',
@@ -283,13 +236,13 @@ export const termsBucketAgg = new BucketAggType({
         defaultMessage: 'Label for other bucket',
       }),
       shouldShow: agg => agg.params.otherBucket,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'missingBucket',
       default: false,
       editorComponent: MissingBucketParamEditor,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'missingBucketLabel',
@@ -303,7 +256,7 @@ export const termsBucketAgg = new BucketAggType({
         defaultMessage: 'Label for missing values',
       }),
       shouldShow: agg => agg.params.missingBucket,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'exclude',
