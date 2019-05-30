@@ -5,12 +5,12 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 const noop = () => {};
 
-interface Return {
-  type: 'datatable';
+interface Return extends Datatable {
   columns: [{ name: 'latitude'; type: 'number' }, { name: 'longitude'; type: 'number' }];
   rows: [{ latitude: number; longitude: number }];
 }

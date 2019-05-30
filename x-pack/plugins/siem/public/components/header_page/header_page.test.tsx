@@ -14,7 +14,7 @@ describe('rendering', () => {
   test('renders correctly', () => {
     const wrapper = shallow(
       <HeaderPage subtitle="My Test Subtitle" title="My Test Title">
-        <p>My test supplement.</p>
+        <p>{'My test supplement.'}</p>
       </HeaderPage>
     );
     expect(toJson(wrapper)).toMatchSnapshot();
