@@ -1,0 +1,18 @@
+{
+  "value": {
+    "id": "action:8978428d-6890-43f7-b4a6-e7a4064c33f7",
+    "index": ".kibana",
+    "source": {
+      "action": {
+        "description": "My action",
+        "actionTypeId": "test",
+        "actionTypeConfig": {
+          "unencrypted" : "unencrypted text"
+        },
+        "actionTypeConfigSecrets": "2EwBKlUB5B2WzdFrW7IkaAf6UqciGwMPugR/Homp9nSxsfHsd01wmqe2r6iKsqwhewUkiYZQ4DRpLf/tR78eWXIGjOV9PAOq6UzMO4cHSBmTdtvQ1smP3UegFKFSvTOnXkQ1yYvih5eURFVgXJrGpXNz2XB3yLoKo4uulhPxjg=="
+      },
+      "type": "action",
+      "migrationVersion": {}
+    }
+  }
+}

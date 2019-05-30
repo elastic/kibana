@@ -62,7 +62,7 @@ export function updateRoute(server: Hapi.Server) {
       const { id } = request.params;
       const { attributes, version, references } = request.payload;
       const options = { version, references };
-      const actionsClient = request.getActionsClient();
+      const actionsClient = request.getActionsClient!();
       return await actionsClient.update({
         id,
         data: attributes,

@@ -13,8 +13,8 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
 
   describe('find', () => {
-    before(() => esArchiver.load('alerting/basic'));
-    after(() => esArchiver.unload('alerting/basic'));
+    before(() => esArchiver.load('actions/basic'));
+    after(() => esArchiver.unload('actions/basic'));
 
     it('should return 200 with individual responses', async () => {
       await supertest
@@ -27,12 +27,12 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '1',
+                id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],
                 attributes: {
-                  description: 'My description',
+                  description: 'My action',
                 },
               },
             ],
@@ -51,12 +51,12 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
             total: 1,
             saved_objects: [
               {
-                id: '1',
+                id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
                 type: 'action',
                 version: resp.body.saved_objects[0].version,
                 references: [],
                 attributes: {
-                  description: 'My description',
+                  description: 'My action',
                   actionTypeId: 'test',
                   actionTypeConfig: {
                     unencrypted: 'unencrypted text',

@@ -13,22 +13,22 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
   const esArchiver = getService('esArchiver');
 
   describe('get', () => {
-    before(() => esArchiver.load('alerting/basic'));
-    after(() => esArchiver.unload('alerting/basic'));
+    before(() => esArchiver.load('actions/basic'));
+    after(() => esArchiver.unload('actions/basic'));
 
     it('should return 200 when finding a record and not return encrypted attributes', async () => {
       await supertest
-        .get('/api/action/1')
+        .get('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '1',
+            id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
             type: 'action',
             references: [],
             version: resp.body.version,
             attributes: {
               actionTypeId: 'test',
-              description: 'My description',
+              description: 'My action',
               actionTypeConfig: {
                 unencrypted: 'unencrypted text',
               },

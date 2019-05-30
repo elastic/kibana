@@ -6,8 +6,9 @@
 
 import { Legacy } from 'kibana';
 import { ActionsClient } from './actions_client';
-import { ActionTypeService } from './action_type_service';
+import { ActionTypeRegistry } from './action_type_registry';
 import { createFireFunction } from './create_fire_function';
+import { ActionsPlugin } from './types';
 import {
   createRoute,
   deleteRoute,
@@ -31,7 +32,7 @@ export function init(server: Legacy.Server) {
     attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
   });
 
-  const actionTypeService = new ActionTypeService({
+  const actionTypeRegistry = new ActionTypeRegistry({
     services: {
       log: server.log,
     },
@@ -46,21 +47,24 @@ export function init(server: Legacy.Server) {
   listActionTypesRoute(server);
 
   const fireFn = createFireFunction({
-    actionTypeService,
+    actionTypeRegistry,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
   });
 
-  // Expose service to server
+  // Expose functions to server
   server.decorate('request', 'getActionsClient', function() {
     const request = this;
     const savedObjectsClient = request.getSavedObjectsClient();
     const actionsClient = new ActionsClient({
       savedObjectsClient,
-      actionTypeService,
+      actionTypeRegistry,
     });
     return actionsClient;
   });
-  server.expose('fire', fireFn);
-  server.expose('registerType', actionTypeService.register.bind(actionTypeService));
-  server.expose('listTypes', actionTypeService.list.bind(actionTypeService));
+  const exposedFunctions: ActionsPlugin = {
+    fire: fireFn,
+    registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+    listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
+  };
+  server.expose(exposedFunctions);
 }

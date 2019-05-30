@@ -5,37 +5,37 @@
  */
 
 import Joi from 'joi';
-import { ActionTypeService } from '../action_type_service';
+import { ActionTypeRegistry } from '../action_type_registry';
 
 const services = {
   log: jest.fn(),
 };
-const actionTypeServiceParams = {
+const actionTypeRegistryParams = {
   services,
 };
 
 describe('register()', () => {
   test('able to register action types', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
-    expect(actionTypeService.has('my-action-type')).toEqual(true);
+    expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
   });
 
   test('throws error if action type already registered', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
     expect(() =>
-      actionTypeService.register({
+      actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
         executor,
@@ -48,13 +48,13 @@ describe('register()', () => {
 
 describe('get()', () => {
   test('returns action type', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const actionType = actionTypeService.get('my-action-type');
+    const actionType = actionTypeRegistry.get('my-action-type');
     expect(actionType).toMatchInlineSnapshot(`
 Object {
   "executor": [Function],
@@ -65,8 +65,8 @@ Object {
   });
 
   test(`throws an error when action type doesn't exist`, () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    expect(() => actionTypeService.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    expect(() => actionTypeRegistry.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"my-action-type\\" is not registered."`
     );
   });
@@ -74,38 +74,38 @@ Object {
 
 describe('getUnencryptedAttributes()', () => {
   test('returns empty array when unencryptedAttributes is undefined', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const result = actionTypeService.getUnencryptedAttributes('my-action-type');
+    const result = actionTypeRegistry.getUnencryptedAttributes('my-action-type');
     expect(result).toEqual([]);
   });
 
   test('returns values inside unencryptedAttributes array when it exists', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'b', 'c'],
       async executor() {},
     });
-    const result = actionTypeService.getUnencryptedAttributes('my-action-type');
+    const result = actionTypeRegistry.getUnencryptedAttributes('my-action-type');
     expect(result).toEqual(['a', 'b', 'c']);
   });
 });
 
 describe('list()', () => {
   test('returns list of action types', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const actionTypes = actionTypeService.list();
+    const actionTypes = actionTypeRegistry.list();
     expect(actionTypes).toEqual([
       {
         id: 'my-action-type',
@@ -117,18 +117,18 @@ describe('list()', () => {
 
 describe('validateParams()', () => {
   test('should pass when validation not defined', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    actionTypeService.validateParams('my-action-type', {});
+    actionTypeRegistry.validateParams('my-action-type', {});
   });
 
   test('should validate and pass when params is valid', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
@@ -140,12 +140,12 @@ describe('validateParams()', () => {
       },
       async executor() {},
     });
-    actionTypeService.validateParams('my-action-type', { param1: 'value' });
+    actionTypeRegistry.validateParams('my-action-type', { param1: 'value' });
   });
 
   test('should validate and throw error when params is invalid', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
@@ -158,7 +158,7 @@ describe('validateParams()', () => {
       async executor() {},
     });
     expect(() =>
-      actionTypeService.validateParams('my-action-type', {})
+      actionTypeRegistry.validateParams('my-action-type', {})
     ).toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -167,18 +167,18 @@ describe('validateParams()', () => {
 
 describe('validateActionTypeConfig()', () => {
   test('should pass when validation not defined', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    actionTypeService.validateActionTypeConfig('my-action-type', {});
+    actionTypeRegistry.validateActionTypeConfig('my-action-type', {});
   });
 
   test('should validate and pass when actionTypeConfig is valid', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
@@ -190,12 +190,12 @@ describe('validateActionTypeConfig()', () => {
       },
       async executor() {},
     });
-    actionTypeService.validateActionTypeConfig('my-action-type', { param1: 'value' });
+    actionTypeRegistry.validateActionTypeConfig('my-action-type', { param1: 'value' });
   });
 
   test('should validate and throw error when actionTypeConfig is invalid', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       validate: {
@@ -208,7 +208,7 @@ describe('validateActionTypeConfig()', () => {
       async executor() {},
     });
     expect(() =>
-      actionTypeService.validateActionTypeConfig('my-action-type', {})
+      actionTypeRegistry.validateActionTypeConfig('my-action-type', {})
     ).toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -217,32 +217,32 @@ describe('validateActionTypeConfig()', () => {
 
 describe('has()', () => {
   test('returns false for unregistered action types', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    expect(actionTypeService.has('my-action-type')).toEqual(false);
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    expect(actionTypeRegistry.has('my-action-type')).toEqual(false);
   });
 
   test('returns true after registering an action type', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
-    expect(actionTypeService.has('my-action-type'));
+    expect(actionTypeRegistry.has('my-action-type'));
   });
 });
 
 describe('execute()', () => {
   test('calls the executor with proper params', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
-    await actionTypeService.execute({
+    await actionTypeRegistry.execute({
       id: 'my-action-type',
       actionTypeConfig: { foo: true },
       params: { bar: false },
@@ -276,8 +276,8 @@ describe('execute()', () => {
 
   test('validates params', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
@@ -290,7 +290,7 @@ describe('execute()', () => {
       },
     });
     await expect(
-      actionTypeService.execute({
+      actionTypeRegistry.execute({
         id: 'my-action-type',
         actionTypeConfig: {},
         params: {},
@@ -302,8 +302,8 @@ describe('execute()', () => {
 
   test('validates actionTypeConfig', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
@@ -316,7 +316,7 @@ describe('execute()', () => {
       },
     });
     await expect(
-      actionTypeService.execute({
+      actionTypeRegistry.execute({
         id: 'my-action-type',
         actionTypeConfig: {},
         params: {},
@@ -327,9 +327,9 @@ describe('execute()', () => {
   });
 
   test('throws error if action type not registered', async () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     await expect(
-      actionTypeService.execute({
+      actionTypeRegistry.execute({
         id: 'my-action-type',
         actionTypeConfig: { foo: true },
         params: { bar: false },

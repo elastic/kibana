@@ -14,12 +14,12 @@ export default function deleteActionTests({ getService }: KibanaFunctionalTestDe
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
-    beforeEach(() => esArchiver.load('alerting/basic'));
-    afterEach(() => esArchiver.unload('alerting/basic'));
+    beforeEach(() => esArchiver.load('actions/basic'));
+    afterEach(() => esArchiver.unload('actions/basic'));
 
     it('should return 200 when deleting an action', async () => {
       await supertest
-        .delete('/api/action/1')
+        .delete('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
         .set('kbn-xsrf', 'foo')
         .expect(200)
         .then((resp: any) => {
