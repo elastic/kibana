@@ -6,7 +6,13 @@
 
 import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
 
-const { FOUR_DAYS, FOUR_MINUTES, FOUR_YEARS, THIRTY_SIX_HOURS, WEEK } = CHART_FORMAT_LIMITS;
+const {
+  FIFTEEN_DAYS,
+  EIGHT_MINUTES,
+  FOUR_YEARS,
+  THIRTY_SIX_HOURS,
+  THREE_WEEKS,
+} = CHART_FORMAT_LIMITS;
 
 /**
  * Any date range that falls between these stops will have the value applied as its label.
@@ -16,7 +22,7 @@ const { FOUR_DAYS, FOUR_MINUTES, FOUR_YEARS, THIRTY_SIX_HOURS, WEEK } = CHART_FO
  */
 const dateStops: Array<{ key: number; value: string }> = [
   {
-    key: FOUR_MINUTES,
+    key: EIGHT_MINUTES,
     value: 'HH:mm:ss',
   },
   {
@@ -24,11 +30,11 @@ const dateStops: Array<{ key: number; value: string }> = [
     value: 'HH:mm',
   },
   {
-    key: FOUR_DAYS,
+    key: FIFTEEN_DAYS,
     value: 'MM-dd HH:mm',
   },
   {
-    key: WEEK,
+    key: THREE_WEEKS,
     value: 'MM-dd',
   },
   {

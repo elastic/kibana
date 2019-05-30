@@ -14,9 +14,9 @@ const WEEK = DAY * 7;
  */
 export const CHART_FORMAT_LIMITS = {
   DAY,
-  FOUR_DAYS: 1000 * 60 * 60 * 24 * 4,
-  FOUR_MINUTES: 1000 * 60 * 4,
+  FIFTEEN_DAYS: 1000 * 60 * 60 * 24 * 15,
+  EIGHT_MINUTES: 1000 * 60 * 8,
   FOUR_YEARS: 4 * 12 * 4 * WEEK,
   THIRTY_SIX_HOURS: 1000 * 60 * 60 * 36,
-  WEEK,
+  THREE_WEEKS: WEEK * 3,
 };

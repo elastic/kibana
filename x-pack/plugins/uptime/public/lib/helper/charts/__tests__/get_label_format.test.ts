@@ -42,10 +42,10 @@ describe('getChartLabelFormatter', () => {
     expect(getChartDateLabel(995454379000, 995565179000)).toBe('MM-dd HH:mm');
   });
 
-  it('creates a format with only month/day for delta up to four days', () => {
+  it('creates a format with only month/day for delta between to eight days and two weeks', () => {
     expect.assertions(1);
-    // Sun, 15 Jul 2001 12:27:59 GMT -> Thu, 19 Jul 2001 17:52:59 GMT
-    expect(getChartDateLabel(995200079000, 995565179000)).toBe('MM-dd');
+    // Sun, 01 Jul 2001 23:28:15 GMT -> Thu, 19 Jul 2001 17:52:59 GMT
+    expect(getChartDateLabel(994030095000, 995565179000)).toBe('MM-dd');
   });
 
   it('creates a format with the year/month for range exceeding a week', () => {
