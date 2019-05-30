@@ -85,7 +85,6 @@ export const getIndexAlias = (defaultIndex: string[], indexName: string): string
   }
 };
 
-// TODO: winlogbeat documentation
 export const getIndexSchemaDoc = memoize((index: string) => {
   if (index.match('auditbeat') != null) {
     return {
