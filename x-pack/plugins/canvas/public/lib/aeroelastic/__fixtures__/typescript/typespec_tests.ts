@@ -5,7 +5,7 @@
  */
 
 import { select } from '../../select';
-import { Json, Selector, vector2d, vector3d, transformMatrix2d, transformMatrix3d } from '../..';
+import { Json, Selector, Vector2d, Vector3d, TransformMatrix2d, TransformMatrix3d } from '../..';
 import {
   mvMultiply as mult2d,
   ORIGIN as UNIT2D,
@@ -46,70 +46,70 @@ import {
    * TYPE TEST SUITE
    */
 
-  (function vectorArrayCreationTests(vec2d: vector2d, vec3d: vector3d): void {
+  (function vectorArrayCreationTests(vec2d: Vector2d, vec3d: Vector3d): void {
     // 2D vector OK
-    vec2d = [0, 0, 0] as vector2d; // OK
-    vec2d = [-0, NaN, -Infinity] as vector2d; // IEEE 754 values are OK
+    vec2d = [0, 0, 0] as Vector2d; // OK
+    vec2d = [-0, NaN, -Infinity] as Vector2d; // IEEE 754 values are OK
 
     // 3D vector OK
-    vec3d = [0, 0, 0, 0] as vector3d;
-    vec3d = [100, -0, Infinity, NaN] as vector3d;
+    vec3d = [0, 0, 0, 0] as Vector3d;
+    vec3d = [100, -0, Infinity, NaN] as Vector3d;
 
     // 2D vector not OK
 
     // typings:expect-error
     vec2d = 3; // not even an array
     // typings:expect-error
-    vec2d = [] as vector2d; // no elements
+    vec2d = [] as Vector2d; // no elements
     // typings:expect-error
-    vec2d = [0, 0] as vector2d; // too few elements
+    vec2d = [0, 0] as Vector2d; // too few elements
     // typings:expect-error
-    vec2d = [0, 0, 0, 0] as vector2d; // too many elements
+    vec2d = [0, 0, 0, 0] as Vector2d; // too many elements
 
     // 3D vector not OK
 
     // typings:expect-error
     vec3d = 3; // not even an array
     // typings:expect-error
-    vec3d = [] as vector3d; // no elements
+    vec3d = [] as Vector3d; // no elements
     // typings:expect-error
-    vec3d = [0, 0, 0] as vector3d; // too few elements
+    vec3d = [0, 0, 0] as Vector3d; // too few elements
     // typings:expect-error
-    vec3d = [0, 0, 0, 0, 0] as vector3d; // too many elements
+    vec3d = [0, 0, 0, 0, 0] as Vector3d; // too many elements
 
     return; // arrayCreationTests
   })(UNIT2D, UNIT3D);
 
-  (function matrixArrayCreationTests(mat2d: transformMatrix2d, mat3d: transformMatrix3d): void {
+  (function matrixArrayCreationTests(mat2d: TransformMatrix2d, mat3d: TransformMatrix3d): void {
     // 2D matrix OK
-    mat2d = [0, 1, 2, 3, 4, 5, 6, 7, 8] as transformMatrix2d; // OK
-    mat2d = [-0, NaN, -Infinity, 3, 4, 5, 6, 7, 8] as transformMatrix2d; // IEEE 754 values are OK
+    mat2d = [0, 1, 2, 3, 4, 5, 6, 7, 8] as TransformMatrix2d; // OK
+    mat2d = [-0, NaN, -Infinity, 3, 4, 5, 6, 7, 8] as TransformMatrix2d; // IEEE 754 values are OK
 
     // 3D matrix OK
-    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as transformMatrix3d;
-    mat3d = [100, -0, Infinity, NaN, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as transformMatrix3d;
+    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as TransformMatrix3d;
+    mat3d = [100, -0, Infinity, NaN, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as TransformMatrix3d;
 
     // 2D matrix not OK
 
     // typings:expect-error
     mat2d = 3; // not even an array
     // typings:expect-error
-    mat2d = [] as transformMatrix2d; // no elements
+    mat2d = [] as TransformMatrix2d; // no elements
     // typings:expect-error
-    mat2d = [0, 1, 2, 3, 4, 5, 6, 7] as transformMatrix2d; // too few elements
+    mat2d = [0, 1, 2, 3, 4, 5, 6, 7] as TransformMatrix2d; // too few elements
     // typings:expect-error
-    mat2d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as transformMatrix2d; // too many elements
+    mat2d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as TransformMatrix2d; // too many elements
 
     // 3D vector not OK
 
     // typings:expect-error
     mat3d = 3; // not even an array
     // typings:expect-error
-    mat3d = [] as transformMatrix3d; // no elements
+    mat3d = [] as TransformMatrix3d; // no elements
     // typings:expect-error
-    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as transformMatrix3d; // too few elements
+    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as TransformMatrix3d; // too few elements
     // typings:expect-error
-    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as transformMatrix3d; // too many elements
+    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as TransformMatrix3d; // too many elements
 
     // Matrix modification should NOT be OK
     mat3d[3] = 100; // too bad the ReadOnly part appears not to be enforced so can't precede it with typings:expect-error
@@ -117,7 +117,7 @@ import {
     return; // arrayCreationTests
   })(UNITMATRIX2D, NANMATRIX3D);
 
-  (function matrixMatrixAdditionTests(mat2d: transformMatrix2d, mat3d: transformMatrix3d): void {
+  (function matrixMatrixAdditionTests(mat2d: TransformMatrix2d, mat3d: TransformMatrix3d): void {
     add2d(mat2d, mat2d); // OK
     add3d(mat3d, mat3d); // OK
 
@@ -138,10 +138,10 @@ import {
   })(UNITMATRIX2D, NANMATRIX3D);
 
   (function matrixVectorMultiplicationTests(
-    vec2d: vector2d,
-    mat2d: transformMatrix2d,
-    vec3d: vector3d,
-    mat3d: transformMatrix3d
+    vec2d: Vector2d,
+    mat2d: TransformMatrix2d,
+    vec3d: Vector3d,
+    mat3d: TransformMatrix3d
   ): void {
     mult2d(mat2d, vec2d); // OK
     mult3d(mat3d, vec3d); // OK
