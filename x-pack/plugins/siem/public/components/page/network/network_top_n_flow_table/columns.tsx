@@ -119,7 +119,7 @@ export const getNetworkTopNFlowColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              expression={`network.direction: ${escapeQueryValue(direction)}`}
+              expression={`network.direction: "${escapeQueryValue(direction)}"`}
               componentFilterType="network"
               type={type}
             >
