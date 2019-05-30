@@ -19,7 +19,6 @@ versions running against the same {es} cluster.
 versions reporting stats to the same monitoring cluster.
 * {es} Nodes Changed. You have {es} nodes that were recently added or removed.
 * {es} License Expiration. The cluster's license is about to expire.
-
 +
 --
 If you do not preserve the data directory when upgrading a {kib} or
