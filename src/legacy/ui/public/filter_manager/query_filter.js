@@ -152,37 +152,6 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
     return this.filterStateManager.invertFilter(filter);
   };
 
-  /**
-   * Pins the filter to the global state
-   * @param {object} filter The filter to pin
-   * @param {boolean} force pinned state
-   * @returns {object} updated filter
-   */
-  queryFilter.pinFilter = function (filter, force) {
-    const appState = getAppState();
-    if (!appState) return filter;
-
-    // ensure that both states have a filters property
-    if (!Array.isArray(globalState.filters)) globalState.filters = [];
-    if (!Array.isArray(appState.filters)) appState.filters = [];
-
-    const appIndex = _.findIndex(appState.filters, appFilter => _.isEqual(appFilter, filter));
-
-    if (appIndex !== -1 && force !== false) {
-      appState.filters.splice(appIndex, 1);
-      globalState.filters.push(filter);
-    } else {
-      const globalIndex = _.findIndex(globalState.filters, globalFilter => _.isEqual(globalFilter, filter));
-
-      if (globalIndex === -1 || force === true) return filter;
-
-      globalState.filters.splice(globalIndex, 1);
-      appState.filters.push(filter);
-    }
-
-    return filter;
-  };
-
   queryFilter.setFilters = filters => {
     return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
       .then(mappedFilters => {
@@ -218,7 +187,6 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
     }
     return state.filters;
   }
-
 
   /**
    * Saves both app and global states, ensuring filters are persisted
