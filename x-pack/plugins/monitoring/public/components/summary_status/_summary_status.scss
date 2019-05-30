@@ -1,5 +1,13 @@
-.monSummaryStatus {
-  background-color: $euiColorLightestShade;
-  border-bottom: $euiBorderThin;
-  padding: $euiSize;
+.monSummaryStatusNoWrap {
+  margin-left: 12px;
+  margin-right: 12px;
+  .euiTitle {
+    overflow-x: hidden;
+    white-space: nowrap;
+    @include euiFontSizeXS;
+  }
+
+  .euiFlexItem {
+    margin: 8px;
+  }
 }

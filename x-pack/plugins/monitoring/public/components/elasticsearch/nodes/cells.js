@@ -43,11 +43,11 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
       <EuiFlexGroup gutterSize="m" alignItems="center" wrap {...props}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="s" style={noWrapStyle}>
-            <h5>
+            <span>
               {metricVal(lastVal, format, isPercent)}
               &nbsp;
               <span className={`fa fa-long-arrow-${getSlopeArrow(slope)}`} />
-            </h5>
+            </span>
           </EuiTitle>
           <EuiText size="xs">
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {

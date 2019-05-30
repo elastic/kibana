@@ -91,6 +91,21 @@ const getColumns = showCgroupMetricsElasticsearch => {
     }
   });
 
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
+      defaultMessage: 'Shards',
+    }),
+    field: 'shardCount',
+    sortable: true,
+    render: (value, node) => {
+      return node.isOnline ? (
+        <div className="monTableCell__number" data-test-subj="shards">
+          {value}
+        </div>
+      ) : <OfflineCell/>;
+    }
+  });
+
   if (showCgroupMetricsElasticsearch) {
     cols.push({
       name: cpuUsageColumnTitle,
@@ -186,22 +201,6 @@ const getColumns = showCgroupMetricsElasticsearch => {
         data-test-subj="diskFreeSpace"
       />
     )
-  });
-
-  cols.push({
-    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
-      defaultMessage: 'Shards',
-    }),
-    field: 'shardCount',
-    sortable: true,
-    width: '80px',
-    render: (value, node) => {
-      return node.isOnline ? (
-        <div className="monTableCell__number" data-test-subj="shards">
-          {value}
-        </div>
-      ) : <OfflineCell/>;
-    }
   });
 
   return cols;
