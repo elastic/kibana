@@ -188,8 +188,8 @@ export async function untar(source, destination, extractOptions = {}) {
 
 export async function compress(type, options = {}, source, destination) {
   const output = fs.createWriteStream(destination);
-  const archive = archiver(type, options);
-  const name = source.split(sep).slice(-1)[0];
+  const archive = archiver(type, options.archiverOptions);
+  const name = (options.createRootDirectory ? source.split(sep).slice(-1)[0] : false);
 
   archive.pipe(output);
 
