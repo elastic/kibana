@@ -10,7 +10,7 @@ jest.mock('../get_create_task_runner_function', () => ({
 
 import { taskManagerMock } from './task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
-import { ActionTypeService } from '../action_type_service';
+import { ActionTypeRegistry } from '../action_type_registry';
 
 const mockTaskManager = taskManagerMock.create();
 
@@ -21,8 +21,7 @@ const mockEncryptedSavedObjectsPlugin = {
 const services = {
   log: jest.fn(),
 };
-
-const actionTypeServiceParams = {
+const actionTypeRegistryParams = {
   services,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
@@ -36,13 +35,13 @@ describe('register()', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getCreateTaskRunnerFunction } = require('../get_create_task_runner_function');
     getCreateTaskRunnerFunction.mockReturnValueOnce(jest.fn());
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
-    expect(actionTypeService.has('my-action-type')).toEqual(true);
+    expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
     expect(mockTaskManager.registerTaskDefinitions).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
@@ -95,14 +94,14 @@ describe('register()', () => {
 
   test('throws error if action type already registered', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
     expect(() =>
-      actionTypeService.register({
+      actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
         executor,
@@ -115,13 +114,13 @@ describe('register()', () => {
 
 describe('get()', () => {
   test('returns action type', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const actionType = actionTypeService.get('my-action-type');
+    const actionType = actionTypeRegistry.get('my-action-type');
     expect(actionType).toMatchInlineSnapshot(`
 Object {
   "executor": [Function],
@@ -132,8 +131,8 @@ Object {
   });
 
   test(`throws an error when action type doesn't exist`, () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    expect(() => actionTypeService.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    expect(() => actionTypeRegistry.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"my-action-type\\" is not registered."`
     );
   });
@@ -141,38 +140,38 @@ Object {
 
 describe('getUnencryptedAttributes()', () => {
   test('returns empty array when unencryptedAttributes is undefined', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const result = actionTypeService.getUnencryptedAttributes('my-action-type');
+    const result = actionTypeRegistry.getUnencryptedAttributes('my-action-type');
     expect(result).toEqual([]);
   });
 
   test('returns values inside unencryptedAttributes array when it exists', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'b', 'c'],
       async executor() {},
     });
-    const result = actionTypeService.getUnencryptedAttributes('my-action-type');
+    const result = actionTypeRegistry.getUnencryptedAttributes('my-action-type');
     expect(result).toEqual(['a', 'b', 'c']);
   });
 });
 
 describe('list()', () => {
   test('returns list of action types', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       async executor() {},
     });
-    const actionTypes = actionTypeService.list();
+    const actionTypes = actionTypeRegistry.list();
     expect(actionTypes).toEqual([
       {
         id: 'my-action-type',
@@ -184,18 +183,18 @@ describe('list()', () => {
 
 describe('has()', () => {
   test('returns false for unregistered action types', () => {
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    expect(actionTypeService.has('my-action-type')).toEqual(false);
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    expect(actionTypeRegistry.has('my-action-type')).toEqual(false);
   });
 
   test('returns true after registering an action type', () => {
     const executor = jest.fn();
-    const actionTypeService = new ActionTypeService(actionTypeServiceParams);
-    actionTypeService.register({
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       executor,
     });
-    expect(actionTypeService.has('my-action-type'));
+    expect(actionTypeRegistry.has('my-action-type'));
   });
 });

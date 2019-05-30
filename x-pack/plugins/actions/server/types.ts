@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeService } from './action_type_service';
+import { ActionTypeRegistry } from './action_type_registry';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 
@@ -19,8 +19,8 @@ export interface Services {
 }
 
 export interface ActionsPlugin {
-  registerType: ActionTypeService['register'];
-  listTypes: ActionTypeService['list'];
+  registerType: ActionTypeRegistry['register'];
+  listTypes: ActionTypeRegistry['list'];
   fire: ({ id, params }: { id: string; params: Record<string, any> }) => Promise<void>;
 }
 

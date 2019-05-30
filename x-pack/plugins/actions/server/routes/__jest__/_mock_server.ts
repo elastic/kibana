@@ -35,9 +35,9 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
     fire: jest.fn(),
   };
 
-  const actionTypeService = {
-    registerType: jest.fn(),
-    listTypes: jest.fn(),
+  const actionTypeRegistry = {
+    register: jest.fn(),
+    list: jest.fn(),
   };
 
   server.config = () => {
@@ -54,13 +54,13 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.register({
     name: 'actions',
     register(pluginServer: Hapi.Server) {
-      pluginServer.expose('registerType', actionTypeService.registerType);
-      pluginServer.expose('listTypes', actionTypeService.listTypes);
+      pluginServer.expose('registerType', actionTypeRegistry.register);
+      pluginServer.expose('listTypes', actionTypeRegistry.list);
     },
   });
 
   server.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
   server.decorate('request', 'getActionsClient', () => actionsClient);
 
-  return { server, savedObjectsClient, actionsClient, actionTypeService };
+  return { server, savedObjectsClient, actionsClient, actionTypeRegistry };
 }

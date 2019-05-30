@@ -6,7 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { ActionsClient } from './actions_client';
-import { ActionTypeService } from './action_type_service';
+import { ActionTypeRegistry } from './action_type_registry';
 import { createFireFunction } from './create_fire_function';
 import { ActionsPlugin } from './types';
 import {
@@ -31,7 +31,7 @@ export function init(server: Legacy.Server) {
   });
 
   const { taskManager } = server;
-  const actionTypeService = new ActionTypeService({
+  const actionTypeRegistry = new ActionTypeRegistry({
     services: {
       log: server.log,
     },
@@ -52,20 +52,20 @@ export function init(server: Legacy.Server) {
     savedObjectsClient: savedObjectsClientWithInternalUser,
   });
 
-  // Expose service to server
+  // Expose functions to server
   server.decorate('request', 'getActionsClient', function() {
     const request = this;
     const savedObjectsClient = request.getSavedObjectsClient();
     const actionsClient = new ActionsClient({
       savedObjectsClient,
-      actionTypeService,
+      actionTypeRegistry,
     });
     return actionsClient;
   });
   const exposedFunctions: ActionsPlugin = {
     fire: fireFn,
-    registerType: actionTypeService.register.bind(actionTypeService),
-    listTypes: actionTypeService.list.bind(actionTypeService),
+    registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+    listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
   };
   server.expose(exposedFunctions);
 }
