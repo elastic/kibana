@@ -11,7 +11,6 @@ import {
 } from './common';
 
 import {
-  getDashboardModeAuthScope,
   createDashboardModeRequestInterceptor,
 } from './server';
 
@@ -80,9 +79,6 @@ export function dashboardMode(kibana) {
       ));
 
       if (server.plugins.security) {
-        // register auth getter with security plugin
-        server.plugins.security.registerAuthScopeGetter(getDashboardModeAuthScope);
-
         // extend the server to intercept requests
         const dashboardViewerApp = server.getHiddenUiAppById('dashboardViewer');
         server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));

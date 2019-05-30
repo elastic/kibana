@@ -8,7 +8,6 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 
 import { NetworkDnsFields, NetworkDnsItem } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -49,7 +48,7 @@ export const getNetworkDnsColumns = (
               kqlQuery: '',
               queryMatch: {
                 field: 'dns.question.etld_plus_one',
-                value: escapeQueryValue(dnsName),
+                value: dnsName,
                 operator: IS_OPERATOR,
               },
             }}

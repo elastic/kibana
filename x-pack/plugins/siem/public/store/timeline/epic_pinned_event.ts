@@ -75,7 +75,7 @@ export const epicPersistPinnedEvent = (
                 version:
                   savedTimeline.version == null && response.timelineVersion != null
                     ? response.timelineVersion
-                    : savedTimeline.savedObjectId,
+                    : savedTimeline.version,
                 pinnedEventsSaveObject: {
                   ...savedTimeline.pinnedEventsSaveObject,
                   [get('payload.eventId', action)]: response,

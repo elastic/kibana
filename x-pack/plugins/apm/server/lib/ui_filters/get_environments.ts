@@ -63,7 +63,7 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search<void, Aggs>(params);
   const aggs = resp.aggregations;
   const environmentsBuckets = idx(aggs, _ => _.environments.buckets) || [];
 
