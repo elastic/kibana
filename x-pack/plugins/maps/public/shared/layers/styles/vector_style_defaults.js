@@ -6,7 +6,7 @@
 
 import { VectorStyle } from './vector_style';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
-import { COLOR_GRADIENTS } from './components/vector/color/color_ramp_select';
+import { COLOR_GRADIENTS } from './color_utils';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
 const DEFAULT_ICON = 'airfield 15';

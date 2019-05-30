@@ -21,7 +21,12 @@ import {
 } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
 
-export function resolveUrlParams(location: Location, state: IUrlParams) {
+type TimeUrlParams = Pick<
+  IUrlParams,
+  'start' | 'end' | 'rangeFrom' | 'rangeTo'
+>;
+
+export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const {
     processorEvent,
     serviceName,
@@ -49,7 +54,6 @@ export function resolveUrlParams(location: Location, state: IUrlParams) {
   } = toQuery(location.search);
 
   return removeUndefinedProps({
-    ...state,
     // date params
     start: getStart(state, rangeFrom),
     end: getEnd(state, rangeTo),
