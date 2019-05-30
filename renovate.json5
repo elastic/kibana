@@ -67,6 +67,7 @@
       },
       {
         packagePatterns: ['\\bbabel\\b'],
+        packageNames: ['core-js'],
         groupName: 'babel related packages',
         groupSlug: 'babel',
       },
@@ -94,6 +95,39 @@
         packagePatterns: ['\\bgrunt\\b'],
         groupName: 'grunt related packages',
         groupSlug: 'grunt',
+      },
+      {
+        packagePatterns: ['\\bd3\\b'],
+        groupName: 'd3 related packages',
+        groupSlug: 'd3',
+      },
+      {
+        packagePatterns: ['\\breact\\b', '\\bredux\\b'],
+        packageNames: [
+          'ngreact',
+          'recompose',
+          'prop-types',
+          'typescript-fsa-reducers',
+          'reselect'
+        ],
+        groupName: 'react related packages',
+        groupSlug: 'react',
+      },
+      {
+        packagePatterns: ['\\bgraphql\\b'],
+        groupName: 'graphql related packages',
+        groupSlug: 'graphql',
+      },
+      {
+        packagePatterns: ['\\bwebpack\\b', '\\bloader\\b'],
+        packageNames: ['mini-css-extract-plugin', 'chokidar'],
+        groupName: 'webpack related packages',
+        groupSlug: 'webpack',
+      },
+      {
+        packageNames: ['vscode-jsonrpc', 'vscode-languageserver', 'vscode-languageserver-types'],
+        groupName: 'language server related packages',
+        groupSlug: 'language server',
       },
 
       // internal/local packages
