@@ -35,6 +35,7 @@ export interface AggParamCommonProps<T> {
   indexedFields?: FieldParamType[];
   showValidation: boolean;
   value: T;
+  responseValueAggs: AggConfig[] | null;
   visName: string;
   setValidity(isValid: boolean): void;
   setTouched(): void;

@@ -122,7 +122,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
             roles: ['krb5-user'],
-            scope: [],
             full_name: null,
             email: null,
             metadata: {
