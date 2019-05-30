@@ -16,8 +16,7 @@ import {
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { serializeCluster } from '../../lib/cluster_serialization';
 
-export const register = (router: Router): void => {
-  const { isEsError } = router;
+export const register = (router: Router, isEsError: any): void => {
   router.delete('/{nameOrNames}', createDeleteHandler(isEsError));
 };
 

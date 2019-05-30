@@ -5,7 +5,7 @@
  */
 
 import { API_BASE_PATH } from './common';
-import { Core } from './shim';
+import { CoreSetup } from './shim';
 import {
   registerGetRoute,
   registerAddRoute,
@@ -14,13 +14,17 @@ import {
 } from './server/routes/api';
 
 export class Plugin {
-  public start(core: Core): void {
-    const router = core.http.createRouter(API_BASE_PATH);
+  public setup(core: CoreSetup): void {
+    const {
+      http: { createRouter, isEsError },
+    } = core;
+
+    const router = createRouter(API_BASE_PATH);
 
     // Register routes.
     registerGetRoute(router);
     registerAddRoute(router);
     registerUpdateRoute(router);
-    registerDeleteRoute(router);
+    registerDeleteRoute(router, isEsError);
   }
 }

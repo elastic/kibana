@@ -6,12 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
-import { createRouter, Router } from '../../server/lib/create_router';
+import { createRouter, createIsEsError, Router } from '../../server/lib/create_router';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 
-export interface Core {
+export interface CoreSetup {
   http: {
     createRouter(basePath: string): Router;
+    isEsError(error: any): boolean;
   };
   i18n: {
     [i18nPackage: string]: any;
@@ -27,15 +28,16 @@ export interface Plugins {
 export function createShim(
   server: Legacy.Server,
   pluginId: string
-): { core: Core; plugins: Plugins } {
+): { coreSetup: CoreSetup; pluginsSetup: Plugins } {
   return {
-    core: {
+    coreSetup: {
       http: {
         createRouter: (basePath: string) => createRouter(server, pluginId, basePath),
+        isEsError: createIsEsError(server),
       },
       i18n,
     },
-    plugins: {
+    pluginsSetup: {
       license: {
         registerLicenseChecker,
       },

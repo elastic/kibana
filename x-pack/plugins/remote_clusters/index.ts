@@ -45,17 +45,17 @@ export function remoteClusters(kibana: any) {
     },
     init(server: Legacy.Server) {
       const {
-        core,
-        plugins: {
+        coreSetup,
+        pluginsSetup: {
           license: { registerLicenseChecker },
         },
       } = createShim(server, PLUGIN.ID);
 
-      const { i18n } = core;
+      const { i18n } = coreSetup;
       const remoteClustersPlugin = new RemoteClustersPlugin();
 
-      // Start plugin.
-      remoteClustersPlugin.start(core);
+      // Set up plugin.
+      remoteClustersPlugin.setup(coreSetup);
 
       registerLicenseChecker(
         server,

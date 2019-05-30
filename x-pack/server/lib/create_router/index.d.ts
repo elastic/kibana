@@ -31,3 +31,5 @@ export declare function createRouter(
   pluginId: string,
   apiBasePath: string
 ): Router;
+
+export declare function createIsEsError(server: Legacy.Server): any;

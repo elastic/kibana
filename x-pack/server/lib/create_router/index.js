@@ -11,8 +11,13 @@ import { licensePreRoutingFactory } from'./license_pre_routing_factory';
 
 export { wrapEsError, wrapUnknownError, wrapCustomError } from './error_wrappers';
 
+// Sometimes consumers will need to check if errors are ES errors, too.
+export const createIsEsError = server => {
+  return isEsErrorFactory(server);
+};
+
 export const createRouter = (server, pluginId, apiBasePath = '') => {
-  const isEsError = isEsErrorFactory(server);
+  const isEsError = createIsEsError(server);
 
   // NOTE: The license-checking logic depends on the xpack_main plugin, so if your plugin
   // consumes this helper, make sure it declares 'xpack_main' as a dependency.
@@ -35,11 +40,6 @@ export const createRouter = (server, pluginId, apiBasePath = '') => {
     }
   };
 
-  // Sometimes consumers will need to check if errors are ES errors, too.
-  const baseRouter = {
-    isEsError,
-  };
-
   // Decorate base router with HTTP methods.
   return (['get', 'post', 'put', 'delete', 'patch'].reduce((router, methodName) => {
     router[methodName] = (subPath, handler) => {
@@ -53,5 +53,5 @@ export const createRouter = (server, pluginId, apiBasePath = '') => {
       });
     };
     return router;
-  }, baseRouter));
+  }, {}));
 };
