@@ -13,12 +13,12 @@ import { SelectableText } from '.';
 
 describe('SelectableText', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<SelectableText>You may select this text</SelectableText>);
+    const wrapper = shallow(<SelectableText>{'You may select this text'}</SelectableText>);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('it applies the user-select: text style', () => {
-    const wrapper = mount(<SelectableText>You may select this text</SelectableText>);
+    const wrapper = mount(<SelectableText>{'You may select this text'}</SelectableText>);
 
     expect(wrapper).toHaveStyleRule('user-select', 'text');
   });

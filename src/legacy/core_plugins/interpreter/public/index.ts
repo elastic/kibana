@@ -17,20 +17,4 @@
  * under the License.
  */
 
-export const kibanaContext = () => ({
-  name: 'kibana_context',
-  from: {
-    null: () => {
-      return {
-        type: 'kibana_context',
-      };
-    },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-  }
-});
+export * from '../types';
