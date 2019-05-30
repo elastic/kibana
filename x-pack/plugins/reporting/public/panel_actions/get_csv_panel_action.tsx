@@ -12,10 +12,8 @@ import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { EuiIcon } from '@elastic/eui';
-import {
-  ISearchEmbeddable,
-  SEARCH_EMBEDDABLE_TYPE,
-} from 'src/legacy/core_plugins/kibana/public/discover/embeddable';
+import { ISearchEmbeddable } from 'src/legacy/core_plugins/kibana/public/discover/embeddable/types';
+
 import {
   Action,
   actionRegistry,
@@ -26,7 +24,7 @@ import {
   triggerRegistry,
   attachAction,
   CONTEXT_MENU_TRIGGER,
-} from 'src/legacy/core_plugins/embeddable_api/public/index';
+} from 'plugins/embeddable_api';
 import { API_BASE_URL_V1 } from '../../common/constants';
 
 const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
@@ -36,7 +34,7 @@ const CSV_REPORTING_ACTION = 'downloadCsvReport';
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
 ): embeddable is ISearchEmbeddable {
-  return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
+  return embeddable.type === 'search';
 }
 class GetCsvReportPanelAction extends Action<ISearchEmbeddable> {
   private isDownloading: boolean;
@@ -80,9 +78,7 @@ class GetCsvReportPanelAction extends Action<ISearchEmbeddable> {
 
     const { embeddable } = context;
 
-    return (
-      embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === SEARCH_EMBEDDABLE_TYPE
-    );
+    return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
   };
 
   public execute = async (context: ActionContext<ISearchEmbeddable>) => {
