@@ -95,7 +95,7 @@ class FilterEditorUI extends Component<Props, State> {
           <EuiFlexGroup alignItems="baseline">
             <EuiFlexItem>
               <FormattedMessage
-                id="common.ui.filterEditor.editFilterPopupTitle"
+                id="data.filter.filterEditor.editFilterPopupTitle"
                 defaultMessage="Edit filter"
               />
             </EuiFlexItem>
@@ -103,12 +103,12 @@ class FilterEditorUI extends Component<Props, State> {
               <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
                 {this.state.isCustomEditorOpen ? (
                   <FormattedMessage
-                    id="common.ui.filterEditor.editFilterValuesButtonLabel"
+                    id="data.filter.filterEditor.editFilterValuesButtonLabel"
                     defaultMessage="Edit filter values"
                   />
                 ) : (
                   <FormattedMessage
-                    id="common.ui.filterEditor.editQueryDslButtonLabel"
+                    id="data.filter.filterEditor.editQueryDslButtonLabel"
                     defaultMessage="Edit as Query DSL"
                   />
                 )}
@@ -128,7 +128,7 @@ class FilterEditorUI extends Component<Props, State> {
             <EuiSwitch
               id="filterEditorCustomLabelSwitch"
               label={this.props.intl.formatMessage({
-                id: 'common.ui.filterEditor.createCustomLabelSwitchLabel',
+                id: 'data.filter.filterEditor.createCustomLabelSwitchLabel',
                 defaultMessage: 'Create custom label?',
               })}
               checked={this.state.useCustomLabel}
@@ -140,7 +140,7 @@ class FilterEditorUI extends Component<Props, State> {
                 <EuiSpacer size="m" />
                 <EuiFormRow
                   label={this.props.intl.formatMessage({
-                    id: 'common.ui.filterEditor.createCustomLabelInputLabel',
+                    id: 'data.filter.filterEditor.createCustomLabelInputLabel',
                     defaultMessage: 'Custom label',
                   })}
                 >
@@ -163,7 +163,7 @@ class FilterEditorUI extends Component<Props, State> {
                   data-test-subj="saveFilter"
                 >
                   <FormattedMessage
-                    id="common.ui.filterEditor.saveButtonLabel"
+                    id="data.filter.filterEditor.saveButtonLabel"
                     defaultMessage="Save"
                   />
                 </EuiButton>
@@ -175,7 +175,7 @@ class FilterEditorUI extends Component<Props, State> {
                   data-test-subj="cancelSaveFilter"
                 >
                   <FormattedMessage
-                    id="common.ui.filterEditor.cancelButtonLabel"
+                    id="data.filter.filterEditor.cancelButtonLabel"
                     defaultMessage="Cancel"
                   />
                 </EuiButtonEmpty>
@@ -198,13 +198,13 @@ class FilterEditorUI extends Component<Props, State> {
         <EuiFlexItem>
           <EuiFormRow
             label={this.props.intl.formatMessage({
-              id: 'common.ui.filterEditor.indexPatternSelectLabel',
+              id: 'data.filter.filterEditor.indexPatternSelectLabel',
               defaultMessage: 'Index Pattern',
             })}
           >
             <IndexPatternComboBox
               placeholder={this.props.intl.formatMessage({
-                id: 'common.ui.filterBar.indexPatternSelectPlaceholder',
+                id: 'data.filter.filterBar.indexPatternSelectPlaceholder',
                 defaultMessage: 'Select an index pattern',
               })}
               options={this.props.indexPatterns}
@@ -240,7 +240,7 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <EuiFormRow
         label={this.props.intl.formatMessage({
-          id: 'common.ui.filterEditor.fieldSelectLabel',
+          id: 'data.filter.filterEditor.fieldSelectLabel',
           defaultMessage: 'Field',
         })}
       >
@@ -248,7 +248,7 @@ class FilterEditorUI extends Component<Props, State> {
           id="fieldInput"
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
-            id: 'common.ui.filterEditor.fieldSelectPlaceholder',
+            id: 'data.filter.filterEditor.fieldSelectPlaceholder',
             defaultMessage: 'Select a field',
           })}
           options={fields}
@@ -269,14 +269,14 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <EuiFormRow
         label={this.props.intl.formatMessage({
-          id: 'common.ui.filterEditor.operatorSelectLabel',
+          id: 'data.filter.filterEditor.operatorSelectLabel',
           defaultMessage: 'Operator',
         })}
       >
         <OperatorComboBox
           isDisabled={!selectedField}
           placeholder={this.props.intl.formatMessage({
-            id: 'common.ui.filterEditor.operatorSelectPlaceholder',
+            id: 'data.filter.filterEditor.operatorSelectPlaceholder',
             defaultMessage: 'Select an operator',
           })}
           options={operators}

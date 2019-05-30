@@ -88,11 +88,11 @@ class FilterItemUI extends Component<Props, State> {
           {
             name: isFilterPinned(filter)
               ? this.props.intl.formatMessage({
-                  id: 'common.ui.filterBar.unpinFilterButtonLabel',
+                  id: 'data.filter.filterBar.unpinFilterButtonLabel',
                   defaultMessage: 'Unpin',
                 })
               : this.props.intl.formatMessage({
-                  id: 'common.ui.filterBar.pinFilterButtonLabel',
+                  id: 'data.filter.filterBar.pinFilterButtonLabel',
                   defaultMessage: 'Pin across all apps',
                 }),
             icon: 'pin',
@@ -104,7 +104,7 @@ class FilterItemUI extends Component<Props, State> {
           },
           {
             name: this.props.intl.formatMessage({
-              id: 'common.ui.filterBar.editFilterButtonLabel',
+              id: 'data.filter.filterBar.editFilterButtonLabel',
               defaultMessage: 'Edit filter',
             }),
             icon: 'pencil',
@@ -114,11 +114,11 @@ class FilterItemUI extends Component<Props, State> {
           {
             name: negate
               ? this.props.intl.formatMessage({
-                  id: 'common.ui.filterBar.includeFilterButtonLabel',
+                  id: 'data.filter.filterBar.includeFilterButtonLabel',
                   defaultMessage: 'Include results',
                 })
               : this.props.intl.formatMessage({
-                  id: 'common.ui.filterBar.excludeFilterButtonLabel',
+                  id: 'data.filter.filterBar.excludeFilterButtonLabel',
                   defaultMessage: 'Exclude results',
                 }),
             icon: negate ? 'plusInCircle' : 'minusInCircle',
@@ -131,11 +131,11 @@ class FilterItemUI extends Component<Props, State> {
           {
             name: disabled
               ? this.props.intl.formatMessage({
-                  id: 'common.ui.filterBar.enableFilterButtonLabel',
+                  id: 'data.filter.filterBar.enableFilterButtonLabel',
                   defaultMessage: 'Re-enable',
                 })
               : this.props.intl.formatMessage({
-                  id: 'common.ui.filterBar.disableFilterButtonLabel',
+                  id: 'data.filter.filterBar.disableFilterButtonLabel',
                   defaultMessage: 'Temporarily disable',
                 }),
             icon: `${disabled ? 'eye' : 'eyeClosed'}`,
@@ -147,7 +147,7 @@ class FilterItemUI extends Component<Props, State> {
           },
           {
             name: this.props.intl.formatMessage({
-              id: 'common.ui.filterBar.deleteFilterButtonLabel',
+              id: 'data.filter.filterBar.deleteFilterButtonLabel',
               defaultMessage: 'Delete',
             }),
             icon: 'trash',
