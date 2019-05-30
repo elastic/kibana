@@ -4,34 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+const EmptyPrompt = styled(EuiEmptyPrompt)`
+  align-self: center; // Corrects horizontal centering in IE11
+`;
+
 interface EmptyPageProps {
-  message: string;
-  title: string;
-  actionLabel: string;
-  actionUrl: string;
+  actionPrimaryIcon?: IconType;
+  actionPrimaryLabel: string;
+  actionPrimaryTarget?: string;
+  actionPrimaryUrl: string;
+  actionSecondaryIcon?: IconType;
+  actionSecondaryLabel?: string;
+  actionSecondaryTarget?: string;
+  actionSecondaryUrl?: string;
   'data-test-subj'?: string;
+  message?: string;
+  title: string;
 }
 
 export const EmptyPage = pure<EmptyPageProps>(
-  ({ actionLabel, actionUrl, message, title, ...rest }) => (
-    <CenteredEmptyPrompt
+  ({
+    actionPrimaryIcon,
+    actionPrimaryLabel,
+    actionPrimaryTarget,
+    actionPrimaryUrl,
+    actionSecondaryIcon,
+    actionSecondaryLabel,
+    actionSecondaryTarget,
+    actionSecondaryUrl,
+    message,
+    title,
+    ...rest
+  }) => (
+    <EmptyPrompt
       title={<h2>{title}</h2>}
-      body={<p>{message}</p>}
+      body={message && <p>{message}</p>}
       actions={
-        <EuiButton href={actionUrl} color="primary" fill>
-          {actionLabel}
-        </EuiButton>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButton
+              fill
+              href={actionPrimaryUrl}
+              iconType={actionPrimaryIcon}
+              target={actionPrimaryTarget}
+            >
+              {actionPrimaryLabel}
+            </EuiButton>
+          </EuiFlexItem>
+
+          {actionSecondaryLabel && actionSecondaryUrl && (
+            <EuiFlexItem>
+              <EuiButton
+                href={actionSecondaryUrl}
+                iconType={actionSecondaryIcon}
+                target={actionSecondaryTarget}
+              >
+                {actionSecondaryLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       }
       {...rest}
     />
   )
 );
-
-const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center;
-`;

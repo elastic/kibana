@@ -42,6 +42,7 @@ import {
   fetchRootRepoTree,
   fetchRootRepoTreeSuccess,
   fetchRootRepoTreeFailed,
+  dirNotFound,
 } from '../actions';
 import { RootState } from '../reducers';
 import { treeCommitsSelector, createTreeSelector } from '../selectors';
@@ -65,6 +66,9 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
       yield call(fetchPath, action.payload!);
     }
   } catch (err) {
+    if (action.payload!.isDir && err.body && err.body.statusCode === 404) {
+      yield put(dirNotFound(action.payload!.path));
+    }
     yield put(fetchRepoTreeFailed(err));
   }
 }
@@ -284,8 +288,9 @@ export function* watchFetchBranchesAndCommits() {
 }
 
 function* handleRepoRouteChange(action: Action<Match>) {
-  const { url } = action.payload!;
-  yield put(gotoRepo(url));
+  const { repo, org, resource } = action.payload!.params;
+  const uri = `${resource}/${org}/${repo}`;
+  yield put(gotoRepo(uri));
 }
 
 export function* watchRepoRouteChange() {
