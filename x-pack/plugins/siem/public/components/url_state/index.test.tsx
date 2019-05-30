@@ -169,7 +169,7 @@ describe('UrlStateComponents', () => {
 
       wrapper.setProps({ urlState: newUrlState });
       wrapper.update();
-      await wait(1000);
+      await wait(2000); // double throttle wait time for latency issues in jenkins
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
@@ -193,7 +193,7 @@ describe('UrlStateComponents', () => {
 
       wrapper.setProps({ urlState: newUrlState });
       wrapper.update();
-      await wait(1000);
+      await wait(2000); // double throttle wait time for latency issues with this test
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
@@ -203,94 +203,181 @@ describe('UrlStateComponents', () => {
       });
     });
   });
-  describe('isKqlForRoute', () => {
-    test('host page and host page kuery', () => {
-      const result = isKqlForRoute('/hosts', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.page,
-      });
-      expect(result).toBeTruthy();
+
+  describe('handleInitialize', () => {
+    // silly that this needs to be an array and not an object
+    // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
+    const testCases = [
+      [
+        /* page */ CONSTANTS.networkPage,
+        /* namespaceLower */ 'network',
+        /* namespaceUpper */ 'Network',
+        /* examplePath */ '/network',
+        /* type */ networkModel.NetworkType.page,
+      ],
+      [
+        /* page */ CONSTANTS.hostsPage,
+        /* namespaceLower */ 'hosts',
+        /* namespaceUpper */ 'Hosts',
+        /* examplePath */ '/hosts',
+        /* type */ hostsModel.HostsType.page,
+      ],
+      [
+        /* page */ CONSTANTS.hostsDetails,
+        /* namespaceLower */ 'hosts',
+        /* namespaceUpper */ 'Hosts',
+        /* examplePath */ '/hosts/siem-es',
+        /* type */ hostsModel.HostsType.details,
+      ],
+      [
+        /* page */ CONSTANTS.networkDetails,
+        /* namespaceLower */ 'network',
+        /* namespaceUpper */ 'Network',
+        /* examplePath */ '/network/ip/100.90.80',
+        /* type */ networkModel.NetworkType.details,
+      ],
+    ];
+    afterEach(() => {
+      jest.resetAllMocks();
     });
-    test('host page and host details kuery', () => {
-      const result = isKqlForRoute('/hosts', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.details,
+    describe('URL state updates redux', () => {
+      describe('relative timerange actions are called with correct data on component mount', () => {
+        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath, type) => {
+          mockProps = getMockPropsObj({ page, examplePath, namespaceLower, type })
+            .relativeTimeSearch.undefinedQuery;
+          shallow(<UrlStateContainerLifecycle {...mockProps} />);
+          // @ts-ignore property mock does not exists
+          expect(defaultProps.setRelativeTimerange.mock.calls[0][0]).toEqual({
+            from: 1558591200000,
+            fromStr: 'now-1d/d',
+            kind: 'relative',
+            to: 1558677599999,
+            toStr: 'now-1d/d',
+            id: 'global',
+          });
+          // @ts-ignore property mock does not exists
+          expect(defaultProps.setRelativeTimerange.mock.calls[1][0]).toEqual({
+            from: 1558732849370,
+            fromStr: 'now-15m',
+            kind: 'relative',
+            to: 1558733749370,
+            toStr: 'now',
+            id: 'timeline',
+          });
+        });
       });
-      expect(result).toBeFalsy();
+      describe('absolute timerange actions are called with correct data on component mount', () => {
+        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath, type) => {
+          mockProps = getMockPropsObj({ page, examplePath, namespaceLower, type })
+            .absoluteTimeSearch.undefinedQuery;
+          shallow(<UrlStateContainerLifecycle {...mockProps} />);
+          // @ts-ignore property mock does not exists
+          expect(defaultProps.setAbsoluteTimerange.mock.calls[0][0]).toEqual({
+            from: 1556736012685,
+            kind: 'absolute',
+            to: 1556822416082,
+            id: 'global',
+          });
+          // @ts-ignore property mock does not exists
+          expect(defaultProps.setAbsoluteTimerange.mock.calls[1][0]).toEqual({
+            from: 1556736012685,
+            kind: 'absolute',
+            to: 1556822416082,
+            id: 'timeline',
+          });
+        });
+      });
+      describe('kqlQuery action is called with correct data on component mount', () => {
+        test.each(testCases)(' %o', (page, namespaceLower, namespaceUpper, examplePath, type) => {
+          mockProps = getMockPropsObj({ page, examplePath, namespaceLower, type })
+            .relativeTimeSearch.undefinedQuery;
+          shallow(<UrlStateContainerLifecycle {...mockProps} />);
+          const functionName =
+            namespaceUpper === 'Network' ? defaultProps.setNetworkKql : defaultProps.setHostsKql;
+          // @ts-ignore property mock does not exists
+          expect(functionName.mock.calls[0][0]).toEqual({
+            filterQuery: serializedFilterQuery,
+            [`${namespaceLower}Type`]: type,
+          });
+        });
+      });
+      describe('kqlQuery action is not called called when the queryLocation does not match the router location', () => {
+        test.each(testCases)(
+          '%o',
+          async (page, namespaceLower, namespaceUpper, examplePath, type) => {
+            mockProps = getMockPropsObj({ page, examplePath, namespaceLower, type })
+              .oppositeQueryLocationSearch.undefinedQuery;
+            shallow(<UrlStateContainerLifecycle {...mockProps} />);
+            // @ts-ignore property mock does not exists
+            expect(defaultProps[`set${namespaceUpper}Kql`].mock.calls.length).toEqual(0);
+          }
+        );
+      });
     });
-    test('host details and host details kuery', () => {
-      const result = isKqlForRoute('/hosts/siem-kibana', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.details,
+
+    describe('Redux updates URL state', () => {
+      afterEach(() => {
+        jest.resetAllMocks();
       });
-      expect(result).toBeTruthy();
-    });
-    test('host details and host page kuery', () => {
-      const result = isKqlForRoute('/hosts/siem-kibana', {
-        filterQuery: {
-          expression: 'host.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.hosts,
-        type: hostsModel.HostsType.page,
+      describe('kqlQuery url state is set from redux data on component mount', () => {
+        afterEach(() => {
+          jest.resetAllMocks();
+        });
+        test.each(testCases)(
+          '%o',
+          async (page, namespaceLower, namespaceUpper, examplePath, type) => {
+            mockProps = getMockPropsObj({ page, examplePath, namespaceLower, type }).noSearch
+              .definedQuery;
+            shallow(<UrlStateContainerLifecycle {...mockProps} />);
+
+            // @ts-ignore property mock does not exists
+            expect(mockHistory.replace.mock.calls[0][0]).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page},type:${type})`,
+              state: '',
+            });
+          }
+        );
       });
-      expect(result).toBeFalsy();
-    });
-    test('network page and network page kuery', () => {
-      const result = isKqlForRoute('/network', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.page,
+
+      describe('kqlQuery and timerange url state is set when not defined on component mount', () => {
+        afterEach(() => {
+          jest.resetAllMocks();
+        });
+        test.each(testCases)(
+          '%o',
+          async (page, namespaceLower, namespaceUpper, examplePath, type) => {
+            const forSureResetProps = {
+              ...getMockPropsObj({ page, examplePath, namespaceLower, type }).noSearch
+                .undefinedQuery,
+              history: {
+                ...mockHistory,
+                replace: jest.fn(),
+              },
+            };
+            shallow(<UrlStateContainerLifecycle {...forSureResetProps} />);
+            await wait(2000); // double throttle wait time for latency issues in jenkins
+
+            // @ts-ignore property mock does not exists
+            expect(forSureResetProps.history.replace.mock.calls[0][0]).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search: `?_g=()&kqlQuery=(filterQuery:!n,queryLocation:${page},type:${type})`,
+              state: '',
+            });
+
+            // @ts-ignore property mock does not exists
+            expect(forSureResetProps.history.replace.mock.calls[1][0]).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search:
+                '?_g=()&timerange=(global:(from:1558048243696,fromStr:now-24h,kind:relative,linkTo:!(timeline),to:1558134643697,toStr:now),timeline:(from:1558048243696,fromStr:now-24h,kind:relative,linkTo:!(global),to:1558134643697,toStr:now))',
+              state: '',
+            });
+          }
+        );
       });
-      expect(result).toBeTruthy();
-    });
-    test('network page and network details kuery', () => {
-      const result = isKqlForRoute('/network', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.details,
-      });
-      expect(result).toBeFalsy();
-    });
-    test('network details and network details kuery', () => {
-      const result = isKqlForRoute('/network/ip/10.100.7.198', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.details,
-      });
-      expect(result).toBeTruthy();
-    });
-    test('network details and network page kuery', () => {
-      const result = isKqlForRoute('/network/ip/123.234.34', {
-        filterQuery: {
-          expression: 'network.name:"siem-kibana"',
-          kind: 'kuery',
-        },
-        model: KueryFilterModel.network,
-        type: networkModel.NetworkType.page,
-      });
-      expect(result).toBeFalsy();
     });
   });
 });
