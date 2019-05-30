@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionId, Payload, State, TypeName, UpdaterFunction } from '.';
+import { ActionId, Payload, State, Store, TypeName, UpdaterFunction } from '.';
 
 let counter = 0 as ActionId;
-
-interface Store {
-  getCurrentState: () => State;
-  setCurrentState: (state: State) => void;
-  commit: (type: TypeName, payload: Payload) => void;
-}
 
 export const createStore = (initialState: State, updater: UpdaterFunction): Store => {
   let currentState = initialState;

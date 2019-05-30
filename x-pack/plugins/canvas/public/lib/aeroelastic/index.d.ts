@@ -37,8 +37,14 @@ interface WithActionId {
 // reselect-based data flow
 export type PlainFun = (...args: Json[]) => Json;
 export type Selector = (...fns: Resolve[]) => Resolve;
-type Resolve = ((obj: State) => Json);
+export type Resolve = ((obj: State) => Json);
 
 export type TypeName = string;
 export type Payload = JsonMap;
 export type UpdaterFunction = (arg: State) => State;
+
+export interface Store {
+  getCurrentState: () => State;
+  setCurrentState: (state: State) => void;
+  commit: (type: TypeName, payload: Payload) => void;
+}
