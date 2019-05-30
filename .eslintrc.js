@@ -184,7 +184,13 @@ module.exports = {
         // instructs import/no-extraneous-dependencies to treat modules
         // in plugins/ or ui/ namespace as "core modules" so they don't
         // trigger failures for not being listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+        'import/core-modules': [
+          'plugins',
+          'legacy/ui',
+          'uiExports',
+          // TODO: Remove once https://github.com/benmosher/eslint-plugin-import/issues/1374 is fixed
+          'querystring',
+        ],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
