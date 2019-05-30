@@ -5,7 +5,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { isString } from 'lodash/fp';
+import { isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { KueryFilterQuery } from '../../store';
@@ -25,7 +25,7 @@ export const convertKueryToElasticSearchQuery = (
 
 export const escapeQueryValue = (val: number | string = ''): string | number => {
   if (isString(val)) {
-    return val.replace(/"/g, '\\"');
+    return escapeKuery(val);
   }
 
   return val;
@@ -41,3 +41,24 @@ export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | nu
   }
   return true;
 };
+
+const escapeWhitespace = (val: string) =>
+  val
+    .replace(/\t/g, '\\t')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n');
+
+// See the SpecialCharacter rule in kuery.peg
+const escapeSpecialCharacters = (val: string) => val.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
+
+// See the Keyword rule in kuery.peg
+const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
+
+const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
+
+export const escapeKuery = flow(
+  escapeSpecialCharacters,
+  escapeAndOr,
+  escapeNot,
+  escapeWhitespace
+);
