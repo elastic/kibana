@@ -7,6 +7,23 @@
 import { get, set } from 'lodash';
 import { QUERY } from '../../../common/constants';
 
+const identifyStatusClause = (item: any) => !get(item, ['match', 'monitor.status']);
+
+const removeNestedStatusQuery = (item: any) => {
+  if (Array.isArray(item)) {
+    return item.map((value: any) => {
+      if (value.bool && value.bool.must) {
+        value.bool.must = get<any[]>(value, 'bool.must', []).filter(identifyStatusClause);
+      }
+      if (value.bool && value.bool.should) {
+        value.bool.should = get<any[]>(value, 'bool.should', []);
+      }
+      return value;
+    });
+  }
+  return item;
+};
+
 export const getFilteredQuery = (
   dateRangeStart: string,
   dateRangeEnd: string,
@@ -31,7 +48,7 @@ export const getFilteredQuery = (
         : filter
     );
     delete filtersObj.bool.must;
-    filtersObj.bool.filter = [...userFilters];
+    filtersObj.bool.filter = [...removeNestedStatusQuery(userFilters)];
   }
   const query = { ...filtersObj };
   const rangeSection = {

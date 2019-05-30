@@ -20,10 +20,12 @@ const isStatusFilter = (clauseToCheck: any): boolean =>
  * @param filterClause an object containing a status filter, or an array with an object
  * containing a filter.
  */
-const checkFilterClause = (filterClause: any) => {
+const hasStatusFilter = (filterClause: any): boolean => {
   const mustClause = get<object | undefined>(filterClause, 'bool.must');
-  if (Array.isArray(mustClause) && mustClause.length === 1) {
-    return isStatusFilter(mustClause[0]);
+  if (Array.isArray(mustClause)) {
+    return mustClause
+      .map(childClause => isStatusFilter(childClause))
+      .reduce((prev, cur) => prev || cur, false);
   }
 
   return isStatusFilter(filterClause);
@@ -72,17 +74,26 @@ const checkFilterClause = (filterClause: any) => {
  * `))
  */
 const getStatusClause = (statusFilter: any): string | undefined => {
-  if (statusFilter.length && statusFilter[0].match) {
-    return statusFilter[0].match['monitor.status'].query;
-  } else if (statusFilter.length) {
-    return get<string | undefined>(statusFilter[0], [
-      'bool',
-      'must',
-      0,
-      'match',
-      'monitor.status',
-      'query',
-    ]);
+  // the status clause was not nested
+  if (Array.isArray(statusFilter) && statusFilter.some(c => c.match && c.match['monitor.status'])) {
+    return statusFilter.find(l => l.match['monitor.status']).match['monitor.status'].query;
+  } else if (Array.isArray(statusFilter)) {
+    // the status clause was nested
+    return statusFilter
+      .map(clause =>
+        clause.bool && clause.bool.must && clause.bool.must.length ? clause.bool.must : []
+      )
+      .reduce((prev, cur) => {
+        const statusClause = cur.find((clause: any) =>
+          get(clause, ['match', 'monitor.status', 'query'])
+        );
+        const statusString = get<string | undefined>(statusClause, [
+          'match',
+          'monitor.status',
+          'query',
+        ]);
+        return statusString || prev;
+      }, undefined);
   }
   return undefined;
 };
@@ -94,7 +105,7 @@ const getStatusClause = (statusFilter: any): string | undefined => {
 const getStatusFilter = (filters: any): string | undefined => {
   const must = get(filters, 'bool.must', []);
   if (must && must.length) {
-    const statusFilter = filters.bool.must.filter((filter: any) => checkFilterClause(filter));
+    const statusFilter = filters.bool.must.filter((filter: any) => hasStatusFilter(filter));
     return getStatusClause(statusFilter);
   }
 };
@@ -118,17 +129,17 @@ export const getFilteredQueryAndStatusFilter = (
   let nonStatusFilters;
   if (filters) {
     filterObject = JSON.parse(filters);
+    statusFilter = getStatusFilter(filterObject);
     nonStatusFilters = getFilteredQuery(dateRangeStart, dateRangeEnd, {
       bool: {
         must: filterObject.bool.must.filter(
           (filter: any) =>
             (filter.match && !filter.match['monitor.status']) ||
             filter.simple_query_string ||
-            (filter.bool && !checkFilterClause(filter))
+            filter.bool
         ),
       },
     });
-    statusFilter = getStatusFilter(filterObject);
   } else {
     nonStatusFilters = getFilteredQuery(dateRangeStart, dateRangeEnd);
   }
