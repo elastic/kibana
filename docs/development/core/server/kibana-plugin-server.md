@@ -29,6 +29,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
+|  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
@@ -49,7 +50,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [Headers](./kibana-plugin-server.headers.md) |  |
-|  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) |  |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) |  |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
