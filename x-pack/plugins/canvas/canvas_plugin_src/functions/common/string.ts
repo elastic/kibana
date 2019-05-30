@@ -10,7 +10,7 @@ interface Arguments {
   value: string[];
 }
 
-export function string(): ExpressionFunction<'string', void, Arguments, string> {
+export function string(): ExpressionFunction<'string', any, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().string;
 
   return {

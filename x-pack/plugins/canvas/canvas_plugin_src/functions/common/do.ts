@@ -10,7 +10,7 @@ interface Arguments {
   fn: any[];
 }
 
-export function doFn(): ExpressionFunction<'do', void, Arguments, any> {
+export function doFn(): ExpressionFunction<'do', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().do;
 
   return {

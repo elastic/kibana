@@ -12,7 +12,7 @@ interface Arguments {
   else: () => Promise<any>;
 }
 
-export function ifFn(): ExpressionFunction<'if', void, Arguments, any> {
+export function ifFn(): ExpressionFunction<'if', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().if;
 
   return {

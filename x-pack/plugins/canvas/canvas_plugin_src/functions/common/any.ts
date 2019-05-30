@@ -11,7 +11,7 @@ interface Arguments {
   condition: boolean[] | null;
 }
 
-export function any(): ExpressionFunction<'any', void, Arguments, boolean> {
+export function any(): ExpressionFunction<'any', any, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().any;
 
   return {

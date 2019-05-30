@@ -48,7 +48,7 @@ export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filt
         value,
         column,
         and: [],
-      } as Filter;
+      };
 
       return { ...context, and: [...context.and, filter] };
     },

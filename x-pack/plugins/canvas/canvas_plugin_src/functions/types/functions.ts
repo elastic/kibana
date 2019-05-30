@@ -14,20 +14,14 @@ import { functions as serverFunctions } from '../../functions/server';
 // one useable type.
 // prettier-ignore
 export type FunctionFactory<FnFactory> = 
-  FnFactory extends InterpreterFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
+  FnFactory extends ExpressionFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
     ExpressionFunction<Name, Context, Arguments, Return> :
     never;
 
-/**
- * A type containing all available Functions.
- */
-export type AvailableFunctions = FunctionFactory<Functions>;
-
-/**
- * A type containing all of the Function names available to Canvas, formally exported.
- */
+// A `ExpressionFunctionFactory` defines a function that produces a named `ExpressionFunction`.
 // prettier-ignore
-export type AvailableFunctionNames = AvailableFunctions['name'];
+type ExpressionFunctionFactory<Name extends string, Context, Arguments, Return> = 
+    () => ExpressionFunction<Name, Context, Arguments, Return>;
 
 // A type containing all of the raw Function definitions in Canvas.
 // prettier-ignore
@@ -36,8 +30,12 @@ type Functions =
   typeof serverFunctions[number] &
   typeof browserFunctions[number];
 
-// A `InterpreterFunctionFactory` defines the function that produces a named FunctionSpec using
-// the Interpreter type.
-// prettier-ignore
-type InterpreterFunctionFactory<Name extends string, Context, Arguments, Return> = 
-  () => ExpressionFunction<Name, Context, Arguments, Return>;
+/**
+ * A type containing all Canvas Functions.
+ */
+export type AvailableFunctions = FunctionFactory<Functions>;
+
+/**
+ * A type containing all Canvas Function names.
+ */
+export type AvailableFunctionNames = AvailableFunctions['name'];

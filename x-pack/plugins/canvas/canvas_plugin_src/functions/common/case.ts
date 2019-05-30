@@ -18,7 +18,7 @@ interface Case {
   result: any;
 }
 
-export function caseFn(): ExpressionFunction<'case', void, Arguments, Promise<Case>> {
+export function caseFn(): ExpressionFunction<'case', any, Arguments, Promise<Case>> {
   const { help, args: argHelp } = getFunctionHelp().case;
 
   return {

@@ -12,7 +12,7 @@ interface Arguments {
   default: () => any;
 }
 
-export function switchFn(): ExpressionFunction<'switch', void, Arguments, any> {
+export function switchFn(): ExpressionFunction<'switch', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {

@@ -59,7 +59,7 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
         type: 'time',
         column,
         and: [],
-      } as Filter;
+      };
 
       function parseAndValidate(str: string): string {
         const moment = dateMath.parse(str);

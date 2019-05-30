@@ -6,7 +6,7 @@
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
-export function clear(): ExpressionFunction<'clear', void, {}, null> {
+export function clear(): ExpressionFunction<'clear', any, {}, null> {
   const { help } = getFunctionHelp().clear;
 
   return {

@@ -6,7 +6,7 @@
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
-export function server(): ExpressionFunction<'server', void, {}, any> {
+export function server(): ExpressionFunction<'server', any, {}, any> {
   const { help } = getFunctionHelp().server;
 
   return {
