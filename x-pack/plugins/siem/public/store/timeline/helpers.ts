@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getOr, omit, uniq, isEqual, isEmpty, isEqualWith } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
@@ -12,7 +12,6 @@ import {
   DataProvider,
   QueryOperator,
   QueryMatch,
-  DataProvidersAnd,
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
