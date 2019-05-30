@@ -13,7 +13,7 @@ import { MetricsChart } from './MetricsChart';
 
 interface ServiceMetricsProps {
   urlParams: IUrlParams;
-  agentName: string;
+  agentName?: string;
 }
 
 export function ServiceMetrics({ urlParams, agentName }: ServiceMetricsProps) {
