@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
 
-export const FillableCircle = ({ style }) => (
+export const PointIcon = ({ style }) => (
   <svg
     className="euiIcon euiIcon--medium mapFillableCircle"
     xmlns="http://www.w3.org/2000/svg"
@@ -41,22 +40,5 @@ export const FillableCircle = ({ style }) => (
         transform="matrix(0.99985753,0.01687955,0,1,0,0)"
       />
     </g>
-  </svg>
-);
-
-export const FillableRectangle = ({ style }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-  >
-    <rect width="15" height="15" x=".5" y=".5" style={style} rx="4"/>
-  </svg>
-);
-
-export const ColorableLine = ({ style }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-    <line x1="0" y1="6" x2="16" y2="6" style={style} />
   </svg>
 );
