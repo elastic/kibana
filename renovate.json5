@@ -56,9 +56,39 @@
         enabled: true,
       },
       {
-        packagePatterns: ['^@babel', '.*babel.*'],
+        packagePatterns: ['^@babel', '\\bbabel\\b'],
         groupName: 'babel related packages',
         groupSlug: 'babel',
+        enabled: true,
+      },
+      {
+        packagePatterns: ['\\bjest\\b'],
+        groupName: 'jest related packages',
+        groupSlug: 'jest',
+        enabled: true,
+      },
+      {
+        packagePatterns: ['\\bmocha\\b'],
+        groupName: 'mocha related packages',
+        groupSlug: 'mocha',
+        enabled: true,
+      },
+      {
+        packagePatterns: ['\\bkarma\\b'],
+        groupName: 'karma related packages',
+        groupSlug: 'karma',
+        enabled: true,
+      },
+      {
+        packagePatterns: ['\\bgulp\\b'],
+        groupName: 'gulp related packages',
+        groupSlug: 'gulp',
+        enabled: true,
+      },
+      {
+        packagePatterns: ['\\bgrunt\\b'],
+        groupName: 'grunt related packages',
+        groupSlug: 'grunt',
         enabled: true,
       },
       {
