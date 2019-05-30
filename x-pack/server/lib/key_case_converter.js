@@ -24,7 +24,7 @@ function convertKeysToSpecifiedCaseDeep(object, caseConversionFunction) {
     newObject = _.clone(object);
 
     // Convert top-level keys
-    newObject = _.mapKeys(newObject, (value, key) => caseConversionFunction(key));
+    newObject = _.mapKeys(newObject, (value, key) => caseConversionFunction(key)); // eslint-disable-line no-unused-vars
   }
 
   // Recursively convert nested object keys

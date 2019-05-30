@@ -1,5 +1,5 @@
 <div ng-if="card.existsInDocs === true" class="card-contents">
-  <div class="stats euiText">
+  <div class="stats euiText--small">
     <div class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
       <span
         i18n-id="xpack.ml.fieldDataCard.cardNumber.cardStatsCountDocumentsPercentsLabel"
@@ -37,9 +37,18 @@
       ></div>
     </div>
     <div>
-      <div class="stat min">{{ card.stats.min | formatField:card.fieldFormat }}</div>
-      <div class="stat median">{{ card.stats.median | formatField:card.fieldFormat }}</div>
-      <div class="stat max">{{ card.stats.max | formatField:card.fieldFormat }}</div>
+      <div class="stat min value">
+        <ml-display-value value="card.stats.min | formatField:card.fieldFormat">
+        </ml-display-value>
+      </div>
+      <div class="stat median value">
+        <ml-display-value value="card.stats.median | formatField:card.fieldFormat">
+        </ml-display-value>
+      </div>
+      <div class="stat max value">
+        <ml-display-value value="card.stats.max | formatField:card.fieldFormat">
+        </ml-display-value>
+      </div>
     </div>
   </div>
 
