@@ -123,7 +123,9 @@ export const setup = (
             return next;
           },
           async error => {
-            if (controller.halted) {
+            if (error instanceof HttpInterceptHaltError) {
+              throw error;
+            } else if (controller.halted) {
               throw new HttpInterceptHaltError();
             }
 
@@ -172,7 +174,9 @@ export const setup = (
             return current;
           },
           async error => {
-            if (controller.halted) {
+            if (error instanceof HttpInterceptHaltError) {
+              throw error;
+            } else if (controller.halted) {
               throw new HttpInterceptHaltError();
             }
 
