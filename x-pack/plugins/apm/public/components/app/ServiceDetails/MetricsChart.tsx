@@ -16,7 +16,7 @@ import {
   asDecimal
 } from '../../../utils/formatters';
 import { Coordinate } from '../../../../typings/timeseries';
-import { getEmptySerie } from '../../shared/charts/CustomPlot/getEmptySeries';
+import { getEmptySeries } from '../../shared/charts/CustomPlot/getEmptySeries';
 
 interface Props {
   start: number | string | undefined;
@@ -44,7 +44,7 @@ export function MetricsChart({ start, end, chart, hoverXHandlers }: Props) {
       <CustomPlot
         {...hoverXHandlers}
         noHits={noHits}
-        series={noHits ? getEmptySerie(start, end) : transformedSeries}
+        series={noHits ? getEmptySeries(start, end) : transformedSeries}
         tickFormatY={formatYValue}
         formatTooltipValue={formatTooltip}
         yMax={chart.yUnit === 'percent' ? 1 : 'max'}

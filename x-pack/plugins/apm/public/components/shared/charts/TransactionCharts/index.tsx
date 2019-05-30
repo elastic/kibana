@@ -27,7 +27,7 @@ import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';
 import { LicenseContext } from '../../../../context/LicenseContext';
-import { getEmptySerie } from '../CustomPlot/getEmptySeries';
+import { getEmptySeries } from '../CustomPlot/getEmptySeries';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -159,7 +159,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   <CustomPlot
                     noHits={noHits}
                     series={
-                      noHits ? getEmptySerie(start, end) : responseTimeSeries
+                      noHits ? getEmptySeries(start, end) : responseTimeSeries
                     }
                     {...hoverXHandlers}
                     tickFormatY={this.getResponseTimeTickFormatter}
@@ -177,7 +177,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiTitle>
                   <CustomPlot
                     noHits={noHits}
-                    series={noHits ? getEmptySerie(start, end) : tpmSeries}
+                    series={noHits ? getEmptySeries(start, end) : tpmSeries}
                     {...hoverXHandlers}
                     tickFormatY={this.getTPMFormatter}
                     formatTooltipValue={this.getTPMTooltipFormatter}

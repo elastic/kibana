@@ -7,7 +7,7 @@
 import { memoize } from 'lodash';
 import d3 from 'd3';
 
-export const getEmptySerie = memoize(
+export const getEmptySeries = memoize(
   (
     start: number | string = Date.now() - 3600000,
     end: number | string = Date.now()

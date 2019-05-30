@@ -14,7 +14,7 @@ import responseWithData from './responseWithData.json';
 import VoronoiPlot from '../VoronoiPlot';
 import InteractivePlot from '../InteractivePlot';
 import { getResponseTimeSeries } from '../../../../../selectors/chartSelectors';
-import { getEmptySerie } from '../getEmptySeries';
+import { getEmptySeries } from '../getEmptySeries';
 
 function getXValueByIndex(index) {
   return responseWithData.responseTimes.avg[index].x;
@@ -287,7 +287,7 @@ describe('when response has no data', () => {
   const onSelectionEnd = jest.fn();
   let wrapper;
   beforeEach(() => {
-    const series = getEmptySerie(1451606400000, 1451610000000);
+    const series = getEmptySeries(1451606400000, 1451610000000);
 
     wrapper = mount(
       <InnerCustomPlot
