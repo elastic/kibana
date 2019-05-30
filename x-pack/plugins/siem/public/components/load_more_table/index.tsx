@@ -172,7 +172,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         onClick={this.onButtonClick}
       >
         {i18n.ROWS}
-        {': '} {limit}
+        {`: ${limit}`}
       </EuiButtonEmpty>
     );
 

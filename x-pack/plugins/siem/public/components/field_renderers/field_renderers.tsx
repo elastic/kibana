@@ -67,8 +67,8 @@ export const autonomousSystemRenderer = (
           id={`${IpOverviewId}-${flowTarget}.autonomous_system.as_org`}
           field={`${flowTarget}.autonomous_system.as_org`}
           value={as.as_org}
-        />{' '}
-        {'/'}
+        />
+        {' /'}
         <DefaultDraggable
           id={`${IpOverviewId}-${flowTarget}.autonomous_system.asn`}
           field={`${flowTarget}.autonomous_system.asn`}

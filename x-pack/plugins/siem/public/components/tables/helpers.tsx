@@ -87,12 +87,12 @@ export const getRowItemDraggables = ({
       const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
       return (
         <React.Fragment key={id}>
-          {index !== 0 ? (
+          {index !== 0 && (
             <>
-              {', '}
+              {','}
               <Spacer />
             </>
-          ) : null}
+          )}
           <DraggableWrapper
             key={id}
             dataProvider={{
