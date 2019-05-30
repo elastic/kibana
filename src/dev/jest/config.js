@@ -54,8 +54,8 @@ export default {
   ],
 
   moduleNameMapper: {
-    '^plugins/([^\/.]*)': '<rootDir>/src/legacy/core_plugins/$1/public',
     '^plugins/([^\/.]*)/(.*)': '<rootDir>/src/legacy/core_plugins/$1/public/$2',
+    '^plugins/([^\/.]*)': '<rootDir>/src/legacy/core_plugins/$1/public',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
