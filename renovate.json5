@@ -63,6 +63,7 @@
       },
       {
         packagePatterns: ['^@babel', '\\bbabel\\b'],
+        packageNames: ['core-js'],
         groupName: 'babel related packages',
         groupSlug: 'babel',
         enabled: true,
