@@ -93,6 +93,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
               defaultMessage: 'IP range from: {value}',
               values: { value: item.value },
             })}
+            compressed
             isInvalid={showValidation ? item.from.isInvalid : false}
             placeholder="*"
             onChange={ev => {
@@ -108,6 +109,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
               defaultMessage: 'IP range to: {value}',
               values: { value: item.value },
             })}
+            compressed
             isInvalid={showValidation ? item.to.isInvalid : false}
             placeholder="*"
             onChange={ev => {
