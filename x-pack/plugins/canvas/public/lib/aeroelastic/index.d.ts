@@ -10,21 +10,18 @@
 type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
 type f = f64; // shorthand
 
-export type vector2d = [f, f, f] & ReadonlyArray<f> & { __nominal: 'vector2d' };
-export type vector3d = [f, f, f, f] & ReadonlyArray<f> & { __nominal: 'vector3d' };
+export type Vector2d = [f, f, f] & ReadonlyArray<f>;
+export type Vector3d = [f, f, f, f] & ReadonlyArray<f>;
 
-export type transformMatrix2d = [f, f, f, f, f, f, f, f, f] &
-  ReadonlyArray<f> & { __nominal: 'transformMatrix2d' };
-export type transformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f] &
-  ReadonlyArray<f> & { __nominal: 'transformMatrix3d' };
+export type TransformMatrix2d = [f, f, f, f, f, f, f, f, f] & ReadonlyArray<f>;
+export type TransformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f] & ReadonlyArray<f>;
 
 // plain, JSON-bijective value
 export type Json = JsonPrimitive | JsonArray | JsonMap;
 type JsonPrimitive = null | boolean | number | string;
 interface JsonArray extends Array<Json> {}
-interface JsonMap extends IMap<Json> {}
-interface IMap<T> {
-  [key: string]: T;
+interface JsonMap {
+  [key: string]: Json;
 }
 
 // state object

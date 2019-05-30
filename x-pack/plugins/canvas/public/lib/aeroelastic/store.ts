@@ -8,7 +8,13 @@ import { ActionId, Payload, State, TypeName, UpdaterFunction } from '.';
 
 let counter = 0 as ActionId;
 
-export const createStore = (initialState: State, updater: UpdaterFunction) => {
+interface Store {
+  getCurrentState: () => State;
+  setCurrentState: (state: State) => void;
+  commit: (type: TypeName, payload: Payload) => void;
+}
+
+export const createStore = (initialState: State, updater: UpdaterFunction): Store => {
   let currentState = initialState;
 
   const commit = (type: TypeName, payload: Payload) => {
