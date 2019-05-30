@@ -132,7 +132,7 @@
       {
         packageNames: [
           'hapi',
-          '@types/hapi'
+          '@types/hapi',
           'joi',
           '@types/joi',
           'boom',
