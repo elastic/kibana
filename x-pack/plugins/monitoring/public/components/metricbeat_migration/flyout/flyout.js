@@ -271,7 +271,7 @@ export class Flyout extends Component {
 
     return (
       <EuiText size="s">
-        <EuiLink href={documentationUrl}>
+        <EuiLink href={documentationUrl} target="_blank">
           Read more about this migration.
         </EuiLink>
       </EuiText>
