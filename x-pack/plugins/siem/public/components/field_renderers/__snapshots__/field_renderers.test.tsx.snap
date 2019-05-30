@@ -14,8 +14,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
         id="ip-overview-source.autonomous_system.as_org"
         value="Test Org"
       />
-       
-      /
+       /
       <pure(Component)
         field="source.autonomous_system.asn"
         id="ip-overview-source.autonomous_system.asn"
