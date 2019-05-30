@@ -65,6 +65,13 @@ export class FilterManager {
     );
   }
 
+  private mergeFilters(newFilters: any[], oldFilters: any[]): any[] {
+    // Order matters!
+    // uniqFilters will throw out duplicates from the back of the array,
+    // but we want newer filters to overwrite previously created filters.
+    return uniqFilters(newFilters.concat(oldFilters));
+  }
+
   private emitUpdateIfChanged(newFilters: any[], newGlobalFilters: any[]) {
     // This is an optimization
     const shouldFetch = this.shouldFetch(newFilters, newGlobalFilters);
@@ -91,13 +98,9 @@ export class FilterManager {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
-    // Order matters!
-    // uniqFilters will throw out duplicates from the back of the array,
-    // but we want newer filters to overwrite previously created filters.
-    const newAppFilters = uniqFilters((addToGlobalState ? [] : filters).concat(this.filters));
-    const newGlobalFilters = uniqFilters(
-      (addToGlobalState ? filters : []).concat(this.globalFilters)
-    );
+
+    const newAppFilters = this.mergeFilters(addToGlobalState ? [] : filters, this.filters);
+    const newGlobalFilters = this.mergeFilters(addToGlobalState ? filters : [], this.globalFilters);
 
     this.setFilters(newAppFilters, newGlobalFilters);
   }
