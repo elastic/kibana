@@ -8,7 +8,7 @@ import { isFunction } from 'lodash';
 
 export class CancellationToken {
   private isCancelled: boolean;
-  private _callbacks: any[];
+  private _callbacks: Function[];
 
   constructor() {
     this.isCancelled = false;
