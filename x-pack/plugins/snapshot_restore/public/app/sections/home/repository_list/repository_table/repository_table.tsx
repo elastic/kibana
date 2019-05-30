@@ -128,10 +128,18 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             return (
               <RepositoryDeleteProvider>
                 {deleteRepositoryPrompt => {
-                  const label = i18n.translate(
-                    'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
-                    { defaultMessage: 'Remove' }
-                  );
+                  const label =
+                    name !== managedRepository
+                      ? i18n.translate(
+                          'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
+                          { defaultMessage: 'Remove' }
+                        )
+                      : i18n.translate(
+                          'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
+                          {
+                            defaultMessage: 'You cannot delete a managed repository.',
+                          }
+                        );
                   return (
                     <EuiToolTip content={label} delay="long">
                       <EuiButtonIcon
@@ -178,7 +186,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
-          'xpack.snapshotRestore.repositoryList.table.unselectableManagedRepositoryTooltip',
+          'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
           {
             defaultMessage: 'You cannot delete a managed repository.',
           }
