@@ -4,21 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Provider } from 'react-redux';
-import { HashRouter } from 'react-router-dom';
+import { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nContext } from 'ui/i18n';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
 import chrome from 'ui/chrome';
 
-import { CRUD_APP_BASE_PATH } from './constants';
-import { setHttpClient, setUserHasLeftApp, setRedirect } from './services';
-import { App } from './app';
 import template from './main.html';
-import { remoteClustersStore } from './store';
+import { renderReact } from './app';
+import { CRUD_APP_BASE_PATH } from './app/constants';
+import { setHttpClient, setUserHasLeftApp, setRedirect } from './app/services';
 
 if (chrome.getInjected('remoteClustersUiEnabled')) {
   const esSection = management.getSection('elasticsearch');
@@ -31,19 +26,6 @@ if (chrome.getInjected('remoteClustersUiEnabled')) {
   });
 
   let appElement;
-
-  const renderReact = async (elem) => {
-    render(
-      <I18nContext>
-        <Provider store={remoteClustersStore}>
-          <HashRouter>
-            <App />
-          </HashRouter>
-        </Provider>
-      </I18nContext>,
-      elem
-    );
-  };
 
   routes.when(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
     template: template,
@@ -72,7 +54,9 @@ if (chrome.getInjected('remoteClustersUiEnabled')) {
 
         $scope.$$postDigest(() => {
           appElement = document.getElementById('remoteClustersReactRoot');
-          renderReact(appElement);
+          if (appElement) {
+            renderReact(appElement);
+          }
 
           const appRoute = $route.current;
           const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
