@@ -93,14 +93,14 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
     }
 
     return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
-      .then(function (filters) {
+      .then(function (mappedFilters) {
         if (!filterState.filters) {
           filterState.filters = [];
         }
 
-        filterState.filters = filterState.filters.concat(filters);
+        filterState.filters = filterState.filters.concat(mappedFilters);
 
-        filterStateManager.addFilters(filters, addToGlobalState);
+        filterStateManager.addFilters(mappedFilters, addToGlobalState);
       });
   };
 
