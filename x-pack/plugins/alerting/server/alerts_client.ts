@@ -80,12 +80,12 @@ export class AlertsClient {
       { references }
     );
     createdAlert.attributes.scheduledTaskId = scheduledTask.id;
-    return this.getAlertFromRaw(createdAlert.attributes, references);
+    return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
   }
 
   public async get({ id }: { id: string }) {
     const result = await this.savedObjectsClient.get('alert', id);
-    return this.getAlertFromRaw(result.attributes, result.references);
+    return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
   public async find({ options = {} }: FindOptions) {
@@ -94,7 +94,7 @@ export class AlertsClient {
       type: 'alert',
     });
     return results.saved_objects.map(result =>
-      this.getAlertFromRaw(result.attributes, result.references)
+      this.getAlertFromRaw(result.id, result.attributes, result.references)
     );
   }
 
@@ -128,7 +128,7 @@ export class AlertsClient {
       );
       updatedObject.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw(updatedObject.attributes, updatedObject.references);
+    return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
   private shouldRescheduleTask(previousAlert: Alert, updatedAlert: Alert) {
@@ -144,12 +144,14 @@ export class AlertsClient {
       params: {
         alertId: id,
       },
-      state: {},
+      state: {
+        nextIntendedRunAt: new Date(Date.now() + alert.interval),
+      },
       scope: [TASK_MANAGER_SCOPE],
     });
   }
 
-  private getAlertFromRaw(rawAlert: RawAlert, references: SavedObjectReference[]) {
+  private getAlertFromRaw(id: string, rawAlert: RawAlert, references: SavedObjectReference[]) {
     const actions = rawAlert.actions.map((action, i) => {
       const reference = references.find(ref => ref.name === action.actionRef);
       if (!reference) {
@@ -162,6 +164,7 @@ export class AlertsClient {
       };
     });
     return {
+      id,
       ...rawAlert,
       actions,
     };

@@ -55,6 +55,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         .then((resp: any) => {
           createdAlertIds.push(resp.body.id);
           expect(resp.body).to.eql({
+            id: resp.body.id,
             actions: [
               {
                 group: 'default',

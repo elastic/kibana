@@ -64,15 +64,22 @@ export function getCreateTaskRunnerFunction({
           alertInstance.resetFire();
         }
 
+        const nextRunAt = new Date(
+          // In the scenario the task took longer than the interval time to run,
+          // we'll run the next interval right away
+          Math.max(
+            new Date(taskInstance.state.nextIntendedRunAt).getTime() +
+              alertSavedObject.attributes.interval,
+            Date.now()
+          )
+        );
         return {
           state: {
             alertTypeState,
             alertInstances,
+            nextIntendedRunAt: nextRunAt,
           },
-          // TODO: Should it be now + interval or previous runAt + interval
-          runAt: alertSavedObject.attributes.interval
-            ? new Date(Date.now() + alertSavedObject.attributes.interval)
-            : undefined,
+          runAt: nextRunAt,
         };
       },
     };
