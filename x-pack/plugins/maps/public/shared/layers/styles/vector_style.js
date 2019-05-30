@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getHexColorRangeStrings } from '../../utils/color_utils';
+import { getColorRampStops } from './color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
@@ -372,18 +372,14 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
-    const colorRange = getHexColorRangeStrings(color, 8)
-      .reduce((accu, curColor, idx, srcArr) => {
-        accu = [ ...accu, idx / srcArr.length, curColor ];
-        return accu;
-      }, []);
+    const colorStops = getColorRampStops(color);
     const targetName = VectorStyle.getComputedFieldName(fieldName);
     return [
       'interpolate',
       ['linear'],
       ['coalesce', ['feature-state', targetName], -1],
       -1, 'rgba(0,0,0,0)',
-      ...colorRange
+      ...colorStops
     ];
   }
 

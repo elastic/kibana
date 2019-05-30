@@ -79,4 +79,9 @@
   vulnerabilityAlerts: {
     enabled: false
   },
+
+  /**
+   * Disable automatic rebase on each change to base branch
+   */
+  rebaseStalePrs: false
 }
