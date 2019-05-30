@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Render } from '../types';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {

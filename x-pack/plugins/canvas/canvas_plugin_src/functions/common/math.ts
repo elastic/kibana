@@ -6,9 +6,9 @@
 
 // @ts-ignore no @typed def; Elastic library
 import { evaluate } from 'tinymath';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { Datatable, isDatatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 

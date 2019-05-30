@@ -5,11 +5,11 @@
  */
 
 import { sortBy } from 'lodash';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 // @ts-ignore
 import { getDemoRows } from './get_demo_rows';
-import { ExpressionFunction } from '../../../../../../../src/legacy/core_plugins/interpreter/types';
 import { Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 import { getFunctionHelp } from '../../../strings';
 
