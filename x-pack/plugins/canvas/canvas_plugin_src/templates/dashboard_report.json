@@ -3,6 +3,7 @@
     "id": "workpad-0e126496-bb78-4b4a-96e3-a67a26560634",
     "displayName": "Dashboard",
     "help": "Infographic-style dashboard with live charts",
+    "tags": ["report"],
     "width": 1100,
     "height": 2570,
     "page": 0,
