@@ -58,5 +58,5 @@ export async function fetch(setup: Setup, serviceName: string) {
     }
   };
 
-  return client<void, MetricsAggs<CPUMetrics>>('search', params);
+  return client.search<void, MetricsAggs<CPUMetrics>>(params);
 }
