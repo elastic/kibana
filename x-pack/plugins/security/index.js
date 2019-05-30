@@ -125,10 +125,13 @@ export const security = (kibana) => new kibana.Plugin({
       };
     },
     replaceInjectedVars: async function (injectedVars, request, server) {
-      if (request.auth && request.auth.credentials) {
+      const { security } = server.plugins;
+      const hasCredentials = request.auth && request.auth.credentials;
+
+      if (hasCredentials && security.authorization.mode.useRbacForRequest(request)) {
         return {
           ...injectedVars,
-          canAccessKibana: await isAuthorizedKibanaUser(server.plugins.security.authorization, request),
+          canAccessKibana: await isAuthorizedKibanaUser(security.authorization, request),
         };
       }
       return injectedVars;
