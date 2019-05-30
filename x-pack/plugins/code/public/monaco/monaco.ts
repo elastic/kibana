@@ -103,7 +103,7 @@ const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
 
 const syntaxTheme = {
   keyword: themeName.euiColorAccent,
-  comment: themeName.euiColorMediumShade,
+  comment: themeName.euiColorDarkShade,
   delimiter: themeName.euiColorSecondary,
   string: themeName.euiColorPrimary,
   number: themeName.euiColorWarning,
@@ -113,10 +113,10 @@ const syntaxTheme = {
   tag: themeName.euiColorAccent,
   symbol: themeName.euiColorDanger,
   foreground: themeName.euiColorDarkestShade,
-  editorBackground: themeName.euiColorLightestShade,
+  editorBackground: themeName.euiColorEmptyShade,
   lineNumbers: themeName.euiColorDarkShade,
   editorIndentGuide: themeName.euiColorLightShade,
-  selectionBackground: themeName.euiColorLightShade,
+  selectionBackground: `${IS_DARK_THEME ? '#343551' : '#E3E4ED'}`,
   editorWidgetBackground: themeName.euiColorLightestShade,
   editorWidgetBorder: themeName.euiColorLightShade,
   findMatchBackground: themeName.euiColorWarning,
