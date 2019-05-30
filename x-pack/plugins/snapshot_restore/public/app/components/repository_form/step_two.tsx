@@ -25,7 +25,7 @@ import { textService } from '../../services/text';
 
 interface Props {
   repository: Repository;
-  isManagedRepository: boolean;
+  isManagedRepository?: boolean;
   isEditing?: boolean;
   isSaving: boolean;
   onSave: () => void;

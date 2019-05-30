@@ -15,7 +15,7 @@ import { RepositoryFormStepTwo } from './step_two';
 
 interface Props {
   repository: Repository | EmptyRepository;
-  isManagedRepository: boolean;
+  isManagedRepository?: boolean;
   isEditing?: boolean;
   isSaving: boolean;
   saveError?: React.ReactNode;
