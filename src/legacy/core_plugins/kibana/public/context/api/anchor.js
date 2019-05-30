@@ -43,6 +43,7 @@ export function fetchAnchorProvider(indexPatterns, Private) {
           constant_score: {
             filter: {
               ids: {
+                type: anchorType,
                 values: [anchorId],
               },
             },
