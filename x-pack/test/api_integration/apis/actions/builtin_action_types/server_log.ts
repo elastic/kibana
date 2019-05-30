@@ -9,18 +9,18 @@ import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function consoleLogTest({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function serverLogTest({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
 
-  describe('console_log', () => {
-    it('should return 200 when creating a builtin console-log action', async () => {
+  describe('create server-log action', () => {
+    it('should return 200 when creating a builtin server-log action', async () => {
       await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            description: 'A console.log action',
-            actionTypeId: 'kibana.console-log',
+            description: 'A server.log action',
+            actionTypeId: 'kibana.server-log',
             actionTypeConfig: {},
           },
         })
@@ -30,8 +30,8 @@ export default function consoleLogTest({ getService }: KibanaFunctionalTestDefau
             type: 'action',
             id: resp.body.id,
             attributes: {
-              description: 'A console.log action',
-              actionTypeId: 'kibana.console-log',
+              description: 'A server.log action',
+              actionTypeId: 'kibana.server-log',
               actionTypeConfig: {},
             },
             references: [],

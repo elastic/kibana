@@ -11,7 +11,7 @@ interface Services {
   log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
 }
 
-interface ExecutorOptions {
+export interface ExecutorOptions {
   actionTypeConfig: Record<string, any>;
   params: Record<string, any>;
   services: Services;

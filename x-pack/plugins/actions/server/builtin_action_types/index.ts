@@ -6,8 +6,8 @@
 
 import { ActionTypeService } from '../action_type_service';
 
-import { actionType as consoleLogActionType } from './console_log';
+import { actionType as serverLogActionType } from '././server_log';
 
 export function registerBuiltInActionTypes(actionTypeService: ActionTypeService) {
-  actionTypeService.register(consoleLogActionType);
+  actionTypeService.register(serverLogActionType);
 }
