@@ -56,7 +56,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
     filterQuery,
     flowTarget,
   }) => (
-    <WithSource sourceId="default" data-test-subj={'ip-details-page'}>
+    <WithSource sourceId="default" data-test-subj="ip-details-page">
       {({ indicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
           <StickyContainer>
@@ -66,7 +66,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
             </FiltersGlobal>
 
             <HeaderPage
-              data-test-subj={'ip-details-headline'}
+              data-test-subj="ip-details-headline"
               subtitle={
                 <LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={decodeIpv6(ip)} />
               }
