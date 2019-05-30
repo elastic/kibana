@@ -6,9 +6,9 @@
 import { KibanaRequest, OnPreAuthToolkit, HttpServiceSetup } from 'src/core/server';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { format } from 'url';
-import { modifyUrl } from '../../../../../../src/core/utils';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../spaces_url_parser';
+import { modifyUrl } from '../utils/url';
 
 export interface OnRequestInterceptorDeps {
   config: KibanaConfig;
