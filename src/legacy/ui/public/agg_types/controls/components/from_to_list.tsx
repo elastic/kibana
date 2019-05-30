@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { EuiFormLabel, EuiFieldText, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import Ipv4Address from '../../../utils/ipv4_address';
 import { InputList, InputListConfig, InputModel, InputObject } from './input_list';
 
@@ -43,7 +42,6 @@ type FromToModel = InputModel & {
 };
 
 interface FromToListProps {
-  labelledbyId: string;
   list: FromToObject[];
   showValidation: boolean;
   onBlur(): void;
@@ -51,7 +49,7 @@ interface FromToListProps {
   setValidity(isValid: boolean): void;
 }
 
-function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToListProps) {
+function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
   const fromToListConfig: InputListConfig = {
     defaultValue: {
       from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
@@ -91,7 +89,10 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
       <>
         <EuiFlexItem>
           <EuiFieldText
-            aria-labelledby={`visEditorIpRangeFromLabel${labelledbyId}`}
+            aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeFromAriaLabel', {
+              defaultMessage: 'IP range from: {value}',
+              values: { value: item.value },
+            })}
             isInvalid={showValidation ? item.from.isInvalid : false}
             placeholder="*"
             onChange={ev => {
@@ -103,7 +104,10 @@ function FromToList({ labelledbyId, showValidation, onBlur, ...rest }: FromToLis
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            aria-labelledby={`visEditorIpRangeToLabel${labelledbyId}`}
+            aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeToAriaLabel', {
+              defaultMessage: 'IP range to: {value}',
+              values: { value: item.value },
+            })}
             isInvalid={showValidation ? item.to.isInvalid : false}
             placeholder="*"
             onChange={ev => {

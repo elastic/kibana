@@ -28,16 +28,16 @@ enum IpRangeTypes {
   FROM_TO = 'fromTo',
 }
 
-function IpRangeTypeParamEditor({ value, setValue }: AggParamEditorProps<IpRangeTypes>) {
+function IpRangeTypeParamEditor({ agg, value, setValue }: AggParamEditorProps<IpRangeTypes>) {
   const options = [
     {
-      id: IpRangeTypes.FROM_TO,
+      id: `visEditorIpRangeFromToLabel${agg.id}`,
       label: i18n.translate('common.ui.aggTypes.ipRanges.fromToButtonLabel', {
         defaultMessage: 'From/to',
       }),
     },
     {
-      id: IpRangeTypes.MASK,
+      id: `visEditorIpRangeCidrLabel${agg.id}`,
       label: i18n.translate('common.ui.aggTypes.ipRanges.cidrMasksButtonLabel', {
         defaultMessage: 'CIDR masks',
       }),
@@ -45,7 +45,7 @@ function IpRangeTypeParamEditor({ value, setValue }: AggParamEditorProps<IpRange
   ];
 
   const onClick = (optionId: string) => {
-    setValue(optionId as IpRangeTypes);
+    setValue(optionId === options[0].id ? IpRangeTypes.FROM_TO : IpRangeTypes.MASK);
   };
 
   return (
@@ -53,7 +53,7 @@ function IpRangeTypeParamEditor({ value, setValue }: AggParamEditorProps<IpRange
       <EuiButtonGroup
         isFullWidth={true}
         onChange={onClick}
-        idSelected={value}
+        idSelected={value === IpRangeTypes.FROM_TO ? options[0].id : options[1].id}
         options={options}
         legend={i18n.translate('common.ui.aggTypes.ipRangesAriaLabel', {
           defaultMessage: 'IP ranges',

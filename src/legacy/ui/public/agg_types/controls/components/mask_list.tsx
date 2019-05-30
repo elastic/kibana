@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormLabel, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { CidrMask } from '../../../utils/cidr_mask';
 import { InputList, InputListConfig, InputObject } from './input_list';
 
@@ -38,7 +37,6 @@ interface MaskModel {
 }
 
 interface MaskListProps {
-  labelledbyId: string;
   list: MaskObject[];
   showValidation: boolean;
   onBlur(): void;
@@ -46,7 +44,7 @@ interface MaskListProps {
   setValidity(isValid: boolean): void;
 }
 
-function MaskList({ labelledbyId, showValidation, onBlur, ...rest }: MaskListProps) {
+function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
   const maskListConfig: InputListConfig = {
     defaultValue: {
       model: '0.0.0.0/1',
@@ -80,7 +78,10 @@ function MaskList({ labelledbyId, showValidation, onBlur, ...rest }: MaskListPro
     renderInputRow: (item: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText
-          aria-labelledby={`visEditorIpRangeCidrLabel${labelledbyId}`}
+          aria-label={i18n.translate('common.ui.aggTypes.ipRanges.cidrMaskAriaLabel', {
+            defaultMessage: 'CIDR mask: {mask}',
+            values: { mask: item.value },
+          })}
           isInvalid={showValidation ? item.isInvalid : false}
           placeholder="*"
           onChange={ev => {

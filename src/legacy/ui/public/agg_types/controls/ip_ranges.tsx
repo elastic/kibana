@@ -45,10 +45,9 @@ function IpRangesParamEditor({
   };
 
   return (
-    <EuiFormRow fullWidth={true}>
+    <EuiFormRow fullWidth={true} id={`visEditorIpRange${agg.id}`}>
       {agg.params.ipRangeType === IpRangeTypes.MASK ? (
         <MaskList
-          labelledbyId={agg.id}
           list={value.mask}
           showValidation={showValidation}
           onBlur={setTouched}
@@ -57,7 +56,6 @@ function IpRangesParamEditor({
         />
       ) : (
         <FromToList
-          labelledbyId={agg.id}
           list={value.fromTo}
           showValidation={showValidation}
           onBlur={setTouched}
