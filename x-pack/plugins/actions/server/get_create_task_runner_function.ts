@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType } from './types';
+import { ActionType, Services } from './types';
 import { TaskInstance } from '../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { throwIfActionTypeConfigInvalid } from './throw_if_action_type_config_invalid';
 import { throwIfActionTypeParamsInvalid } from './throw_if_action_type_params_invalid';
 
 interface CreateTaskRunnerFunctionOptions {
+  services: Services;
   actionType: ActionType;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 }
@@ -20,6 +21,7 @@ interface TaskRunnerOptions {
 }
 
 export function getCreateTaskRunnerFunction({
+  services,
   actionType,
   encryptedSavedObjectsPlugin,
 }: CreateTaskRunnerFunctionOptions) {
@@ -37,6 +39,7 @@ export function getCreateTaskRunnerFunction({
         throwIfActionTypeConfigInvalid(actionType, mergedActionTypeConfig);
         throwIfActionTypeParamsInvalid(actionType, actionTypeParams);
         await actionType.executor({
+          services,
           actionTypeConfig: mergedActionTypeConfig,
           params: actionTypeParams,
         });

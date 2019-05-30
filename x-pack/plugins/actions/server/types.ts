@@ -14,6 +14,10 @@ export interface SavedObjectReference {
   id: string;
 }
 
+export interface Services {
+  log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
+}
+
 export interface ActionsPlugin {
   registerType: ActionTypeService['register'];
   listTypes: ActionTypeService['list'];
@@ -21,6 +25,7 @@ export interface ActionsPlugin {
 }
 
 export interface ActionTypeExecutorOptions {
+  services: Services;
   actionTypeConfig: Record<string, any>;
   params: Record<string, any>;
 }
@@ -33,5 +38,5 @@ export interface ActionType {
     params?: Record<string, any>;
     actionTypeConfig?: Record<string, any>;
   };
-  executor({ actionTypeConfig, params }: ActionTypeExecutorOptions): Promise<any>;
+  executor({ services, actionTypeConfig, params }: ActionTypeExecutorOptions): Promise<any>;
 }

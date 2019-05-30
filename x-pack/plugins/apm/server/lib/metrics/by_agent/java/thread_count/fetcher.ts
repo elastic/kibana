@@ -52,5 +52,5 @@ export async function fetch(setup: Setup, serviceName: string) {
     }
   };
 
-  return client<void, MetricsAggs<ThreadCountMetrics>>('search', params);
+  return client.search<void, MetricsAggs<ThreadCountMetrics>>(params);
 }

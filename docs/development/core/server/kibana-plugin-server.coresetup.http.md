@@ -8,9 +8,11 @@
 
 ```typescript
 http: {
+        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnRequest: HttpServiceSetup['registerOnRequest'];
+        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         getBasePathFor: HttpServiceSetup['getBasePathFor'];
         setBasePathFor: HttpServiceSetup['setBasePathFor'];
+        createNewServer: HttpServiceSetup['createNewServer'];
     };
 ```

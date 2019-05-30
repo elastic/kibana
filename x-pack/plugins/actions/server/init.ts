@@ -32,6 +32,9 @@ export function init(server: Legacy.Server) {
 
   const { taskManager } = server;
   const actionTypeService = new ActionTypeService({
+    services: {
+      log: server.log,
+    },
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
   });

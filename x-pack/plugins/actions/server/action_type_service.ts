@@ -6,22 +6,25 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { ActionType } from './types';
+import { ActionType, Services } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
 interface ConstructorOptions {
+  services: Services;
   taskManager: TaskManager;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 }
 
 export class ActionTypeService {
+  private services: Services;
   private taskManager: TaskManager;
   private actionTypes: Record<string, ActionType> = {};
   private encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 
-  constructor({ taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
+  constructor({ services, taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
+    this.services = services;
     this.taskManager = taskManager;
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
   }
@@ -53,6 +56,7 @@ export class ActionTypeService {
         title: actionType.name,
         type: `actions:${actionType.id}`,
         createTaskRunner: getCreateTaskRunnerFunction({
+          services: this.services,
           actionType,
           encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
         }),

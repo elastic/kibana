@@ -18,7 +18,12 @@ const mockEncryptedSavedObjectsPlugin = {
   getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
 } as EncryptedSavedObjectsPlugin;
 
+const services = {
+  log: jest.fn(),
+};
+
 const actionTypeServiceParams = {
+  services,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
 };
