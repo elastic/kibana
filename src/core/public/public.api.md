@@ -175,6 +175,26 @@ export interface FatalErrorsSetup {
 }
 
 // @public (undocumented)
+export interface HttpInterceptor {
+    // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpErrorRequest" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptController): Promise<Request> | Request | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpResponse" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    response?(httpResponse: HttpResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpErrorResponse" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+}
+
+// @public (undocumented)
 export interface HttpServiceBase {
     // (undocumented)
     addLoadingCount(count$: Observable<number>): void;
@@ -192,8 +212,6 @@ export interface HttpServiceBase {
     getLoadingCount$(): Observable<number>;
     // (undocumented)
     head: HttpHandler;
-    // Warning: (ae-forgotten-export) The symbol "HttpInterceptor" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     intercept(interceptor: HttpInterceptor): () => void;
     // (undocumented)

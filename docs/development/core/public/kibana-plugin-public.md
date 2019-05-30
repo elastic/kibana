@@ -33,6 +33,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) |  |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
+|  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) |  |
 |  [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |  |
 |  [I18nSetup](./kibana-plugin-public.i18nsetup.md) | I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
