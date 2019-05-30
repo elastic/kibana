@@ -3335,20 +3335,6 @@
   resolved "https://registry.yarnpkg.com/@types/deepmerge/-/deepmerge-2.1.0.tgz#22f175e5cb55874fe818caa6fd50a1d98fc3d748"
   integrity sha512-/0Ct/q5g+SgaACZ+A0ylY3071nEBN7QDnTWiCtaB3fx24UpoAQXf25yNVloOYVUis7jytM1F1WC78+EOwXkQJQ==
 
-"@types/del@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/del/-/del-3.0.0.tgz#1c8cd8b6e38da3b572352ca8eaf5527931426288"
-  integrity sha512-18mSs54BvzV8+TTQxt0ancig6tsuPZySnhp3cQkWFFDmDMavU4pmWwR+bHHqRBWODYqpzIzVkqKLuk/fP6yypQ==
-  dependencies:
-    "@types/glob" "*"
-
-"@types/del@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/del/-/del-3.0.1.tgz#4712da8c119873cbbf533ad8dbf1baac5940ac5d"
-  integrity sha512-y6qRq6raBuu965clKgx6FHuiPu3oHdtmzMPXi8Uahsjdq1L6DL5fS/aY5/s71YwM7k6K1QIWvem5vNwlnNGIkQ==
-  dependencies:
-    "@types/glob" "*"
-
 "@types/delete-empty@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
