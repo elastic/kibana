@@ -21,7 +21,6 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { context, createContext, useKibana } from './context';
 import { createMock } from './mock';
-import { Core } from './types';
 
 let container: HTMLDivElement | null;
 
