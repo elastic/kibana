@@ -294,6 +294,20 @@ export default function exploreRepositoryFunctonalTests({
       //     });
       //   });
       // });
+
+      it('goes to a repository which does not exist should render the 404 error page', async () => {
+        log.debug('it goes to a repository which does not exist');
+        const notExistRepoUri = 'github.com/I_DO_NOT_EXIST/I_DO_NOT_EXIST';
+        const url = `${PageObjects.common.getHostPort()}/app/code#/${notExistRepoUri}`;
+        await browser.get(url);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(notExistRepoUri)).to.greaterThan(0);
+        });
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeNotFoundErrorPage')).ok();
+        });
+      });
     });
   });
 }
