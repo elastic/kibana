@@ -69,7 +69,8 @@ export const fetchFileFailed = createAction<Error>('FETCH FILE ERROR');
 export const fetchDirectory = createAction<FetchRepoTreePayload>('FETCH REPO DIR');
 export const fetchDirectorySuccess = createAction<FileTree>('FETCH REPO DIR SUCCESS');
 export const fetchDirectoryFailed = createAction<Error>('FETCH REPO DIR FAILED');
-export const setNotFound = createAction<boolean>('SET NOT FOUND');
+export const setNotFound = createAction<boolean>('SET FILE NOT FOUND');
+export const dirNotFound = createAction<string>('DIR NOT FOUND');
 
 export const fetchTreeCommits = createAction<FetchFilePayload>('FETCH TREE COMMITS');
 export const fetchTreeCommitsSuccess = createAction<{
