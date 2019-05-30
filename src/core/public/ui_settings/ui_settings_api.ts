@@ -144,15 +144,13 @@ export class UiSettingsApi {
     try {
       this.loadingCount$.next(this.loadingCount$.getValue() + 1);
 
-      const value = await this.http.fetch(path, {
+      return await this.http.fetch(path, {
         method,
         body: JSON.stringify(body),
         headers: {
           accept: 'application/json',
         },
       });
-
-      return value;
     } catch (err) {
       if (err.response && err.response.status >= 300) {
         throw new Error(`Request failed with status code: ${err.response.status}`);

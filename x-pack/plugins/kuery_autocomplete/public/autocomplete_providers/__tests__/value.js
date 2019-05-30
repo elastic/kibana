@@ -72,10 +72,11 @@ describe('Kuery value suggestions', function () {
     const suggestions = await getSuggestions({ fieldName, prefix, suffix });
 
     const lastCall = fetchMock.lastCall(fetchUrlMatcher, 'POST');
+
+    expect(lastCall.request._bodyInit, '{"query":"","field":"machine.os.raw","boolFilter":[]}');
     expect(lastCall[0]).to.eql('/api/kibana/suggestions/values/logstash-*');
     expect(lastCall[1]).to.eql({
       method: 'POST',
-      body: '{"query":"","field":"machine.os.raw","boolFilter":[]}',
       headers: {
         'content-type': 'application/json',
         'kbn-version': '1.2.3',
