@@ -5,7 +5,19 @@
  */
 
 import { select } from '../../select';
-import { Json, Selector } from '../..';
+import { Json, Selector, vector2d, vector3d, transformMatrix2d, transformMatrix3d } from '../..';
+import {
+  mvMultiply as mult2d,
+  ORIGIN as UNIT2D,
+  UNITMATRIX as UNITMATRIX2D,
+  add as add2d,
+} from '../../matrix2d';
+import {
+  mvMultiply as mult3d,
+  ORIGIN as UNIT3D,
+  NANMATRIX as NANMATRIX3D,
+  add as add3d,
+} from '../../matrix';
 
 /*
 
@@ -33,6 +45,124 @@ import { Json, Selector } from '../..';
   /**
    * TYPE TEST SUITE
    */
+
+  (function vectorArrayCreationTests(vec2d: vector2d, vec3d: vector3d): void {
+    // 2D vector OK
+    vec2d = [0, 0, 0] as vector2d; // OK
+    vec2d = [-0, NaN, -Infinity] as vector2d; // IEEE 754 values are OK
+
+    // 3D vector OK
+    vec3d = [0, 0, 0, 0] as vector3d;
+    vec3d = [100, -0, Infinity, NaN] as vector3d;
+
+    // 2D vector not OK
+
+    // typings:expect-error
+    vec2d = 3; // not even an array
+    // typings:expect-error
+    vec2d = [] as vector2d; // no elements
+    // typings:expect-error
+    vec2d = [0, 0] as vector2d; // too few elements
+    // typings:expect-error
+    vec2d = [0, 0, 0, 0] as vector2d; // too many elements
+
+    // 3D vector not OK
+
+    // typings:expect-error
+    vec3d = 3; // not even an array
+    // typings:expect-error
+    vec3d = [] as vector2d; // no elements
+    // typings:expect-error
+    vec3d = [0, 0, 0] as vector2d; // too few elements
+    // typings:expect-error
+    vec3d = [0, 0, 0, 0, 0] as vector2d; // too many elements
+
+    return; // arrayCreationTests
+  })(UNIT2D, UNIT3D);
+
+  (function matrixArrayCreationTests(mat2d: transformMatrix2d, mat3d: transformMatrix3d): void {
+    // 2D matrix OK
+    mat2d = [0, 1, 2, 3, 4, 5, 6, 7, 8] as transformMatrix2d; // OK
+    mat2d = [-0, NaN, -Infinity, 3, 4, 5, 6, 7, 8] as transformMatrix2d; // IEEE 754 values are OK
+
+    // 3D matrix OK
+    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as transformMatrix3d;
+    mat3d = [100, -0, Infinity, NaN, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as transformMatrix3d;
+
+    // 2D matrix not OK
+
+    // typings:expect-error
+    mat2d = 3; // not even an array
+    // typings:expect-error
+    mat2d = [] as transformMatrix2d; // no elements
+    // typings:expect-error
+    mat2d = [0, 1, 2, 3, 4, 5, 6, 7] as transformMatrix2d; // too few elements
+    // typings:expect-error
+    mat2d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as transformMatrix2d; // too many elements
+
+    // 3D vector not OK
+
+    // typings:expect-error
+    mat3d = 3; // not even an array
+    // typings:expect-error
+    mat3d = [] as transformMatrix3d; // no elements
+    // typings:expect-error
+    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as transformMatrix3d; // too few elements
+    // typings:expect-error
+    mat3d = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as transformMatrix3d; // too many elements
+
+    // Matrix modification should NOT be OK
+    mat3d[3] = 100; // too bad the ReadOnly part appears not to be enforced so can't precede it with typings:expect-error
+
+    return; // arrayCreationTests
+  })(UNITMATRIX2D, NANMATRIX3D);
+
+  (function matrixMatrixAdditionTests(mat2d: transformMatrix2d, mat3d: transformMatrix3d): void {
+    add2d(mat2d, mat2d); // OK
+    add3d(mat3d, mat3d); // OK
+
+    // typings:expect-error
+    add2d(mat2d, mat3d); // at least one arg doesn't comply
+    // typings:expect-error
+    add2d(mat3d, mat2d); // at least one arg doesn't comply
+    // typings:expect-error
+    add2d(mat3d, mat3d); // at least one arg doesn't comply
+    // typings:expect-error
+    add3d(mat2d, mat3d); // at least one arg doesn't comply
+    // typings:expect-error
+    add3d(mat3d, mat2d); // at least one arg doesn't comply
+    // typings:expect-error
+    add3d(mat2d, mat2d); // at least one arg doesn't comply
+
+    return; // matrixMatrixAdditionTests
+  })(UNITMATRIX2D, NANMATRIX3D);
+
+  (function matrixVectorMultiplicationTests(
+    vec2d: vector2d,
+    mat2d: transformMatrix2d,
+    vec3d: vector3d,
+    mat3d: transformMatrix3d
+  ): void {
+    mult2d(mat2d, vec2d); // OK
+    mult3d(mat3d, vec3d); // OK
+
+    // typings:expect-error
+    mult3d(mat2d, vec2d); // trying to use a 3d fun for 2d args
+    // typings:expect-error
+    mult2d(mat3d, vec3d); // trying to use a 2d fun for 3d args
+
+    // typings:expect-error
+    mult2d(mat3d, vec2d); // 1st arg is a mismatch
+    // typings:expect-error
+    mult2d(mat2d, vec3d); // 2nd arg is a mismatch
+
+    // typings:expect-error
+    mult3d(mat2d, vec3d); // 1st arg is a mismatch
+    // typings:expect-error
+    mult3d(mat3d, vec2d); // 2nd arg is a mismatch
+
+    return; // matrixVectorTests
+  })(UNIT2D, UNITMATRIX2D, UNIT3D, NANMATRIX3D);
 
   (function jsonTests(plain: Json): void {
     // numbers are OK
