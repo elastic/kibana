@@ -55,32 +55,25 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         .then((resp: any) => {
           createdAlertIds.push(resp.body.id);
           expect(resp.body).to.eql({
-            id: resp.body.id,
-            type: 'alert',
-            references: [],
-            updated_at: resp.body.updated_at,
-            version: resp.body.version,
-            attributes: {
-              actions: [
-                {
-                  group: 'default',
-                  id: ES_ARCHIVER_ACTION_ID,
-                  params: {
-                    message:
-                      'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
-                  },
+            actions: [
+              {
+                group: 'default',
+                id: ES_ARCHIVER_ACTION_ID,
+                params: {
+                  message:
+                    'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
                 },
-              ],
-              alertTypeId: 'cpu-check',
-              alertTypeParams: {
-                server: '1.2.3.4',
-                threshold: 80,
               },
-              interval: 10000,
-              scheduledTaskId: resp.body.attributes.scheduledTaskId,
+            ],
+            alertTypeId: 'cpu-check',
+            alertTypeParams: {
+              server: '1.2.3.4',
+              threshold: 80,
             },
+            interval: 10000,
+            scheduledTaskId: resp.body.scheduledTaskId,
           });
-          expect(typeof resp.body.attributes.scheduledTaskId).to.be('string');
+          expect(typeof resp.body.scheduledTaskId).to.be('string');
         });
     });
   });

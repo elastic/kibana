@@ -13,7 +13,7 @@
           "group": {
             "type": "keyword"
           },
-          "id": {
+          "actionRef": {
             "type": "keyword"
           },
           "params": {

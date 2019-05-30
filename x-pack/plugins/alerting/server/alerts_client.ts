@@ -71,9 +71,14 @@ export class AlertsClient {
       await this.savedObjectsClient.delete('alert', createdAlert.id);
       throw e;
     }
-    await this.savedObjectsClient.update('alert', createdAlert.id, {
-      scheduledTaskId: scheduledTask.id,
-    });
+    await this.savedObjectsClient.update(
+      'alert',
+      createdAlert.id,
+      {
+        scheduledTaskId: scheduledTask.id,
+      },
+      { references }
+    );
     createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     return this.getAlertFromRaw(createdAlert.attributes, references);
   }
@@ -113,9 +118,14 @@ export class AlertsClient {
     if (this.shouldRescheduleTask(currentSavedObject.attributes, data)) {
       await this.taskManager.remove(currentSavedObject.attributes.scheduledTaskId);
       const scheduledTask = await this.scheduleAlert(id, rawAlert);
-      await this.savedObjectsClient.update<any>('alert', id, {
-        scheduledTaskId: scheduledTask.id,
-      });
+      await this.savedObjectsClient.update<any>(
+        'alert',
+        id,
+        {
+          scheduledTaskId: scheduledTask.id,
+        },
+        { references }
+      );
       updatedObject.attributes.scheduledTaskId = scheduledTask.id;
     }
     return this.getAlertFromRaw(updatedObject.attributes, updatedObject.references);

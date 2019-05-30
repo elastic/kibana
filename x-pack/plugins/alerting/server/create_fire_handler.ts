@@ -6,7 +6,7 @@
 
 import Handlebars from 'handlebars';
 import { SavedObject } from 'src/legacy/server/saved_objects';
-import { AlertAction, State, Context } from './types';
+import { RawAlertAction, State, Context } from './types';
 import { ActionsPlugin } from '../../actions';
 
 interface CreateFireHandlerOptions {
@@ -16,7 +16,7 @@ interface CreateFireHandlerOptions {
 
 export function createFireHandler({ fireAction, alertSavedObject }: CreateFireHandlerOptions) {
   return async (actionGroup: string, context: Context, state: State) => {
-    const alertActions: AlertAction[] = alertSavedObject.attributes.actions;
+    const alertActions: RawAlertAction[] = alertSavedObject.attributes.actions;
     const actions = alertActions.filter(({ group }: { group: string }) => group === actionGroup);
     for (const action of actions) {
       const params: Record<string, any> = {};
@@ -29,8 +29,16 @@ export function createFireHandler({ fireAction, alertSavedObject }: CreateFireHa
         const template = Handlebars.compile(value);
         params[key] = template({ context, state });
       }
+      const actionReference = alertSavedObject.references.find(
+        obj => obj.name === action.actionRef
+      );
+      if (!actionReference) {
+        throw new Error(
+          `Action reference "${actionReference}" not found in alert id: ${alertSavedObject.id}`
+        );
+      }
       fireAction({
-        id: action.id,
+        id: actionReference.id,
         params,
       });
     }
