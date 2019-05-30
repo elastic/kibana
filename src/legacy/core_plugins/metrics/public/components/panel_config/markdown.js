@@ -90,16 +90,16 @@ class MarkdownPanelConfigUi extends Component {
     const alignOptions = [
       {
         label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.topLabel', defaultMessage: 'Top' }),
-        value: 'top',
+        value: 'top'
       },
       {
         label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.middleLabel', defaultMessage: 'Middle' }),
-        value: 'middle',
+        value: 'middle'
       },
       {
         label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.bottomLabel', defaultMessage: 'Bottom' }),
-        value: 'bottom',
-      },
+        value: 'bottom'
+      }
     ];
     const selectedAlignOption = alignOptions.find(option => {
       return model.markdown_vertical_align === option.value;

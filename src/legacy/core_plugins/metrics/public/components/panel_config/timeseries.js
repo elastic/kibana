@@ -84,7 +84,7 @@ class TimeseriesPanelConfigUi extends Component {
       {
         label: intl.formatMessage({ id: 'tsvb.timeseries.positionOptions.leftLabel', defaultMessage: 'Left' }),
         value: 'left'
-      },
+      }
     ];
     const selectedPositionOption = positionOptions.find(option => {
       return model.axis_position === option.value;
@@ -97,12 +97,11 @@ class TimeseriesPanelConfigUi extends Component {
       {
         label: intl.formatMessage({ id: 'tsvb.timeseries.scaleOptions.logLabel', defaultMessage: 'Log' }),
         value: 'log'
-      },
+      }
     ];
     const selectedAxisScaleOption = scaleOptions.find(option => {
       return model.axis_scale === option.value;
     });
-
     const legendPositionOptions = [
       {
         label: intl.formatMessage({ id: 'tsvb.timeseries.legendPositionOptions.rightLabel', defaultMessage: 'Right' }),
@@ -115,7 +114,7 @@ class TimeseriesPanelConfigUi extends Component {
       {
         label: intl.formatMessage({ id: 'tsvb.timeseries.legendPositionOptions.bottomLabel', defaultMessage: 'Bottom' }),
         value: 'bottom'
-      },
+      }
     ];
     const selectedLegendPosOption = legendPositionOptions.find(option => {
       return model.legend_position === option.value;
@@ -154,6 +153,7 @@ class TimeseriesPanelConfigUi extends Component {
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
+
             <IndexPattern
               fields={this.props.fields}
               model={this.props.model}
@@ -224,7 +224,10 @@ class TimeseriesPanelConfigUi extends Component {
                     defaultMessage="Axis min"
                   />)}
                 >
-                  <EuiFieldText onChange={handleTextChange('axis_min')} value={model.axis_min} />
+                  <EuiFieldText
+                    onChange={handleTextChange('axis_min')}
+                    value={model.axis_min}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>

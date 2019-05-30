@@ -52,10 +52,7 @@ const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLa
 export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selectedTab: 'data',
-      uiQueryLanguage: uiSettingsQueryLanguage,
-    };
+    this.state = { selectedTab: 'data' };
   }
 
   componentWillMount() {

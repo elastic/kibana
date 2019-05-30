@@ -49,6 +49,7 @@ export const createBulkGetRoute = (prereqs: Prerequisites) => ({
     },
     handler(request: BulkGetRequest) {
       const { savedObjectsClient } = request.pre;
+
       return savedObjectsClient.bulkGet(request.payload);
     },
   },

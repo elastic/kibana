@@ -81,21 +81,16 @@ export class VisEditor extends Component {
   };
 
   isAllValidKueryQuery = (partialModel) => {
-    // checking validity of kuery queries
     let isParsedKueryValid = true;
-    // panel item filter:
     isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(partialModel.filter);
-    // panel item annotation items filters:
     if (partialModel.annotations && partialModel.annotations.length) {
       partialModel.annotations.forEach((annotationItem) => {
         isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(annotationItem.query_string);
       });
     }
-    // panel item series items filters:
     if (partialModel.series && partialModel.series.length) {
       partialModel.series.forEach((seriesItem) => {
         isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(seriesItem.filter);
-        // panel item series items split_filter items filters:
         if (seriesItem.split_filters && seriesItem.split_filters.length) {
           seriesItem.split_filters.forEach((splitFilterItem) => {
             isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(splitFilterItem.filter);
@@ -110,7 +105,6 @@ export class VisEditor extends Component {
     if (isEmpty(partialModel)) {
       return;
     }
-
     const hasTypeChanged = partialModel.type && this.state.model.type !== partialModel.type;
     const nextModel = {
       ...this.state.model,
@@ -126,12 +120,11 @@ export class VisEditor extends Component {
     if (this.props.isEditorMode) {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns).then(visFields =>
-          this.setState({
+        fetchFields(extractedIndexPatterns)
+          .then(visFields => this.setState({
             visFields,
             extractedIndexPatterns,
-          })
-        );
+          }));
       }
     }
 
@@ -146,7 +139,7 @@ export class VisEditor extends Component {
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = event => {
+  handleAutoApplyToggle = (event) => {
     this.setState({ autoApply: event.target.checked });
   };
 
@@ -178,7 +171,7 @@ export class VisEditor extends Component {
       return (
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange} />
+            <VisPicker model={model} onChange={this.handleChange}/>
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}

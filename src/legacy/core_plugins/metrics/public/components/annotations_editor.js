@@ -93,7 +93,7 @@ export class AnnotationsEditor extends Component {
       query_string: { query: '', language: uiSettingsQueryLanguage }
     };
     const model = { ...defaults, ...row };
-    const handleChange = part => {
+    const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
@@ -103,8 +103,10 @@ export class AnnotationsEditor extends Component {
       });
     };
     const htmlId = htmlIdGenerator(model.id);
-    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
-    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
+    const handleAdd = collectionActions.handleAdd
+      .bind(null, this.props, newAnnotation);
+    const handleDelete = collectionActions.handleDelete
+      .bind(null, this.props, model);
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
         <EuiFlexGroup responsive={false}>
@@ -223,7 +225,10 @@ export class AnnotationsEditor extends Component {
                     defaultMessage="Icon (required)"
                   />)}
                 >
-                  <IconSelect value={model.icon} onChange={this.handleChange(model, 'icon')} />
+                  <IconSelect
+                    value={model.icon}
+                    onChange={this.handleChange(model, 'icon')}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -254,7 +259,7 @@ export class AnnotationsEditor extends Component {
                       <FormattedMessage
                         id="tsvb.annotationsEditor.rowTemplateHelpText"
                         defaultMessage="eg.{rowTemplateExample}"
-                        values={{ rowTemplateExample: <EuiCode>{'{{field}}'}</EuiCode> }}
+                        values={{ rowTemplateExample: (<EuiCode>{'{{field}}'}</EuiCode>) }}
                       />
                     </span>
                   }
@@ -287,7 +292,8 @@ export class AnnotationsEditor extends Component {
     const { model } = this.props;
     let content;
     if (!model.annotations || !model.annotations.length) {
-      const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
+      const handleAdd = collectionActions.handleAdd
+        .bind(null, this.props, newAnnotation);
       content = (
         <EuiText textAlign="center">
           <p>
@@ -322,7 +328,11 @@ export class AnnotationsEditor extends Component {
         </div>
       );
     }
-    return <div className="tvbAnnotationsEditor__container">{content}</div>;
+    return(
+      <div className="tvbAnnotationsEditor__container">
+        { content }
+      </div>
+    );
   }
 }
 
